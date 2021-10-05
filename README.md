@@ -1,15 +1,22 @@
 # dcargs
 
-`dcargs` is argparse + datclasses, with the goal of generating portable,
-reusable, and strongly typed CLI interfaces.
+`dcargs` is a tool for generating portable, reusable, and strongly typed CLI
+interfaces from dataclass definitions.
 
-We expose only one function, which takes a dataclass type and instantiates it
-via CLI flags:
+We expose one function, `parse(Type[T]) -> T`, which takes a dataclass type and
+instantiates it via an argparse-style CLI interface:
 
 ```python
-# Importable via dcargs.parse
-def parse(cls: Type[DataclassType], description: str = "") -> DataclassType:
-    ...
+import dataclasses
+
+import dcargs
+
+@dataclasses.dataclass
+class Args:
+    field1: str
+    field2: int
+
+args = dcargs.parse(Args)
 ```
 
 The parse function supports dataclasses containing:
@@ -18,8 +25,8 @@ The parse function supports dataclasses containing:
 - [x] Boolean flags
 - [x] Enums (via `enum.Enum`)
 - [x] Optional types
-- [x] Literal types (by populating `choices`)
-- [ ] Sequence and list types (by populating `nargs`)
+- [x] Literal types (populates `choices`)
+- [ ] Sequence and list types
 - [x] Forward references (including in unions)
 - [x] Automatic helptext generation
 - [x] Nested dataclasses

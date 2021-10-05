@@ -29,8 +29,7 @@ class _Tokenization:
             if toktype in (tokenize.NEWLINE, tokenize.NL):
                 line_number += 1
                 tokens_from_line[line_number] = []
-            elif toktype != tokenize.INDENT:
-                # Add everything else except for whitespace
+            elif toktype is not tokenize.INDENT:
                 token = _Token(token_type=toktype, token=tok, line_number=line_number)
                 tokens.append(token)
                 tokens_from_line[line_number].append(token)
@@ -82,7 +81,7 @@ def get_field_docstring(cls: Type, field_name: str) -> str:
         return comment[1:].strip()
 
     # Check for comment on the line before the field
-    # TODO: this will likely results in unintentional docstrings?
+    # TODO: this may result in unintentional helptext?
     comment_index = field_index
     comments: List[str] = []
     while True:

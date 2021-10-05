@@ -1,17 +1,9 @@
 import dataclasses
 import enum
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    List,
-    Literal,
-    Optional,
-    Set,
-    Type,
-    Union,
-    get_type_hints,
-)
+from typing import (TYPE_CHECKING, Any, Callable, List, Optional, Set, Type,
+                    Union)
+
+from typing_extensions import Literal  # Python 3.7 compat
 
 from . import _docstrings
 
@@ -73,6 +65,8 @@ def _bool_flags(arg: ArgumentDefinition) -> None:
     """For booleans, we use a `store_true` action."""
     if arg.type is not bool:
         return
+
+    # TODO: what if the default value of the field is set to true by the user?
     arg.action = "store_true"
     arg.type = None
     arg.default = False
@@ -100,7 +94,7 @@ def _handle_optionals(arg: ArgumentDefinition) -> None:
     not required."""
     field = arg.field
     if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
-        options = set(get_type_hints(arg.parent_class)[field.name].__args__)
+        options = set(field.type.__args__)
         assert (
             len(options) == 2 and type(None) in options
         ), "Union must be either over dataclasses (for subparsers) or Optional"
@@ -125,7 +119,7 @@ def _choices_from_literals(arg: ArgumentDefinition) -> None:
 
 def _enums_as_strings(arg: ArgumentDefinition) -> None:
     """For enums, use string representations."""
-    if arg.type is not None and issubclass(arg.type, enum.Enum):
+    if type(arg.type) is type and issubclass(arg.type, enum.Enum):
         if arg.choices is None:
             arg.choices = set(x.name for x in arg.type)
         else:

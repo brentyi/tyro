@@ -8,3 +8,5 @@ __pycache__
 .hypothesis
 .ipynb_checkpoints
 .cache
+build/
+dist/

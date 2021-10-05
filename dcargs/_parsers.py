@@ -1,6 +1,6 @@
 import argparse
 import dataclasses
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Type, Union, get_type_hints
+from typing import Any, Dict, List, Optional, Set, Type, Union, get_type_hints
 
 from . import _strings
 from ._arguments import ArgumentDefinition
@@ -51,22 +51,33 @@ class ParserDefinition:
                 subparser_def.apply(Parser.make(subparser))
 
     @staticmethod
-    def from_dataclass(cls: Type[Any]) -> "ParserDefinition":
+    def from_dataclass(
+        cls: Type[Any], parent_dataclasses: Set[Type] = set()
+    ) -> "ParserDefinition":
         """Create a parser definition from a dataclass."""
 
         assert dataclasses.is_dataclass(cls)
+        assert (
+            cls not in parent_dataclasses
+        ), f"Found a cyclic dataclass dependency with type {cls}"
 
         args = []
         subparsers = None
+        annotations = get_type_hints(cls)
         for field in dataclasses.fields(cls):
             if not field.init:
                 continue
+
+            # Resolve forward references
+            field.type = annotations[field.name]
 
             vanilla_field: bool = True
 
             # Add arguments for nested dataclasses
             if dataclasses.is_dataclass(field.type):
-                child_definition = ParserDefinition.from_dataclass(field.type)
+                child_definition = ParserDefinition.from_dataclass(
+                    field.type, parent_dataclasses | {cls}
+                )
                 child_args = child_definition.args
                 for arg in child_args:
                     arg.name = (
@@ -82,7 +93,7 @@ class ParserDefinition:
 
             # Unions of dataclasses should create subparsers
             if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
-                options = get_type_hints(cls)[field.name].__args__
+                options = field.type.__args__
                 if all(map(dataclasses.is_dataclass, options)):
                     assert (
                         subparsers is None
@@ -91,7 +102,9 @@ class ParserDefinition:
                     subparsers = SubparsersDefinition(
                         name=field.name,
                         parsers={
-                            option.__name__: ParserDefinition.from_dataclass(option)
+                            option.__name__: ParserDefinition.from_dataclass(
+                                option, parent_dataclasses | {cls}
+                            )
                             for option in options
                         },
                     )
