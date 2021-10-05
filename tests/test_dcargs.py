@@ -1,4 +1,5 @@
 import dataclasses
+import enum
 import io
 from contextlib import redirect_stdout
 from typing import Optional, Union
@@ -60,6 +61,26 @@ def test_optional():
         x: Optional[int]
 
     assert dcargs.parse(A, args=[]) == A(x=None)
+
+
+def test_enum():
+    class Color(enum.Enum):
+        RED = enum.auto()
+        GREEN = enum.auto()
+        BLUE = enum.auto()
+
+    @dataclasses.dataclass
+    class EnumClassA:
+        color: Color
+
+    @dataclasses.dataclass
+    class EnumClassB:
+        color: Color = Color.GREEN
+
+    assert dcargs.parse(EnumClassA, args=["--color", "RED"]) == EnumClassA(
+        color=Color.RED
+    )
+    assert dcargs.parse(EnumClassB) == EnumClassB()
 
 
 def test_literal():

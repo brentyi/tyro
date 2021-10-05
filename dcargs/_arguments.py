@@ -1,7 +1,6 @@
 import dataclasses
 import enum
-from typing import (TYPE_CHECKING, Any, Callable, List, Optional, Set, Type,
-                    Union)
+from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set, Type, Union
 
 from typing_extensions import Literal  # Python 3.7 compat
 
@@ -106,8 +105,6 @@ def _choices_from_literals(arg: ArgumentDefinition) -> None:
     """For literal types, set choices."""
     field = arg.field
 
-    if hasattr(field.type, "__origin__"):
-        print(field.type.__origin__)
     if hasattr(field.type, "__origin__") and field.type.__origin__ is Literal:
         choices = set(field.type.__args__)
         assert (
@@ -119,12 +116,15 @@ def _choices_from_literals(arg: ArgumentDefinition) -> None:
 
 def _enums_as_strings(arg: ArgumentDefinition) -> None:
     """For enums, use string representations."""
-    if type(arg.type) is type and issubclass(arg.type, enum.Enum):
+    if isinstance(arg.type, type) and issubclass(arg.type, enum.Enum):
         if arg.choices is None:
             arg.choices = set(x.name for x in arg.type)
         else:
             arg.choices = set(x.name for x in arg.choices)
+
         arg.type = str
+        if arg.default is not None:
+            arg.default = arg.default.name  # default should be a string type
 
 
 def _use_comment_as_helptext(arg: ArgumentDefinition) -> None:
