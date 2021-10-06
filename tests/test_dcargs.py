@@ -69,7 +69,10 @@ def test_sequences():
         x: Sequence[int]
 
     assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    assert dcargs.parse(A, args=["--x"]) == A(x=[])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
 
 
 def test_lists():
@@ -78,7 +81,32 @@ def test_lists():
         x: List[int]
 
     assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    assert dcargs.parse(A, args=["--x"]) == A(x=[])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+
+def test_optional_sequences():
+    @dataclasses.dataclass
+    class A:
+        x: Optional[Sequence[int]]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    assert dcargs.parse(A, args=[]) == A(x=None)
+
+
+def test_optional_lists():
+    @dataclasses.dataclass
+    class A:
+        x: Optional[List[int]]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    assert dcargs.parse(A, args=[]) == A(x=None)
 
 
 def test_tuples_fixed():
@@ -89,6 +117,8 @@ def test_tuples_fixed():
     assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     with pytest.raises(SystemExit):
         dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
 
 
 def test_tuples_variable():
@@ -97,7 +127,21 @@ def test_tuples_variable():
         x: Tuple[int, ...]
 
     assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
-    assert dcargs.parse(A, args=["--x"]) == A(x=())
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+
+def test_tuples_variable_optional():
+    @dataclasses.dataclass
+    class A:
+        x: Optional[Tuple[int, ...]]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    assert dcargs.parse(A, args=[]) == A(x=None)
 
 
 def test_enum():
@@ -128,6 +172,17 @@ def test_literal():
     assert dcargs.parse(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):
         assert dcargs.parse(A, args=["--x", "3"])
+
+
+def test_optional_literal():
+    @dataclasses.dataclass
+    class A:
+        x: Optional[Literal[0, 1, 2]]
+
+    assert dcargs.parse(A, args=["--x", "1"]) == A(x=1)
+    with pytest.raises(SystemExit):
+        assert dcargs.parse(A, args=["--x", "3"])
+    assert dcargs.parse(A, args=[]) == A(x=None)
 
 
 def test_nested():
@@ -198,7 +253,7 @@ def test_helptext():
         # Documentation 2
         y: int
 
-        z: int
+        z: int = 3
         """Documentation 3"""
 
     f = io.StringIO()
@@ -206,6 +261,6 @@ def test_helptext():
         with redirect_stdout(f):
             dcargs.parse(Helptext, args=["--help"])
     helptext = f.getvalue()
-    assert "--x X       Documentation 1 (int)" in helptext
-    assert "--y Y       Documentation 2 (int)" in helptext
-    assert "--z Z       Documentation 3 (int)" in helptext
+    assert "--x INT     Documentation 1\n" in helptext
+    assert "--y INT     Documentation 2\n" in helptext
+    assert "--z INT     Documentation 3 (default: 3)\n" in helptext

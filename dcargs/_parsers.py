@@ -3,7 +3,7 @@ import dataclasses
 from typing import Any, Dict, List, Optional, Set, Type, Union, get_type_hints
 
 from . import _strings
-from ._arguments import ArgumentDefinition
+from ._arguments import ArgumentDefinition, FieldRole
 
 
 @dataclasses.dataclass
@@ -29,6 +29,9 @@ class ParserDefinition:
     description: str
     args: List["ArgumentDefinition"]
     subparsers: Optional["SubparsersDefinition"]
+    role_from_field: Dict[dataclasses.Field, FieldRole] = dataclasses.field(
+        default_factory=dict
+    )
 
     def apply(self, parsers: Parser) -> None:
         """Create defined arguments and subparsers."""
@@ -52,9 +55,16 @@ class ParserDefinition:
 
     @staticmethod
     def from_dataclass(
-        cls: Type[Any], parent_dataclasses: Set[Type] = set()
+        cls: Type[Any],
+        parent_dataclasses: Optional[Set[Type]] = None,
+        role_from_field: Optional[Dict[dataclasses.Field, FieldRole]] = None,
     ) -> "ParserDefinition":
         """Create a parser definition from a dataclass."""
+
+        if parent_dataclasses is None:
+            parent_dataclasses = set()
+        if role_from_field is None:
+            role_from_field = {}
 
         assert dataclasses.is_dataclass(cls)
         assert (
@@ -76,7 +86,9 @@ class ParserDefinition:
             # Add arguments for nested dataclasses
             if dataclasses.is_dataclass(field.type):
                 child_definition = ParserDefinition.from_dataclass(
-                    field.type, parent_dataclasses | {cls}
+                    field.type,
+                    parent_dataclasses | {cls},
+                    role_from_field=role_from_field,
                 )
                 child_args = child_definition.args
                 for arg in child_args:
@@ -89,13 +101,14 @@ class ParserDefinition:
                     assert subparsers is None
                     subparsers = child_definition.subparsers
 
+                role_from_field[field] = FieldRole.NESTED_DATACLASS
                 vanilla_field = False
 
             # Unions of dataclasses should create subparsers
             if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
                 # We don't use sets here to retain order of subcommands
                 options = field.type.__args__
-                options_no_none = [o for o in options if not isinstance(None, o)]
+                options_no_none = [o for o in options if o != type(None)]  # noqa
                 if all(map(dataclasses.is_dataclass, options_no_none)):
                     assert (
                         subparsers is None
@@ -105,7 +118,9 @@ class ParserDefinition:
                         name=field.name,
                         parsers={
                             option.__name__: ParserDefinition.from_dataclass(
-                                option, parent_dataclasses | {cls}
+                                option,
+                                parent_dataclasses | {cls},
+                                role_from_field,
                             )
                             for option in options_no_none
                         },
@@ -114,15 +129,18 @@ class ParserDefinition:
                         ),  # not required if no options
                     )
                     vanilla_field = False
+                    role_from_field[field] = FieldRole.SUBPARSERS
 
             # Make a vanilla field
             if vanilla_field:
                 args.append(ArgumentDefinition.make_from_field(cls, field))
+                role_from_field[field] = args[-1].role
 
         return ParserDefinition(
             description=str(cls.__doc__),
             args=args,
             subparsers=subparsers,
+            role_from_field=role_from_field,
         )
 
 

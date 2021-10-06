@@ -23,23 +23,28 @@ class Args:
 args = dcargs.parse(Args)
 ```
 
-The parse function supports dataclasses containing:
+The parse function supports dataclasses containing a wide range of types. Our
+unit tests currently cover:
 
-- All types natively accepted by `argparse`: str, int, float, pathlib.Path, etc
+- Types natively accepted by `argparse`: str, int, float, pathlib.Path, etc
 - Booleans, which are converted to flags (in argparse: `action="store_true"`)
 - Enums (via `enum.Enum`)
-- A wide range of generic and container types:
+- Various generic and container types:
   - `typing.Optional` types
   - `typing.Literal` types (populates `choices`)
   - `typing.Sequence` types (populates `nargs`)
   - `typing.List` types (populates `nargs`)
   - `typing.Tuple` types (populates `nargs`; must contain just one child type)
+  - `typing.Optional[typing.Literal]` types
+  - `typing.Optional[typing.Sequence]` types
+  - `typing.Optional[typing.List]` types
+  - `typing.Optional[typing.Tuple]` types
 - Nested dataclasses
   - Simple nesting
   - Unions over nested dataclasses (subparsers)
-  - Optional unions over nested dataclasses (optoinal subparsers)
+  - Optional unions over nested dataclasses (optional subparsers)
 
-It will also:
+`dcargs.parse` will also:
 
 - Generate helptext from field comments/docstrings
 - Resolve forward references in type hints
@@ -129,8 +134,8 @@ Generates the following argument parser:
 
 ```
 $ python example.py --help
-usage: example.py [-h] --experiment-name EXPERIMENT_NAME --optimizer.type {ADAM,SGD} [--optimizer.learning-rate OPTIMIZER.LEARNING_RATE]
-                  [--optimizer.weight-decay OPTIMIZER.WEIGHT_DECAY] [--seed SEED]
+usage: example.py [-h] --experiment-name STR --optimizer.type {ADAM,SGD} [--optimizer.learning-rate FLOAT]
+                  [--optimizer.weight-decay FLOAT] [--seed INT]
 
 An argument parsing example.
 
@@ -139,16 +144,16 @@ of which are supported by the automatic helptext generator.
 
 optional arguments:
   -h, --help            show this help message and exit
-  --optimizer.learning-rate OPTIMIZER.LEARNING_RATE
-                        Learning rate to use. (float, default: 0.0003)
-  --optimizer.weight-decay OPTIMIZER.WEIGHT_DECAY
-                        Coefficient for L2 regularization. (float, default: 0.01)
-  --seed SEED           Random seed. This is helpful for making sure that our experiments are
-                        all reproducible! (int, default: 0)
+  --optimizer.learning-rate FLOAT
+                        Learning rate to use. (default: 0.0003)
+  --optimizer.weight-decay FLOAT
+                        Coefficient for L2 regularization. (default: 0.01)
+  --seed INT            Random seed. This is helpful for making sure that our experiments are
+                        all reproducible! (default: 0)
 
 required arguments:
-  --experiment-name EXPERIMENT_NAME
-                        Experiment name to use. (str)
+  --experiment-name STR
+                        Experiment name to use.
   --optimizer.type {ADAM,SGD}
-                        Variant of SGD to use. (str)
+                        Variant of SGD to use.
 ```

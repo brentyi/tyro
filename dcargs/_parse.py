@@ -1,9 +1,9 @@
 import argparse
 import dataclasses
-import enum
-from typing import Any, Dict, Optional, Sequence, Type, TypeVar, Union
+from typing import Any, Dict, Optional, Sequence, Type, TypeVar
 
 from . import _strings
+from ._arguments import FieldRole
 from ._parsers import Parser, ParserDefinition
 
 DataclassType = TypeVar("DataclassType")
@@ -26,11 +26,13 @@ def parse(
     parser_definition.apply(Parser.make(root_parser))
     namespace = root_parser.parse_args(args)
 
-    return _construct_dataclass(cls, vars(namespace))
+    return _construct_dataclass(cls, parser_definition.role_from_field, vars(namespace))
 
 
 def _construct_dataclass(
-    cls: Type[DataclassType], values: Dict[str, Any]
+    cls: Type[DataclassType],
+    role_from_field: Dict[dataclasses.Field, FieldRole],
+    values: Dict[str, Any],
 ) -> DataclassType:
     """Construct a dataclass object from a dictionary of values from argparse."""
 
@@ -44,31 +46,25 @@ def _construct_dataclass(
             continue
 
         value: Any
+        role = role_from_field[field]
 
-        # Handle enums
-        if isinstance(field.type, type) and issubclass(field.type, enum.Enum):
+        if role is FieldRole.ENUM:
+            # Handle enums
             value = field.type[values[field.name]]
-
-        # Nested dataclasses
-        elif dataclasses.is_dataclass(field.type):
+        elif role is FieldRole.NESTED_DATACLASS:
+            # Nested dataclasses
             arg_prefix = field.name + _strings.NESTED_DATACLASS_DELIMETER
             value = _construct_dataclass(
                 field.type,
+                role_from_field,
                 values={
                     k[len(arg_prefix) :]: v
                     for k, v in values.items()
                     if k.startswith(arg_prefix)
                 },
             )
-
-        # Unions over dataclasses (subparsers)
-        elif (
-            hasattr(field.type, "__origin__")
-            and field.type.__origin__ is Union
-            and all(
-                map(dataclasses.is_dataclass, set(field.type.__args__) - {type(None)})
-            )
-        ):
+        elif role is FieldRole.SUBPARSERS:
+            # Unions over dataclasses (subparsers)
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(name=field.name)
             if values[subparser_dest] is None:
                 # No subparser selected -- this should only happen when we do either
@@ -85,15 +81,17 @@ def _construct_dataclass(
                         chosen_cls = option
                         break
                 assert chosen_cls is not None
-                value = _construct_dataclass(chosen_cls, values)
-
-        # For sequences, argparse always gives us lists -- sometimes we want tuples
-        elif hasattr(field.type, "__origin__") and field.type.__origin__ is tuple:
-            value = tuple(values[field.name])
-
-        # General case
-        else:
+                value = _construct_dataclass(chosen_cls, role_from_field, values)
+        elif role is FieldRole.TUPLE:
+            # For sequences, argparse always gives us lists -- sometimes we want tuples
+            value = (
+                tuple(values[field.name]) if values[field.name] is not None else None
+            )
+        elif role is FieldRole.VANILLA_FIELD:
+            # General case
             value = values[field.name]
+        else:
+            assert False
 
         kwargs[field.name] = value
 
