@@ -1,6 +1,16 @@
+import collections.abc
 import dataclasses
 import enum
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    List,
+    Optional,
+    Set,
+    Type,
+    Union,
+)
 
 from typing_extensions import Literal  # Python 3.7 compat
 
@@ -101,6 +111,33 @@ def _handle_optionals(arg: ArgumentDefinition) -> None:
         arg.required = False
 
 
+def _nargs_from_sequences_and_lists(arg: ArgumentDefinition) -> None:
+    """Transform for handling Sequence[T] and list types."""
+    field = arg.field
+    if hasattr(field.type, "__origin__") and field.type.__origin__ in (
+        collections.abc.Sequence,  # different from typing.Sequence!
+        list,  # different from typing.List!
+    ):
+        assert len(field.type.__args__) == 1
+        (arg.type,) = field.type.__args__
+        arg.nargs = "*"  # `*` is >=0 values, `+` is >=1 values
+
+
+def _nargs_from_tuples(arg: ArgumentDefinition) -> None:
+    """Transform for handling Tuple[T, T, ...] types."""
+    field = arg.field
+    if hasattr(field.type, "__origin__") and field.type.__origin__ == tuple:
+        argset = set(field.type.__args__)
+        argset_no_ellipsis = argset - {Ellipsis}
+        assert len(argset_no_ellipsis) == 1, "Tuples must be of a single type!"
+
+        if argset != argset_no_ellipsis:
+            arg.nargs = "*"  # `*` is >=0 values, `+` is >=1 values
+        else:
+            arg.nargs = len(field.type.__args__)
+        (arg.type,) = argset_no_ellipsis
+
+
 def _choices_from_literals(arg: ArgumentDefinition) -> None:
     """For literal types, set choices."""
     field = arg.field
@@ -155,6 +192,8 @@ _argument_transforms: List[Callable[[ArgumentDefinition], None]] = [
     _bool_flags,  # needs to come before defaults are populated
     _populate_defaults,
     _handle_optionals,
+    _nargs_from_sequences_and_lists,
+    _nargs_from_tuples,
     _choices_from_literals,
     _enums_as_strings,
     _use_comment_as_helptext,

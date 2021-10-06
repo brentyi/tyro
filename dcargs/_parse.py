@@ -65,18 +65,31 @@ def _construct_dataclass(
         elif (
             hasattr(field.type, "__origin__")
             and field.type.__origin__ is Union
-            and all(map(dataclasses.is_dataclass, field.type.__args__))
+            and all(
+                map(dataclasses.is_dataclass, set(field.type.__args__) - {type(None)})
+            )
         ):
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(name=field.name)
-            assert subparser_dest in values.keys()
-            options = field.type.__args__
-            chosen_cls = None
-            for option in options:
-                if option.__name__ == values[subparser_dest]:
-                    chosen_cls = option
-                    break
-            assert chosen_cls is not None
-            value = _construct_dataclass(chosen_cls, values)
+            if values[subparser_dest] is None:
+                # No subparser selected -- this should only happen when we do either
+                # Optional[Union[A, B, ...]] or Union[A, B, None] -- note that these are
+                # equivalent
+                assert type(None) in field.type.__args__
+                value = None
+            else:
+                assert subparser_dest in values.keys()
+                options = field.type.__args__
+                chosen_cls = None
+                for option in options:
+                    if option.__name__ == values[subparser_dest]:
+                        chosen_cls = option
+                        break
+                assert chosen_cls is not None
+                value = _construct_dataclass(chosen_cls, values)
+
+        # For sequences, argparse always gives us lists -- sometimes we want tuples
+        elif hasattr(field.type, "__origin__") and field.type.__origin__ is tuple:
+            value = tuple(values[field.name])
 
         # General case
         else:

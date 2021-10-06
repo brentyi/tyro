@@ -2,7 +2,7 @@ import dataclasses
 import enum
 import io
 from contextlib import redirect_stdout
-from typing import Optional, Union
+from typing import List, Optional, Sequence, Tuple, Union
 
 import pytest
 from typing_extensions import Literal  # Python 3.7 compat
@@ -63,6 +63,43 @@ def test_optional():
     assert dcargs.parse(A, args=[]) == A(x=None)
 
 
+def test_sequences():
+    @dataclasses.dataclass
+    class A:
+        x: Sequence[int]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert dcargs.parse(A, args=["--x"]) == A(x=[])
+
+
+def test_lists():
+    @dataclasses.dataclass
+    class A:
+        x: List[int]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert dcargs.parse(A, args=["--x"]) == A(x=[])
+
+
+def test_tuples_fixed():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[int, int, int]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+
+
+def test_tuples_variable():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[int, ...]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    assert dcargs.parse(A, args=["--x"]) == A(x=())
+
+
 def test_enum():
     class Color(enum.Enum):
         RED = enum.auto()
@@ -103,7 +140,7 @@ def test_nested():
         x: int
         b: B
 
-    assert dcargs.parse(A, args=["--x", "1", "--b-y", "3"]) == A(x=1, b=B(y=3))
+    assert dcargs.parse(A, args=["--x", "1", "--b.y", "3"]) == A(x=1, b=B(y=3))
 
 
 def test_subparser():
@@ -122,6 +159,30 @@ def test_subparser():
 
     assert dcargs.parse(A, args=["--x", "1", "B", "--y", "3"]) == A(x=1, bc=B(y=3))
     assert dcargs.parse(A, args=["--x", "1", "C", "--z", "3"]) == A(x=1, bc=C(z=3))
+
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "1", "B", "--z", "3"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "1", "C", "--y", "3"])
+
+
+def test_optional_subparser():
+    @dataclasses.dataclass
+    class B:
+        y: int
+
+    @dataclasses.dataclass
+    class C:
+        z: int
+
+    @dataclasses.dataclass
+    class A:
+        x: int
+        bc: Optional[Union[B, C]]
+
+    assert dcargs.parse(A, args=["--x", "1", "B", "--y", "3"]) == A(x=1, bc=B(y=3))
+    assert dcargs.parse(A, args=["--x", "1", "C", "--z", "3"]) == A(x=1, bc=C(z=3))
+    assert dcargs.parse(A, args=["--x", "1"]) == A(x=1, bc=None)
 
     with pytest.raises(SystemExit):
         dcargs.parse(A, args=["--x", "1", "B", "--z", "3"])

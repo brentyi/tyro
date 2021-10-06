@@ -41,7 +41,7 @@ class ParserDefinition:
         if self.subparsers is not None:
             subparsers = parsers.root.add_subparsers(
                 dest=_strings.SUBPARSER_DEST_FMT.format(name=self.subparsers.name),
-                required=True,  # TODO: make a constant
+                required=self.subparsers.required,
             )
             for name, subparser_def in self.subparsers.parsers.items():
                 subparser = subparsers.add_parser(
@@ -93,8 +93,10 @@ class ParserDefinition:
 
             # Unions of dataclasses should create subparsers
             if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
+                # We don't use sets here to retain order of subcommands
                 options = field.type.__args__
-                if all(map(dataclasses.is_dataclass, options)):
+                options_no_none = [o for o in options if not isinstance(None, o)]
+                if all(map(dataclasses.is_dataclass, options_no_none)):
                     assert (
                         subparsers is None
                     ), "Only one Union (subparser group) is supported per dataclass"
@@ -105,8 +107,11 @@ class ParserDefinition:
                             option.__name__: ParserDefinition.from_dataclass(
                                 option, parent_dataclasses | {cls}
                             )
-                            for option in options
+                            for option in options_no_none
                         },
+                        required=(
+                            options == options_no_none
+                        ),  # not required if no options
                     )
                     vanilla_field = False
 
@@ -127,3 +132,4 @@ class SubparsersDefinition:
 
     name: str
     parsers: Dict[str, ParserDefinition]
+    required: bool

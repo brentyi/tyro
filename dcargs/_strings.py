@@ -1,6 +1,6 @@
 import textwrap
 
-NESTED_DATACLASS_DELIMETER: str = "_"  # This gets converted to a hyphen by argparse!
+NESTED_DATACLASS_DELIMETER: str = "."
 SUBPARSER_DEST_FMT: str = "{name} (positional)"
 
 
