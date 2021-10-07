@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set, Type, Unio
 
 from typing_extensions import Literal  # Python 3.7 compat
 
-from . import _docstrings
+from . import _docstrings, _strings
 
 if TYPE_CHECKING:
     from ._parsers import Parser
@@ -39,6 +39,7 @@ class ArgumentDefinition:
     choices: Optional[Set[Any]] = None
     metavar: Optional[str] = None
     help: Optional[str] = None
+    dest: Optional[str] = None
 
     def apply(self, parsers: "Parser") -> None:
         """Add a defined argument to a parser."""
@@ -63,6 +64,8 @@ class ArgumentDefinition:
             name=field.name,
             field=field,
             parent_class=parent_class,
+            # Default role -- this can be overridden by transforms to enable various
+            # special behaviours. (such as for enums)
             role=FieldRole.VANILLA_FIELD,
             type=field.type,
         )
@@ -72,18 +75,6 @@ class ArgumentDefinition:
 
 
 # Argument transformations
-
-
-def _bool_flags(arg: ArgumentDefinition) -> None:
-    """For booleans, we use a `store_true` action."""
-    if arg.type is not bool:
-        return
-
-    # TODO: what if the default value of the field is set to true by the user?
-    arg.action = "store_true"
-    arg.type = None
-    arg.default = False
-    arg.required = False
 
 
 def _populate_defaults(arg: ArgumentDefinition) -> None:
@@ -112,6 +103,26 @@ def _handle_optionals(arg: ArgumentDefinition) -> None:
         ), "Union must be either over dataclasses (for subparsers) or Optional"
         (arg.type,) = options - {type(None)}
         arg.required = False
+
+
+def _bool_flags(arg: ArgumentDefinition) -> None:
+    """For booleans, we use a `store_true` action."""
+    if arg.type != bool:
+        return
+
+    # TODO: what if the default value of the field is set to true by the user?
+    print(arg.default)
+    if arg.default is None:
+        arg.type = _strings.bool_from_string  # type: ignore
+        arg.metavar = "{True,False}"
+    elif arg.default is False:
+        arg.action = "store_true"
+        arg.type = None
+    elif arg.default is True:
+        arg.dest = arg.name
+        arg.name = "no_" + arg.name
+        arg.action = "store_false"
+        arg.type = None
 
 
 def _nargs_from_sequences_and_lists(arg: ArgumentDefinition) -> None:
@@ -178,7 +189,7 @@ def _enums_as_strings(arg: ArgumentDefinition) -> None:
 
 def _use_comment_as_helptext(arg: ArgumentDefinition) -> None:
     """Read the comment corresponding to a field and use that as helptext."""
-    arg.help = _docstrings.get_field_docstring(arg.parent_class, arg.name)
+    arg.help = _docstrings.get_field_docstring(arg.parent_class, arg.field.name)
 
 
 def _add_default_and_type_to_helptext(arg: ArgumentDefinition) -> None:
@@ -202,14 +213,14 @@ def _add_default_and_type_to_helptext(arg: ArgumentDefinition) -> None:
 
 def _use_type_as_metavar(arg: ArgumentDefinition) -> None:
     """Communicate the argument type using the metavar."""
-    if hasattr(arg.type, "__name__") and arg.choices is None:
+    if hasattr(arg.type, "__name__") and arg.choices is None and arg.metavar is None:
         arg.metavar = arg.type.__name__.upper()  # type: ignore
 
 
 _argument_transforms: List[Callable[[ArgumentDefinition], None]] = [
-    _bool_flags,  # needs to come before defaults are populated
     _populate_defaults,
     _handle_optionals,
+    _bool_flags,
     _nargs_from_sequences_and_lists,
     _nargs_from_tuples,
     _choices_from_literals,

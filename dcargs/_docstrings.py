@@ -63,7 +63,8 @@ def get_field_docstring(cls: Type, field_name: str) -> str:
         field_line is not None
         and field_index is not None
         and prev_line_with_name is not None
-    )
+    ), "Docstring parsing error -- this usually means that there are multiple \
+    dataclasses in the same file with the same name but different scopes."
 
     # Check for docstring-style comment
     if field_line + 1 in tokens_from_line and len(tokens_from_line[field_line + 1]) > 0:

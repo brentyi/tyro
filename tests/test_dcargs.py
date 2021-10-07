@@ -1,6 +1,7 @@
 import dataclasses
 import enum
 import io
+import pathlib
 from contextlib import redirect_stdout
 from typing import List, Optional, Sequence, Tuple, Union
 
@@ -12,10 +13,28 @@ import dcargs
 
 def test_basic():
     @dataclasses.dataclass
-    class A:
-        x: int
+    class ManyTypes:
+        i: int
+        s: str
+        f: float
+        p: pathlib.Path
 
-    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+    assert (
+        dcargs.parse(
+            ManyTypes,
+            args=[
+                "--i",
+                "5",
+                "--s",
+                "5",
+                "--f",
+                "5",
+                "--p",
+                "~",
+            ],
+        )
+        == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
+    )
 
 
 def test_required():
@@ -28,23 +47,44 @@ def test_required():
 
 
 def test_flag():
+    """When boolean flags have no default value, they must be explicitly specified."""
+
     @dataclasses.dataclass
     class A:
         x: bool
 
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+    assert dcargs.parse(A, args=["--x", "1"]) == A(True)
+    assert dcargs.parse(A, args=["--x", "true"]) == A(True)
+    assert dcargs.parse(A, args=["--x", "True"]) == A(True)
+
+    assert dcargs.parse(A, args=["--x", "0"]) == A(False)
+    assert dcargs.parse(A, args=["--x", "false"]) == A(False)
+    assert dcargs.parse(A, args=["--x", "False"]) == A(False)
+
+
+def test_flag_default_false():
+    """When boolean flags default to False, a --flag-name flag must be passed in to flip it to True."""
+
+    @dataclasses.dataclass
+    class A:
+        x: bool = False
+
     assert dcargs.parse(A, args=[]) == A(False)
     assert dcargs.parse(A, args=["--x"]) == A(True)
 
 
-def test_flag_inv():
-    # This is a weird but currently expected behavior: the default values of boolean
-    # flags are ignored. Should think harder about how this is handled.
+def test_flag_default_true():
+    """When boolean flags default to True, a --no-flag-name flag must be passed in to flip it to False."""
+
     @dataclasses.dataclass
     class A:
         x: bool = True
 
-    assert dcargs.parse(A, args=[]) == A(False)
-    assert dcargs.parse(A, args=["--x"]) == A(True)
+    assert dcargs.parse(A, args=[]) == A(True)
+    assert dcargs.parse(A, args=["--no-x"]) == A(False)
 
 
 def test_default():

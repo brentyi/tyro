@@ -27,7 +27,8 @@ The parse function supports dataclasses containing a wide range of types. Our
 unit tests currently cover:
 
 - Types natively accepted by `argparse`: str, int, float, pathlib.Path, etc
-- Booleans, which are converted to flags (in argparse: `action="store_true"`)
+- Booleans, which can have different behaviors based on default values (eg
+  `action="store_true"` or `action="store_false"`)
 - Enums (via `enum.Enum`)
 - Various generic and container types:
   - `typing.Optional` types
@@ -40,7 +41,7 @@ unit tests currently cover:
   - `typing.Optional[typing.List]` types
   - `typing.Optional[typing.Tuple]` types
 - Nested dataclasses
-  - Simple nesting
+  - Simple nesting (see `OptimizerConfig` example below)
   - Unions over nested dataclasses (subparsers)
   - Optional unions over nested dataclasses (optional subparsers)
 
@@ -52,34 +53,32 @@ unit tests currently cover:
 A usage example is available below. Examples of additional features can be found
 in the [unit tests](./tests/).
 
-### Comparisons to existing tools
+### Comparisons to alternative tools
 
-**[datargs](https://github.com/roee30/datargs)** was the largest inspiration for
-`dcargs`. Use `datargs` if you need more fine-grained configurability, attrs
-support, or automatic conversion from legacy argparse code to dataclass
-definitions. Use `dcargs` if you'd prefer to keep argument parsing-specific code
-out of your dataclasses, or want more simplicity, nested dataclasses, forward
-references, or automatic helptext generation.
+There are several alternative libraries to `dcargs`; here's a rough summary of
+some of them:
 
-**[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)** is also
-similar and simple, but has fewer features and relies on field metadata for
-specifying argparse options. In contrast, `dcargs` completely abstracts away the
-underlying argparse interface, and has support for things like nested classes,
-subparsers, and container types.
+|                                                                                                 | Parsers from dataclasses | Parsers from attrs | Nested dataclasses | Subparsers (via Unions) | Containers | Choices from literals                                    | Docstrings as helptext |
+| ----------------------------------------------------------------------------------------------- | ------------------------ | ------------------ | ------------------ | ----------------------- | ---------- | -------------------------------------------------------- | ---------------------- |
+| **dcargs**                                                                                      | ✓                        |                    | ✓                  | ✓                       | ✓          | ✓                                                        | ✓                      |
+| **[datargs](https://github.com/roee30/datargs)**                                                | ✓                        | ✓                  |                    | ✓                       | ✓          | ✓                                                        |                        |
+| **[simple-parsing](https://github.com/lebrice/SimpleParsing)**                                  | ✓                        |                    | ✓                  | ✓                       | ✓          | [soon](https://github.com/lebrice/SimpleParsing/pull/86) | ✓                      |
+| **[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)**                          | ✓                        |                    |                    |                         |            |                                                          |                        |
+| **[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)**                      | ✓                        |                    |                    |                         |            |                                                          |                        |
+| **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                 | ✓                        |                    |                    |                         |            |                                                          |                        |
+| **[hf_argparser](https://huggingface.co/transformers/_modules/transformers/hf_argparser.html)** | ✓                        |                    |                    |                         | ✓          |                                                          |                        |
 
-**[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)** uses
-an inheritance-based approach for building parsers from dataclasses. `dcargs` is
-more functional, and has support for things like nested classes, subparsers, and
-container types.
+Aside from the raw feature list, `dcargs` also has robust handling of forward
+references and more generic types, as well as some more philosphical design and
+usage distinctions.
 
-**[simple-parsing](https://github.com/lebrice/SimpleParsing)** is also a really
-powerful library, with similar support for helptext generation, containers, and
-nested dataclasses. Use `simple-parsing` if you don't mind a less minimalistic
-design philosophy and are okay with slightly weaker typing (a la argparse
-namespaces), or are willing to trade that off for more configurablity and
-features. (for example, a single parser in simple-parsing can support multiple
-dataclasses with different "destinations", and raw argparse-style arguments can
-also be specified)
+We choose strong typing and abstraction over configurability: we don't expose
+any argparse implementation details, rely on any dynamic namespace objects (eg
+`argparse.Namespace`) or string-based keys, and don't offer any way to add
+argument parsing-specific code or logic to dataclass definitions (these should
+be separate!). In contrast, many of the libraries above rely on field metadata
+to specify helptext or argument choices, or otherwise focused on inheritance-
+and decorator-based syntax for defining argument parsing-specific dataclasses.
 
 ### Example usage
 
