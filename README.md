@@ -4,54 +4,78 @@
 ![mypy](https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master)
 ![lint](https://github.com/brentyi/dcargs/workflows/lint/badge.svg)
 
+<!-- vim-markdown-toc GFM -->
+
+* [Feature list](#feature-list)
+* [Comparisons to alternative tools](#comparisons-to-alternative-tools)
+* [Example usage](#example-usage)
+
+<!-- vim-markdown-toc -->
+
 `dcargs` is a tool for generating portable, reusable, and strongly typed CLI
 interfaces from dataclass definitions.
 
 We expose one function, `parse(Type[T]) -> T`, which takes a dataclass type and
-instantiates it via an argparse-style CLI interface:
+instantiates it via an argparse-style CLI interface. If we create a script
+called `simple.py`:
 
 ```python
 import dataclasses
 
 import dcargs
 
+
 @dataclasses.dataclass
 class Args:
-    field1: str
-    field2: int
+    field1: str  # A string field.
+    field2: int  # A numeric field.
+
 
 args = dcargs.parse(Args)
 ```
 
-The parse function supports dataclasses containing a wide range of types. Our
-unit tests currently cover:
+Running `python simple.py --help` would print:
+
+```
+usage: simple.py [-h] --field1 STR --field2 INT
+
+optional arguments:
+  -h, --help    show this help message and exit
+
+required arguments:
+  --field1 STR  A string field.
+  --field2 INT  A numeric field.
+```
+
+### Feature list
+
+The parse function automatically generates helptext from comments/docstrings,
+and supports a wide range of dataclass definitions. Our unit tests cover classes
+containing:
 
 - Types natively accepted by `argparse`: str, int, float, pathlib.Path, etc
+- Default values for optional parameters
 - Booleans, which can have different behaviors based on default values (eg
   `action="store_true"` or `action="store_false"`)
 - Enums (via `enum.Enum`)
-- Various generic and container types:
+- Various generic and container types. Some examples:
+  - `typing.ClassVar` types (omitted from parser)
   - `typing.Optional` types
   - `typing.Literal` types (populates `choices`)
   - `typing.Sequence` types (populates `nargs`)
   - `typing.List` types (populates `nargs`)
   - `typing.Tuple` types (populates `nargs`; must contain just one child type)
-  - `typing.Optional[typing.Literal]` types
-  - `typing.Optional[typing.Sequence]` types
-  - `typing.Optional[typing.List]` types
-  - `typing.Optional[typing.Tuple]` types
+  - `typing.Final` types and `typing.Annotated` (for parsing, these are
+    effectively no-ops)
+  - Nested combinations of the above: `Optional[Literal[...]]`,
+    `Final[Optional[Sequence[...]]]`, etc
 - Nested dataclasses
   - Simple nesting (see `OptimizerConfig` example below)
   - Unions over nested dataclasses (subparsers)
   - Optional unions over nested dataclasses (optional subparsers)
 
-`dcargs.parse` will also:
-
-- Generate helptext from field comments/docstrings
-- Resolve forward references in type hints
-
 A usage example is available below. Examples of additional features can be found
-in the [unit tests](./tests/).
+in the [tests](./tests/).
 
 ### Comparisons to alternative tools
 
@@ -68,17 +92,18 @@ some of them:
 | **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                 | ✓                        |                    |                    |                         |            |                                                          |                        |
 | **[hf_argparser](https://huggingface.co/transformers/_modules/transformers/hf_argparser.html)** | ✓                        |                    |                    |                         | ✓          |                                                          |                        |
 
-Aside from the raw feature list, `dcargs` also has robust handling of forward
-references and more generic types, as well as some more philosphical design and
-usage distinctions.
+Some other distinguishing factors that `dcargs` has put effort into:
 
-We choose strong typing and abstraction over configurability: we don't expose
-any argparse implementation details, rely on any dynamic namespace objects (eg
-`argparse.Namespace`) or string-based keys, and don't offer any way to add
-argument parsing-specific code or logic to dataclass definitions (these should
-be separate!). In contrast, many of the libraries above rely on field metadata
-to specify helptext or argument choices, or otherwise focused on inheritance-
-and decorator-based syntax for defining argument parsing-specific dataclasses.
+- Robust handling of forward references
+- Support for nested generics
+- Strong typing: we actively avoid relying on strings or dynamic namespace
+  objects (eg `argparse.Namespace`)
+- Simplicity + strict abstractions: we're focused on a single function API, and
+  don't leak any argparse implementation details to the user level. We also
+  intentionally don't offer any way to add argument parsing-specific logic to
+  dataclass definitions. (in contrast, some of the libaries above rely heavily
+  on dataclass field metadata, or on the more extreme end inheritance+decorators
+  to make parsing-specific dataclasses)
 
 ### Example usage
 

@@ -8,7 +8,7 @@ from ._arguments import ArgumentDefinition, FieldRole
 
 @dataclasses.dataclass
 class Parser:
-    """Simple wrapper for an `argparse.ArgumentParser` object, which also retrains an
+    """Simple wrapper for an `argparse.ArgumentParser` object, which also retains an
     argument group for required arguments."""
 
     root: argparse.ArgumentParser
@@ -91,9 +91,12 @@ class ParserDefinition:
                     role_from_field=role_from_field,
                 )
                 child_args = child_definition.args
-                for arg in child_args:
-                    arg.name = (
-                        field.name + _strings.NESTED_DATACLASS_DELIMETER + arg.name
+                for i, arg in enumerate(child_args):
+                    child_args[i] = dataclasses.replace(
+                        arg,
+                        name=field.name
+                        + _strings.NESTED_DATACLASS_DELIMETER
+                        + arg.name,
                     )
                 args.extend(child_args)
 

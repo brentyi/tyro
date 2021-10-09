@@ -39,7 +39,7 @@ class _Tokenization:
 _cached_tokenization: Dict[Type, _Tokenization] = {}
 
 
-def get_field_docstring(cls: Type, field_name: str) -> str:
+def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
 
     if cls not in _cached_tokenization:
@@ -99,4 +99,4 @@ def get_field_docstring(cls: Type, field_name: str) -> str:
     if len(comments) > 0:
         return "\n".join(comments[::-1])
 
-    return ""
+    return None

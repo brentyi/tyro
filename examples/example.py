@@ -6,7 +6,6 @@ of which are supported by the automatic helptext generator.
 
 import dataclasses
 import enum
-import pathlib
 
 import dcargs
 

@@ -3,10 +3,10 @@ import enum
 import io
 import pathlib
 from contextlib import redirect_stdout
-from typing import List, Optional, Sequence, Tuple, Union
+from typing import ClassVar, List, Optional, Sequence, Tuple, Union
 
 import pytest
-from typing_extensions import Literal  # Python 3.7 compat
+from typing_extensions import Annotated, Final, Literal  # Backward compat
 
 import dcargs
 
@@ -223,6 +223,69 @@ def test_optional_literal():
     with pytest.raises(SystemExit):
         assert dcargs.parse(A, args=["--x", "3"])
     assert dcargs.parse(A, args=[]) == A(x=None)
+
+
+def test_annotated():
+    """Annotated[] is a no-op."""
+
+    @dataclasses.dataclass
+    class A:
+        x: Annotated[int, "some label"] = 3
+
+    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+
+
+def test_annotated_optional():
+    """Annotated[] is a no-op."""
+
+    @dataclasses.dataclass
+    class A:
+        x: Annotated[Optional[int], "some label"] = 3
+
+    assert dcargs.parse(A, args=[]) == A(x=3)
+    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+
+
+def test_optional_annotated():
+    """Annotated[] is a no-op."""
+
+    @dataclasses.dataclass
+    class A:
+        x: Optional[Annotated[int, "some label"]] = 3
+
+    assert dcargs.parse(A, args=[]) == A(x=3)
+    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+
+
+def test_final():
+    """Final[] is a no-op."""
+
+    @dataclasses.dataclass
+    class A:
+        x: Final[int] = 3
+
+    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+
+
+def test_final_optional():
+    @dataclasses.dataclass
+    class A:
+        x: Final[Optional[int]] = 3
+
+    assert dcargs.parse(A, args=[]) == A(x=3)
+    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+
+
+def test_classvar():
+    """ClassVar[] types should be skipped."""
+
+    @dataclasses.dataclass
+    class A:
+        x: ClassVar[int] = 5
+
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "1"])
+    assert dcargs.parse(A, args=[]) == A()
 
 
 def test_nested():
