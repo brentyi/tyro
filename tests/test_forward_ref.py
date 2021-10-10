@@ -48,7 +48,3 @@ def test_forward_ref_2():
         dcargs.parse(A2, args=["--x", "1", "B", "--z", "3"])
     with pytest.raises(SystemExit):
         dcargs.parse(A2, args=["--x", "1", "C", "--y", "3"])
-
-
-test_forward_ref_1()
-test_forward_ref_2()

@@ -294,11 +294,40 @@ def test_nested():
         y: int
 
     @dataclasses.dataclass
-    class A:
+    class Nested:
         x: int
         b: B
 
-    assert dcargs.parse(A, args=["--x", "1", "--b.y", "3"]) == A(x=1, b=B(y=3))
+    assert dcargs.parse(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(
+        x=1, b=B(y=3)
+    )
+    with pytest.raises(SystemExit):
+        dcargs.parse(Nested, args=["--x", "1"])
+
+
+# TODO: implement this!
+# def test_optional_nested():
+#     @dataclasses.dataclass
+#     class OptionalNestedChild:
+#         y: int
+#         z: int
+#
+#     @dataclasses.dataclass
+#     class OptionalNested:
+#         x: int
+#         b: Optional[OptionalNestedChild]
+#
+#     assert dcargs.parse(OptionalNested, args=["--x", "1"]) == OptionalNested(
+#         x=1, b=None
+#     )
+#     with pytest.raises(SystemExit):
+#         dcargs.parse(OptionalNested, args=["--x", "1", "--b.y", "3"])
+#     with pytest.raises(SystemExit):
+#         dcargs.parse(OptionalNested, args=["--x", "1", "--b.z", "3"])
+#
+#     assert dcargs.parse(
+#         OptionalNested, args=["--x", "1", "--b.y", "2", "--b.z", "3"]
+#     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
 
 
 def test_subparser():
@@ -311,17 +340,21 @@ def test_subparser():
         z: int
 
     @dataclasses.dataclass
-    class A:
+    class Subparser:
         x: int
         bc: Union[B, C]
 
-    assert dcargs.parse(A, args=["--x", "1", "B", "--y", "3"]) == A(x=1, bc=B(y=3))
-    assert dcargs.parse(A, args=["--x", "1", "C", "--z", "3"]) == A(x=1, bc=C(z=3))
+    assert dcargs.parse(Subparser, args=["--x", "1", "B", "--y", "3"]) == Subparser(
+        x=1, bc=B(y=3)
+    )
+    assert dcargs.parse(Subparser, args=["--x", "1", "C", "--z", "3"]) == Subparser(
+        x=1, bc=C(z=3)
+    )
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "1", "B", "--z", "3"])
+        dcargs.parse(Subparser, args=["--x", "1", "B", "--z", "3"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "1", "C", "--y", "3"])
+        dcargs.parse(Subparser, args=["--x", "1", "C", "--y", "3"])
 
 
 def test_optional_subparser():
@@ -334,18 +367,24 @@ def test_optional_subparser():
         z: int
 
     @dataclasses.dataclass
-    class A:
+    class OptionalSubparser:
         x: int
         bc: Optional[Union[B, C]]
 
-    assert dcargs.parse(A, args=["--x", "1", "B", "--y", "3"]) == A(x=1, bc=B(y=3))
-    assert dcargs.parse(A, args=["--x", "1", "C", "--z", "3"]) == A(x=1, bc=C(z=3))
-    assert dcargs.parse(A, args=["--x", "1"]) == A(x=1, bc=None)
+    assert dcargs.parse(
+        OptionalSubparser, args=["--x", "1", "B", "--y", "3"]
+    ) == OptionalSubparser(x=1, bc=B(y=3))
+    assert dcargs.parse(
+        OptionalSubparser, args=["--x", "1", "C", "--z", "3"]
+    ) == OptionalSubparser(x=1, bc=C(z=3))
+    assert dcargs.parse(OptionalSubparser, args=["--x", "1"]) == OptionalSubparser(
+        x=1, bc=None
+    )
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "1", "B", "--z", "3"])
+        dcargs.parse(OptionalSubparser, args=["--x", "1", "B", "--z", "3"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "1", "C", "--y", "3"])
+        dcargs.parse(OptionalSubparser, args=["--x", "1", "C", "--y", "3"])
 
 
 def test_helptext():

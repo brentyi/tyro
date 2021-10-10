@@ -1,22 +1,12 @@
+import argparse
 import collections.abc
 import dataclasses
 import enum
-from typing import TYPE_CHECKING, Any, Callable, List, Optional, Set, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Final, Literal, _AnnotatedAlias  # Backward compat
 
-from . import _docstrings, _strings
-
-if TYPE_CHECKING:
-    from ._parsers import Parser
-
-
-class FieldRole(enum.Enum):
-    VANILLA_FIELD = enum.auto()
-    TUPLE = enum.auto()
-    ENUM = enum.auto()
-    NESTED_DATACLASS = enum.auto()  # Singular nested dataclass
-    SUBPARSERS = enum.auto()  # Unions over dataclasses
+from . import _construction, _docstrings, _strings
 
 
 @dataclasses.dataclass(frozen=True)
@@ -28,7 +18,6 @@ class ArgumentDefinition:
     name: str
     field: dataclasses.Field
     parent_class: Type
-    role: FieldRole
     type: Optional[Type[Any]]
 
     # Fields that will be handled by argument transformations
@@ -41,24 +30,24 @@ class ArgumentDefinition:
     help: Optional[str] = None
     dest: Optional[str] = None
 
-    def apply(self, parsers: "Parser") -> None:
+    def add_argument(
+        self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
+    ) -> None:
         """Add a defined argument to a parser."""
         kwargs = {k: v for k, v in vars(self).items() if v is not None}
         name = "--" + kwargs.pop("name").replace("_", "-")
         kwargs.pop("field")
         kwargs.pop("parent_class")
-        kwargs.pop("role")
-
-        if "required" in kwargs and kwargs["required"]:
-            parsers.required.add_argument(name, **kwargs)
-        else:
-            parsers.root.add_argument(name, **kwargs)
+        parser.add_argument(name, **kwargs)
 
     @staticmethod
     def make_from_field(
-        parent_class: Type, field: dataclasses.Field
-    ) -> "ArgumentDefinition":
-        """Create an argument definition from a field."""
+        parent_class: Type,
+        field: dataclasses.Field,
+        type_from_typevar: Dict[TypeVar, Type],
+    ) -> Tuple["ArgumentDefinition", _construction.FieldRole]:
+        """Create an argument definition from a field. Also returns a field role, which
+        specifies special instructions for reconstruction."""
 
         assert field.init, "Field must be in class constructor"
 
@@ -67,51 +56,81 @@ class ArgumentDefinition:
             name=field.name,
             field=field,
             parent_class=parent_class,
-            # Default role -- this can be overridden by transforms to enable various
-            # special behaviours. (such as for enums)
-            role=FieldRole.VANILLA_FIELD,
             type=field.type,
         )
 
         # Propagate argument through transforms until stable
         prev_arg = arg
+        role: _construction.FieldRole = _construction.FieldRole.VANILLA_FIELD
+
+        def _handle_generics(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
+            return (
+                dataclasses.replace(
+                    arg,
+                    type=type_from_typevar[arg.type]  # type:ignore
+                    if arg.type in type_from_typevar
+                    else arg.type,
+                ),
+                None,
+            )
+
         while True:
-            for transform in _argument_transforms:
-                arg = transform(arg)
+            for transform in [_handle_generics] + _argument_transforms:  # type: ignore
+                # Apply transform
+                arg, new_role = transform(arg)
+
+                # Update field role
+                if new_role is not None:
+                    assert (
+                        role == _construction.FieldRole.VANILLA_FIELD
+                    ), "Something went wrong -- only one field role can be specified per argument!"
+                    role = new_role
+
+            # Stability check
             if arg == prev_arg:
                 break
             prev_arg = arg
-        return arg
+        return arg, role
 
 
 # Argument transformations
+# Each transform returns an argument definition and (optionall) a special role for
+# reconstruction -- note that a field can only ever have one role
+
+_ArgumentTransformOutput = Tuple[ArgumentDefinition, Optional[_construction.FieldRole]]
 
 
-def _unwrap_no_ops(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _unwrap_final(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Treat Final[T] as just T."""
     if hasattr(arg.type, "__origin__") and arg.type.__origin__ is Final:  # type: ignore
         (typ,) = arg.type.__args__  # type: ignore
-        return dataclasses.replace(
-            arg,
-            type=typ,
+        return (
+            dataclasses.replace(
+                arg,
+                type=typ,
+            ),
+            None,
         )
     else:
-        return arg
+        return arg, None
 
 
-def _unwrap_annotated(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _unwrap_annotated(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Treat Annotated[T, annotation] as just T."""
     if hasattr(arg.type, "__class__") and arg.type.__class__ == _AnnotatedAlias:
         typ = arg.type.__origin__  # type: ignore
-        return dataclasses.replace(
-            arg,
-            type=typ,
+        return (
+            dataclasses.replace(
+                arg,
+                type=typ,
+            ),
+            None,
         )
     else:
-        return arg
+        return arg, None
 
 
-def _handle_optionals(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _handle_optionals(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Transform for handling Optional[T] types. Sets default to None and marks arg as
     not required."""
     if hasattr(arg.type, "__origin__") and arg.type.__origin__ is Union:  # type: ignore
@@ -121,20 +140,23 @@ def _handle_optionals(arg: ArgumentDefinition) -> ArgumentDefinition:
         ), "Union must be either over dataclasses (for subparsers) or Optional"
         (typ,) = options - {type(None)}
         required = False
-        return dataclasses.replace(
-            arg,
-            type=typ,
-            required=required,
+        return (
+            dataclasses.replace(
+                arg,
+                type=typ,
+                required=required,
+            ),
+            None,
         )
     else:
-        return arg
+        return arg, None
 
 
-def _populate_defaults(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _populate_defaults(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Populate default values."""
     if arg.default is not None:
         # Skip if another handler has already populated the default
-        return arg
+        return arg, None
 
     default = None
     required = True
@@ -148,39 +170,50 @@ def _populate_defaults(arg: ArgumentDefinition) -> ArgumentDefinition:
     if arg.required is not None:
         required = arg.required
 
-    return dataclasses.replace(arg, default=default, required=required)
+    return dataclasses.replace(arg, default=default, required=required), None
 
 
-def _bool_flags(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _bool_flags(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """For booleans, we use a `store_true` action."""
     if arg.type != bool:
-        return arg
+        return arg, None
 
     if arg.default is None:
-        return dataclasses.replace(
-            arg,
-            type=_strings.bool_from_string,  # type: ignore
-            metavar="{True,False}",
+        return (
+            dataclasses.replace(
+                arg,
+                type=_strings.bool_from_string,  # type: ignore
+                metavar="{True,False}",
+            ),
+            None,
         )
     elif arg.default is False:
-        return dataclasses.replace(
-            arg,
-            action="store_true",
-            type=None,
+        return (
+            dataclasses.replace(
+                arg,
+                action="store_true",
+                type=None,
+            ),
+            None,
         )
     elif arg.default is True:
-        return dataclasses.replace(
-            arg,
-            dest=arg.name,
-            name="no_" + arg.name,
-            action="store_false",
-            type=None,
+        return (
+            dataclasses.replace(
+                arg,
+                dest=arg.name,
+                name="no_" + arg.name,
+                action="store_false",
+                type=None,
+            ),
+            None,
         )
     else:
         assert False, "Invalid default"
 
 
-def _nargs_from_sequences_and_lists(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _nargs_from_sequences_and_lists(
+    arg: ArgumentDefinition,
+) -> _ArgumentTransformOutput:
     """Transform for handling Sequence[T] and list types."""
     if hasattr(arg.type, "__origin__") and arg.type.__origin__ in (  # type: ignore
         collections.abc.Sequence,  # different from typing.Sequence!
@@ -189,19 +222,22 @@ def _nargs_from_sequences_and_lists(arg: ArgumentDefinition) -> ArgumentDefiniti
         assert len(arg.type.__args__) == 1  # type: ignore
         (typ,) = arg.type.__args__  # type: ignore
 
-        return dataclasses.replace(
-            arg,
-            type=typ,
-            # `*` is >=0 values, `+` is >=1 values
-            # We're going to require at least 1 value; if a user wants to accept no
-            # input, they can use Optional[Tuple[...]]
-            nargs="+",
+        return (
+            dataclasses.replace(
+                arg,
+                type=typ,
+                # `*` is >=0 values, `+` is >=1 values
+                # We're going to require at least 1 value; if a user wants to accept no
+                # input, they can use Optional[Tuple[...]]
+                nargs="+",
+            ),
+            None,
         )
     else:
-        return arg
+        return arg, None
 
 
-def _nargs_from_tuples(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _nargs_from_tuples(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Transform for handling Tuple[T, T, ...] types."""
     if hasattr(arg.type, "__origin__") and arg.type.__origin__ == tuple:  # type: ignore
         argset = set(arg.type.__args__)  # type: ignore
@@ -217,34 +253,38 @@ def _nargs_from_tuples(arg: ArgumentDefinition) -> ArgumentDefinition:
             nargs = len(arg.type.__args__)  # type: ignore
         (typ,) = argset_no_ellipsis
 
-        assert arg.role is FieldRole.VANILLA_FIELD
-        return dataclasses.replace(
-            arg,
-            nargs=nargs,
-            type=typ,
-            role=FieldRole.TUPLE,
+        return (
+            dataclasses.replace(
+                arg,
+                nargs=nargs,
+                type=typ,
+            ),
+            _construction.FieldRole.TUPLE,
         )
     else:
-        return arg
+        return arg, None
 
 
-def _choices_from_literals(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _choices_from_literals(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """For literal types, set choices."""
     if hasattr(arg.type, "__origin__") and arg.type.__origin__ is Literal:  # type: ignore
         choices = set(arg.type.__args__)  # type: ignore
         assert (
             len(set(map(type, choices))) == 1
         ), "All choices in literal must have the same type!"
-        return dataclasses.replace(
-            arg,
-            type=type(arg.type.__args__[0]),  # type: ignore
-            choices=choices,
+        return (
+            dataclasses.replace(
+                arg,
+                type=type(arg.type.__args__[0]),  # type: ignore
+                choices=choices,
+            ),
+            None,
         )
     else:
-        return arg
+        return arg, None
 
 
-def _enums_as_strings(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _enums_as_strings(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """For enums, use string representations."""
     if isinstance(arg.type, type) and issubclass(arg.type, enum.Enum):
         if arg.choices is None:
@@ -252,19 +292,20 @@ def _enums_as_strings(arg: ArgumentDefinition) -> ArgumentDefinition:
         else:
             choices = set(x.name for x in arg.choices)
 
-        assert arg.role is FieldRole.VANILLA_FIELD
-        return dataclasses.replace(
-            arg,
-            choices=choices,
-            type=str,
-            default=None if arg.default is None else arg.default.name,
-            role=FieldRole.ENUM,
+        return (
+            dataclasses.replace(
+                arg,
+                choices=choices,
+                type=str,
+                default=None if arg.default is None else arg.default.name,
+            ),
+            _construction.FieldRole.ENUM,
         )
     else:
-        return arg
+        return arg, None
 
 
-def _generate_helptext(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _generate_helptext(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Generate helptext from docstring and argument name."""
     if arg.help is None:
         help_parts = []
@@ -281,23 +322,24 @@ def _generate_helptext(arg: ArgumentDefinition) -> ArgumentDefinition:
             # General case
             help_parts.append("(default: %(default)s)")
 
-        return dataclasses.replace(arg, help=" ".join(help_parts))
+        return dataclasses.replace(arg, help=" ".join(help_parts)), None
     else:
-        return arg
+        return arg, None
 
 
-def _use_type_as_metavar(arg: ArgumentDefinition) -> ArgumentDefinition:
+def _use_type_as_metavar(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Communicate the argument type using the metavar."""
     if hasattr(arg.type, "__name__") and arg.choices is None and arg.metavar is None:
-        return dataclasses.replace(
-            arg, metavar=arg.type.__name__.upper()  # type: ignore
+        return (
+            dataclasses.replace(arg, metavar=arg.type.__name__.upper()),  # type: ignore
+            None,
         )
     else:
-        return arg
+        return arg, None
 
 
-_argument_transforms: List[Callable[[ArgumentDefinition], ArgumentDefinition]] = [
-    _unwrap_no_ops,
+_argument_transforms: List[Callable[[ArgumentDefinition], _ArgumentTransformOutput]] = [
+    _unwrap_final,
     _unwrap_annotated,
     _handle_optionals,
     _populate_defaults,

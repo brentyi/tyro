@@ -4,6 +4,8 @@ import io
 import tokenize
 from typing import Dict, List, Optional, Type
 
+from typing_extensions import _GenericAlias  # type: ignore
+
 from . import _strings
 
 
@@ -41,6 +43,9 @@ _cached_tokenization: Dict[Type, _Tokenization] = {}
 
 def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
+
+    if isinstance(cls, _GenericAlias):
+        cls = cls.__origin__
 
     if cls not in _cached_tokenization:
         _cached_tokenization[cls] = _Tokenization.make(cls)

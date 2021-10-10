@@ -1,25 +1,12 @@
 import argparse
 import dataclasses
-from typing import Any, Dict, List, Optional, Set, Type, Union, get_type_hints
+from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union
 
-from . import _strings
-from ._arguments import ArgumentDefinition, FieldRole
+from typing_extensions import _GenericAlias  # type: ignore
 
+from . import _arguments, _construction, _docstrings, _resolver, _strings
 
-@dataclasses.dataclass
-class Parser:
-    """Simple wrapper for an `argparse.ArgumentParser` object, which also retains an
-    argument group for required arguments."""
-
-    root: argparse.ArgumentParser
-    required: argparse._ArgumentGroup
-
-    @staticmethod
-    def make(parser: argparse.ArgumentParser) -> "Parser":
-        return Parser(
-            root=parser,  # the default argument group is "optional arguments"
-            required=parser.add_argument_group("required arguments"),
-        )
+TypeOrGeneric = Union[Type, _GenericAlias]
 
 
 @dataclasses.dataclass
@@ -27,23 +14,35 @@ class ParserDefinition:
     """Each parser contains a list of arguments and optionally a subparser."""
 
     description: str
-    args: List["ArgumentDefinition"]
+    args: List["_arguments.ArgumentDefinition"]
     subparsers: Optional["SubparsersDefinition"]
-    role_from_field: Dict[dataclasses.Field, FieldRole] = dataclasses.field(
-        default_factory=dict
-    )
+    role_from_field: Dict[
+        dataclasses.Field, _construction.FieldRole
+    ] = dataclasses.field(default_factory=dict)
 
-    def apply(self, parsers: Parser) -> None:
+    def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
+
+        groups: Dict[str, Union[argparse.ArgumentParser, argparse._ArgumentGroup]] = {
+            "optional arguments": parser,
+        }
 
         # Add each argument
         for arg in self.args:
-            arg.apply(parsers)
+            if arg.required:
+                group = "required arguments"
+            else:
+                group = "optional arguments"
+
+            if group not in groups:
+                groups[group] = parser.add_argument_group(group)
+            arg.add_argument(groups[group])
 
         # Add subparsers
         if self.subparsers is not None:
-            subparsers = parsers.root.add_subparsers(
+            subparsers = parser.add_subparsers(
                 dest=_strings.SUBPARSER_DEST_FMT.format(name=self.subparsers.name),
+                description=self.subparsers.description,
                 required=self.subparsers.required,
             )
             for name, subparser_def in self.subparsers.parsers.items():
@@ -51,13 +50,16 @@ class ParserDefinition:
                     name,
                     description=subparser_def.description,
                 )
-                subparser_def.apply(Parser.make(subparser))
+                subparser_def.apply(subparser)
 
     @staticmethod
     def from_dataclass(
-        cls: Type[Any],
+        cls: Union[Type[Any], _GenericAlias],
         parent_dataclasses: Optional[Set[Type]] = None,
-        role_from_field: Optional[Dict[dataclasses.Field, FieldRole]] = None,
+        role_from_field: Optional[
+            Dict[dataclasses.Field, _construction.FieldRole]
+        ] = None,
+        parent_type_from_typevar: Optional[Dict[TypeVar, Type]] = None,
     ) -> "ParserDefinition":
         """Create a parser definition from a dataclass."""
 
@@ -66,29 +68,35 @@ class ParserDefinition:
         if role_from_field is None:
             role_from_field = {}
 
-        assert dataclasses.is_dataclass(cls)
+        assert _resolver.is_dataclass(cls)
+
+        cls, type_from_typevar = _resolver.resolve_generic_dataclasses(cls)
+
+        if parent_type_from_typevar is not None:
+            for typevar, typ in type_from_typevar.items():
+                if typ in parent_type_from_typevar:
+                    type_from_typevar[typevar] = parent_type_from_typevar[typ]  # type: ignore
+
         assert (
             cls not in parent_dataclasses
         ), f"Found a cyclic dataclass dependency with type {cls}"
 
         args = []
         subparsers = None
-        annotations = get_type_hints(cls)
-        for field in dataclasses.fields(cls):
+        for field in _resolver.resolved_fields(cls):  # type: ignore
             if not field.init:
                 continue
 
-            # Resolve forward references
-            field.type = annotations[field.name]
-
-            vanilla_field: bool = True
+            # If set to False, we don't directly create an argument from this field
+            arg_from_field: bool = True
 
             # Add arguments for nested dataclasses
-            if dataclasses.is_dataclass(field.type):
+            if _resolver.is_dataclass(field.type):
                 child_definition = ParserDefinition.from_dataclass(
                     field.type,
                     parent_dataclasses | {cls},
                     role_from_field=role_from_field,
+                    parent_type_from_typevar=type_from_typevar,
                 )
                 child_args = child_definition.args
                 for i, arg in enumerate(child_args):
@@ -104,26 +112,30 @@ class ParserDefinition:
                     assert subparsers is None
                     subparsers = child_definition.subparsers
 
-                role_from_field[field] = FieldRole.NESTED_DATACLASS
-                vanilla_field = False
+                role_from_field[field] = _construction.FieldRole.NESTED_DATACLASS
+                arg_from_field = False
 
-            # Unions of dataclasses should create subparsers
+            # Union of dataclasses should create subparsers
             if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
                 # We don't use sets here to retain order of subcommands
                 options = field.type.__args__
                 options_no_none = [o for o in options if o != type(None)]  # noqa
-                if all(map(dataclasses.is_dataclass, options_no_none)):
+                if len(options_no_none) >= 2 and all(
+                    map(_resolver.is_dataclass, options_no_none)
+                ):
                     assert (
                         subparsers is None
-                    ), "Only one Union (subparser group) is supported per dataclass"
+                    ), "Only one subparser group is supported per dataclass"
 
                     subparsers = SubparsersDefinition(
                         name=field.name,
+                        description=_docstrings.get_field_docstring(cls, field.name),
                         parsers={
                             option.__name__: ParserDefinition.from_dataclass(
                                 option,
                                 parent_dataclasses | {cls},
                                 role_from_field,
+                                parent_type_from_typevar=type_from_typevar,
                             )
                             for option in options_no_none
                         },
@@ -131,13 +143,16 @@ class ParserDefinition:
                             options == options_no_none
                         ),  # not required if no options
                     )
-                    vanilla_field = False
-                    role_from_field[field] = FieldRole.SUBPARSERS
+                    role_from_field[field] = _construction.FieldRole.SUBPARSERS
+                    arg_from_field = False
 
-            # Make a vanilla field
-            if vanilla_field:
-                args.append(ArgumentDefinition.make_from_field(cls, field))
-                role_from_field[field] = args[-1].role
+            # Make an argument!
+            if arg_from_field:
+                arg, role = _arguments.ArgumentDefinition.make_from_field(
+                    cls, field, type_from_typevar
+                )
+                args.append(arg)
+                role_from_field[field] = role
 
         return ParserDefinition(
             description=str(cls.__doc__),
@@ -152,5 +167,6 @@ class SubparsersDefinition:
     """Structure for containing subparsers. Each subparser is a parser with a name."""
 
     name: str
+    description: Optional[str]
     parsers: Dict[str, ParserDefinition]
     required: bool

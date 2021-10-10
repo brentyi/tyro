@@ -31,7 +31,8 @@ class Args:
     field2: int  # A numeric field.
 
 
-args = dcargs.parse(Args)
+if __name__ == "__main__":
+    args = dcargs.parse(Args)
 ```
 
 Running `python simple.py --help` would print:
@@ -58,7 +59,7 @@ containing:
 - Booleans, which can have different behaviors based on default values (eg
   `action="store_true"` or `action="store_false"`)
 - Enums (via `enum.Enum`)
-- Various generic and container types. Some examples:
+- Various container types. Some examples:
   - `typing.ClassVar` types (omitted from parser)
   - `typing.Optional` types
   - `typing.Literal` types (populates `choices`)
@@ -73,6 +74,8 @@ containing:
   - Simple nesting (see `OptimizerConfig` example below)
   - Unions over nested dataclasses (subparsers)
   - Optional unions over nested dataclasses (optional subparsers)
+- Generic dataclasses (including nested generics, see
+  [./examples/generics.py](./examples/generics.py))
 
 A usage example is available below. Examples of additional features can be found
 in the [tests](./tests/).
@@ -95,7 +98,7 @@ some of them:
 Some other distinguishing factors that `dcargs` has put effort into:
 
 - Robust handling of forward references
-- Support for nested generics
+- Support for nested containers+generics
 - Strong typing: we actively avoid relying on strings or dynamic namespace
   objects (eg `argparse.Namespace`)
 - Simplicity + strict abstractions: we're focused on a single function API, and
@@ -150,8 +153,9 @@ class ExperimentConfig:
     all reproducible!"""
 
 
-config = dcargs.parse(ExperimentConfig, description=__doc__)
-print(config)
+if __name__ == "__main__":
+  config = dcargs.parse(ExperimentConfig, description=__doc__)
+  print(config)
 ```
 
 Generates the following argument parser:
