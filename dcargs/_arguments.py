@@ -18,7 +18,7 @@ class ArgumentDefinition:
     name: str
     field: dataclasses.Field
     parent_class: Type
-    type: Optional[Type[Any]]
+    type: Optional[Union[Type, TypeVar]]
 
     # Fields that will be handled by argument transformations
     required: Optional[bool] = None
@@ -64,15 +64,16 @@ class ArgumentDefinition:
         role: _construction.FieldRole = _construction.FieldRole.VANILLA_FIELD
 
         def _handle_generics(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
-            return (
-                dataclasses.replace(
-                    arg,
-                    type=type_from_typevar[arg.type]  # type:ignore
-                    if arg.type in type_from_typevar
-                    else arg.type,
-                ),
-                None,
-            )
+            if isinstance(arg.type, TypeVar):
+                assert arg.type in type_from_typevar, "TypeVar not bounded"
+                return (
+                    dataclasses.replace(
+                        arg, type=type_from_typevar[arg.type]  # type:ignore
+                    ),
+                    None,
+                )
+            else:
+                return arg, None
 
         while True:
             for transform in [_handle_generics] + _argument_transforms:  # type: ignore

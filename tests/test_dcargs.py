@@ -1,8 +1,6 @@
 import dataclasses
 import enum
-import io
 import pathlib
-from contextlib import redirect_stdout
 from typing import ClassVar, List, Optional, Sequence, Tuple, Union
 
 import pytest
@@ -385,24 +383,3 @@ def test_optional_subparser():
         dcargs.parse(OptionalSubparser, args=["--x", "1", "B", "--z", "3"])
     with pytest.raises(SystemExit):
         dcargs.parse(OptionalSubparser, args=["--x", "1", "C", "--y", "3"])
-
-
-def test_helptext():
-    @dataclasses.dataclass
-    class Helptext:
-        x: int  # Documentation 1
-
-        # Documentation 2
-        y: int
-
-        z: int = 3
-        """Documentation 3"""
-
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with redirect_stdout(f):
-            dcargs.parse(Helptext, args=["--help"])
-    helptext = f.getvalue()
-    assert "--x INT     Documentation 1\n" in helptext
-    assert "--y INT     Documentation 2\n" in helptext
-    assert "--z INT     Documentation 3 (default: 3)\n" in helptext

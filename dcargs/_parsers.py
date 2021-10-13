@@ -23,20 +23,16 @@ class ParserDefinition:
     def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
 
-        groups: Dict[str, Union[argparse.ArgumentParser, argparse._ArgumentGroup]] = {
-            "optional arguments": parser,
-        }
+        # Put required group at start of group list
+        required_group = parser.add_argument_group("required arguments")
+        parser._action_groups = parser._action_groups[::-1]
 
         # Add each argument
         for arg in self.args:
             if arg.required:
-                group = "required arguments"
+                arg.add_argument(required_group)
             else:
-                group = "optional arguments"
-
-            if group not in groups:
-                groups[group] = parser.add_argument_group(group)
-            arg.add_argument(groups[group])
+                arg.add_argument(parser)
 
         # Add subparsers
         if self.subparsers is not None:

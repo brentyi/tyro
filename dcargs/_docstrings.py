@@ -47,8 +47,15 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     if isinstance(cls, _GenericAlias):
         cls = cls.__origin__
 
+    assert dataclasses.is_dataclass(cls)
     if cls not in _cached_tokenization:
-        _cached_tokenization[cls] = _Tokenization.make(cls)
+        try:
+            _cached_tokenization[cls] = _Tokenization.make(cls)
+        except OSError as e:
+            # Dynamic dataclasses
+            assert "could not find class definition" in e.args[0]
+            return None
+
     tokens = _cached_tokenization[cls].tokens
     tokens_from_line = _cached_tokenization[cls].tokens_from_line
 
@@ -87,7 +94,6 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         return comment[1:].strip()
 
     # Check for comment on the line before the field
-    # TODO: this may result in unintentional helptext?
     comment_index = field_index
     comments: List[str] = []
     while True:
