@@ -1,6 +1,6 @@
 import argparse
 import dataclasses
-from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import _GenericAlias  # type: ignore
 
@@ -16,9 +16,6 @@ class ParserDefinition:
     description: str
     args: List["_arguments.ArgumentDefinition"]
     subparsers: Optional["SubparsersDefinition"]
-    role_from_field: Dict[
-        dataclasses.Field, _construction.FieldRole
-    ] = dataclasses.field(default_factory=dict)
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
@@ -51,18 +48,14 @@ class ParserDefinition:
     @staticmethod
     def from_dataclass(
         cls: Union[Type[Any], _GenericAlias],
-        parent_dataclasses: Optional[Set[Type]] = None,
-        role_from_field: Optional[
-            Dict[dataclasses.Field, _construction.FieldRole]
-        ] = None,
-        parent_type_from_typevar: Optional[Dict[TypeVar, Type]] = None,
-    ) -> "ParserDefinition":
+        parent_dataclasses: Optional[Set[Type]],
+        subparser_name_from_type: Dict[Type, str],
+        parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
+    ) -> Tuple["ParserDefinition", _construction.ConstructionMetadata]:
         """Create a parser definition from a dataclass."""
 
         if parent_dataclasses is None:
             parent_dataclasses = set()
-        if role_from_field is None:
-            role_from_field = {}
 
         assert _resolver.is_dataclass(cls)
 
@@ -79,6 +72,7 @@ class ParserDefinition:
 
         args = []
         subparsers = None
+        metadata = _construction.ConstructionMetadata()
         for field in _resolver.resolved_fields(cls):  # type: ignore
             if not field.init:
                 continue
@@ -88,27 +82,29 @@ class ParserDefinition:
 
             # Add arguments for nested dataclasses
             if _resolver.is_dataclass(field.type):
-                child_definition = ParserDefinition.from_dataclass(
+                child_definition, child_metadata = ParserDefinition.from_dataclass(
                     field.type,
                     parent_dataclasses | {cls},
-                    role_from_field=role_from_field,
+                    subparser_name_from_type=subparser_name_from_type,
                     parent_type_from_typevar=type_from_typevar,
                 )
+                metadata.update(child_metadata)
+
                 child_args = child_definition.args
                 for i, arg in enumerate(child_args):
-                    child_args[i] = dataclasses.replace(
-                        arg,
-                        name=field.name
-                        + _strings.NESTED_DATACLASS_DELIMETER
-                        + arg.name,
+                    child_args[i] = arg.prefix(
+                        field.name + _strings.NESTED_DATACLASS_DELIMETER
                     )
+
                 args.extend(child_args)
 
                 if child_definition.subparsers is not None:
                     assert subparsers is None
                     subparsers = child_definition.subparsers
 
-                role_from_field[field] = _construction.FieldRole.NESTED_DATACLASS
+                metadata.role_from_field[
+                    field
+                ] = _construction.FieldRole.NESTED_DATACLASS
                 arg_from_field = False
 
             # Union of dataclasses should create subparsers
@@ -123,23 +119,37 @@ class ParserDefinition:
                         subparsers is None
                     ), "Only one subparser group is supported per dataclass"
 
+                    parsers: Dict[str, ParserDefinition] = {}
+                    for option in options_no_none:
+                        subparser_name = (
+                            subparser_name_from_type[option]
+                            if option in subparser_name_from_type
+                            else _strings.hyphen_separated_from_camel_case(
+                                option.__name__
+                            )
+                        )
+                        metadata.subparser_name_from_type[option] = subparser_name
+
+                        (
+                            parsers[subparser_name],
+                            child_metadata,
+                        ) = ParserDefinition.from_dataclass(
+                            option,
+                            parent_dataclasses | {cls},
+                            subparser_name_from_type,
+                            parent_type_from_typevar=type_from_typevar,
+                        )
+                        metadata.update(child_metadata)
+
                     subparsers = SubparsersDefinition(
                         name=field.name,
                         description=_docstrings.get_field_docstring(cls, field.name),
-                        parsers={
-                            option.__name__: ParserDefinition.from_dataclass(
-                                option,
-                                parent_dataclasses | {cls},
-                                role_from_field,
-                                parent_type_from_typevar=type_from_typevar,
-                            )
-                            for option in options_no_none
-                        },
+                        parsers=parsers,
                         required=(
                             options == options_no_none
                         ),  # not required if no options
                     )
-                    role_from_field[field] = _construction.FieldRole.SUBPARSERS
+                    metadata.role_from_field[field] = _construction.FieldRole.SUBPARSERS
                     arg_from_field = False
 
             # Make an argument!
@@ -148,13 +158,15 @@ class ParserDefinition:
                     cls, field, type_from_typevar
                 )
                 args.append(arg)
-                role_from_field[field] = role
+                metadata.role_from_field[field] = role
 
-        return ParserDefinition(
-            description=str(cls.__doc__),
-            args=args,
-            subparsers=subparsers,
-            role_from_field=role_from_field,
+        return (
+            ParserDefinition(
+                description=str(cls.__doc__),
+                args=args,
+                subparsers=subparsers,
+            ),
+            metadata,
         )
 
 

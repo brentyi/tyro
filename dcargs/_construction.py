@@ -19,12 +19,28 @@ class FieldRole(enum.Enum):
     SUBPARSERS = enum.auto()  # Unions over dataclasses
 
 
+@dataclasses.dataclass
+class ConstructionMetadata:
+    """Metadata recorded during parsing that's needed for reconstructing dataclasses."""
+
+    role_from_field: Dict[dataclasses.Field, FieldRole] = dataclasses.field(
+        default_factory=dict
+    )
+    subparser_name_from_type: Dict[Type, str] = dataclasses.field(default_factory=dict)
+
+    def update(self, other: "ConstructionMetadata") -> None:
+        self.role_from_field.update(other.role_from_field)
+        self.subparser_name_from_type.update(other.subparser_name_from_type)
+
+
 def construct_dataclass(
     cls: Type[DataclassType],
-    role_from_field: Dict[dataclasses.Field, FieldRole],
-    values: Dict[str, Any],
+    value_from_arg: Dict[str, Any],
+    metadata: ConstructionMetadata,
+    field_name_prefix: str = "",
 ) -> DataclassType:
-    """Construct a dataclass object from a dictionary of values from argparse."""
+    """Construct a dataclass object from a dictionary of values from argparse.
+    Mutates `value_from_arg`."""
 
     assert _resolver.is_dataclass(cls)
 
@@ -37,50 +53,56 @@ def construct_dataclass(
             continue
 
         value: Any
-        role = role_from_field[field]
+        role = metadata.role_from_field[field]
+
+        prefixed_field_name = field_name_prefix + field.name
 
         if role is FieldRole.ENUM:
             # Handle enums
-            value = field.type[values[field.name]]
+            value = field.type[value_from_arg.pop(prefixed_field_name)]
         elif role is FieldRole.NESTED_DATACLASS:
             # Nested dataclasses
-            arg_prefix = field.name + _strings.NESTED_DATACLASS_DELIMETER
             value = construct_dataclass(
                 field.type,
-                role_from_field,
-                values={
-                    k[len(arg_prefix) :]: v
-                    for k, v in values.items()
-                    if k.startswith(arg_prefix)
-                },
-            )
+                value_from_arg,
+                metadata,
+                field_name_prefix=prefixed_field_name
+                + _strings.NESTED_DATACLASS_DELIMETER,
+            )  # TODO: need to strip prefixes here. not sure how
         elif role is FieldRole.SUBPARSERS:
             # Unions over dataclasses (subparsers)
-            subparser_dest = _strings.SUBPARSER_DEST_FMT.format(name=field.name)
-            if values[subparser_dest] is None:
+            subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
+                name=prefixed_field_name
+            )
+            subparser_name = value_from_arg.pop(subparser_dest)
+            if subparser_name is None:
                 # No subparser selected -- this should only happen when we do either
                 # Optional[Union[A, B, ...]] or Union[A, B, None] -- note that these are
                 # equivalent
                 assert type(None) in field.type.__args__
                 value = None
             else:
-                assert subparser_dest in values.keys()
                 options = field.type.__args__
                 chosen_cls = None
                 for option in options:
-                    if option.__name__ == values[subparser_dest]:
+                    if metadata.subparser_name_from_type[option] == subparser_name:
                         chosen_cls = option
                         break
                 assert chosen_cls is not None
-                value = construct_dataclass(chosen_cls, role_from_field, values)
+                value = construct_dataclass(
+                    chosen_cls,
+                    value_from_arg,
+                    metadata,
+                )
         elif role is FieldRole.TUPLE:
             # For sequences, argparse always gives us lists -- sometimes we want tuples
-            value = (
-                tuple(values[field.name]) if values[field.name] is not None else None
-            )
+            value = value_from_arg.pop(prefixed_field_name)
+            if value is not None:
+                value = tuple(value)
+
         elif role is FieldRole.VANILLA_FIELD:
             # General case
-            value = values[field.name]
+            value = value_from_arg.pop(prefixed_field_name)
         else:
             assert False
 

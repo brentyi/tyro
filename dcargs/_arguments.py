@@ -40,6 +40,15 @@ class ArgumentDefinition:
         kwargs.pop("parent_class")
         parser.add_argument(name, **kwargs)
 
+    def prefix(self, prefix: str) -> "ArgumentDefinition":
+        """Prefix an argument's name and destination. Used for nested dataclasses."""
+        _strings.NESTED_DATACLASS_DELIMETER
+        arg = self
+        arg = dataclasses.replace(arg, name=prefix + arg.name)
+        if arg.dest is not None:
+            arg = dataclasses.replace(arg, dest=prefix + arg.dest)
+        return arg
+
     @staticmethod
     def make_from_field(
         parent_class: Type,

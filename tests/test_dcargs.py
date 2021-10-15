@@ -85,6 +85,21 @@ def test_flag_default_true():
     assert dcargs.parse(A, args=["--no-x"]) == A(False)
 
 
+def test_flag_default_true_nested():
+    """When boolean flags default to True, a --no-flag-name flag must be passed in to flip it to False."""
+
+    @dataclasses.dataclass
+    class NestedDefaultTrue:
+        x: bool = True
+
+    @dataclasses.dataclass
+    class A:
+        x: NestedDefaultTrue
+
+    assert dcargs.parse(A, args=[]) == A(NestedDefaultTrue(True))
+    assert dcargs.parse(A, args=["--x.no-x"]) == A(NestedDefaultTrue(False))
+
+
 def test_default():
     @dataclasses.dataclass
     class A:
@@ -330,51 +345,51 @@ def test_nested():
 
 def test_subparser():
     @dataclasses.dataclass
-    class B:
+    class HTTPServer:
         y: int
 
     @dataclasses.dataclass
-    class C:
+    class SMTPServer:
         z: int
 
     @dataclasses.dataclass
     class Subparser:
         x: int
-        bc: Union[B, C]
+        bc: Union[HTTPServer, SMTPServer]
 
-    assert dcargs.parse(Subparser, args=["--x", "1", "B", "--y", "3"]) == Subparser(
-        x=1, bc=B(y=3)
-    )
-    assert dcargs.parse(Subparser, args=["--x", "1", "C", "--z", "3"]) == Subparser(
-        x=1, bc=C(z=3)
-    )
+    assert dcargs.parse(
+        Subparser, args=["--x", "1", "http-server", "--y", "3"]
+    ) == Subparser(x=1, bc=HTTPServer(y=3))
+    assert dcargs.parse(
+        Subparser, args=["--x", "1", "smtp-server", "--z", "3"]
+    ) == Subparser(x=1, bc=SMTPServer(z=3))
 
     with pytest.raises(SystemExit):
-        dcargs.parse(Subparser, args=["--x", "1", "B", "--z", "3"])
+        dcargs.parse(Subparser, args=["--x", "1", "b", "--z", "3"])
     with pytest.raises(SystemExit):
-        dcargs.parse(Subparser, args=["--x", "1", "C", "--y", "3"])
+        dcargs.parse(Subparser, args=["--x", "1", "c", "--y", "3"])
 
 
 def test_optional_subparser():
     @dataclasses.dataclass
-    class B:
+    class OptionalHTTPServer:
         y: int
 
     @dataclasses.dataclass
-    class C:
+    class OptionalSMTPServer:
         z: int
 
     @dataclasses.dataclass
     class OptionalSubparser:
         x: int
-        bc: Optional[Union[B, C]]
+        bc: Optional[Union[OptionalHTTPServer, OptionalSMTPServer]]
 
     assert dcargs.parse(
-        OptionalSubparser, args=["--x", "1", "B", "--y", "3"]
-    ) == OptionalSubparser(x=1, bc=B(y=3))
+        OptionalSubparser, args=["--x", "1", "optional-http-server", "--y", "3"]
+    ) == OptionalSubparser(x=1, bc=OptionalHTTPServer(y=3))
     assert dcargs.parse(
-        OptionalSubparser, args=["--x", "1", "C", "--z", "3"]
-    ) == OptionalSubparser(x=1, bc=C(z=3))
+        OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--z", "3"]
+    ) == OptionalSubparser(x=1, bc=OptionalSMTPServer(z=3))
     assert dcargs.parse(OptionalSubparser, args=["--x", "1"]) == OptionalSubparser(
         x=1, bc=None
     )

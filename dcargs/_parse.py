@@ -15,8 +15,11 @@ def parse(
 ) -> DataclassType:
     """Populate a dataclass via CLI args."""
 
-    parser_definition = _parsers.ParserDefinition.from_dataclass(
-        cls, parent_dataclasses=set()
+    parser_definition, construction_metadata = _parsers.ParserDefinition.from_dataclass(
+        cls,
+        parent_dataclasses=set(),  # Used for recursive calls
+        subparser_name_from_type={},  # Aliases for subparsers; this is working, but not yet exposed
+        parent_type_from_typevar=None,  # Used for recursive calls
     )
 
     parser = argparse.ArgumentParser(
@@ -26,6 +29,7 @@ def parse(
     parser_definition.apply(parser)
     namespace = parser.parse_args(args)
 
-    return _construction.construct_dataclass(
-        cls, parser_definition.role_from_field, vars(namespace)
-    )
+    value_from_arg = vars(namespace)
+    out = _construction.construct_dataclass(cls, value_from_arg, construction_metadata)
+    assert len(value_from_arg) == 0, "Not all arguments were consumed!"
+    return out
