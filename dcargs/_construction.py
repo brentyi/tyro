@@ -1,6 +1,6 @@
 import dataclasses
 import enum
-from typing import Any, Dict, Type, TypeVar, Union
+from typing import Any, Dict, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import _GenericAlias  # type: ignore
 
@@ -15,8 +15,8 @@ class FieldRole(enum.Enum):
     VANILLA_FIELD = enum.auto()
     TUPLE = enum.auto()
     ENUM = enum.auto()
-    NESTED_DATACLASS = enum.auto()  # Singular nested dataclass
-    SUBPARSERS = enum.auto()  # Unions over dataclasses
+    NESTED_DATACLASS = enum.auto()  # Singular nested dataclass.
+    SUBPARSERS = enum.auto()  # Unions over dataclasses.
 
 
 @dataclasses.dataclass
@@ -38,15 +38,25 @@ def construct_dataclass(
     value_from_arg: Dict[str, Any],
     metadata: ConstructionMetadata,
     field_name_prefix: str = "",
-) -> DataclassType:
+) -> Tuple[DataclassType, Set[str]]:
     """Construct a dataclass object from a dictionary of values from argparse.
-    Mutates `value_from_arg`."""
+
+    Returns dataclass object and set of used arguments."""
 
     assert _resolver.is_dataclass(cls)
 
     cls, _type_from_typevar = _resolver.resolve_generic_dataclasses(cls)
 
     kwargs: Dict[str, Any] = {}
+    consumed_keywords: Set[str] = set()
+
+    def get_value_from_arg(arg: str) -> Any:
+        """Helper for getting values from `value_from_arg` + doing some extra
+        asserts."""
+        assert arg in value_from_arg
+        assert arg not in consumed_keywords
+        consumed_keywords.add(arg)
+        return value_from_arg[arg]
 
     for field in _resolver.resolved_fields(cls):  # type: ignore
         if not field.init:
@@ -58,27 +68,27 @@ def construct_dataclass(
         prefixed_field_name = field_name_prefix + field.name
 
         if role is FieldRole.ENUM:
-            # Handle enums
-            value = field.type[value_from_arg.pop(prefixed_field_name)]
+            # Handle enums.
+            value = field.type[get_value_from_arg(prefixed_field_name)]
         elif role is FieldRole.NESTED_DATACLASS:
-            # Nested dataclasses
-            value = construct_dataclass(
+            # Nested dataclasses.
+            value, consumed_keywords_child = construct_dataclass(
                 field.type,
                 value_from_arg,
                 metadata,
                 field_name_prefix=prefixed_field_name
                 + _strings.NESTED_DATACLASS_DELIMETER,
-            )  # TODO: need to strip prefixes here. not sure how
+            )
+            consumed_keywords |= consumed_keywords_child
         elif role is FieldRole.SUBPARSERS:
-            # Unions over dataclasses (subparsers)
+            # Unions over dataclasses (subparsers).
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
                 name=prefixed_field_name
             )
-            subparser_name = value_from_arg.pop(subparser_dest)
+            subparser_name = get_value_from_arg(subparser_dest)
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we do either
-                # Optional[Union[A, B, ...]] or Union[A, B, None] -- note that these are
-                # equivalent
+                # Optional[Union[A, B, ...]] or Union[A, B, None].
                 assert type(None) in field.type.__args__
                 value = None
             else:
@@ -89,23 +99,24 @@ def construct_dataclass(
                         chosen_cls = option
                         break
                 assert chosen_cls is not None
-                value = construct_dataclass(
+                value, consumed_keywords_child = construct_dataclass(
                     chosen_cls,
                     value_from_arg,
                     metadata,
                 )
+                consumed_keywords |= consumed_keywords_child
         elif role is FieldRole.TUPLE:
-            # For sequences, argparse always gives us lists -- sometimes we want tuples
-            value = value_from_arg.pop(prefixed_field_name)
+            # For sequences, argparse always gives us lists. Sometimes we want tuples.
+            value = get_value_from_arg(prefixed_field_name)
             if value is not None:
                 value = tuple(value)
 
         elif role is FieldRole.VANILLA_FIELD:
-            # General case
-            value = value_from_arg.pop(prefixed_field_name)
+            # General case.
+            value = get_value_from_arg(prefixed_field_name)
         else:
             assert False
 
         kwargs[field.name] = value
 
-    return cls(**kwargs)  # type: ignore
+    return cls(**kwargs), consumed_keywords  # type: ignore

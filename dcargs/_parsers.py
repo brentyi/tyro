@@ -6,32 +6,29 @@ from typing_extensions import _GenericAlias  # type: ignore
 
 from . import _arguments, _construction, _docstrings, _resolver, _strings
 
-TypeOrGeneric = Union[Type, _GenericAlias]
-
 
 @dataclasses.dataclass
 class ParserDefinition:
     """Each parser contains a list of arguments and optionally a subparser."""
 
-    description: str
     args: List["_arguments.ArgumentDefinition"]
     subparsers: Optional["SubparsersDefinition"]
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
 
-        # Put required group at start of group list
+        # Put required group at start of group list.
         required_group = parser.add_argument_group("required arguments")
         parser._action_groups = parser._action_groups[::-1]
 
-        # Add each argument
+        # Add each argument.
         for arg in self.args:
             if arg.required:
                 arg.add_argument(required_group)
             else:
                 arg.add_argument(parser)
 
-        # Add subparsers
+        # Add subparsers.
         if self.subparsers is not None:
             subparsers = parser.add_subparsers(
                 dest=_strings.SUBPARSER_DEST_FMT.format(name=self.subparsers.name),
@@ -39,10 +36,7 @@ class ParserDefinition:
                 required=self.subparsers.required,
             )
             for name, subparser_def in self.subparsers.parsers.items():
-                subparser = subparsers.add_parser(
-                    name,
-                    description=subparser_def.description,
-                )
+                subparser = subparsers.add_parser(name)
                 subparser_def.apply(subparser)
 
     @staticmethod
@@ -77,10 +71,10 @@ class ParserDefinition:
             if not field.init:
                 continue
 
-            # If set to False, we don't directly create an argument from this field
+            # If set to False, we don't directly create an argument from this field.
             arg_from_field: bool = True
 
-            # Add arguments for nested dataclasses
+            # Add arguments for nested dataclasses.
             if _resolver.is_dataclass(field.type):
                 child_definition, child_metadata = ParserDefinition.from_dataclass(
                     field.type,
@@ -107,9 +101,9 @@ class ParserDefinition:
                 ] = _construction.FieldRole.NESTED_DATACLASS
                 arg_from_field = False
 
-            # Union of dataclasses should create subparsers
+            # Union of dataclasses should create subparsers.
             if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
-                # We don't use sets here to retain order of subcommands
+                # We don't use sets here to retain order of subcommands.
                 options = field.type.__args__
                 options_no_none = [o for o in options if o != type(None)]  # noqa
                 if len(options_no_none) >= 2 and all(
@@ -147,7 +141,7 @@ class ParserDefinition:
                         parsers=parsers,
                         required=(
                             options == options_no_none
-                        ),  # not required if no options
+                        ),  # Not required if no options.
                     )
                     metadata.role_from_field[field] = _construction.FieldRole.SUBPARSERS
                     arg_from_field = False
@@ -162,7 +156,6 @@ class ParserDefinition:
 
         return (
             ParserDefinition(
-                description=str(cls.__doc__),
                 args=args,
                 subparsers=subparsers,
             ),

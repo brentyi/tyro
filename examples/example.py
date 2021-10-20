@@ -38,5 +38,6 @@ class ExperimentConfig:
     all reproducible!"""
 
 
-config = dcargs.parse(ExperimentConfig, description=__doc__)
-print(config)
+if __name__ == "__main__":
+    config = dcargs.parse(ExperimentConfig, description=__doc__)
+    print(config)

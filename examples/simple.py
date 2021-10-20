@@ -9,4 +9,6 @@ class Args:
     field2: int  # A numeric field.
 
 
-args = dcargs.parse(Args)
+if __name__ == "__main__":
+    args = dcargs.parse(Args)
+    print(args)

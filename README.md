@@ -33,6 +33,7 @@ class Args:
 
 if __name__ == "__main__":
     args = dcargs.parse(Args)
+    print(args)
 ```
 
 Running `python simple.py --help` would print:
@@ -48,28 +49,41 @@ required arguments:
   --field2 INT  A numeric field.
 ```
 
+And, from `python simple.py --field1 string --field2 4`:
+
+```
+Args(field1='string', field2=4)
+```
+
 ### Feature list
 
-The parse function automatically generates helptext from comments/docstrings,
-and supports a wide range of dataclass definitions. Our unit tests cover classes
+The parse function supports a wide range of dataclass definitions, while
+automatically generating helptext from comments/docstrings. Some of the basic
+features are shown in the [example below](#example-usage).
+
+Our unit tests cover many more complex type annotations, including classes
 containing:
 
 - Types natively accepted by `argparse`: str, int, float, pathlib.Path, etc
 - Default values for optional parameters
-- Booleans, which can have different behaviors based on default values (eg
-  `action="store_true"` or `action="store_false"`)
-- Enums (via `enum.Enum`)
+- Booleans, which are automatically converted to flags when provided a default
+  value (eg `action="store_true"` or `action="store_false"`; in the latter case,
+  we prefix names with `no-`)
+- Enums (via `enum.Enum`; argparse's `choices` is populated and arguments are
+  converted automatically)
 - Various container types. Some examples:
   - `typing.ClassVar` types (omitted from parser)
   - `typing.Optional` types
-  - `typing.Literal` types (populates `choices`)
-  - `typing.Sequence` types (populates `nargs`)
-  - `typing.List` types (populates `nargs`)
-  - `typing.Tuple` types (populates `nargs`; must contain just one child type)
+  - `typing.Literal` types (populates argparse's `choices`)
+  - `typing.Sequence` types (populates argparse's `nargs`)
+  - `typing.List` types (populates argparse's `nargs`)
+  - `typing.Tuple` types, such as `typing.Tuple[T, T, T]` or
+    `typing.Tuple[T, ...]` (populates argparse's `nargs`, and converts
+    automatically)
   - `typing.Final` types and `typing.Annotated` (for parsing, these are
     effectively no-ops)
-  - Nested combinations of the above: `Optional[Literal[...]]`,
-    `Final[Optional[Sequence[...]]]`, etc
+  - Nested combinations of the above: `Optional[Literal[T]]`,
+    `Final[Optional[Sequence[T]]]`, etc
 - Nested dataclasses
   - Simple nesting (see `OptimizerConfig` example below)
   - Unions over nested dataclasses (subparsers)
@@ -98,7 +112,7 @@ some of them:
 Some other distinguishing factors that `dcargs` has put effort into:
 
 - Robust handling of forward references
-- Support for nested containers+generics
+- Support for nested containers and generics
 - Strong typing: we actively avoid relying on strings or dynamic namespace
   objects (eg `argparse.Namespace`)
 - Simplicity + strict abstractions: we're focused on a single function API, and

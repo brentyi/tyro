@@ -4,7 +4,7 @@ import dataclasses
 import enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
-from typing_extensions import Final, Literal, _AnnotatedAlias  # Backward compat
+from typing_extensions import Final, Literal, _AnnotatedAlias  # Backward compatibility.
 
 from . import _construction, _docstrings, _strings
 
@@ -14,13 +14,13 @@ class ArgumentDefinition:
     """Options for defining arguments. Contains all necessary arguments for argparse's
     add_argument() method."""
 
-    # Fields that will be populated initially
+    # Fields that will be populated initially.
     name: str
     field: dataclasses.Field
     parent_class: Type
     type: Optional[Union[Type, TypeVar]]
 
-    # Fields that will be handled by argument transformations
+    # Fields that will be handled by argument transformations.
     required: Optional[bool] = None
     action: Optional[str] = None
     nargs: Optional[Union[int, str]] = None
@@ -60,7 +60,7 @@ class ArgumentDefinition:
 
         assert field.init, "Field must be in class constructor"
 
-        # Create initial argument
+        # Create initial argument.
         arg = ArgumentDefinition(
             name=field.name,
             field=field,
@@ -68,7 +68,7 @@ class ArgumentDefinition:
             type=field.type,
         )
 
-        # Propagate argument through transforms until stable
+        # Propagate argument through transforms until stable.
         prev_arg = arg
         role: _construction.FieldRole = _construction.FieldRole.VANILLA_FIELD
 
@@ -86,26 +86,26 @@ class ArgumentDefinition:
 
         while True:
             for transform in [_handle_generics] + _argument_transforms:  # type: ignore
-                # Apply transform
+                # Apply transform.
                 arg, new_role = transform(arg)
 
-                # Update field role
+                # Update field role.
                 if new_role is not None:
                     assert (
                         role == _construction.FieldRole.VANILLA_FIELD
                     ), "Something went wrong -- only one field role can be specified per argument!"
                     role = new_role
 
-            # Stability check
+            # Stability check.
             if arg == prev_arg:
                 break
             prev_arg = arg
         return arg, role
 
 
-# Argument transformations
+# Argument transformations.
 # Each transform returns an argument definition and (optionall) a special role for
-# reconstruction -- note that a field can only ever have one role
+# reconstruction -- note that a field can only ever have one role.
 
 _ArgumentTransformOutput = Tuple[ArgumentDefinition, Optional[_construction.FieldRole]]
 
@@ -165,7 +165,7 @@ def _handle_optionals(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
 def _populate_defaults(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Populate default values."""
     if arg.default is not None:
-        # Skip if another handler has already populated the default
+        # Skip if another handler has already populated the default.
         return arg, None
 
     default = None
@@ -255,9 +255,9 @@ def _nargs_from_tuples(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
         assert len(argset_no_ellipsis) == 1, "Tuples must be of a single type!"
 
         if argset != argset_no_ellipsis:
-            # `*` is >=0 values, `+` is >=1 values
+            # `*` is >=0 values, `+` is >=1 values.
             # We're going to require at least 1 value; if a user wants to accept no
-            # input, they can use Optional[Tuple[...]]
+            # input, they can use Optional[Tuple[...]].
             nargs = "+"
         else:
             nargs = len(arg.type.__args__)  # type: ignore
@@ -326,10 +326,10 @@ def _generate_helptext(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
             help_parts.append(docstring_help)
 
         if arg.default is not None and hasattr(arg.default, "name"):
-            # Special case for enums
+            # Special case for enums.
             help_parts.append(f"(default: {arg.default.name})")
         elif arg.default is not None:
-            # General case
+            # General case.
             help_parts.append("(default: %(default)s)")
 
         return dataclasses.replace(arg, help=" ".join(help_parts)), None

@@ -22,5 +22,6 @@ class Commit:
     all: bool = False
 
 
-args = dcargs.parse(Args)
-print(args)
+if __name__ == "__main":
+    args = dcargs.parse(Args)
+    print(args)

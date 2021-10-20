@@ -4,7 +4,7 @@ import pathlib
 from typing import ClassVar, List, Optional, Sequence, Tuple, Union
 
 import pytest
-from typing_extensions import Annotated, Final, Literal  # Backward compat
+from typing_extensions import Annotated, Final, Literal  # Backward compatibility.
 
 import dcargs
 

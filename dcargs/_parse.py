@@ -17,9 +17,9 @@ def parse(
 
     parser_definition, construction_metadata = _parsers.ParserDefinition.from_dataclass(
         cls,
-        parent_dataclasses=set(),  # Used for recursive calls
-        subparser_name_from_type={},  # Aliases for subparsers; this is working, but not yet exposed
-        parent_type_from_typevar=None,  # Used for recursive calls
+        parent_dataclasses=set(),  # Used for recursive calls.
+        subparser_name_from_type={},  # Aliases for subparsers; this is working, but not yet exposed.
+        parent_type_from_typevar=None,  # Used for recursive calls.
     )
 
     parser = argparse.ArgumentParser(
@@ -27,9 +27,15 @@ def parse(
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_definition.apply(parser)
+
     namespace = parser.parse_args(args)
 
     value_from_arg = vars(namespace)
-    out = _construction.construct_dataclass(cls, value_from_arg, construction_metadata)
-    assert len(value_from_arg) == 0, "Not all arguments were consumed!"
+    out, consumed_keywords = _construction.construct_dataclass(
+        cls, value_from_arg, construction_metadata
+    )
+    assert (
+        consumed_keywords == value_from_arg.keys()
+    ), "Not all arguments were consumed!"
+
     return out

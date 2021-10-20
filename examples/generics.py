@@ -33,4 +33,5 @@ class Args:
 
 
 if __name__ == "__main__":
-    dcargs.parse(Args)
+    args = dcargs.parse(Args)
+    print(args)
