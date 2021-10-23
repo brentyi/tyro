@@ -54,6 +54,7 @@ class ArgumentDefinition:
         parent_class: Type,
         field: dataclasses.Field,
         type_from_typevar: Dict[TypeVar, Type],
+        default_override: Optional[Any],
     ) -> Tuple["ArgumentDefinition", _construction.FieldRole]:
         """Create an argument definition from a field. Also returns a field role, which
         specifies special instructions for reconstruction."""
@@ -66,6 +67,7 @@ class ArgumentDefinition:
             field=field,
             parent_class=parent_class,
             type=field.type,
+            default=default_override,
         )
 
         # Propagate argument through transforms until stable.

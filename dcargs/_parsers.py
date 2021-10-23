@@ -1,10 +1,12 @@
 import argparse
 import dataclasses
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import _GenericAlias  # type: ignore
 
 from . import _arguments, _construction, _docstrings, _resolver, _strings
+
+T = TypeVar("T")
 
 
 @dataclasses.dataclass
@@ -41,10 +43,11 @@ class ParserDefinition:
 
     @staticmethod
     def from_dataclass(
-        cls: Union[Type[Any], _GenericAlias],
+        cls: Union[Type[T], _GenericAlias],
         parent_dataclasses: Optional[Set[Type]],
         subparser_name_from_type: Dict[Type, str],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
+        default_instance: Optional[T],
     ) -> Tuple["ParserDefinition", _construction.ConstructionMetadata]:
         """Create a parser definition from a dataclass."""
 
@@ -81,6 +84,9 @@ class ParserDefinition:
                     parent_dataclasses | {cls},
                     subparser_name_from_type=subparser_name_from_type,
                     parent_type_from_typevar=type_from_typevar,
+                    default_instance=field.default
+                    if field.default is not dataclasses.MISSING
+                    else None,
                 )
                 metadata.update(child_metadata)
 
@@ -112,6 +118,9 @@ class ParserDefinition:
                     assert (
                         subparsers is None
                     ), "Only one subparser group is supported per dataclass"
+                    assert (
+                        field.default == dataclasses.MISSING
+                    ), "Default dataclass value not yet supported for subparser definitions"
 
                     parsers: Dict[str, ParserDefinition] = {}
                     for option in options_no_none:
@@ -132,6 +141,7 @@ class ParserDefinition:
                             parent_dataclasses | {cls},
                             subparser_name_from_type,
                             parent_type_from_typevar=type_from_typevar,
+                            default_instance=None,
                         )
                         metadata.update(child_metadata)
 
@@ -149,7 +159,12 @@ class ParserDefinition:
             # Make an argument!
             if arg_from_field:
                 arg, role = _arguments.ArgumentDefinition.make_from_field(
-                    cls, field, type_from_typevar
+                    cls,
+                    field,
+                    type_from_typevar,
+                    default_override=getattr(default_instance, field.name)
+                    if default_instance is not None
+                    else None,
                 )
                 args.append(arg)
                 metadata.role_from_field[field] = role
