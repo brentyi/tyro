@@ -54,6 +54,28 @@ def test_default_nested():
     assert dcargs.parse(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
+def test_double_default_nested():
+    @dataclasses.dataclass
+    class Child:
+        y: int
+
+    @dataclasses.dataclass
+    class Parent:
+        c: Child
+
+    @dataclasses.dataclass
+    class Grandparent:
+        x: int
+        b: Parent = Parent(Child(y=5))
+
+    assert dcargs.parse(Grandparent, args=["--x", "1", "--b.c.y", "3"]) == Grandparent(
+        x=1, b=Parent(Child(y=3))
+    )
+    assert dcargs.parse(Grandparent, args=["--x", "1"]) == Grandparent(
+        x=1, b=Parent(Child(y=5))
+    )
+
+
 # TODO: implement this!
 # def test_optional_nested():
 #     @dataclasses.dataclass
