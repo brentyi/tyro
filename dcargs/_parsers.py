@@ -79,14 +79,18 @@ class ParserDefinition:
 
             # Add arguments for nested dataclasses.
             if _resolver.is_dataclass(field.type):
+                default = None
+                if default_instance is not None:
+                    default = getattr(default_instance, field.name)
+                elif field.default is not dataclasses.MISSING:
+                    default = field.default
+
                 child_definition, child_metadata = ParserDefinition.from_dataclass(
                     field.type,
                     parent_dataclasses | {cls},
                     subparser_name_from_type=subparser_name_from_type,
                     parent_type_from_typevar=type_from_typevar,
-                    default_instance=field.default
-                    if field.default is not dataclasses.MISSING
-                    else None,
+                    default_instance=default,
                 )
                 metadata.update(child_metadata)
 
