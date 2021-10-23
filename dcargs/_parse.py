@@ -10,7 +10,7 @@ DataclassType = TypeVar("DataclassType", bound=Union[Type, _GenericAlias])
 
 def parse(
     cls: Type[DataclassType],
-    description: str = "",
+    description: Optional[str] = "",
     args: Optional[Sequence[str]] = None,
 ) -> DataclassType:
     """Populate a dataclass via CLI args."""
@@ -22,6 +22,8 @@ def parse(
         parent_type_from_typevar=None,  # Used for recursive calls.
     )
 
+    if description is None:
+        description = ""
     parser = argparse.ArgumentParser(
         description=_strings.dedent(description),
         formatter_class=argparse.RawTextHelpFormatter,
