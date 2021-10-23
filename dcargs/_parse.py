@@ -10,10 +10,13 @@ DataclassType = TypeVar("DataclassType", bound=Union[Type, _GenericAlias])
 
 def parse(
     cls: Type[DataclassType],
-    description: str = "",
+    description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
 ) -> DataclassType:
     """Populate a dataclass via CLI args."""
+
+    if description is None:
+        description = ""
 
     parser_definition, construction_metadata = _parsers.ParserDefinition.from_dataclass(
         cls,
