@@ -330,7 +330,7 @@ def _generate_helptext(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
         if arg.default is not None and hasattr(arg.default, "name"):
             # Special case for enums.
             help_parts.append(f"(default: {arg.default.name})")
-        elif arg.default is not None:
+        elif not arg.required:
             # General case.
             help_parts.append("(default: %(default)s)")
 
