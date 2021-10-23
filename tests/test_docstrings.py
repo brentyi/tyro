@@ -58,11 +58,11 @@ def test_multiline_helptext():
     )
 
 
-def test_default_value():
+def test_none_default_value_helptext():
     @dataclasses.dataclass
     class Config:
         x: typing.Optional[int] = None
-        """An optinal variable."""
+        """An optional variable."""
 
     f = io.StringIO()
     with pytest.raises(SystemExit):
@@ -70,4 +70,4 @@ def test_default_value():
             dcargs.parse(Config, args=["--help"])
     helptext = f.getvalue()
     print(helptext)
-    assert "  --x INT     An optinal variable. (default: None)\n" in helptext
+    assert "  --x INT     An optional variable. (default: None)\n" in helptext
