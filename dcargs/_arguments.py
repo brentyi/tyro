@@ -325,13 +325,12 @@ def _generate_helptext(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
         if docstring_help is not None:
             help_parts.append(docstring_help)
 
-        if arg.default is not None and hasattr(arg.default, "name"):
+        if hasattr(arg.default, "name"):
             # Special case for enums.
             help_parts.append(f"(default: {arg.default.name})")
-        else:
+        elif not arg.required::
             # General case.
-            if not arg.required:
-                help_parts.append("(default: %(default)s)")
+            help_parts.append("(default: %(default)s)")
 
         return dataclasses.replace(arg, help=" ".join(help_parts)), None
     else:
