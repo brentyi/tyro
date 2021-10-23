@@ -1,3 +1,4 @@
+import typing
 import contextlib
 import dataclasses
 import io
@@ -55,3 +56,18 @@ def test_multiline_helptext():
         "  --z INT     Documentation 3\n              Next line of documentation 3 (default: 3)\n"
         in helptext
     )
+
+
+def test_default_value():
+    @dataclasses.dataclass
+    class Config:
+        x: typing.Optional[int] = None
+        """An optinal variable."""
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(Config, args=["--help"])
+    helptext = f.getvalue()
+    print(helptext)
+    assert "  --x INT     An optinal variable. (default: None)\n" in helptext
