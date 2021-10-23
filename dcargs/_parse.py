@@ -23,6 +23,7 @@ def parse(
         parent_dataclasses=set(),  # Used for recursive calls.
         subparser_name_from_type={},  # Aliases for subparsers; this is working, but not yet exposed.
         parent_type_from_typevar=None,  # Used for recursive calls.
+        default_instance=None,  # Overrides for default values. This could also be exposed.
     )
 
     parser = argparse.ArgumentParser(

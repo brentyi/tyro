@@ -301,23 +301,6 @@ def test_classvar():
     assert dcargs.parse(A, args=[]) == A()
 
 
-def test_nested():
-    @dataclasses.dataclass
-    class B:
-        y: int
-
-    @dataclasses.dataclass
-    class Nested:
-        x: int
-        b: B
-
-    assert dcargs.parse(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(
-        x=1, b=B(y=3)
-    )
-    with pytest.raises(SystemExit):
-        dcargs.parse(Nested, args=["--x", "1"])
-
-
 # TODO: implement this!
 # def test_optional_nested():
 #     @dataclasses.dataclass
