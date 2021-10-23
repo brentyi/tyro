@@ -398,3 +398,13 @@ def test_optional_subparser():
         dcargs.parse(OptionalSubparser, args=["--x", "1", "B", "--z", "3"])
     with pytest.raises(SystemExit):
         dcargs.parse(OptionalSubparser, args=["--x", "1", "C", "--y", "3"])
+
+
+def test_parse_empty_description():
+    """If the file has no dosctring, it should be treated as an empty string."""
+
+    @dataclasses.dataclass
+    class A:
+        x: int = 0
+
+    assert dcargs.parse(A, description=None) == A(x=0)
