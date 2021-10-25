@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, TypeVar
+from typing import Generic, TypeVar, Union
 
 import pytest
 
@@ -112,3 +112,45 @@ def test_multilevel_generic():
         Point3(1.0, 1.2, 1.3, "world"),
         Point3(1.0, 1.2, 1.3, "world"),
     )
+
+
+def test_generic_nested_dataclass():
+    @dataclasses.dataclass
+    class Child:
+        a: int
+        b: int
+
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class DataclassGeneric(Generic[T]):
+        child: T
+
+    assert dcargs.parse(
+        DataclassGeneric[Child], args=["--child.a", "5", "--child.b", "7"]
+    ) == DataclassGeneric(Child(5, 7))
+
+
+def test_generic_subparsers():
+    @dataclasses.dataclass
+    class CommandOne:
+        a: int
+
+    @dataclasses.dataclass
+    class CommandTwo:
+        b: int
+
+    T1 = TypeVar("T1")
+    T2 = TypeVar("T2")
+
+    @dataclasses.dataclass
+    class Subparser(Generic[T1, T2]):
+        command: Union[T1, T2]
+
+    assert dcargs.parse(
+        Subparser[CommandOne, CommandTwo], args="command-one --a 5".split(" ")
+    ) == Subparser(CommandOne(5))
+
+    assert dcargs.parse(
+        Subparser[CommandOne, CommandTwo], args="command-two --b 7".split(" ")
+    ) == Subparser(CommandTwo(7))

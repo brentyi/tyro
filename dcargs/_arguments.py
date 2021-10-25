@@ -75,6 +75,9 @@ class ArgumentDefinition:
         role: _construction.FieldRole = _construction.FieldRole.VANILLA_FIELD
 
         def _handle_generics(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
+            """Handle generic arguments. Note that this needs to be a transform -- if we
+            only checked field.type before running transforms, we wouldn't be able to
+            handle cases like Optional[T]."""
             if isinstance(arg.type, TypeVar):
                 assert arg.type in type_from_typevar, "TypeVar not bounded"
                 return (

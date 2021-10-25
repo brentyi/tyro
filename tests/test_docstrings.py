@@ -1,7 +1,7 @@
-import typing
 import contextlib
 import dataclasses
 import io
+import typing
 
 import pytest
 
