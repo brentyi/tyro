@@ -51,6 +51,9 @@ class ParserDefinition:
     ) -> Tuple["ParserDefinition", _construction.ConstructionMetadata]:
         """Create a parser definition from a dataclass."""
 
+        # TODO: this function is getting bloated and can probably be refactored. There's
+        # also some repeated logic between here and _construct.py; worth revisiting.
+
         if parent_dataclasses is None:
             parent_dataclasses = set()
 
@@ -77,8 +80,15 @@ class ParserDefinition:
             # If set to False, we don't directly create an argument from this field.
             arg_from_field: bool = True
 
+            # Resolve field type
+            field_type = (
+                type_from_typevar[field.type]  # type: ignore
+                if field.type in type_from_typevar
+                else field.type
+            )
+
             # Add arguments for nested dataclasses.
-            if _resolver.is_dataclass(field.type):
+            if _resolver.is_dataclass(field_type):
                 default = None
                 if default_instance is not None:
                     default = getattr(default_instance, field.name)
@@ -86,7 +96,7 @@ class ParserDefinition:
                     default = field.default
 
                 child_definition, child_metadata = ParserDefinition.from_dataclass(
-                    field.type,
+                    field_type,
                     parent_dataclasses | {cls},
                     subparser_name_from_type=subparser_name_from_type,
                     parent_type_from_typevar=type_from_typevar,
@@ -112,9 +122,13 @@ class ParserDefinition:
                 arg_from_field = False
 
             # Union of dataclasses should create subparsers.
-            if hasattr(field.type, "__origin__") and field.type.__origin__ is Union:
+            if hasattr(field_type, "__origin__") and field_type.__origin__ is Union:
                 # We don't use sets here to retain order of subcommands.
-                options = field.type.__args__
+                options = field_type.__args__
+                options = map(
+                    lambda x: x if x not in type_from_typevar else type_from_typevar[x],
+                    field_type.__args__,
+                )
                 options_no_none = [o for o in options if o != type(None)]  # noqa
                 if len(options_no_none) >= 2 and all(
                     map(_resolver.is_dataclass, options_no_none)

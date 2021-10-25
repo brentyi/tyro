@@ -45,7 +45,7 @@ def construct_dataclass(
 
     assert _resolver.is_dataclass(cls)
 
-    cls, _type_from_typevar = _resolver.resolve_generic_dataclasses(cls)
+    cls, type_from_typevar = _resolver.resolve_generic_dataclasses(cls)
 
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
@@ -67,13 +67,20 @@ def construct_dataclass(
 
         prefixed_field_name = field_name_prefix + field.name
 
+        # Resolve field type
+        field_type = (
+            type_from_typevar[field.type]  # type: ignore
+            if field.type in type_from_typevar
+            else field.type
+        )
+
         if role is FieldRole.ENUM:
             # Handle enums.
-            value = field.type[get_value_from_arg(prefixed_field_name)]
+            value = field_type[get_value_from_arg(prefixed_field_name)]
         elif role is FieldRole.NESTED_DATACLASS:
             # Nested dataclasses.
             value, consumed_keywords_child = construct_dataclass(
-                field.type,
+                field_type,
                 value_from_arg,
                 metadata,
                 field_name_prefix=prefixed_field_name
@@ -89,10 +96,14 @@ def construct_dataclass(
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we do either
                 # Optional[Union[A, B, ...]] or Union[A, B, None].
-                assert type(None) in field.type.__args__
+                assert type(None) in field_type.__args__
                 value = None
             else:
-                options = field.type.__args__
+                options = field_type.__args__
+                options = map(
+                    lambda x: x if x not in type_from_typevar else type_from_typevar[x],
+                    field_type.__args__,
+                )
                 chosen_cls = None
                 for option in options:
                     if metadata.subparser_name_from_type[option] == subparser_name:
