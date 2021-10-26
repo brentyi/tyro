@@ -71,3 +71,24 @@ def test_none_default_value_helptext():
     helptext = f.getvalue()
     print(helptext)
     assert "  --x INT     An optional variable. (default: None)\n" in helptext
+
+
+def test_helptext_hard_string():
+    @dataclasses.dataclass
+    class HelptextHardString:
+        # fmt: off
+        x: str = (
+            "This docstring may be tougher to parse!"
+        )
+        """Helptext."""
+        # fmt: on
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(HelptextHardString, args=["--help"])
+    helptext = f.getvalue()
+    assert (
+        "--x STR     Helptext. (default: This docstring may be tougher to parse!)\n"
+        in helptext
+    )

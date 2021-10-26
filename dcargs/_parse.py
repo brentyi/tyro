@@ -10,6 +10,7 @@ DataclassType = TypeVar("DataclassType", bound=Union[Type, _GenericAlias])
 
 def parse(
     cls: Type[DataclassType],
+    *,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
 ) -> DataclassType:

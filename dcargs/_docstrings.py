@@ -13,7 +13,7 @@ from . import _strings
 @dataclasses.dataclass
 class _Token:
     token_type: int
-    token: str
+    content: str
     line_number: int
 
 
@@ -46,7 +46,7 @@ class _Tokenization:
                 line_number += 1
                 tokens_from_line[line_number] = []
             elif toktype is not tokenize.INDENT:
-                token = _Token(token_type=toktype, token=tok, line_number=line_number)
+                token = _Token(token_type=toktype, content=tok, line_number=line_number)
                 tokens.append(token)
                 tokens_from_line[line_number].append(token)
 
@@ -54,12 +54,12 @@ class _Tokenization:
         for i, token in enumerate(tokens[:-1]):
             if token.token_type == tokenize.NAME:
                 # Naive heuristic for field names
-                # This will currently catch variable/argument annotations as well
                 if (
-                    tokens[i + 1].token == ":"
-                    and token.token not in field_data_from_name
+                    tokens[i + 1].content == ":"
+                    and tokens[i] == tokens_from_line[tokens[i].line_number][0]
+                    and token.content not in field_data_from_name
                 ):
-                    field_data_from_name[token.token] = _FieldData(
+                    field_data_from_name[token.content] = _FieldData(
                         index=i,
                         line_number=token.line_number,
                         prev_field_line_number=prev_field_line_number,
@@ -96,22 +96,51 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     field_data = tokenization.field_data_from_name[field_name]
 
     # Check for docstring-style comment.
-    if (
-        field_data.line_number + 1 in tokenization.tokens_from_line
-        and len(tokenization.tokens_from_line[field_data.line_number + 1]) > 0
+    line_number = field_data.line_number + 1
+    while (
+        line_number in tokenization.tokens_from_line
+        and len(tokenization.tokens_from_line[line_number]) > 0
     ):
-        first_token_on_next_line = tokenization.tokens_from_line[
-            field_data.line_number + 1
-        ][0]
-        if first_token_on_next_line.token_type == tokenize.STRING:
-            docstring = first_token_on_next_line.token.strip()
-            assert docstring.endswith('"""') and docstring.startswith('"""')
-            return _strings.dedent(docstring[3:-3])
+        first_token = tokenization.tokens_from_line[line_number][0]
+        first_token_content = first_token.content.strip()
+
+        # Found a docstring!
+        if (
+            first_token.token_type == tokenize.STRING
+            and first_token_content.startswith('"""')
+            and first_token_content.endswith('"""')
+        ):
+            return _strings.dedent(first_token_content[3:-3])
+
+        # Found the next field.
+        if (
+            first_token.token_type == tokenize.NAME
+            and len(tokenization.tokens_from_line[line_number]) >= 2
+            and tokenization.tokens_from_line[line_number][1].content == ":"
+        ):
+            break
+
+        # Found a method.
+        if first_token.content == "def":
+            break
+
+        line_number += 1
+    # if (
+    #     field_data.line_number + 1 in tokenization.tokens_from_line
+    #     and len(tokenization.tokens_from_line[field_data.line_number + 1]) > 0
+    # ):
+    #     first_token_on_next_line = tokenization.tokens_from_line[
+    #         field_data.line_number + 1
+    #     ][0]
+    #     if first_token_on_next_line.token_type == tokenize.STRING:
+    #         docstring = first_token_on_next_line.token.strip()
+    #         assert docstring.endswith('"""') and docstring.startswith('"""')
+    #         return _strings.dedent(docstring[3:-3])
 
     # Check for comment on the same line as the field.
     final_token_on_line = tokenization.tokens_from_line[field_data.line_number][-1]
     if final_token_on_line.token_type == tokenize.COMMENT:
-        comment: str = final_token_on_line.token
+        comment: str = final_token_on_line.content
         assert comment.startswith("#")
         return comment[1:].strip()
 
@@ -125,8 +154,8 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
             comment_token.token_type == tokenize.COMMENT
             and comment_token.line_number > field_data.prev_field_line_number
         ):
-            assert comment_token.token.startswith("#")
-            comments.append(comment_token.token[1:].strip())
+            assert comment_token.content.startswith("#")
+            comments.append(comment_token.content[1:].strip())
         else:
             break
     if len(comments) > 0:
