@@ -22,7 +22,6 @@ def parse(
     parser_definition, construction_metadata = _parsers.ParserDefinition.from_dataclass(
         cls,
         parent_dataclasses=set(),  # Used for recursive calls.
-        subparser_name_from_type={},  # Aliases for subparsers; this is working, but not yet exposed.
         parent_type_from_typevar=None,  # Used for recursive calls.
         default_instance=None,  # Overrides for default values. This could also be exposed.
     )

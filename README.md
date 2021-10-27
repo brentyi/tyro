@@ -15,9 +15,9 @@
 `dcargs` is a tool for generating portable, reusable, and strongly typed CLI
 interfaces from dataclass definitions.
 
-We expose one function, `parse(Type[T]) -> T`, which takes a dataclass type and
-instantiates it via an argparse-style CLI interface. If we create a script
-called `simple.py`:
+We expose one function, `parse()`, which takes a dataclass type and instantiates
+it via an argparse-style CLI interface. If we create a script called
+`simple.py`:
 
 ```python
 import dataclasses
@@ -99,15 +99,17 @@ in the [tests](./tests/).
 There are several alternative libraries to `dcargs`; here's a rough summary of
 some of them:
 
-|                                                                                                 | Parsers from dataclasses | Parsers from attrs | Nested dataclasses | Subparsers (via Unions) | Containers | Choices from literals                                    | Docstrings as helptext |
-| ----------------------------------------------------------------------------------------------- | ------------------------ | ------------------ | ------------------ | ----------------------- | ---------- | -------------------------------------------------------- | ---------------------- |
-| **dcargs**                                                                                      | ✓                        |                    | ✓                  | ✓                       | ✓          | ✓                                                        | ✓                      |
-| **[datargs](https://github.com/roee30/datargs)**                                                | ✓                        | ✓                  |                    | ✓                       | ✓          | ✓                                                        |                        |
-| **[simple-parsing](https://github.com/lebrice/SimpleParsing)**                                  | ✓                        |                    | ✓                  | ✓                       | ✓          | [soon](https://github.com/lebrice/SimpleParsing/pull/86) | ✓                      |
-| **[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)**                          | ✓                        |                    |                    |                         |            |                                                          |                        |
-| **[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)**                      | ✓                        |                    |                    |                         |            |                                                          |                        |
-| **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                 | ✓                        |                    |                    |                         |            |                                                          |                        |
-| **[hf_argparser](https://huggingface.co/transformers/_modules/transformers/hf_argparser.html)** | ✓                        |                    |                    |                         | ✓          |                                                          |                        |
+|                                                                                                 | dataclasses | attrs | Nesting | Subparsers | Containers | Choices from literals                                    | Docstrings as helptext | Generics |
+| ----------------------------------------------------------------------------------------------- | ----------- | ----- | ------- | ---------- | ---------- | -------------------------------------------------------- | ---------------------- | -------- |
+| **dcargs**                                                                                      | ✓           |       | ✓       | ✓          | ✓          | ✓                                                        | ✓                      | ✓        |
+| **[datargs](https://github.com/roee30/datargs)**                                                | ✓           | ✓     |         | ✓          | ✓          | ✓                                                        |                        |          |
+| **[typed-argument-parser](https://github.com/swansonk14/typed-argument-parser)**                |             |       |         | ✓          | ✓          | ✓                                                        | ✓                      |          |
+| **[simple-parsing](https://github.com/lebrice/SimpleParsing)**                                  | ✓           |       | ✓       | ✓          | ✓          | [soon](https://github.com/lebrice/SimpleParsing/pull/86) | ✓                      |          |
+| **[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)**                          | ✓           |       |         |            |            |                                                          |                        |          |
+| **[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)**                      | ✓           |       |         |            |            |                                                          |                        |          |
+| **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                 | ✓           |       |         |            |            |                                                          |                        |          |
+| **[clout](https://github.com/python-clout/clout)**                                              |             | ✓     | ✓       |            |            |                                                          |                        |          |
+| **[hf_argparser](https://huggingface.co/transformers/_modules/transformers/hf_argparser.html)** | ✓           |       |         |            | ✓          |                                                          |                        |          |
 
 Some other distinguishing factors that `dcargs` has put effort into:
 
