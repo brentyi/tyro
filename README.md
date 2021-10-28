@@ -77,8 +77,10 @@ containing:
   - `typing.Literal` types (populates argparse's `choices`)
   - `typing.Sequence` types (populates argparse's `nargs`)
   - `typing.List` types (populates argparse's `nargs`)
-  - `typing.Tuple` types, such as `typing.Tuple[T, T, T]` or
+  - `typing.Tuple` types, such as `typing.Tuple[T1, T2, T3]` or
     `typing.Tuple[T, ...]` (populates argparse's `nargs`, and converts
+    automatically)
+  - `typing.Set` types (populates argparse's `nargs`, and converts
     automatically)
   - `typing.Final` types and `typing.Annotated` (for parsing, these are
     effectively no-ops)
