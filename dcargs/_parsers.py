@@ -201,7 +201,7 @@ class _NestedDataclassHandler:
             parsers=parsers,
             required=(options == options_no_none),  # Not required if no options.
         )
-        metadata.role_from_field[self.field] = _construction.FieldRole.SUBPARSERS
+        metadata.role_from_field[self.field] = _construction.FieldRoleEnum.SUBPARSERS
 
         return subparsers, metadata
 
@@ -242,6 +242,6 @@ class _NestedDataclassHandler:
 
         child_metadata.role_from_field[
             self.field
-        ] = _construction.FieldRole.NESTED_DATACLASS
+        ] = _construction.FieldRoleEnum.NESTED_DATACLASS
 
         return child_args, child_metadata

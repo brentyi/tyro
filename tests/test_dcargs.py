@@ -1,7 +1,7 @@
 import dataclasses
 import enum
 import pathlib
-from typing import ClassVar, List, Optional, Sequence, Tuple, Union
+from typing import ClassVar, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
 from typing_extensions import Annotated, Final, Literal  # Backward compatibility.
@@ -140,6 +140,18 @@ def test_lists():
         dcargs.parse(A, args=[])
 
 
+def test_sets():
+    @dataclasses.dataclass
+    class A:
+        x: Set[int]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+
 def test_optional_sequences():
     @dataclasses.dataclass
     class A:
@@ -168,6 +180,18 @@ def test_tuples_fixed():
         x: Tuple[int, int, int]
 
     assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+
+def test_tuples_fixed_multitype():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[int, str, float]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3.5"]) == A(x=(1, "2", 3.5))
     with pytest.raises(SystemExit):
         dcargs.parse(A, args=["--x"])
     with pytest.raises(SystemExit):

@@ -26,7 +26,7 @@ class ArgumentDefinition:
     nargs: Optional[Union[int, str]] = None
     default: Optional[Any] = None
     choices: Optional[Set[Any]] = None
-    metavar: Optional[str] = None
+    metavar: Optional[Union[str, Tuple[str, ...]]] = None
     help: Optional[str] = None
     dest: Optional[str] = None
 
@@ -72,7 +72,7 @@ class ArgumentDefinition:
 
         # Propagate argument through transforms until stable.
         prev_arg = arg
-        role: _construction.FieldRole = _construction.FieldRole.VANILLA_FIELD
+        role: _construction.FieldRole = _construction.FieldRoleEnum.VANILLA_FIELD
 
         def _handle_generics(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
             """Handle generic arguments. Note that this needs to be a transform -- if we
@@ -97,7 +97,7 @@ class ArgumentDefinition:
                 # Update field role.
                 if new_role is not None:
                     assert (
-                        role == _construction.FieldRole.VANILLA_FIELD
+                        role == _construction.FieldRoleEnum.VANILLA_FIELD
                     ), "Something went wrong -- only one field role can be specified per argument!"
                     role = new_role
 
@@ -226,16 +226,20 @@ def _bool_flags(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
         assert False, "Invalid default"
 
 
-def _nargs_from_sequences_and_lists(
+def _nargs_from_sequences_lists_and_sets(
     arg: ArgumentDefinition,
 ) -> _ArgumentTransformOutput:
     """Transform for handling Sequence[T] and list types."""
     if hasattr(arg.type, "__origin__") and arg.type.__origin__ in (  # type: ignore
         collections.abc.Sequence,  # different from typing.Sequence!
         list,  # different from typing.List!
+        set,  # different from typing.Set!
     ):
         assert len(arg.type.__args__) == 1  # type: ignore
         (typ,) = arg.type.__args__  # type: ignore
+        role = arg.type.__origin__  # type: ignore
+        if role is collections.abc.Sequence:
+            role = list
 
         return (
             dataclasses.replace(
@@ -246,7 +250,7 @@ def _nargs_from_sequences_and_lists(
                 # input, they can use Optional[Tuple[...]]
                 nargs="+",
             ),
-            None,
+            role,
         )
     else:
         return arg, None
@@ -254,28 +258,46 @@ def _nargs_from_sequences_and_lists(
 
 def _nargs_from_tuples(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Transform for handling Tuple[T, T, ...] types."""
-    if hasattr(arg.type, "__origin__") and arg.type.__origin__ == tuple:  # type: ignore
-        argset = set(arg.type.__args__)  # type: ignore
-        argset_no_ellipsis = argset - {Ellipsis}  #
-        assert len(argset_no_ellipsis) == 1, "Tuples must be of a single type!"
 
-        if argset != argset_no_ellipsis:
-            # `*` is >=0 values, `+` is >=1 values.
-            # We're going to require at least 1 value; if a user wants to accept no
-            # input, they can use Optional[Tuple[...]].
-            nargs = "+"
+    if arg.nargs is None and hasattr(arg.type, "__origin__") and arg.type.__origin__ == tuple:  # type: ignore
+        types = arg.type.__args__  # type: ignore
+        typeset = set(types)
+        typeset_no_ellipsis = typeset - {Ellipsis}  #
+
+        if typeset_no_ellipsis != typeset:
+            # Ellipsis: variable argument counts
+            assert (
+                len(typeset_no_ellipsis) == 1
+            ), "If ellipsis is used, tuples must contain only one type."
+            (typ,) = typeset_no_ellipsis
+
+            return (
+                dataclasses.replace(
+                    arg,
+                    # `*` is >=0 values, `+` is >=1 values.
+                    # We're going to require at least 1 value; if a user wants to accept no
+                    # input, they can use Optional[Tuple[...]].
+                    nargs="+",
+                    type=typ,
+                ),
+                tuple,
+            )
         else:
-            nargs = len(arg.type.__args__)  # type: ignore
-        (typ,) = argset_no_ellipsis
+            # Tuples with more than one type
+            assert arg.metavar is None
+            return (
+                dataclasses.replace(
+                    arg,
+                    nargs=len(types),
+                    type=str,  # Types will be converted in the dataclass reconstruction step
+                    metavar=tuple(
+                        t.__name__.upper() if hasattr(t, "__name__") else "X"
+                        for t in types
+                    ),
+                ),
+                lambda str_list: tuple(typ(x) for typ, x in zip(types, str_list)),
+            )
 
-        return (
-            dataclasses.replace(
-                arg,
-                nargs=nargs,
-                type=typ,
-            ),
-            _construction.FieldRole.TUPLE,
-        )
     else:
         return arg, None
 
@@ -314,7 +336,7 @@ def _enums_as_strings(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
                 type=str,
                 default=None if arg.default is None else arg.default.name,
             ),
-            _construction.FieldRole.ENUM,
+            lambda enum_name: arg.type[enum_name],  # type: ignore
         )
     else:
         return arg, None
@@ -359,7 +381,7 @@ _argument_transforms: List[Callable[[ArgumentDefinition], _ArgumentTransformOutp
     _handle_optionals,
     _populate_defaults,
     _bool_flags,
-    _nargs_from_sequences_and_lists,
+    _nargs_from_sequences_lists_and_sets,
     _nargs_from_tuples,
     _choices_from_literals,
     _enums_as_strings,

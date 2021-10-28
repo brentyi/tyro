@@ -1,6 +1,6 @@
 import dataclasses
 import enum
-from typing import Any, Dict, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import _GenericAlias  # type: ignore
 
@@ -9,14 +9,16 @@ from . import _resolver, _strings
 DataclassType = TypeVar("DataclassType", bound=Union[Type, _GenericAlias])
 
 
-class FieldRole(enum.Enum):
-    """Enum for specifying special behaviors for ."""
-
+# Each dataclass field is assigned a role, which is either taken from an enum or a
+# callable type that converts raw values from the argparse namespace to their final
+# values in the dataclass.
+class FieldRoleEnum(enum.Enum):
     VANILLA_FIELD = enum.auto()
-    TUPLE = enum.auto()
-    ENUM = enum.auto()
     NESTED_DATACLASS = enum.auto()  # Singular nested dataclass.
     SUBPARSERS = enum.auto()  # Unions over dataclasses.
+
+
+FieldRole = Union[FieldRoleEnum, Callable[[Any], Any]]
 
 
 @dataclasses.dataclass
@@ -74,10 +76,7 @@ def construct_dataclass(
             else field.type
         )
 
-        if role is FieldRole.ENUM:
-            # Handle enums.
-            value = field_type[get_value_from_arg(prefixed_field_name)]
-        elif role is FieldRole.NESTED_DATACLASS:
+        if role is FieldRoleEnum.NESTED_DATACLASS:
             # Nested dataclasses.
             value, consumed_keywords_child = construct_dataclass(
                 field_type,
@@ -87,7 +86,7 @@ def construct_dataclass(
                 + _strings.NESTED_DATACLASS_DELIMETER,
             )
             consumed_keywords |= consumed_keywords_child
-        elif role is FieldRole.SUBPARSERS:
+        elif role is FieldRoleEnum.SUBPARSERS:
             # Unions over dataclasses (subparsers).
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
                 name=prefixed_field_name
@@ -116,15 +115,14 @@ def construct_dataclass(
                     metadata,
                 )
                 consumed_keywords |= consumed_keywords_child
-        elif role is FieldRole.TUPLE:
-            # For sequences, argparse always gives us lists. Sometimes we want tuples.
-            value = get_value_from_arg(prefixed_field_name)
-            if value is not None:
-                value = tuple(value)
-
-        elif role is FieldRole.VANILLA_FIELD:
+        elif role is FieldRoleEnum.VANILLA_FIELD:
             # General case.
             value = get_value_from_arg(prefixed_field_name)
+        elif callable(role):
+            # Callable roles. Used for tuples, lists, sets, etc.
+            value = get_value_from_arg(prefixed_field_name)
+            if value is not None:
+                value = role(value)
         else:
             assert False
 

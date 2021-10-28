@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-import typing
+from typing import Optional, Tuple
 
 import pytest
 
@@ -61,7 +61,7 @@ def test_multiline_helptext():
 def test_none_default_value_helptext():
     @dataclasses.dataclass
     class Config:
-        x: typing.Optional[int] = None
+        x: Optional[int] = None
         """An optional variable."""
 
     f = io.StringIO()
@@ -92,3 +92,16 @@ def test_helptext_hard_string():
         "--x STR     Helptext. (default: This docstring may be tougher to parse!)\n"
         in helptext
     )
+
+
+def test_tuple_helptext():
+    @dataclasses.dataclass
+    class TupleHelptext:
+        x: Tuple[int, str, float]
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(TupleHelptext, args=["--help"])
+    helptext = f.getvalue()
+    assert "--x INT STR FLOAT\n" in helptext
