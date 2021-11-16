@@ -195,7 +195,7 @@ def _bool_flags(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
 
     # Populate helptext for boolean flags => don't show default value, which can be
     # confusing.
-    helptext = (_docstrings.get_field_docstring(arg.parent_class, arg.field.name),)
+    helptext = _docstrings.get_field_docstring(arg.parent_class, arg.field.name)
     arg = dataclasses.replace(
         arg,
         help=helptext if helptext is not None else "",
