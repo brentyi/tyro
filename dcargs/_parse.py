@@ -1,5 +1,5 @@
 import argparse
-from typing import Optional, Sequence, Type, TypeVar, Union
+from typing import Optional, Sequence, Type, TypeVar
 
 from . import _construction, _parsers, _strings
 

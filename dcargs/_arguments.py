@@ -4,7 +4,7 @@ import dataclasses
 import enum
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
-from typing_extensions import Final, Literal, _AnnotatedAlias  # Backward compatibility.
+from typing_extensions import Final, Literal, _AnnotatedAlias, get_args, get_origin
 
 from . import _construction, _docstrings, _strings
 
@@ -117,8 +117,8 @@ _ArgumentTransformOutput = Tuple[ArgumentDefinition, Optional[_construction.Fiel
 
 def _unwrap_final(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Treat Final[T] as just T."""
-    if hasattr(arg.type, "__origin__") and arg.type.__origin__ is Final:  # type: ignore
-        (typ,) = arg.type.__args__  # type: ignore
+    if get_origin(arg.type) is Final:
+        (typ,) = get_args(arg.type)
         return (
             dataclasses.replace(
                 arg,
@@ -133,7 +133,7 @@ def _unwrap_final(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
 def _unwrap_annotated(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Treat Annotated[T, annotation] as just T."""
     if hasattr(arg.type, "__class__") and arg.type.__class__ == _AnnotatedAlias:
-        typ = arg.type.__origin__  # type: ignore
+        typ = get_origin(arg.type)
         return (
             dataclasses.replace(
                 arg,
@@ -148,8 +148,8 @@ def _unwrap_annotated(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
 def _handle_optionals(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Transform for handling Optional[T] types. Sets default to None and marks arg as
     not required."""
-    if hasattr(arg.type, "__origin__") and arg.type.__origin__ is Union:  # type: ignore
-        options = set(arg.type.__args__)  # type: ignore
+    if get_origin(arg.type) is Union:
+        options = set(get_args(arg.type))
         assert (
             len(options) == 2 and type(None) in options
         ), "Union must be either over dataclasses (for subparsers) or Optional"
@@ -238,14 +238,13 @@ def _nargs_from_sequences_lists_and_sets(
     arg: ArgumentDefinition,
 ) -> _ArgumentTransformOutput:
     """Transform for handling Sequence[T] and list types."""
-    if hasattr(arg.type, "__origin__") and arg.type.__origin__ in (  # type: ignore
+    if get_origin(arg.type) in (
         collections.abc.Sequence,  # different from typing.Sequence!
         list,  # different from typing.List!
         set,  # different from typing.Set!
     ):
-        assert len(arg.type.__args__) == 1  # type: ignore
-        (typ,) = arg.type.__args__  # type: ignore
-        role = arg.type.__origin__  # type: ignore
+        (typ,) = get_args(arg.type)
+        role = get_origin(arg.type)
         if role is collections.abc.Sequence:
             role = list
 
@@ -267,10 +266,10 @@ def _nargs_from_sequences_lists_and_sets(
 def _nargs_from_tuples(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """Transform for handling Tuple[T, T, ...] types."""
 
-    if arg.nargs is None and hasattr(arg.type, "__origin__") and arg.type.__origin__ == tuple:  # type: ignore
-        types = arg.type.__args__  # type: ignore
+    if arg.nargs is None and get_origin(arg.type) is tuple:
+        types = get_args(arg.type)
         typeset = set(types)
-        typeset_no_ellipsis = typeset - {Ellipsis}  #
+        typeset_no_ellipsis = typeset - {Ellipsis}
 
         if typeset_no_ellipsis != typeset:
             # Ellipsis: variable argument counts
@@ -312,15 +311,15 @@ def _nargs_from_tuples(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
 
 def _choices_from_literals(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
     """For literal types, set choices."""
-    if hasattr(arg.type, "__origin__") and arg.type.__origin__ is Literal:  # type: ignore
-        choices = set(arg.type.__args__)  # type: ignore
+    if get_origin(arg.type) is Literal:
+        choices = set(get_args(arg.type))
         assert (
             len(set(map(type, choices))) == 1
         ), "All choices in literal must have the same type!"
         return (
             dataclasses.replace(
                 arg,
-                type=type(arg.type.__args__[0]),  # type: ignore
+                type=type(next(iter(choices))),
                 choices=choices,
             ),
             None,

@@ -2,6 +2,8 @@ import dataclasses
 import enum
 from typing import Any, Callable, Dict, Set, Tuple, Type, TypeVar, Union
 
+from typing_extensions import get_args
+
 from . import _resolver, _strings
 
 DataclassType = TypeVar("DataclassType")
@@ -93,13 +95,12 @@ def construct_dataclass(
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we do either
                 # Optional[Union[A, B, ...]] or Union[A, B, None].
-                assert type(None) in field_type.__args__
+                assert type(None) in get_args(field_type)
                 value = None
             else:
-                options = field_type.__args__
                 options = map(
                     lambda x: x if x not in type_from_typevar else type_from_typevar[x],
-                    field_type.__args__,
+                    get_args(field_type),
                 )
                 chosen_cls = None
                 for option in options:

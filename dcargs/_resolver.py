@@ -1,20 +1,14 @@
 import copy
 import dataclasses
 import functools
-from typing import Dict, List, Optional, Tuple, Type, TypeVar, Union
+from typing import Dict, List, Tuple, Type, TypeVar
 
-from typing_extensions import get_type_hints
-
-
-def unwrap_generic(cls: Type) -> Optional[Type]:
-    """Returns the origin of a generic type; or None if not a generic."""
-    # Note that isinstance(cls, GenericAlias) breaks in Python >= 3.9
-    return cls.__origin__ if hasattr(cls, "__origin__") else None
+from typing_extensions import get_args, get_origin, get_type_hints
 
 
 def is_dataclass(cls: Type) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
-    origin_cls = unwrap_generic(cls)
+    origin_cls = get_origin(cls)
     return dataclasses.is_dataclass(cls if origin_cls is None else origin_cls)
 
 
@@ -24,10 +18,10 @@ def resolve_generic_dataclasses(
     """If the input is a dataclass: no-op. If it's a generic alias: returns the root
     dataclass, and a mapping from typevars to concrete types."""
 
-    origin_cls = unwrap_generic(cls)
+    origin_cls = get_origin(cls)
     if origin_cls is not None:
         typevars = origin_cls.__parameters__
-        typevar_values = cls.__args__
+        typevar_values = get_args(cls)
         assert len(typevars) == len(typevar_values)
         return origin_cls, dict(zip(typevars, typevar_values))
     else:
