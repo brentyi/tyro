@@ -2,8 +2,6 @@ import argparse
 import dataclasses
 from typing import Any, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
-from typing_extensions import _GenericAlias  # type: ignore
-
 from . import _arguments, _construction, _docstrings, _resolver, _strings
 
 T = TypeVar("T")
@@ -43,7 +41,7 @@ class ParserDefinition:
 
     @staticmethod
     def from_dataclass(
-        cls: Union[Type[T], _GenericAlias],
+        cls: Type[T],
         parent_dataclasses: Optional[Set[Type]],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Optional[T],

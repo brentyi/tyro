@@ -1,36 +1,41 @@
 import copy
 import dataclasses
 import functools
-from typing import Dict, List, Tuple, Type, TypeVar, Union
+from typing import Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from typing_extensions import _GenericAlias, get_type_hints  # type: ignore
+from typing_extensions import get_type_hints
 
 
-def is_dataclass(cls: Union[Type, _GenericAlias]) -> bool:
+def unwrap_generic(cls: Type) -> Optional[Type]:
+    """Returns the origin of a generic type; or None if not a generic."""
+    # Note that isinstance(cls, GenericAlias) breaks in Python >= 3.9
+    return cls.__origin__ if hasattr(cls, "__origin__") else None
+
+
+def is_dataclass(cls: Type) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
-    return dataclasses.is_dataclass(cls) or (
-        isinstance(cls, _GenericAlias) and dataclasses.is_dataclass(cls.__origin__)
-    )
+    origin_cls = unwrap_generic(cls)
+    return dataclasses.is_dataclass(cls if origin_cls is None else origin_cls)
 
 
 def resolve_generic_dataclasses(
-    cls: Union[Type, _GenericAlias],
+    cls: Type,
 ) -> Tuple[Type, Dict[TypeVar, Type]]:
     """If the input is a dataclass: no-op. If it's a generic alias: returns the root
     dataclass, and a mapping from typevars to concrete types."""
 
-    if isinstance(cls, _GenericAlias):
-        typevars = cls.__origin__.__parameters__
+    origin_cls = unwrap_generic(cls)
+    if origin_cls is not None:
+        typevars = origin_cls.__parameters__
         typevar_values = cls.__args__
         assert len(typevars) == len(typevar_values)
-        cls = cls.__origin__
-        return cls, dict(zip(typevars, typevar_values))
+        return origin_cls, dict(zip(typevars, typevar_values))
     else:
         return cls, {}
 
 
 @functools.lru_cache(maxsize=16)
-def resolved_fields(cls: Union[Type, _GenericAlias]) -> List[dataclasses.Field]:
+def resolved_fields(cls: Type) -> List[dataclasses.Field]:
     """Similar to dataclasses.fields, but resolves forward references."""
 
     assert dataclasses.is_dataclass(cls)

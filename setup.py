@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     package_data={"dcargs": ["py.typed"]},
     python_requires=">=3.7",
-    install_requires=["typing_extensions"],
+    install_requires=["typing_extensions>=4.0.0"],
     extras_require={
         "testing": [
             "pytest",
