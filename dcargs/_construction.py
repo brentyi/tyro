@@ -2,11 +2,9 @@ import dataclasses
 import enum
 from typing import Any, Callable, Dict, Set, Tuple, Type, TypeVar, Union
 
-from typing_extensions import _GenericAlias  # type: ignore
-
 from . import _resolver, _strings
 
-DataclassType = TypeVar("DataclassType", bound=Union[Type, _GenericAlias])
+DataclassType = TypeVar("DataclassType")
 
 
 # Each dataclass field is assigned a role, which is either taken from an enum or a

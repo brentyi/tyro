@@ -5,9 +5,7 @@ import io
 import tokenize
 from typing import Dict, List, Optional, Type
 
-from typing_extensions import _GenericAlias  # type: ignore
-
-from . import _strings
+from . import _resolver, _strings
 
 
 @dataclasses.dataclass
@@ -76,8 +74,9 @@ class _Tokenization:
 def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
 
-    if isinstance(cls, _GenericAlias):
-        cls = cls.__origin__
+    origin_cls = _resolver.unwrap_generic(cls)
+    if origin_cls is not None:
+        cls = origin_cls
 
     assert dataclasses.is_dataclass(cls)
     try:

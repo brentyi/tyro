@@ -1,11 +1,9 @@
 import argparse
 from typing import Optional, Sequence, Type, TypeVar, Union
 
-from typing_extensions import _GenericAlias  # type: ignore
-
 from . import _construction, _parsers, _strings
 
-DataclassType = TypeVar("DataclassType", bound=Union[Type, _GenericAlias])
+DataclassType = TypeVar("DataclassType")
 
 
 def parse(
