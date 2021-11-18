@@ -5,7 +5,9 @@ import io
 import tokenize
 from typing import Dict, List, Optional, Type
 
-from . import _resolver, _strings
+from typing_extensions import get_origin
+
+from . import _strings
 
 
 @dataclasses.dataclass
@@ -74,7 +76,7 @@ class _Tokenization:
 def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
 
-    origin_cls = _resolver.unwrap_generic(cls)
+    origin_cls = get_origin(cls)
     if origin_cls is not None:
         cls = origin_cls
 

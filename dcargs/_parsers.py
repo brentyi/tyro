@@ -2,6 +2,8 @@ import argparse
 import dataclasses
 from typing import Any, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
+from typing_extensions import get_args, get_origin
+
 from . import _arguments, _construction, _docstrings, _resolver, _strings
 
 T = TypeVar("T")
@@ -153,19 +155,15 @@ class _NestedDataclassHandler:
         metadata = _construction.ConstructionMetadata()
 
         # Union of dataclasses should create subparsers.
-        if (
-            not hasattr(self.field.type, "__origin__")
-            or self.field.type.__origin__ is not Union
-        ):
+        if get_origin(self.field.type) is not Union:
             return None
 
-            # We don't use sets here to retain order of subcommands.
-        options = self.field.type.__args__
+        # We don't use sets here to retain order of subcommands.
         options = map(
             lambda x: x
             if x not in self.type_from_typevar
             else self.type_from_typevar[x],
-            self.field.type.__args__,
+            get_args(self.field.type),
         )
         options_no_none = [o for o in options if o != type(None)]  # noqa
         if len(options_no_none) < 2 or not all(
