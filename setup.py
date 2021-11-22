@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="dcargs",
-    version="0.0.8",
+    version="0.0.9",
     description="Portable, reusable, strongly typed CLIs from dataclass definitions",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -16,7 +16,7 @@ setup(
     packages=find_packages(),
     package_data={"dcargs": ["py.typed"]},
     python_requires=">=3.7",
-    install_requires=["typing_extensions>=4.0.0"],
+    install_requires=["typing_extensions>=4.0.0", "pyyaml"],
     extras_require={
         "testing": [
             "pytest",

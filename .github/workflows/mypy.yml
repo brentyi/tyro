@@ -26,4 +26,4 @@ jobs:
           pip install -e .[type-checking]
       - name: Test with mypy
         run: |
-          mypy .
+          mypy --install-types --non-interactive .

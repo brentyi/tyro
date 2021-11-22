@@ -6,18 +6,39 @@
 
 <!-- vim-markdown-toc GFM -->
 
+* [Simple example](#simple-example)
 * [Feature list](#feature-list)
 * [Comparisons to alternative tools](#comparisons-to-alternative-tools)
-* [Example usage](#example-usage)
+* [Nested example](#nested-example)
 
 <!-- vim-markdown-toc -->
 
-`dcargs` is a tool for generating portable, reusable, and strongly typed CLI
-interfaces from dataclass definitions.
+**dcargs** is a library for building dataclass-based argument parsers and
+configuration objects.
 
-We expose one function, `parse()`, which takes a dataclass type and instantiates
-it via an argparse-style CLI interface. If we create a script called
-`simple.py`:
+The vision: we use (potentially nested or generic) dataclasses to define
+configuration objects that can be (a) populated via a CLI interface without
+additional effort and (b) robustly and human-readably serialized. The result is
+a statically typed replacement for not only `argparse`, but libraries likes
+[YACS](https://github.com/rbgirshick/yacs) and
+[ml_collections](https://github.com/google/ml_collections).
+
+We expose a one-function argument parsing API:
+
+- <code><strong>dcargs.parse</strong>(cls: Type[T], \*, description:
+  Optional[str]) -> T</code> takes a dataclass type and instantiates it via an
+  argparse-style CLI interface.
+
+And two functions for dataclass serialization:
+
+- <code><strong>dcargs.from_yaml</strong>(cls: Type[T], stream: Union[str,
+  IO[str], bytes, IO[bytes]]) -> T</code> and
+  <code><strong>dcargs.to_yaml</strong>(instance: T) -> str</code> convert
+  between YAML-style strings and dataclass instances. In contrast to naively
+  dumping or loading (via pickle, PyYAML, etc), explicit type references enable
+  robustness against code reorganization and refactor.
+
+### Simple example
 
 ```python
 import dataclasses
@@ -34,6 +55,8 @@ class Args:
 if __name__ == "__main__":
     args = dcargs.parse(Args)
     print(args)
+    print()
+    print(dcargs.to_yaml(args))
 ```
 
 Running `python simple.py --help` would print:
@@ -53,13 +76,17 @@ And, from `python simple.py --field1 string --field2 4`:
 
 ```
 Args(field1='string', field2=4)
+
+!Args
+field1: string
+field2: 4
 ```
 
 ### Feature list
 
 The parse function supports a wide range of dataclass definitions, while
 automatically generating helptext from comments/docstrings. Some of the basic
-features are shown in the [example below](#example-usage).
+features are shown in the [nesting example below](#nested-example).
 
 Our unit tests cover many more complex type annotations, including classes
 containing:
@@ -93,13 +120,10 @@ containing:
 - Generic dataclasses (including nested generics, see
   [./examples/generics.py](./examples/generics.py))
 
-A usage example is available below. Examples of additional features can be found
-in the [tests](./tests/).
-
 ### Comparisons to alternative tools
 
-There are several alternative libraries to `dcargs`; here's a rough summary of
-some of them:
+There are several alternative libraries to the parsing functionality of
+`dcargs`; here's a rough summary of some of them:
 
 |                                                                                                 | dataclasses | attrs | Nesting | Subparsers | Containers | Choices from literals                                    | Docstrings as helptext | Generics |
 | ----------------------------------------------------------------------------------------------- | ----------- | ----- | ------- | ---------- | ---------- | -------------------------------------------------------- | ---------------------- | -------- |
@@ -126,7 +150,7 @@ Some other distinguishing factors that `dcargs` has put effort into:
   on dataclass field metadata, or on the more extreme end inheritance+decorators
   to make parsing-specific dataclasses)
 
-### Example usage
+### Nested example
 
 This code:
 
@@ -203,3 +227,5 @@ required arguments:
   --optimizer.type {ADAM,SGD}
                         Variant of SGD to use.
 ```
+
+Examples of additional features can be found in our [unit tests](./tests/).

@@ -12,3 +12,5 @@ class Args:
 if __name__ == "__main__":
     args = dcargs.parse(Args)
     print(args)
+    print()
+    print(dcargs.to_yaml(args))

@@ -1,9 +1,16 @@
 import dataclasses
-from typing import Generic, TypeVar, Union
+from typing import Generic, Type, TypeVar, Union
 
 import pytest
 
 import dcargs
+
+T = TypeVar("T")
+
+
+def _check_serialization_identity(cls: Type[T], instance: T) -> None:
+    assert dcargs.from_yaml(cls, dcargs.to_yaml(instance)) == instance
+
 
 ScalarType = TypeVar("ScalarType")
 
@@ -22,30 +29,31 @@ def test_simple_generic():
         point_continuous: Point3[float]
         point_discrete: Point3[int]
 
-    assert (
-        dcargs.parse(
-            SimpleGeneric,
-            args=[
-                "--point-continuous.x",
-                "1.2",
-                "--point-continuous.y",
-                "2.2",
-                "--point-continuous.z",
-                "3.2",
-                "--point-continuous.frame-id",
-                "world",
-                "--point-discrete.x",
-                "1",
-                "--point-discrete.y",
-                "2",
-                "--point-discrete.z",
-                "3",
-                "--point-discrete.frame-id",
-                "world",
-            ],
-        )
-        == SimpleGeneric(Point3(1.2, 2.2, 3.2, "world"), Point3(1, 2, 3, "world"))
+    parsed_instance = dcargs.parse(
+        SimpleGeneric,
+        args=[
+            "--point-continuous.x",
+            "1.2",
+            "--point-continuous.y",
+            "2.2",
+            "--point-continuous.z",
+            "3.2",
+            "--point-continuous.frame-id",
+            "world",
+            "--point-discrete.x",
+            "1",
+            "--point-discrete.y",
+            "2",
+            "--point-discrete.z",
+            "3",
+            "--point-discrete.frame-id",
+            "world",
+        ],
     )
+    assert parsed_instance == SimpleGeneric(
+        Point3(1.2, 2.2, 3.2, "world"), Point3(1, 2, 3, "world")
+    )
+    _check_serialization_identity(SimpleGeneric, parsed_instance)
 
     with pytest.raises(SystemExit):
         # Accidentally pass in floats instead of ints for discrete
@@ -79,7 +87,7 @@ def test_multilevel_generic():
         b: Point3[ScalarType]
         c: Point3[ScalarType]
 
-    dcargs.parse(
+    parsed_instance = dcargs.parse(
         Triangle[float],
         args=[
             "--a.x",
@@ -107,11 +115,13 @@ def test_multilevel_generic():
             "--c.frame-id",
             "world",
         ],
-    ) == Triangle(
+    )
+    assert parsed_instance == Triangle(
         Point3(1.0, 1.2, 1.3, "world"),
         Point3(1.0, 1.2, 1.3, "world"),
         Point3(1.0, 1.2, 1.3, "world"),
     )
+    _check_serialization_identity(Triangle[float], parsed_instance)
 
 
 def test_generic_nested_dataclass():
@@ -126,9 +136,11 @@ def test_generic_nested_dataclass():
     class DataclassGeneric(Generic[T]):
         child: T
 
-    assert dcargs.parse(
+    parsed_instance = dcargs.parse(
         DataclassGeneric[Child], args=["--child.a", "5", "--child.b", "7"]
-    ) == DataclassGeneric(Child(5, 7))
+    )
+    assert parsed_instance == DataclassGeneric(Child(5, 7))
+    _check_serialization_identity(DataclassGeneric[Child], parsed_instance)
 
 
 def test_generic_subparsers():
@@ -147,10 +159,14 @@ def test_generic_subparsers():
     class Subparser(Generic[T1, T2]):
         command: Union[T1, T2]
 
-    assert dcargs.parse(
+    parsed_instance = dcargs.parse(
         Subparser[CommandOne, CommandTwo], args="command-one --a 5".split(" ")
-    ) == Subparser(CommandOne(5))
+    )
+    assert parsed_instance == Subparser(CommandOne(5))
+    _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
 
-    assert dcargs.parse(
+    parsed_instance = dcargs.parse(
         Subparser[CommandOne, CommandTwo], args="command-two --b 7".split(" ")
-    ) == Subparser(CommandTwo(7))
+    )
+    assert parsed_instance == Subparser(CommandTwo(7))
+    _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
