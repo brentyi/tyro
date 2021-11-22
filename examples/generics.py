@@ -31,6 +31,12 @@ class Args:
 
     triangle_optional_coords: Triangle[Optional[float]]
 
+    triangle_with_default: Triangle[int] = Triangle(
+        a=Point3(1, 2, 3, "world"),
+        b=Point3(1, 2, 3, "world"),
+        c=Point3(1, 2, 3, "world"),
+    )
+
 
 if __name__ == "__main__":
     args = dcargs.parse(Args)
