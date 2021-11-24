@@ -41,3 +41,4 @@ class ExperimentConfig:
 if __name__ == "__main__":
     config = dcargs.parse(ExperimentConfig, description=__doc__)
     print(config)
+    print(dcargs.to_yaml(config))
