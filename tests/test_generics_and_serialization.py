@@ -1,4 +1,5 @@
 import dataclasses
+import enum
 from typing import Generic, Type, TypeVar, Union
 
 import pytest
@@ -15,12 +16,17 @@ def _check_serialization_identity(cls: Type[T], instance: T) -> None:
 ScalarType = TypeVar("ScalarType")
 
 
+class CoordinateFrame(enum.Enum):
+    WORLD = enum.auto()
+    CAMERA = enum.auto()
+
+
 @dataclasses.dataclass
 class Point3(Generic[ScalarType]):
     x: ScalarType
     y: ScalarType
     z: ScalarType
-    frame_id: str
+    frame: CoordinateFrame
 
 
 def test_simple_generic():
@@ -38,20 +44,21 @@ def test_simple_generic():
             "2.2",
             "--point-continuous.z",
             "3.2",
-            "--point-continuous.frame-id",
-            "world",
+            "--point-continuous.frame",
+            "WORLD",
             "--point-discrete.x",
             "1",
             "--point-discrete.y",
             "2",
             "--point-discrete.z",
             "3",
-            "--point-discrete.frame-id",
-            "world",
+            "--point-discrete.frame",
+            "WORLD",
         ],
     )
     assert parsed_instance == SimpleGeneric(
-        Point3(1.2, 2.2, 3.2, "world"), Point3(1, 2, 3, "world")
+        Point3(1.2, 2.2, 3.2, CoordinateFrame.WORLD),
+        Point3(1, 2, 3, CoordinateFrame.WORLD),
     )
     _check_serialization_identity(SimpleGeneric, parsed_instance)
 
@@ -66,16 +73,16 @@ def test_simple_generic():
                 "2.2",
                 "--point-continuous.z",
                 "3.2",
-                "--point-continuous.frame-id",
-                "world",
+                "--point-continuous.frame",
+                "WORLD",
                 "--point-discrete.x",
                 "1.5",
                 "--point-discrete.y",
                 "2.5",
                 "--point-discrete.z",
                 "3.5",
-                "--point-discrete.frame-id",
-                "world",
+                "--point-discrete.frame",
+                "WORLD",
             ],
         )
 
@@ -96,30 +103,30 @@ def test_multilevel_generic():
             "1.2",
             "--a.z",
             "1.3",
-            "--a.frame-id",
-            "world",
+            "--a.frame",
+            "WORLD",
             "--b.x",
             "1.0",
             "--b.y",
             "1.2",
             "--b.z",
             "1.3",
-            "--b.frame-id",
-            "world",
+            "--b.frame",
+            "WORLD",
             "--c.x",
             "1.0",
             "--c.y",
             "1.2",
             "--c.z",
             "1.3",
-            "--c.frame-id",
-            "world",
+            "--c.frame",
+            "WORLD",
         ],
     )
     assert parsed_instance == Triangle(
-        Point3(1.0, 1.2, 1.3, "world"),
-        Point3(1.0, 1.2, 1.3, "world"),
-        Point3(1.0, 1.2, 1.3, "world"),
+        Point3(1.0, 1.2, 1.3, CoordinateFrame.WORLD),
+        Point3(1.0, 1.2, 1.3, CoordinateFrame.WORLD),
+        Point3(1.0, 1.2, 1.3, CoordinateFrame.WORLD),
     )
     _check_serialization_identity(Triangle[float], parsed_instance)
 

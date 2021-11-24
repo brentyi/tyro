@@ -77,7 +77,7 @@ And, from `python simple.py --field1 string --field2 4`:
 ```
 Args(field1='string', field2=4)
 
-!Args
+!dataclass:Args
 field1: string
 field2: 4
 ```

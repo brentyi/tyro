@@ -1,4 +1,6 @@
 import dataclasses
+import datetime
+import enum
 from typing import IO, Any, Optional, Set, Type, TypeVar, Union
 
 import yaml
@@ -6,27 +8,31 @@ from typing_extensions import get_origin
 
 from . import _resolver
 
-DATACLASS_YAML_TAG_PREFIX = "!"
+ENUM_YAML_TAG_PREFIX = "!enum:"
+DATACLASS_YAML_TAG_PREFIX = "!dataclass:"
 
 DataclassType = TypeVar("DataclassType")
 
 
-def _get_contained_dataclass_types_from_instance(instance: Any) -> Set[Type]:
-    """Takes a dataclass instance, and recursively searches its cihldren for dataclass
+def _get_contained_special_types_from_instance(instance: Any) -> Set[Type]:
+    """Takes an object and recursively searches its cihldren for dataclass or enum
     types."""
-    if not dataclasses.is_dataclass(instance):
+    if issubclass(type(instance), enum.Enum):
+        return {type(instance)}
+    elif not dataclasses.is_dataclass(instance):
         return set()
+
     out = {type(instance)}
     for v in vars(instance).values():
-        out |= _get_contained_dataclass_types_from_instance(v)
+        out |= _get_contained_special_types_from_instance(v)
     return out
 
 
-def _get_contained_dataclass_types_from_type(
+def _get_contained_special_types_from_type(
     cls: Type,
     _parent_contained_dataclasses: Optional[Set[Type]] = None,
 ) -> Set[Type]:
-    """Takes a dataclass type, and recursively searches its fields for dataclass
+    """Takes a dataclass type, and recursively searches its fields for dataclass or enum
     types."""
     assert _resolver.is_dataclass(cls)
     parent_contained_dataclasses = (
@@ -41,11 +47,13 @@ def _get_contained_dataclass_types_from_type(
 
     def handle_type(typ) -> Set[Type]:
         if _resolver.is_dataclass(typ) and typ not in parent_contained_dataclasses:
-            return _get_contained_dataclass_types_from_type(
+            return _get_contained_special_types_from_type(
                 typ,
                 _parent_contained_dataclasses=contained_dataclasses
                 | parent_contained_dataclasses,
             )
+        elif type(typ) is enum.EnumMeta:
+            return {typ}
         return set()
 
     # Handle generics.
@@ -74,7 +82,7 @@ def _make_loader(cls: Type) -> Type[yaml.Loader]:
     # => let's just keep things simple, assert uniqueness for now. Easier to add new
     # features later than remove them.
 
-    contained_types = list(_get_contained_dataclass_types_from_type(cls))
+    contained_types = list(_get_contained_special_types_from_type(cls))
     contained_type_names = list(map(lambda cls: cls.__name__, contained_types))
     assert len(set(contained_type_names)) == len(
         contained_type_names
@@ -83,14 +91,25 @@ def _make_loader(cls: Type) -> Type[yaml.Loader]:
     loader: yaml.Loader
     node: yaml.Node
 
-    def make_constructor(typ: Type):
+    def make_dataclass_constructor(typ: Type):
         return lambda loader, node: typ(**loader.construct_mapping(node))
 
+    def make_enum_constructor(typ: Type):
+        return lambda loader, node: typ[loader.construct_python_str(node)]
+
     for typ, name in zip(contained_types, contained_type_names):
-        DataclassLoader.add_constructor(
-            tag=DATACLASS_YAML_TAG_PREFIX + name,
-            constructor=make_constructor(typ),
-        )
+        if dataclasses.is_dataclass(typ):
+            DataclassLoader.add_constructor(
+                tag=DATACLASS_YAML_TAG_PREFIX + name,
+                constructor=make_dataclass_constructor(typ),
+            )
+        elif issubclass(typ, enum.Enum):
+            DataclassLoader.add_constructor(
+                tag=ENUM_YAML_TAG_PREFIX + name,
+                constructor=make_enum_constructor(typ),
+            )
+        else:
+            assert False
 
     return DataclassLoader
 
@@ -99,7 +118,7 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
     class DataclassDumper(yaml.Dumper):
         pass
 
-    contained_types = list(_get_contained_dataclass_types_from_instance(instance))
+    contained_types = list(_get_contained_special_types_from_instance(instance))
     contained_type_names = list(map(lambda cls: cls.__name__, contained_types))
     assert len(set(contained_type_names)) == len(
         contained_type_names
@@ -110,14 +129,22 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
     field: dataclasses.Field
 
     def make_representer(name: str):
-        return lambda dumper, data: dumper.represent_mapping(
-            tag=DATACLASS_YAML_TAG_PREFIX + name,
-            mapping={
-                field.name: getattr(data, field.name)
-                for field in dataclasses.fields(data)
-                if field.init
-            },
-        )
+        def representer(dumper, data):
+            if dataclasses.is_dataclass(data):
+                return dumper.represent_mapping(
+                    tag=DATACLASS_YAML_TAG_PREFIX + name,
+                    mapping={
+                        field.name: getattr(data, field.name)
+                        for field in dataclasses.fields(data)
+                        if field.init
+                    },
+                )
+            elif isinstance(data, enum.Enum):
+                return dumper.represent_scalar(
+                    tag=ENUM_YAML_TAG_PREFIX + name, value=data.name
+                )
+
+        return representer
 
     for typ, name in zip(contained_types, contained_type_names):
         DataclassDumper.add_representer(typ, make_representer(name))
@@ -136,7 +163,14 @@ def from_yaml(
     return out
 
 
+def _timestamp() -> str:
+    """Get a current timestamp as a string. Example format: `2021-11-05-15:46:32`."""
+    return datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
+
+
 def to_yaml(instance: Any) -> str:
     """Serialize a dataclass; returns a yaml-compatible string that can be deserialized
     via `dcargs.from_yaml()`."""
-    return yaml.dump(instance, Dumper=_make_dumper(instance))
+    return f"# YAML generated via dcargs, at {_timestamp()}.\n" + yaml.dump(
+        instance, Dumper=_make_dumper(instance)
+    )
