@@ -94,6 +94,61 @@ def test_helptext_hard_string():
     )
 
 
+def test_helptext_with_inheritance():
+    @dataclasses.dataclass
+    class Parent:
+        # fmt: off
+        x: str = (
+            "This docstring may be tougher to parse!"
+        )
+        """Helptext."""
+        # fmt: on
+
+    @dataclasses.dataclass
+    class Child(Parent):
+        pass
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(Child, args=["--help"])
+    helptext = f.getvalue()
+    assert (
+        "--x STR     Helptext. (default: This docstring may be tougher to parse!)\n"
+        in helptext
+    )
+
+
+def test_helptext_with_inheritance_overriden():
+    @dataclasses.dataclass
+    class Parent2:
+        # fmt: off
+        x: str = (
+            "This docstring may be tougher to parse!"
+        )
+        """Helptext."""
+        # fmt: on
+
+    @dataclasses.dataclass
+    class Child2(Parent2):
+        # fmt: off
+        x: str = (
+            "This docstring may be tougher to parse?"
+        )
+        """Helptext."""
+        # fmt: on
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(Child2, args=["--help"])
+    helptext = f.getvalue()
+    assert (
+        "--x STR     Helptext. (default: This docstring may be tougher to parse?)\n"
+        in helptext
+    )
+
+
 def test_tuple_helptext():
     @dataclasses.dataclass
     class TupleHelptext:

@@ -25,14 +25,14 @@ class _FieldData:
 
 
 @dataclasses.dataclass
-class _Tokenization:
+class _ClassTokenization:
     tokens: List[_Token]
     tokens_from_line: Dict[int, List[_Token]]
     field_data_from_name: Dict[str, _FieldData]
 
     @staticmethod
-    @functools.lru_cache(maxsize=4)
-    def make(cls) -> "_Tokenization":
+    @functools.lru_cache(maxsize=8)
+    def make(cls) -> "_ClassTokenization":
         """Parse the source code of a class, and cache some tokenization information."""
         readline = io.BytesIO(inspect.getsource(cls).encode("utf-8")).readline
 
@@ -66,34 +66,57 @@ class _Tokenization:
                     )
                     prev_field_line_number = token.line_number
 
-        return _Tokenization(
+        return _ClassTokenization(
             tokens=tokens,
             tokens_from_line=tokens_from_line,
             field_data_from_name=field_data_from_name,
         )
 
 
+def get_class_tokenization_with_field(
+    cls: Type, field_name: str
+) -> Optional[_ClassTokenization]:
+    # Search for token in this class + all parents.
+    found_field: bool = False
+    classes_to_search = cls.mro()
+    for search_cls in classes_to_search:
+        # Unwrap generics.
+        origin_cls = get_origin(search_cls)
+        if origin_cls is not None:
+            search_cls = origin_cls
+
+        # Skip parent classes that aren't dataclasses.
+        if not dataclasses.is_dataclass(search_cls):
+            continue
+
+        try:
+            tokenization = _ClassTokenization.make(search_cls)  # type: ignore
+        except OSError as e:
+            # Dynamic dataclasses will result in an OSError -- this is fine, we just assume
+            # there's no docstring.
+            assert "could not find class definition" in e.args[0]
+            return None
+
+        # Grab field-specific tokenization data.
+        if field_name in tokenization.field_data_from_name:
+            found_field = True
+            break
+
+    assert (
+        found_field
+    ), "Docstring parsing error -- this usually means that there are multiple \
+    dataclasses in the same file with the same name but different scopes."
+
+    return tokenization
+
+
 def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
 
-    origin_cls = get_origin(cls)
-    if origin_cls is not None:
-        cls = origin_cls
-
-    assert dataclasses.is_dataclass(cls)
-    try:
-        tokenization = _Tokenization.make(cls)  # type: ignore
-    except OSError as e:
-        # Dynamic dataclasses will result in an OSError -- this is fine, we just assume
-        # there's no docstring.
-        assert "could not find class definition" in e.args[0]
+    tokenization = get_class_tokenization_with_field(cls, field_name)
+    if tokenization is None:  # Currently only happens for dynamic dataclasses.
         return None
 
-    # Grab field-specific tokenization data.
-    assert (
-        field_name in tokenization.field_data_from_name
-    ), "Docstring parsing error -- this usually means that there are multiple \
-    dataclasses in the same file with the same name but different scopes."
     field_data = tokenization.field_data_from_name[field_name]
 
     # Check for docstring-style comment.
@@ -126,17 +149,6 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
             break
 
         line_number += 1
-    # if (
-    #     field_data.line_number + 1 in tokenization.tokens_from_line
-    #     and len(tokenization.tokens_from_line[field_data.line_number + 1]) > 0
-    # ):
-    #     first_token_on_next_line = tokenization.tokens_from_line[
-    #         field_data.line_number + 1
-    #     ][0]
-    #     if first_token_on_next_line.token_type == tokenize.STRING:
-    #         docstring = first_token_on_next_line.token.strip()
-    #         assert docstring.endswith('"""') and docstring.startswith('"""')
-    #         return _strings.dedent(docstring[3:-3])
 
     # Check for comment on the same line as the field.
     final_token_on_line = tokenization.tokens_from_line[field_data.line_number][-1]

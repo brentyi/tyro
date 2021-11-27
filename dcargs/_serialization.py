@@ -120,9 +120,11 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
 
     contained_types = list(_get_contained_special_types_from_instance(instance))
     contained_type_names = list(map(lambda cls: cls.__name__, contained_types))
+
+    # Note: this is currently a stricter than necessary assert.
     assert len(set(contained_type_names)) == len(
         contained_type_names
-    ), f"Contained dataclass type names must all be unique, but got {contained_type_names}"
+    ), f"Contained dataclass/enum names must all be unique, but got {contained_type_names}"
 
     dumper: yaml.Dumper
     data: Any
