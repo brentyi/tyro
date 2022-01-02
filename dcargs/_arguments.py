@@ -357,6 +357,9 @@ def _generate_helptext(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
             arg.parent_class, arg.field.name
         )
         if docstring_help is not None:
+            # Note that the percent symbol needs some extra handling in argparse.
+            # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
+            docstring_help = docstring_help.replace("%", "%%")
             help_parts.append(docstring_help)
 
         if arg.default is not None and hasattr(arg.default, "name"):
