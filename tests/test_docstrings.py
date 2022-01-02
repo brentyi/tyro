@@ -80,8 +80,11 @@ def test_helptext_hard_string():
         x: str = (
             "This docstring may be tougher to parse!"
         )
-        """Helptext."""
+        """Helptext. 2% milk."""
         # fmt: on
+
+    # Note that the percent symbol needs some extra handling in argparse.
+    # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
 
     f = io.StringIO()
     with pytest.raises(SystemExit):
@@ -89,7 +92,7 @@ def test_helptext_hard_string():
             dcargs.parse(HelptextHardString, args=["--help"])
     helptext = f.getvalue()
     assert (
-        "--x STR     Helptext. (default: This docstring may be tougher to parse!)\n"
+        "--x STR     Helptext. 2% milk. (default: This docstring may be tougher to parse!)\n"
         in helptext
     )
 
