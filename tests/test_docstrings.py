@@ -73,12 +73,12 @@ def test_none_default_value_helptext():
     assert "  --x INT     An optional variable. (default: None)\n" in helptext
 
 
-def test_helptext_hard_string():
+def test_helptext_hard_bool():
     @dataclasses.dataclass
     class HelptextHardString:
         # fmt: off
-        x: str = (
-            "This docstring may be tougher to parse!"
+        x: bool = (
+            False
         )
         """Helptext. 2% milk."""
         # fmt: on
@@ -91,10 +91,7 @@ def test_helptext_hard_string():
         with contextlib.redirect_stdout(f):
             dcargs.parse(HelptextHardString, args=["--help"])
     helptext = f.getvalue()
-    assert (
-        "--x STR     Helptext. 2% milk. (default: This docstring may be tougher to parse!)\n"
-        in helptext
-    )
+    assert "--x         Helptext. 2% milk.\n" in helptext
 
 
 def test_helptext_with_inheritance():
