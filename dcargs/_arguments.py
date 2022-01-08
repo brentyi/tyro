@@ -195,11 +195,20 @@ def _bool_flags(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
 
     # Populate helptext for boolean flags => don't show default value, which can be
     # confusing.
-    helptext = _docstrings.get_field_docstring(arg.parent_class, arg.field.name)
-    arg = dataclasses.replace(
-        arg,
-        help=helptext if helptext is not None else "",
-    )
+    docstring_help = _docstrings.get_field_docstring(arg.parent_class, arg.field.name)
+    if docstring_help is not None:
+        # Note that the percent symbol needs some extra handling in argparse.
+        # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
+        docstring_help = docstring_help.replace("%", "%%")
+        arg = dataclasses.replace(
+            arg,
+            help=docstring_help,
+        )
+    else:
+        arg = dataclasses.replace(
+            arg,
+            help="",
+        )
 
     if arg.default is None:
         return (
