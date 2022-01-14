@@ -135,7 +135,7 @@ def test_helptext_with_inheritance_overriden():
         x: str = (
             "This docstring may be tougher to parse?"
         )
-        """Helptext."""
+        """Helptext!"""
         # fmt: on
 
     f = io.StringIO()
@@ -144,7 +144,7 @@ def test_helptext_with_inheritance_overriden():
             dcargs.parse(Child2, args=["--help"])
     helptext = f.getvalue()
     assert (
-        "--x STR     Helptext. (default: This docstring may be tougher to parse?)\n"
+        "--x STR     Helptext! (default: This docstring may be tougher to parse?)\n"
         in helptext
     )
 

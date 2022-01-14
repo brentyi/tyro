@@ -8,6 +8,31 @@ from typing_extensions import Final, Literal, _AnnotatedAlias, get_args, get_ori
 
 from . import _construction, _docstrings, _strings
 
+T = TypeVar("T")
+
+
+def _instance_from_string(typ: Type[T], arg: str) -> T:
+    """Given a type and and a string from the command-line, reconstruct an object. Not
+    intended to deal with generic types or containers; these are handled in the
+    "argument transformations" below.
+
+    This is intended to replace all calls to `type(string)`, which can cause unexpected
+    behavior. As an example, note that the following argparse code will always print
+    `True`, because `bool("True") == bool("False") == bool("0") == True`.
+    ```
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--flag", type=bool)
+
+    print(parser.parse_args().flag)
+    ```
+    """
+    if typ is bool:
+        return _strings.bool_from_string(arg)  # type: ignore
+    else:
+        return typ(arg)  # type: ignore
+
 
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
@@ -38,6 +63,16 @@ class ArgumentDefinition:
         name = "--" + kwargs.pop("name").replace("_", "-")
         kwargs.pop("field")
         kwargs.pop("parent_class")
+
+        # Wrap the raw type with handling for special types. (currently only booleans)
+        # This feels a like a bit of band-aid; in the future, we may want to always set
+        # the argparse type to str and fold this logic into a more general version of
+        # what we currently call the "field role" (callables used for reconstructing
+        # lists, tuples, sets, etc).
+        if "type" in kwargs:
+            raw_type = kwargs["type"]
+            kwargs["type"] = lambda arg: _instance_from_string(raw_type, arg)
+
         parser.add_argument(name, **kwargs)
 
     def prefix(self, prefix: str) -> "ArgumentDefinition":
@@ -214,7 +249,6 @@ def _bool_flags(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
         return (
             dataclasses.replace(
                 arg,
-                type=_strings.bool_from_string,  # type: ignore
                 metavar="{True,False}",
             ),
             None,
@@ -301,17 +335,21 @@ def _nargs_from_tuples(arg: ArgumentDefinition) -> _ArgumentTransformOutput:
         else:
             # Tuples with more than one type
             assert arg.metavar is None
+
             return (
                 dataclasses.replace(
                     arg,
                     nargs=len(types),
-                    type=str,  # Types will be converted in the dataclass reconstruction step
+                    type=str,  # Types will be converted in the dataclass reconstruction step.
                     metavar=tuple(
                         t.__name__.upper() if hasattr(t, "__name__") else "X"
                         for t in types
                     ),
                 ),
-                lambda str_list: tuple(typ(x) for typ, x in zip(types, str_list)),
+                # Field role: convert lists of strings to tuples of the correct types.
+                lambda str_list: tuple(
+                    _instance_from_string(typ, x) for typ, x in zip(types, str_list)
+                ),
             )
 
     else:
