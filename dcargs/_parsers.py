@@ -13,7 +13,6 @@ T = TypeVar("T")
 class ParserDefinition:
     """Each parser contains a list of arguments and optionally a subparser."""
 
-    # Track a list of (argument def, action) pairs.
     args: List[_arguments.ArgumentDefinition]
     nested_dataclass_field_names: List[str]
     subparsers: Optional["SubparsersDefinition"]

@@ -1,6 +1,6 @@
 import dataclasses
 import enum
-from typing import Generic, List, Type, TypeVar, Union
+from typing import Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
 
@@ -14,6 +14,26 @@ def _check_serialization_identity(cls: Type[T], instance: T) -> None:
 
 
 ScalarType = TypeVar("ScalarType")
+
+
+def test_tuple_generic_variable():
+    @dataclasses.dataclass
+    class TupleGenericVariable(Generic[ScalarType]):
+        xyz: Tuple[ScalarType, ...]
+
+    assert dcargs.parse(
+        TupleGenericVariable[int], args=["--xyz", "1", "2", "3"]
+    ) == TupleGenericVariable((1, 2, 3))
+
+
+def test_tuple_generic_fixed():
+    @dataclasses.dataclass
+    class TupleGenericFixed(Generic[ScalarType]):
+        xyz: Tuple[ScalarType, ScalarType, ScalarType]
+
+    assert dcargs.parse(
+        TupleGenericFixed[int], args=["--xyz", "1", "2", "3"]
+    ) == TupleGenericFixed((1, 2, 3))
 
 
 class CoordinateFrame(enum.Enum):
