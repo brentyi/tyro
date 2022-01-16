@@ -7,6 +7,7 @@ import dcargs
 class Args:
     field1: str  # A string field.
     field2: int  # A numeric field.
+    flag: bool = False  # A boolean flag.
 
 
 if __name__ == "__main__":

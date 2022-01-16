@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import get_args, get_origin
 
-from . import _arguments, _construction, _docstrings, _resolver, _strings
+from . import _arguments, _docstrings, _resolver, _strings
 
 T = TypeVar("T")
 
@@ -13,7 +13,9 @@ T = TypeVar("T")
 class ParserDefinition:
     """Each parser contains a list of arguments and optionally a subparser."""
 
+    # Track a list of (argument def, action) pairs.
     args: List[_arguments.ArgumentDefinition]
+    nested_dataclass_field_names: List[str]
     subparsers: Optional["SubparsersDefinition"]
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
@@ -47,7 +49,7 @@ class ParserDefinition:
         parent_dataclasses: Optional[Set[Type]],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Optional[T],
-    ) -> Tuple["ParserDefinition", _construction.ConstructionMetadata]:
+    ) -> "ParserDefinition":
         """Create a parser definition from a dataclass."""
 
         if parent_dataclasses is None:
@@ -55,7 +57,7 @@ class ParserDefinition:
 
         assert _resolver.is_dataclass(cls)
 
-        cls, type_from_typevar = _resolver.resolve_generic_dataclasses(cls)
+        cls, type_from_typevar = _resolver.resolve_generic_classes(cls)
 
         if parent_type_from_typevar is not None:
             for typevar, typ in type_from_typevar.items():
@@ -68,8 +70,8 @@ class ParserDefinition:
         parent_dataclasses = parent_dataclasses | {cls}
 
         args = []
+        nested_dataclass_field_names = []
         subparsers = None
-        metadata = _construction.ConstructionMetadata()
         for field in _resolver.resolved_fields(cls):  # type: ignore
 
             # Ignore fields not in constructor
@@ -90,22 +92,22 @@ class ParserDefinition:
                 assert (
                     subparsers is None
                 ), "Only one subparser (union over dataclasses) is allowed per class"
-                subparsers, subparsers_metadata = subparsers_out
-                metadata.update(subparsers_metadata)
 
+                subparsers = subparsers_out
                 continue
 
             # Try to interpret field as a nested dataclass.
             nested_out = field_parser.handle_nested_dataclasses()
             if nested_out is not None:
-                child_args, child_metadata = nested_out
-                args.extend(child_args)
-                metadata.update(child_metadata)
 
+                child_args, child_nested_field_names = nested_out
+                args.extend(child_args)
+                nested_dataclass_field_names.extend(child_nested_field_names)
+                nested_dataclass_field_names.append(field.name)
                 continue
 
             # Handle simple fields!
-            arg, role = _arguments.ArgumentDefinition.make_from_field(
+            arg = _arguments.ArgumentDefinition.make_from_field(
                 cls,
                 field,
                 type_from_typevar,
@@ -114,14 +116,11 @@ class ParserDefinition:
                 else None,
             )
             args.append(arg)
-            metadata.role_from_field[field] = role
 
-        return (
-            ParserDefinition(
-                args=args,
-                subparsers=subparsers,
-            ),
-            metadata,
+        return ParserDefinition(
+            args=args,
+            nested_dataclass_field_names=nested_dataclass_field_names,
+            subparsers=subparsers,
         )
 
 
@@ -148,11 +147,9 @@ class _NestedDataclassHandler:
 
     def handle_unions_over_dataclasses(
         self,
-    ) -> Optional[Tuple["SubparsersDefinition", _construction.ConstructionMetadata]]:
+    ) -> Optional["SubparsersDefinition"]:
         """Handle unions over dataclasses, which are converted to subparsers.. Returns
         `None` if not applicable."""
-
-        metadata = _construction.ConstructionMetadata()
 
         # Union of dataclasses should create subparsers.
         if get_origin(self.field.type) is not Union:
@@ -177,19 +174,14 @@ class _NestedDataclassHandler:
 
         parsers: Dict[str, ParserDefinition] = {}
         for option in options_no_none:
-            subparser_name = _strings.hyphen_separated_from_camel_case(option.__name__)
-            metadata.subparser_name_from_type[option] = subparser_name
+            subparser_name = _strings.subparser_name_from_type(option)
 
-            (
-                parsers[subparser_name],
-                child_metadata,
-            ) = ParserDefinition.from_dataclass(
+            parsers[subparser_name] = ParserDefinition.from_dataclass(
                 option,
                 self.parent_dataclasses,
                 parent_type_from_typevar=self.type_from_typevar,
                 default_instance=None,
             )
-            metadata.update(child_metadata)
 
         subparsers = SubparsersDefinition(
             name=self.field.name,
@@ -197,15 +189,12 @@ class _NestedDataclassHandler:
             parsers=parsers,
             required=(options == options_no_none),  # Not required if no options.
         )
-        metadata.role_from_field[self.field] = _construction.FieldRoleEnum.SUBPARSERS
 
-        return subparsers, metadata
+        return subparsers
 
     def handle_nested_dataclasses(
         self,
-    ) -> Optional[
-        Tuple[List[_arguments.ArgumentDefinition], _construction.ConstructionMetadata]
-    ]:
+    ) -> Optional[Tuple[List[_arguments.ArgumentDefinition], List[str]]]:
         """Handle nested dataclasses. Returns `None` if not applicable."""
         # Resolve field type
         field_type = (
@@ -223,7 +212,7 @@ class _NestedDataclassHandler:
         elif self.field.default is not dataclasses.MISSING:
             default = self.field.default
 
-        child_definition, child_metadata = ParserDefinition.from_dataclass(
+        child_definition = ParserDefinition.from_dataclass(
             field_type,
             self.parent_dataclasses,
             parent_type_from_typevar=self.type_from_typevar,
@@ -232,12 +221,16 @@ class _NestedDataclassHandler:
 
         child_args = child_definition.args
         for i, arg in enumerate(child_args):
-            child_args[i] = arg.prefix(
-                self.field.name + _strings.NESTED_DATACLASS_DELIMETER
+            child_args[i] = dataclasses.replace(
+                arg,
+                prefix=self.field.name
+                + _strings.NESTED_DATACLASS_DELIMETER
+                + arg.prefix,
             )
 
-        child_metadata.role_from_field[
-            self.field
-        ] = _construction.FieldRoleEnum.NESTED_DATACLASS
+        nested_dataclass_field_names = [
+            self.field.name + _strings.NESTED_DATACLASS_DELIMETER + x
+            for x in child_definition.nested_dataclass_field_names
+        ]
 
-        return child_args, child_metadata
+        return child_args, nested_dataclass_field_names

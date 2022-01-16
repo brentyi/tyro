@@ -69,7 +69,6 @@ def test_none_default_value_helptext():
         with contextlib.redirect_stdout(f):
             dcargs.parse(Config, args=["--help"])
     helptext = f.getvalue()
-    print(helptext)
     assert "  --x INT     An optional variable. (default: None)\n" in helptext
 
 

@@ -50,6 +50,7 @@ import dcargs
 class Args:
     field1: str  # A string field.
     field2: int  # A numeric field.
+    flag: bool = False # A boolean flag.
 
 
 if __name__ == "__main__":
@@ -62,24 +63,26 @@ if __name__ == "__main__":
 Running `python simple.py --help` would print:
 
 ```
-usage: simple.py [-h] --field1 STR --field2 INT
-
-optional arguments:
-  -h, --help    show this help message and exit
+usage: simple.py [-h] --field1 STR --field2 INT [--flag]
 
 required arguments:
   --field1 STR  A string field.
   --field2 INT  A numeric field.
+
+optional arguments:
+  -h, --help    show this help message and exit
+  --flag        A boolean flag.
 ```
 
 And, from `python simple.py --field1 string --field2 4`:
 
 ```
-Args(field1='string', field2=4)
+Args(field1='string', field2=4, flag=False)
 
 !dataclass:Args
 field1: string
 field2: 4
+flag: false
 ```
 
 ### Feature list

@@ -17,7 +17,7 @@ def parse(
     if description is None:
         description = ""
 
-    parser_definition, construction_metadata = _parsers.ParserDefinition.from_dataclass(
+    parser_definition = _parsers.ParserDefinition.from_dataclass(
         cls,
         parent_dataclasses=set(),  # Used for recursive calls.
         parent_type_from_typevar=None,  # Used for recursive calls.
@@ -33,9 +33,19 @@ def parse(
     namespace = parser.parse_args(args)
 
     value_from_arg = vars(namespace)
-    out, consumed_keywords = _construction.construct_dataclass(
-        cls, value_from_arg, construction_metadata
-    )
+
+    try:
+        out, consumed_keywords = _construction.construct_dataclass(
+            cls,
+            parser_definition,
+            value_from_arg,
+        )
+    except _construction.FieldActionValueError as e:
+        parser.print_usage()
+        print()
+        print(e.args[0])
+        raise SystemExit()
+
     assert (
         consumed_keywords == value_from_arg.keys()
     ), "Not all arguments were consumed!"
