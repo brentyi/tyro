@@ -21,29 +21,6 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-def instance_from_string(typ: Type[T], arg: str) -> T:
-    """Given a type and and a string from the command-line, reconstruct an object. Not
-    intended to deal with generic types or containers; these are handled in the
-    "argument transformations".
-
-    This is intended to replace all calls to `type(string)`, which can cause unexpected
-    behavior. As an example, note that the following argparse code will always print
-    `True`, because `bool("True") == bool("False") == bool("0") == True`.
-    ```
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--flag", type=bool)
-
-    print(parser.parse_args().flag)
-    ```
-    """
-    if typ is bool:
-        return _strings.bool_from_string(arg)  # type: ignore
-    else:
-        return typ(arg)  # type: ignore
-
-
 # Each argument is assigned an action, which determines how it's populated from the CLI
 # string.
 #
