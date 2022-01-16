@@ -12,11 +12,11 @@ def is_dataclass(cls: Type) -> bool:
     return dataclasses.is_dataclass(cls if origin_cls is None else origin_cls)
 
 
-def resolve_generic_dataclasses(
+def resolve_generic_classes(
     cls: Type,
 ) -> Tuple[Type, Dict[TypeVar, Type]]:
-    """If the input is a dataclass: no-op. If it's a generic alias: returns the root
-    dataclass, and a mapping from typevars to concrete types."""
+    """If the input is a class: no-op. If it's a generic alias: returns the origin
+    class, and a mapping from typevars to concrete types."""
 
     origin_cls = get_origin(cls)
     if origin_cls is not None:

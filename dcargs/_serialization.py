@@ -41,7 +41,7 @@ def _get_contained_special_types_from_type(
         else _parent_contained_dataclasses
     )
 
-    cls, type_from_typevar = _resolver.resolve_generic_dataclasses(cls)
+    cls, type_from_typevar = _resolver.resolve_generic_classes(cls)
 
     contained_dataclasses = {cls}
 

@@ -1,6 +1,6 @@
 import dataclasses
 import enum
-from typing import Generic, Type, TypeVar, Union
+from typing import Generic, List, Type, TypeVar, Union
 
 import pytest
 
@@ -177,3 +177,34 @@ def test_generic_subparsers():
     )
     assert parsed_instance == Subparser(CommandTwo(7))
     _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
+
+
+def test_generic_subparsers_in_container():
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class Command(Generic[T]):
+        a: List[int]
+
+    T1 = TypeVar("T1")
+    T2 = TypeVar("T2")
+
+    @dataclasses.dataclass
+    class Subparser(Generic[T1, T2]):
+        command: Union[T1, T2]
+
+    parsed_instance = dcargs.parse(
+        Subparser[Command[int], Command[float]], args="command-int --a 5 3".split(" ")
+    )
+    assert parsed_instance == Subparser(Command([5, 3]))
+    _check_serialization_identity(
+        Subparser[Command[int], Command[float]], parsed_instance
+    )
+
+    parsed_instance = dcargs.parse(
+        Subparser[Command[int], Command[float]], args="command-float --a 7 2".split(" ")
+    )
+    assert parsed_instance == Subparser(Command([7.0, 2.0]))
+    _check_serialization_identity(
+        Subparser[Command[int], Command[float]], parsed_instance
+    )

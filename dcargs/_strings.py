@@ -1,6 +1,9 @@
 import functools
 import re
 import textwrap
+from typing import Type
+
+from . import _resolver
 
 NESTED_DATACLASS_DELIMETER: str = "."
 SUBPARSER_DEST_FMT: str = "{name} (positional)"
@@ -21,6 +24,20 @@ _camel_separator_pattern = functools.lru_cache(maxsize=1)(
 
 def hyphen_separated_from_camel_case(name: str) -> str:
     return _camel_separator_pattern().sub(r"-\1", name).lower()
+
+
+def subparser_name_from_type(cls: Type) -> str:
+    cls, type_from_typevar = _resolver.resolve_generic_classes(cls)
+    if len(type_from_typevar) == 0:
+        assert hasattr(cls, "__name__")
+        return hyphen_separated_from_camel_case(cls.__name__)  # type: ignore
+
+    return "-".join(
+        map(
+            subparser_name_from_type,
+            [cls] + list(type_from_typevar.values()),
+        )
+    )
 
 
 def bool_from_string(text: str) -> bool:

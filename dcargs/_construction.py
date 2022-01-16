@@ -1,44 +1,72 @@
-import dataclasses
-import enum
-from typing import Any, Callable, Dict, Set, Tuple, Type, TypeVar, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import get_args
 
 from . import _resolver, _strings
 
+if TYPE_CHECKING:
+    from . import _parsers
+
+T = TypeVar("T")
+
+
+def instance_from_string(typ: Type[T], arg: str) -> T:
+    """Given a type and and a string from the command-line, reconstruct an object. Not
+    intended to deal with generic types or containers; these are handled in the
+    "argument transformations".
+
+    This is intended to replace all calls to `type(string)`, which can cause unexpected
+    behavior. As an example, note that the following argparse code will always print
+    `True`, because `bool("True") == bool("False") == bool("0") == True`.
+    ```
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--flag", type=bool)
+
+    print(parser.parse_args().flag)
+    ```
+    """
+    if typ is bool:
+        return _strings.bool_from_string(arg)  # type: ignore
+    else:
+        return typ(arg)  # type: ignore
+
+
+# Each argument is assigned an action, which determines how it's populated from the CLI
+# string.
+#
+# There are 2 options:
+FieldAction = Union[
+    # Most standard fields: these are converted from strings from the CLI.
+    Callable[[str], Any],
+    # Sequence fields! This should be used whenever argparse's `nargs` field is set.
+    Callable[[List[str]], Any],
+]
+
+
+class FieldActionValueError(Exception):
+    """Exception raised when field actions fail; this is caused by"""
+
+
 DataclassType = TypeVar("DataclassType")
-
-
-# Each dataclass field is assigned a role, which is either taken from an enum or a
-# callable type that converts raw values from the argparse namespace to their final
-# values in the dataclass.
-class FieldRoleEnum(enum.Enum):
-    VANILLA_FIELD = enum.auto()
-    NESTED_DATACLASS = enum.auto()  # Singular nested dataclass.
-    SUBPARSERS = enum.auto()  # Unions over dataclasses.
-
-
-FieldRole = Union[FieldRoleEnum, Callable[[Any], Any]]
-
-
-@dataclasses.dataclass
-class ConstructionMetadata:
-    """Metadata recorded during parsing that's needed for reconstructing dataclasses."""
-
-    role_from_field: Dict[dataclasses.Field, FieldRole] = dataclasses.field(
-        default_factory=dict
-    )
-    subparser_name_from_type: Dict[Type, str] = dataclasses.field(default_factory=dict)
-
-    def update(self, other: "ConstructionMetadata") -> None:
-        self.role_from_field.update(other.role_from_field)
-        self.subparser_name_from_type.update(other.subparser_name_from_type)
 
 
 def construct_dataclass(
     cls: Type[DataclassType],
+    parser_definition: "_parsers.ParserDefinition",
     value_from_arg: Dict[str, Any],
-    metadata: ConstructionMetadata,
     field_name_prefix: str = "",
 ) -> Tuple[DataclassType, Set[str]]:
     """Construct a dataclass object from a dictionary of values from argparse.
@@ -47,7 +75,7 @@ def construct_dataclass(
 
     assert _resolver.is_dataclass(cls)
 
-    cls, type_from_typevar = _resolver.resolve_generic_dataclasses(cls)
+    cls, type_from_typevar = _resolver.resolve_generic_classes(cls)
 
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
@@ -60,13 +88,15 @@ def construct_dataclass(
         consumed_keywords.add(arg)
         return value_from_arg[arg]
 
+    arg_from_prefixed_field_name = {}
+    for arg in parser_definition.args:
+        arg_from_prefixed_field_name[arg.prefix + arg.field.name] = arg
+
     for field in _resolver.resolved_fields(cls):  # type: ignore
         if not field.init:
             continue
 
         value: Any
-        role = metadata.role_from_field[field]
-
         prefixed_field_name = field_name_prefix + field.name
 
         # Resolve field type
@@ -76,18 +106,33 @@ def construct_dataclass(
             else field.type
         )
 
-        if role is FieldRoleEnum.NESTED_DATACLASS:
+        if prefixed_field_name in arg_from_prefixed_field_name:
+            # Callable actions. Used for tuples, lists, sets, etc.
+            arg = arg_from_prefixed_field_name[prefixed_field_name]
+            action = arg.field_action
+            value = get_value_from_arg(prefixed_field_name)
+            if value is not None:
+                try:
+                    value = action(value)
+                except ValueError as e:
+                    raise FieldActionValueError(
+                        f"Parsing error for {arg.get_flag()}: {e.args[0]}"
+                    )
+        elif prefixed_field_name in parser_definition.nested_dataclass_field_names:
             # Nested dataclasses.
             value, consumed_keywords_child = construct_dataclass(
                 field_type,
+                parser_definition,
                 value_from_arg,
-                metadata,
                 field_name_prefix=prefixed_field_name
                 + _strings.NESTED_DATACLASS_DELIMETER,
             )
             consumed_keywords |= consumed_keywords_child
-        elif role is FieldRoleEnum.SUBPARSERS:
-            # Unions over dataclasses (subparsers).
+        else:
+            # Unions over dataclasses (subparsers). This is the only other option.
+            assert parser_definition.subparsers is not None
+            assert field.name == parser_definition.subparsers.name
+
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
                 name=prefixed_field_name
             )
@@ -104,26 +149,16 @@ def construct_dataclass(
                 )
                 chosen_cls = None
                 for option in options:
-                    if metadata.subparser_name_from_type[option] == subparser_name:
+                    if _strings.subparser_name_from_type(option) == subparser_name:
                         chosen_cls = option
                         break
                 assert chosen_cls is not None
                 value, consumed_keywords_child = construct_dataclass(
                     chosen_cls,
+                    parser_definition.subparsers.parsers[subparser_name],
                     value_from_arg,
-                    metadata,
                 )
                 consumed_keywords |= consumed_keywords_child
-        elif role is FieldRoleEnum.VANILLA_FIELD:
-            # General case.
-            value = get_value_from_arg(prefixed_field_name)
-        elif callable(role):
-            # Callable roles. Used for tuples, lists, sets, etc.
-            value = get_value_from_arg(prefixed_field_name)
-            if value is not None:
-                value = role(value)
-        else:
-            assert False
 
         kwargs[field.name] = value
 
