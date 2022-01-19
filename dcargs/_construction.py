@@ -1,15 +1,4 @@
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Dict, Set, Tuple, Type, TypeVar
 
 from typing_extensions import get_args
 
@@ -21,20 +10,9 @@ if TYPE_CHECKING:
 T = TypeVar("T")
 
 
-# Each argument is assigned an action, which determines how it's populated from the CLI
-# string.
-#
-# There are 2 options:
-FieldAction = Union[
-    # Most standard fields: these are converted from strings from the CLI.
-    Callable[[str], Any],
-    # Sequence fields! This should be used whenever argparse's `nargs` field is set.
-    Callable[[List[str]], Any],
-]
-
-
 class FieldActionValueError(Exception):
-    """Exception raised when field actions fail; this is caused by"""
+    """Exception raised when field actions fail; this typically means that values from
+    the CLI are invalid."""
 
 
 DataclassType = TypeVar("DataclassType")
@@ -42,7 +20,7 @@ DataclassType = TypeVar("DataclassType")
 
 def construct_dataclass(
     cls: Type[DataclassType],
-    parser_definition: "_parsers.ParserDefinition",
+    parser_definition: "_parsers.ParserSpecification",
     value_from_arg: Dict[str, Any],
     field_name_prefix: str = "",
 ) -> Tuple[DataclassType, Set[str]]:
@@ -84,13 +62,12 @@ def construct_dataclass(
         )
 
         if prefixed_field_name in arg_from_prefixed_field_name:
-            # Callable actions. Used for tuples, lists, sets, etc.
+            # Standard arguments.
             arg = arg_from_prefixed_field_name[prefixed_field_name]
-            action = arg.field_action
             value = get_value_from_arg(prefixed_field_name)
             if value is not None:
                 try:
-                    value = action(value)
+                    value = arg.field_action(value)
                 except ValueError as e:
                     raise FieldActionValueError(
                         f"Parsing error for {arg.get_flag()}: {e.args[0]}"
@@ -132,7 +109,7 @@ def construct_dataclass(
                 assert chosen_cls is not None
                 value, consumed_keywords_child = construct_dataclass(
                     chosen_cls,
-                    parser_definition.subparsers.parsers[subparser_name],
+                    parser_definition.subparsers.parser_from_name[subparser_name],
                     value_from_arg,
                 )
                 consumed_keywords |= consumed_keywords_child

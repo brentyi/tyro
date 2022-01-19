@@ -10,12 +10,12 @@ T = TypeVar("T")
 
 
 @dataclasses.dataclass
-class ParserDefinition:
-    """Each parser contains a list of arguments and optionally a subparser."""
+class ParserSpecification:
+    """Each parser contains a list of arguments and optionally some subparsers."""
 
     args: List[_arguments.ArgumentDefinition]
     nested_dataclass_field_names: List[str]
-    subparsers: Optional["SubparsersDefinition"]
+    subparsers: Optional["SubparsersSpecification"]
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
@@ -33,13 +33,13 @@ class ParserDefinition:
 
         # Add subparsers.
         if self.subparsers is not None:
-            subparsers = parser.add_subparsers(
+            argparse_subparsers = parser.add_subparsers(
                 dest=_strings.SUBPARSER_DEST_FMT.format(name=self.subparsers.name),
                 description=self.subparsers.description,
                 required=self.subparsers.required,
             )
-            for name, subparser_def in self.subparsers.parsers.items():
-                subparser = subparsers.add_parser(name)
+            for name, subparser_def in self.subparsers.parser_from_name.items():
+                subparser = argparse_subparsers.add_parser(name)
                 subparser_def.apply(subparser)
 
     @staticmethod
@@ -48,7 +48,7 @@ class ParserDefinition:
         parent_dataclasses: Optional[Set[Type]],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Optional[T],
-    ) -> "ParserDefinition":
+    ) -> "ParserSpecification":
         """Create a parser definition from a dataclass."""
 
         if parent_dataclasses is None:
@@ -116,7 +116,7 @@ class ParserDefinition:
             )
             args.append(arg)
 
-        return ParserDefinition(
+        return ParserSpecification(
             args=args,
             nested_dataclass_field_names=nested_dataclass_field_names,
             subparsers=subparsers,
@@ -124,12 +124,12 @@ class ParserDefinition:
 
 
 @dataclasses.dataclass
-class SubparsersDefinition:
-    """Structure for containing subparsers. Each subparser is a parser with a name."""
+class SubparsersSpecification:
+    """Structure for defining subparsers. Each subparser is a parser with a name."""
 
     name: str
     description: Optional[str]
-    parsers: Dict[str, ParserDefinition]
+    parser_from_name: Dict[str, ParserSpecification]
     required: bool
 
 
@@ -146,7 +146,7 @@ class _NestedDataclassHandler:
 
     def handle_unions_over_dataclasses(
         self,
-    ) -> Optional["SubparsersDefinition"]:
+    ) -> Optional["SubparsersSpecification"]:
         """Handle unions over dataclasses, which are converted to subparsers.. Returns
         `None` if not applicable."""
 
@@ -171,21 +171,21 @@ class _NestedDataclassHandler:
             self.field.default == dataclasses.MISSING
         ), "Default dataclass value not yet supported for subparser definitions"
 
-        parsers: Dict[str, ParserDefinition] = {}
+        parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:
             subparser_name = _strings.subparser_name_from_type(option)
 
-            parsers[subparser_name] = ParserDefinition.from_dataclass(
+            parser_from_name[subparser_name] = ParserSpecification.from_dataclass(
                 option,
                 self.parent_dataclasses,
                 parent_type_from_typevar=self.type_from_typevar,
                 default_instance=None,
             )
 
-        subparsers = SubparsersDefinition(
+        subparsers = SubparsersSpecification(
             name=self.field.name,
             description=_docstrings.get_field_docstring(self.cls, self.field.name),
-            parsers=parsers,
+            parser_from_name=parser_from_name,
             required=(options == options_no_none),  # Not required if no options.
         )
 
@@ -211,7 +211,7 @@ class _NestedDataclassHandler:
         elif self.field.default is not dataclasses.MISSING:
             default = self.field.default
 
-        child_definition = ParserDefinition.from_dataclass(
+        child_definition = ParserSpecification.from_dataclass(
             field_type,
             self.parent_dataclasses,
             parent_type_from_typevar=self.type_from_typevar,
