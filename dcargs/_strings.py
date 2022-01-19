@@ -47,4 +47,4 @@ def bool_from_string(text: str) -> bool:
     elif text in ("false", "0"):
         return False
     else:
-        raise ValueError(f"Boolean value expected, but got {text}.")
+        raise ValueError(f"Boolean (True/False or 1/0) expected, but got {text}.")

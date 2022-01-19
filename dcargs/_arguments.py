@@ -18,14 +18,13 @@ from typing import (
 
 from typing_extensions import Final, Literal, _AnnotatedAlias, get_args, get_origin
 
-from . import _construction, _docstrings, _strings
-
-
-def _no_op_action(x):
-    return x
-
+from . import _docstrings, _strings
 
 T = TypeVar("T")
+
+
+def _no_op_action(x: T) -> T:
+    return x
 
 
 @dataclasses.dataclass(frozen=True)
@@ -42,7 +41,14 @@ class ArgumentDefinition:
 
     # Action that is called on parsed arguments. This handles conversions from strings
     # to our desired types.
-    field_action: _construction.FieldAction
+    #
+    # There are 2 options:
+    field_action: Union[
+        # Most standard fields: these are converted from strings from the CLI.
+        Callable[[str], Any],
+        # Sequence fields! This should be used whenever argparse's `nargs` field is set.
+        Callable[[List[str]], Any],
+    ]
 
     # Fields that will be populated initially.
     # Important: from here on out, all fields correspond 1:1 to inputs to argparse's
