@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Optional, Tuple
+from typing import Generic, List, Optional, Tuple, TypeVar
 
 import pytest
 
@@ -159,3 +159,48 @@ def test_tuple_helptext():
             dcargs.parse(TupleHelptext, args=["--help"])
     helptext = f.getvalue()
     assert "--x INT STR FLOAT\n" in helptext
+
+
+def test_generic_helptext():
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class GenericTupleHelptext(Generic[T]):
+        x: T
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(GenericTupleHelptext[int], args=["--help"])
+    helptext = f.getvalue()
+    assert "--x INT\n" in helptext
+
+
+def test_generic_tuple_helptext():
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class GenericTupleHelptext(Generic[T]):
+        x: Tuple[T, T, T]
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(GenericTupleHelptext[int], args=["--help"])
+    helptext = f.getvalue()
+    assert "--x INT INT INT\n" in helptext
+
+
+def test_generic_list_helptext():
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class GenericTupleHelptext(Generic[T]):
+        x: List[T]
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(GenericTupleHelptext[int], args=["--help"])
+    helptext = f.getvalue()
+    assert "--x INT [INT ...]\n" in helptext
