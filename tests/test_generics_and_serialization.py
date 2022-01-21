@@ -204,7 +204,7 @@ def test_generic_subparsers_in_container():
 
     @dataclasses.dataclass
     class Command(Generic[T]):
-        a: List[int]
+        a: List[T]
 
     T1 = TypeVar("T1")
     T2 = TypeVar("T2")
@@ -216,7 +216,9 @@ def test_generic_subparsers_in_container():
     parsed_instance = dcargs.parse(
         Subparser[Command[int], Command[float]], args="command-int --a 5 3".split(" ")
     )
-    assert parsed_instance == Subparser(Command([5, 3]))
+    assert parsed_instance == Subparser(Command([5, 3])) and isinstance(
+        parsed_instance.command.a[0], int
+    )
     _check_serialization_identity(
         Subparser[Command[int], Command[float]], parsed_instance
     )
@@ -224,7 +226,9 @@ def test_generic_subparsers_in_container():
     parsed_instance = dcargs.parse(
         Subparser[Command[int], Command[float]], args="command-float --a 7 2".split(" ")
     )
-    assert parsed_instance == Subparser(Command([7.0, 2.0]))
+    assert parsed_instance == Subparser(Command([7.0, 2.0])) and isinstance(
+        parsed_instance.command.a[0], float
+    )
     _check_serialization_identity(
         Subparser[Command[int], Command[float]], parsed_instance
     )
