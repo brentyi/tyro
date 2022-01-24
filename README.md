@@ -63,7 +63,11 @@ Returns:
 
 **Example usage**
 
+If you're familiar with dataclasses, writing a script with `dcargs.parse()` is
+simple!
+
 ```python
+# examples/simple.py
 import dataclasses
 
 import dcargs
@@ -81,7 +85,7 @@ if __name__ == "__main__":
     print(args)
 ```
 
-Which we can run to get:
+We can run this to get:
 
 ```
 $ python simple.py --help
@@ -101,7 +105,7 @@ $ python simple.py --field1 string --field2 4
 Args(field1='string', field2=4, flag=False)
 ```
 
-Note that we support significantly more complex structures and annotations,
+Note that we also support significantly more complex structures and annotations,
 including nested dataclasses, container types, generics, optional and default
 arguments, enums, and more. Examples of additional features can be found in the
 [examples](./examples/) and [unit tests](./tests/); a
@@ -111,9 +115,9 @@ arguments, enums, and more. Examples of additional features can be found in the
 
 Compared to other options, using dataclasses for configuration is:
 
-- **Low-effort.** Type annotations, docstrings, and default values for dataclass
+- **Low effort.** Type annotations, docstrings, and default values for dataclass
   fields can be used to automatically generate argument parsers.
-- **Non-invasive.** Dataclasses themselves are part of the standard Python
+- **Noninvasive.** Dataclasses themselves are part of the standard Python
   library; defining them requires no external dependencies and they can be
   easily instantiated without `dcargs` (for example, within quick experiments in
   Jupyter notebooks).
@@ -123,7 +127,7 @@ Compared to other options, using dataclasses for configuration is:
   of configurable fields across modules or source files. A model configuration
   dataclass, for example, can be co-located in its entirety with the model
   implementation and dropped into any experiment configuration dataclass with an
-  import --- this eliminates the redundancy you typically see with the argparse
+  import — this eliminates the redundancy you typically see with the argparse
   equivalent and makes the entire module easy to port across codebases.
 - **Strongly typed.** Unlike dynamic configuration namespaces produced by
   libraries like `argparse`, `YACS`, `abseil`, or `ml_collections`, dataclasses
@@ -142,7 +146,7 @@ dataclass serialization:
   <code><strong>dcargs.to_yaml</strong>(instance: T) -> str</code> convert
   between YAML-style strings and dataclass instances.
 
-The functions attempt to strike a balance between flexibility and robustness ---
+The functions attempt to strike a balance between flexibility and robustness —
 in contrast to naively dumping or loading dataclass instances (via pickle,
 PyYAML, etc), explicit type references enable custom tags that are robust
 against code reorganization and refactor, while a PyYAML backend enables
