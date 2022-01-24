@@ -6,39 +6,62 @@
 
 <!-- vim-markdown-toc GFM -->
 
-* [Simple example](#simple-example)
+* [Overview](#overview)
+* [Core interface](#core-interface)
+* [Motivation](#motivation)
+* [Serialization](#serialization)
 * [Feature list](#feature-list)
 * [Comparisons to alternative tools](#comparisons-to-alternative-tools)
-* [Nested example](#nested-example)
 
 <!-- vim-markdown-toc -->
 
-**dcargs** is a library for building dataclass-based argument parsers and
-configuration objects.
+### Overview
 
-The vision: we use (potentially nested or generic) dataclasses to define
-configuration objects that can be (a) populated via a CLI interface without
-additional effort and (b) robustly and human-readably serialized. The result is
-a statically typed replacement for not only `argparse`, but libraries likes
-[YACS](https://github.com/rbgirshick/yacs) and
-[ml_collections](https://github.com/google/ml_collections).
+**`dcargs`** is a library for defining argument parsers and configuration
+objects using standard Python dataclasses.
 
-We expose a one-function argument parsing API:
+Installation is simple:
 
-- <code><strong>dcargs.parse</strong>(cls: Type[T], \*, description:
-  Optional[str]) -> T</code> takes a dataclass type and instantiates it via an
-  argparse-style CLI interface.
+```
+pip install dcargs
+```
 
-And two functions for dataclass serialization:
+### Core interface
 
-- <code><strong>dcargs.from_yaml</strong>(cls: Type[T], stream: Union[str,
-  IO[str], bytes, IO[bytes]]) -> T</code> and
-  <code><strong>dcargs.to_yaml</strong>(instance: T) -> str</code> convert
-  between YAML-style strings and dataclass instances. In contrast to naively
-  dumping or loading (via pickle, PyYAML, etc), explicit type references enable
-  robustness against code reorganization and refactor.
+Our core interface is composed of a single function, which instantiates a
+dataclass from an automatically generated CLI interface:
 
-### Simple example
+<table><tr><td>
+<details>
+    <summary>
+    <code><strong>dcargs.parse</strong>(cls: Type[T], *, description:
+    Optional[str], args: Optional[Sequence[str]], default_instance: Optional[T]) -> T</code>
+    </summary>
+
+<!-- prettier-ignore-start -->
+<pre><code>Generate a CLI containing fields for a dataclass, and use it to create an
+instance of the class. Gracefully handles nested dataclasses, container types,
+generics, optional and default arguments, enums, and more.
+
+Args:
+    cls: Dataclass type to instantiate.
+
+Keyword Args:
+    description: Description text for the parser, displayed when the --help flag is
+        passed in. Mirrors argument from `argparse.ArgumentParser()`.
+    args: If set, parse arguments from a sequence of strings instead of the
+        commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
+    default_instance: An instance of `T` to use for default values. Helpful for overriding fields
+        in an existing instance; if not specified, the field defaults are used instead.
+
+Returns:
+    Instantiated dataclass.</code></pre>
+<!-- prettier-ignore-end -->
+
+</details>
+</td></tr></table>
+
+**Example usage**
 
 ```python
 import dataclasses
@@ -56,13 +79,12 @@ class Args:
 if __name__ == "__main__":
     args = dcargs.parse(Args)
     print(args)
-    print()
-    print(dcargs.to_yaml(args))
 ```
 
-Running `python simple.py --help` would print:
+Which we can run to get:
 
 ```
+$ python simple.py --help
 usage: simple.py [-h] --field1 STR --field2 INT [--flag]
 
 required arguments:
@@ -74,22 +96,67 @@ optional arguments:
   --flag        A boolean flag.
 ```
 
-And, from `python simple.py --field1 string --field2 4`:
-
 ```
+$ python simple.py --field1 string --field2 4
 Args(field1='string', field2=4, flag=False)
-
-!dataclass:Args
-field1: string
-field2: 4
-flag: false
 ```
+
+Note that we support significantly more complex structures and annotations,
+including nested dataclasses, container types, generics, optional and default
+arguments, enums, and more. Examples of additional features can be found in the
+[examples](./examples/) and [unit tests](./tests/); a
+[feature list](#feature-list) is also included below.
+
+### Motivation
+
+Compared to other options, using dataclasses for configuration is:
+
+- **Low-effort.** Type annotations, docstrings, and default values for dataclass
+  fields can be used to automatically generate argument parsers.
+- **Non-invasive.** Dataclasses themselves are part of the standard Python
+  library; defining them requires no external dependencies and they can be
+  easily instantiated without `dcargs` (for example, within quick experiments in
+  Jupyter notebooks).
+- **Modular.** Most approaches to configuration objects require a centralized
+  definition of all configurable fields. Hierarchically nesting dataclasses,
+  however, makes it easy to distribute definitions, defaults, and documentation
+  of configurable fields across modules or source files. A model configuration
+  dataclass, for example, can be co-located in its entirety with the model
+  implementation and dropped into any experiment configuration dataclass with an
+  import --- this eliminates the redundancy you typically see with the argparse
+  equivalent and makes the entire module easy to port across codebases.
+- **Strongly typed.** Unlike dynamic configuration namespaces produced by
+  libraries like `argparse`, `YACS`, `abseil`, or `ml_collections`, dataclasses
+  are robustly supported by static type checking tools (mypy, pyright, etc), as
+  well as IDEs and language servers. This means code can be checked
+  automatically for errors and typos, and IDE-assisted autocomplete, rename,
+  refactor, and jump operations work out-of-the-box.
+
+### Serialization
+
+As a secondary feature, we also introduce two functions for human-readable
+dataclass serialization:
+
+- <code><strong>dcargs.from_yaml</strong>(cls: Type[T], stream: Union[str,
+  IO[str], bytes, IO[bytes]]) -> T</code> and
+  <code><strong>dcargs.to_yaml</strong>(instance: T) -> str</code> convert
+  between YAML-style strings and dataclass instances.
+
+The functions attempt to strike a balance between flexibility and robustness ---
+in contrast to naively dumping or loading dataclass instances (via pickle,
+PyYAML, etc), explicit type references enable custom tags that are robust
+against code reorganization and refactor, while a PyYAML backend enables
+serialization of arbitrary Python objects.
+
+Particularly for cases where serialized dataclasses need to exit the Python
+ecosystem, [dacite](https://github.com/konradhalas/dacite) is also a good option
+(at the cost of a little bit of flexibility).
 
 ### Feature list
 
 The parse function supports a wide range of dataclass definitions, while
-automatically generating helptext from comments/docstrings. Some of the basic
-features are shown in the [nesting example below](#nested-example).
+automatically generating helptext from comments/docstrings. A selection of
+features are shown in the [examples](./examples/).
 
 Our unit tests cover many more complex type annotations, including classes
 containing:
@@ -125,22 +192,22 @@ containing:
 
 ### Comparisons to alternative tools
 
-There are several alternative libraries to the parsing functionality of
-`dcargs`; here's a rough summary of some of them:
+There are several alternatives for the parsing functionality of `dcargs`; here's
+a rough summary of some of them:
 
-|                                                                                                 | dataclasses | attrs | Nesting | Subparsers | Containers | Choices from literals                                    | Docstrings as helptext | Generics |
-| ----------------------------------------------------------------------------------------------- | ----------- | ----- | ------- | ---------- | ---------- | -------------------------------------------------------- | ---------------------- | -------- |
-| **dcargs**                                                                                      | ✓           |       | ✓       | ✓          | ✓          | ✓                                                        | ✓                      | ✓        |
-| **[datargs](https://github.com/roee30/datargs)**                                                | ✓           | ✓     |         | ✓          | ✓          | ✓                                                        |                        |          |
-| **[typed-argument-parser](https://github.com/swansonk14/typed-argument-parser)**                |             |       |         | ✓          | ✓          | ✓                                                        | ✓                      |          |
-| **[simple-parsing](https://github.com/lebrice/SimpleParsing)**                                  | ✓           |       | ✓       | ✓          | ✓          | [soon](https://github.com/lebrice/SimpleParsing/pull/86) | ✓                      |          |
-| **[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)**                          | ✓           |       |         |            |            |                                                          |                        |          |
-| **[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)**                      | ✓           |       |         |            |            |                                                          |                        |          |
-| **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                 | ✓           |       |         |            |            |                                                          |                        |          |
-| **[clout](https://github.com/python-clout/clout)**                                              |             | ✓     | ✓       |            |            |                                                          |                        |          |
-| **[hf_argparser](https://huggingface.co/transformers/_modules/transformers/hf_argparser.html)** | ✓           |       |         |            | ✓          |                                                          |                        |          |
+|                                                                                                              | dataclasses | attrs | Choices from literals                                    | Generics | Docstrings as helptext | Nesting | Subparsers | Containers |
+| ------------------------------------------------------------------------------------------------------------ | ----------- | ----- | -------------------------------------------------------- | -------- | ---------------------- | ------- | ---------- | ---------- |
+| **dcargs**                                                                                                   | ✓           |       | ✓                                                        | ✓        | ✓                      | ✓       | ✓          | ✓          |
+| **[datargs](https://github.com/roee30/datargs)**                                                             | ✓           | ✓     | ✓                                                        |          |                        |         | ✓          | ✓          |
+| **[typed-argument-parser](https://github.com/swansonk14/typed-argument-parser)**                             |             |       | ✓                                                        |          | ✓                      |         | ✓          | ✓          |
+| **[simple-parsing](https://github.com/lebrice/SimpleParsing)**                                               | ✓           |       | [soon](https://github.com/lebrice/SimpleParsing/pull/86) |          | ✓                      | ✓       | ✓          | ✓          |
+| **[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)**                                       | ✓           |       |                                                          |          |                        |         |            |            |
+| **[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)**                                   | ✓           |       |                                                          |          |                        |         |            |            |
+| **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                              | ✓           |       |                                                          |          |                        |         |            |            |
+| **[clout](https://github.com/python-clout/clout)**                                                           |             | ✓     |                                                          |          |                        | ✓       |            |            |
+| **[hf_argparser](https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py)** | ✓           |       |                                                          |          |                        |         |            | ✓          |
 
-Some other distinguishing factors that `dcargs` has put effort into:
+Some other distinguishing factors that we've put effort into:
 
 - Robust handling of forward references
 - Support for nested containers and generics
@@ -152,83 +219,3 @@ Some other distinguishing factors that `dcargs` has put effort into:
   dataclass definitions. (in contrast, some of the libaries above rely heavily
   on dataclass field metadata, or on the more extreme end inheritance+decorators
   to make parsing-specific dataclasses)
-
-### Nested example
-
-This code:
-
-```python
-"""An argument parsing example.
-
-Note that there are multiple possible ways to document dataclass attributes, all
-of which are supported by the automatic helptext generator.
-"""
-
-import dataclasses
-import enum
-
-import dcargs
-
-
-class OptimizerType(enum.Enum):
-    ADAM = enum.auto()
-    SGD = enum.auto()
-
-
-@dataclasses.dataclass
-class OptimizerConfig:
-    # Variant of SGD to use.
-    type: OptimizerType
-
-    # Learning rate to use.
-    learning_rate: float = 3e-4
-
-    # Coefficient for L2 regularization.
-    weight_decay: float = 1e-2
-
-
-@dataclasses.dataclass
-class ExperimentConfig:
-    experiment_name: str  # Experiment name to use.
-
-    optimizer: OptimizerConfig
-
-    seed: int = 0
-    """Random seed. This is helpful for making sure that our experiments are
-    all reproducible!"""
-
-
-if __name__ == "__main__":
-  config = dcargs.parse(ExperimentConfig, description=__doc__)
-  print(config)
-```
-
-Generates the following argument parser:
-
-```
-$ python example.py --help
-usage: example.py [-h] --experiment-name STR --optimizer.type {ADAM,SGD} [--optimizer.learning-rate FLOAT]
-                  [--optimizer.weight-decay FLOAT] [--seed INT]
-
-An argument parsing example.
-
-Note that there are multiple possible ways to document dataclass attributes, all
-of which are supported by the automatic helptext generator.
-
-optional arguments:
-  -h, --help            show this help message and exit
-  --optimizer.learning-rate FLOAT
-                        Learning rate to use. (default: 0.0003)
-  --optimizer.weight-decay FLOAT
-                        Coefficient for L2 regularization. (default: 0.01)
-  --seed INT            Random seed. This is helpful for making sure that our experiments are
-                        all reproducible! (default: 0)
-
-required arguments:
-  --experiment-name STR
-                        Experiment name to use.
-  --optimizer.type {ADAM,SGD}
-                        Variant of SGD to use.
-```
-
-Examples of additional features can be found in our [unit tests](./tests/).
