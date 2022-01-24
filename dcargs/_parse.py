@@ -11,15 +11,32 @@ def parse(
     *,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
+    default_instance: Optional[DataclassType] = None,
 ) -> DataclassType:
-    """Populate a dataclass via CLI args."""
+    """Generate a CLI containing fields for a dataclass, and use it to create an
+    instance of the class. Gracefully handles nested dataclasses, container types,
+    generics, optional and default arguments, enums, and more.
 
+    Args:
+        cls: Dataclass type to instantiate.
+
+    Keyword Args:
+        description: Description text for the parser, displayed when the --help flag is
+            passed in. Mirrors argument from `argparse.ArgumentParser()`.
+        args: If set, parse arguments from a sequence of strings instead of the
+            commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
+        default_instance: An instance of `T` to use for default values. Helpful for overriding fields
+            in an existing instance; if not specified, the field defaults are used instead.
+
+    Returns:
+        Instantiated dataclass.
+    """
     # Map a dataclass to the relevant CLI arguments + subparsers.
     parser_definition = _parsers.ParserSpecification.from_dataclass(
         cls,
         parent_dataclasses=set(),  # Used for recursive calls.
         parent_type_from_typevar=None,  # Used for recursive calls.
-        default_instance=None,  # Overrides for default values. This could also be exposed.
+        default_instance=default_instance,  # Overrides for default values.
     )
 
     # Parse using argparse!

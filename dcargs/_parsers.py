@@ -1,6 +1,6 @@
 import argparse
 import dataclasses
-from typing import Any, Dict, List, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import get_args, get_origin
 
@@ -33,10 +33,18 @@ class ParserSpecification:
 
         # Add subparsers.
         if self.subparsers is not None:
+            title = "subcommands"
+            metavar = "{" + ",".join(self.subparsers.parser_from_name.keys()) + "}"
+            if not self.subparsers.required:
+                title = "optional " + title
+                metavar = f"[{metavar}]"
+
             argparse_subparsers = parser.add_subparsers(
                 dest=_strings.SUBPARSER_DEST_FMT.format(name=self.subparsers.name),
                 description=self.subparsers.description,
                 required=self.subparsers.required,
+                title=title,
+                metavar=metavar,
             )
             for name, subparser_def in self.subparsers.parser_from_name.items():
                 subparser = argparse_subparsers.add_parser(name)
@@ -77,7 +85,7 @@ class ParserSpecification:
             if not field.init:
                 continue
 
-            field_parser = _NestedDataclassHandler(
+            nested_handler = _NestedDataclassHandler(
                 cls,
                 field,
                 type_from_typevar,
@@ -86,7 +94,7 @@ class ParserSpecification:
             )
 
             # Try to create subparsers from this field.
-            subparsers_out = field_parser.handle_unions_over_dataclasses()
+            subparsers_out = nested_handler.handle_unions_over_dataclasses()
             if subparsers_out is not None:
                 assert (
                     subparsers is None
@@ -96,9 +104,8 @@ class ParserSpecification:
                 continue
 
             # Try to interpret field as a nested dataclass.
-            nested_out = field_parser.handle_nested_dataclasses()
+            nested_out = nested_handler.handle_nested_dataclasses()
             if nested_out is not None:
-
                 child_args, child_nested_field_names = nested_out
                 args.extend(child_args)
                 nested_dataclass_field_names.extend(child_nested_field_names)
@@ -131,18 +138,19 @@ class SubparsersSpecification:
     description: Optional[str]
     parser_from_name: Dict[str, ParserSpecification]
     required: bool
+    default_instance: Optional[Any]
 
 
 @dataclasses.dataclass
-class _NestedDataclassHandler:
-    """Helper functions for handling nested dataclasses, which are converted to either
-    subparsers or prefixed fields."""
+class _NestedDataclassHandler(Generic[T]):
+    """Helper for handling nested dataclasses, which are converted to either subparsers
+    or prefixed fields."""
 
-    cls: Type
+    cls: Type[T]
     field: dataclasses.Field
     type_from_typevar: Dict[TypeVar, Type]
     parent_dataclasses: Set[Type]
-    default_instance: Any
+    default_instance: T
 
     def handle_unions_over_dataclasses(
         self,
@@ -155,21 +163,18 @@ class _NestedDataclassHandler:
             return None
 
         # We don't use sets here to retain order of subcommands.
-        options = map(
-            lambda x: x
-            if x not in self.type_from_typevar
-            else self.type_from_typevar[x],
-            get_args(self.field.type),
-        )
+        options = [
+            self.type_from_typevar.get(typ, typ) for typ in get_args(self.field.type)
+        ]
         options_no_none = [o for o in options if o != type(None)]  # noqa
         if len(options_no_none) < 2 or not all(
             map(_resolver.is_dataclass, options_no_none)
         ):
             return None
 
-        assert (
-            self.field.default == dataclasses.MISSING
-        ), "Default dataclass value not yet supported for subparser definitions"
+        # assert (
+        #     self.field.default == dataclasses.MISSING
+        # ), "Default dataclass value not yet supported for subparser definitions"
 
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:
@@ -182,14 +187,24 @@ class _NestedDataclassHandler:
                 default_instance=None,
             )
 
-        subparsers = SubparsersSpecification(
+        default_instance = None
+        if self.field.default is not dataclasses.MISSING:
+            default_instance = self.field.default
+        elif self.field.default_factory is not dataclasses.MISSING:
+            default_instance = self.field.default_factory()
+
+        return SubparsersSpecification(
             name=self.field.name,
+            # If we wanted, we could add information about the default instance
+            # automatically, as is done for normal fields. But for now we just rely on
+            # the user to include it in the docstring.
             description=_docstrings.get_field_docstring(self.cls, self.field.name),
             parser_from_name=parser_from_name,
-            required=(options == options_no_none),  # Not required if no options.
+            # Required if: type hint is not Optional[], or a default instance is
+            # provided.
+            required=(options == options_no_none) and default_instance is None,
+            default_instance=default_instance,
         )
-
-        return subparsers
 
     def handle_nested_dataclasses(
         self,

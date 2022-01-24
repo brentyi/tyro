@@ -108,6 +108,14 @@ def test_default():
     assert dcargs.parse(A, args=[]) == A()
 
 
+def test_default_factory():
+    @dataclasses.dataclass
+    class A:
+        x: int = dataclasses.field(default_factory=lambda: 5)
+
+    assert dcargs.parse(A, args=[]) == A()
+
+
 def test_optional():
     @dataclasses.dataclass
     class A:
@@ -267,9 +275,45 @@ def test_subparser():
     ) == Subparser(x=1, bc=SMTPServer(z=3))
 
     with pytest.raises(SystemExit):
-        dcargs.parse(Subparser, args=["--x", "1", "b", "--z", "3"])
+        # Missing subcommand.
+        dcargs.parse(Subparser, args=["--x", "1"])
     with pytest.raises(SystemExit):
-        dcargs.parse(Subparser, args=["--x", "1", "c", "--y", "3"])
+        # Wrong field.
+        dcargs.parse(Subparser, args=["--x", "1", "http-server", "--z", "3"])
+    with pytest.raises(SystemExit):
+        # Wrong field.
+        dcargs.parse(Subparser, args=["--x", "1", "smtp-server", "--y", "3"])
+
+
+def test_subparser_with_default():
+    @dataclasses.dataclass
+    class DefaultHTTPServer:
+        y: int
+
+    @dataclasses.dataclass
+    class DefaultSMTPServer:
+        z: int
+
+    @dataclasses.dataclass
+    class DefaultSubparser:
+        x: int
+        bc: Union[DefaultHTTPServer, DefaultSMTPServer] = DefaultHTTPServer(5)
+
+    assert (
+        dcargs.parse(
+            DefaultSubparser, args=["--x", "1", "default-http-server", "--y", "5"]
+        )
+        == dcargs.parse(DefaultSubparser, args=["--x", "1"])
+        == DefaultSubparser(x=1, bc=DefaultHTTPServer(y=5))
+    )
+    assert dcargs.parse(
+        DefaultSubparser, args=["--x", "1", "default-smtp-server", "--z", "3"]
+    ) == DefaultSubparser(x=1, bc=DefaultSMTPServer(z=3))
+
+    with pytest.raises(SystemExit):
+        dcargs.parse(DefaultSubparser, args=["--x", "1", "b", "--z", "3"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(DefaultSubparser, args=["--x", "1", "c", "--y", "3"])
 
 
 def test_optional_subparser():
@@ -297,9 +341,15 @@ def test_optional_subparser():
     )
 
     with pytest.raises(SystemExit):
-        dcargs.parse(OptionalSubparser, args=["--x", "1", "B", "--z", "3"])
+        # Wrong field.
+        dcargs.parse(
+            OptionalSubparser, args=["--x", "1", "optional-http-server", "--z", "3"]
+        )
     with pytest.raises(SystemExit):
-        dcargs.parse(OptionalSubparser, args=["--x", "1", "C", "--y", "3"])
+        # Wrong field.
+        dcargs.parse(
+            OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--y", "3"]
+        )
 
 
 def test_parse_empty_description():

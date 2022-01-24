@@ -93,9 +93,13 @@ def construct_dataclass(
             subparser_name = get_value_from_arg(subparser_dest)
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we do either
-                # Optional[Union[A, B, ...]] or Union[A, B, None].
-                assert type(None) in get_args(field_type)
-                value = None
+                # Optional[Union[A, B, ...]] or Union[A, B, None], or have a
+                # default/default_factory set.
+                assert (
+                    type(None) in get_args(field_type)
+                    or parser_definition.subparsers.default_instance is not None
+                )
+                value = parser_definition.subparsers.default_instance
             else:
                 options = map(
                     lambda x: x if x not in type_from_typevar else type_from_typevar[x],
