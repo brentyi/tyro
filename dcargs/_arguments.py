@@ -378,7 +378,8 @@ def _get_argument_transforms(
             return dataclasses.replace(
                 arg,
                 type=type(next(iter(choices))),
-                choices=set(map(str, choices)),
+                # We use a list and not a set to preserve ordering.
+                choices=list(map(str, choices)),
             )
         else:
             return arg

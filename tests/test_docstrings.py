@@ -4,6 +4,7 @@ import io
 from typing import Generic, List, Optional, Tuple, TypeVar
 
 import pytest
+from typing_extensions import Literal
 
 import dcargs
 
@@ -204,3 +205,31 @@ def test_generic_list_helptext():
             dcargs.parse(GenericTupleHelptext[int], args=["--help"])
     helptext = f.getvalue()
     assert "--x INT [INT ...]\n" in helptext
+
+
+def test_literal_helptext():
+    @dataclasses.dataclass
+    class LiteralHelptext:
+        x: Literal[1, 2, 3]
+        """A number."""
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(LiteralHelptext, args=["--help"])
+    helptext = f.getvalue()
+    assert "--x {1,2,3}  A number.\n" in helptext
+
+
+def test_optional_literal_helptext():
+    @dataclasses.dataclass
+    class OptionalLiteralHelptext:
+        x: Optional[Literal[1, 2, 3]]
+        """A number."""
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(OptionalLiteralHelptext, args=["--help"])
+    helptext = f.getvalue()
+    assert "--x {1,2,3}  A number. (default: None)\n" in helptext
