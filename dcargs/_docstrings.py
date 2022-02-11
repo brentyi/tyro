@@ -10,21 +10,21 @@ from typing_extensions import get_origin
 from . import _strings
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class _Token:
     token_type: int
     content: str
     line_number: int
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class _FieldData:
     index: int
     line_number: int
     prev_field_line_number: int
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class _ClassTokenization:
     tokens: List[_Token]
     tokens_from_line: Dict[int, List[_Token]]

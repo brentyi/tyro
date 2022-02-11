@@ -17,22 +17,19 @@ def test_basic():
         f: float
         p: pathlib.Path
 
-    assert (
-        dcargs.parse(
-            ManyTypes,
-            args=[
-                "--i",
-                "5",
-                "--s",
-                "5",
-                "--f",
-                "5",
-                "--p",
-                "~",
-            ],
-        )
-        == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
-    )
+    assert dcargs.parse(
+        ManyTypes,
+        args=[
+            "--i",
+            "5",
+            "--s",
+            "5",
+            "--f",
+            "5",
+            "--p",
+            "~",
+        ],
+    ) == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
 
 def test_required():

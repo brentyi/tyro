@@ -9,7 +9,7 @@ from . import _arguments, _docstrings, _resolver, _strings
 T = TypeVar("T")
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
@@ -130,7 +130,7 @@ class ParserSpecification:
         )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
@@ -141,7 +141,7 @@ class SubparsersSpecification:
     default_instance: Optional[Any]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class _NestedDataclassHandler(Generic[T]):
     """Helper for handling nested dataclasses, which are converted to either subparsers
     or prefixed fields."""
