@@ -372,12 +372,20 @@ def _get_argument_transforms(
         """For literal types, set choices."""
         if get_origin(arg.type) is Literal:
             choices = get_args(arg.type)
-            assert (
-                len(set(map(type, choices))) == 1
+            typ = type(next(iter(choices)))
+
+            assert typ not in (
+                list,
+                tuple,
+                set,
+            ), "Containers not supported in literals."
+            assert all(
+                map(lambda c: type(c) == typ, choices)
             ), "All choices in literal must have the same type!"
+
             return dataclasses.replace(
                 arg,
-                type=type(next(iter(choices))),
+                type=typ,
                 # We use a list and not a set to preserve ordering.
                 choices=list(map(str, choices)),
             )
@@ -388,9 +396,13 @@ def _get_argument_transforms(
         """For enums, use string representations."""
         if isinstance(arg.type, type) and issubclass(arg.type, enum.Enum):
             if arg.choices is None:
-                choices = set(x.name for x in arg.type)
+                # We use a list and not a set to preserve ordering.
+                choices = list(x.name for x in arg.type)
             else:
-                choices = set(x.name for x in arg.choices)
+                # `arg.choices` is set; this occurs when we have enums in a literal
+                # type.
+                choices = list(x.name for x in arg.choices)
+            assert len(choices) == len(set(choices))
 
             return dataclasses.replace(
                 arg,
