@@ -51,12 +51,16 @@ def test_flag():
     with pytest.raises(SystemExit):
         dcargs.parse(A, args=[])
 
-    assert dcargs.parse(A, args=["--x", "1"]) == A(True)
-    assert dcargs.parse(A, args=["--x", "true"]) == A(True)
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "1"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "true"])
     assert dcargs.parse(A, args=["--x", "True"]) == A(True)
 
-    assert dcargs.parse(A, args=["--x", "0"]) == A(False)
-    assert dcargs.parse(A, args=["--x", "false"]) == A(False)
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "0"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "false"])
     assert dcargs.parse(A, args=["--x", "False"]) == A(False)
 
 
@@ -149,6 +153,22 @@ def test_literal():
     assert dcargs.parse(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):
         assert dcargs.parse(A, args=["--x", "3"])
+
+
+def test_literal_enum():
+    class Color(enum.Enum):
+        RED = enum.auto()
+        GREEN = enum.auto()
+        BLUE = enum.auto()
+
+    @dataclasses.dataclass
+    class A:
+        x: Literal[Color.RED, Color.GREEN]
+
+    assert dcargs.parse(A, args=["--x", "RED"]) == A(x=Color.RED)
+    assert dcargs.parse(A, args=["--x", "GREEN"]) == A(x=Color.GREEN)
+    with pytest.raises(SystemExit):
+        assert dcargs.parse(A, args=["--x", "BLUE"])
 
 
 def test_optional_literal():

@@ -41,10 +41,9 @@ def subparser_name_from_type(cls: Type) -> str:
 
 
 def bool_from_string(text: str) -> bool:
-    text = text.lower()
-    if text in ("true", "1"):
+    if text == "True":
         return True
-    elif text in ("false", "0"):
+    elif text == "False":
         return False
     else:
-        raise ValueError(f"Boolean (True/False or 1/0) expected, but got {text}.")
+        raise ValueError(f"Boolean (True/False) expected, but got {text}.")

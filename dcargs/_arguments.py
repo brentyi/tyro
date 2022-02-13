@@ -107,6 +107,8 @@ class ArgumentDefinition:
         # and multi-type tuples.
         if "type" in kwargs:
             kwargs["type"] = str
+        if "choices" in kwargs:
+            kwargs["choices"] = list(map(str, kwargs["choices"]))
 
         kwargs.pop("field")
         kwargs.pop("parent_class")
@@ -243,36 +245,20 @@ def _get_argument_transforms(
 
         return dataclasses.replace(arg, default=default, required=required)
 
-    def transform_bool_flags(arg: ArgumentDefinition) -> ArgumentDefinition:
-        """For booleans, we use a `store_true` action."""
-        if arg.type != bool:
+    def transform_booleans(arg: ArgumentDefinition) -> ArgumentDefinition:
+        """Set choices or actions for booleans."""
+        if arg.type != bool or arg.choices is not None:
             return arg
 
-        # Populate helptext for boolean flags => don't show default value, which can be
-        # confusing.
-        docstring_help = _docstrings.get_field_docstring(
-            arg.parent_class, arg.field.name
-        )
-        if docstring_help is not None:
-            # Note that the percent symbol needs some extra handling in argparse.
-            # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-            docstring_help = docstring_help.replace("%", "%%")
-            arg = dataclasses.replace(
-                arg,
-                help=docstring_help,
-            )
-        else:
-            arg = dataclasses.replace(
-                arg,
-                help="",
-            )
-
         if arg.default is None:
+            # If no default is passed in, the user must explicitly choose between `True`
+            # and `False`.
             return dataclasses.replace(
                 arg,
-                metavar="{True,False}",
+                choices=(True, False),
             )
         elif arg.default is False:
+            # Default `False` => --flag passed in flips to `True`.
             return dataclasses.replace(
                 arg,
                 action="store_true",
@@ -280,6 +266,7 @@ def _get_argument_transforms(
                 field_action=lambda x: x,  # argparse will directly give us a bool!
             )
         elif arg.default is True:
+            # Default `True` => --no-flag passed in flips to `False`.
             return dataclasses.replace(
                 arg,
                 dest=arg.name,
@@ -386,8 +373,7 @@ def _get_argument_transforms(
             return dataclasses.replace(
                 arg,
                 type=typ,
-                # We use a list and not a set to preserve ordering.
-                choices=list(map(str, choices)),
+                choices=choices,
             )
         else:
             return arg
@@ -427,7 +413,10 @@ def _get_argument_transforms(
                 docstring_help = docstring_help.replace("%", "%%")
                 help_parts.append(docstring_help)
 
-            if arg.default is not None and hasattr(arg.default, "name"):
+            if arg.action is not None:
+                # Don't show defaults for boolean flags.
+                assert arg.action in ("store_true", "store_false")
+            elif arg.default is not None and hasattr(arg.default, "name"):
                 # Special case for enums.
                 help_parts.append(f"(default: {arg.default.name})")
             elif not arg.required:
