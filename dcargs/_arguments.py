@@ -416,7 +416,7 @@ def _get_argument_transforms(
             if arg.action is not None:
                 # Don't show defaults for boolean flags.
                 assert arg.action in ("store_true", "store_false")
-            elif arg.default is not None and hasattr(arg.default, "name"):
+            elif arg.default is not None and isinstance(arg.default, enum.Enum):
                 # Special case for enums.
                 help_parts.append(f"(default: {arg.default.name})")
             elif not arg.required:
