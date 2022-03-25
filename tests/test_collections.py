@@ -18,6 +18,17 @@ def test_tuples_fixed():
         dcargs.parse(A, args=[])
 
 
+def test_tuples_with_default():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[int, int, int] = (0, 1, 2)
+
+    assert dcargs.parse(A, args=[]) == A(x=(0, 1, 2))
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+
+
 def test_tuples_fixed_multitype():
     @dataclasses.dataclass
     class A:
@@ -105,6 +116,15 @@ def test_lists():
         dcargs.parse(A, args=[])
 
 
+def test_lists_with_default():
+    @dataclasses.dataclass
+    class A:
+        x: List[int] = dataclasses.field(default_factory=[0, 1, 2].copy)
+
+    assert dcargs.parse(A, args=[]) == A(x=[0, 1, 2])
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+
+
 def test_lists_bool():
     @dataclasses.dataclass
     class A:
@@ -129,6 +149,17 @@ def test_sets():
         dcargs.parse(A, args=["--x"])
     with pytest.raises(SystemExit):
         dcargs.parse(A, args=[])
+
+
+def test_sets_with_default():
+    @dataclasses.dataclass
+    class A:
+        x: Set[int] = dataclasses.field(default_factory={0, 1, 2}.copy)
+
+    assert dcargs.parse(A, args=[]) == A(x={0, 1, 2})
+    assert dcargs.parse(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
 
 
 def test_optional_sequences():
