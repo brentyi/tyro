@@ -188,8 +188,10 @@ containing:
   - Nested combinations of the above: `Optional[Literal[T]]`,
     `Final[Optional[Sequence[T]]]`, etc
 - Nested dataclasses
-  - Simple nesting (see `OptimizerConfig` example below)
-  - Unions over nested dataclasses (subparsers)
+  - Simple nesting (see `OptimizerConfig` in
+    [./examples/example.py](./examples/example.py))
+  - Unions over nested dataclasses (subparsers, see
+    [./examples/subparsers.py](./examples/subparsers.py))
   - Optional unions over nested dataclasses (optional subparsers)
 - Generic dataclasses (including nested generics, see
   [./examples/generics.py](./examples/generics.py))
@@ -223,3 +225,6 @@ Some other distinguishing factors that we've put effort into:
   dataclass definitions. (in contrast, some of the libaries above rely heavily
   on dataclass field metadata, or on the more extreme end inheritance+decorators
   to make parsing-specific dataclasses)
+- POSIX compatibility. For example, field names with underscores
+  (`argument_name`) are parsed with hyphens (`--argument-name`).
+  ([why](https://stackoverflow.com/questions/1253679/should-command-line-options-in-posix-style-operating-systems-be-underscore-style))
