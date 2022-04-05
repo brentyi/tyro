@@ -1,7 +1,7 @@
 import argparse
 from typing import Optional, Sequence, Type, TypeVar
 
-from . import _construction, _parsers, _strings
+from . import _construction, _docstrings, _parsers, _strings
 
 DataclassType = TypeVar("DataclassType")
 
@@ -22,7 +22,8 @@ def parse(
 
     Keyword Args:
         description: Description text for the parser, displayed when the --help flag is
-            passed in. Mirrors argument from `argparse.ArgumentParser()`.
+            passed in. If not specified, the dataclass docstring is used. Mirrors argument
+            from `argparse.ArgumentParser()`.
         args: If set, parse arguments from a sequence of strings instead of the
             commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
         default_instance: An instance of `T` to use for default values. Helpful for overriding fields
@@ -39,9 +40,12 @@ def parse(
         default_instance=default_instance,  # Overrides for default values.
     )
 
+    if description is None:
+        description = _docstrings.get_dataclass_docstring(cls)
+
     # Parse using argparse!
     parser = argparse.ArgumentParser(
-        description="" if description is None else _strings.dedent(description),
+        description=_strings.dedent(description),
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_definition.apply(parser)
