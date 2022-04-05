@@ -48,7 +48,8 @@ Args:
 
 Keyword Args:
     description: Description text for the parser, displayed when the --help flag is
-        passed in. Mirrors argument from `argparse.ArgumentParser()`.
+        passed in. If not specified, the dataclass docstring is used. Mirrors argument
+        from `argparse.ArgumentParser()`.
     args: If set, parse arguments from a sequence of strings instead of the
         commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
     default_instance: An instance of `T` to use for default values. Helpful for overriding fields

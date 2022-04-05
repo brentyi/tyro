@@ -8,16 +8,26 @@ import dcargs
 
 @dataclasses.dataclass
 class Args:
+    """Example of a version control-style subcommand interface."""
+
+    # Subcommand to use; we support "checkout" and "commit".
+    #
+    # If desired, we also support default values for subparsers, eg
+    #     command: Union[Checkout, Commit] = Checkout("main")
     command: Union[Checkout, Commit]
 
 
 @dataclasses.dataclass
 class Checkout:
+    """Checkout a branch."""
+
     branch: str
 
 
 @dataclasses.dataclass
 class Commit:
+    """Commit changes."""
+
     message: str
     all: bool = False
 

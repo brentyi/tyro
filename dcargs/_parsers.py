@@ -13,6 +13,7 @@ T = TypeVar("T")
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
+    cls: Type
     args: List[_arguments.ArgumentDefinition]
     nested_dataclass_field_names: List[str]
     subparsers: Optional["SubparsersSpecification"]
@@ -47,7 +48,10 @@ class ParserSpecification:
                 metavar=metavar,
             )
             for name, subparser_def in self.subparsers.parser_from_name.items():
-                subparser = argparse_subparsers.add_parser(name)
+                subparser = argparse_subparsers.add_parser(
+                    name,
+                    description=_docstrings.get_dataclass_docstring(subparser_def.cls),
+                )
                 subparser_def.apply(subparser)
 
     @staticmethod
@@ -124,6 +128,7 @@ class ParserSpecification:
             args.append(arg)
 
         return ParserSpecification(
+            cls=cls,
             args=args,
             nested_dataclass_field_names=nested_dataclass_field_names,
             subparsers=subparsers,
@@ -171,10 +176,6 @@ class _NestedDataclassHandler(Generic[T]):
             map(_resolver.is_dataclass, options_no_none)
         ):
             return None
-
-        # assert (
-        #     self.field.default == dataclasses.MISSING
-        # ), "Default dataclass value not yet supported for subparser definitions"
 
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:

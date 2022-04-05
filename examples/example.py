@@ -29,6 +29,10 @@ class OptimizerConfig:
 
 @dataclasses.dataclass
 class ExperimentConfig:
+    """A nested experiment configuration. Note that the argument parser description is
+    pulled from this docstring by default, but can also be overrided with
+    `dcargs.parse`'s `description=` flag."""
+
     experiment_name: str  # Experiment name to use.
 
     optimizer: OptimizerConfig
@@ -39,6 +43,6 @@ class ExperimentConfig:
 
 
 if __name__ == "__main__":
-    config = dcargs.parse(ExperimentConfig, description=__doc__)
+    config = dcargs.parse(ExperimentConfig)
     print(config)
     print(dcargs.to_yaml(config))
