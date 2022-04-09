@@ -14,6 +14,8 @@ import dcargs
 def test_helptext():
     @dataclasses.dataclass
     class Helptext:
+        """This docstring should be printed as a description."""
+
         x: int  # Documentation 1
 
         # Documentation 2
@@ -27,6 +29,7 @@ def test_helptext():
         with contextlib.redirect_stdout(f):
             dcargs.parse(Helptext, args=["--help"])
     helptext = f.getvalue()
+    assert Helptext.__doc__ in helptext
     assert "--x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext
@@ -56,6 +59,8 @@ def test_multiline_helptext():
     @dataclasses.dataclass
     class HelptextMultiline:
         x: int  # Documentation 1
+
+        # This comment should be ignored!
 
         # Documentation 2
         # Next line of documentation 2

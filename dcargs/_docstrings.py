@@ -160,14 +160,20 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     # Check for comment on the line before the field.
     comment_index = field_data.index
     comments: List[str] = []
+    current_line_number = field_data.line_number
     while True:
         comment_index -= 1
         comment_token = tokenization.tokens[comment_index]
         if (
+            # Looking for comments!
             comment_token.token_type == tokenize.COMMENT
+            # Comments should come after the previous field.
             and comment_token.line_number > field_data.prev_field_line_number
+            # And be contiguous.
+            and comment_token.line_number == current_line_number - 1
         ):
             assert comment_token.content.startswith("#")
+            current_line_number -= 1
             comments.append(comment_token.content[1:].strip())
         else:
             break
