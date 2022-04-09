@@ -314,7 +314,9 @@ def test_subparser_with_default():
     @dataclasses.dataclass
     class DefaultSubparser:
         x: int
-        bc: Union[DefaultHTTPServer, DefaultSMTPServer] = DefaultHTTPServer(5)
+        bc: Union[DefaultHTTPServer, DefaultSMTPServer] = dataclasses.field(
+            default_factory=lambda: DefaultHTTPServer(5)
+        )
 
     assert (
         dcargs.parse(

@@ -81,8 +81,8 @@ def test_multiline_helptext():
         in helptext
     )
     assert (
-        "  --z INT     Documentation 3\n              Next line of documentation 3 (default: 3)\n"
-        in helptext
+        "  --z INT     Documentation 3\n              Next line of documentation 3"
+        " (default: 3)\n" in helptext
     )
 
 

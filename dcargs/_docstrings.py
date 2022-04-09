@@ -102,10 +102,10 @@ def get_class_tokenization_with_field(
             found_field = True
             break
 
-    assert (
-        found_field
-    ), "Docstring parsing error -- this usually means that there are multiple \
-    dataclasses in the same file with the same name but different scopes."
+    assert found_field, (
+        "Docstring parsing error -- this usually means that there are multiple"
+        " dataclasses in the same file with the same name but different scopes."
+    )
 
     return tokenization
 

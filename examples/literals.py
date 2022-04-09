@@ -11,7 +11,7 @@ class Color(enum.Enum):
     BLUE = enum.auto()
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Args:
     enum: Color
     restricted_enum: Literal[Color.RED, Color.GREEN]

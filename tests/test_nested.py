@@ -39,11 +39,11 @@ def test_nested_default():
 
 
 def test_default_nested():
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class B:
         y: int = 3
 
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class Nested:
         x: int
         b: B = B(y=5)
@@ -55,15 +55,15 @@ def test_default_nested():
 
 
 def test_double_default_nested():
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class Child:
         y: int
 
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class Parent:
         c: Child
 
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class Grandparent:
         x: int
         b: Parent = Parent(Child(y=5))
@@ -74,6 +74,22 @@ def test_double_default_nested():
     assert dcargs.parse(Grandparent, args=["--x", "1"]) == Grandparent(
         x=1, b=Parent(Child(y=5))
     )
+
+
+def test_default_factory_nested():
+    @dataclasses.dataclass
+    class B:
+        y: int = 3
+
+    @dataclasses.dataclass
+    class Nested:
+        x: int
+        b: B = dataclasses.field(default_factory=lambda: B(y=5))
+
+    assert dcargs.parse(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(
+        x=1, b=B(y=3)
+    )
+    assert dcargs.parse(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
 # TODO: implement this!
