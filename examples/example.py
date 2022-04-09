@@ -15,7 +15,7 @@ class OptimizerType(enum.Enum):
     SGD = enum.auto()
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class OptimizerConfig:
     # Variant of SGD to use.
     type: OptimizerType
@@ -27,7 +27,7 @@ class OptimizerConfig:
     weight_decay: float = 1e-2
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class ExperimentConfig:
     """A nested experiment configuration. Note that the argument parser description is
     pulled from this docstring by default, but can also be overrided with

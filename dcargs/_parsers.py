@@ -1,5 +1,6 @@
 import argparse
 import dataclasses
+import warnings
 from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar, Union
 
 from typing_extensions import get_args, get_origin
@@ -191,6 +192,7 @@ class _NestedDataclassHandler(Generic[T]):
         default_instance = None
         if self.field.default is not dataclasses.MISSING:
             default_instance = self.field.default
+            self._ensure_dataclass_used_as_default_is_frozen(default_instance)
         elif self.field.default_factory is not dataclasses.MISSING:
             default_instance = self.field.default_factory()
 
@@ -221,17 +223,20 @@ class _NestedDataclassHandler(Generic[T]):
             return None
 
         # Add arguments for nested dataclasses.
-        default = None
+        default_instance = None
         if self.default_instance is not None:
-            default = getattr(self.default_instance, self.field.name)
+            default_instance = getattr(self.default_instance, self.field.name)
         elif self.field.default is not dataclasses.MISSING:
-            default = self.field.default
+            default_instance = self.field.default
+            self._ensure_dataclass_used_as_default_is_frozen(default_instance)
+        elif self.field.default_factory is not dataclasses.MISSING:
+            default_instance = self.field.default_factory()
 
         child_definition = ParserSpecification.from_dataclass(
             field_type,
             self.parent_dataclasses,
             parent_type_from_typevar=self.type_from_typevar,
-            default_instance=default,
+            default_instance=default_instance,
         )
 
         child_args = child_definition.args
@@ -249,3 +254,17 @@ class _NestedDataclassHandler(Generic[T]):
         ]
 
         return child_args, nested_dataclass_field_names
+
+    def _ensure_dataclass_used_as_default_is_frozen(
+        self, default_instance: Any
+    ) -> None:
+        """Ensure that a dataclass type used directly as a default value is marked as
+        frozen."""
+        assert dataclasses.is_dataclass(default_instance)
+        cls = type(default_instance)
+        if not cls.__dataclass_params__.frozen:
+            warnings.warn(
+                f"Mutable type {cls} is used as a default value for {self.field.name}. "
+                "This is dangerous! Consider using"
+                f" `dataclasses.field(default_factory=...)` or marking {cls} as frozen."
+            )

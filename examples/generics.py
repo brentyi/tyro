@@ -6,7 +6,7 @@ import dcargs
 ScalarType = TypeVar("ScalarType")
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Point3(Generic[ScalarType]):
     x: ScalarType
     y: ScalarType
@@ -14,14 +14,14 @@ class Point3(Generic[ScalarType]):
     frame_id: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Triangle(Generic[ScalarType]):
     a: Point3[ScalarType]
     b: Point3[ScalarType]
     c: Point3[ScalarType]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Args:
     point_continuous: Point3[float]
     point_discrete: Point3[int]

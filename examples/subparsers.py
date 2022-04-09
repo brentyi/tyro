@@ -6,7 +6,7 @@ from typing import Union
 import dcargs
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Args:
     """Example of a version control-style subcommand interface."""
 
@@ -17,14 +17,14 @@ class Args:
     command: Union[Checkout, Commit]
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Checkout:
     """Checkout a branch."""
 
     branch: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Commit:
     """Commit changes."""
 
