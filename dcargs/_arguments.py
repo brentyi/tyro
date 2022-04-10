@@ -128,7 +128,7 @@ class ArgumentDefinition:
         parent_class: Type,
         field: dataclasses.Field,
         type_from_typevar: Dict[TypeVar, Type],
-        default_override: Optional[Any],
+        default: Optional[Any],
     ) -> "ArgumentDefinition":
         """Create an argument definition from a field. Also returns a field action, which
         specifies special instructions for reconstruction."""
@@ -148,7 +148,7 @@ class ArgumentDefinition:
             field_action=default_field_action,
             name=field.name,
             type=field.type,
-            default=default_override,
+            default=default,
         )
 
         # Propagate argument through transforms until stable.
@@ -225,25 +225,13 @@ def _get_argument_transforms(
         else:
             return arg
 
-    def transform_populate_defaults(arg: ArgumentDefinition) -> ArgumentDefinition:
-        """Populate default values."""
-        if arg.default is not None:
-            # Skip if another handler has already populated the default.
+    def transform_required(arg: ArgumentDefinition) -> ArgumentDefinition:
+        """Set `required=True` if a default value is set."""
+
+        # Don't set if default is set, or if required flag is already set.
+        if arg.default is not None or arg.required is not None:
             return arg
-
-        default = None
-        required = True
-        if arg.field.default is not dataclasses.MISSING:
-            default = arg.field.default
-            required = False
-        elif arg.field.default_factory is not dataclasses.MISSING:  # type: ignore
-            default = arg.field.default_factory()  # type: ignore
-            required = False
-
-        if arg.required is not None:
-            required = arg.required
-
-        return dataclasses.replace(arg, default=default, required=required)
+        return dataclasses.replace(arg, required=True)
 
     def transform_booleans(arg: ArgumentDefinition) -> ArgumentDefinition:
         """Set choices or actions for booleans."""
