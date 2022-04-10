@@ -33,5 +33,6 @@ class Commit:
 
 
 if __name__ == "__main__":
-    args = dcargs.parse(Args)
+    # args = dcargs.parse(Args)
+    args = dcargs.parse(Args, default_instance=Args(command=Checkout(branch="main")))
     print(args)

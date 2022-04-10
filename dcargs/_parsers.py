@@ -10,6 +10,44 @@ from . import _arguments, _docstrings, _resolver, _strings
 T = TypeVar("T")
 
 
+def _ensure_dataclass_instance_used_as_default_is_frozen(
+    field: dataclasses.Field, default_instance: Any
+) -> None:
+    """Ensure that a dataclass type used directly as a default value is marked as
+    frozen."""
+    assert dataclasses.is_dataclass(default_instance)
+    cls = type(default_instance)
+    if not cls.__dataclass_params__.frozen:
+        warnings.warn(
+            f"Mutable type {cls} is used as a default value for `{field.name}`. This is"
+            " dangerous! Consider using `dataclasses.field(default_factory=...)` or"
+            f" marking {cls} as frozen."
+        )
+
+
+def _get_field_default(
+    field: dataclasses.Field, parent_default_instance: Any
+) -> Optional[Any]:
+    """Helper for getting the default instance for a field."""
+    field_default_instance = None
+    if field.default is not dataclasses.MISSING:
+        # Populate default from usual default value, or
+        # `dataclasses.field(default=...)`.
+        field_default_instance = field.default
+        if dataclasses.is_dataclass(field_default_instance):
+            _ensure_dataclass_instance_used_as_default_is_frozen(
+                field, field_default_instance
+            )
+    elif field.default_factory is not dataclasses.MISSING:
+        # Populate default from `dataclasses.field(default_factory=...)`.
+        field_default_instance = field.default_factory()
+
+    if parent_default_instance is not None:
+        # Populate default from explicit `default_instance` in `dcargs.parse()`.
+        field_default_instance = getattr(parent_default_instance, field.name)
+    return field_default_instance
+
+
 @dataclasses.dataclass(frozen=True)
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
@@ -90,12 +128,13 @@ class ParserSpecification:
             if not field.init:
                 continue
 
+            field_default_instance = _get_field_default(field, default_instance)
             nested_handler = _NestedDataclassHandler(
                 cls,
                 field,
                 type_from_typevar,
                 parent_dataclasses,
-                default_instance,
+                field_default_instance,
             )
 
             # Try to create subparsers from this field.
@@ -122,9 +161,7 @@ class ParserSpecification:
                 cls,
                 field,
                 type_from_typevar,
-                default_override=getattr(default_instance, field.name)
-                if default_instance is not None
-                else None,
+                default=field_default_instance,
             )
             args.append(arg)
 
@@ -156,7 +193,7 @@ class _NestedDataclassHandler(Generic[T]):
     field: dataclasses.Field
     type_from_typevar: Dict[TypeVar, Type]
     parent_dataclasses: Set[Type]
-    default_instance: T
+    default_instance: Optional[T]
 
     def handle_unions_over_dataclasses(
         self,
@@ -189,13 +226,6 @@ class _NestedDataclassHandler(Generic[T]):
                 default_instance=None,
             )
 
-        default_instance = None
-        if self.field.default is not dataclasses.MISSING:
-            default_instance = self.field.default
-            self._ensure_dataclass_used_as_default_is_frozen(default_instance)
-        elif self.field.default_factory is not dataclasses.MISSING:
-            default_instance = self.field.default_factory()
-
         return SubparsersSpecification(
             name=self.field.name,
             # If we wanted, we could add information about the default instance
@@ -205,8 +235,8 @@ class _NestedDataclassHandler(Generic[T]):
             parser_from_name=parser_from_name,
             # Required if: type hint is not Optional[], or a default instance is
             # provided.
-            required=(options == options_no_none) and default_instance is None,
-            default_instance=default_instance,
+            required=(options == options_no_none) and self.default_instance is None,
+            default_instance=self.default_instance,
         )
 
     def handle_nested_dataclasses(
@@ -223,20 +253,11 @@ class _NestedDataclassHandler(Generic[T]):
             return None
 
         # Add arguments for nested dataclasses.
-        default_instance = None
-        if self.default_instance is not None:
-            default_instance = getattr(self.default_instance, self.field.name)
-        elif self.field.default is not dataclasses.MISSING:
-            default_instance = self.field.default
-            self._ensure_dataclass_used_as_default_is_frozen(default_instance)
-        elif self.field.default_factory is not dataclasses.MISSING:
-            default_instance = self.field.default_factory()
-
         child_definition = ParserSpecification.from_dataclass(
             field_type,
             self.parent_dataclasses,
             parent_type_from_typevar=self.type_from_typevar,
-            default_instance=default_instance,
+            default_instance=self.default_instance,
         )
 
         child_args = child_definition.args
@@ -254,17 +275,3 @@ class _NestedDataclassHandler(Generic[T]):
         ]
 
         return child_args, nested_dataclass_field_names
-
-    def _ensure_dataclass_used_as_default_is_frozen(
-        self, default_instance: Any
-    ) -> None:
-        """Ensure that a dataclass type used directly as a default value is marked as
-        frozen."""
-        assert dataclasses.is_dataclass(default_instance)
-        cls = type(default_instance)
-        if not cls.__dataclass_params__.frozen:
-            warnings.warn(
-                f"Mutable type {cls} is used as a default value for {self.field.name}. "
-                "This is dangerous! Consider using"
-                f" `dataclasses.field(default_factory=...)` or marking {cls} as frozen."
-            )

@@ -30,7 +30,7 @@ def test_helptext():
             dcargs.parse(Helptext, args=["--help"])
     helptext = f.getvalue()
     assert Helptext.__doc__ in helptext
-    assert "--x INT     Documentation 1\n" in helptext
+    assert "required arguments:\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext
 
@@ -51,7 +51,10 @@ def test_helptext_defaults():
         with contextlib.redirect_stdout(f):
             dcargs.parse(HelptextWithVariousDefaults, args=["--help"])
     helptext = f.getvalue()
-    assert "--x PATH              (default: /some/path/to/a/file)\n" in helptext
+    assert (
+        "show this help message and exit\n  --x PATH              (default:"
+        " /some/path/to/a/file)\n" in helptext
+    )
     assert "--y {RED,GREEN,BLUE}  (default: RED)\n" in helptext
 
 
