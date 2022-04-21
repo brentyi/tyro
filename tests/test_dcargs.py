@@ -142,7 +142,7 @@ def test_enum():
     assert dcargs.parse(EnumClassA, args=["--color", "RED"]) == EnumClassA(
         color=Color.RED
     )
-    assert dcargs.parse(EnumClassB) == EnumClassB()
+    assert dcargs.parse(EnumClassB, args=[]) == EnumClassB()
 
 
 def test_literal():
@@ -277,4 +277,4 @@ def test_parse_empty_description():
     class A:
         x: int = 0
 
-    assert dcargs.parse(A, description=None) == A(x=0)
+    assert dcargs.parse(A, description=None, args=[]) == A(x=0)

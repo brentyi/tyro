@@ -1,3 +1,5 @@
+"""Abstractions for creating argparse parsers from a dataclass definition."""
+
 import argparse
 import dataclasses
 import warnings
@@ -5,7 +7,7 @@ from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar
 
 from typing_extensions import get_args, get_origin
 
-from . import _arguments, _docstrings, _resolver, _strings
+from . import _arguments, _docstrings, _instantiators, _resolver, _strings
 
 T = TypeVar("T")
 
@@ -114,9 +116,10 @@ class ParserSpecification:
                 if typ in parent_type_from_typevar:
                     type_from_typevar[typevar] = parent_type_from_typevar[typ]  # type: ignore
 
-        assert (
-            cls not in parent_dataclasses
-        ), f"Found a cyclic dataclass dependency with type {cls}"
+        if cls in parent_dataclasses:
+            raise _instantiators.UnsupportedTypeAnnotationError(
+                f"Found a cyclic dataclass dependency with type {cls}."
+            )
         parent_dataclasses = parent_dataclasses | {cls}
 
         args = []
@@ -140,9 +143,10 @@ class ParserSpecification:
             # Try to create subparsers from this field.
             subparsers_out = nested_handler.handle_unions_over_dataclasses()
             if subparsers_out is not None:
-                assert (
-                    subparsers is None
-                ), "Only one subparser (union over dataclasses) is allowed per class"
+                if subparsers is not None:
+                    raise _instantiators.UnsupportedTypeAnnotationError(
+                        "Only one subparser (union over dataclasses) is allowed per class."
+                    )
 
                 subparsers = subparsers_out
                 continue
@@ -157,12 +161,20 @@ class ParserSpecification:
                 continue
 
             # Handle simple fields!
-            arg = _arguments.ArgumentDefinition.make_from_field(
-                cls,
-                field,
-                type_from_typevar,
-                default=field_default_instance,
-            )
+            try:
+                arg = _arguments.ArgumentDefinition.make_from_field(
+                    cls,
+                    field,
+                    type_from_typevar,
+                    default=field_default_instance,
+                )
+            except _instantiators.UnsupportedTypeAnnotationError as e:
+                # Catch unsupported annotation errors, and make the error message more
+                # informative.
+                raise _instantiators.UnsupportedTypeAnnotationError(
+                    f"Error when parsing {cls.__name__}.{field.name} of type"
+                    f" {field.type}: {e.args[0]}"
+                )
             args.append(arg)
 
         return ParserSpecification(

@@ -1,7 +1,9 @@
 import dataclasses
+import enum
 from typing import List, Optional, Sequence, Set, Tuple
 
 import pytest
+from typing_extensions import Literal
 
 import dcargs
 
@@ -116,13 +118,57 @@ def test_lists():
         dcargs.parse(A, args=[])
 
 
-def test_lists_with_default():
+def test_list_with_literal():
     @dataclasses.dataclass
     class A:
-        x: List[int] = dataclasses.field(default_factory=[0, 1, 2].copy)
+        x: List[Literal[1, 2, 3]]
 
-    assert dcargs.parse(A, args=[]) == A(x=[0, 1, 2])
     assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "1", "2", "3", "4"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+
+def test_list_with_enums():
+    class Color(enum.Enum):
+        RED = enum.auto()
+        GREEN = enum.auto()
+        BLUE = enum.auto()
+
+    @dataclasses.dataclass
+    class A:
+        x: List[Color]
+
+    assert dcargs.parse(A, args=["--x", "RED", "RED", "BLUE"]) == A(
+        x=[Color.RED, Color.RED, Color.BLUE]
+    )
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x", "RED", "RED", "YELLOW"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+
+def test_lists_with_default():
+    class Color(enum.Enum):
+        RED = enum.auto()
+        GREEN = enum.auto()
+        BLUE = enum.auto()
+
+    @dataclasses.dataclass
+    class A:
+        x: List[Color] = dataclasses.field(
+            default_factory=[Color.RED, Color.GREEN].copy
+        )
+
+    assert dcargs.parse(A, args=[]) == A(x=[Color.RED, Color.GREEN])
+    assert dcargs.parse(A, args=["--x", "RED", "GREEN", "BLUE"]) == A(
+        x=[Color.RED, Color.GREEN, Color.BLUE]
+    )
 
 
 def test_lists_bool():
