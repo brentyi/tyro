@@ -1,7 +1,12 @@
+"""Utilities for working with strings."""
+
+import enum
 import functools
 import re
 import textwrap
-from typing import Type
+from typing import Type, TypeVar
+
+from typing_extensions import get_args
 
 from . import _resolver
 
@@ -40,10 +45,38 @@ def subparser_name_from_type(cls: Type) -> str:
     )
 
 
-def bool_from_string(text: str) -> bool:
-    if text == "True":
-        return True
-    elif text == "False":
-        return False
+T = TypeVar("T")
+
+
+def instance_from_string(typ: Type[T], arg: str) -> T:
+    """Given a type and and a string from the command-line, reconstruct an object. Not
+    intended to deal with containers.
+
+    This is intended to replace all calls to `type(string)`, which can cause unexpected
+    behavior. As an example, note that the following argparse code will always print
+    `True`, because `bool("True") == bool("False") == bool("0") == True`.
+    ```
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--flag", type=bool)
+
+    print(parser.parse_args().flag)
+    ```
+    """
+    assert len(get_args(typ)) == 0, f"Type {typ} cannot be instantiated."
+    if typ is bool:
+        if arg == "True":
+            return True  # type: ignore
+        elif arg == "False":
+            return False  # type: ignore
+        else:
+            raise ValueError(f"Boolean (True/False) expected, but got {arg}.")
+    elif issubclass(typ, enum.Enum):
+        try:
+            return typ[arg]  # type: ignore
+        except KeyError as e:
+            # Raise enum key errors as value errors.
+            raise ValueError(*e.args)
     else:
-        raise ValueError(f"Boolean (True/False) expected, but got {text}.")
+        return typ(arg)  # type: ignore

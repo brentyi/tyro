@@ -1,3 +1,5 @@
+"""Type-safe, human-readable serialization helpers."""
+
 import dataclasses
 import datetime
 import enum

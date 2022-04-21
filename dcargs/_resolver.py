@@ -1,3 +1,5 @@
+"""Utilities for resolving generic types and forward references."""
+
 import copy
 import dataclasses
 import functools

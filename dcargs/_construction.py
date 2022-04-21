@@ -1,3 +1,5 @@
+"""Core functionality for instantiating dataclasses from argparse namespaces."""
+
 from typing import TYPE_CHECKING, Any, Dict, Set, Tuple, Type, TypeVar
 
 from typing_extensions import get_args
@@ -54,7 +56,7 @@ def construct_dataclass(
         value: Any
         prefixed_field_name = field_name_prefix + field.name
 
-        # Resolve field type
+        # Resolve field type.
         field_type = (
             type_from_typevar[field.type]  # type: ignore
             if field.type in type_from_typevar
@@ -67,7 +69,8 @@ def construct_dataclass(
             value = get_value_from_arg(prefixed_field_name)
             if value is not None:
                 try:
-                    value = arg.field_action(value)
+                    assert arg.instantiator is not None
+                    value = arg.instantiator(value)
                 except ValueError as e:
                     raise FieldActionValueError(
                         f"Parsing error for {arg.get_flag()}: {e.args[0]}"
