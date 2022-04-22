@@ -2,9 +2,11 @@
 
 import argparse
 import dataclasses
+import shutil
 import warnings
 from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar, Union
 
+import termcolor
 from typing_extensions import get_args, get_origin
 
 from . import _arguments, _docstrings, _instantiators, _resolver, _strings
@@ -56,22 +58,64 @@ class ParserSpecification:
 
     cls: Type
     args: List[_arguments.ArgumentDefinition]
-    nested_dataclass_field_names: List[str]
+    helptext_from_nested_dataclass_field_name: Dict[str, Optional[str]]
     subparsers: Optional["SubparsersSpecification"]
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
 
-        # Put required group at start of group list.
-        required_group = parser.add_argument_group("required arguments")
+        def format_group_name(nested_field_name: str, required: bool) -> str:
+            if required:
+                prefix = termcolor.colored("required", attrs=["bold"])
+            else:
+                prefix = termcolor.colored("optional", attrs=["bold", "dark"])
+            suffix = " arguments"
+            if nested_field_name == "":
+                suffix = suffix[1:]
+
+            return (
+                prefix
+                + " "
+                + nested_field_name.replace("_", " ").replace(".", " • ")
+                + suffix
+            )
+
+        optional_group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
+            "": parser._action_groups[1],
+        }
+        required_group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
+            "": parser.add_argument_group(format_group_name("", required=True)),
+        }
+
+        # Break some API boundaries to rename the optional group, and
+        parser._action_groups[1].title = format_group_name("", required=False)
         parser._action_groups = parser._action_groups[::-1]
 
         # Add each argument.
         for arg in self.args:
             if arg.required:
-                arg.add_argument(required_group)
+                target_groups, other_groups = (
+                    required_group_from_prefix,
+                    optional_group_from_prefix,
+                )
             else:
-                arg.add_argument(parser)
+                target_groups, other_groups = (
+                    optional_group_from_prefix,
+                    required_group_from_prefix,
+                )
+
+            if arg.prefix not in target_groups:
+                nested_field_name = arg.prefix[:-1]
+                target_groups[arg.prefix] = parser.add_argument_group(
+                    format_group_name(nested_field_name, required=arg.required),
+                    # Add a description, but only to the first group for a field.
+                    description=self.helptext_from_nested_dataclass_field_name[
+                        nested_field_name
+                    ]
+                    if arg.prefix not in other_groups
+                    else None,
+                )
+            arg.add_argument(target_groups[arg.prefix])
 
         # Add subparsers.
         if self.subparsers is not None:
@@ -123,7 +167,7 @@ class ParserSpecification:
         parent_dataclasses = parent_dataclasses | {cls}
 
         args = []
-        nested_dataclass_field_names = []
+        helptext_from_nested_dataclass_field_name = {}
         subparsers = None
         for field in _resolver.resolved_fields(cls):  # type: ignore
 
@@ -145,7 +189,8 @@ class ParserSpecification:
             if subparsers_out is not None:
                 if subparsers is not None:
                     raise _instantiators.UnsupportedTypeAnnotationError(
-                        "Only one subparser (union over dataclasses) is allowed per class."
+                        "Only one subparser (union over dataclasses) is allowed per"
+                        " class."
                     )
 
                 subparsers = subparsers_out
@@ -156,8 +201,12 @@ class ParserSpecification:
             if nested_out is not None:
                 child_args, child_nested_field_names = nested_out
                 args.extend(child_args)
-                nested_dataclass_field_names.extend(child_nested_field_names)
-                nested_dataclass_field_names.append(field.name)
+                helptext_from_nested_dataclass_field_name.update(
+                    child_nested_field_names
+                )
+                helptext_from_nested_dataclass_field_name[
+                    field.name
+                ] = _docstrings.get_field_docstring(cls, field.name)
                 continue
 
             # Handle simple fields!
@@ -180,7 +229,7 @@ class ParserSpecification:
         return ParserSpecification(
             cls=cls,
             args=args,
-            nested_dataclass_field_names=nested_dataclass_field_names,
+            helptext_from_nested_dataclass_field_name=helptext_from_nested_dataclass_field_name,
             subparsers=subparsers,
         )
 
@@ -253,7 +302,7 @@ class _NestedDataclassHandler(Generic[T]):
 
     def handle_nested_dataclasses(
         self,
-    ) -> Optional[Tuple[List[_arguments.ArgumentDefinition], List[str]]]:
+    ) -> Optional[Tuple[List[_arguments.ArgumentDefinition], Dict[str, Optional[str]]]]:
         """Handle nested dataclasses. Returns `None` if not applicable."""
         # Resolve field type
         field_type = (
@@ -281,9 +330,9 @@ class _NestedDataclassHandler(Generic[T]):
                 + arg.prefix,
             )
 
-        nested_dataclass_field_names = [
-            self.field.name + _strings.NESTED_DATACLASS_DELIMETER + x
-            for x in child_definition.nested_dataclass_field_names
-        ]
+        helptext_from_nested_dataclass_field_name = {
+            self.field.name + _strings.NESTED_DATACLASS_DELIMETER + x: y
+            for x, y in child_definition.helptext_from_nested_dataclass_field_name.items()
+        }
 
-        return child_args, nested_dataclass_field_names
+        return child_args, helptext_from_nested_dataclass_field_name

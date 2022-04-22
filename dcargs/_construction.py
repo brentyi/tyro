@@ -75,7 +75,10 @@ def construct_dataclass(
                     raise FieldActionValueError(
                         f"Parsing error for {arg.get_flag()}: {e.args[0]}"
                     )
-        elif prefixed_field_name in parser_definition.nested_dataclass_field_names:
+        elif (
+            prefixed_field_name
+            in parser_definition.helptext_from_nested_dataclass_field_name
+        ):
             # Nested dataclasses.
             value, consumed_keywords_child = construct_dataclass(
                 field_type,

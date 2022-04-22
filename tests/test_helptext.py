@@ -30,7 +30,7 @@ def test_helptext():
             dcargs.parse(Helptext, args=["--help"])
     helptext = f.getvalue()
     assert Helptext.__doc__ in helptext
-    assert "required arguments:\n  --x INT     Documentation 1\n" in helptext
+    assert ":\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext
 
