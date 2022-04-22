@@ -30,7 +30,7 @@ class ArgumentDefinition:
     default: Optional[Any]
 
     # Fields that will be handled by argument transformations.
-    required: Optional[bool] = None
+    required: bool = False
     action: Optional[str] = None
     nargs: Optional[Union[int, str]] = None
     choices: Optional[Set[Any]] = None
@@ -103,11 +103,10 @@ class ArgumentDefinition:
 def _transform_required_if_default_set(arg: ArgumentDefinition) -> ArgumentDefinition:
     """Set `required=True` if a default value is set."""
 
-    # Don't set if default is set, or if required flag is already set.
-    if arg.default is not None:
-        return dataclasses.replace(arg, required=False)
-    else:
+    # Mark arg as required if a default is set.
+    if arg.default is None:
         return dataclasses.replace(arg, required=True)
+    return arg
 
 
 def _transform_handle_boolean_flags(arg: ArgumentDefinition) -> ArgumentDefinition:

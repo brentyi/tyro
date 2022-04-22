@@ -1,7 +1,8 @@
 """An argument parsing example.
 
-Note that there are multiple possible ways to document dataclass attributes, all
-of which are supported by the automatic helptext generator.
+Note that multiple possible documentation styles are supported by the field helptext
+generator; we could also use docstring-style triple quote comments, or #-style comments
+on the same line.
 """
 
 import dataclasses
@@ -17,8 +18,8 @@ class OptimizerType(enum.Enum):
 
 @dataclasses.dataclass(frozen=True)
 class OptimizerConfig:
-    # Variant of SGD to use.
-    type: OptimizerType
+    # Gradient-based optimizer to use.
+    algorithm: OptimizerType = OptimizerType.ADAM
 
     # Learning rate to use.
     learning_rate: float = 3e-4
@@ -33,13 +34,15 @@ class ExperimentConfig:
     pulled from this docstring by default, but can also be overrided with
     `dcargs.parse`'s `description=` flag."""
 
-    experiment_name: str  # Experiment name to use.
+    # Experiment name to use.
+    experiment_name: str
 
+    # Various configurable options for our optimizer.
     optimizer: OptimizerConfig
 
+    # Random seed. This is helpful for making sure that our experiments are all
+    # reproducible!
     seed: int = 0
-    """Random seed. This is helpful for making sure that our experiments are
-    all reproducible!"""
 
 
 if __name__ == "__main__":
