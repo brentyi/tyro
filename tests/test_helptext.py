@@ -35,6 +35,40 @@ def test_helptext():
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext
 
 
+def test_helptext_inherited():
+    class UnrelatedParentClass:
+        pass
+
+    @dataclasses.dataclass
+    class ActualParentClass:
+        """This docstring should be printed as a description."""
+
+        x: int  # Documentation 1
+
+        # Documentation 2
+        y: int
+
+        # fmt: off
+
+        z: int = 3
+        def some_method(self) -> None:  # noqa
+            """Coverage stress test."""
+            pass
+        # fmt: on
+
+    @dataclasses.dataclass
+    class ChildClass(UnrelatedParentClass, ActualParentClass):
+        pass
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(ChildClass, args=["--help"])
+    helptext = f.getvalue()
+    assert ":\n  --x INT     Documentation 1\n" in helptext
+    assert "--y INT     Documentation 2\n" in helptext
+
+
 def test_helptext_defaults():
     class Color(enum.Enum):
         RED = enum.auto()

@@ -32,6 +32,36 @@ def test_basic():
     ) == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
 
+def test_init_false():
+    @dataclasses.dataclass
+    class InitFalseDataclass:
+        i: int
+        s: str
+        f: float
+        p: pathlib.Path
+        ignored: str = dataclasses.field(default="hello", init=False)
+
+    assert dcargs.parse(
+        InitFalseDataclass,
+        args=[
+            "--i",
+            "5",
+            "--s",
+            "5",
+            "--f",
+            "5",
+            "--p",
+            "~",
+        ],
+    ) == InitFalseDataclass(i=5, s="5", f=5.0, p=pathlib.Path("~"))
+
+    with pytest.raises(SystemExit):
+        dcargs.parse(
+            InitFalseDataclass,
+            args=["--i", "5", "--s", "5", "--f", "5", "--p", "~", "--ignored", "blah"],
+        )
+
+
 def test_required():
     @dataclasses.dataclass
     class A:

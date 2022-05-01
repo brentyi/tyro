@@ -82,10 +82,9 @@ def get_class_tokenization_with_field(
     found_field: bool = False
     classes_to_search = cls.mro()
     for search_cls in classes_to_search:
-        # Unwrap generics.
-        origin_cls = get_origin(search_cls)
-        if origin_cls is not None:
-            search_cls = origin_cls
+        # Inherited generics seem challenging for now.
+        # https://github.com/python/typing/issues/777
+        assert get_origin(search_cls) is None
 
         # Skip parent classes that aren't dataclasses.
         if not dataclasses.is_dataclass(search_cls):
