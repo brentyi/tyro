@@ -2,7 +2,6 @@
 
 import argparse
 import dataclasses
-import shutil
 import warnings
 from typing import Any, Dict, Generic, List, Optional, Set, Tuple, Type, TypeVar, Union
 
@@ -47,7 +46,7 @@ def _get_field_default(
         field_default_instance = field.default_factory()
 
     if parent_default_instance is not None:
-        # Populate default from explicit `default_instance` in `dcargs.parse()`.
+        # Populate default from some parent, eg `default_instance` in `dcargs.parse()`.
         field_default_instance = getattr(parent_default_instance, field.name)
     return field_default_instance
 
@@ -142,14 +141,11 @@ class ParserSpecification:
     @staticmethod
     def from_dataclass(
         cls: Type[T],
-        parent_dataclasses: Optional[Set[Type]],
+        parent_dataclasses: Set[Type],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Optional[T],
     ) -> "ParserSpecification":
         """Create a parser definition from a dataclass."""
-
-        if parent_dataclasses is None:
-            parent_dataclasses = set()
 
         assert _resolver.is_dataclass(cls)
 

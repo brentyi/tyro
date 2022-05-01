@@ -38,7 +38,7 @@ import dataclasses
 import enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from typing_extensions import Final, Literal, _AnnotatedAlias, get_args, get_origin
+from typing_extensions import Final, Literal, get_args, get_origin
 
 from . import _strings
 
@@ -84,6 +84,14 @@ def instantiator_from_type(
             type_from_typevar[typ],  # type: ignore
             type_from_typevar,
         )
+    elif isinstance(typ, TypeVar):
+        # Found an unbound TypeVar. This could be because inheriting from generics is
+        # currently not implemented. It's unclear whether this is feasible, because
+        # generics are lost in the mro: https://github.com/python/typing/issues/777
+        raise UnsupportedTypeAnnotationError(
+            f"Found unbound TypeVar {typ}. Note that inheritance from generic dataclass"
+            " types is currently not supported."
+        )
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
@@ -120,10 +128,6 @@ def _instantiator_from_container_type(
         (contained_type,) = get_args(typ)
         return instantiator_from_type(contained_type, type_from_typevar)
 
-    # Unwrap Annotated types.
-    if hasattr(typ, "__class__") and typ.__class__ == _AnnotatedAlias:
-        return instantiator_from_type(type_origin, type_from_typevar)
-
     # List, tuples, and sequences.
     if type_origin in (
         collections.abc.Sequence,  # different from typing.Sequence!
@@ -154,11 +158,9 @@ def _instantiator_from_container_type(
         typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
 
         if typeset_no_ellipsis != typeset:
-            # Ellipsis: variable argument counts.
-            if len(typeset_no_ellipsis) > 1:
-                raise UnsupportedTypeAnnotationError(
-                    "When an ellipsis is used, tuples must contain only one type."
-                )
+            # Ellipsis: variable argument counts. When an ellipsis is used, tuples must
+            # contain only one type.
+            assert len(typeset_no_ellipsis) == 1
             (contained_type,) = typeset_no_ellipsis
 
             make, inner_meta = _instantiator_from_type_inner(
@@ -226,7 +228,9 @@ def _instantiator_from_container_type(
         )
         return instantiator, dataclasses.replace(metadata, choices=choices)
 
-    return None
+    raise UnsupportedTypeAnnotationError(  # pragma: no cover
+        f"Unsupported type {typ} with origin {type_origin}"
+    )
 
 
 def _instantiator_from_type_inner(

@@ -3,15 +3,15 @@
 ![build](https://github.com/brentyi/dcargs/workflows/build/badge.svg)
 ![mypy](https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master)
 ![lint](https://github.com/brentyi/dcargs/workflows/lint/badge.svg)
+[![codecov](https://codecov.io/gh/brentyi/dcargs/branch/master/graph/badge.svg)](https://codecov.io/gh/brentyi/dcargs)
 
 <!-- vim-markdown-toc GFM -->
 
 * [Overview](#overview)
 * [Core interface](#core-interface)
-* [Motivation](#motivation)
 * [Serialization](#serialization)
 * [Feature list](#feature-list)
-* [Comparisons to alternative tools](#comparisons-to-alternative-tools)
+* [Alternative tools](#alternative-tools)
 
 <!-- vim-markdown-toc -->
 
@@ -20,11 +20,30 @@
 **`dcargs`** is a library for defining argument parsers and configuration
 objects using standard Python dataclasses.
 
-Installation is simple:
-
 ```
 pip install dcargs
 ```
+
+Compared to other options, using dataclasses for configuration is:
+
+- **Strongly typed.** Unlike dynamic configuration namespaces produced by
+  libraries like `argparse`, `YACS`, `abseil`, or `ml_collections`, this means
+  that IDE-assisted autocomplete, rename, refactor, go-to-definition operations
+  work out-of-the-box, as do static checking tools like `mypy` and `pyright`.
+- **Modular.** Most approaches to configuration objects require a centralized
+  definition of all configurable fields. Hierarchically nesting dataclasses,
+  however, makes it easy to distribute definitions, defaults, and documentation
+  of configurable fields across modules or source files. A model configuration
+  dataclass, for example, can be co-located in its entirety with the model
+  implementation and dropped into any experiment configuration with an import —
+  this eliminates redundancy and makes the entire module easy to port across
+  codebases.
+- **Noninvasive.** Dataclasses themselves are part of the standard Python
+  library; defining them requires no external dependencies and they can be
+  easily instantiated without `dcargs` (for example, within quick experiments in
+  Jupyter notebooks).
+- **Low effort.** Type annotations, docstrings, and default values for dataclass
+  fields can be used to automatically generate argument parsers.
 
 ### Core interface
 
@@ -112,31 +131,6 @@ arguments, enums, and more. Examples of additional features can be found in the
 [examples](./examples/) and [unit tests](./tests/); a
 [feature list](#feature-list) is also included below.
 
-### Motivation
-
-Compared to other options, using dataclasses for configuration is:
-
-- **Low effort.** Type annotations, docstrings, and default values for dataclass
-  fields can be used to automatically generate argument parsers.
-- **Noninvasive.** Dataclasses themselves are part of the standard Python
-  library; defining them requires no external dependencies and they can be
-  easily instantiated without `dcargs` (for example, within quick experiments in
-  Jupyter notebooks).
-- **Modular.** Most approaches to configuration objects require a centralized
-  definition of all configurable fields. Hierarchically nesting dataclasses,
-  however, makes it easy to distribute definitions, defaults, and documentation
-  of configurable fields across modules or source files. A model configuration
-  dataclass, for example, can be co-located in its entirety with the model
-  implementation and dropped into any experiment configuration dataclass with an
-  import — this eliminates the redundancy you typically see with the argparse
-  equivalent and makes the entire module easy to port across codebases.
-- **Strongly typed.** Unlike dynamic configuration namespaces produced by
-  libraries like `argparse`, `YACS`, `abseil`, or `ml_collections`, dataclasses
-  are robustly supported by static type checking tools (mypy, pyright, etc), as
-  well as IDEs and language servers. This means code can be checked
-  automatically for errors and typos, and IDE-assisted autocomplete, rename,
-  refactor, and jump operations work out-of-the-box.
-
 ### Serialization
 
 As a secondary feature, we also introduce two functions for human-readable
@@ -190,36 +184,17 @@ containing:
     `Final[Optional[Sequence[T]]]`, etc
 - Nested dataclasses
   - Simple nesting (see `OptimizerConfig` in
-    [./examples/example.py](./examples/example.py))
+    [./examples/nested.py](./examples/nested.py))
   - Unions over nested dataclasses (subparsers, see
     [./examples/subparsers.py](./examples/subparsers.py))
   - Optional unions over nested dataclasses (optional subparsers)
 - Generic dataclasses (including nested generics, see
   [./examples/generics.py](./examples/generics.py))
 
-### Comparisons to alternative tools
+Some other design decisions that we've put effort into:
 
-There are several alternatives for the parsing functionality of `dcargs`; here's
-a rough summary of some of them:
-
-|                                                                                                              | dataclasses | attrs | Choices from literals                                    | Generics | Docstrings as helptext | Nesting | Subparsers | Containers |
-| ------------------------------------------------------------------------------------------------------------ | ----------- | ----- | -------------------------------------------------------- | -------- | ---------------------- | ------- | ---------- | ---------- |
-| **dcargs**                                                                                                   | ✓           |       | ✓                                                        | ✓        | ✓                      | ✓       | ✓          | ✓          |
-| **[datargs](https://github.com/roee30/datargs)**                                                             | ✓           | ✓     | ✓                                                        |          |                        |         | ✓          | ✓          |
-| **[typed-argument-parser](https://github.com/swansonk14/typed-argument-parser)**                             |             |       | ✓                                                        |          | ✓                      |         | ✓          | ✓          |
-| **[simple-parsing](https://github.com/lebrice/SimpleParsing)**                                               | ✓           |       | [soon](https://github.com/lebrice/SimpleParsing/pull/86) |          | ✓                      | ✓       | ✓          | ✓          |
-| **[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)**                                       | ✓           |       |                                                          |          |                        |         |            |            |
-| **[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)**                                   | ✓           |       |                                                          |          |                        |         |            |            |
-| **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                              | ✓           |       |                                                          |          |                        |         |            |            |
-| **[clout](https://github.com/python-clout/clout)**                                                           |             | ✓     |                                                          |          |                        | ✓       |            |            |
-| **[hf_argparser](https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py)** | ✓           |       |                                                          |          |                        |         |            | ✓          |
-
-Some other distinguishing factors that we've put effort into:
-
-- Robust handling of forward references
-- Support for nested containers and generics
 - Strong typing: we actively avoid relying on strings or dynamic namespace
-  objects (eg `argparse.Namespace`)
+  objects (eg `argparse.Namespace`).
 - Simplicity + strict abstractions: we're focused on a single function API, and
   don't leak any argparse implementation details to the user level. We also
   intentionally don't offer any way to add argument parsing-specific logic to
@@ -228,4 +203,29 @@ Some other distinguishing factors that we've put effort into:
   to make parsing-specific dataclasses)
 - POSIX compatibility. For example, field names with underscores
   (`argument_name`) are parsed with hyphens (`--argument-name`).
-  ([why](https://stackoverflow.com/questions/1253679/should-command-line-options-in-posix-style-operating-systems-be-underscore-style))
+  ([why?](https://stackoverflow.com/questions/1253679/should-command-line-options-in-posix-style-operating-systems-be-underscore-style))
+
+### Alternative tools
+
+The core functionality of `dcargs` --- generating an argument parser from type
+annotations --- can be found as a subset of the features offered by many other
+libraries. A summary of some distinguishing features:
+
+|                                                                                                              | Choices from literals                                    | Generics | Docstrings as helptext | Nesting | Subparsers | Containers |
+| ------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------- | -------- | ---------------------- | ------- | ---------- | ---------- |
+| **dcargs**                                                                                                   | ✓                                                        | ✓        | ✓                      | ✓       | ✓          | ✓          |
+| **[datargs](https://github.com/roee30/datargs)**                                                             | ✓                                                        |          |                        |         | ✓          | ✓          |
+| **[tap](https://github.com/swansonk14/typed-argument-parser)**                                               | ✓                                                        |          | ✓                      |         | ✓          | ✓          |
+| **[simple-parsing](https://github.com/lebrice/SimpleParsing)**                                               | [soon](https://github.com/lebrice/SimpleParsing/pull/86) |          | ✓                      | ✓       | ✓          | ✓          |
+| **[argparse-dataclass](https://pypi.org/project/argparse-dataclass/)**                                       |                                                          |          |                        |         |            |            |
+| **[argparse-dataclasses](https://pypi.org/project/argparse-dataclasses/)**                                   |                                                          |          |                        |         |            |            |
+| **[dataclass-cli](https://github.com/malte-soe/dataclass-cli)**                                              |                                                          |          |                        |         |            |            |
+| **[clout](https://pypi.org/project/clout/)**                                                                 |                                                          |          |                        | ✓       |            |            |
+| **[hf_argparser](https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py)** |                                                          |          |                        |         |            | ✓          |
+| **[pyrallis](https://github.com/eladrich/pyrallis/)**                                                        |                                                          |          | ✓                      | ✓       |            | ✓          |
+
+Note that most of these other libraries offer other features that you might find
+useful, such as `attrs` support (`datargs`, `clout`), registration for custom
+types (`pyrallis`), different approaches for serialization and config files
+(`tap`, `pyrallis`), simultaneous parsing of multiple dataclasses
+(`simple-parsing`), etc.

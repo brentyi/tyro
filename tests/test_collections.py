@@ -20,6 +20,18 @@ def test_tuples_fixed():
         dcargs.parse(A, args=[])
 
 
+def test_tuples_fixed_mixed():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[int, str, int]
+
+    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, "2", 3))
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.parse(A, args=[])
+
+
 def test_tuples_with_default():
     @dataclasses.dataclass
     class A:

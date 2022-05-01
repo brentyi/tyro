@@ -66,17 +66,8 @@ def instance_from_string(typ: Type[T], arg: str) -> T:
     """
     assert len(get_args(typ)) == 0, f"Type {typ} cannot be instantiated."
     if typ is bool:
-        if arg == "True":
-            return True  # type: ignore
-        elif arg == "False":
-            return False  # type: ignore
-        else:
-            raise ValueError(f"Boolean (True/False) expected, but got {arg}.")
+        return {"True": True, "False": False}[arg]  # type: ignore
     elif issubclass(typ, enum.Enum):
-        try:
-            return typ[arg]  # type: ignore
-        except KeyError as e:
-            # Raise enum key errors as value errors.
-            raise ValueError(*e.args)
+        return typ[arg]  # type: ignore
     else:
         return typ(arg)  # type: ignore

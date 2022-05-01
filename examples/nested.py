@@ -8,6 +8,8 @@ on the same line.
 import dataclasses
 import enum
 
+from typing_extensions import Annotated
+
 import dcargs
 
 
@@ -22,7 +24,7 @@ class OptimizerConfig:
     algorithm: OptimizerType = OptimizerType.ADAM
 
     # Learning rate to use.
-    learning_rate: float = 3e-4
+    learning_rate: Annotated[float, "Learning rate"] = 3e-4
 
     # Coefficient for L2 regularization.
     weight_decay: float = 1e-2
