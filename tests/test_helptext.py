@@ -123,6 +123,25 @@ def test_multiline_helptext():
     )
 
 
+def test_grouped_helptext():
+    @dataclasses.dataclass
+    class HelptextGrouped:
+        x: int  # Documentation 1
+
+        # Description of both y and z.
+        y: int
+        z: int = 3
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(HelptextGrouped, args=["--help"])
+    helptext = f.getvalue()
+    assert "  --x INT     Documentation 1\n" in helptext
+    assert "  --y INT     Description of both y and z.\n" in helptext
+    assert "  --z INT     Description of both y and z. (default: 3)\n" in helptext
+
+
 def test_none_default_value_helptext():
     @dataclasses.dataclass
     class Config:
@@ -178,7 +197,7 @@ def test_helptext_with_inheritance():
             dcargs.parse(Child, args=["--help"])
     helptext = f.getvalue()
     assert (
-        "--x STR     Helptext. (default: This docstring may be tougher to parse!)\n"
+        "--x STR     Helptext. (default: 'This docstring may be tougher to parse!')\n"
         in helptext
     )
 
@@ -208,7 +227,7 @@ def test_helptext_with_inheritance_overriden():
             dcargs.parse(Child2, args=["--help"])
     helptext = f.getvalue()
     assert (
-        "--x STR     Helptext! (default: This docstring may be tougher to parse?)\n"
+        "--x STR     Helptext! (default: 'This docstring may be tougher to parse?')\n"
         in helptext
     )
 
@@ -224,6 +243,19 @@ def test_tuple_helptext():
             dcargs.parse(TupleHelptext, args=["--help"])
     helptext = f.getvalue()
     assert "--x INT STR FLOAT\n" in helptext
+
+
+def test_tuple_helptext_defaults():
+    @dataclasses.dataclass
+    class TupleHelptextDefaults:
+        x: Tuple[int, str, str] = (5, "hello world", "hello")
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.parse(TupleHelptextDefaults, args=["--help"])
+    helptext = f.getvalue()
+    assert "--x INT STR STR  (default: 5 'hello world' hello)\n" in helptext
 
 
 def test_generic_helptext():
