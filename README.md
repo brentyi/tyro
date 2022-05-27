@@ -43,7 +43,8 @@ Compared to other options, using dataclasses for configuration is:
   easily instantiated without `dcargs` (for example, within quick experiments in
   Jupyter notebooks).
 - **Low effort.** Type annotations, docstrings, and default values for dataclass
-  fields can be used to automatically generate argument parsers.
+  fields can be used to automatically generate argument parsers with informative
+  helptext.
 
 ### Core interface
 
@@ -201,7 +202,7 @@ Some other design decisions that we've put effort into:
   dataclass definitions. (in contrast, some of the libaries above rely heavily
   on dataclass field metadata, or on the more extreme end inheritance+decorators
   to make parsing-specific dataclasses)
-- POSIX compatibility. For example, field names with underscores
+- Hyphens over underscores. For example, field names with underscores
   (`argument_name`) are parsed with hyphens (`--argument-name`).
   ([why?](https://stackoverflow.com/questions/1253679/should-command-line-options-in-posix-style-operating-systems-be-underscore-style))
 

@@ -1,6 +1,7 @@
 import argparse
 import dataclasses
 import enum
+import shlex
 from typing import Any, Dict, Optional, Set, Tuple, Type, TypeVar, Union
 
 from . import _docstrings, _instantiators
@@ -179,10 +180,21 @@ def _transform_generate_helptext(arg: ArgumentDefinition) -> ArgumentDefinition:
         # Special case for enums.
         help_parts.append(f"(default: {arg.default.name})")
     elif not arg.required:
-        # General case. We intentionally don't use the % template, because the default
-        # will be casted to a string and that can make unnecessary quotation marks
-        # appear in the helptext.
-        help_parts.append(f"(default: {arg.default})")
+        # Include default value in helptext. We intentionally don't use the % template
+        # because the types of all arguments are set to strings, which will cause the
+        # default to be casted to a string and introduce extra quotation marks.
+        if arg.nargs is not None and hasattr(arg.default, "__iter__"):
+            # For tuple types, we might have arg.default as (0, 1, 2, 3).
+            # For list types, we might have arg.default as [0, 1, 2, 3].
+            # For set types, we might have arg.default as {0, 1, 2, 3}.
+            #
+            # In all cases, we want to display (default: 0 1 2 3), for consistency with
+            # the format that argparse expects when we set nargs.
+            assert arg.default is not None  # Just for type checker.
+            default_parts = map(shlex.quote, map(str, arg.default))
+            help_parts.append(f"(default: {' '.join(default_parts)})")
+        else:
+            help_parts.append(f"(default: {shlex.quote(str(arg.default))})")
 
     return dataclasses.replace(arg, help=" ".join(help_parts))
 

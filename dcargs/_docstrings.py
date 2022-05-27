@@ -16,61 +16,82 @@ from . import _resolver, _strings
 class _Token:
     token_type: int
     content: str
-    line_number: int
+    logical_line: int
+    actual_line: int
 
 
 @dataclasses.dataclass(frozen=True)
 class _FieldData:
     index: int
-    line_number: int
-    prev_field_line_number: int
+    logical_line: int
+    actual_line: int
+    prev_field_logical_line: int
 
 
 @dataclasses.dataclass(frozen=True)
 class _ClassTokenization:
     tokens: List[_Token]
-    tokens_from_line: Dict[int, List[_Token]]
+    tokens_from_logical_line: Dict[int, List[_Token]]
+    tokens_from_actual_line: Dict[int, List[_Token]]
     field_data_from_name: Dict[str, _FieldData]
 
     @staticmethod
     @functools.lru_cache(maxsize=8)
-    def make(cls) -> "_ClassTokenization":
+    def make(clz) -> "_ClassTokenization":
         """Parse the source code of a class, and cache some tokenization information."""
-        readline = io.BytesIO(inspect.getsource(cls).encode("utf-8")).readline
+        readline = io.BytesIO(inspect.getsource(clz).encode("utf-8")).readline
 
         tokens: List[_Token] = []
-        tokens_from_line: Dict[int, List[_Token]] = {1: []}
+        tokens_from_logical_line: Dict[int, List[_Token]] = {1: []}
+        tokens_from_actual_line: Dict[int, List[_Token]] = {1: []}
         field_data_from_name: Dict[str, _FieldData] = {}
 
-        line_number: int = 1
+        logical_line: int = 1
+        actual_line: int = 1
         for toktype, tok, start, end, line in tokenize.tokenize(readline):
-            if toktype in (tokenize.NEWLINE, tokenize.NL):
-                line_number += 1
-                tokens_from_line[line_number] = []
+            # Note: we only track logical line numbers, which are delimited by
+            # `tokenize.NEWLINE`. `tokenize.NL` tokens appear when logical lines are
+            # broken into multiple lines of code; these are ignored.
+            if toktype == tokenize.NEWLINE:
+                logical_line += 1
+                actual_line += 1
+                tokens_from_logical_line[logical_line] = []
+                tokens_from_actual_line[actual_line] = []
+            elif toktype == tokenize.NL:
+                actual_line += 1
+                tokens_from_actual_line[actual_line] = []
             elif toktype is not tokenize.INDENT:
-                token = _Token(token_type=toktype, content=tok, line_number=line_number)
+                token = _Token(
+                    token_type=toktype,
+                    content=tok,
+                    logical_line=logical_line,
+                    actual_line=actual_line,
+                )
                 tokens.append(token)
-                tokens_from_line[line_number].append(token)
+                tokens_from_logical_line[logical_line].append(token)
+                tokens_from_actual_line[actual_line].append(token)
 
-        prev_field_line_number: int = 1
+        prev_field_logical_line: int = 1
         for i, token in enumerate(tokens[:-1]):
             if token.token_type == tokenize.NAME:
-                # Naive heuristic for field names
+                # Naive heuristic for field names.
                 if (
                     tokens[i + 1].content == ":"
-                    and tokens[i] == tokens_from_line[tokens[i].line_number][0]
+                    and tokens[i] == tokens_from_actual_line[tokens[i].actual_line][0]
                     and token.content not in field_data_from_name
                 ):
                     field_data_from_name[token.content] = _FieldData(
                         index=i,
-                        line_number=token.line_number,
-                        prev_field_line_number=prev_field_line_number,
+                        logical_line=token.logical_line,
+                        actual_line=token.actual_line,
+                        prev_field_logical_line=prev_field_logical_line,
                     )
-                    prev_field_line_number = token.line_number
+                    prev_field_logical_line = token.logical_line
 
         return _ClassTokenization(
             tokens=tokens,
-            tokens_from_line=tokens_from_line,
+            tokens_from_logical_line=tokens_from_logical_line,
+            tokens_from_actual_line=tokens_from_actual_line,
             field_data_from_name=field_data_from_name,
         )
 
@@ -120,13 +141,13 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
 
     field_data = tokenization.field_data_from_name[field_name]
 
-    # Check for docstring-style comment.
-    line_number = field_data.line_number + 1
-    while (
-        line_number in tokenization.tokens_from_line
-        and len(tokenization.tokens_from_line[line_number]) > 0
+    # Check for docstring-style comment. This should be on the next logical line.
+    logical_line = field_data.logical_line + 1
+    if (
+        logical_line in tokenization.tokens_from_logical_line
+        and len(tokenization.tokens_from_logical_line[logical_line]) >= 1
     ):
-        first_token = tokenization.tokens_from_line[line_number][0]
+        first_token = tokenization.tokens_from_logical_line[logical_line][0]
         first_token_content = first_token.content.strip()
 
         # Found a docstring!
@@ -137,49 +158,49 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         ):
             return _strings.dedent(first_token_content[3:-3])
 
-        # Found the next field.
-        if (
-            first_token.token_type == tokenize.NAME
-            and len(tokenization.tokens_from_line[line_number]) >= 2
-            and tokenization.tokens_from_line[line_number][1].content == ":"
-        ):
-            break
-
-        # Found a method.
-        if first_token.content == "def":
-            break
-
-        line_number += 1
-
     # Check for comment on the same line as the field.
-    final_token_on_line = tokenization.tokens_from_line[field_data.line_number][-1]
+    final_token_on_line = tokenization.tokens_from_logical_line[
+        field_data.logical_line
+    ][-1]
     if final_token_on_line.token_type == tokenize.COMMENT:
         comment: str = final_token_on_line.content
         assert comment.startswith("#")
         return comment[1:].strip()
 
-    # Check for comment on the line before the field.
-    comment_index = field_data.index
+    # Check for comments that come before the field. This is intentionally written to
+    # support comments covering multiple (grouped) fields, for example:
+    #
+    #     # Optimizer hyperparameters.
+    #     learning_rate: float
+    #     beta1: float
+    #     beta2: float
+    #
+    # In this case, 'Optimizer hyperparameters' will be treated as the docstring for all
+    # 3 fields.
     comments: List[str] = []
-    current_line_number = field_data.line_number
-    while True:
-        comment_index -= 1
-        comment_token = tokenization.tokens[comment_index]
-        if (
-            # Looking for comments!
-            comment_token.token_type == tokenize.COMMENT
-            # Comments should come after the previous field.
-            and comment_token.line_number > field_data.prev_field_line_number
-            # And be contiguous.
-            and comment_token.line_number == current_line_number - 1
-        ):
-            assert comment_token.content.startswith("#")
-            current_line_number -= 1
-            comments.append(comment_token.content[1:].strip())
-        else:
+    current_actual_line = field_data.actual_line - 1
+    while current_actual_line in tokenization.tokens_from_actual_line:
+        actual_line_tokens = tokenization.tokens_from_actual_line[current_actual_line]
+        current_actual_line -= 1
+
+        # We stop looking if we find an empty line.
+        if len(actual_line_tokens) == 0:
             break
+
+        # Record single comments!
+        if (
+            len(actual_line_tokens) == 1
+            and actual_line_tokens[0].token_type == tokenize.COMMENT
+        ):
+            (comment_token,) = actual_line_tokens
+            assert comment_token.content.startswith("#")
+            comments.append(comment_token.content[1:].strip())
+        elif len(comments) > 0:
+            # Comments should be contiguous.
+            break
+
     if len(comments) > 0:
-        return "\n".join(comments[::-1])
+        return "\n".join(reversed(comments))
 
     return None
 

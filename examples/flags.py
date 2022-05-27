@@ -3,7 +3,6 @@ import dataclasses
 import dcargs
 
 
-@dcargs.parse
 @dataclasses.dataclass
 class Args:
     # Color input.
@@ -12,10 +11,13 @@ class Args:
     blue: int
 
     # Boolean values.
-    # These are useful!
     flag: bool
     flag1: bool = False
     flag2: bool = True
 
 
-print(Args.red)
+if __name__ == "__main__":
+    args = dcargs.parse(Args)
+    print(args)
+    print()
+    print(dcargs.to_yaml(args))
