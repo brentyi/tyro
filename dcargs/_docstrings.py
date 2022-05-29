@@ -118,6 +118,11 @@ def get_class_tokenization_with_field(
             # there's no docstring.
             assert "could not find class definition" in e.args[0]
             return None
+        except TypeError as e:   # pragma: no cover
+            # Notebooks cause “___ is a built-in class” TypeError.
+            assert "built-in class" in e.args[0]
+            return None
+
 
         # Grab field-specific tokenization data.
         if field_name in tokenization.field_data_from_name:
