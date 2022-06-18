@@ -16,11 +16,9 @@ def test_nested():
         x: int
         b: B
 
-    assert dcargs.parse(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(
-        x=1, b=B(y=3)
-    )
+    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):
-        dcargs.parse(Nested, args=["--x", "1"])
+        dcargs.cli(Nested, args=["--x", "1"])
 
 
 def test_nested_default():
@@ -35,10 +33,10 @@ def test_nested_default():
 
     assert (
         Nested(x=1, b=B(y=3))
-        == dcargs.parse(Nested, args=["--x", "1", "--b.y", "3"])
-        == dcargs.parse(Nested, args=[], default_instance=Nested(x=1, b=B(y=3)))
+        == dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"])
+        == dcargs.cli(Nested, args=[], default_instance=Nested(x=1, b=B(y=3)))
     )
-    assert dcargs.parse(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=3))
+    assert dcargs.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=3))
 
 
 def test_default_nested():
@@ -51,10 +49,8 @@ def test_default_nested():
         x: int
         b: B = B(y=5)
 
-    assert dcargs.parse(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(
-        x=1, b=B(y=3)
-    )
-    assert dcargs.parse(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
+    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    assert dcargs.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
 def test_double_default_nested():
@@ -71,10 +67,10 @@ def test_double_default_nested():
         x: int
         b: Parent = Parent(Child(y=5))
 
-    assert dcargs.parse(Grandparent, args=["--x", "1", "--b.c.y", "3"]) == Grandparent(
+    assert dcargs.cli(Grandparent, args=["--x", "1", "--b.c.y", "3"]) == Grandparent(
         x=1, b=Parent(Child(y=3))
     )
-    assert dcargs.parse(Grandparent, args=["--x", "1"]) == Grandparent(
+    assert dcargs.cli(Grandparent, args=["--x", "1"]) == Grandparent(
         x=1, b=Parent(Child(y=5))
     )
 
@@ -89,10 +85,8 @@ def test_default_factory_nested():
         x: int
         b: B = dataclasses.field(default_factory=lambda: B(y=5))
 
-    assert dcargs.parse(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(
-        x=1, b=B(y=3)
-    )
-    assert dcargs.parse(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
+    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    assert dcargs.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
 # TODO: implement this!
@@ -107,15 +101,15 @@ def test_default_factory_nested():
 #         x: int
 #         b: Optional[OptionalNestedChild]
 #
-#     assert dcargs.parse(OptionalNested, args=["--x", "1"]) == OptionalNested(
+#     assert dcargs.cli(OptionalNested, args=["--x", "1"]) == OptionalNested(
 #         x=1, b=None
 #     )
 #     with pytest.raises(SystemExit):
-#         dcargs.parse(OptionalNested, args=["--x", "1", "--b.y", "3"])
+#         dcargs.cli(OptionalNested, args=["--x", "1", "--b.y", "3"])
 #     with pytest.raises(SystemExit):
-#         dcargs.parse(OptionalNested, args=["--x", "1", "--b.z", "3"])
+#         dcargs.cli(OptionalNested, args=["--x", "1", "--b.z", "3"])
 #
-#     assert dcargs.parse(
+#     assert dcargs.cli(
 #         OptionalNested, args=["--x", "1", "--b.y", "2", "--b.z", "3"]
 #     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
 
@@ -134,22 +128,22 @@ def test_subparser():
         x: int
         bc: Union[HTTPServer, SMTPServer]
 
-    assert dcargs.parse(
+    assert dcargs.cli(
         Subparser, args=["--x", "1", "http-server", "--y", "3"]
     ) == Subparser(x=1, bc=HTTPServer(y=3))
-    assert dcargs.parse(
+    assert dcargs.cli(
         Subparser, args=["--x", "1", "smtp-server", "--z", "3"]
     ) == Subparser(x=1, bc=SMTPServer(z=3))
 
     with pytest.raises(SystemExit):
         # Missing subcommand.
-        dcargs.parse(Subparser, args=["--x", "1"])
+        dcargs.cli(Subparser, args=["--x", "1"])
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.parse(Subparser, args=["--x", "1", "http-server", "--z", "3"])
+        dcargs.cli(Subparser, args=["--x", "1", "http-server", "--z", "3"])
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.parse(Subparser, args=["--x", "1", "smtp-server", "--y", "3"])
+        dcargs.cli(Subparser, args=["--x", "1", "smtp-server", "--y", "3"])
 
 
 def test_subparser_with_default():
@@ -169,20 +163,20 @@ def test_subparser_with_default():
         )
 
     assert (
-        dcargs.parse(
+        dcargs.cli(
             DefaultSubparser, args=["--x", "1", "default-http-server", "--y", "5"]
         )
-        == dcargs.parse(DefaultSubparser, args=["--x", "1"])
+        == dcargs.cli(DefaultSubparser, args=["--x", "1"])
         == DefaultSubparser(x=1, bc=DefaultHTTPServer(y=5))
     )
-    assert dcargs.parse(
+    assert dcargs.cli(
         DefaultSubparser, args=["--x", "1", "default-smtp-server", "--z", "3"]
     ) == DefaultSubparser(x=1, bc=DefaultSMTPServer(z=3))
     assert (
-        dcargs.parse(
+        dcargs.cli(
             DefaultSubparser, args=["--x", "1", "default-http-server", "--y", "8"]
         )
-        == dcargs.parse(
+        == dcargs.cli(
             DefaultSubparser,
             args=[],
             default_instance=DefaultSubparser(x=1, bc=DefaultHTTPServer(y=8)),
@@ -191,9 +185,9 @@ def test_subparser_with_default():
     )
 
     with pytest.raises(SystemExit):
-        dcargs.parse(DefaultSubparser, args=["--x", "1", "b", "--z", "3"])
+        dcargs.cli(DefaultSubparser, args=["--x", "1", "b", "--z", "3"])
     with pytest.raises(SystemExit):
-        dcargs.parse(DefaultSubparser, args=["--x", "1", "c", "--y", "3"])
+        dcargs.cli(DefaultSubparser, args=["--x", "1", "c", "--y", "3"])
 
 
 def test_optional_subparser():
@@ -210,23 +204,23 @@ def test_optional_subparser():
         x: int
         bc: Optional[Union[OptionalHTTPServer, OptionalSMTPServer]]
 
-    assert dcargs.parse(
+    assert dcargs.cli(
         OptionalSubparser, args=["--x", "1", "optional-http-server", "--y", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalHTTPServer(y=3))
-    assert dcargs.parse(
+    assert dcargs.cli(
         OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--z", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalSMTPServer(z=3))
-    assert dcargs.parse(OptionalSubparser, args=["--x", "1"]) == OptionalSubparser(
+    assert dcargs.cli(OptionalSubparser, args=["--x", "1"]) == OptionalSubparser(
         x=1, bc=None
     )
 
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.parse(
+        dcargs.cli(
             OptionalSubparser, args=["--x", "1", "optional-http-server", "--z", "3"]
         )
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.parse(
+        dcargs.cli(
             OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--y", "3"]
         )

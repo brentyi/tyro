@@ -10,5 +10,5 @@ def test_dynamic():
     A = make_dataclass("A", [("b", B, field())])
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
-    assert dcargs.parse(A, args=["--b.c", "5"]) == A(b=B(c=5))
+        dcargs.cli(A, args=[])
+    assert dcargs.cli(A, args=["--b.c", "5"]) == A(b=B(c=5))

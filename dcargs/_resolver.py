@@ -3,20 +3,23 @@
 import copy
 import dataclasses
 import functools
-from typing import Dict, List, Tuple, Type, TypeVar
+from typing import Callable, Dict, List, Tuple, Type, TypeVar, Union
 
 from typing_extensions import get_args, get_origin, get_type_hints
 
 
-def is_dataclass(cls: Type) -> bool:
+def is_dataclass(cls: Union[Type, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
     origin_cls = get_origin(cls)
     return dataclasses.is_dataclass(cls if origin_cls is None else origin_cls)
 
 
-def resolve_generic_classes(
-    cls: Type,
-) -> Tuple[Type, Dict[TypeVar, Type]]:
+TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
+
+
+def resolve_generic_types(
+    cls: TypeOrCallable,
+) -> Tuple[TypeOrCallable, Dict[TypeVar, Type]]:
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
 

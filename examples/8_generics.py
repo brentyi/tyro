@@ -30,5 +30,5 @@ class Args(Generic[ShapeType]):
 
 
 if __name__ == "__main__":
-    args = dcargs.parse(Args[Triangle])
+    args = dcargs.cli(Args[Triangle])
     print(args)
