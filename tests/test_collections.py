@@ -13,11 +13,11 @@ def test_tuples_fixed():
     class A:
         x: Tuple[int, int, int]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_tuples_fixed_mixed():
@@ -25,11 +25,11 @@ def test_tuples_fixed_mixed():
     class A:
         x: Tuple[int, str, int]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, "2", 3))
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, "2", 3))
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_tuples_with_default():
@@ -37,10 +37,10 @@ def test_tuples_with_default():
     class A:
         x: Tuple[int, int, int] = (0, 1, 2)
 
-    assert dcargs.parse(A, args=[]) == A(x=(0, 1, 2))
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    assert dcargs.cli(A, args=[]) == A(x=(0, 1, 2))
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
 
 
 def test_tuples_fixed_multitype():
@@ -48,11 +48,11 @@ def test_tuples_fixed_multitype():
     class A:
         x: Tuple[int, str, float]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3.5"]) == A(x=(1, "2", 3.5))
+    assert dcargs.cli(A, args=["--x", "1", "2", "3.5"]) == A(x=(1, "2", 3.5))
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_tuples_fixed_bool():
@@ -60,13 +60,13 @@ def test_tuples_fixed_bool():
     class A:
         x: Tuple[bool, bool, bool]
 
-    assert dcargs.parse(A, args=["--x", "True", "True", "False"]) == A(
+    assert dcargs.cli(A, args=["--x", "True", "True", "False"]) == A(
         x=(True, True, False)
     )
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_tuples_variable():
@@ -74,11 +74,11 @@ def test_tuples_variable():
     class A:
         x: Tuple[int, ...]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_tuples_variable_bool():
@@ -86,13 +86,13 @@ def test_tuples_variable_bool():
     class A:
         x: Tuple[bool, ...]
 
-    assert dcargs.parse(A, args=["--x", "True", "True", "False"]) == A(
+    assert dcargs.cli(A, args=["--x", "True", "True", "False"]) == A(
         x=(True, True, False)
     )
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_tuples_variable_optional():
@@ -100,10 +100,10 @@ def test_tuples_variable_optional():
     class A:
         x: Optional[Tuple[int, ...]]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
-    assert dcargs.parse(A, args=[]) == A(x=None)
+        dcargs.cli(A, args=["--x"])
+    assert dcargs.cli(A, args=[]) == A(x=None)
 
 
 def test_sequences():
@@ -111,11 +111,11 @@ def test_sequences():
     class A:
         x: Sequence[int]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_lists():
@@ -123,11 +123,11 @@ def test_lists():
     class A:
         x: List[int]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_list_with_literal():
@@ -135,13 +135,13 @@ def test_list_with_literal():
     class A:
         x: List[Literal[1, 2, 3]]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "1", "2", "3", "4"])
+        dcargs.cli(A, args=["--x", "1", "2", "3", "4"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_list_with_enums():
@@ -154,15 +154,15 @@ def test_list_with_enums():
     class A:
         x: List[Color]
 
-    assert dcargs.parse(A, args=["--x", "RED", "RED", "BLUE"]) == A(
+    assert dcargs.cli(A, args=["--x", "RED", "RED", "BLUE"]) == A(
         x=[Color.RED, Color.RED, Color.BLUE]
     )
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "RED", "RED", "YELLOW"])
+        dcargs.cli(A, args=["--x", "RED", "RED", "YELLOW"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_lists_with_default():
@@ -177,8 +177,8 @@ def test_lists_with_default():
             default_factory=[Color.RED, Color.GREEN].copy
         )
 
-    assert dcargs.parse(A, args=[]) == A(x=[Color.RED, Color.GREEN])
-    assert dcargs.parse(A, args=["--x", "RED", "GREEN", "BLUE"]) == A(
+    assert dcargs.cli(A, args=[]) == A(x=[Color.RED, Color.GREEN])
+    assert dcargs.cli(A, args=["--x", "RED", "GREEN", "BLUE"]) == A(
         x=[Color.RED, Color.GREEN, Color.BLUE]
     )
 
@@ -188,13 +188,13 @@ def test_lists_bool():
     class A:
         x: List[bool]
 
-    assert dcargs.parse(A, args=["--x", "True", "False", "True"]) == A(
+    assert dcargs.cli(A, args=["--x", "True", "False", "True"]) == A(
         x=[True, False, True]
     )
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_sets():
@@ -202,11 +202,11 @@ def test_sets():
     class A:
         x: Set[int]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
+    assert dcargs.cli(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_sets_with_default():
@@ -214,10 +214,10 @@ def test_sets_with_default():
     class A:
         x: Set[int] = dataclasses.field(default_factory={0, 1, 2}.copy)
 
-    assert dcargs.parse(A, args=[]) == A(x={0, 1, 2})
-    assert dcargs.parse(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
+    assert dcargs.cli(A, args=[]) == A(x={0, 1, 2})
+    assert dcargs.cli(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
+        dcargs.cli(A, args=["--x"])
 
 
 def test_optional_sequences():
@@ -225,10 +225,10 @@ def test_optional_sequences():
     class A:
         x: Optional[Sequence[int]]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
-    assert dcargs.parse(A, args=[]) == A(x=None)
+        dcargs.cli(A, args=["--x"])
+    assert dcargs.cli(A, args=[]) == A(x=None)
 
 
 def test_optional_lists():
@@ -236,7 +236,7 @@ def test_optional_lists():
     class A:
         x: Optional[List[int]]
 
-    assert dcargs.parse(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x"])
-    assert dcargs.parse(A, args=[]) == A(x=None)
+        dcargs.cli(A, args=["--x"])
+    assert dcargs.cli(A, args=[]) == A(x=None)

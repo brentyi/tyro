@@ -15,14 +15,14 @@ def test_choices_in_tuples():
     class A:
         x: Tuple[bool, bool]
 
-    assert dcargs.parse(A, args=["--x", "True", "False"]) == A((True, False))
+    assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, False))
 
     # OK
     @dataclasses.dataclass
     class A:
         x: Tuple[bool, Literal["True", "False"]]
 
-    assert dcargs.parse(A, args=["--x", "True", "False"]) == A((True, "False"))
+    assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, "False"))
 
     # Not OK: same argument, different choices.
     @dataclasses.dataclass
@@ -30,7 +30,7 @@ def test_choices_in_tuples():
         x: Tuple[bool, Literal["True", "False", "None"]]
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.parse(A, args=["--x", "True", "False"])
+        dcargs.cli(A, args=["--x", "True", "False"])
 
 
 def test_nested_sequence_types():
@@ -41,7 +41,7 @@ def test_nested_sequence_types():
         x: Tuple[Tuple[int, ...], ...]
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.parse(A, args=["--x", "0", "1"])
+        dcargs.cli(A, args=["--x", "0", "1"])
 
 
 def test_nested_optional_types():
@@ -57,7 +57,7 @@ def test_nested_optional_types():
         x: Tuple[Optional[int], ...]
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.parse(A, args=["--x", "0", "1"])
+        dcargs.cli(A, args=["--x", "0", "1"])
 
 
 def test_multiple_subparsers():
@@ -77,7 +77,7 @@ def test_multiple_subparsers():
         y: Union[Subcommmand1, Subcommand2]
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.parse(MultipleSubparsers)
+        dcargs.cli(MultipleSubparsers)
 
 
 # Must be global.
@@ -88,7 +88,7 @@ class _CycleDataclass:
 
 def test_cycle():
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.parse(_CycleDataclass)
+        dcargs.cli(_CycleDataclass)
 
 
 def test_generic_inherited():
@@ -116,4 +116,4 @@ def test_generic_inherited():
         pass
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.parse(ChildClass, args=["--x", 1, "--y", 2, "--z", 3])
+        dcargs.cli(ChildClass, args=["--x", 1, "--y", 2, "--z", 3])

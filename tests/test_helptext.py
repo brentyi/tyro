@@ -27,7 +27,7 @@ def test_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(Helptext, args=["--help"])
+            dcargs.cli(Helptext, args=["--help"])
     helptext = f.getvalue()
     assert Helptext.__doc__ in helptext
     assert ":\n  --x INT     Documentation 1\n" in helptext
@@ -53,7 +53,6 @@ def test_helptext_inherited():
         z: int = 3
         def some_method(self) -> None:  # noqa
             """Coverage stress test."""
-            pass
         # fmt: on
 
     @dataclasses.dataclass
@@ -63,7 +62,7 @@ def test_helptext_inherited():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(ChildClass, args=["--help"])
+            dcargs.cli(ChildClass, args=["--help"])
     helptext = f.getvalue()
     assert ":\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
@@ -83,7 +82,7 @@ def test_helptext_defaults():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(HelptextWithVariousDefaults, args=["--help"])
+            dcargs.cli(HelptextWithVariousDefaults, args=["--help"])
     helptext = f.getvalue()
     assert (
         "show this help message and exit\n  --x PATH              (default:"
@@ -110,7 +109,7 @@ def test_multiline_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(HelptextMultiline, args=["--help"])
+            dcargs.cli(HelptextMultiline, args=["--help"])
     helptext = f.getvalue()
     assert "  --x INT     Documentation 1\n" in helptext
     assert (
@@ -127,7 +126,7 @@ def test_grouped_helptext():
     @dataclasses.dataclass
     class HelptextGrouped:
         x: int  # Documentation 1
-
+        pass
         # Description of both y and z.
         y: int
         z: int = 3
@@ -135,7 +134,7 @@ def test_grouped_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(HelptextGrouped, args=["--help"])
+            dcargs.cli(HelptextGrouped, args=["--help"])
     helptext = f.getvalue()
     assert "  --x INT     Documentation 1\n" in helptext
     assert "  --y INT     Description of both y and z.\n" in helptext
@@ -151,7 +150,7 @@ def test_none_default_value_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(Config, args=["--help"])
+            dcargs.cli(Config, args=["--help"])
     helptext = f.getvalue()
     assert "  --x INT     An optional variable. (default: None)\n" in helptext
 
@@ -172,7 +171,7 @@ def test_helptext_hard_bool():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(HelptextHardString, args=["--help"])
+            dcargs.cli(HelptextHardString, args=["--help"])
     helptext = f.getvalue()
     assert "--x         Helptext. 2% milk.\n" in helptext
 
@@ -194,7 +193,7 @@ def test_helptext_with_inheritance():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(Child, args=["--help"])
+            dcargs.cli(Child, args=["--help"])
     helptext = f.getvalue()
     assert (
         "--x STR     Helptext. (default: 'This docstring may be tougher to parse!')\n"
@@ -224,7 +223,7 @@ def test_helptext_with_inheritance_overriden():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(Child2, args=["--help"])
+            dcargs.cli(Child2, args=["--help"])
     helptext = f.getvalue()
     assert (
         "--x STR     Helptext! (default: 'This docstring may be tougher to parse?')\n"
@@ -240,7 +239,7 @@ def test_tuple_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(TupleHelptext, args=["--help"])
+            dcargs.cli(TupleHelptext, args=["--help"])
     helptext = f.getvalue()
     assert "--x INT STR FLOAT\n" in helptext
 
@@ -253,7 +252,7 @@ def test_tuple_helptext_defaults():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(TupleHelptextDefaults, args=["--help"])
+            dcargs.cli(TupleHelptextDefaults, args=["--help"])
     helptext = f.getvalue()
     assert "--x INT STR STR  (default: 5 'hello world' hello)\n" in helptext
 
@@ -268,7 +267,7 @@ def test_generic_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(GenericTupleHelptext[int], args=["--help"])
+            dcargs.cli(GenericTupleHelptext[int], args=["--help"])
     helptext = f.getvalue()
     assert "--x INT\n" in helptext
 
@@ -283,7 +282,7 @@ def test_generic_tuple_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(GenericTupleHelptext[int], args=["--help"])
+            dcargs.cli(GenericTupleHelptext[int], args=["--help"])
     helptext = f.getvalue()
     assert "--x INT INT INT\n" in helptext
 
@@ -298,7 +297,7 @@ def test_generic_list_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(GenericTupleHelptext[int], args=["--help"])
+            dcargs.cli(GenericTupleHelptext[int], args=["--help"])
     helptext = f.getvalue()
     assert "--x INT [INT ...]\n" in helptext
 
@@ -312,7 +311,7 @@ def test_literal_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(LiteralHelptext, args=["--help"])
+            dcargs.cli(LiteralHelptext, args=["--help"])
     helptext = f.getvalue()
     assert "--x {1,2,3}  A number.\n" in helptext
 
@@ -326,6 +325,6 @@ def test_optional_literal_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.parse(OptionalLiteralHelptext, args=["--help"])
+            dcargs.cli(OptionalLiteralHelptext, args=["--help"])
     helptext = f.getvalue()
     assert "--x {1,2,3}  A number. (default: None)\n" in helptext

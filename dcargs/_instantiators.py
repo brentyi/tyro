@@ -84,14 +84,6 @@ def instantiator_from_type(
             type_from_typevar[typ],  # type: ignore
             type_from_typevar,
         )
-    elif isinstance(typ, TypeVar):
-        # Found an unbound TypeVar. This could be because inheriting from generics is
-        # currently not implemented. It's unclear whether this is feasible, because
-        # generics are lost in the mro: https://github.com/python/typing/issues/777
-        raise UnsupportedTypeAnnotationError(
-            f"Found unbound TypeVar {typ}. Note that inheritance from generic dataclass"
-            " types is currently not supported."
-        )
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().

@@ -1,5 +1,4 @@
 """Utilities for working with strings."""
-
 import enum
 import functools
 import re
@@ -32,7 +31,7 @@ def hyphen_separated_from_camel_case(name: str) -> str:
 
 
 def subparser_name_from_type(cls: Type) -> str:
-    cls, type_from_typevar = _resolver.resolve_generic_classes(cls)
+    cls, type_from_typevar = _resolver.resolve_generic_types(cls)
     if len(type_from_typevar) == 0:
         assert hasattr(cls, "__name__")
         return hyphen_separated_from_camel_case(cls.__name__)  # type: ignore

@@ -3,6 +3,7 @@ import enum
 import pathlib
 from typing import ClassVar, Optional
 
+import attr
 import pytest
 from typing_extensions import Annotated, Final, Literal  # Backward compatibility.
 
@@ -17,7 +18,8 @@ def test_basic():
         f: float
         p: pathlib.Path
 
-    assert dcargs.parse(
+    # We can directly pass a dataclass to `dcargs.cli()`:
+    assert dcargs.cli(
         ManyTypes,
         args=[
             "--i",
@@ -31,6 +33,43 @@ def test_basic():
         ],
     ) == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
+    # We can directly pass a function to `dcargs.cli()`:
+    def function(i: int, s: str, f: float, p: pathlib.Path) -> ManyTypes:
+        return ManyTypes(i=i, s=s, f=f, p=p)
+
+    assert dcargs.cli(
+        function,
+        args=[
+            "--i",
+            "5",
+            "--s",
+            "5",
+            "--f",
+            "5",
+            "--p",
+            "~",
+        ],
+    ) == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
+
+    # We can directly pass a generic class to `dcargs.cli()`:
+    class Wrapper:
+        def __init__(self, i: int, s: str, f: float, p: pathlib.Path):
+            self.inner = ManyTypes(i=i, s=s, f=f, p=p)
+
+    assert dcargs.cli(
+        Wrapper,
+        args=[
+            "--i",
+            "5",
+            "--s",
+            "5",
+            "--f",
+            "5",
+            "--p",
+            "~",
+        ],
+    ).inner == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
+
 
 def test_init_false():
     @dataclasses.dataclass
@@ -41,7 +80,7 @@ def test_init_false():
         p: pathlib.Path
         ignored: str = dataclasses.field(default="hello", init=False)
 
-    assert dcargs.parse(
+    assert dcargs.cli(
         InitFalseDataclass,
         args=[
             "--i",
@@ -56,7 +95,7 @@ def test_init_false():
     ) == InitFalseDataclass(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
     with pytest.raises(SystemExit):
-        dcargs.parse(
+        dcargs.cli(
             InitFalseDataclass,
             args=["--i", "5", "--s", "5", "--f", "5", "--p", "~", "--ignored", "blah"],
         )
@@ -68,7 +107,7 @@ def test_required():
         x: int
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
 
 def test_flag():
@@ -79,19 +118,19 @@ def test_flag():
         x: bool
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=[])
+        dcargs.cli(A, args=[])
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "1"])
+        dcargs.cli(A, args=["--x", "1"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "true"])
-    assert dcargs.parse(A, args=["--x", "True"]) == A(True)
+        dcargs.cli(A, args=["--x", "true"])
+    assert dcargs.cli(A, args=["--x", "True"]) == A(True)
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "0"])
+        dcargs.cli(A, args=["--x", "0"])
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "false"])
-    assert dcargs.parse(A, args=["--x", "False"]) == A(False)
+        dcargs.cli(A, args=["--x", "false"])
+    assert dcargs.cli(A, args=["--x", "False"]) == A(False)
 
 
 def test_flag_default_false():
@@ -101,8 +140,8 @@ def test_flag_default_false():
     class A:
         x: bool = False
 
-    assert dcargs.parse(A, args=[]) == A(False)
-    assert dcargs.parse(A, args=["--x"]) == A(True)
+    assert dcargs.cli(A, args=[]) == A(False)
+    assert dcargs.cli(A, args=["--x"]) == A(True)
 
 
 def test_flag_default_true():
@@ -112,8 +151,8 @@ def test_flag_default_true():
     class A:
         x: bool = True
 
-    assert dcargs.parse(A, args=[]) == A(True)
-    assert dcargs.parse(A, args=["--no-x"]) == A(False)
+    assert dcargs.cli(A, args=[]) == A(True)
+    assert dcargs.cli(A, args=["--no-x"]) == A(False)
 
 
 def test_flag_default_true_nested():
@@ -127,8 +166,8 @@ def test_flag_default_true_nested():
     class A:
         x: NestedDefaultTrue
 
-    assert dcargs.parse(A, args=[]) == A(NestedDefaultTrue(True))
-    assert dcargs.parse(A, args=["--x.no-x"]) == A(NestedDefaultTrue(False))
+    assert dcargs.cli(A, args=[]) == A(NestedDefaultTrue(True))
+    assert dcargs.cli(A, args=["--x.no-x"]) == A(NestedDefaultTrue(False))
 
 
 def test_default():
@@ -136,7 +175,7 @@ def test_default():
     class A:
         x: int = 5
 
-    assert dcargs.parse(A, args=[]) == A()
+    assert dcargs.cli(A, args=[]) == A()
 
 
 def test_default_factory():
@@ -144,7 +183,7 @@ def test_default_factory():
     class A:
         x: int = dataclasses.field(default_factory=lambda: 5)
 
-    assert dcargs.parse(A, args=[]) == A()
+    assert dcargs.cli(A, args=[]) == A()
 
 
 def test_optional():
@@ -152,7 +191,7 @@ def test_optional():
     class A:
         x: Optional[int]
 
-    assert dcargs.parse(A, args=[]) == A(x=None)
+    assert dcargs.cli(A, args=[]) == A(x=None)
 
 
 def test_enum():
@@ -169,10 +208,10 @@ def test_enum():
     class EnumClassB:
         color: Color = Color.GREEN
 
-    assert dcargs.parse(EnumClassA, args=["--color", "RED"]) == EnumClassA(
+    assert dcargs.cli(EnumClassA, args=["--color", "RED"]) == EnumClassA(
         color=Color.RED
     )
-    assert dcargs.parse(EnumClassB, args=[]) == EnumClassB()
+    assert dcargs.cli(EnumClassB, args=[]) == EnumClassB()
 
 
 def test_literal():
@@ -180,9 +219,9 @@ def test_literal():
     class A:
         x: Literal[0, 1, 2]
 
-    assert dcargs.parse(A, args=["--x", "1"]) == A(x=1)
+    assert dcargs.cli(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):
-        assert dcargs.parse(A, args=["--x", "3"])
+        assert dcargs.cli(A, args=["--x", "3"])
 
 
 def test_literal_enum():
@@ -195,10 +234,10 @@ def test_literal_enum():
     class A:
         x: Literal[Color.RED, Color.GREEN]
 
-    assert dcargs.parse(A, args=["--x", "RED"]) == A(x=Color.RED)
-    assert dcargs.parse(A, args=["--x", "GREEN"]) == A(x=Color.GREEN)
+    assert dcargs.cli(A, args=["--x", "RED"]) == A(x=Color.RED)
+    assert dcargs.cli(A, args=["--x", "GREEN"]) == A(x=Color.GREEN)
     with pytest.raises(SystemExit):
-        assert dcargs.parse(A, args=["--x", "BLUE"])
+        assert dcargs.cli(A, args=["--x", "BLUE"])
 
 
 def test_optional_literal():
@@ -206,10 +245,10 @@ def test_optional_literal():
     class A:
         x: Optional[Literal[0, 1, 2]]
 
-    assert dcargs.parse(A, args=["--x", "1"]) == A(x=1)
+    assert dcargs.cli(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):
-        assert dcargs.parse(A, args=["--x", "3"])
-    assert dcargs.parse(A, args=[]) == A(x=None)
+        assert dcargs.cli(A, args=["--x", "3"])
+    assert dcargs.cli(A, args=[]) == A(x=None)
 
 
 def test_annotated():
@@ -219,7 +258,7 @@ def test_annotated():
     class A:
         x: Annotated[int, "some label"] = 3
 
-    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_annotated_optional():
@@ -229,8 +268,8 @@ def test_annotated_optional():
     class A:
         x: Annotated[Optional[int], "some label"] = 3
 
-    assert dcargs.parse(A, args=[]) == A(x=3)
-    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+    assert dcargs.cli(A, args=[]) == A(x=3)
+    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_optional_annotated():
@@ -240,8 +279,8 @@ def test_optional_annotated():
     class A:
         x: Optional[Annotated[int, "some label"]] = 3
 
-    assert dcargs.parse(A, args=[]) == A(x=3)
-    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+    assert dcargs.cli(A, args=[]) == A(x=3)
+    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_final():
@@ -251,7 +290,7 @@ def test_final():
     class A:
         x: Final[int] = 3
 
-    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_final_optional():
@@ -259,8 +298,8 @@ def test_final_optional():
     class A:
         x: Final[Optional[int]] = 3
 
-    assert dcargs.parse(A, args=[]) == A(x=3)
-    assert dcargs.parse(A, args=["--x", "5"]) == A(x=5)
+    assert dcargs.cli(A, args=[]) == A(x=3)
+    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_classvar():
@@ -271,33 +310,8 @@ def test_classvar():
         x: ClassVar[int] = 5
 
     with pytest.raises(SystemExit):
-        dcargs.parse(A, args=["--x", "1"])
-    assert dcargs.parse(A, args=[]) == A()
-
-
-# TODO: implement this!
-# def test_optional_nested():
-#     @dataclasses.dataclass
-#     class OptionalNestedChild:
-#         y: int
-#         z: int
-#
-#     @dataclasses.dataclass
-#     class OptionalNested:
-#         x: int
-#         b: Optional[OptionalNestedChild]
-#
-#     assert dcargs.parse(OptionalNested, args=["--x", "1"]) == OptionalNested(
-#         x=1, b=None
-#     )
-#     with pytest.raises(SystemExit):
-#         dcargs.parse(OptionalNested, args=["--x", "1", "--b.y", "3"])
-#     with pytest.raises(SystemExit):
-#         dcargs.parse(OptionalNested, args=["--x", "1", "--b.z", "3"])
-#
-#     assert dcargs.parse(
-#         OptionalNested, args=["--x", "1", "--b.y", "2", "--b.z", "3"]
-#     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
+        dcargs.cli(A, args=["--x", "1"])
+    assert dcargs.cli(A, args=[]) == A()
 
 
 def test_parse_empty_description():
@@ -307,4 +321,4 @@ def test_parse_empty_description():
     class A:
         x: int = 0
 
-    assert dcargs.parse(A, description=None, args=[]) == A(x=0)
+    assert dcargs.cli(A, description=None, args=[]) == A(x=0)

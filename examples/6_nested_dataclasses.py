@@ -8,8 +8,6 @@ on the same line.
 import dataclasses
 import enum
 
-from typing_extensions import Annotated
-
 import dcargs
 
 
@@ -24,7 +22,7 @@ class OptimizerConfig:
     algorithm: OptimizerType = OptimizerType.ADAM
 
     # Learning rate to use.
-    learning_rate: Annotated[float, "Learning rate"] = 3e-4
+    learning_rate: float = 3e-4
 
     # Coefficient for L2 regularization.
     weight_decay: float = 1e-2
@@ -34,7 +32,7 @@ class OptimizerConfig:
 class ExperimentConfig:
     """A nested experiment configuration. Note that the argument parser description is
     pulled from this docstring by default, but can also be overrided with
-    `dcargs.parse`'s `description=` flag."""
+    `dcargs.cli()`'s `description=` flag."""
 
     # Experiment name to use.
     experiment_name: str
@@ -48,6 +46,6 @@ class ExperimentConfig:
 
 
 if __name__ == "__main__":
-    config = dcargs.parse(ExperimentConfig)
+    config = dcargs.cli(ExperimentConfig)
     print(config)
     print(dcargs.to_yaml(config))
