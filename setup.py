@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setup(
     name="dcargs",
-    version="0.0.21",
-    description="Portable, reusable, strongly typed CLIs from dataclass definitions",
+    version="0.1.0",
+    description="Strongly typed, zero effort CLIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="http://github.com/brentyi/dcargs",
@@ -16,11 +16,17 @@ setup(
     packages=find_packages(),
     package_data={"dcargs": ["py.typed"]},
     python_requires=">=3.7",
-    install_requires=["typing_extensions>=4.0.0", "pyyaml", "termcolor"],
+    install_requires=[
+        "docstring_parser",
+        "typing_extensions>=4.0.0",
+        "pyyaml",
+        "termcolor",
+    ],
     extras_require={
         "testing": [
             "pytest",
             "pytest-cov",
+            "attrs",
         ],
         "type-checking": [
             "mypy",

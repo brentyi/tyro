@@ -1,15 +1,13 @@
-"""Core functionality for instantiating dataclasses from argparse namespaces."""
+"""Core functionality for calling functions with arguments specified by argparse
+namespaces."""
 
-from typing import TYPE_CHECKING, Any, Dict, Set, Tuple, Type, TypeVar
+from __future__ import annotations
+
+from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar
 
 from typing_extensions import get_args
 
-from . import _resolver, _strings
-
-if TYPE_CHECKING:
-    from . import _parsers
-
-T = TypeVar("T")
+from . import _parsers, _resolver, _strings
 
 
 class FieldActionValueError(Exception):
@@ -17,23 +15,22 @@ class FieldActionValueError(Exception):
     the CLI are invalid."""
 
 
-DataclassType = TypeVar("DataclassType")
+T = TypeVar("T")
 
 
-def construct_dataclass(
-    cls: Type[DataclassType],
-    parser_definition: "_parsers.ParserSpecification",
+def call_from_args(
+    f: Callable[..., T],
+    parser_definition: _parsers.ParserSpecification,
     value_from_arg: Dict[str, Any],
     field_name_prefix: str = "",
-) -> Tuple[DataclassType, Set[str]]:
-    """Construct a dataclass object from a dictionary of values from argparse.
+) -> Tuple[T, Set[str]]:
+    """Call `f` with arguments specified by a dictionary of values from argparse.
 
-    Returns dataclass object and set of used arguments."""
+    Returns the output of `f` and a set of used arguments."""
 
-    assert _resolver.is_dataclass(cls)
+    f, type_from_typevar = _resolver.resolve_generic_types(f)
 
-    cls, type_from_typevar = _resolver.resolve_generic_classes(cls)
-
+    args: List[str] = []
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
 
@@ -49,18 +46,15 @@ def construct_dataclass(
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[arg.prefix + arg.field.name] = arg
 
-    for field in _resolver.resolved_fields(cls):  # type: ignore
-        if not field.init:
-            continue
-
+    for field in _parsers._fields_from_callable(f, default_instance=None):  # type: ignore
         value: Any
         prefixed_field_name = field_name_prefix + field.name
 
         # Resolve field type.
         field_type = (
-            type_from_typevar[field.type]  # type: ignore
-            if field.type in type_from_typevar
-            else field.type
+            type_from_typevar[field.typ]  # type: ignore
+            if field.typ in type_from_typevar
+            else field.typ
         )
 
         if prefixed_field_name in arg_from_prefixed_field_name:
@@ -77,10 +71,10 @@ def construct_dataclass(
                     )
         elif (
             prefixed_field_name
-            in parser_definition.helptext_from_nested_dataclass_field_name
+            in parser_definition.helptext_from_nested_class_field_name
         ):
-            # Nested dataclasses.
-            value, consumed_keywords_child = construct_dataclass(
+            # Nested callable.
+            value, consumed_keywords_child = call_from_args(
                 field_type,
                 parser_definition,
                 value_from_arg,
@@ -111,19 +105,22 @@ def construct_dataclass(
                     lambda x: x if x not in type_from_typevar else type_from_typevar[x],
                     get_args(field_type),
                 )
-                chosen_cls = None
+                chosen_f = None
                 for option in options:
                     if _strings.subparser_name_from_type(option) == subparser_name:
-                        chosen_cls = option
+                        chosen_f = option
                         break
-                assert chosen_cls is not None
-                value, consumed_keywords_child = construct_dataclass(
-                    chosen_cls,
+                assert chosen_f is not None
+                value, consumed_keywords_child = call_from_args(
+                    chosen_f,
                     parser_definition.subparsers.parser_from_name[subparser_name],
                     value_from_arg,
                 )
                 consumed_keywords |= consumed_keywords_child
 
-        kwargs[field.name] = value
+        if field.positional:
+            args.append(value)
+        else:
+            kwargs[field.name] = value
 
-    return cls(**kwargs), consumed_keywords  # type: ignore
+    return f(*args, **kwargs), consumed_keywords  # type: ignore

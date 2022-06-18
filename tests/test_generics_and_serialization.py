@@ -21,7 +21,7 @@ def test_tuple_generic_variable():
     class TupleGenericVariable(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ...]
 
-    assert dcargs.parse(
+    assert dcargs.cli(
         TupleGenericVariable[int], args=["--xyz", "1", "2", "3"]
     ) == TupleGenericVariable((1, 2, 3))
 
@@ -31,7 +31,7 @@ def test_tuple_generic_fixed():
     class TupleGenericFixed(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ScalarType, ScalarType]
 
-    assert dcargs.parse(
+    assert dcargs.cli(
         TupleGenericFixed[int], args=["--xyz", "1", "2", "3"]
     ) == TupleGenericFixed((1, 2, 3))
 
@@ -55,7 +55,7 @@ def test_simple_generic():
         point_continuous: Point3[float]
         point_discrete: Point3[int]
 
-    parsed_instance = dcargs.parse(
+    parsed_instance = dcargs.cli(
         SimpleGeneric,
         args=[
             "--point-continuous.x",
@@ -84,7 +84,7 @@ def test_simple_generic():
 
     with pytest.raises(SystemExit):
         # Accidentally pass in floats instead of ints for discrete
-        dcargs.parse(
+        dcargs.cli(
             SimpleGeneric,
             args=[
                 "--point-continuous.x",
@@ -114,7 +114,7 @@ def test_multilevel_generic():
         b: Point3[ScalarType]
         c: Point3[ScalarType]
 
-    parsed_instance = dcargs.parse(
+    parsed_instance = dcargs.cli(
         Triangle[float],
         args=[
             "--a.x",
@@ -163,7 +163,7 @@ def test_generic_nested_dataclass():
     class DataclassGeneric(Generic[T]):
         child: T
 
-    parsed_instance = dcargs.parse(
+    parsed_instance = dcargs.cli(
         DataclassGeneric[Child], args=["--child.a", "5", "--child.b", "7"]
     )
     assert parsed_instance == DataclassGeneric(Child(5, 7))
@@ -186,13 +186,13 @@ def test_generic_subparsers():
     class Subparser(Generic[T1, T2]):
         command: Union[T1, T2]
 
-    parsed_instance = dcargs.parse(
+    parsed_instance = dcargs.cli(
         Subparser[CommandOne, CommandTwo], args="command-one --a 5".split(" ")
     )
     assert parsed_instance == Subparser(CommandOne(5))
     _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
 
-    parsed_instance = dcargs.parse(
+    parsed_instance = dcargs.cli(
         Subparser[CommandOne, CommandTwo], args="command-two --b 7".split(" ")
     )
     assert parsed_instance == Subparser(CommandTwo(7))
@@ -213,7 +213,7 @@ def test_generic_subparsers_in_container():
     class Subparser(Generic[T1, T2]):
         command: Union[T1, T2]
 
-    parsed_instance = dcargs.parse(
+    parsed_instance = dcargs.cli(
         Subparser[Command[int], Command[float]], args="command-int --a 5 3".split(" ")
     )
     assert parsed_instance == Subparser(Command([5, 3])) and isinstance(
@@ -223,7 +223,7 @@ def test_generic_subparsers_in_container():
         Subparser[Command[int], Command[float]], parsed_instance
     )
 
-    parsed_instance = dcargs.parse(
+    parsed_instance = dcargs.cli(
         Subparser[Command[int], Command[float]], args="command-float --a 7 2".split(" ")
     )
     assert parsed_instance == Subparser(Command([7.0, 2.0])) and isinstance(
@@ -236,27 +236,29 @@ def test_generic_subparsers_in_container():
 
 # Not implemented. It's unclear whether this is feasible, because generics are lost in
 # the mro: https://github.com/python/typing/issues/777
-#
-# def test_generic_inherited():
-#     class UnrelatedParentClass:
-#         pass
-#
-#     T = TypeVar("T")
-#
-#     @dataclasses.dataclass
-#     class ActualParentClass(Generic[T]):
-#         x: T  # Documentation 1
-#
-#         # Documentation 2
-#         y: T
-#
-#         z: T = 3
-#         """Documentation 3"""
-#
-#     @dataclasses.dataclass
-#     class ChildClass(UnrelatedParentClass, ActualParentClass[int]):
-#         pass
-#
-#     assert dcargs.parse(ChildClass, args=["--x", 1, "--y", 2, "--z", 3]) == ChildClass(
-#         1, 2, 3
-#     )
+
+
+def test_generic_inherited():
+    class UnrelatedParentClass:
+        pass
+
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class ActualParentClass(Generic[T]):
+        x: T  # Documentation 1
+
+        # Documentation 2
+        y: T
+
+        z: T = 3
+        """Documentation 3"""
+
+    @dataclasses.dataclass
+    class ChildClass(UnrelatedParentClass, ActualParentClass[int]):
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        assert dcargs.cli(
+            ChildClass, args=["--x", 1, "--y", 2, "--z", 3]
+        ) == ChildClass(1, 2, 3)

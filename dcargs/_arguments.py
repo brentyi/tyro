@@ -1,23 +1,24 @@
+from __future__ import annotations
+
 import argparse
 import dataclasses
 import enum
 import shlex
-from typing import Any, Dict, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Type, TypeVar, Union
 
-from . import _docstrings, _instantiators
+from . import _instantiators
+
+if TYPE_CHECKING:
+    from . import _parsers
 
 
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
     """Options for defining arguments. Contains all necessary arguments for argparse's
-    add_argument() method.
-
-    TODO: this class (as well as major other parts of this library) has succumbed a bit
-    to entropy and could benefit from some refactoring."""
+    add_argument() method."""
 
     prefix: str  # Prefix for nesting.
-    field: dataclasses.Field  # Corresponding dataclass field.
-    parent_class: Type  # Class that this field belongs to.
+    field: _parsers.Field  # Corresponding dataclass field.
 
     # Action that is called on parsed arguments. This handles conversions from strings
     # to our desired types.
@@ -59,9 +60,8 @@ class ArgumentDefinition:
         if "choices" in kwargs:
             kwargs["choices"] = list(map(str, kwargs["choices"]))
 
-        kwargs.pop("field")
-        kwargs.pop("parent_class")
         kwargs.pop("prefix")
+        kwargs.pop("field")
         kwargs.pop("instantiator")
         kwargs.pop("name")
 
@@ -70,34 +70,31 @@ class ArgumentDefinition:
 
     def get_flag(self) -> str:
         """Get --flag representation, with a prefix applied for nested dataclasses."""
-        return "--" + (self.prefix + self.name).replace("_", "-")
+        if self.field.positional:
+            return (self.prefix + self.name).replace("_", "-")
+        else:
+            return "--" + (self.prefix + self.name).replace("_", "-")
 
     @staticmethod
-    def make_from_field(
-        parent_class: Type,
-        field: dataclasses.Field,
+    def from_field(
+        field: _parsers.Field,
         type_from_typevar: Dict[TypeVar, Type],
-        default: Optional[Any],
-    ) -> "ArgumentDefinition":
-        """Create an argument definition from a field. Also returns a field action, which
-        specifies special instructions for reconstruction."""
-
-        assert field.init, "Field must be in class constructor"
-
+    ) -> ArgumentDefinition:
+        """"""
         arg = ArgumentDefinition(
             prefix="",
             field=field,
-            parent_class=parent_class,
             instantiator=None,
             name=field.name,
-            type=field.type,
-            default=default,
+            type=field.typ,
+            default=field.default,
         )
         arg = _transform_required_if_default_set(arg)
         arg = _transform_handle_boolean_flags(arg)
         arg = _transform_recursive_instantiator_from_type(arg, type_from_typevar)
         arg = _transform_generate_helptext(arg)
         arg = _transform_convert_defaults_to_strings(arg)
+        arg = _transform_positional_special_handling(arg)
         return arg
 
 
@@ -107,7 +104,8 @@ def _transform_required_if_default_set(arg: ArgumentDefinition) -> ArgumentDefin
     # Mark arg as required if a default is set.
     if arg.default is None:
         return dataclasses.replace(arg, required=True)
-    return arg
+
+    return dataclasses.replace(arg)
 
 
 def _transform_handle_boolean_flags(arg: ArgumentDefinition) -> ArgumentDefinition:
@@ -166,12 +164,16 @@ def _transform_recursive_instantiator_from_type(
 def _transform_generate_helptext(arg: ArgumentDefinition) -> ArgumentDefinition:
     """Generate helptext from docstring and argument name."""
     help_parts = []
-    docstring_help = _docstrings.get_field_docstring(arg.parent_class, arg.field.name)
-    if docstring_help is not None:
+
+    docstring_help = arg.field.helptext
+
+    if docstring_help is not None and docstring_help != "":
         # Note that the percent symbol needs some extra handling in argparse.
         # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
         docstring_help = docstring_help.replace("%", "%%")
         help_parts.append(docstring_help)
+    elif arg.field.positional:
+        help_parts.append(str(arg.metavar))
 
     if arg.action is not None:
         # Don't show defaults for boolean flags.
@@ -213,7 +215,23 @@ def _transform_convert_defaults_to_strings(
 
     if arg.default is None or arg.action is not None:
         return arg
-    elif arg.nargs is not None:
+    elif arg.nargs is not None and arg.nargs != "?":
         return dataclasses.replace(arg, default=tuple(map(as_str, arg.default)))
     else:
         return dataclasses.replace(arg, default=as_str(arg.default))
+
+
+def _transform_positional_special_handling(
+    arg: ArgumentDefinition,
+) -> ArgumentDefinition:
+    """Special handling for positional args."""
+
+    if not arg.field.positional:
+        return arg
+
+    return dataclasses.replace(
+        arg,
+        metavar=(arg.prefix + arg.name).upper(),
+        required=None,
+        nargs="?" if not arg.required else arg.nargs,
+    )
