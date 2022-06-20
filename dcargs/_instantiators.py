@@ -38,7 +38,7 @@ import dataclasses
 import enum
 from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
 
-from typing_extensions import Final, Literal, get_args, get_origin
+from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
 from . import _strings
 
@@ -115,9 +115,9 @@ def _instantiator_from_container_type(
     if type_origin is None:
         return None
 
-    # Unwrap Final types.
-    if type_origin is Final:
-        (contained_type,) = get_args(typ)
+    # Unwrap Annotated and Final types.
+    if type_origin in (Annotated, Final):
+        contained_type = get_args(typ)[0]
         return instantiator_from_type(contained_type, type_from_typevar)
 
     # List, tuples, and sequences.
@@ -192,9 +192,12 @@ def _instantiator_from_container_type(
     # Optionals.
     if type_origin is Union:
         options = set(get_args(typ))
-        assert (
-            len(options) == 2 and type(None) in options
-        ), "Union must be either over dataclasses (for subparsers) or Optional"
+        if len(options) != 2 or type(None) not in options:
+            # Note that the subparsers logic happens much earlier.
+            raise UnsupportedTypeAnnotationError(
+                "Union must be either over dataclasses (for subparsers) or Optional"
+                " (Union[T, None])"
+            )
         (typ,) = options - {type(None)}
         instantiator, metadata = _instantiator_from_type_inner(
             typ, type_from_typevar, allow_sequences=True
@@ -204,10 +207,11 @@ def _instantiator_from_container_type(
     # Literals.
     if type_origin is Literal:
         choices = get_args(typ)
+        if not len(set(map(type, choices))) == 1:
+            raise UnsupportedTypeAnnotationError(
+                "All choices in literal must have the same type!"
+            )
         contained_type = type(next(iter(choices)))
-        assert all(
-            map(lambda c: type(c) == contained_type, choices)
-        ), "All choices in literal must have the same type!"
         if issubclass(contained_type, enum.Enum):
             choices = tuple(map(lambda x: x.name, choices))
         instantiator, metadata = _instantiator_from_type_inner(
