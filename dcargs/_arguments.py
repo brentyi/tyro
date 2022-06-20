@@ -4,12 +4,9 @@ import argparse
 import dataclasses
 import enum
 import shlex
-from typing import TYPE_CHECKING, Any, Dict, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Optional, Set, Tuple, Type, TypeVar, Union
 
-from . import _instantiators
-
-if TYPE_CHECKING:
-    from . import _parsers
+from . import _fields, _instantiators
 
 
 @dataclasses.dataclass(frozen=True)
@@ -18,7 +15,7 @@ class ArgumentDefinition:
     add_argument() method."""
 
     prefix: str  # Prefix for nesting.
-    field: _parsers.Field  # Corresponding dataclass field.
+    field: _fields.Field  # Corresponding dataclass field.
 
     # Action that is called on parsed arguments. This handles conversions from strings
     # to our desired types.
@@ -77,7 +74,7 @@ class ArgumentDefinition:
 
     @staticmethod
     def from_field(
-        field: _parsers.Field,
+        field: _fields.Field,
         type_from_typevar: Dict[TypeVar, Type],
     ) -> ArgumentDefinition:
         """"""

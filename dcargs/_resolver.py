@@ -2,7 +2,6 @@
 
 import copy
 import dataclasses
-import functools
 from typing import Callable, Dict, List, Tuple, Type, TypeVar, Union
 
 from typing_extensions import get_args, get_origin, get_type_hints
@@ -33,7 +32,6 @@ def resolve_generic_types(
         return cls, {}
 
 
-@functools.lru_cache(maxsize=16)
 def resolved_fields(cls: Type) -> List[dataclasses.Field]:
     """Similar to dataclasses.fields, but resolves forward references."""
 

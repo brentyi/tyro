@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar
 
 from typing_extensions import get_args
 
-from . import _parsers, _resolver, _strings
+from . import _fields, _parsers, _resolver, _strings
 
 
 class FieldActionValueError(Exception):
@@ -46,7 +46,7 @@ def call_from_args(
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[arg.prefix + arg.field.name] = arg
 
-    for field in _parsers._fields_from_callable(f, default_instance=None):  # type: ignore
+    for field in _fields.field_list_from_callable(f, default_instance=None):  # type: ignore
         value: Any
         prefixed_field_name = field_name_prefix + field.name
 

@@ -7,7 +7,6 @@ import collections.abc
 import dataclasses
 import inspect
 import itertools
-import warnings
 from typing import (
     Any,
     Callable,
@@ -20,32 +19,15 @@ from typing import (
     TypeVar,
     Union,
     cast,
-    get_type_hints,
 )
 
-import docstring_parser
 import termcolor
 import typing_extensions
 from typing_extensions import get_args, get_origin
 
-from . import _arguments, _docstrings, _instantiators, _resolver, _strings
+from . import _arguments, _docstrings, _fields, _instantiators, _resolver, _strings
 
 T = TypeVar("T")
-
-
-def _ensure_dataclass_instance_used_as_default_is_frozen(
-    field: dataclasses.Field, default_instance: Any
-) -> None:
-    """Ensure that a dataclass type used directly as a default value is marked as
-    frozen."""
-    assert dataclasses.is_dataclass(default_instance)
-    cls = type(default_instance)
-    if not cls.__dataclass_params__.frozen:
-        warnings.warn(
-            f"Mutable type {cls} is used as a default value for `{field.name}`. This is"
-            " dangerous! Consider using `dataclasses.field(default_factory=...)` or"
-            f" marking {cls} as frozen."
-        )
 
 
 _known_parsable_types = set(
@@ -88,106 +70,19 @@ def _is_parsable_type(typ: Any) -> bool:
     return False
 
 
-def _get_field_default(
-    field: dataclasses.Field, parent_default_instance: Any
-) -> Optional[Any]:
-    """Helper for getting the default instance for a field."""
-    field_default_instance = None
-    if field.default is not dataclasses.MISSING:
-        # Populate default from usual default value, or
-        # `dataclasses.field(default=...)`.
-        field_default_instance = field.default
-        if dataclasses.is_dataclass(field_default_instance):
-            _ensure_dataclass_instance_used_as_default_is_frozen(
-                field, field_default_instance
-            )
-    elif field.default_factory is not dataclasses.MISSING:
-        # Populate default from `dataclasses.field(default_factory=...)`.
-        field_default_instance = field.default_factory()
-
-    if parent_default_instance is not None:
-        # Populate default from some parent, eg `default_instance` in `dcargs.cli()`.
-        field_default_instance = getattr(parent_default_instance, field.name)
-    return field_default_instance
-
-
-@dataclasses.dataclass(frozen=True)
-class Field:
-    name: str
-    typ: Type
-    default: Any
-    helptext: Optional[str]
-    positional: bool
-
-
-def _fields_from_callable(f: Callable, default_instance: Any) -> List[Field]:
-    """Generate a list of generic 'field' objects corresponding to an input callable.
-
-    `f` can be from a dataclass type, regular class type, or function."""
-    out = []
-    f, type_from_typevar = _resolver.resolve_generic_types(f)
-    if _resolver.is_dataclass(f):
-        for field in _resolver.resolved_fields(f):
-            if not field.init:
-                continue
-            out.append(
-                Field(
-                    name=field.name,
-                    typ=field.type,
-                    default=_get_field_default(field, default_instance),
-                    helptext=_docstrings.get_field_docstring(cast(Type, f), field.name),
-                    positional=False,
-                )
-            )
-    else:
-        if isinstance(f, type):
-            hints = get_type_hints(f.__init__)  # type: ignore
-            docstring = inspect.getdoc(f.__init__)  # type: ignore
-        else:
-            hints = get_type_hints(f)
-            docstring = inspect.getdoc(f)
-
-        docstring_from_name = {}
-        if docstring is not None:
-            for param_doc in docstring_parser.parse(docstring).params:
-                docstring_from_name[param_doc.arg_name] = param_doc.description
-
-        for param in inspect.signature(f).parameters.values():
-            field_docstring = (
-                _docstrings.get_field_docstring(cast(Type, f), param.name)
-                if isinstance(f, type) and hasattr(f, "mro")
-                else None
-            )
-            out.append(
-                Field(
-                    name=param.name,
-                    # Note that param.annotation does not resolve forward references.
-                    typ=hints[param.name],
-                    default=param.default
-                    if param.default is not inspect.Parameter.empty
-                    else None,
-                    helptext=docstring_from_name.get(
-                        param.name,
-                        field_docstring,
-                    ),
-                    positional=param.kind is inspect.Parameter.POSITIONAL_ONLY,
-                )
-            )
-    return out
-
-
 @dataclasses.dataclass(frozen=True)
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
-    f: Callable
+    description: str
     args: List[_arguments.ArgumentDefinition]
     helptext_from_nested_class_field_name: Dict[str, Optional[str]]
     subparsers: Optional[SubparsersSpecification]
 
     @staticmethod
     def from_callable(
-        f: Callable,
+        f: Callable[..., T],
+        description: Optional[str],
         parent_classes: Set[Type],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Optional[T],
@@ -215,7 +110,10 @@ class ParserSpecification:
         args = []
         helptext_from_nested_class_field_name = {}
         subparsers = None
-        for field in _fields_from_callable(f=f, default_instance=default_instance):
+        field_list = _fields.field_list_from_callable(
+            f=f, default_instance=default_instance
+        )
+        for field in field_list:
 
             field = dataclasses.replace(
                 field,
@@ -258,6 +156,7 @@ class ParserSpecification:
             # (3) Handle nested callables.
             nested_parser = ParserSpecification.from_callable(
                 field.typ,
+                description=None,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
                 default_instance=field.default,
@@ -278,7 +177,9 @@ class ParserSpecification:
             helptext_from_nested_class_field_name[field.name] = field.helptext
 
         return ParserSpecification(
-            f=f,
+            description=description
+            if description is not None
+            else _docstrings.get_callable_description(f),
             args=args,
             helptext_from_nested_class_field_name=helptext_from_nested_class_field_name,
             subparsers=subparsers,
@@ -286,6 +187,8 @@ class ParserSpecification:
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
+
+        parser.description = self.description
 
         def format_group_name(nested_field_name: str, required: bool) -> str:
             if required:
@@ -365,10 +268,7 @@ class ParserSpecification:
                 metavar=metavar,
             )
             for name, subparser_def in self.subparsers.parser_from_name.items():
-                subparser = argparse_subparsers.add_parser(
-                    name,
-                    description=_docstrings.get_callable_description(subparser_def.f),
-                )
+                subparser = argparse_subparsers.add_parser(name)
                 subparser_def.apply(subparser)
 
 
@@ -384,7 +284,7 @@ class SubparsersSpecification:
 
     @staticmethod
     def from_field(
-        field: Field,
+        field: _fields.Field,
         type_from_typevar: Dict[TypeVar, Type],
         parent_classes: Set[Type],
     ) -> Optional[SubparsersSpecification]:
@@ -403,7 +303,8 @@ class SubparsersSpecification:
             subparser_name = _strings.subparser_name_from_type(option)
             parser_from_name[subparser_name] = ParserSpecification.from_callable(
                 option,
-                parent_classes,
+                description=None,
+                parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
                 default_instance=None,
             )
