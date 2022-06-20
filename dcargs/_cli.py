@@ -1,9 +1,28 @@
 import argparse
 from typing import Callable, Optional, Sequence, TypeVar
 
-from . import _calling, _docstrings, _parsers, _resolver
+from . import _calling, _parsers, _resolver
 
 T = TypeVar("T")
+
+
+def parse(
+    f: Callable[..., T],
+    *,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[T] = None,
+) -> T:  # pragma: no cover
+    """Deprecated alias for `dcargs.cli()`."""
+    # import warnings
+    #
+    # warnings.warn(
+    #     "`dcargs.parse()` has been renamed `dcargs.cli()`. It will be removed"
+    #     " soon.",
+    #     DeprecationWarning,
+    #     stacklevel=2,
+    # )
+    return cli(f, description=description, args=args, default_instance=default_instance)
 
 
 def cli(
@@ -67,17 +86,14 @@ def cli(
     ), "Default instance specification is only supported for dataclasses!"
     parser_definition = _parsers.ParserSpecification.from_callable(
         f,
+        description=description,
         parent_classes=set(),  # Used for recursive calls.
         parent_type_from_typevar=None,  # Used for recursive calls.
         default_instance=default_instance,  # Overrides for default values.
     )
 
-    if description is None:
-        description = _docstrings.get_callable_description(f)
-
     # Parse using argparse!
     parser = argparse.ArgumentParser(
-        description=description,
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_definition.apply(parser)

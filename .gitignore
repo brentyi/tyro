@@ -8,5 +8,6 @@ __pycache__
 .hypothesis
 .ipynb_checkpoints
 .cache
+.coverage
 build/
 dist/

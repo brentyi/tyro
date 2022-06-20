@@ -60,6 +60,22 @@ def test_nested_optional_types():
         dcargs.cli(A, args=["--x", "0", "1"])
 
 
+def test_unsupported_union():
+    def main(x: Union[int, str]) -> None:
+        return
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main)
+
+
+def test_unsupported_literal():
+    def main(x: Literal[0, "5"]) -> None:
+        return
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main)
+
+
 def test_multiple_subparsers():
     """argparse doesn't support multiple subparsers."""
 

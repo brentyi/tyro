@@ -93,16 +93,16 @@ Returns:
 Notably, `dcargs.cli()` supports _nested_ classes and dataclasses, which enable
 expressive hierarchical configuration objects built on standard Python features.
 
-Our ultimate goal is an interface that's:
+Our ultimate goal is the ability build interfaces that are:
 
 - **Low-effort.** Type annotations, docstrings, and default values can be used
   to automatically generate argument parsers with informative helptext. This
   includes bells and whistles like enums, containers, etc.
 - **Strongly typed.** Unlike dynamic configuration namespaces produced by
   libraries like `argparse`, `YACS`, `abseil`, `hydra`, or `ml_collections`,
-  statically typed outputs mean that IDE-assisted autocomplete, rename,
-  refactor, go-to-definition operations work out-of-the-box, as do static
-  checking tools like `mypy` and `pyright`.
+  typed outputs mean that IDE-assisted autocomplete, rename, refactor,
+  go-to-definition operations work out-of-the-box, as do static checking tools
+  like `mypy` and `pyright`.
 - **Modular.** Most approaches to configuration objects require a centralized
   definition of all configurable fields. Supporting hierarchically nested
   configuration classes/dataclasses, however, makes it easy to distribute
@@ -301,8 +301,8 @@ serialization of arbitrary Python objects.
 
 ## Alternative tools
 
-The core functionality of `dcargs` --- generating argument parsers from type
-annotations --- can be found as a subset of the features offered by many other
+The core functionality of `dcargs` — generating argument parsers from type
+annotations — can be found as a subset of the features offered by many other
 libraries. A summary of some distinguishing features:
 
 |                                                                                                              | Choices from literals                                    | Generics | Docstrings as helptext | Nesting | Subparsers | Containers |

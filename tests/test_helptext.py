@@ -126,7 +126,6 @@ def test_grouped_helptext():
     @dataclasses.dataclass
     class HelptextGrouped:
         x: int  # Documentation 1
-        pass
         # Description of both y and z.
         y: int
         z: int = 3
