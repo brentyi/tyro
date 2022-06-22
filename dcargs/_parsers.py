@@ -42,32 +42,39 @@ _known_parsable_types = set(
 )
 
 
-def _is_parsable_type(typ: Any) -> bool:
-    """Heuristics for determining whether a type can be treated as a single argument.
-    This is true for built-in types like ints, strings, bools, etc, as well as
-    pathlib.Path."""
+def _is_possibly_nested_type(typ: Any) -> bool:
+    """Heuristics for determining whether a type can be treated as a 'nested type',
+    where a single field has multiple corresponding argumentsi (eg for nested
+    dataclasses or classes).
+
+    Examples of when we return False: int, str, List[int], List[str], pathlib.Path, etc.
+    """
 
     origin = get_origin(typ)
     if origin is not None:
         typ = origin
 
+    # Nested types should be callable.
+    if not callable(typ):
+        return False
+
     # Known parsable types: builtins like int/str/float/bool, collections, annotations.
     if typ in _known_parsable_types:
-        return True
+        return False
 
     # Simple heuristic: dataclasses should be treated as nested objects and are not
     # parsable.
     if dataclasses.is_dataclass(typ):
-        return False
+        return True
 
     # Non-parsable types like nested (data)classes should have fully type-annotated
     # inputs. If any inputs are unannotated (for example, in the case of pathlib.Path),
     # we can assume the type is parsable.
     for param in inspect.signature(typ).parameters.values():
         if param.annotation is inspect.Parameter.empty:
-            return True
+            return False
 
-    return False
+    return True
 
 
 @dataclasses.dataclass(frozen=True)
@@ -146,35 +153,35 @@ class ParserSpecification:
                 subparsers = subparsers_attempt
                 continue
 
-            # (2) Handle primitive types. These produce a single argument!
-            if _is_parsable_type(field.typ):
-                args.append(
-                    _arguments.ArgumentDefinition.from_field(field, type_from_typevar)
+            # (2) Handle nested callables.
+            if _is_possibly_nested_type(field.typ):
+                nested_parser = ParserSpecification.from_callable(
+                    field.typ,
+                    description=None,
+                    parent_classes=parent_classes,
+                    parent_type_from_typevar=type_from_typevar,
+                    default_instance=field.default,
                 )
+                for arg in nested_parser.args:
+                    args.append(
+                        dataclasses.replace(
+                            arg,
+                            prefix=field.name
+                            + _strings.NESTED_DATACLASS_DELIMETER
+                            + arg.prefix,
+                        )
+                    )
+                for k, v in nested_parser.helptext_from_nested_class_field_name.items():
+                    helptext_from_nested_class_field_name[
+                        field.name + _strings.NESTED_DATACLASS_DELIMETER + k
+                    ] = v
+                helptext_from_nested_class_field_name[field.name] = field.helptext
                 continue
 
-            # (3) Handle nested callables.
-            nested_parser = ParserSpecification.from_callable(
-                field.typ,
-                description=None,
-                parent_classes=parent_classes,
-                parent_type_from_typevar=type_from_typevar,
-                default_instance=field.default,
+            # (3) Handle primitive types. These produce a single argument!
+            args.append(
+                _arguments.ArgumentDefinition.from_field(field, type_from_typevar)
             )
-            for arg in nested_parser.args:
-                args.append(
-                    dataclasses.replace(
-                        arg,
-                        prefix=field.name
-                        + _strings.NESTED_DATACLASS_DELIMETER
-                        + arg.prefix,
-                    )
-                )
-            for k, v in nested_parser.helptext_from_nested_class_field_name.items():
-                helptext_from_nested_class_field_name[
-                    field.name + _strings.NESTED_DATACLASS_DELIMETER + k
-                ] = v
-            helptext_from_nested_class_field_name[field.name] = field.helptext
 
         return ParserSpecification(
             description=description
@@ -295,7 +302,9 @@ class SubparsersSpecification:
         # We don't use sets here to retain order of subcommands.
         options = [type_from_typevar.get(typ, typ) for typ in get_args(field.typ)]
         options_no_none = [o for o in options if o != type(None)]  # noqa
-        if len(options_no_none) < 2 or any(map(_is_parsable_type, options_no_none)):
+        if len(options_no_none) < 2 or not all(
+            map(_is_possibly_nested_type, options_no_none)
+        ):
             return None
 
         parser_from_name: Dict[str, ParserSpecification] = {}

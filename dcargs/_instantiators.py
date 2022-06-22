@@ -36,7 +36,19 @@ Some examples of type annotations and the desired instantiators:
 import collections
 import dataclasses
 import enum
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar, Union
+import inspect
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Hashable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
@@ -63,8 +75,15 @@ class InstantiatorMetadata:
 
 
 class UnsupportedTypeAnnotationError(Exception):
-    """Exception raised when field actions fail; this typically means that values from
-    the CLI are invalid."""
+    """Exception raised when an unsupported type annotation is detected."""
+
+
+_builtin_set = set(
+    filter(
+        lambda x: isinstance(x, Hashable),  # type: ignore
+        __builtins__.values(),  # type: ignore
+    )
+)
 
 
 def instantiator_from_type(
@@ -91,12 +110,47 @@ def instantiator_from_type(
     if container_out is not None:
         return container_out
 
-    # Construct instantiators for raw types.
+    # Validate that typ is a `(arg: str) -> T` type converter, as expected by argparse.
+    if typ in _builtin_set:
+        pass
+    elif not callable(typ):
+        raise UnsupportedTypeAnnotationError(
+            f"Expected {typ} to be a `(arg: str) -> T` type converter, but is not"
+            " callable."
+        )
+    else:
+        param_count = 0
+        has_var_positional = False
+        signature = inspect.signature(typ)
+        for i, param in enumerate(signature.parameters.values()):
+            if i == 0 and param.annotation not in (str, inspect.Parameter.empty):
+                raise UnsupportedTypeAnnotationError(
+                    f"Expected {typ} to be a `(arg: str) -> T` type converter, but got"
+                    f" {signature}. You may have a nested type in a container, which is"
+                    " unsupported."
+                )
+            if param.kind is inspect.Parameter.VAR_POSITIONAL:
+                has_var_positional = True
+            elif param.default is inspect.Parameter.empty and param.kind is not (
+                inspect.Parameter.VAR_KEYWORD
+            ):
+                param_count += 1
+
+        # Raise an error if parameters look wrong.
+        if not (param_count == 1 or (param_count == 0 and has_var_positional)):
+            raise UnsupportedTypeAnnotationError(
+                f"Expected {typ} to be a `(arg: str) -> T` type converter, but got"
+                f" {signature}. You may have a nested type in a container, which is"
+                " unsupported."
+            )
+
+    # Special case `choices` for some types, as implemented in `instance_from_string()`.
     auto_choices: Optional[Tuple[str, ...]] = None
     if typ is bool:
         auto_choices = ("True", "False")
     elif issubclass(typ, enum.Enum):
         auto_choices = tuple(x.name for x in typ)
+
     return lambda arg: _strings.instance_from_string(typ, arg), InstantiatorMetadata(
         nargs=None,
         metavar=typ.__name__.upper(),

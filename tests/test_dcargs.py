@@ -4,7 +4,7 @@ import pathlib
 from typing import ClassVar, Optional
 
 import pytest
-from typing_extensions import Annotated, Final, Literal  # Backward compatibility.
+from typing_extensions import Annotated, Final, Literal, TypeAlias
 
 import dcargs
 
@@ -321,3 +321,13 @@ def test_parse_empty_description():
         x: int = 0
 
     assert dcargs.cli(A, description=None, args=[]) == A(x=0)
+
+
+SomeTypeAlias: TypeAlias = int
+
+
+def test_type_alias():
+    def add(a: SomeTypeAlias, b: SomeTypeAlias) -> SomeTypeAlias:
+        return a + b
+
+    assert dcargs.cli(add, args=["--a", "5", "--b", "7"]) == 12
