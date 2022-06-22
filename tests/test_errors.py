@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, Optional, Tuple, TypeVar, Union
+from typing import Generic, List, Optional, Tuple, TypeVar, Union
 
 import pytest
 from typing_extensions import Literal
@@ -65,7 +65,7 @@ def test_unsupported_union():
         return
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main)
+        dcargs.cli(main, args=[])
 
 
 def test_unsupported_literal():
@@ -73,7 +73,7 @@ def test_unsupported_literal():
         return
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main)
+        dcargs.cli(main, args=[])
 
 
 def test_multiple_subparsers():
@@ -93,7 +93,7 @@ def test_multiple_subparsers():
         y: Union[Subcommmand1, Subcommand2]
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(MultipleSubparsers)
+        dcargs.cli(MultipleSubparsers, args=[])
 
 
 # Must be global.
@@ -104,7 +104,51 @@ class _CycleDataclass:
 
 def test_cycle():
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(_CycleDataclass)
+        dcargs.cli(_CycleDataclass, args=[])
+
+
+def test_uncallable_annotation():
+    def main(arg: 5) -> None:  # type: ignore
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=[])
+
+
+def test_nested_annotation():
+    @dataclasses.dataclass
+    class OneIntArg:
+        x: int
+
+    def main(arg: List[OneIntArg]) -> List[OneIntArg]:
+        return arg
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=[])
+
+    @dataclasses.dataclass
+    class OneStringArg:
+        x: str
+
+    def main(arg: List[OneStringArg]) -> List[OneStringArg]:
+        return arg
+
+    assert dcargs.cli(main, args=["--arg", "0", "1", "2"]) == [
+        OneStringArg("0"),
+        OneStringArg("1"),
+        OneStringArg("2"),
+    ]
+
+    @dataclasses.dataclass
+    class TwoStringArg:
+        x: str
+        y: str
+
+    def main(arg: List[TwoStringArg]) -> None:
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=[])
 
 
 def test_generic_inherited():

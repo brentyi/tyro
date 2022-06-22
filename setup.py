@@ -5,8 +5,8 @@ with open("README.md", "r") as fh:
 
 setup(
     name="dcargs",
-    version="0.1.1",
-    description="Strongly typed, zero effort CLIs",
+    version="0.1.2",
+    description="Strongly typed, zero-effort CLIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="http://github.com/brentyi/dcargs",
