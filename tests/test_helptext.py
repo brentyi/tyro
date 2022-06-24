@@ -73,9 +73,12 @@ def test_helptext_nested():
     possible. The class docstring can be used as a fallback."""
 
     class Inner:
-        """Documented in class."""
-
         def __init__(self, a: int):
+            """Something
+
+            Args:
+                a (int): Hello world!
+            """
             pass
 
     def main_with_docstring(a: Inner) -> None:
@@ -86,6 +89,7 @@ def test_helptext_nested():
         """
 
     def main_no_docstring(a: Inner) -> None:
+        """main_no_docstring."""
         pass
 
     f = io.StringIO()
@@ -94,13 +98,18 @@ def test_helptext_nested():
             dcargs.cli(main_with_docstring, args=["--help"])
     helptext = f.getvalue()
     assert "Documented in function" in helptext and str(Inner.__doc__) not in helptext
+    assert "Args:" not in helptext
+    assert "Hello world!" in helptext
 
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
             dcargs.cli(main_no_docstring, args=["--help"])
     helptext = f.getvalue()
-    assert "Documented in function" not in helptext and str(Inner.__doc__) in helptext
+    print(helptext)
+    assert "Something" in helptext
+    assert "Args:" not in helptext
+    assert "Hello world!" in helptext
 
 
 def test_helptext_defaults():

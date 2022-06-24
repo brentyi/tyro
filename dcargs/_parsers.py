@@ -178,7 +178,9 @@ class ParserSpecification:
                 if field.helptext is not None:
                     helptext_from_nested_class_field_name[field.name] = field.helptext
                 else:
-                    helptext_from_nested_class_field_name[field.name] = inspect.getdoc(
+                    helptext_from_nested_class_field_name[
+                        field.name
+                    ] = _docstrings.get_callable_description(
                         _resolver.resolve_generic_types(field.typ)[0]
                     )
                 continue

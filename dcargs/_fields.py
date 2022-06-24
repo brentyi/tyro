@@ -81,7 +81,7 @@ def field_list_from_callable(
 
         # Get helptext from docstring.
         helptext = docstring_from_arg_name.get(param.name)
-        if cls is not None:
+        if helptext is None and cls is not None:
             helptext = _docstrings.get_field_docstring(cls, param.name)
 
         field_list.append(

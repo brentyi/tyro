@@ -8,7 +8,6 @@ import concurrent.futures
 import pathlib
 import re
 import subprocess
-from typing import Optional
 
 import dcargs
 
