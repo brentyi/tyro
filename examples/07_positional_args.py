@@ -1,3 +1,5 @@
+"""Positional-only arguments in functions are converted to positional CLI arguments."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -21,8 +23,6 @@ def main(
     docstring is parsed to generate helptext.
 
     Args:
-        source: Path to move data from.
-        dest: Path to move data to.
         optimizer: Configuration for our optimizer object.
         force: Do not prompt before overwriting.
         verbose: Explain what is being done.

@@ -1,3 +1,5 @@
+"""Example using dcargs.cli() to instantiate a dataclass."""
+
 import dataclasses
 
 import dcargs
@@ -9,7 +11,7 @@ class Args:
     This should show up in the helptext!"""
 
     field1: str  # A string field.
-    field2: int  # A numeric field.
+    field2: int = 3  # A numeric field, with a default value.
     flag: bool = False  # A boolean flag.
 
 

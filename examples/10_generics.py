@@ -1,3 +1,5 @@
+"""Example of parsing for generic (~templated) dataclasses."""
+
 import dataclasses
 from typing import Generic, TypeVar
 

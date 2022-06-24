@@ -1,3 +1,5 @@
+"""Unions over nested types (classes or dataclasses) will result in subparsers."""
+
 from __future__ import annotations
 
 import dataclasses
@@ -7,7 +9,7 @@ import dcargs
 
 
 def main(command: Union[Checkout, Commit]) -> None:
-    pass
+    print(command)
 
 
 @dataclasses.dataclass(frozen=True)

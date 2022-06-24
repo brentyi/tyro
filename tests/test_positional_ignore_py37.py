@@ -55,3 +55,35 @@ def test_nested_positional_alt():
     assert isinstance(dcargs.cli(nest2, args="0 1 2 3 --thing.c 4 --c 4".split(" ")), B)
     with pytest.raises(SystemExit):
         dcargs.cli(nest2, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
+
+
+def test_positional_with_underscores():
+    """Hyphen replacement works a bit different for positional arguments."""
+
+    def main(a_multi_word_input: int, /) -> int:
+        return a_multi_word_input
+
+    assert dcargs.cli(main, args=["5"]) == 5
+
+
+def test_positional_booleans():
+    """Make sure that flag behavior is disabled for positional booleans."""
+
+    def main(
+        flag1: bool,
+        flag2: bool = True,
+        flag3: bool = False,
+        /,
+    ) -> Tuple[bool, bool, bool]:
+        return flag1, flag2, flag3
+
+    assert dcargs.cli(main, args=["True"]) == (True, True, False)
+    assert dcargs.cli(main, args=["True", "False"]) == (True, False, False)
+    assert dcargs.cli(main, args=["False", "False", "True"]) == (False, False, True)
+
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["hmm"])
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["true"])
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["True", "false"])

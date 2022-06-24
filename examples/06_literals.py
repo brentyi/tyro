@@ -1,3 +1,5 @@
+"""typing.Literal[] can be used to specify accepted input choices."""
+
 import dataclasses
 import enum
 from typing import Literal
@@ -15,6 +17,7 @@ class Color(enum.Enum):
 class Args:
     enum: Color
     restricted_enum: Literal[Color.RED, Color.GREEN]
+
     integer: Literal[0, 1, 2, 3]
     string: Literal["red", "green"]
 
