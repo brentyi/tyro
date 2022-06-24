@@ -7,10 +7,10 @@
 
 <!-- vim-markdown-toc GFM -->
 
-* [Overview](#overview)
-* [Examples](#examples)
-* [Serialization](#serialization)
-* [Alternative tools](#alternative-tools)
+- [Overview](#overview)
+- [Examples](#examples)
+- [Serialization](#serialization)
+- [Alternative tools](#alternative-tools)
 
 <!-- vim-markdown-toc -->
 
@@ -760,28 +760,15 @@ $ python examples/08_standard_classes.py --help
 ```
 usage: 08_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
 
+Arguments.
+
 required arguments:
-  --field1 STR  Arguments.
-
-                Args:
-                    field1: A string field.
-                    field2: A numeric field.
-                    flag: A boolean flag.
-  --field2 INT  Arguments.
-
-                Args:
-                    field1: A string field.
-                    field2: A numeric field.
-                    flag: A boolean flag.
+  --field1 STR  A string field.
+  --field2 INT  A numeric field.
 
 optional arguments:
   -h, --help    show this help message and exit
-  --flag        Arguments.
-
-                Args:
-                    field1: A string field.
-                    field2: A numeric field.
-                    flag: A boolean flag.
+  --flag        A boolean flag.
 ```
 
 </td></tr></table>
@@ -919,7 +906,6 @@ optional arguments:
   -h, --help            show this help message and exit
 
 required point_continuous arguments:
-  Point3(*args, **kwds)
 
   --point-continuous.x FLOAT
   --point-continuous.y FLOAT
@@ -927,7 +913,6 @@ required point_continuous arguments:
   --point-continuous.frame-id STR
 
 required point_discrete arguments:
-  Point3(*args, **kwds)
 
   --point-discrete.x INT
   --point-discrete.y INT
@@ -935,7 +920,6 @@ required point_discrete arguments:
   --point-discrete.frame-id STR
 
 required shape.a arguments:
-  Point3(*args, **kwds)
 
   --shape.a.x FLOAT
   --shape.a.y FLOAT
@@ -943,7 +927,6 @@ required shape.a arguments:
   --shape.a.frame-id STR
 
 required shape.b arguments:
-  Point3(*args, **kwds)
 
   --shape.b.x FLOAT
   --shape.b.y FLOAT
@@ -951,7 +934,6 @@ required shape.b arguments:
   --shape.b.frame-id STR
 
 required shape.c arguments:
-  Point3(*args, **kwds)
 
   --shape.c.x FLOAT
   --shape.c.y FLOAT
