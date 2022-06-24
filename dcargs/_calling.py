@@ -10,8 +10,8 @@ from typing_extensions import get_args
 from . import _fields, _parsers, _resolver, _strings
 
 
-class FieldActionValueError(Exception):
-    """Exception raised when field actions fail; this typically means that values from
+class InstantiationError(Exception):
+    """Exception raised when instantiation fail; this typically means that values from
     the CLI are invalid."""
 
 
@@ -66,8 +66,8 @@ def call_from_args(
                     assert arg.instantiator is not None
                     value = arg.instantiator(value)
                 except ValueError as e:
-                    raise FieldActionValueError(
-                        f"Parsing error for {arg.get_flag()}: {e.args[0]}"
+                    raise InstantiationError(
+                        f"Parsing error for {arg.get_name_or_flag()}: {e.args[0]}"
                     )
         elif (
             prefixed_field_name

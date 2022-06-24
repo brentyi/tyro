@@ -224,3 +224,31 @@ def test_optional_subparser():
         dcargs.cli(
             OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--y", "3"]
         )
+
+
+def test_post_init_default():
+    @dataclasses.dataclass
+    class DataclassWithDynamicDefault:
+        x: int = 3
+        y: Optional[int] = None
+
+        def __post_init__(self):
+            # If unspecified, set y = x.
+            if self.y is None:
+                self.y = self.x
+
+    @dataclasses.dataclass
+    class NoDefaultPostInitArgs:
+        inner: DataclassWithDynamicDefault
+
+    @dataclasses.dataclass
+    class DefaultFactoryPostInitArgs:
+        inner: DataclassWithDynamicDefault = dataclasses.field(
+            default_factory=DataclassWithDynamicDefault
+        )
+
+    assert (
+        dcargs.cli(NoDefaultPostInitArgs, args=["--inner.x", "5"]).inner
+        == dcargs.cli(DefaultFactoryPostInitArgs, args=["--inner.x", "5"]).inner
+        == DataclassWithDynamicDefault(x=5, y=5)
+    )

@@ -1,5 +1,7 @@
+import contextlib
 import dataclasses
 import enum
+import io
 from typing import Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
@@ -24,6 +26,37 @@ def test_tuple_generic_variable():
     assert dcargs.cli(
         TupleGenericVariable[int], args=["--xyz", "1", "2", "3"]
     ) == TupleGenericVariable((1, 2, 3))
+
+
+def test_tuple_generic_helptext():
+    @dataclasses.dataclass
+    class TupleGenericVariableHelptext(Generic[ScalarType]):
+        """Helptext!"""
+
+        xyz: Tuple[ScalarType, ...]
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(TupleGenericVariableHelptext[int], args=["--help"])
+    helptext = f.getvalue()
+    assert "Helptext!" in helptext
+
+
+def test_tuple_generic_no_helptext():
+    @dataclasses.dataclass
+    class TupleGenericVariableNoHelptext(Generic[ScalarType]):
+        xyz: Tuple[ScalarType, ...]
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(TupleGenericVariableNoHelptext[int], args=["--help"])
+    helptext = f.getvalue()
+    assert "Helptext!" not in helptext
+
+    # Check that we don't accidentally grab docstrings from the generic alias!
+    assert "The central part of internal API" not in helptext
 
 
 def test_tuple_generic_fixed():
@@ -151,6 +184,22 @@ def test_multilevel_generic():
     _check_serialization_identity(Triangle[float], parsed_instance)
 
 
+def test_multilevel_generic_no_helptext():
+    @dataclasses.dataclass
+    class LineSegment(Generic[ScalarType]):
+        a: Point3[ScalarType]
+        b: Point3[ScalarType]
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(LineSegment[int], args=["--help"])
+    helptext = f.getvalue()
+
+    # Check that we don't accidentally grab docstrings from the generic alias!
+    assert "The central part of internal API" not in helptext
+
+
 def test_generic_nested_dataclass():
     @dataclasses.dataclass
     class Child:
@@ -168,6 +217,28 @@ def test_generic_nested_dataclass():
     )
     assert parsed_instance == DataclassGeneric(Child(5, 7))
     _check_serialization_identity(DataclassGeneric[Child], parsed_instance)
+
+
+def test_generic_nested_dataclass_helptext():
+    @dataclasses.dataclass
+    class Child:
+        a: int
+        b: int
+
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class DataclassGeneric(Generic[T]):
+        child: T
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(DataclassGeneric[Child], args=["--help"])
+    helptext = f.getvalue()
+
+    # Check that we don't accidentally grab docstrings from the generic alias!
+    assert "The central part of internal API" not in helptext
 
 
 def test_generic_subparsers():

@@ -9,6 +9,15 @@ from typing_extensions import Annotated, Final, Literal, TypeAlias
 import dcargs
 
 
+def test_no_args():
+    def main() -> int:
+        return 5
+
+    assert dcargs.cli(main, args=[]) == 5
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["3"])
+
+
 def test_basic():
     @dataclasses.dataclass
     class ManyTypes:
