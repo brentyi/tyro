@@ -68,6 +68,41 @@ def test_helptext_inherited():
     assert "--y INT     Documentation 2\n" in helptext
 
 
+def test_helptext_nested():
+    """For nested classes, we should pull helptext from the outermost docstring if
+    possible. The class docstring can be used as a fallback."""
+
+    class Inner:
+        """Documented in class."""
+
+        def __init__(self, a: int):
+            pass
+
+    def main_with_docstring(a: Inner) -> None:
+        """main_with_docstring.
+
+        Args:
+            a: Documented in function.
+        """
+
+    def main_no_docstring(a: Inner) -> None:
+        pass
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(main_with_docstring, args=["--help"])
+    helptext = f.getvalue()
+    assert "Documented in function" in helptext and str(Inner.__doc__) not in helptext
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(main_no_docstring, args=["--help"])
+    helptext = f.getvalue()
+    assert "Documented in function" not in helptext and str(Inner.__doc__) in helptext
+
+
 def test_helptext_defaults():
     class Color(enum.Enum):
         RED = enum.auto()

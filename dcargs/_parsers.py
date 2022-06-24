@@ -138,7 +138,6 @@ class ParserSpecification:
                     " the mro: https://github.com/python/typing/issues/777"
                 )
 
-            get_origin(field.typ)
             # (1) Handle Unions over callables; these result in subparsers.
             subparsers_attempt = SubparsersSpecification.from_field(
                 field,
@@ -175,7 +174,13 @@ class ParserSpecification:
                     helptext_from_nested_class_field_name[
                         field.name + _strings.NESTED_DATACLASS_DELIMETER + k
                     ] = v
-                helptext_from_nested_class_field_name[field.name] = field.helptext
+
+                if field.helptext is not None:
+                    helptext_from_nested_class_field_name[field.name] = field.helptext
+                else:
+                    helptext_from_nested_class_field_name[field.name] = inspect.getdoc(
+                        _resolver.resolve_generic_types(field.typ)[0]
+                    )
                 continue
 
             # (3) Handle primitive types. These produce a single argument!

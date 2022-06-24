@@ -24,7 +24,6 @@ class ArgumentDefinition:
     # Fields that will be populated initially.
     # Important: from here on out, all fields correspond 1:1 to inputs to argparse's
     # add_argument() method.
-    name: str
     type: Optional[Union[Type, TypeVar]]
     default: Optional[Any]
 
@@ -35,7 +34,6 @@ class ArgumentDefinition:
     choices: Optional[Set[Any]] = None
     metavar: Optional[Union[str, Tuple[str, ...]]] = None
     help: Optional[str] = None
-    dest: Optional[str] = None
 
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
@@ -44,8 +42,9 @@ class ArgumentDefinition:
         kwargs = {k: v for k, v in vars(self).items() if v is not None}
 
         # Apply prefix for nested dataclasses.
-        if "dest" in kwargs:
-            kwargs["dest"] = self.prefix + kwargs["dest"]
+        assert "dest" not in kwargs
+        if not self.field.positional:
+            kwargs["dest"] = self.prefix + self.field.name
 
         # Important: as far as argparse is concerned, all inputs are strings.
         #
@@ -60,29 +59,29 @@ class ArgumentDefinition:
         kwargs.pop("prefix")
         kwargs.pop("field")
         kwargs.pop("instantiator")
-        kwargs.pop("name")
 
         # Note that the name must be passed in as a position argument.
-        parser.add_argument(self.get_flag(), **kwargs)
+        parser.add_argument(self.get_name_or_flag(), **kwargs)
 
-    def get_flag(self) -> str:
-        """Get --flag representation, with a prefix applied for nested dataclasses."""
+    def get_name_or_flag(self) -> str:
+        """Get name (for positional args) or flag (for keyword args), with a prefix
+        applied for nested dataclasses."""
         if self.field.positional:
-            return (self.prefix + self.name).replace("_", "-")
+            return self.prefix + self.field.name
+        elif self.action == "store_false":
+            return "--" + (self.prefix + "no-" + self.field.name).replace("_", "-")
         else:
-            return "--" + (self.prefix + self.name).replace("_", "-")
+            return "--" + (self.prefix + self.field.name).replace("_", "-")
 
     @staticmethod
     def from_field(
         field: _fields.Field,
         type_from_typevar: Dict[TypeVar, Type],
     ) -> ArgumentDefinition:
-        """"""
         arg = ArgumentDefinition(
             prefix="",
             field=field,
             instantiator=None,
-            name=field.name,
             type=field.typ,
             default=field.default,
         )
@@ -110,7 +109,7 @@ def _transform_handle_boolean_flags(arg: ArgumentDefinition) -> ArgumentDefiniti
     if arg.type is not bool:
         return arg
 
-    if arg.default is None:
+    if arg.default is None or arg.field.positional:
         # If no default is passed in, we treat bools as a normal parameter.
         return arg
     elif arg.default is False:
@@ -125,8 +124,6 @@ def _transform_handle_boolean_flags(arg: ArgumentDefinition) -> ArgumentDefiniti
         # Default `True` => --no-flag passed in flips to `False`.
         return dataclasses.replace(
             arg,
-            dest=arg.name,
-            name="no_" + arg.name,
             action="store_false",
             type=None,
             instantiator=lambda x: x,  # argparse will directly give us a bool!
@@ -228,7 +225,7 @@ def _transform_positional_special_handling(
 
     return dataclasses.replace(
         arg,
-        metavar=(arg.prefix + arg.name).upper(),
+        metavar=(arg.prefix + arg.field.name).upper(),
         required=None,
         nargs="?" if not arg.required else arg.nargs,
     )

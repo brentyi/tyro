@@ -104,7 +104,7 @@ def cli(
         out, consumed_keywords = _calling.call_from_args(
             f, parser_definition, value_from_arg
         )
-    except _calling.FieldActionValueError as e:
+    except _calling.InstantiationError as e:
         # Emulate argparse's error behavior when invalid arguments are passed in.
         parser.print_usage()
         print()

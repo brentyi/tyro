@@ -125,7 +125,19 @@ def _get_dataclass_field_default(
             _ensure_dataclass_instance_used_as_default_is_frozen(
                 field, field_default_instance
             )
-    elif field.default_factory is not dataclasses.MISSING:
+    elif field.default_factory is not dataclasses.MISSING and not (
+        # Special case to ignore default_factory if we write:
+        # `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.
+        #
+        # In other words, treat it the same way as:
+        # `field: Dataclass`.
+        #
+        # The only time this matters is when we our dataclass has a `__post_init__`
+        # function that mutates the dataclass. We choose here to use the default values
+        # before this method is called.
+        dataclasses.is_dataclass(field.type)
+        and field.default_factory is field.type
+    ):
         # Populate default from `dataclasses.field(default_factory=...)`.
         field_default_instance = field.default_factory()
 
