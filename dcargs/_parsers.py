@@ -23,7 +23,7 @@ from typing import (
 
 import termcolor
 import typing_extensions
-from typing_extensions import get_args, get_origin
+from typing_extensions import get_args, get_origin, is_typeddict
 
 from . import _arguments, _docstrings, _fields, _instantiators, _resolver, _strings
 
@@ -67,9 +67,13 @@ def _is_possibly_nested_type(typ: Any) -> bool:
     if dataclasses.is_dataclass(typ):
         return True
 
-    # Non-parsable types like nested (data)classes should have fully type-annotated
-    # inputs. If any inputs are unannotated (for example, in the case of pathlib.Path),
-    # we can assume the type is parsable.
+    # TypedDict types can be unpacked.
+    if is_typeddict(typ):
+        return True
+
+    # Nested types like nested (data)classes should have fully type-annotated inputs. If
+    # any inputs are unannotated (for example, in the case of pathlib.Path), we can
+    # assume the type is not nested.
     for param in inspect.signature(typ).parameters.values():
         if param.annotation is inspect.Parameter.empty:
             return False
@@ -104,6 +108,9 @@ class ParserSpecification:
                     type_from_typevar[typevar] = parent_type_from_typevar[typ]  # type: ignore
 
         # Cycle detection.
+        #
+        # Note that 'parent' here refers to in the nesting hierarchy, not the
+        # superclass.
         if f in parent_classes:
             raise _instantiators.UnsupportedTypeAnnotationError(
                 f"Found a cyclic dataclass dependency with type {f}."
@@ -117,11 +124,10 @@ class ParserSpecification:
         args = []
         helptext_from_nested_class_field_name = {}
         subparsers = None
-        field_list = _fields.field_list_from_callable(
-            f=f, default_instance=default_instance
-        )
-        for field in field_list:
 
+        for field in _fields.field_list_from_callable(
+            f=f, default_instance=default_instance
+        ):
             field = dataclasses.replace(
                 field,
                 typ=type_from_typevar.get(field.typ, field.typ),  # type: ignore

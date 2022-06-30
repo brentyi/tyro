@@ -136,7 +136,8 @@ def _transform_recursive_instantiator_from_type(
     arg: ArgumentDefinition,
     type_from_typevar: Dict[TypeVar, Type],
 ) -> ArgumentDefinition:
-    """The bulkiest bit: recursively analyze the type annotation and use it to determine how"""
+    """The bulkiest bit: recursively analyze the type annotation and use it to determine
+    how to instantiate it given some string from the commandline."""
     if arg.instantiator is not None:
         return arg
 
