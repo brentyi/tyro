@@ -22,7 +22,7 @@ class TrainConfig:
     dataset_sources: Tuple[pathlib.Path, ...]
     """Paths to load training data from. This can be multiple!"""
 
-    # Fixed-length tupels are also okay:
+    # Fixed-length tuples are also okay:
     image_dimensions: Tuple[int, int]
     """Height and width of some image data."""
 

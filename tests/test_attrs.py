@@ -1,4 +1,5 @@
-"""Tests for attrs. This is not officially supported, but should work."""
+"""Tests for attrs. This is not officially supported, but most features should work.
+(exceptions include default factories)"""
 
 import contextlib
 import io

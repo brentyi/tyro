@@ -23,7 +23,7 @@ def resolve_generic_types(
     class, and a mapping from typevars to concrete types."""
 
     origin_cls = get_origin(cls)
-    if origin_cls is not None:
+    if origin_cls is not None and hasattr(origin_cls, "__parameters__"):
         typevars = origin_cls.__parameters__
         typevar_values = get_args(cls)
         assert len(typevars) == len(typevar_values)
@@ -48,3 +48,12 @@ def resolved_fields(cls: Type) -> List[dataclasses.Field]:
         fields.append(field)
 
     return fields
+
+
+def is_namedtuple(cls: Type) -> bool:
+    return (
+        hasattr(cls, "_fields")
+        # Remove in Python >=3.9.
+        # and hasattr(cls, "_field_types")
+        and hasattr(cls, "_field_defaults")
+    )
