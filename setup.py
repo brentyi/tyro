@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="dcargs",
-    version="0.1.4",
+    version="0.1.5",
     description="Strongly typed, zero-effort CLIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -18,7 +18,7 @@ setup(
     python_requires=">=3.7",
     install_requires=[
         "docstring_parser",
-        "typing_extensions>=4.0.0",
+        "typing_extensions>=4.3.0",
         "pyyaml",
         "termcolor",
         "backports.cached-property; python_version < '3.8.0'",
@@ -27,6 +27,7 @@ setup(
         "testing": [
             "pytest",
             "pytest-cov",
+            "omegaconf",
             "attrs",
         ],
         "type-checking": [

@@ -46,18 +46,20 @@ def cli(
           value.
         - Enums (via `enum.Enum`).
         - Various annotations from the standard typing library. Some examples:
-          - `typing.ClassVar`.
-          - `typing.Optional`.
-          - `typing.Literal`.
-          - `typing.Sequence`.
-          - `typing.List`.
+          - `typing.ClassVar[T]`.
+          - `typing.Optional[T]`.
+          - `typing.Literal[T]`.
+          - `typing.Sequence[T]`.
+          - `typing.List[T]`.
+          - `typing.Dict[K, V]`.
           - `typing.Tuple`, such as `typing.Tuple[T1, T2, T3]` or
             `typing.Tuple[T, ...]`.
-          - `typing.Set`.
-          - `typing.Final` and `typing.Annotated`.
-          - Nested combinations of the above: `Optional[Literal[T]]`,
+          - `typing.Set[T]`.
+          - `typing.Final[T]` and `typing.Annotated[T]`.
+          - Various nested combinations of the above: `Optional[Literal[T]]`,
             `Final[Optional[Sequence[T]]]`, etc.
-        - Nested structures; dataclasses, TypedDict, NamedTuple, classes.
+        - Hierarchical structures via nested dataclasses, TypedDict, NamedTuple,
+          classes.
           - Simple nesting.
           - Unions over nested structures (subparsers).
           - Optional unions over nested structures (optional subparsers).

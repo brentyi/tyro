@@ -1,12 +1,51 @@
 import contextlib
 import io
 import pathlib
-from typing import NamedTuple
+from typing import Any, Dict, Mapping, NamedTuple
 
 import pytest
-from typing_extensions import TypedDict
+from typing_extensions import Literal, TypedDict
 
 import dcargs
+
+
+def test_basic_dict():
+    def main(params: Dict[str, int]) -> Dict[str, int]:
+        return params
+
+    assert dcargs.cli(main, args="--params hey 5 hello 2".split(" ")) == {
+        "hey": 5,
+        "hello": 2,
+    }
+    assert dcargs.cli(main, args="--params hey 5 hello 2".split(" ")) == {
+        "hey": 5,
+        "hello": 2,
+    }
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--params hey 5 hello hey".split(" "))
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--params hey 5 hello".split(" "))
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--params".split(" "))
+
+
+def test_dict_with_default():
+    def main(params: Mapping[Literal[1, 3, 5, 7], bool] = {5: False, 1: True}) -> Any:
+        return params
+
+    assert dcargs.cli(main, args=[]) == {5: False, 1: True}
+    assert dcargs.cli(main, args="--params 5 True 3 False".split(" ")) == {
+        5: True,
+        3: False,
+    }
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--params".split(" "))
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--params 5 Tru 3 False".split(" "))
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--params 5 Tru 3 False".split(" "))
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--params 4 Tru 3 False".split(" "))
 
 
 def test_basic_typeddict():

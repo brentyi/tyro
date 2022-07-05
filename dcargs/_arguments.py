@@ -4,8 +4,9 @@ import argparse
 import dataclasses
 import enum
 import functools
+import itertools
 import shlex
-from typing import Any, Dict, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Mapping, Optional, Set, Tuple, Type, TypeVar, Union
 
 from . import _fields, _instantiators
 
@@ -104,17 +105,14 @@ def _rule_handle_boolean_flags(
     if arg.type_from_typevar.get(arg.field.typ, arg.field.typ) is not bool:  # type: ignore
         return lowered
 
-    if lowered.default is None or arg.field.positional:
-        # If no default is passed in, we treat bools as a normal parameter.
-        return lowered
-    elif lowered.default is False:
+    if lowered.default is False and not arg.field.positional:
         # Default `False` => --flag passed in flips to `True`.
         return dataclasses.replace(
             lowered,
             action="store_true",
             instantiator=lambda x: x,  # argparse will directly give us a bool!
         )
-    elif lowered.default is True:
+    elif lowered.default is True and not arg.field.positional:
         # Default `True` => --no-flag passed in flips to `False`.
         return dataclasses.replace(
             lowered,
@@ -122,7 +120,8 @@ def _rule_handle_boolean_flags(
             instantiator=lambda x: x,  # argparse will directly give us a bool!
         )
     else:
-        assert False, "Invalid default"
+        # Treat bools as a normal parameter.
+        return lowered
 
 
 def _rule_recursive_instantiator_from_type(
@@ -147,13 +146,10 @@ def _rule_recursive_instantiator_from_type(
     return dataclasses.replace(
         lowered,
         instantiator=instantiator,
-        choices=tuple(map(str, metadata.choices))
-        if metadata.choices is not None
-        else None,
+        choices=metadata.choices,
         nargs=metadata.nargs,
         required=(not metadata.is_optional) and lowered.required,
-        # Ignore metavar if choices is set.
-        metavar=metadata.metavar if metadata.choices is None else None,
+        metavar=metadata.metavar,
     )
 
 
@@ -173,7 +169,15 @@ def _rule_convert_defaults_to_strings(
     if lowered.default is None or lowered.action is not None:
         return lowered
     elif lowered.nargs is not None and lowered.nargs != "?":
-        return dataclasses.replace(lowered, default=tuple(map(as_str, lowered.default)))
+        if isinstance(lowered.default, Mapping):
+            return dataclasses.replace(
+                lowered,
+                default=tuple(map(as_str, itertools.chain(*lowered.default.items()))),
+            )
+        else:
+            return dataclasses.replace(
+                lowered, default=tuple(map(as_str, lowered.default))
+            )
     else:
         return dataclasses.replace(lowered, default=as_str(lowered.default))
 
@@ -197,7 +201,8 @@ def _rule_generate_helptext(
 
     if lowered.action is not None:
         # Don't show defaults for boolean flags.
-        assert lowered.action in ("store_true", "store_false")
+        # assert lowered.action in ("store_true", "store_false")
+        pass
     elif not lowered.required:
         # Include default value in helptext. We intentionally don't use the % template
         # because the types of all arguments are set to strings, which will cause the

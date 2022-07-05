@@ -57,18 +57,20 @@ annotations; a broad range of core type annotations are supported...
       value.
     - Enums (via `enum.Enum`).
     - Various annotations from the standard typing library. Some examples:
-      - `typing.ClassVar`.
-      - `typing.Optional`.
-      - `typing.Literal`.
-      - `typing.Sequence`.
-      - `typing.List`.
+      - `typing.ClassVar[T]`.
+      - `typing.Optional[T]`.
+      - `typing.Literal[T]`.
+      - `typing.Sequence[T]`.
+      - `typing.List[T]`.
+      - `typing.Dict[K, V]`.
       - `typing.Tuple`, such as `typing.Tuple[T1, T2, T3]` or
         `typing.Tuple[T, ...]`.
-      - `typing.Set`.
-      - `typing.Final` and `typing.Annotated`.
-      - Nested combinations of the above: `Optional[Literal[T]]`,
+      - `typing.Set[T]`.
+      - `typing.Final[T]` and `typing.Annotated[T]`.
+      - Various nested combinations of the above: `Optional[Literal[T]]`,
         `Final[Optional[Sequence[T]]]`, etc.
-    - Nested structures; dataclasses, TypedDict, NamedTuple, classes.
+    - Hierarchical structures via nested dataclasses, TypedDict, NamedTuple,
+      classes.
       - Simple nesting.
       - Unions over nested structures (subparsers).
       - Optional unions over nested structures (optional subparsers).
@@ -897,18 +899,20 @@ required shape.c arguments:
 </details>
 <details>
 <summary>
-<strong>11. Typed Dictionaries</strong>
+<strong>11. Dictionaries</strong>
 </summary>
 <table><tr><td>
 
-[examples/11_typed_dictionaries.py](examples/11_typed_dictionaries.py)
+[examples/11_dictionaries.py](examples/11_dictionaries.py)
 
 ```python
-"""Dictionary inputs can be specified using a TypedDict type.
+"""Dictionary inputs can be specified using either a standard Dict[T1, T2] annotation,
+or a TypedDict type.
 
-TODO: note that setting total=False is not yet (but could be) supported."""
+Note that setting total=False for TypedDicts is currently not (but reasonably could be)
+supported."""
 
-from typing import TypedDict
+from typing import Dict, TypedDict
 
 import dcargs
 
@@ -919,27 +923,45 @@ class DictionarySchema(TypedDict):
     field3: bool  # A boolean field.
 
 
+def main(
+    standard_dict: Dict[int, bool],
+    typed_dict: DictionarySchema = {
+        "field1": "hey",
+        "field2": 3,
+        "field3": False,
+    },
+) -> None:
+    assert isinstance(standard_dict, dict)
+    assert isinstance(typed_dict, dict)
+    print("Standard dict:", standard_dict)
+    print("Typed dict:", typed_dict)
+
+
 if __name__ == "__main__":
-    x = dcargs.cli(DictionarySchema)
-    assert isinstance(x, dict)
-    print(x)
+    dcargs.cli(main)
 ```
 
 ---
 
 <pre>
-<samp>$ <kbd>python examples/11_typed_dictionaries.py --help</kbd>
-usage: 11_typed_dictionaries.py [-h] --field1 STR --field2 INT --field3
-                                {True,False}
+<samp>$ <kbd>python examples/11_dictionaries.py --help</kbd>
+usage: 11_dictionaries.py [-h] --standard-dict INT {True,False}
+                          [INT {True,False} ...] [--typed-dict.field1 STR]
+                          [--typed-dict.field2 INT] [--typed-dict.field3]
 
 required arguments:
-  --field1 STR          A string field.
-  --field2 INT          A numeric field.
-  --field3 {True,False}
-                        A boolean field.
+  --standard-dict INT {True,False} [INT {True,False} ...]
 
 optional arguments:
-  -h, --help            show this help message and exit</samp>
+  -h, --help            show this help message and exit
+
+optional typed_dict arguments:
+
+  --typed-dict.field1 STR
+                        A string field. (default: hey)
+  --typed-dict.field2 INT
+                        A numeric field. (default: 3)
+  --typed-dict.field3   A boolean field.</samp>
 </pre>
 
 </td></tr></table>
