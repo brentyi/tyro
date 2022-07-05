@@ -9,7 +9,7 @@ from typing_extensions import get_args
 
 from . import _resolver
 
-NESTED_DATACLASS_DELIMETER: str = "."
+NESTED_FIELD_DELIMETER: str = "."
 SUBPARSER_DEST_FMT: str = "{name} (positional)"
 
 

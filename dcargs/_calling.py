@@ -63,11 +63,11 @@ def call_from_args(
             value = get_value_from_arg(prefixed_field_name)
             if value is not None:
                 try:
-                    assert arg.instantiator is not None
-                    value = arg.instantiator(value)
+                    assert arg.lowered.instantiator is not None
+                    value = arg.lowered.instantiator(value)
                 except ValueError as e:
                     raise InstantiationError(
-                        f"Parsing error for {arg.get_name_or_flag()}: {e.args[0]}"
+                        f"Parsing error for {arg.lowered.name_or_flag}: {e.args[0]}"
                     )
         elif (
             prefixed_field_name
@@ -78,8 +78,7 @@ def call_from_args(
                 field_type,
                 parser_definition,
                 value_from_arg,
-                field_name_prefix=prefixed_field_name
-                + _strings.NESTED_DATACLASS_DELIMETER,
+                field_name_prefix=prefixed_field_name + _strings.NESTED_FIELD_DELIMETER,
             )
             consumed_keywords |= consumed_keywords_child
         else:

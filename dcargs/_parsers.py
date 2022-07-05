@@ -172,13 +172,13 @@ class ParserSpecification:
                         dataclasses.replace(
                             arg,
                             prefix=field.name
-                            + _strings.NESTED_DATACLASS_DELIMETER
+                            + _strings.NESTED_FIELD_DELIMETER
                             + arg.prefix,
                         )
                     )
                 for k, v in nested_parser.helptext_from_nested_class_field_name.items():
                     helptext_from_nested_class_field_name[
-                        field.name + _strings.NESTED_DATACLASS_DELIMETER + k
+                        field.name + _strings.NESTED_FIELD_DELIMETER + k
                     ] = v
 
                 if field.helptext is not None:
@@ -193,7 +193,9 @@ class ParserSpecification:
 
             # (3) Handle primitive types. These produce a single argument!
             args.append(
-                _arguments.ArgumentDefinition.from_field(field, type_from_typevar)
+                _arguments.ArgumentDefinition(
+                    prefix="", field=field, type_from_typevar=type_from_typevar
+                )
             )
 
         return ParserSpecification(
@@ -248,7 +250,7 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            if arg.required:
+            if arg.lowered.required:
                 target_groups, other_groups = (
                     required_group_from_prefix,
                     optional_group_from_prefix,
@@ -262,7 +264,7 @@ class ParserSpecification:
             if arg.prefix not in target_groups:
                 nested_field_name = arg.prefix[:-1]
                 target_groups[arg.prefix] = parser.add_argument_group(
-                    format_group_name(nested_field_name, required=arg.required),
+                    format_group_name(nested_field_name, required=arg.lowered.required),
                     # Add a description, but only to the first group for a field.
                     description=self.helptext_from_nested_class_field_name[
                         nested_field_name
