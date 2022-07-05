@@ -1,3 +1,5 @@
+import contextlib
+import io
 from typing import List, Tuple
 
 import pytest
@@ -33,15 +35,25 @@ def test_positional():
 
 def test_nested_positional():
     class A:
-        def __init__(self, a: int, b: int, /, c: int):
-            pass
+        def __init__(self, a: int, hello_world: int, /, c: int):
+            self.hello_world = hello_world
 
-    def nest1(a: int, b: int, thing: A, /, c: int):
+    def nest1(a: int, b: int, thing: A, /, c: int) -> A:
         return thing
 
     assert isinstance(dcargs.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")), A)
+    assert (
+        dcargs.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")).hello_world == 3
+    )
     with pytest.raises(SystemExit):
         dcargs.cli(nest1, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(nest1, args=["--help"])
+    helptext = f.getvalue()
+    assert "THING.HELLO_WORLD" in helptext
 
 
 def test_nested_positional_alt():

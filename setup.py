@@ -21,6 +21,7 @@ setup(
         "typing_extensions>=4.0.0",
         "pyyaml",
         "termcolor",
+        "backports.cached-property; python_version < '3.8.0'",
     ],
     extras_require={
         "testing": [
