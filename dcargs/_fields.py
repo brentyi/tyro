@@ -164,12 +164,21 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
         )
 
 
+_missing_types = [dataclasses.MISSING]
+try:
+    import omegaconf
+
+    _missing_types.append(omegaconf.MISSING)
+except ImportError:
+    pass
+
+
 def _get_dataclass_field_default(
     field: dataclasses.Field, parent_default_instance: Any
 ) -> Optional[Any]:
     """Helper for getting the default instance for a field."""
     field_default_instance = None
-    if field.default is not dataclasses.MISSING:
+    if field.default not in _missing_types:
         # Populate default from usual default value, or
         # `dataclasses.field(default=...)`.
         field_default_instance = field.default
@@ -177,7 +186,7 @@ def _get_dataclass_field_default(
             _ensure_dataclass_instance_used_as_default_is_frozen(
                 field, field_default_instance
             )
-    elif field.default_factory is not dataclasses.MISSING and not (
+    elif field.default_factory not in _missing_types and not (
         # Special case to ignore default_factory if we write:
         # `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.
         #
@@ -191,9 +200,18 @@ def _get_dataclass_field_default(
         and field.default_factory is field.type
     ):
         # Populate default from `dataclasses.field(default_factory=...)`.
+        assert callable(field.default_factory)
         field_default_instance = field.default_factory()
 
     if parent_default_instance is not None:
         # Populate default from some parent, eg `default_instance` in `dcargs.cli()`.
-        field_default_instance = getattr(parent_default_instance, field.name)
+        if hasattr(parent_default_instance, field.name):
+            field_default_instance = getattr(parent_default_instance, field.name)
+        else:
+            warnings.warn(
+                f"Could not find field {field.name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
+            )
     return field_default_instance

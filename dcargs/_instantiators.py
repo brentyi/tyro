@@ -37,6 +37,8 @@ import collections
 import dataclasses
 import enum
 import inspect
+import warnings
+from collections.abc import Mapping
 from typing import (
     Any,
     Callable,
@@ -70,7 +72,7 @@ Instantiator = Union[
 class InstantiatorMetadata:
     nargs: Optional[Union[str, int]]
     metavar: Union[str, Tuple[str, ...]]
-    choices: Optional[Tuple[Any, ...]]
+    choices: Optional[Tuple[str, ...]]
     is_optional: bool
 
 
@@ -102,6 +104,15 @@ def instantiator_from_type(
         return instantiator_from_type(
             type_from_typevar[typ],  # type: ignore
             type_from_typevar,
+        )
+
+    if typ is Any:
+        warnings.warn("Found field with type `Any`, which will be parsed as a string.")
+        return lambda arg: arg, InstantiatorMetadata(
+            nargs=None,
+            metavar="ANY",
+            choices=None,
+            is_optional=False,
         )
 
     # Address container types. If a matching container is found, this will recursively
@@ -148,12 +159,14 @@ def instantiator_from_type(
     auto_choices: Optional[Tuple[str, ...]] = None
     if typ is bool:
         auto_choices = ("True", "False")
-    elif issubclass(typ, enum.Enum):
+    elif isinstance(typ, type) and issubclass(typ, enum.Enum):
         auto_choices = tuple(x.name for x in typ)
 
     return lambda arg: _strings.instance_from_string(typ, arg), InstantiatorMetadata(
         nargs=None,
-        metavar=typ.__name__.upper(),
+        metavar=typ.__name__.upper()
+        if auto_choices is None
+        else "{" + ",".join(map(str, auto_choices)) + "}",
         choices=auto_choices,
         is_optional=False,
     )
@@ -186,7 +199,10 @@ def _instantiator_from_container_type(
             container_type = list
 
         make, inner_meta = _instantiator_from_type_inner(
-            contained_type, type_from_typevar
+            contained_type,
+            type_from_typevar,
+            allow_sequences=False,
+            allow_optional=False,
         )
         return lambda strings: container_type(
             [make(x) for x in strings]
@@ -210,7 +226,10 @@ def _instantiator_from_container_type(
             (contained_type,) = typeset_no_ellipsis
 
             make, inner_meta = _instantiator_from_type_inner(
-                contained_type, type_from_typevar
+                contained_type,
+                type_from_typevar,
+                allow_sequences=False,
+                allow_optional=False,
             )
             return lambda strings: tuple(
                 [make(x) for x in strings]
@@ -224,7 +243,12 @@ def _instantiator_from_container_type(
         else:
             instantiators, metas = zip(
                 *map(
-                    lambda t: _instantiator_from_type_inner(t, type_from_typevar),
+                    lambda t: _instantiator_from_type_inner(
+                        t,
+                        type_from_typevar,
+                        allow_sequences=False,
+                        allow_optional=False,
+                    ),
                     types,
                 )
             )
@@ -254,7 +278,10 @@ def _instantiator_from_container_type(
             )
         (typ,) = options - {type(None)}
         instantiator, metadata = _instantiator_from_type_inner(
-            typ, type_from_typevar, allow_sequences=True
+            typ,
+            type_from_typevar,
+            allow_sequences=True,
+            allow_optional=False,
         )
         return instantiator, dataclasses.replace(metadata, is_optional=True)
 
@@ -269,14 +296,62 @@ def _instantiator_from_container_type(
         if issubclass(contained_type, enum.Enum):
             choices = tuple(map(lambda x: x.name, choices))
         instantiator, metadata = _instantiator_from_type_inner(
-            contained_type, type_from_typevar
+            contained_type,
+            type_from_typevar,
+            allow_sequences=False,
+            allow_optional=False,
         )
         assert (
             # Choices provided by the contained type
             metadata.choices is None
             or len(set(choices) - set(metadata.choices)) == 0
         )
-        return instantiator, dataclasses.replace(metadata, choices=choices)
+        return instantiator, dataclasses.replace(
+            metadata,
+            choices=tuple(map(str, choices)),
+            metavar="{" + ",".join(map(str, choices)) + "}",
+        )
+
+    # Dictionaries.
+    if type_origin in (dict, Mapping):
+        key_type, val_type = get_args(typ)
+        key_instantiator, key_metadata = _instantiator_from_type_inner(
+            key_type,
+            type_from_typevar,
+            allow_sequences=False,
+            allow_optional=False,
+        )
+        val_instantiator, val_metadata = _instantiator_from_type_inner(
+            val_type,
+            type_from_typevar,
+            allow_sequences=False,
+            allow_optional=False,
+        )
+
+        def dict_instantiator(strings: List[str]) -> Any:
+            out = {}
+            if len(strings) % 2 != 0:
+                raise ValueError("incomplete set of key value pairs!")
+            for i in range(len(strings) // 2):
+                k = strings[i * 2]
+                v = strings[i * 2 + 1]
+                if key_metadata.choices is not None and k not in key_metadata.choices:
+                    raise ValueError(
+                        f"invalid choice: {k} (choose from {key_metadata.choices}))"
+                    )
+                if val_metadata.choices is not None and v not in val_metadata.choices:
+                    raise ValueError(
+                        f"invalid choice: {v} (choose from {val_metadata.choices}))"
+                    )
+                out[key_instantiator(k)] = val_instantiator(v)  # type: ignore
+            return out
+
+        return dict_instantiator, InstantiatorMetadata(
+            nargs="+",
+            metavar=f"{key_metadata.metavar} {val_metadata.metavar}",
+            choices=None,
+            is_optional=False,
+        )
 
     raise UnsupportedTypeAnnotationError(  # pragma: no cover
         f"Unsupported type {typ} with origin {type_origin}"
@@ -286,8 +361,8 @@ def _instantiator_from_container_type(
 def _instantiator_from_type_inner(
     typ: Type,
     type_from_typevar: Dict[TypeVar, Type],
-    allow_sequences: bool = False,
-    allow_optional: bool = False,
+    allow_sequences: bool,
+    allow_optional: bool,
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""

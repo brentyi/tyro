@@ -1,7 +1,7 @@
 import dataclasses
 import enum
 import pathlib
-from typing import ClassVar, Optional
+from typing import Any, ClassVar, Optional
 
 import pytest
 from typing_extensions import Annotated, Final, Literal, TypeAlias
@@ -340,3 +340,11 @@ def test_type_alias():
         return a + b
 
     assert dcargs.cli(add, args=["--a", "5", "--b", "7"]) == 12
+
+
+@pytest.mark.filterwarnings("ignore::Warning")
+def test_any():
+    def main(x: Any) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "hello"]) == "hello"

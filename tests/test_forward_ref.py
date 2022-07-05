@@ -29,7 +29,6 @@ class C:
 
 
 def test_forward_ref_1():
-
     assert dcargs.cli(A1, args=["--x", "1", "b", "--y", "3"]) == A1(x=1, bc=B(y=3))
     assert dcargs.cli(A1, args=["--x", "1", "c", "--z", "3"]) == A1(x=1, bc=C(z=3))
 
@@ -40,7 +39,6 @@ def test_forward_ref_1():
 
 
 def test_forward_ref_2():
-
     assert dcargs.cli(A2, args=["--x", "1", "b", "--y", "3"]) == A2(x=1, bc=B(y=3))
     assert dcargs.cli(A2, args=["--x", "1", "c", "--z", "3"]) == A2(x=1, bc=C(z=3))
 
