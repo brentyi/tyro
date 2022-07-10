@@ -1,4 +1,9 @@
-"""Example using dcargs.cli() to instantiate a named tuple."""
+"""Example using `dcargs.cli()` to instantiate a named tuple.
+
+Usage:
+`python ./12_named_tuples.py --help`
+`python ./12_named_tuples.py --field1 hello`
+"""
 
 from typing import NamedTuple
 
@@ -15,7 +20,6 @@ class TupleType(NamedTuple):
 
 
 if __name__ == "__main__":
-    print(TupleType.__doc__)
     x = dcargs.cli(TupleType)
     assert isinstance(x, tuple)
     print(x)

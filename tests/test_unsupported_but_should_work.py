@@ -7,7 +7,7 @@ have corner cases or just seem sketchy.
 import contextlib
 import io
 import pathlib
-from typing import Tuple
+from typing import Tuple, cast
 
 import attr
 import omegaconf
@@ -16,8 +16,8 @@ import pytest
 import dcargs
 
 
-def test_missing():
-    """Passing in a 'missing' default; this will mark an argument as required."""
+def test_omegaconf_missing():
+    """Passing in a omegaconf.MISSING default; this will mark an argument as required."""
 
     def main(
         required_a: int,
@@ -123,7 +123,7 @@ def test_attrs_helptext():
         with contextlib.redirect_stdout(f):
             dcargs.cli(Helptext, args=["--help"])
     helptext = f.getvalue()
-    assert Helptext.__doc__ in helptext
+    assert cast(str, Helptext.__doc__) in helptext
     assert ":\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext

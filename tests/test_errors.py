@@ -12,14 +12,14 @@ def test_choices_in_tuples():
     future, we might avoid this by implementing choice restrictions manually."""
     # OK
     @dataclasses.dataclass
-    class A:
+    class A:  # type: ignore
         x: Tuple[bool, bool]
 
     assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, False))
 
     # OK
     @dataclasses.dataclass
-    class A:
+    class A:  # type: ignore
         x: Tuple[bool, Literal["True", "False"]]
 
     assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, "False"))
@@ -120,7 +120,7 @@ def test_nested_annotation():
     class OneIntArg:
         x: int
 
-    def main(arg: List[OneIntArg]) -> List[OneIntArg]:
+    def main(arg: List[OneIntArg]) -> List[OneIntArg]:  # type: ignore
         return arg
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
@@ -130,7 +130,7 @@ def test_nested_annotation():
     class OneStringArg:
         x: str
 
-    def main(arg: List[OneStringArg]) -> List[OneStringArg]:
+    def main(arg: List[OneStringArg]) -> List[OneStringArg]:  # type: ignore
         return arg
 
     assert dcargs.cli(main, args=["--arg", "0", "1", "2"]) == [
@@ -168,7 +168,7 @@ def test_generic_inherited():
         # Documentation 2
         y: T
 
-        z: T = 3
+        z: T = 3  # type: ignore
         """Documentation 3"""
 
     @dataclasses.dataclass
@@ -176,4 +176,4 @@ def test_generic_inherited():
         pass
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(ChildClass, args=["--x", 1, "--y", 2, "--z", 3])
+        dcargs.cli(ChildClass, args=["--x", "1", "--y", "2", "--z", "3"])

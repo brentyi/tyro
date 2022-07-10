@@ -32,6 +32,7 @@ setup(
         ],
         "type-checking": [
             "mypy",
+            "pyright",
         ],
     },
     classifiers=[

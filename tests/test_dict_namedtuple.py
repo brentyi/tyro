@@ -1,7 +1,7 @@
 import contextlib
 import io
 import pathlib
-from typing import Any, Dict, Mapping, NamedTuple
+from typing import Any, Dict, Mapping, NamedTuple, cast
 
 import pytest
 from typing_extensions import Literal, TypedDict
@@ -102,7 +102,7 @@ def test_helptext_and_default_instance_typeddict():
         with contextlib.redirect_stdout(f):
             dcargs.cli(HelptextTypedDict, default_instance={"z": 3}, args=["--help"])
     helptext = f.getvalue()
-    assert HelptextTypedDict.__doc__ in helptext
+    assert cast(str, HelptextTypedDict.__doc__) in helptext
     assert ":\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext
@@ -162,7 +162,7 @@ def test_helptext_and_default_namedtuple():
         with contextlib.redirect_stdout(f):
             dcargs.cli(HelptextNamedTupleDefault, args=["--help"])
     helptext = f.getvalue()
-    assert HelptextNamedTupleDefault.__doc__ in helptext
+    assert cast(str, HelptextNamedTupleDefault.__doc__) in helptext
     assert ":\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext
@@ -194,7 +194,7 @@ def test_helptext_and_default_instance_namedtuple():
                 args=["--help"],
             )
     helptext = f.getvalue()
-    assert HelptextNamedTuple.__doc__ in helptext
+    assert cast(str, HelptextNamedTuple.__doc__) in helptext
     assert ":\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext

@@ -1,4 +1,9 @@
-"""typing.Literal[] can be used to specify accepted input choices."""
+"""`typing.Literal[]` can be used to restrict inputs to a fixed set of choices.
+
+Usage:
+`python ./06_literals.py --help`
+`python ./06_literals.py --enum RED --restricted-enum GREEN --integer 3 --string green`
+"""
 
 import dataclasses
 import enum
@@ -29,5 +34,3 @@ class Args:
 if __name__ == "__main__":
     args = dcargs.cli(Args)
     print(args)
-    print()
-    print(dcargs.to_yaml(args))

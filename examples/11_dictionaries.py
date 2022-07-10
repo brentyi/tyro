@@ -1,8 +1,13 @@
-"""Dictionary inputs can be specified using either a standard Dict[T1, T2] annotation,
-or a TypedDict type.
+"""Dictionary inputs can be specified using either a standard `Dict[K, V]` annotation,
+or a `TypedDict` type.
 
-Note that setting total=False for TypedDicts is currently not (but reasonably could be)
-supported."""
+Note that setting `total=False` for `TypedDict` is currently not (but reasonably could be)
+supported.
+
+Usage:
+`python ./11_dictionaries.py --help`
+`python ./11_dictionaries.py --standard-dict key1 True key2 False`
+"""
 
 from typing import Dict, TypedDict
 
@@ -16,7 +21,7 @@ class DictionarySchema(TypedDict):
 
 
 def main(
-    standard_dict: Dict[int, bool],
+    standard_dict: Dict[str, bool],
     typed_dict: DictionarySchema = {
         "field1": "hey",
         "field2": 3,

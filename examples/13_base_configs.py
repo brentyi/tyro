@@ -1,0 +1,77 @@
+"""Example of a common configuration pattern: selecting one of multiple possible base
+configurations, and then using the CLI to either override existing values or fill in
+missing ones.
+
+Usage:
+`BASE_CONFIG=small python ./13_base_configs.py --help`
+`BASE_CONFIG=small python ./13_base_configs.py --seed 94720`
+`BASE_CONFIG=big python ./13_base_configs.py --help`
+`BASE_CONFIG=big python ./13_base_configs.py --seed 94720`
+"""
+
+import dataclasses
+import os
+from typing import Literal
+
+import dcargs
+
+
+@dataclasses.dataclass(frozen=True)
+class ExperimentConfig:
+    # Dataset to run experiment on.
+    dataset: Literal["mnist", "imagenet-50"]
+
+    # Model size.
+    num_layers: int
+    units: int
+
+    # Batch size.
+    batch_size: int
+
+    # Total number of training steps.
+    train_steps: int
+
+    # Random seed. This is helpful for making sure that our experiments are all
+    # reproducible!
+    seed: int
+
+
+# Note that we could also define this library using separate YAML files (similar to
+# `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
+# checking + IDE support.
+base_config_library = {
+    "small": ExperimentConfig(
+        dataset="mnist",
+        batch_size=2048,
+        num_layers=4,
+        units=64,
+        train_steps=30_000,
+        # The dcargs.MISSING sentinel allows us to specify that the seed should have no
+        # default, and needs to be populated from the CLI.
+        seed=dcargs.MISSING,
+    ),
+    "big": ExperimentConfig(
+        dataset="imagenet-50",
+        batch_size=32,
+        num_layers=8,
+        units=256,
+        train_steps=100_000,
+        seed=dcargs.MISSING,
+    ),
+}
+
+if __name__ == "__main__":
+    # Get base configuration name from environment.
+    base_config_name = os.environ.get("BASE_CONFIG")
+    if base_config_name is None or base_config_name not in base_config_library:
+        raise SystemExit(
+            f"BASE_CONFIG should be set to one of {tuple(base_config_library.keys())}"
+        )
+
+    # Get base configuration from our library, and use it for default CLI parameters.
+    base_config = base_config_library[base_config_name]
+    config = dcargs.cli(
+        ExperimentConfig,
+        default_instance=base_config,
+    )
+    print(config)

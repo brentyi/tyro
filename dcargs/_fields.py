@@ -20,6 +20,23 @@ class Field:
     positional: bool
 
 
+class _MISSING_TYPE:
+    pass
+
+
+MISSING: Any = _MISSING_TYPE()
+"""Sentinel value to mark fields as missing. Should generally only be used to mark
+fields passed in as a `default_instance` for `dcargs.cli()` as required."""
+
+_missing_types = [dataclasses.MISSING, MISSING, inspect.Parameter.empty]
+try:
+    # Undocumented feature: support omegaconf dataclasses out of the box.
+    import omegaconf
+
+    _missing_types.append(omegaconf.MISSING)
+except ImportError:
+    pass
+
 T = TypeVar("T")
 
 
@@ -46,15 +63,18 @@ def field_list_from_callable(
     if cls is not None and is_typeddict(cls):
         # Handle typed dictionaries.
         field_list = []
-        assert default_instance is None or isinstance(default_instance, dict)
+        no_default_instance = (
+            default_instance is None or default_instance in _missing_types
+        )
+        assert no_default_instance or isinstance(default_instance, dict)
         for name, typ in get_type_hints(cls).items():
             field_list.append(
                 Field(
                     name=name,
                     typ=typ,
-                    default=None
-                    if default_instance is None
-                    else default_instance.get(name, None),
+                    default=MISSING
+                    if no_default_instance
+                    else default_instance.get(name, MISSING),  # type: ignore
                     helptext=_docstrings.get_field_docstring(cls, name),
                     positional=False,
                 )
@@ -73,8 +93,10 @@ def field_list_from_callable(
         for name, typ in _resolver.get_type_hints(cls).items():
             # Get default, with priority for `default_instance`.
             default = field_defaults.get(name)
-            if default_instance is not None and hasattr(default_instance, name):
+            if hasattr(default_instance, name):
                 default = getattr(default_instance, name)
+            if default in _missing_types or default_instance in _missing_types:
+                default = MISSING
 
             field_list.append(
                 Field(
@@ -92,11 +114,12 @@ def field_list_from_callable(
         for dc_field in filter(
             lambda field: field.init, _resolver.resolved_fields(cls)
         ):
+            default = _get_dataclass_field_default(dc_field, default_instance)
             field_list.append(
                 Field(
                     name=dc_field.name,
                     typ=dc_field.type,
-                    default=_get_dataclass_field_default(dc_field, default_instance),
+                    default=default,
                     helptext=_docstrings.get_field_docstring(cls, dc_field.name),
                     positional=False,
                 )
@@ -128,7 +151,7 @@ def field_list_from_callable(
 
             # Get default value.
             default = param.default
-            if default is inspect.Parameter.empty:
+            if default in _missing_types:
                 default = None
 
             # Get helptext from docstring.
@@ -164,29 +187,37 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
         )
 
 
-_missing_types = [dataclasses.MISSING]
-try:
-    import omegaconf
-
-    _missing_types.append(omegaconf.MISSING)
-except ImportError:
-    pass
-
-
 def _get_dataclass_field_default(
     field: dataclasses.Field, parent_default_instance: Any
 ) -> Optional[Any]:
     """Helper for getting the default instance for a field."""
-    field_default_instance = None
-    if field.default not in _missing_types:
-        # Populate default from usual default value, or
-        # `dataclasses.field(default=...)`.
-        field_default_instance = field.default
-        if dataclasses.is_dataclass(field_default_instance):
-            _ensure_dataclass_instance_used_as_default_is_frozen(
-                field, field_default_instance
+    # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
+    # as well.
+    if parent_default_instance in _missing_types:
+        return MISSING
+
+    # Try grabbing default from parent instance.
+    if parent_default_instance is not None:
+        # Populate default from some parent, eg `default_instance` in `dcargs.cli()`.
+        if hasattr(parent_default_instance, field.name):
+            return getattr(parent_default_instance, field.name)
+        else:
+            warnings.warn(
+                f"Could not find field {field.name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
             )
-    elif field.default_factory not in _missing_types and not (
+
+    # Try grabbing default from dataclass field.
+    if field.default not in _missing_types:
+        default = field.default
+        if dataclasses.is_dataclass(default):
+            _ensure_dataclass_instance_used_as_default_is_frozen(field, default)
+        return default
+
+    # Populate default from `dataclasses.field(default_factory=...)`.
+    if field.default_factory is not dataclasses.MISSING and not (
         # Special case to ignore default_factory if we write:
         # `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.
         #
@@ -199,19 +230,8 @@ def _get_dataclass_field_default(
         dataclasses.is_dataclass(field.type)
         and field.default_factory is field.type
     ):
-        # Populate default from `dataclasses.field(default_factory=...)`.
-        assert callable(field.default_factory)
-        field_default_instance = field.default_factory()
+        return field.default_factory()
 
-    if parent_default_instance is not None:
-        # Populate default from some parent, eg `default_instance` in `dcargs.cli()`.
-        if hasattr(parent_default_instance, field.name):
-            field_default_instance = getattr(parent_default_instance, field.name)
-        else:
-            warnings.warn(
-                f"Could not find field {field.name} in default instance"
-                f" {parent_default_instance}, which has"
-                f" type {type(parent_default_instance)},",
-                stacklevel=2,
-            )
-    return field_default_instance
+    # Otherwise, no default. This is different from MISSING, because MISSING propagates
+    # to children. We could revisit this design to make it clearer.
+    return None

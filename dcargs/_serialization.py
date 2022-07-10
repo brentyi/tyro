@@ -1,17 +1,17 @@
 """Type-safe, human-readable serialization helpers."""
 
 import dataclasses
-import datetime
 import enum
 from typing import IO, Any, Optional, Set, Type, TypeVar, Union
 
 import yaml
 from typing_extensions import get_origin
 
-from . import _resolver
+from . import _fields, _resolver
 
 ENUM_YAML_TAG_PREFIX = "!enum:"
 DATACLASS_YAML_TAG_PREFIX = "!dataclass:"
+MISSING_YAML_TAG_PREFIX = "!missing"
 
 DataclassType = TypeVar("DataclassType")
 
@@ -114,12 +114,18 @@ def _make_loader(cls: Type) -> Type[yaml.Loader]:
         else:
             assert False
 
+    DataclassLoader.add_constructor(
+        tag=MISSING_YAML_TAG_PREFIX,
+        constructor=lambda *_unused: _fields.MISSING,
+    )
+
     return DataclassLoader
 
 
 def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
     class DataclassDumper(yaml.Dumper):
-        pass
+        def ignore_aliases(self, data):
+            return super().ignore_aliases(data) or data is _fields.MISSING
 
     contained_types = list(_get_contained_special_types_from_instance(instance))
     contained_type_names = list(map(lambda cls: cls.__name__, contained_types))
@@ -135,7 +141,7 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
     field: dataclasses.Field
 
     def make_representer(name: str):
-        def representer(dumper, data):
+        def representer(dumper: DataclassDumper, data: Any) -> yaml.Node:
             if dataclasses.is_dataclass(data):
                 return dumper.represent_mapping(
                     tag=DATACLASS_YAML_TAG_PREFIX + name,
@@ -149,11 +155,19 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
                 return dumper.represent_scalar(
                     tag=ENUM_YAML_TAG_PREFIX + name, value=data.name
                 )
+            assert False
 
         return representer
 
     for typ, name in zip(contained_types, contained_type_names):
         DataclassDumper.add_representer(typ, make_representer(name))
+
+    DataclassDumper.add_representer(
+        type(_fields.MISSING),
+        lambda dumper, data: dumper.represent_scalar(
+            tag=MISSING_YAML_TAG_PREFIX, value=""
+        ),
+    )
     return DataclassDumper
 
 
@@ -169,14 +183,7 @@ def from_yaml(
     return out
 
 
-def _timestamp() -> str:
-    """Get a current timestamp as a string. Example format: `2021-11-05-15:46:32`."""
-    return datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-
-
 def to_yaml(instance: Any) -> str:
     """Serialize a dataclass; returns a yaml-compatible string that can be deserialized
     via `dcargs.from_yaml()`."""
-    return f"# YAML generated via dcargs, at {_timestamp()}.\n" + yaml.dump(
-        instance, Dumper=_make_dumper(instance)
-    )
+    return "# dcargs YAML.\n" + yaml.dump(instance, Dumper=_make_dumper(instance))

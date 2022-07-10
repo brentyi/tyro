@@ -1,5 +1,11 @@
-"""CLI generation example from a simple annotated function. `dcargs.cli()` will call
-`main()`, with arguments populated from the CLI."""
+"""In the simplest case, `dcargs.cli()` can be used to run a function with arguments
+populated from the CLI.
+
+Usage:
+`python ./01_functions.py --help`
+`python ./01_functions.py --field1 hello`
+`python ./01_functions.py --field1 hello --flag`
+"""
 
 import dcargs
 

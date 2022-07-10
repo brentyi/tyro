@@ -92,8 +92,8 @@ def _rule_handle_defaults(
     """Set `required=True` if a default value is set."""
 
     # Mark lowered as required if a default is set.
-    if arg.field.default is None:
-        return dataclasses.replace(lowered, required=True)
+    if arg.field.default is None or arg.field.default is _fields.MISSING:
+        return dataclasses.replace(lowered, default=None, required=True)
 
     return dataclasses.replace(lowered, default=arg.field.default)
 

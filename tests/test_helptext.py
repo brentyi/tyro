@@ -3,7 +3,7 @@ import dataclasses
 import enum
 import io
 import pathlib
-from typing import Generic, List, Optional, Tuple, TypeVar
+from typing import Generic, List, Optional, Tuple, TypeVar, cast
 
 import pytest
 from typing_extensions import Literal
@@ -29,7 +29,7 @@ def test_helptext():
         with contextlib.redirect_stdout(f):
             dcargs.cli(Helptext, args=["--help"])
     helptext = f.getvalue()
-    assert Helptext.__doc__ in helptext
+    assert cast(str, Helptext.__doc__) in helptext
     assert ":\n  --x INT     Documentation 1\n" in helptext
     assert "--y INT     Documentation 2\n" in helptext
     assert "--z INT     Documentation 3 (default: 3)\n" in helptext

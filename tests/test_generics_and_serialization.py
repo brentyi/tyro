@@ -305,10 +305,6 @@ def test_generic_subparsers_in_container():
     )
 
 
-# Not implemented. It's unclear whether this is feasible, because generics are lost in
-# the mro: https://github.com/python/typing/issues/777
-
-
 def test_generic_inherited():
     class UnrelatedParentClass:
         pass
@@ -322,7 +318,7 @@ def test_generic_inherited():
         # Documentation 2
         y: T
 
-        z: T = 3
+        z: T = 3  # type: ignore
         """Documentation 3"""
 
     @dataclasses.dataclass
@@ -331,5 +327,19 @@ def test_generic_inherited():
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         assert dcargs.cli(
-            ChildClass, args=["--x", 1, "--y", 2, "--z", 3]
+            ChildClass, args=["--x", "1", "--y", "2", "--z", "3"]
         ) == ChildClass(1, 2, 3)
+
+
+def test_serialize_missing():
+    @dataclasses.dataclass
+    class TupleGenericVariableMissing(Generic[ScalarType]):
+        xyz: Tuple[ScalarType, ...]
+
+    x = TupleGenericVariableMissing[int](xyz=(dcargs.MISSING, dcargs.MISSING))
+    assert dcargs.to_yaml(x).count("!missing") == 2
+    _check_serialization_identity(TupleGenericVariableMissing[int], x)
+    assert (
+        dcargs.from_yaml(TupleGenericVariableMissing[int], dcargs.to_yaml(x)).xyz[0]
+        is dcargs.MISSING
+    )
