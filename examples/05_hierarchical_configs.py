@@ -1,5 +1,11 @@
-"""An example of how we can create hierarchical configuration interfaces by nesting
-dataclasses."""
+"""Parsing of nested types (in this case nested dataclasses) enables hierarchical
+configuration objects that are both modular and highly expressive.
+
+Usage:
+`python ./05_hierarchical_configs.py --help`
+`python ./05_hierarchical_configs.py . --config.optimizer.algorithm SGD`
+`python ./05_hierarchical_configs.py . --restore-checkpoint`
+"""
 
 import dataclasses
 import enum
@@ -56,12 +62,9 @@ def train(
         restore_checkpoint: Set to restore an existing checkpoint.
         checkpoint_interval: Training steps between each checkpoint save.
     """
-    print(out_dir)
-    print("---")
+    print(f"{out_dir=}, {restore_checkpoint=}, {checkpoint_interval=}")
+    print(f"{config=}")
     print(dcargs.to_yaml(config))
-    print("---")
-    print(restore_checkpoint)
-    print(checkpoint_interval)
 
 
 if __name__ == "__main__":

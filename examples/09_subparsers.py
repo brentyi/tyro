@@ -1,4 +1,12 @@
-"""Unions over nested types (classes or dataclasses) will result in subparsers."""
+"""Unions over nested types (classes or dataclasses) are populated using subparsers.
+
+Usage:
+`python ./09_subparsers.py --help`
+`python ./09_subparsers.py commit --help`
+`python ./09_subparsers.py commit --message hello --all`
+`python ./09_subparsers.py checkout --help`
+`python ./09_subparsers.py checkout --branch main`
+"""
 
 from __future__ import annotations
 

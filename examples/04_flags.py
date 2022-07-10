@@ -1,4 +1,11 @@
-"""Example of how booleans are handled and automatically converted to flags."""
+"""Booleans can either be expected to be explicitly passed in, or, if given a default
+value, automatically converted to flags.
+
+Usage:
+`python ./04_flags.py --boolean True`
+`python ./04_flags.py --boolean False --flag-a`
+`python ./04_flags.py --boolean False --no-flag-b`
+"""
 
 import dataclasses
 from typing import Optional
@@ -24,5 +31,3 @@ class Args:
 if __name__ == "__main__":
     args = dcargs.cli(Args)
     print(args)
-    print()
-    print(dcargs.to_yaml(args))

@@ -33,12 +33,11 @@ Some examples of type annotations and the desired instantiators:
 ```
 """
 
-import collections
+import collections.abc
 import dataclasses
 import enum
 import inspect
 import warnings
-from collections.abc import Mapping
 from typing import (
     Any,
     Callable,
@@ -50,22 +49,24 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    cast,
+    overload,
 )
 
 from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
 from . import _strings
 
-Instantiator = Union[
-    # Most standard fields: these are converted from strings from the CLI.
-    Callable[[str], Any],
-    # Sequence fields! This should be used whenever argparse's `nargs` field is set.
-    Callable[[List[str]], Any],
-    # Special case: the only time that argparse doesn't give us a string is when the
-    # argument action is set to `store_true` or `store_false`. In this case, we get
-    # a bool directly, and the field action can be a no-op.
-    Callable[[bool], bool],
-]
+# Most standard fields: these are converted from strings from the CLI.
+_StandardInstantiator = Callable[[str], Any]
+# Sequence fields! This should be used whenever argparse's `nargs` field is set.
+_SequenceInstantiator = Callable[[List[str]], Any]
+# Special case: the only time that argparse doesn't give us a string is when the
+# argument action is set to `store_true` or `store_false`. In this case, we get
+# a bool directly, and the field action can be a no-op.
+_FlagInstantiator = Callable[[bool], bool]
+
+Instantiator = Union[_StandardInstantiator, _SequenceInstantiator, _FlagInstantiator]
 
 
 @dataclasses.dataclass
@@ -241,17 +242,18 @@ def _instantiator_from_container_type(
             )
 
         else:
-            instantiators, metas = zip(
-                *map(
-                    lambda t: _instantiator_from_type_inner(
-                        t,
-                        type_from_typevar,
-                        allow_sequences=False,
-                        allow_optional=False,
-                    ),
-                    types,
+            instantiators = []
+            metas = []
+            for t in types:
+                a, b = _instantiator_from_type_inner(
+                    t,
+                    type_from_typevar,
+                    allow_sequences=False,
+                    allow_optional=False,
                 )
-            )
+                instantiators.append(a)
+                metas.append(b)
+
             if len(set(m.choices for m in metas)) > 1:
                 raise UnsupportedTypeAnnotationError(
                     "Due to constraints in argparse, all choices in fixed-length tuples"
@@ -262,7 +264,7 @@ def _instantiator_from_container_type(
                 make(x) for make, x in zip(instantiators, strings)
             ), InstantiatorMetadata(
                 nargs=len(types),
-                metavar=tuple(m.metavar for m in metas),
+                metavar=tuple(cast(str, m.metavar) for m in metas),
                 choices=metas[0].choices,
                 is_optional=False,
             )
@@ -313,7 +315,7 @@ def _instantiator_from_container_type(
         )
 
     # Dictionaries.
-    if type_origin in (dict, Mapping):
+    if type_origin in (dict, collections.abc.Mapping):
         key_type, val_type = get_args(typ)
         key_instantiator, key_metadata = _instantiator_from_type_inner(
             key_type,
@@ -356,6 +358,26 @@ def _instantiator_from_container_type(
     raise UnsupportedTypeAnnotationError(  # pragma: no cover
         f"Unsupported type {typ} with origin {type_origin}"
     )
+
+
+@overload
+def _instantiator_from_type_inner(
+    typ: Type,
+    type_from_typevar: Dict[TypeVar, Type],
+    allow_sequences: Literal[False],
+    allow_optional: bool,
+) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
+    ...
+
+
+@overload
+def _instantiator_from_type_inner(
+    typ: Type,
+    type_from_typevar: Dict[TypeVar, Type],
+    allow_sequences: Literal[True],
+    allow_optional: bool,
+) -> Tuple[Instantiator, InstantiatorMetadata]:
+    ...
 
 
 def _instantiator_from_type_inner(

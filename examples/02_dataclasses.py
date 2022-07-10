@@ -1,4 +1,10 @@
-"""Example using dcargs.cli() to instantiate a dataclass."""
+"""Common pattern: use `dcargs.cli()` to instantiate a dataclass.
+
+Usage:
+`python ./02_dataclasses.py --help`
+`python ./02_dataclasses.py --field1 hello`
+`python ./02_dataclasses.py --field1 hello --flag`
+"""
 
 import dataclasses
 
@@ -18,5 +24,3 @@ class Args:
 if __name__ == "__main__":
     args = dcargs.cli(Args)
     print(args)
-    print()
-    print(dcargs.to_yaml(args))

@@ -1,11 +1,13 @@
 """Helper script for updating the auto-generated parts of the README. (docstring,
 examples list)"""
-
 import concurrent.futures
 import dataclasses
+import html
 import inspect
+import os
 import pathlib
 import re
+import shlex
 import subprocess
 
 import dcargs
@@ -44,36 +46,75 @@ def format_script_for_readme(path: pathlib.Path) -> str:
     title = title.replace("_", " ").title()
 
     source = path.read_text().strip()
-    helptext = subprocess.run(
-        args=["python", str(path), "--help"], stdout=subprocess.PIPE, encoding="utf8"
-    ).stdout
-    helptext = re.sub(  # Strip colorcodes.
-        r"\x1b(\[.*?[@-~]|\].*?(\x07|\x1b\\))", "", helptext
-    ).strip()
+    example_output_lines = []
 
-    return f"""
-<details>
-<summary>
-<strong>{index}. {title}</strong>
-</summary>
-<table><tr><td>
+    docstring = source.split('"""')[1].strip()
+    assert "Usage:" in docstring
+    description_text, _, usage_text = docstring.partition("Usage:")
+    example_usages = map(
+        lambda x: x[1:-1],
+        filter(
+            lambda line: line.startswith("`") and line.endswith("`"),
+            usage_text.split("\n"),
+        ),
+    )
+    for usage in example_usages:
+        # Example usage: `ENV=something python ./path --help`
+        args = shlex.split(usage)
+        python_index = args.index("python")
 
-[{path}]({path})
+        env_vars = {}
+        if python_index > 0:
+            env_vars = {
+                k: v for (k, v) in map(lambda x: x.split("="), args[:python_index])
+            }
+        output = subprocess.run(
+            args=["python", str(path)] + args[python_index + 2 :],
+            stdout=subprocess.PIPE,
+            encoding="utf8",
+            env=dict(os.environ, **env_vars),
+        ).stdout
+        output = re.sub(  # Strip colorcodes.
+            r"\x1b(\[.*?[@-~]|\].*?(\x07|\x1b\\))", "", output
+        ).strip()
+        example_output_lines.extend(
+            [
+                "",
+                "<pre>",
+                f"<samp>$ <kbd>{usage}</kbd>",
+                f"{html.escape(output)}</samp>",
+                "</pre>",
+            ]
+        )
 
-```python
-{source}
-```
-
----
-
-<pre>
-<samp>$ <kbd>python {path} --help</kbd>
-{helptext}</samp>
-</pre>
-
-</td></tr></table>
-</details>
-    """.strip()
+    return "\n".join(
+        [
+            "",
+            "<details>",
+            "<summary>",
+            f"<strong>{index}. {title}</strong>",
+            "</summary>",
+            "<br />",
+            "",
+            description_text,
+            "",
+            f"**Code ([link]({path})):**",
+            "",
+            "```python",
+            source[3:].partition('"""')[2].strip(),
+            "```",
+            "",
+            "<br />",
+            "",
+            "**Example usage:**",
+            "",
+        ]
+        + example_output_lines
+        + [
+            "",
+            "</details>",
+        ]
+    )
 
 
 def get_examples_str(examples_dir: pathlib.Path, constants: Constants) -> str:

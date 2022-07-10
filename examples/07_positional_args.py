@@ -1,4 +1,9 @@
-"""Positional-only arguments in functions are converted to positional CLI arguments."""
+"""Positional-only arguments in functions are converted to positional CLI arguments.
+
+Usage:
+`python ./07_positional_args.py --help`
+`python ./07_positional_args.py ./a ./b --optimizer.learning-rate 1e-5`
+"""
 
 from __future__ import annotations
 
@@ -30,19 +35,7 @@ def main(
         verbose: Explain what is being done.
         background_rgb: Background color. Red by default.
     """
-    print(
-        f"{source.absolute()=}"
-        "\n"
-        f"{dest.absolute()=}"
-        "\n"
-        f"{optimizer=}"
-        "\n"
-        f"{force=}"
-        "\n"
-        f"{verbose=}"
-        "\n"
-        f"{background_rgb=}"
-    )
+    print(f"{source=}\n{dest=}\n{optimizer=}\n{force=}\n{verbose=}\n{background_rgb=}")
 
 
 class OptimizerType(enum.Enum):

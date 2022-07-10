@@ -190,6 +190,69 @@ def test_subparser_with_default():
         dcargs.cli(DefaultSubparser, args=["--x", "1", "c", "--y", "3"])
 
 
+def test_subparser_with_default_instance():
+    @dataclasses.dataclass
+    class DefaultInstanceHTTPServer:
+        y: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSMTPServer:
+        z: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSubparser:
+        x: int
+        bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+
+    assert (
+        dcargs.cli(
+            DefaultInstanceSubparser,
+            args=["--x", "1", "default-instance-http-server", "--y", "5"],
+        )
+        == dcargs.cli(
+            DefaultInstanceSubparser,
+            args=[],
+            default_instance=DefaultInstanceSubparser(
+                x=1, bc=DefaultInstanceHTTPServer(y=5)
+            ),
+        )
+        == dcargs.cli(
+            DefaultInstanceSubparser,
+            args=["default-instance-http-server"],
+            default_instance=DefaultInstanceSubparser(
+                x=1, bc=DefaultInstanceHTTPServer(y=5)
+            ),
+        )
+        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
+    )
+    assert dcargs.cli(
+        DefaultInstanceSubparser,
+        args=["default-instance-smtp-server", "--z", "3"],
+        default_instance=DefaultInstanceSubparser(
+            x=1, bc=DefaultInstanceHTTPServer(y=5)
+        ),
+    ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceSMTPServer(z=3))
+    assert (
+        dcargs.cli(
+            DefaultInstanceSubparser,
+            args=["--x", "1", "default-instance-http-server", "--y", "8"],
+        )
+        == dcargs.cli(
+            DefaultInstanceSubparser,
+            args=[],
+            default_instance=DefaultInstanceSubparser(
+                x=1, bc=DefaultInstanceHTTPServer(y=8)
+            ),
+        )
+        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
+    )
+
+    with pytest.raises(SystemExit):
+        dcargs.cli(DefaultInstanceSubparser, args=["--x", "1", "b", "--z", "3"])
+    with pytest.raises(SystemExit):
+        dcargs.cli(DefaultInstanceSubparser, args=["--x", "1", "c", "--y", "3"])
+
+
 def test_optional_subparser():
     @dataclasses.dataclass
     class OptionalHTTPServer:

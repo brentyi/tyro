@@ -6,14 +6,21 @@ from typing import Callable, Dict, List, Tuple, Type, TypeVar, Union
 
 from typing_extensions import get_args, get_origin, get_type_hints
 
+TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
+
+
+def unwrap_origin(tp: TypeOrCallable) -> TypeOrCallable:
+    """Returns the origin of tp if it exists. Otherwise, returns tp."""
+    origin = get_origin(tp)
+    if origin is None:
+        return tp
+    else:
+        return origin
+
 
 def is_dataclass(cls: Union[Type, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
-    origin_cls = get_origin(cls)
-    return dataclasses.is_dataclass(cls if origin_cls is None else origin_cls)
-
-
-TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
+    return dataclasses.is_dataclass(unwrap_origin(cls))
 
 
 def resolve_generic_types(

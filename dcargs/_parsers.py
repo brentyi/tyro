@@ -50,9 +50,7 @@ def _is_possibly_nested_type(typ: Any) -> bool:
     Examples of when we return False: int, str, List[int], List[str], pathlib.Path, etc.
     """
 
-    origin = get_origin(typ)
-    if origin is not None:
-        typ = origin
+    typ = _resolver.unwrap_origin(typ)
 
     # Nested types should be callable.
     if not callable(typ):
@@ -330,7 +328,9 @@ class SubparsersSpecification:
                 description=None,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
-                default_instance=None,
+                default_instance=field.default
+                if isinstance(field.default, _resolver.unwrap_origin(option))
+                else None,
             )
 
         return SubparsersSpecification(

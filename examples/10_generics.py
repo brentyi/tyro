@@ -1,4 +1,8 @@
-"""Example of parsing for generic (~templated) dataclasses."""
+"""Example of parsing for generic dataclasses.
+
+Usage:
+`python ./10_generics.py --help`
+"""
 
 import dataclasses
 from typing import Generic, TypeVar
