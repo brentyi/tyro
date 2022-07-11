@@ -25,9 +25,10 @@ _`f`_, which may be a function, class, or dataclass:
 dcargs.cli(
     f: Callable[..., T],
     *,
-    description: Optional[str]=None,
-    args: Optional[Sequence[str]]=None,
-    default_instance: Optional[T]=None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[T] = None,
+    avoid_subparsers: bool = False,
 ) -> T
 ```
 
@@ -83,6 +84,8 @@ Keyword Args:
         if `T` is a dataclass, TypedDict, or NamedTuple. Helpful for merging CLI
         arguments with values loaded from elsewhere. (for example, a config object
         loaded from a yaml file)
+    avoid_subparsers: Avoid creating a subparser when defaults are provided for
+        unions over nested types. Generates cleaner but less expressive CLIs.
 
 Returns:
     The output of `f(...)`.
@@ -567,15 +570,33 @@ one of multiple possible base configurations, and then use the CLI to either ove
 ```python
 import dataclasses
 import os
-from typing import Literal
+from typing import Literal, Tuple, Union
 
 import dcargs
+
+
+@dataclasses.dataclass
+class AdamOptimizer:
+    # Adam learning rate.
+    learning_rate: float = 1e-3
+
+    # Moving average parameters.
+    betas: Tuple[float, float] = (0.9, 0.999)
+
+
+@dataclasses.dataclass
+class SgdOptimizer:
+    # SGD learning rate.
+    learning_rate: float = 3e-4
 
 
 @dataclasses.dataclass(frozen=True)
 class ExperimentConfig:
     # Dataset to run experiment on.
     dataset: Literal["mnist", "imagenet-50"]
+
+    # Optimizer parameters.
+    optimizer: Union[AdamOptimizer, SgdOptimizer]
 
     # Model size.
     num_layers: int
@@ -598,6 +619,7 @@ class ExperimentConfig:
 base_config_library = {
     "small": ExperimentConfig(
         dataset="mnist",
+        optimizer=SgdOptimizer(),
         batch_size=2048,
         num_layers=4,
         units=64,
@@ -608,6 +630,7 @@ base_config_library = {
     ),
     "big": ExperimentConfig(
         dataset="imagenet-50",
+        optimizer=AdamOptimizer(),
         batch_size=32,
         num_layers=8,
         units=256,
@@ -629,6 +652,10 @@ if __name__ == "__main__":
     config = dcargs.cli(
         ExperimentConfig,
         default_instance=base_config,
+        # `avoid_subparsers` will avoid making a subparser for unions when a default is
+        # provided; in this case, it makes our CLI less expressive (cannot switch
+        # away from the base optimizer types), but easier to use.
+        avoid_subparsers=True,
     )
     print(config)
 ```
@@ -640,8 +667,9 @@ if __name__ == "__main__":
 <pre>
 <samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --help</kbd>
 usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
-                          [--num-layers INT] [--units INT] [--batch-size INT]
-                          [--train-steps INT] --seed INT
+                          [--optimizer.learning-rate FLOAT] [--num-layers INT]
+                          [--units INT] [--batch-size INT] [--train-steps INT]
+                          --seed INT
 
 required arguments:
   --seed INT            Random seed. This is helpful for making sure that our experiments are all
@@ -654,19 +682,27 @@ optional arguments:
   --num-layers INT      Model size. (default: 4)
   --units INT           Model size. (default: 64)
   --batch-size INT      Batch size. (default: 2048)
-  --train-steps INT     Total number of training steps. (default: 30000)</samp>
+  --train-steps INT     Total number of training steps. (default: 30000)
+
+optional optimizer arguments:
+  Optimizer parameters.
+
+  --optimizer.learning-rate FLOAT
+                        SGD learning rate. (default: 0.0003)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;mnist&#x27;, num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
+ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --help</kbd>
 usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
-                          [--num-layers INT] [--units INT] [--batch-size INT]
-                          [--train-steps INT] --seed INT
+                          [--optimizer.learning-rate FLOAT]
+                          [--optimizer.betas FLOAT FLOAT] [--num-layers INT]
+                          [--units INT] [--batch-size INT] [--train-steps INT]
+                          --seed INT
 
 required arguments:
   --seed INT            Random seed. This is helpful for making sure that our experiments are all
@@ -679,12 +715,20 @@ optional arguments:
   --num-layers INT      Model size. (default: 8)
   --units INT           Model size. (default: 256)
   --batch-size INT      Batch size. (default: 32)
-  --train-steps INT     Total number of training steps. (default: 100000)</samp>
+  --train-steps INT     Total number of training steps. (default: 100000)
+
+optional optimizer arguments:
+  Optimizer parameters.
+
+  --optimizer.learning-rate FLOAT
+                        Adam learning rate. (default: 0.001)
+  --optimizer.betas FLOAT FLOAT
+                        Moving average parameters. (default: 0.9 0.999)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
+ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
 </pre>
 
 </details>

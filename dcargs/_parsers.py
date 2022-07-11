@@ -96,7 +96,8 @@ class ParserSpecification:
         parent_classes: Set[Type],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Optional[T],
-        prefix: str = "",
+        prefix: str,
+        avoid_subparsers: bool,
     ) -> ParserSpecification:
         """Create a parser definition from a callable."""
 
@@ -150,10 +151,22 @@ class ParserSpecification:
                 type_from_typevar=type_from_typevar,
                 parent_classes=parent_classes,
                 prefix=prefix + field.name + _strings.NESTED_FIELD_DELIMETER,
+                avoid_subparsers=avoid_subparsers,
             )
             if subparsers_attempt is not None:
-                subparsers_from_name[subparsers_attempt.name] = subparsers_attempt
-                continue
+                if (
+                    not avoid_subparsers
+                    # Required subparsers => must create a subparser.
+                    or subparsers_attempt.required
+                    # If the output can be None, the only way to specify whether this is
+                    # or isn't None is with a subparser.
+                    or subparsers_attempt.can_be_none
+                ):
+                    subparsers_from_name[subparsers_attempt.name] = subparsers_attempt
+                    continue
+                else:
+                    field = dataclasses.replace(field, typ=type(field.default))
+                    assert _is_possibly_nested_type(field.typ)
 
             # (2) Handle nested callables.
             if _is_possibly_nested_type(field.typ):
@@ -164,6 +177,7 @@ class ParserSpecification:
                     parent_type_from_typevar=type_from_typevar,
                     default_instance=field.default,
                     prefix=prefix + field.name + _strings.NESTED_FIELD_DELIMETER,
+                    avoid_subparsers=avoid_subparsers,
                 )
                 args.extend(nested_parser.args)
 
@@ -332,6 +346,7 @@ class SubparsersSpecification:
     parser_from_name: Dict[str, ParserSpecification]
     required: bool
     default_instance: Optional[Any]
+    can_be_none: bool  # If underlying type is Optional[Something].
 
     @staticmethod
     def from_field(
@@ -339,6 +354,7 @@ class SubparsersSpecification:
         type_from_typevar: Dict[TypeVar, Type],
         parent_classes: Set[Type],
         prefix: str,
+        avoid_subparsers: bool,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
         if get_origin(field.typ) is not Union:
@@ -362,12 +378,13 @@ class SubparsersSpecification:
                 if isinstance(field.default, _resolver.unwrap_origin(option))
                 else None,
                 prefix=prefix,
+                avoid_subparsers=avoid_subparsers,
             )
 
         # Optional if: type hint is Optional[], or a default instance is provided.
         required = True
-        if options != options_no_none:
-            # Optional[] type.
+        can_be_none = options != options_no_none  # Optional[] type.
+        if can_be_none:
             required = False
         elif field.default is not None:
             required = False
@@ -404,4 +421,5 @@ class SubparsersSpecification:
             parser_from_name=parser_from_name,
             required=required,
             default_instance=field.default,
+            can_be_none=can_be_none,
         )

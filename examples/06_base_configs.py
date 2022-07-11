@@ -11,15 +11,33 @@ Usage:
 
 import dataclasses
 import os
-from typing import Literal
+from typing import Literal, Tuple, Union
 
 import dcargs
+
+
+@dataclasses.dataclass
+class AdamOptimizer:
+    # Adam learning rate.
+    learning_rate: float = 1e-3
+
+    # Moving average parameters.
+    betas: Tuple[float, float] = (0.9, 0.999)
+
+
+@dataclasses.dataclass
+class SgdOptimizer:
+    # SGD learning rate.
+    learning_rate: float = 3e-4
 
 
 @dataclasses.dataclass(frozen=True)
 class ExperimentConfig:
     # Dataset to run experiment on.
     dataset: Literal["mnist", "imagenet-50"]
+
+    # Optimizer parameters.
+    optimizer: Union[AdamOptimizer, SgdOptimizer]
 
     # Model size.
     num_layers: int
@@ -42,6 +60,7 @@ class ExperimentConfig:
 base_config_library = {
     "small": ExperimentConfig(
         dataset="mnist",
+        optimizer=SgdOptimizer(),
         batch_size=2048,
         num_layers=4,
         units=64,
@@ -52,6 +71,7 @@ base_config_library = {
     ),
     "big": ExperimentConfig(
         dataset="imagenet-50",
+        optimizer=AdamOptimizer(),
         batch_size=32,
         num_layers=8,
         units=256,
@@ -73,5 +93,9 @@ if __name__ == "__main__":
     config = dcargs.cli(
         ExperimentConfig,
         default_instance=base_config,
+        # `avoid_subparsers` will avoid making a subparser for unions when a default is
+        # provided; in this case, it makes our CLI less expressive (cannot switch
+        # away from the base optimizer types), but easier to use.
+        avoid_subparsers=True,
     )
     print(config)
