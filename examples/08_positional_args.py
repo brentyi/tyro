@@ -1,8 +1,8 @@
 """Positional-only arguments in functions are converted to positional CLI arguments.
 
 Usage:
-`python ./07_positional_args.py --help`
-`python ./07_positional_args.py ./a ./b --optimizer.learning-rate 1e-5`
+`python ./08_positional_args.py --help`
+`python ./08_positional_args.py ./a ./b --optimizer.learning-rate 1e-5`
 """
 
 from __future__ import annotations

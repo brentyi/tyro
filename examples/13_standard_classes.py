@@ -2,8 +2,8 @@
 constructors of) standard Python classes.
 
 Usage:
-`python ./08_standard_classes.py --help`
-`python ./08_standard_classes.py --field1 hello --field2 7`
+`python ./13_standard_classes.py --help`
+`python ./13_standard_classes.py --field1 hello --field2 7`
 """
 
 import dcargs

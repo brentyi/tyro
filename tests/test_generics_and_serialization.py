@@ -258,13 +258,13 @@ def test_generic_subparsers():
         command: Union[T1, T2]
 
     parsed_instance = dcargs.cli(
-        Subparser[CommandOne, CommandTwo], args="command-one --a 5".split(" ")
+        Subparser[CommandOne, CommandTwo], args="command-one --command.a 5".split(" ")
     )
     assert parsed_instance == Subparser(CommandOne(5))
     _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
 
     parsed_instance = dcargs.cli(
-        Subparser[CommandOne, CommandTwo], args="command-two --b 7".split(" ")
+        Subparser[CommandOne, CommandTwo], args="command-two --command.b 7".split(" ")
     )
     assert parsed_instance == Subparser(CommandTwo(7))
     _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
@@ -285,7 +285,8 @@ def test_generic_subparsers_in_container():
         command: Union[T1, T2]
 
     parsed_instance = dcargs.cli(
-        Subparser[Command[int], Command[float]], args="command-int --a 5 3".split(" ")
+        Subparser[Command[int], Command[float]],
+        args="command-int --command.a 5 3".split(" "),
     )
     assert parsed_instance == Subparser(Command([5, 3])) and isinstance(
         parsed_instance.command.a[0], int
@@ -295,7 +296,8 @@ def test_generic_subparsers_in_container():
     )
 
     parsed_instance = dcargs.cli(
-        Subparser[Command[int], Command[float]], args="command-float --a 7 2".split(" ")
+        Subparser[Command[int], Command[float]],
+        args="command-float --command.a 7 2".split(" "),
     )
     assert parsed_instance == Subparser(Command([7.0, 2.0])) and isinstance(
         parsed_instance.command.a[0], float

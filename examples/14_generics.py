@@ -1,7 +1,7 @@
 """Example of parsing for generic dataclasses.
 
 Usage:
-`python ./10_generics.py --help`
+`python ./14_generics.py --help`
 """
 
 import dataclasses

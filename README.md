@@ -554,13 +554,150 @@ train_steps: 100000</samp>
 
 <details>
 <summary>
-<strong>6. Literals</strong>
+<strong>6. Base Configs</strong>
+</summary>
+<br />
+
+We can integrate `dcargs.cli()` into common configuration patterns: here, we select
+one of multiple possible base configurations, and then use the CLI to either override
+(existing) or fill in (missing) values.
+
+**Code ([link](examples/06_base_configs.py)):**
+
+```python
+import dataclasses
+import os
+from typing import Literal
+
+import dcargs
+
+
+@dataclasses.dataclass(frozen=True)
+class ExperimentConfig:
+    # Dataset to run experiment on.
+    dataset: Literal["mnist", "imagenet-50"]
+
+    # Model size.
+    num_layers: int
+    units: int
+
+    # Batch size.
+    batch_size: int
+
+    # Total number of training steps.
+    train_steps: int
+
+    # Random seed. This is helpful for making sure that our experiments are all
+    # reproducible!
+    seed: int
+
+
+# Note that we could also define this library using separate YAML files (similar to
+# `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
+# checking + IDE support.
+base_config_library = {
+    "small": ExperimentConfig(
+        dataset="mnist",
+        batch_size=2048,
+        num_layers=4,
+        units=64,
+        train_steps=30_000,
+        # The dcargs.MISSING sentinel allows us to specify that the seed should have no
+        # default, and needs to be populated from the CLI.
+        seed=dcargs.MISSING,
+    ),
+    "big": ExperimentConfig(
+        dataset="imagenet-50",
+        batch_size=32,
+        num_layers=8,
+        units=256,
+        train_steps=100_000,
+        seed=dcargs.MISSING,
+    ),
+}
+
+if __name__ == "__main__":
+    # Get base configuration name from environment.
+    base_config_name = os.environ.get("BASE_CONFIG")
+    if base_config_name is None or base_config_name not in base_config_library:
+        raise SystemExit(
+            f"BASE_CONFIG should be set to one of {tuple(base_config_library.keys())}"
+        )
+
+    # Get base configuration from our library, and use it for default CLI parameters.
+    base_config = base_config_library[base_config_name]
+    config = dcargs.cli(
+        ExperimentConfig,
+        default_instance=base_config,
+    )
+    print(config)
+```
+
+<br />
+
+**Example usage:**
+
+<pre>
+<samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --help</kbd>
+usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
+                          [--num-layers INT] [--units INT] [--batch-size INT]
+                          [--train-steps INT] --seed INT
+
+required arguments:
+  --seed INT            Random seed. This is helpful for making sure that our experiments are all
+                        reproducible!
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --dataset {mnist,imagenet-50}
+                        Dataset to run experiment on. (default: mnist)
+  --num-layers INT      Model size. (default: 4)
+  --units INT           Model size. (default: 64)
+  --batch-size INT      Batch size. (default: 2048)
+  --train-steps INT     Total number of training steps. (default: 30000)</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --seed 94720</kbd>
+ExperimentConfig(dataset=&#x27;mnist&#x27;, num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --help</kbd>
+usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
+                          [--num-layers INT] [--units INT] [--batch-size INT]
+                          [--train-steps INT] --seed INT
+
+required arguments:
+  --seed INT            Random seed. This is helpful for making sure that our experiments are all
+                        reproducible!
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --dataset {mnist,imagenet-50}
+                        Dataset to run experiment on. (default: imagenet-50)
+  --num-layers INT      Model size. (default: 8)
+  --units INT           Model size. (default: 256)
+  --batch-size INT      Batch size. (default: 32)
+  --train-steps INT     Total number of training steps. (default: 100000)</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --seed 94720</kbd>
+ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
+</pre>
+
+</details>
+
+<details>
+<summary>
+<strong>7. Literals</strong>
 </summary>
 <br />
 
 `typing.Literal[]` can be used to restrict inputs to a fixed set of choices.
 
-**Code ([link](examples/06_literals.py)):**
+**Code ([link](examples/07_literals.py)):**
 
 ```python
 import dataclasses
@@ -599,8 +736,8 @@ if __name__ == "__main__":
 **Example usage:**
 
 <pre>
-<samp>$ <kbd>python ./06_literals.py --help</kbd>
-usage: 06_literals.py [-h] --enum {RED,GREEN,BLUE} --restricted-enum
+<samp>$ <kbd>python ./07_literals.py --help</kbd>
+usage: 07_literals.py [-h] --enum {RED,GREEN,BLUE} --restricted-enum
                       {RED,GREEN} --integer {0,1,2,3} --string {red,green}
                       [--restricted-enum-with-default {RED,GREEN}]
                       [--integer-with-default {0,1,2,3}]
@@ -623,7 +760,7 @@ optional arguments:
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./06_literals.py --enum RED --restricted-enum GREEN --integer 3 --string green</kbd>
+<samp>$ <kbd>python ./07_literals.py --enum RED --restricted-enum GREEN --integer 3 --string green</kbd>
 Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.GREEN: 2&gt;, integer=3, string=&#x27;green&#x27;, restricted_enum_with_default=&lt;Color.GREEN: 2&gt;, integer_with_default=3, string_with_Default=&#x27;red&#x27;)</samp>
 </pre>
 
@@ -631,13 +768,13 @@ Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.GREEN: 2&gt;, integer=
 
 <details>
 <summary>
-<strong>7. Positional Args</strong>
+<strong>8. Positional Args</strong>
 </summary>
 <br />
 
 Positional-only arguments in functions are converted to positional CLI arguments.
 
-**Code ([link](examples/07_positional_args.py)):**
+**Code ([link](examples/08_positional_args.py)):**
 
 ```python
 from __future__ import annotations
@@ -699,8 +836,8 @@ if __name__ == "__main__":
 **Example usage:**
 
 <pre>
-<samp>$ <kbd>python ./07_positional_args.py --help</kbd>
-usage: 07_positional_args.py [-h] [--optimizer.algorithm {ADAM,SGD}]
+<samp>$ <kbd>python ./08_positional_args.py --help</kbd>
+usage: 08_positional_args.py [-h] [--optimizer.algorithm {ADAM,SGD}]
                              [--optimizer.learning-rate FLOAT]
                              [--optimizer.weight-decay FLOAT] [--force]
                              [--verbose] [--background-rgb FLOAT FLOAT FLOAT]
@@ -732,76 +869,13 @@ optional optimizer arguments:
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./07_positional_args.py ./a ./b --optimizer.learning-rate 1e-5</kbd>
+<samp>$ <kbd>python ./08_positional_args.py ./a ./b --optimizer.learning-rate 1e-5</kbd>
 source=PosixPath(&#x27;a&#x27;)
 dest=PosixPath(&#x27;b&#x27;)
 optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=1e-05, weight_decay=0.01)
 force=False
 verbose=False
 background_rgb=(1.0, 0.0, 0.0)</samp>
-</pre>
-
-</details>
-
-<details>
-<summary>
-<strong>8. Standard Classes</strong>
-</summary>
-<br />
-
-In addition to functions and dataclasses, we can also generate CLIs from (the
-constructors of) standard Python classes.
-
-**Code ([link](examples/08_standard_classes.py)):**
-
-```python
-import dcargs
-
-
-class Args:
-    def __init__(
-        self,
-        field1: str,
-        field2: int,
-        flag: bool = False,
-    ):
-        """Arguments.
-
-        Args:
-            field1: A string field.
-            field2: A numeric field.
-            flag: A boolean flag.
-        """
-        self.data = [field1, field2, flag]
-
-
-if __name__ == "__main__":
-    args = dcargs.cli(Args)
-    print(args.data)
-```
-
-<br />
-
-**Example usage:**
-
-<pre>
-<samp>$ <kbd>python ./08_standard_classes.py --help</kbd>
-usage: 08_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
-
-Arguments.
-
-required arguments:
-  --field1 STR  A string field.
-  --field2 INT  A numeric field.
-
-optional arguments:
-  -h, --help    show this help message and exit
-  --flag        A boolean flag.</samp>
-</pre>
-
-<pre>
-<samp>$ <kbd>python ./08_standard_classes.py --field1 hello --field2 7</kbd>
-[&#x27;hello&#x27;, 7, False]</samp>
 </pre>
 
 </details>
@@ -825,10 +899,6 @@ from typing import Union
 import dcargs
 
 
-def main(command: Union[Checkout, Commit]) -> None:
-    print(command)
-
-
 @dataclasses.dataclass(frozen=True)
 class Checkout:
     """Checkout a branch."""
@@ -844,6 +914,10 @@ class Commit:
     all: bool = False
 
 
+def main(cmd: Union[Checkout, Commit] = Checkout("main")) -> None:
+    print(cmd)
+
+
 if __name__ == "__main__":
     dcargs.cli(main)
 ```
@@ -854,49 +928,53 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./09_subparsers.py --help</kbd>
-usage: 09_subparsers.py [-h] {checkout,commit} ...
+usage: 09_subparsers.py [-h] [{checkout,commit}] ...
 
 optional arguments:
-  -h, --help         show this help message and exit
+  -h, --help           show this help message and exit
 
-subcommands:
-  {checkout,commit}</samp>
+optional subcommands:
+   (default: checkout)
+
+  [{checkout,commit}]</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./09_subparsers.py commit --help</kbd>
-usage: 09_subparsers.py commit [-h] --message STR [--all]
+usage: 09_subparsers.py commit [-h] --cmd.message STR [--cmd.all]
 
 Commit changes.
 
-required arguments:
-  --message STR
-
 optional arguments:
-  -h, --help     show this help message and exit
-  --all</samp>
+  -h, --help         show this help message and exit
+
+required cmd arguments:
+  --cmd.message STR
+
+optional cmd arguments:
+  --cmd.all</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./09_subparsers.py commit --message hello --all</kbd>
+<samp>$ <kbd>python ./09_subparsers.py commit --cmd.message hello --cmd.all</kbd>
 Commit(message=&#x27;hello&#x27;, all=True)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./09_subparsers.py checkout --help</kbd>
-usage: 09_subparsers.py checkout [-h] --branch STR
+usage: 09_subparsers.py checkout [-h] [--cmd.branch STR]
 
 Checkout a branch.
 
-required arguments:
-  --branch STR
-
 optional arguments:
-  -h, --help    show this help message and exit</samp>
+  -h, --help        show this help message and exit
+
+optional cmd arguments:
+  --cmd.branch STR  (default: main)</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./09_subparsers.py checkout --branch main</kbd>
+<samp>$ <kbd>python ./09_subparsers.py checkout --cmd.branch main</kbd>
 Checkout(branch=&#x27;main&#x27;)</samp>
 </pre>
 
@@ -904,49 +982,73 @@ Checkout(branch=&#x27;main&#x27;)</samp>
 
 <details>
 <summary>
-<strong>10. Generics</strong>
+<strong>10. Multiple Subparsers</strong>
 </summary>
 <br />
 
-Example of parsing for generic dataclasses.
+Multiple unions over nested types are populated using a series of subparsers.
 
-**Code ([link](examples/10_generics.py)):**
+**Code ([link](examples/10_multiple_subparsers.py)):**
 
 ```python
+from __future__ import annotations
+
 import dataclasses
-from typing import Generic, TypeVar
+from typing import Literal, Tuple, Union
 
 import dcargs
 
-ScalarType = TypeVar("ScalarType")
-ShapeType = TypeVar("ShapeType")
+# Possible dataset configurations.
 
 
-@dataclasses.dataclass(frozen=True)
-class Point3(Generic[ScalarType]):
-    x: ScalarType
-    y: ScalarType
-    z: ScalarType
-    frame_id: str
+@dataclasses.dataclass
+class MnistDataset:
+    binary: bool = False
+    """Set to load binary version of MNIST dataset."""
 
 
-@dataclasses.dataclass(frozen=True)
-class Triangle:
-    a: Point3[float]
-    b: Point3[float]
-    c: Point3[float]
+@dataclasses.dataclass
+class ImageNetDataset:
+    subset: Literal[50, 100, 1000]
+    """Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""
 
 
-@dataclasses.dataclass(frozen=True)
-class Args(Generic[ShapeType]):
-    point_continuous: Point3[float]
-    point_discrete: Point3[int]
-    shape: ShapeType
+# Possible optimizer configurations.
+
+
+@dataclasses.dataclass
+class AdamOptimizer:
+    learning_rate: float = 1e-3
+    betas: Tuple[float, float] = (0.9, 0.999)
+
+
+@dataclasses.dataclass
+class SgdOptimizer:
+    learning_rate: float = 3e-4
+
+
+# Train script.
+
+
+def train(
+    dataset: Union[MnistDataset, ImageNetDataset] = MnistDataset(),
+    optimizer: Union[AdamOptimizer, SgdOptimizer] = AdamOptimizer(),
+) -> None:
+    """Example training script.
+
+    Args:
+        dataset: Dataset to train on.
+        optimizer: Optimizer to train with.
+
+    Returns:
+        None:
+    """
+    print(dataset)
+    print(optimizer)
 
 
 if __name__ == "__main__":
-    args = dcargs.cli(Args[Triangle])
-    print(args)
+    dcargs.cli(train)
 ```
 
 <br />
@@ -954,55 +1056,48 @@ if __name__ == "__main__":
 **Example usage:**
 
 <pre>
-<samp>$ <kbd>python ./10_generics.py --help</kbd>
-usage: 10_generics.py [-h] --point-continuous.x FLOAT --point-continuous.y
-                      FLOAT --point-continuous.z FLOAT
-                      --point-continuous.frame-id STR --point-discrete.x INT
-                      --point-discrete.y INT --point-discrete.z INT
-                      --point-discrete.frame-id STR --shape.a.x FLOAT
-                      --shape.a.y FLOAT --shape.a.z FLOAT --shape.a.frame-id
-                      STR --shape.b.x FLOAT --shape.b.y FLOAT --shape.b.z
-                      FLOAT --shape.b.frame-id STR --shape.c.x FLOAT
-                      --shape.c.y FLOAT --shape.c.z FLOAT --shape.c.frame-id
-                      STR
+<samp>$ <kbd>python ./10_multiple_subparsers.py</kbd>
+MnistDataset(binary=False)
+AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999))</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./10_multiple_subparsers.py --help</kbd>
+usage: 10_multiple_subparsers.py [-h] [{mnist-dataset,image-net-dataset}] ...
+
+Example training script.
 
 optional arguments:
   -h, --help            show this help message and exit
 
-required point_continuous arguments:
+optional subcommands:
+  Dataset to train on.  (default: mnist-dataset)
 
-  --point-continuous.x FLOAT
-  --point-continuous.y FLOAT
-  --point-continuous.z FLOAT
-  --point-continuous.frame-id STR
+  [{mnist-dataset,image-net-dataset}]</samp>
+</pre>
 
-required point_discrete arguments:
+<pre>
+<samp>$ <kbd>python ./10_multiple_subparsers.py mnist-dataset --help</kbd>
+usage: 10_multiple_subparsers.py mnist-dataset [-h] [--dataset.binary]
+                                               [{adam-optimizer,sgd-optimizer}]
+                                               ...
 
-  --point-discrete.x INT
-  --point-discrete.y INT
-  --point-discrete.z INT
-  --point-discrete.frame-id STR
+optional arguments:
+  -h, --help            show this help message and exit
 
-required shape.a arguments:
+optional dataset arguments:
+  --dataset.binary      Set to load binary version of MNIST dataset.
 
-  --shape.a.x FLOAT
-  --shape.a.y FLOAT
-  --shape.a.z FLOAT
-  --shape.a.frame-id STR
+optional subcommands:
+  Optimizer to train with. (default: adam-optimizer)
 
-required shape.b arguments:
+  [{adam-optimizer,sgd-optimizer}]</samp>
+</pre>
 
-  --shape.b.x FLOAT
-  --shape.b.y FLOAT
-  --shape.b.z FLOAT
-  --shape.b.frame-id STR
-
-required shape.c arguments:
-
-  --shape.c.x FLOAT
-  --shape.c.y FLOAT
-  --shape.c.z FLOAT
-  --shape.c.frame-id STR</samp>
+<pre>
+<samp>$ <kbd>python ./10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4</kbd>
+MnistDataset(binary=False)
+AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</samp>
 </pre>
 
 </details>
@@ -1144,98 +1239,39 @@ TupleType(field1=&#x27;hello&#x27;, field2=3, flag=False)</samp>
 
 <details>
 <summary>
-<strong>13. Base Configs</strong>
+<strong>13. Standard Classes</strong>
 </summary>
 <br />
 
-Example of a common configuration pattern: selecting one of multiple possible base
-configurations, and then using the CLI to either override existing values or fill in
-missing ones.
+In addition to functions and dataclasses, we can also generate CLIs from (the
+constructors of) standard Python classes.
 
-`BASE_CONFIG=small python ./13_base_configs.py --help`
-`BASE_CONFIG=small python ./13_base_configs.py --seed 94720`
-`BASE_CONFIG=big python ./13_base_configs.py --help`
-`BASE_CONFIG=big python ./13_base_configs.py --seed 94720`
-
-**Code ([link](examples/13_base_configs.py)):**
+**Code ([link](examples/13_standard_classes.py)):**
 
 ```python
-import dataclasses
-import os
-import sys
-from typing import Literal
-
 import dcargs
 
 
-@dataclasses.dataclass(frozen=True)
-class ExperimentConfig:
-    # Dataset to run experiment on.
-    dataset: Literal["mnist", "imagenet-50"]
+class Args:
+    def __init__(
+        self,
+        field1: str,
+        field2: int,
+        flag: bool = False,
+    ):
+        """Arguments.
 
-    # Model size.
-    num_layers: int
-    units: int
+        Args:
+            field1: A string field.
+            field2: A numeric field.
+            flag: A boolean flag.
+        """
+        self.data = [field1, field2, flag]
 
-    # Batch size.
-    batch_size: int
-
-    # Total number of training steps.
-    train_steps: int
-
-    # Random seed. This is helpful for making sure that our experiments are all
-    # reproducible!
-    seed: int
-
-
-# Note that we could also define this library using separate YAML files (a la
-# `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
-# checking + IDE support.
-base_config_library = {
-    "small": ExperimentConfig(
-        dataset="mnist",
-        batch_size=2048,
-        num_layers=4,
-        units=64,
-        train_steps=30_000,
-        # The dcargs.MISSING sentinel allows us to specify that the seed should have no
-        # default, and needs to be populated from the CLI.
-        seed=dcargs.MISSING,
-    ),
-    "big": ExperimentConfig(
-        dataset="imagenet-50",
-        batch_size=32,
-        num_layers=8,
-        units=256,
-        train_steps=100_000,
-        seed=dcargs.MISSING,
-    ),
-}
 
 if __name__ == "__main__":
-    # Get base configuration name from environment.
-    # base_config_name = os.environ.get("BASE_CONFIG")
-    # if base_config_name is None or base_config_name not in base_config_library:
-    #     raise SystemExit(
-    #         f"BASE_CONFIG should be set to one of {tuple(base_config_library.keys())}"
-    #     )
-    if (
-        len(sys.argv) < 2
-        or (base_config_name := sys.argv[1]) not in base_config_library
-    ):
-        raise SystemExit(
-            f"BASE_CONFIG should be set to one of {tuple(base_config_library.keys())}"
-        )
-
-    # Get base configuration from our library, and use it for default CLI parameters.
-    base_config = base_config_library[base_config_name]
-    config = dcargs.cli(
-        ExperimentConfig,
-        default_instance=base_config,
-        args=sys.argv[2:],
-    )
-
-    print(config)
+    args = dcargs.cli(Args)
+    print(args.data)
 ```
 
 <br />
@@ -1243,53 +1279,128 @@ if __name__ == "__main__":
 **Example usage:**
 
 <pre>
-<samp>$ <kbd>python ./13_base_configs.py small --help</kbd>
-usage: 13_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
-                          [--num-layers INT] [--units INT] [--batch-size INT]
-                          [--train-steps INT] --seed INT
+<samp>$ <kbd>python ./13_standard_classes.py --help</kbd>
+usage: 13_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
+
+Arguments.
 
 required arguments:
-  --seed INT            Random seed. This is helpful for making sure that our experiments are all
-                        reproducible!
+  --field1 STR  A string field.
+  --field2 INT  A numeric field.
+
+optional arguments:
+  -h, --help    show this help message and exit
+  --flag        A boolean flag.</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./13_standard_classes.py --field1 hello --field2 7</kbd>
+[&#x27;hello&#x27;, 7, False]</samp>
+</pre>
+
+</details>
+
+<details>
+<summary>
+<strong>14. Generics</strong>
+</summary>
+<br />
+
+Example of parsing for generic dataclasses.
+
+**Code ([link](examples/14_generics.py)):**
+
+```python
+import dataclasses
+from typing import Generic, TypeVar
+
+import dcargs
+
+ScalarType = TypeVar("ScalarType")
+ShapeType = TypeVar("ShapeType")
+
+
+@dataclasses.dataclass(frozen=True)
+class Point3(Generic[ScalarType]):
+    x: ScalarType
+    y: ScalarType
+    z: ScalarType
+    frame_id: str
+
+
+@dataclasses.dataclass(frozen=True)
+class Triangle:
+    a: Point3[float]
+    b: Point3[float]
+    c: Point3[float]
+
+
+@dataclasses.dataclass(frozen=True)
+class Args(Generic[ShapeType]):
+    point_continuous: Point3[float]
+    point_discrete: Point3[int]
+    shape: ShapeType
+
+
+if __name__ == "__main__":
+    args = dcargs.cli(Args[Triangle])
+    print(args)
+```
+
+<br />
+
+**Example usage:**
+
+<pre>
+<samp>$ <kbd>python ./14_generics.py --help</kbd>
+usage: 14_generics.py [-h] --point-continuous.x FLOAT --point-continuous.y
+                      FLOAT --point-continuous.z FLOAT
+                      --point-continuous.frame-id STR --point-discrete.x INT
+                      --point-discrete.y INT --point-discrete.z INT
+                      --point-discrete.frame-id STR --shape.a.x FLOAT
+                      --shape.a.y FLOAT --shape.a.z FLOAT --shape.a.frame-id
+                      STR --shape.b.x FLOAT --shape.b.y FLOAT --shape.b.z
+                      FLOAT --shape.b.frame-id STR --shape.c.x FLOAT
+                      --shape.c.y FLOAT --shape.c.z FLOAT --shape.c.frame-id
+                      STR
 
 optional arguments:
   -h, --help            show this help message and exit
-  --dataset {mnist,imagenet-50}
-                        Dataset to run experiment on. (default: mnist)
-  --num-layers INT      Model size. (default: 4)
-  --units INT           Model size. (default: 64)
-  --batch-size INT      Batch size. (default: 2048)
-  --train-steps INT     Total number of training steps. (default: 30000)</samp>
-</pre>
 
-<pre>
-<samp>$ <kbd>python ./13_base_configs.py small --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;mnist&#x27;, num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
-</pre>
+required point_continuous arguments:
 
-<pre>
-<samp>$ <kbd>python ./13_base_configs.py big --help</kbd>
-usage: 13_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
-                          [--num-layers INT] [--units INT] [--batch-size INT]
-                          [--train-steps INT] --seed INT
+  --point-continuous.x FLOAT
+  --point-continuous.y FLOAT
+  --point-continuous.z FLOAT
+  --point-continuous.frame-id STR
 
-required arguments:
-  --seed INT            Random seed. This is helpful for making sure that our experiments are all
-                        reproducible!
+required point_discrete arguments:
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --dataset {mnist,imagenet-50}
-                        Dataset to run experiment on. (default: imagenet-50)
-  --num-layers INT      Model size. (default: 8)
-  --units INT           Model size. (default: 256)
-  --batch-size INT      Batch size. (default: 32)
-  --train-steps INT     Total number of training steps. (default: 100000)</samp>
-</pre>
+  --point-discrete.x INT
+  --point-discrete.y INT
+  --point-discrete.z INT
+  --point-discrete.frame-id STR
 
-<pre>
-<samp>$ <kbd>python ./13_base_configs.py big --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
+required shape.a arguments:
+
+  --shape.a.x FLOAT
+  --shape.a.y FLOAT
+  --shape.a.z FLOAT
+  --shape.a.frame-id STR
+
+required shape.b arguments:
+
+  --shape.b.x FLOAT
+  --shape.b.y FLOAT
+  --shape.b.z FLOAT
+  --shape.b.frame-id STR
+
+required shape.c arguments:
+
+  --shape.c.x FLOAT
+  --shape.c.y FLOAT
+  --shape.c.z FLOAT
+  --shape.c.frame-id STR</samp>
 </pre>
 
 </details><!-- END EXAMPLES -->

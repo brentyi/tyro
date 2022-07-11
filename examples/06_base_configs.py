@@ -1,12 +1,12 @@
-"""Example of a common configuration pattern: selecting one of multiple possible base
-configurations, and then using the CLI to either override existing values or fill in
-missing ones.
+"""We can integrate `dcargs.cli()` into common configuration patterns: here, we select
+one of multiple possible base configurations, and then use the CLI to either override
+(existing) or fill in (missing) values.
 
 Usage:
-`BASE_CONFIG=small python ./13_base_configs.py --help`
-`BASE_CONFIG=small python ./13_base_configs.py --seed 94720`
-`BASE_CONFIG=big python ./13_base_configs.py --help`
-`BASE_CONFIG=big python ./13_base_configs.py --seed 94720`
+`BASE_CONFIG=small python ./06_base_configs.py --help`
+`BASE_CONFIG=small python ./06_base_configs.py --seed 94720`
+`BASE_CONFIG=big python ./06_base_configs.py --help`
+`BASE_CONFIG=big python ./06_base_configs.py --seed 94720`
 """
 
 import dataclasses

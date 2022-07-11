@@ -116,7 +116,7 @@ def _make_loader(cls: Type) -> Type[yaml.Loader]:
 
     DataclassLoader.add_constructor(
         tag=MISSING_YAML_TAG_PREFIX,
-        constructor=lambda *_unused: _fields.MISSING,
+        constructor=lambda *_unused: _fields.MISSING,  # type: ignore
     )
 
     return DataclassLoader
