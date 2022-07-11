@@ -118,7 +118,9 @@ def format_script_for_readme(path: pathlib.Path) -> str:
 
 
 def get_examples_str(examples_dir: pathlib.Path, constants: Constants) -> str:
-    script_paths = sorted(examples_dir.glob("*.py"))
+    script_paths = filter(
+        lambda p: not p.name.startswith("_"), sorted(examples_dir.glob("*.py"))
+    )
     with concurrent.futures.ThreadPoolExecutor() as executor:
         return "\n".join(
             executor.map(

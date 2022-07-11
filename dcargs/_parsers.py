@@ -86,7 +86,8 @@ class ParserSpecification:
     description: str
     args: List[_arguments.ArgumentDefinition]
     helptext_from_nested_class_field_name: Dict[str, Optional[str]]
-    subparsers: Optional[SubparsersSpecification]
+    subparsers_from_name: Dict[str, SubparsersSpecification]
+    prefix: str
 
     @staticmethod
     def from_callable(
@@ -95,6 +96,7 @@ class ParserSpecification:
         parent_classes: Set[Type],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Optional[T],
+        prefix: str = "",
     ) -> ParserSpecification:
         """Create a parser definition from a callable."""
 
@@ -121,7 +123,7 @@ class ParserSpecification:
 
         args = []
         helptext_from_nested_class_field_name = {}
-        subparsers = None
+        subparsers_from_name = {}
 
         for field in _fields.field_list_from_callable(
             f=f, default_instance=default_instance
@@ -147,13 +149,10 @@ class ParserSpecification:
                 field,
                 type_from_typevar=type_from_typevar,
                 parent_classes=parent_classes,
+                prefix=prefix + field.name + _strings.NESTED_FIELD_DELIMETER,
             )
             if subparsers_attempt is not None:
-                if subparsers is not None:
-                    raise _instantiators.UnsupportedTypeAnnotationError(
-                        "Only one set of subparsers is allowed."
-                    )
-                subparsers = subparsers_attempt
+                subparsers_from_name[subparsers_attempt.name] = subparsers_attempt
                 continue
 
             # (2) Handle nested callables.
@@ -164,16 +163,10 @@ class ParserSpecification:
                     parent_classes=parent_classes,
                     parent_type_from_typevar=type_from_typevar,
                     default_instance=field.default,
+                    prefix=prefix + field.name + _strings.NESTED_FIELD_DELIMETER,
                 )
-                for arg in nested_parser.args:
-                    args.append(
-                        dataclasses.replace(
-                            arg,
-                            prefix=field.name
-                            + _strings.NESTED_FIELD_DELIMETER
-                            + arg.prefix,
-                        )
-                    )
+                args.extend(nested_parser.args)
+
                 for k, v in nested_parser.helptext_from_nested_class_field_name.items():
                     helptext_from_nested_class_field_name[
                         field.name + _strings.NESTED_FIELD_DELIMETER + k
@@ -192,8 +185,17 @@ class ParserSpecification:
             # (3) Handle primitive types. These produce a single argument!
             args.append(
                 _arguments.ArgumentDefinition(
-                    prefix="", field=field, type_from_typevar=type_from_typevar
+                    prefix=prefix, field=field, type_from_typevar=type_from_typevar
                 )
+            )
+
+        # If a later subparser is required, all previous ones should be as well.
+        subparsers_required = False
+        for name, subparsers in list(subparsers_from_name.items())[::-1]:
+            if subparsers.required:
+                subparsers_required = True
+            subparsers_from_name[name] = dataclasses.replace(
+                subparsers, required=subparsers_required
             )
 
         return ParserSpecification(
@@ -202,7 +204,8 @@ class ParserSpecification:
             else _docstrings.get_callable_description(f),
             args=args,
             helptext_from_nested_class_field_name=helptext_from_nested_class_field_name,
-            subparsers=subparsers,
+            subparsers_from_name=subparsers_from_name,
+            prefix=prefix,
         )
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
@@ -264,32 +267,60 @@ class ParserSpecification:
                 target_groups[arg.prefix] = parser.add_argument_group(
                     format_group_name(nested_field_name, required=arg.lowered.required),
                     # Add a description, but only to the first group for a field.
-                    description=self.helptext_from_nested_class_field_name[
+                    description=self.helptext_from_nested_class_field_name.get(
                         nested_field_name
-                    ]
+                    )
                     if arg.prefix not in other_groups
                     else None,
                 )
             arg.add_argument(target_groups[arg.prefix])
 
-        # Add subparsers.
-        if self.subparsers is not None:
-            title = "subcommands"
-            metavar = "{" + ",".join(self.subparsers.parser_from_name.keys()) + "}"
-            if not self.subparsers.required:
-                title = "optional " + title
-                metavar = f"[{metavar}]"
+        # Create subparser tree.
+        if len(self.subparsers_from_name) > 0:
+            prev_subparser_tree_nodes = [parser]  # Root node.
+            for subparsers in self.subparsers_from_name.values():
+                title = "subcommands"
+                metavar = "{" + ",".join(subparsers.parser_from_name.keys()) + "}"
+                if not subparsers.required:
+                    title = "optional " + title
+                    metavar = f"[{metavar}]"
 
-            argparse_subparsers = parser.add_subparsers(
-                dest=_strings.SUBPARSER_DEST_FMT.format(name=self.subparsers.name),
-                description=self.subparsers.description,
-                required=self.subparsers.required,
-                title=title,
-                metavar=metavar,
-            )
-            for name, subparser_def in self.subparsers.parser_from_name.items():
-                subparser = argparse_subparsers.add_parser(name)
-                subparser_def.apply(subparser)
+                subparser_tree_nodes = []
+                for p in prev_subparser_tree_nodes:
+                    # Add subparsers to every node in previous level of the tree.
+                    argparse_subparsers = p.add_subparsers(
+                        dest=self.prefix
+                        + _strings.SUBPARSER_DEST_FMT.format(name=subparsers.name),
+                        description=subparsers.description,
+                        required=subparsers.required,
+                        title=title,
+                        metavar=metavar,
+                    )
+                    for name, subparser_def in subparsers.parser_from_name.items():
+                        subparser = argparse_subparsers.add_parser(name)
+                        subparser_def.apply(subparser)
+
+                        def _get_leaf_subparsers(
+                            node: argparse.ArgumentParser,
+                        ) -> List[argparse.ArgumentParser]:
+                            if node._subparsers is None:
+                                return [node]
+                            else:
+                                # Magic!
+                                return list(
+                                    itertools.chain(
+                                        *map(
+                                            _get_leaf_subparsers,
+                                            node._subparsers._actions[
+                                                -1
+                                            ]._name_parser_map.values(),  # type: ignore
+                                        )
+                                    )
+                                )
+
+                        subparser_tree_nodes.extend(_get_leaf_subparsers(subparser))
+
+                prev_subparser_tree_nodes = subparser_tree_nodes
 
 
 @dataclasses.dataclass(frozen=True)
@@ -307,6 +338,7 @@ class SubparsersSpecification:
         field: _fields.Field,
         type_from_typevar: Dict[TypeVar, Type],
         parent_classes: Set[Type],
+        prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
         if get_origin(field.typ) is not Union:
@@ -315,9 +347,7 @@ class SubparsersSpecification:
         # We don't use sets here to retain order of subcommands.
         options = [type_from_typevar.get(typ, typ) for typ in get_args(field.typ)]
         options_no_none = [o for o in options if o != type(None)]  # noqa
-        if len(options_no_none) < 2 or not all(
-            map(_is_possibly_nested_type, options_no_none)
-        ):
+        if not all(map(_is_possibly_nested_type, options_no_none)):
             return None
 
         parser_from_name: Dict[str, ParserSpecification] = {}
@@ -331,17 +361,47 @@ class SubparsersSpecification:
                 default_instance=field.default
                 if isinstance(field.default, _resolver.unwrap_origin(option))
                 else None,
+                prefix=prefix,
             )
+
+        # Optional if: type hint is Optional[], or a default instance is provided.
+        required = True
+        if options != options_no_none:
+            # Optional[] type.
+            required = False
+        elif field.default is not None:
+            required = False
+
+        # If there are any required arguments in the default subparser, we should mark
+        # the subparser group as a whole as required.
+        if field.default is not None:
+            default_parser = parser_from_name[
+                _strings.subparser_name_from_type(type(field.default))
+            ]
+            if any(map(lambda arg: arg.lowered.required, default_parser.args)):
+                required = True
+            if any(
+                map(
+                    lambda subparsers: subparsers.required,
+                    default_parser.subparsers_from_name.values(),
+                )
+            ):
+                required = True
+
+        description_parts = []
+        if field.helptext is not None:
+            description_parts.append(field.helptext)
+        if not required and field.default is not None:
+            default = _strings.subparser_name_from_type(type(field.default))
+            description_parts.append(f" (default: {default})")
 
         return SubparsersSpecification(
             name=field.name,
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.
-            description=field.helptext,
+            description=" ".join(description_parts),
             parser_from_name=parser_from_name,
-            # Required if: type hint is not Optional[], or a default instance is
-            # provided.
-            required=(options == options_no_none) and field.default is None,
+            required=required,
             default_instance=field.default,
         )

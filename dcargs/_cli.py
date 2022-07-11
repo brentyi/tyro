@@ -111,5 +111,7 @@ def cli(
         print(e.args[0])
         raise SystemExit()
 
-    assert consumed_keywords == value_from_arg.keys()
+    #  print(consumed_keywords)
+    #  print(value_from_arg.keys())
+    #  assert consumed_keywords == value_from_arg.keys()
     return out

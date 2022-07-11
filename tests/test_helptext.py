@@ -3,7 +3,7 @@ import dataclasses
 import enum
 import io
 import pathlib
-from typing import Generic, List, Optional, Tuple, TypeVar, cast
+from typing import Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 import pytest
 from typing_extensions import Literal
@@ -371,3 +371,50 @@ def test_optional_literal_helptext():
             dcargs.cli(OptionalLiteralHelptext, args=["--help"])
     helptext = f.getvalue()
     assert "--x {1,2,3}  A number. (default: None)\n" in helptext
+
+
+def test_multiple_subparsers_helptext():
+    @dataclasses.dataclass
+    class Subcommand1:
+        x: int = 0
+
+    @dataclasses.dataclass
+    class Subcommand2:
+        y: int = 1
+
+    @dataclasses.dataclass
+    class Subcommand3:
+        z: int = 2
+
+    @dataclasses.dataclass
+    class MultipleSubparsers:
+        # Field a description.
+        a: Union[Subcommand1, Subcommand2, Subcommand3]
+        # Field b description.
+        b: Union[Subcommand1, Subcommand2, Subcommand3]
+        # Field c description.
+        c: Union[Subcommand1, Subcommand2, Subcommand3] = dataclasses.field(
+            default_factory=Subcommand3
+        )
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(MultipleSubparsers, args=["--help"])
+    helptext = f.getvalue()
+
+    assert "Field a description." in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description." not in helptext
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            dcargs.cli(
+                MultipleSubparsers, args=["subcommand1", "subcommand1", "--help"]
+            )
+    helptext = f.getvalue()
+
+    assert "Field a description." not in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description. (default: subcommand3)" in helptext

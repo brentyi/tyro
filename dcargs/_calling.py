@@ -83,22 +83,34 @@ def call_from_args(
             consumed_keywords |= consumed_keywords_child
         else:
             # Unions over dataclasses (subparsers). This is the only other option.
-            assert parser_definition.subparsers is not None
-            assert field.name == parser_definition.subparsers.name
+            assert len(parser_definition.subparsers_from_name) > 0
+            assert field.name in parser_definition.subparsers_from_name
 
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
                 name=prefixed_field_name
             )
-            subparser_name = get_value_from_arg(subparser_dest)
+            if subparser_dest in value_from_arg:
+                subparser_name = get_value_from_arg(subparser_dest)
+            else:
+                default_instance = parser_definition.subparsers_from_name[
+                    field.name
+                ].default_instance
+                assert default_instance is not None
+                subparser_name = None
             if subparser_name is None:
                 # No subparser selected -- this should only happen when we do either
                 # Optional[Union[A, B, ...]] or Union[A, B, None], or have a
                 # default/default_factory set.
                 assert (
                     type(None) in get_args(field_type)
-                    or parser_definition.subparsers.default_instance is not None
+                    or parser_definition.subparsers_from_name[
+                        field.name
+                    ].default_instance
+                    is not None
                 )
-                value = parser_definition.subparsers.default_instance
+                value = parser_definition.subparsers_from_name[
+                    field.name
+                ].default_instance
             else:
                 options = map(
                     lambda x: x if x not in type_from_typevar else type_from_typevar[x],
@@ -112,8 +124,12 @@ def call_from_args(
                 assert chosen_f is not None
                 value, consumed_keywords_child = call_from_args(
                     chosen_f,
-                    parser_definition.subparsers.parser_from_name[subparser_name],
+                    parser_definition.subparsers_from_name[field.name].parser_from_name[
+                        subparser_name
+                    ],
                     value_from_arg,
+                    field_name_prefix=prefixed_field_name
+                    + _strings.NESTED_FIELD_DELIMETER,
                 )
                 consumed_keywords |= consumed_keywords_child
 

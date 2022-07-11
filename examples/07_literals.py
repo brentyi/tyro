@@ -1,8 +1,8 @@
 """`typing.Literal[]` can be used to restrict inputs to a fixed set of choices.
 
 Usage:
-`python ./06_literals.py --help`
-`python ./06_literals.py --enum RED --restricted-enum GREEN --integer 3 --string green`
+`python ./07_literals.py --help`
+`python ./07_literals.py --enum RED --restricted-enum GREEN --integer 3 --string green`
 """
 
 import dataclasses

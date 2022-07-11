@@ -187,8 +187,8 @@ def test_helptext_and_default_instance_namedtuple():
                 HelptextNamedTuple,
                 default_instance=HelptextNamedTuple(
                     # Sketchy, unsupported behavior...
-                    x=None,  # type: ignore
-                    y=None,  # type: ignore
+                    x=dcargs.MISSING,
+                    y=dcargs.MISSING,
                     z=3,
                 ),
                 args=["--help"],

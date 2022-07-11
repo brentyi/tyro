@@ -3,9 +3,9 @@
 Usage:
 `python ./09_subparsers.py --help`
 `python ./09_subparsers.py commit --help`
-`python ./09_subparsers.py commit --message hello --all`
+`python ./09_subparsers.py commit --cmd.message hello --cmd.all`
 `python ./09_subparsers.py checkout --help`
-`python ./09_subparsers.py checkout --branch main`
+`python ./09_subparsers.py checkout --cmd.branch main`
 """
 
 from __future__ import annotations
@@ -14,10 +14,6 @@ import dataclasses
 from typing import Union
 
 import dcargs
-
-
-def main(command: Union[Checkout, Commit]) -> None:
-    print(command)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -33,6 +29,10 @@ class Commit:
 
     message: str
     all: bool = False
+
+
+def main(cmd: Union[Checkout, Commit] = Checkout("main")) -> None:
+    print(cmd)
 
 
 if __name__ == "__main__":

@@ -76,26 +76,6 @@ def test_unsupported_literal():
         dcargs.cli(main, args=[])
 
 
-def test_multiple_subparsers():
-    """argparse doesn't support multiple subparsers."""
-
-    @dataclasses.dataclass
-    class Subcommmand1:
-        pass
-
-    @dataclasses.dataclass
-    class Subcommand2:
-        pass
-
-    @dataclasses.dataclass
-    class MultipleSubparsers:
-        x: Union[Subcommmand1, Subcommand2]
-        y: Union[Subcommmand1, Subcommand2]
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(MultipleSubparsers, args=[])
-
-
 # Must be global.
 @dataclasses.dataclass
 class _CycleDataclass:
