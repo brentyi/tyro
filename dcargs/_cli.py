@@ -31,6 +31,7 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[T] = None,
+    avoid_subparsers: bool = False,
 ) -> T:
     """Call `f(...)`, with arguments populated from an automatically generated CLI
     interface.
@@ -78,6 +79,8 @@ def cli(
             if `T` is a dataclass, TypedDict, or NamedTuple. Helpful for merging CLI
             arguments with values loaded from elsewhere. (for example, a config object
             loaded from a yaml file)
+        avoid_subparsers: Avoid creating a subparser when defaults are provided for
+            unions over nested types. Generates cleaner but less expressive CLIs.
 
     Returns:
         The output of `f(...)`.
@@ -90,6 +93,8 @@ def cli(
         parent_classes=set(),  # Used for recursive calls.
         parent_type_from_typevar=None,  # Used for recursive calls.
         default_instance=default_instance,  # Overrides for default values.
+        prefix="",  # Used for recursive calls.
+        avoid_subparsers=avoid_subparsers,
     )
 
     # Parse using argparse!
@@ -102,7 +107,12 @@ def cli(
     try:
         # Attempt to call `f` using whatever was passed in.
         out, consumed_keywords = _calling.call_from_args(
-            f, parser_definition, value_from_arg
+            f,
+            parser_definition,
+            default_instance,
+            value_from_arg,
+            field_name_prefix="",
+            avoid_subparsers=avoid_subparsers,
         )
     except _calling.InstantiationError as e:
         # Emulate argparse's error behavior when invalid arguments are passed in.

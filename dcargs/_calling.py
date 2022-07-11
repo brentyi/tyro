@@ -3,9 +3,9 @@ namespaces."""
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TypeVar, Union
 
-from typing_extensions import get_args
+from typing_extensions import get_args, get_origin
 
 from . import _fields, _parsers, _resolver, _strings
 
@@ -21,8 +21,10 @@ T = TypeVar("T")
 def call_from_args(
     f: Callable[..., T],
     parser_definition: _parsers.ParserSpecification,
+    default_instance: Optional[T],
     value_from_arg: Dict[str, Any],
-    field_name_prefix: str = "",
+    field_name_prefix: str,
+    avoid_subparsers: bool,
 ) -> Tuple[T, Set[str]]:
     """Call `f` with arguments specified by a dictionary of values from argparse.
 
@@ -46,7 +48,7 @@ def call_from_args(
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[arg.prefix + arg.field.name] = arg
 
-    for field in _fields.field_list_from_callable(f, default_instance=None):  # type: ignore
+    for field in _fields.field_list_from_callable(f, default_instance=default_instance):  # type: ignore
         value: Any
         prefixed_field_name = field_name_prefix + field.name
 
@@ -74,11 +76,16 @@ def call_from_args(
             in parser_definition.helptext_from_nested_class_field_name
         ):
             # Nested callable.
+            if get_origin(field_type) is Union:
+                assert avoid_subparsers
+                field_type = type(field.default)
             value, consumed_keywords_child = call_from_args(
                 field_type,
                 parser_definition,
+                field.default,
                 value_from_arg,
                 field_name_prefix=prefixed_field_name + _strings.NESTED_FIELD_DELIMETER,
+                avoid_subparsers=avoid_subparsers,
             )
             consumed_keywords |= consumed_keywords_child
         else:
@@ -127,9 +134,11 @@ def call_from_args(
                     parser_definition.subparsers_from_name[field.name].parser_from_name[
                         subparser_name
                     ],
+                    field.default if type(field.default) is chosen_f else None,
                     value_from_arg,
                     field_name_prefix=prefixed_field_name
                     + _strings.NESTED_FIELD_DELIMETER,
+                    avoid_subparsers=avoid_subparsers,
                 )
                 consumed_keywords |= consumed_keywords_child
 
