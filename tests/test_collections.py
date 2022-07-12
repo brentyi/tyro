@@ -240,3 +240,16 @@ def test_optional_lists():
     with pytest.raises(SystemExit):
         dcargs.cli(A, args=["--x"])
     assert dcargs.cli(A, args=[]) == A(x=None)
+
+
+def test_nested_optional_types():
+    """We support "None" as a special-case keyword. (note: this is a bit weird because
+    Optional[str] might interprete "None" as either a string or an actual `None`
+    value)"""
+
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[Optional[int], ...]
+
+    assert dcargs.cli(A, args=["--x", "0", "1"]) == A((0, 1))
+    assert dcargs.cli(A, args=["--x", "0", "None", "1"]) == A((0, None, 1))

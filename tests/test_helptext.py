@@ -195,7 +195,7 @@ def test_none_default_value_helptext():
         with contextlib.redirect_stdout(f):
             dcargs.cli(Config, args=["--help"])
     helptext = f.getvalue()
-    assert "  --x INT     An optional variable. (default: None)\n" in helptext
+    assert "  --x (INT | None)  An optional variable. (default: None)\n" in helptext
 
 
 def test_helptext_hard_bool():
@@ -370,7 +370,7 @@ def test_optional_literal_helptext():
         with contextlib.redirect_stdout(f):
             dcargs.cli(OptionalLiteralHelptext, args=["--help"])
     helptext = f.getvalue()
-    assert "--x {1,2,3}  A number. (default: None)\n" in helptext
+    assert "--x ({1,2,3} | None)  A number. (default: None)\n" in helptext
 
 
 def test_multiple_subparsers_helptext():
