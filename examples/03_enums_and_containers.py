@@ -1,6 +1,5 @@
 """We can generate argument parsers from more advanced type annotations, like enums and
-tuple types. For collections, we only showcase `Tuple` here, but `List`, `Sequence`,
-`Set`, `Dict`, etc are all supported as well.
+tuple types.
 
 Usage:
 `python ./03_enums_and_containers.py --help`
@@ -23,11 +22,12 @@ class OptimizerType(enum.Enum):
 
 @dataclasses.dataclass(frozen=True)
 class TrainConfig:
-    # Example of a variable-length tuple:
+    # Example of a variable-length tuple. `typing.List`, `typing.Sequence`,
+    # `typing.Set`, `typing.Dict`, etc are all supported as well.
     dataset_sources: Tuple[pathlib.Path, ...]
     """Paths to load training data from. This can be multiple!"""
 
-    # Fixed-length tuples are also okay:
+    # Fixed-length tuples are also okay.
     image_dimensions: Tuple[int, int] = (32, 32)
     """Height and width of some image data."""
 
