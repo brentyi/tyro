@@ -312,7 +312,7 @@ if __name__ == "__main__":
 usage: 03_enums_and_containers.py [-h] --dataset-sources PATH [PATH ...]
                                   [--image-dimensions INT INT]
                                   [--optimizer-type {ADAM,SGD}]
-                                  [--checkpoint-interval INT]
+                                  [--checkpoint-interval (INT | None)]
 
 required arguments:
   --dataset-sources PATH [PATH ...]
@@ -324,7 +324,7 @@ optional arguments:
                         Height and width of some image data. (default: 32 32)
   --optimizer-type {ADAM,SGD}
                         Gradient-based optimizer to use. (default: ADAM)
-  --checkpoint-interval INT
+  --checkpoint-interval (INT | None)
                         Interval to save checkpoints at. (default: None)</samp>
 </pre>
 
@@ -653,8 +653,8 @@ if __name__ == "__main__":
         ExperimentConfig,
         default_instance=base_config,
         # `avoid_subparsers` will avoid making a subparser for unions when a default is
-        # provided; in this case, it makes our CLI less expressive (cannot switch
-        # away from the base optimizer types), but easier to use.
+        # provided; in this case, it simplifies our CLI but makes it less expressive
+        # (cannot switch away from the base optimizer types).
         avoid_subparsers=True,
     )
     print(config)

@@ -94,8 +94,8 @@ if __name__ == "__main__":
         ExperimentConfig,
         default_instance=base_config,
         # `avoid_subparsers` will avoid making a subparser for unions when a default is
-        # provided; in this case, it makes our CLI less expressive (cannot switch
-        # away from the base optimizer types), but easier to use.
+        # provided; in this case, it simplifies our CLI but makes it less expressive
+        # (cannot switch away from the base optimizer types).
         avoid_subparsers=True,
     )
     print(config)

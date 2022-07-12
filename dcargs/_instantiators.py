@@ -203,7 +203,6 @@ def _instantiator_from_container_type(
             contained_type,
             type_from_typevar,
             allow_sequences=False,
-            allow_optional=False,
         )
         return lambda strings: container_type(
             [make(x) for x in strings]
@@ -230,7 +229,6 @@ def _instantiator_from_container_type(
                 contained_type,
                 type_from_typevar,
                 allow_sequences=False,
-                allow_optional=False,
             )
             return lambda strings: tuple(
                 [make(x) for x in strings]
@@ -249,7 +247,6 @@ def _instantiator_from_container_type(
                     t,
                     type_from_typevar,
                     allow_sequences=False,
-                    allow_optional=False,
                 )
                 instantiators.append(a)
                 metas.append(b)
@@ -279,13 +276,19 @@ def _instantiator_from_container_type(
                 " (Union[T, None])"
             )
         (typ,) = options - {type(None)}
-        instantiator, metadata = _instantiator_from_type_inner(
+        inner_instantiator, metadata = _instantiator_from_type_inner(
             typ,
             type_from_typevar,
             allow_sequences=True,
-            allow_optional=False,
         )
-        return instantiator, dataclasses.replace(metadata, is_optional=True)
+        instantiator = (
+            lambda string: None if string == "None" else inner_instantiator(string)
+        )
+        return instantiator, dataclasses.replace(
+            metadata,
+            metavar=f"({metadata.metavar} | None)",
+            is_optional=True,
+        )
 
     # Literals.
     if type_origin is Literal:
@@ -301,7 +304,6 @@ def _instantiator_from_container_type(
             contained_type,
             type_from_typevar,
             allow_sequences=False,
-            allow_optional=False,
         )
         assert (
             # Choices provided by the contained type
@@ -312,6 +314,7 @@ def _instantiator_from_container_type(
             metadata,
             choices=tuple(map(str, choices)),
             metavar="{" + ",".join(map(str, choices)) + "}",
+            is_optional=False,
         )
 
     # Dictionaries.
@@ -321,13 +324,11 @@ def _instantiator_from_container_type(
             key_type,
             type_from_typevar,
             allow_sequences=False,
-            allow_optional=False,
         )
         val_instantiator, val_metadata = _instantiator_from_type_inner(
             val_type,
             type_from_typevar,
             allow_sequences=False,
-            allow_optional=False,
         )
 
         def dict_instantiator(strings: List[str]) -> Any:
@@ -365,7 +366,6 @@ def _instantiator_from_type_inner(
     typ: Type,
     type_from_typevar: Dict[TypeVar, Type],
     allow_sequences: Literal[False],
-    allow_optional: bool,
 ) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
     ...
 
@@ -375,7 +375,6 @@ def _instantiator_from_type_inner(
     typ: Type,
     type_from_typevar: Dict[TypeVar, Type],
     allow_sequences: Literal[True],
-    allow_optional: bool,
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     ...
 
@@ -384,13 +383,10 @@ def _instantiator_from_type_inner(
     typ: Type,
     type_from_typevar: Dict[TypeVar, Type],
     allow_sequences: bool,
-    allow_optional: bool,
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""
     out = instantiator_from_type(typ, type_from_typevar)
     if not allow_sequences and out[1].nargs is not None:
         raise UnsupportedTypeAnnotationError("Nested sequence types are not supported!")
-    if not allow_optional and out[1].is_optional:
-        raise UnsupportedTypeAnnotationError("Nested optional types are not supported!")
     return out

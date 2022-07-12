@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, List, Optional, Tuple, TypeVar, Union
+from typing import Generic, List, Tuple, TypeVar, Union
 
 import pytest
 from typing_extensions import Literal
@@ -39,22 +39,6 @@ def test_nested_sequence_types():
     @dataclasses.dataclass
     class A:
         x: Tuple[Tuple[int, ...], ...]
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(A, args=["--x", "0", "1"])
-
-
-def test_nested_optional_types():
-    """Unclear how to handle optionals nested in other types, so we don't support
-    them.
-
-    In the future, we might support "None" as a special-case keyword. But this is a bit
-    weird because Optional[str] might interprete "None" as either a string or an actual
-    `None` value."""
-
-    @dataclasses.dataclass
-    class A:
-        x: Tuple[Optional[int], ...]
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(A, args=["--x", "0", "1"])
