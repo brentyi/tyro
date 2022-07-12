@@ -286,7 +286,7 @@ def _instantiator_from_container_type(
         )
         return instantiator, dataclasses.replace(
             metadata,
-            metavar=f"({metadata.metavar} | None)",
+            metavar=f"({metadata.metavar}|None)",
             is_optional=True,
         )
 
