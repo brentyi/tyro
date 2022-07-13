@@ -246,6 +246,10 @@ def _rule_positional_special_handling(
     if not arg.field.positional:
         return lowered
 
+    if lowered.nargs is not None and not lowered.required:
+        raise _instantiators.UnsupportedTypeAnnotationError(
+            "Optional sequences are not supported for positional arguments!"
+        )
     return dataclasses.replace(
         lowered,
         dest=None,

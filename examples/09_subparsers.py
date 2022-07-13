@@ -31,7 +31,7 @@ class Commit:
     all: bool = False
 
 
-def main(cmd: Union[Checkout, Commit] = Checkout("main")) -> None:
+def main(cmd: Union[Checkout, Commit]) -> None:
     print(cmd)
 
 

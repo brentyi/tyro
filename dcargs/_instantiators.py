@@ -68,6 +68,8 @@ _FlagInstantiator = Callable[[bool], bool]
 
 Instantiator = Union[_StandardInstantiator, _SequenceInstantiator, _FlagInstantiator]
 
+NoneType = type(None)
+
 
 @dataclasses.dataclass
 class InstantiatorMetadata:
@@ -113,6 +115,18 @@ def instantiator_from_type(
             nargs=None,
             metavar="ANY",
             choices=None,
+            is_optional=False,
+        )
+
+    if typ is NoneType:
+
+        def instantiator(_unused_string: str) -> None:
+            return None
+
+        return instantiator, InstantiatorMetadata(
+            nargs=None,
+            metavar="None",
+            choices=("None",),
             is_optional=False,
         )
 
@@ -173,194 +187,6 @@ def instantiator_from_type(
     )
 
 
-def _instantiator_from_container_type(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
-) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
-    """Attempt to create an instantiator from a container type. Returns `None` is no
-    container type is found."""
-
-    type_origin = get_origin(typ)
-    if type_origin is None:
-        return None
-
-    # Unwrap Annotated and Final types.
-    if type_origin in (Annotated, Final):
-        contained_type = get_args(typ)[0]
-        return instantiator_from_type(contained_type, type_from_typevar)
-
-    # List, tuples, and sequences.
-    if type_origin in (
-        collections.abc.Sequence,  # different from typing.Sequence!
-        list,  # different from typing.List!
-        set,  # different from typing.Set!
-    ):
-        (contained_type,) = get_args(typ)
-        container_type = type_origin
-        if container_type is collections.abc.Sequence:
-            container_type = list
-
-        make, inner_meta = _instantiator_from_type_inner(
-            contained_type,
-            type_from_typevar,
-            allow_sequences=False,
-        )
-        return lambda strings: container_type(
-            [make(x) for x in strings]
-        ), InstantiatorMetadata(
-            nargs="+",
-            metavar=inner_meta.metavar,
-            choices=inner_meta.choices,
-            is_optional=False,
-        )
-
-    # Tuples.
-    if type_origin is tuple:
-        types = get_args(typ)
-        typeset = set(types)  # Note that sets are unordered.
-        typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
-
-        if typeset_no_ellipsis != typeset:
-            # Ellipsis: variable argument counts. When an ellipsis is used, tuples must
-            # contain only one type.
-            assert len(typeset_no_ellipsis) == 1
-            (contained_type,) = typeset_no_ellipsis
-
-            make, inner_meta = _instantiator_from_type_inner(
-                contained_type,
-                type_from_typevar,
-                allow_sequences=False,
-            )
-            return lambda strings: tuple(
-                [make(x) for x in strings]
-            ), InstantiatorMetadata(
-                nargs="+",
-                metavar=inner_meta.metavar,
-                choices=inner_meta.choices,
-                is_optional=False,
-            )
-
-        else:
-            instantiators = []
-            metas = []
-            for t in types:
-                a, b = _instantiator_from_type_inner(
-                    t,
-                    type_from_typevar,
-                    allow_sequences=False,
-                )
-                instantiators.append(a)
-                metas.append(b)
-
-            if len(set(m.choices for m in metas)) > 1:
-                raise UnsupportedTypeAnnotationError(
-                    "Due to constraints in argparse, all choices in fixed-length tuples"
-                    " must match. This restricts mixing enums & literals with other"
-                    " types."
-                )
-            return lambda strings: tuple(
-                make(x) for make, x in zip(instantiators, strings)
-            ), InstantiatorMetadata(
-                nargs=len(types),
-                metavar=tuple(cast(str, m.metavar) for m in metas),
-                choices=metas[0].choices,
-                is_optional=False,
-            )
-
-    # Optionals.
-    if type_origin is Union:
-        options = set(get_args(typ))
-        if len(options) != 2 or type(None) not in options:
-            # Note that the subparsers logic happens much earlier.
-            raise UnsupportedTypeAnnotationError(
-                "Union must be either over dataclasses (for subparsers) or Optional"
-                " (Union[T, None])"
-            )
-        (typ,) = options - {type(None)}
-        inner_instantiator, metadata = _instantiator_from_type_inner(
-            typ,
-            type_from_typevar,
-            allow_sequences=True,
-        )
-        instantiator = (
-            lambda string: None if string == "None" else inner_instantiator(string)
-        )
-        return instantiator, dataclasses.replace(
-            metadata,
-            metavar=f"({metadata.metavar}|None)",
-            is_optional=True,
-        )
-
-    # Literals.
-    if type_origin is Literal:
-        choices = get_args(typ)
-        if not len(set(map(type, choices))) == 1:
-            raise UnsupportedTypeAnnotationError(
-                "All choices in literal must have the same type!"
-            )
-        contained_type = type(next(iter(choices)))
-        if issubclass(contained_type, enum.Enum):
-            choices = tuple(map(lambda x: x.name, choices))
-        instantiator, metadata = _instantiator_from_type_inner(
-            contained_type,
-            type_from_typevar,
-            allow_sequences=False,
-        )
-        assert (
-            # Choices provided by the contained type
-            metadata.choices is None
-            or len(set(choices) - set(metadata.choices)) == 0
-        )
-        return instantiator, dataclasses.replace(
-            metadata,
-            choices=tuple(map(str, choices)),
-            metavar="{" + ",".join(map(str, choices)) + "}",
-            is_optional=False,
-        )
-
-    # Dictionaries.
-    if type_origin in (dict, collections.abc.Mapping):
-        key_type, val_type = get_args(typ)
-        key_instantiator, key_metadata = _instantiator_from_type_inner(
-            key_type,
-            type_from_typevar,
-            allow_sequences=False,
-        )
-        val_instantiator, val_metadata = _instantiator_from_type_inner(
-            val_type,
-            type_from_typevar,
-            allow_sequences=False,
-        )
-
-        def dict_instantiator(strings: List[str]) -> Any:
-            out = {}
-            if len(strings) % 2 != 0:
-                raise ValueError("incomplete set of key value pairs!")
-            for i in range(len(strings) // 2):
-                k = strings[i * 2]
-                v = strings[i * 2 + 1]
-                if key_metadata.choices is not None and k not in key_metadata.choices:
-                    raise ValueError(
-                        f"invalid choice: {k} (choose from {key_metadata.choices}))"
-                    )
-                if val_metadata.choices is not None and v not in val_metadata.choices:
-                    raise ValueError(
-                        f"invalid choice: {v} (choose from {val_metadata.choices}))"
-                    )
-                out[key_instantiator(k)] = val_instantiator(v)  # type: ignore
-            return out
-
-        return dict_instantiator, InstantiatorMetadata(
-            nargs="+",
-            metavar=f"{key_metadata.metavar} {val_metadata.metavar}",
-            choices=None,
-            is_optional=False,
-        )
-
-    raise UnsupportedTypeAnnotationError(  # pragma: no cover
-        f"Unsupported type {typ} with origin {type_origin}"
-    )
-
-
 @overload
 def _instantiator_from_type_inner(
     typ: Type,
@@ -387,6 +213,267 @@ def _instantiator_from_type_inner(
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""
     out = instantiator_from_type(typ, type_from_typevar)
-    if not allow_sequences and out[1].nargs is not None:
+    if (
+        not allow_sequences
+        and out[1].nargs is not None
+        and get_origin(typ) is not Union
+    ):
         raise UnsupportedTypeAnnotationError("Nested sequence types are not supported!")
     return out
+
+
+def _instantiator_from_container_type(
+    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
+    """Attempt to create an instantiator from a container type. Returns `None` is no
+    container type is found."""
+
+    type_origin = get_origin(typ)
+    if type_origin is None:
+        return None
+
+    # Unwrap Annotated and Final types.
+    if type_origin in (Annotated, Final):
+        contained_type = get_args(typ)[0]
+        return instantiator_from_type(contained_type, type_from_typevar)
+
+    for make, matched_origins in {
+        _instantiator_from_list_sequence_or_set: (collections.abc.Sequence, list, set),
+        _instantiator_from_tuple: (tuple,),
+        _instantiator_from_dict: (dict, collections.abc.Mapping),
+        _instantiator_from_union: (Union,),
+        _instantiator_from_literal: (Literal,),
+    }.items():
+        if type_origin in matched_origins:
+            return make(typ, type_from_typevar)
+
+    raise UnsupportedTypeAnnotationError(  # pragma: no cover
+        f"Unsupported type {typ} with origin {type_origin}"
+    )
+
+
+def _instantiator_from_tuple(
+    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+) -> Tuple[Instantiator, InstantiatorMetadata]:
+    types = get_args(typ)
+    typeset = set(types)  # Note that sets are unordered.
+    typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
+
+    if typeset_no_ellipsis != typeset:
+        # Ellipsis: variable argument counts. When an ellipsis is used, tuples must
+        # contain only one type.
+        assert len(typeset_no_ellipsis) == 1
+        (contained_type,) = typeset_no_ellipsis
+
+        make, inner_meta = _instantiator_from_type_inner(
+            contained_type,
+            type_from_typevar,
+            allow_sequences=False,
+        )
+        return lambda strings: tuple([make(x) for x in strings]), InstantiatorMetadata(
+            nargs="+",
+            metavar=inner_meta.metavar,
+            choices=inner_meta.choices,
+            is_optional=False,
+        )
+
+    else:
+        instantiators = []
+        metas = []
+        for t in types:
+            a, b = _instantiator_from_type_inner(
+                t,
+                type_from_typevar,
+                allow_sequences=False,
+            )
+            instantiators.append(a)
+            metas.append(b)
+
+        if len(set(m.choices for m in metas)) > 1:
+            raise UnsupportedTypeAnnotationError(
+                "Due to constraints in argparse, all choices in fixed-length tuples"
+                " must match. This restricts mixing enums & literals with other"
+                " types."
+            )
+        return lambda strings: tuple(
+            make(x) for make, x in zip(instantiators, strings)
+        ), InstantiatorMetadata(
+            nargs=len(types),
+            metavar=tuple(cast(str, m.metavar) for m in metas),
+            choices=metas[0].choices,
+            is_optional=False,
+        )
+
+
+def _instantiator_from_union(
+    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+) -> Tuple[Instantiator, InstantiatorMetadata]:
+    options = list(get_args(typ))
+    if NoneType in options:
+        # Move `None` types to the beginning.
+        # If we have `Optional[str]`, we want this to be parsed as
+        # `Union[NoneType, str]`.
+        options.remove(NoneType)
+        options.insert(0, NoneType)
+
+    # General unions, eg Union[int, bool]. We'll try to convert these from left to
+    # right.
+    instantiators = []
+    metas = []
+    nargs = None
+    first = True
+    for t in options:
+        a, b = _instantiator_from_type_inner(
+            t,
+            type_from_typevar,
+            allow_sequences=True,
+        )
+        instantiators.append(a)
+        metas.append(b)
+
+        if t is not NoneType:
+            # Enforce that `nargs` is the same for all child types, except for
+            # NoneType.
+            if first:
+                nargs = b.nargs
+                first = False
+            elif nargs != b.nargs:
+                raise UnsupportedTypeAnnotationError(
+                    f"All options in {typ} must expect the same number of CLI"
+                    " arguments. (this is a limitation from argparse's nargs"
+                    " option)"
+                )
+
+    # Set metavar.
+    if nargs is not None and options[0] is NoneType:
+        # For optional types + sequences, the only way to set a field to None will
+        # be to omit its corresponding argument.
+        instantiators.pop(0)
+        metas.pop(0)
+
+    metavar: Union[str, Tuple[str, ...]]
+    if isinstance(metas[0].metavar, str):
+        metavar = "(" + "|".join(map(lambda x: cast(str, x.metavar), metas)) + ")"
+    else:
+        # Do our best to create a reasonable looking metavar.
+        # This is imperfect!
+        assert isinstance(metas[0].metavar, tuple)
+        metavar = tuple(
+            map(
+                lambda metavars: "(" + "|".join(metavars) + ")",
+                zip(*map(lambda m: m.metavar, metas)),
+            )
+        )
+
+    def union_instantiator(string_or_strings: Union[str, List[str]]) -> Any:
+        for instantiator, metadata in zip(instantiators, metas):
+            if metadata.choices is None or string_or_strings in metadata.choices:
+                try:
+                    return instantiator(string_or_strings)  # type: ignore
+                except ValueError:
+                    # Failed, try next instantiator.
+                    pass
+        raise ValueError(
+            f"No type in {options} could be instantiated from {string_or_strings}."
+        )
+
+    return union_instantiator, InstantiatorMetadata(
+        nargs=nargs,
+        metavar=metavar,
+        choices=None,
+        is_optional=NoneType in options,
+    )
+
+
+def _instantiator_from_dict(
+    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+) -> Tuple[Instantiator, InstantiatorMetadata]:
+    key_type, val_type = get_args(typ)
+    key_instantiator, key_metadata = _instantiator_from_type_inner(
+        key_type,
+        type_from_typevar,
+        allow_sequences=False,
+    )
+    val_instantiator, val_metadata = _instantiator_from_type_inner(
+        val_type,
+        type_from_typevar,
+        allow_sequences=False,
+    )
+
+    def dict_instantiator(strings: List[str]) -> Any:
+        out = {}
+        if len(strings) % 2 != 0:
+            raise ValueError("incomplete set of key value pairs!")
+        for i in range(len(strings) // 2):
+            k = strings[i * 2]
+            v = strings[i * 2 + 1]
+            if key_metadata.choices is not None and k not in key_metadata.choices:
+                raise ValueError(
+                    f"invalid choice: {k} (choose from {key_metadata.choices}))"
+                )
+            if val_metadata.choices is not None and v not in val_metadata.choices:
+                raise ValueError(
+                    f"invalid choice: {v} (choose from {val_metadata.choices}))"
+                )
+            out[key_instantiator(k)] = val_instantiator(v)  # type: ignore
+        return out
+
+    return dict_instantiator, InstantiatorMetadata(
+        nargs="+",
+        metavar=f"{key_metadata.metavar} {val_metadata.metavar}",
+        choices=None,
+        is_optional=False,
+    )
+
+
+def _instantiator_from_list_sequence_or_set(
+    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+) -> Tuple[Instantiator, InstantiatorMetadata]:
+    (contained_type,) = get_args(typ)
+    container_type = get_origin(typ)
+    assert container_type is not None
+    if container_type is collections.abc.Sequence:
+        container_type = list
+
+    make, inner_meta = _instantiator_from_type_inner(
+        contained_type,
+        type_from_typevar,
+        allow_sequences=False,
+    )
+    return lambda strings: container_type(
+        [make(x) for x in strings]
+    ), InstantiatorMetadata(
+        nargs="+",
+        metavar=inner_meta.metavar,
+        choices=inner_meta.choices,
+        is_optional=False,
+    )
+
+
+def _instantiator_from_literal(
+    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+) -> Tuple[Instantiator, InstantiatorMetadata]:
+    choices = get_args(typ)
+    if not len(set(map(type, choices))) == 1:
+        raise UnsupportedTypeAnnotationError(
+            "All choices in literal must have the same type!"
+        )
+    contained_type = type(next(iter(choices)))
+    if issubclass(contained_type, enum.Enum):
+        choices = tuple(map(lambda x: x.name, choices))
+    instantiator, metadata = _instantiator_from_type_inner(
+        contained_type,
+        type_from_typevar,
+        allow_sequences=False,
+    )
+    assert (
+        # Choices provided by the contained type
+        metadata.choices is None
+        or len(set(choices) - set(metadata.choices)) == 0
+    )
+    return instantiator, dataclasses.replace(
+        metadata,
+        choices=tuple(map(str, choices)),
+        metavar="{" + ",".join(map(str, choices)) + "}",
+        is_optional=False,
+    )

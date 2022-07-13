@@ -134,16 +134,25 @@ class ParserSpecification:
                 typ=type_from_typevar.get(field.typ, field.typ),  # type: ignore
             )
             if isinstance(field.typ, TypeVar):
-                # Found an unbound TypeVar. This could be because inheriting from
-                # generics is currently not implemented. It's unclear whether this is
-                # feasible, because generics are lost in the mro:
-                # https://github.com/python/typing/issues/777
-                raise _instantiators.UnsupportedTypeAnnotationError(
-                    f"Field {field.name} has an unbound TypeVar: {field.typ}. Note that"
-                    " inheriting from generics is currently not implemented. It's"
-                    " unclear whether this is feasible, because generics are lost in"
-                    " the mro: https://github.com/python/typing/issues/777"
-                )
+                if field.typ.__bound__ is not None:
+                    # Try to infer type from TypeVar bound.
+                    field = dataclasses.replace(field, typ=field.typ.__bound__)
+                elif len(field.typ.__constraints__) > 0:
+                    # Try to infer type from TypeVar constraints.
+                    field = dataclasses.replace(
+                        field, typ=Union.__getitem__(field.typ.__constraints__)  # type: ignore
+                    )
+                else:
+                    # Found an unbound TypeVar. This could be because inheriting from
+                    # generics is currently not implemented. It's unclear whether this is
+                    # feasible, because generics are lost in the mro:
+                    # https://github.com/python/typing/issues/777
+                    raise _instantiators.UnsupportedTypeAnnotationError(
+                        f"Field {field.name} has an unbound TypeVar: {field.typ}. Note"
+                        " that inheriting from generics is currently not implemented."
+                        " It's unclear whether this is feasible, because generics are"
+                        " lost in the mro: https://github.com/python/typing/issues/777"
+                    )
 
             # (1) Handle Unions over callables; these result in subparsers.
             subparsers_attempt = SubparsersSpecification.from_field(

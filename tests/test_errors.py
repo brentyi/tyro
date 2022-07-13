@@ -44,14 +44,6 @@ def test_nested_sequence_types():
         dcargs.cli(A, args=["--x", "0", "1"])
 
 
-def test_unsupported_union():
-    def main(x: Union[int, str]) -> None:
-        return
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=[])
-
-
 def test_unsupported_literal():
     def main(x: Literal[0, "5"]) -> None:
         return
@@ -141,3 +133,11 @@ def test_generic_inherited():
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(ChildClass, args=["--x", "1", "--y", "2", "--z", "3"])
+
+
+def test_unsupported_union():
+    def main(a: Union[Tuple[int, int], Tuple[int, int, int]]) -> None:
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=["--a", "5", "5"])

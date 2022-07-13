@@ -1,7 +1,7 @@
 import dataclasses
 import enum
 import pathlib
-from typing import Any, ClassVar, Optional
+from typing import Any, ClassVar, Optional, TypeVar, Union
 
 import pytest
 from typing_extensions import Annotated, Final, Literal, TypeAlias
@@ -200,6 +200,35 @@ def test_optional():
         x: Optional[int]
 
     assert dcargs.cli(A, args=[]) == A(x=None)
+
+
+def test_union():
+    def main(x: Union[int, str]) -> Union[int, str]:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "5"]) == 5
+    assert dcargs.cli(main, args=["--x", "five"]) == "five"
+
+
+def test_func_typevar():
+    T = TypeVar("T", int, str)
+
+    def main(x: T) -> T:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "5"]) == 5
+    assert dcargs.cli(main, args=["--x", "five"]) == "five"
+
+
+def test_func_typevar_bound():
+    T = TypeVar("T", bound=int)
+
+    def main(x: T) -> T:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "5"]) == 5
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--x", "five"])
 
 
 def test_enum():

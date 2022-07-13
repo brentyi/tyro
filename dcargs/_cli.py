@@ -57,6 +57,7 @@ def cli(
             `typing.Tuple[T, ...]`.
           - `typing.Set[T]`.
           - `typing.Final[T]` and `typing.Annotated[T]`.
+          - `typing.Union[T1, T2]`.
           - Various nested combinations of the above: `Optional[Literal[T]]`,
             `Final[Optional[Sequence[T]]]`, etc.
         - Hierarchical structures via nested dataclasses, TypedDict, NamedTuple,
