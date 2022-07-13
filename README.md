@@ -62,6 +62,7 @@ annotations; a broad range of core type annotations are supported...
         `typing.Tuple[T, ...]`.
       - `typing.Set[T]`.
       - `typing.Final[T]` and `typing.Annotated[T]`.
+      - `typing.Union[T1, T2]`.
       - Various nested combinations of the above: `Optional[Literal[T]]`,
         `Final[Optional[Sequence[T]]]`, etc.
     - Hierarchical structures via nested dataclasses, TypedDict, NamedTuple,
@@ -312,7 +313,7 @@ if __name__ == "__main__":
 usage: 03_enums_and_containers.py [-h] --dataset-sources PATH [PATH ...]
                                   [--image-dimensions INT INT]
                                   [--optimizer-type {ADAM,SGD}]
-                                  [--checkpoint-interval (INT|None)]
+                                  [--checkpoint-interval (None|INT)]
 
 required arguments:
   --dataset-sources PATH [PATH ...]
@@ -324,7 +325,7 @@ optional arguments:
                         Height and width of some image data. (default: 32 32)
   --optimizer-type {ADAM,SGD}
                         Gradient-based optimizer to use. (default: ADAM)
-  --checkpoint-interval (INT|None)
+  --checkpoint-interval (None|INT)
                         Interval to save checkpoints at. (default: None)</samp>
 </pre>
 
@@ -735,18 +736,19 @@ ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learni
 
 <details>
 <summary>
-<strong>7. Literals</strong>
+<strong>7. Literals And Unions</strong>
 </summary>
 <br />
 
-`typing.Literal[]` can be used to restrict inputs to a fixed set of choices.
+`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices;
+`typing.Union[]` can be used to restrict inputs to a fixed set of types.
 
-**Code ([link](examples/07_literals.py)):**
+**Code ([link](examples/07_literals_and_unions.py)):**
 
 ```python
 import dataclasses
 import enum
-from typing import Literal
+from typing import Literal, Tuple, Union
 
 import dcargs
 
@@ -759,15 +761,15 @@ class Color(enum.Enum):
 
 @dataclasses.dataclass(frozen=True)
 class Args:
-    enum: Color
-    restricted_enum: Literal[Color.RED, Color.GREEN]
-
-    integer: Literal[0, 1, 2, 3]
-    string: Literal["red", "green"]
-
-    restricted_enum_with_default: Literal[Color.RED, Color.GREEN] = Color.GREEN
-    integer_with_default: Literal[0, 1, 2, 3] = 3
-    string_with_Default: Literal["red", "green"] = "red"
+    enum: Color = Color.RED
+    restricted_enum: Literal[Color.RED, Color.GREEN] = Color.RED
+    integer: Literal[0, 1, 2, 3] = 0
+    string: Literal["red", "green"] = "red"
+    string_or_enum: Union[Literal["red", "green"], Color] = "red"
+    tuple_of_string_or_enum: Tuple[Union[Literal["red", "green"], Color], ...] = (
+        "red",
+        Color.RED,
+    )
 
 
 if __name__ == "__main__":
@@ -780,32 +782,45 @@ if __name__ == "__main__":
 **Example usage:**
 
 <pre>
-<samp>$ <kbd>python ./07_literals.py --help</kbd>
-usage: 07_literals.py [-h] --enum {RED,GREEN,BLUE} --restricted-enum
-                      {RED,GREEN} --integer {0,1,2,3} --string {red,green}
-                      [--restricted-enum-with-default {RED,GREEN}]
-                      [--integer-with-default {0,1,2,3}]
-                      [--string-with-Default {red,green}]
-
-required arguments:
-  --enum {RED,GREEN,BLUE}
-  --restricted-enum {RED,GREEN}
-  --integer {0,1,2,3}
-  --string {red,green}
+<samp>$ <kbd>python ./07_literals_and_unions.py --help</kbd>
+usage: 07_literals_and_unions.py [-h] [--enum {RED,GREEN,BLUE}]
+                                 [--restricted-enum {RED,GREEN}]
+                                 [--integer {0,1,2,3}] [--string {red,green}]
+                                 [--string-or-enum ({red,green}|{RED,GREEN,BLUE})]
+                                 [--tuple-of-string-or-enum ({red,green}|{RED,GREEN,BLUE}) [({red,green}|{RED,GREEN,BLUE}) ...]]
 
 optional arguments:
   -h, --help            show this help message and exit
-  --restricted-enum-with-default {RED,GREEN}
-                        (default: GREEN)
-  --integer-with-default {0,1,2,3}
-                        (default: 3)
-  --string-with-Default {red,green}
-                        (default: red)</samp>
+  --enum {RED,GREEN,BLUE}
+                        (default: RED)
+  --restricted-enum {RED,GREEN}
+                        (default: RED)
+  --integer {0,1,2,3}   (default: 0)
+  --string {red,green}  (default: red)
+  --string-or-enum ({red,green}|{RED,GREEN,BLUE})
+                        (default: red)
+  --tuple-of-string-or-enum ({red,green}|{RED,GREEN,BLUE}) [({red,green}|{RED,GREEN,BLUE}) ...]
+                        (default: red RED)</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./07_literals.py --enum RED --restricted-enum GREEN --integer 3 --string green</kbd>
-Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.GREEN: 2&gt;, integer=3, string=&#x27;green&#x27;, restricted_enum_with_default=&lt;Color.GREEN: 2&gt;, integer_with_default=3, string_with_Default=&#x27;red&#x27;)</samp>
+<samp>$ <kbd>python ./07_literals_and_unions.py --enum RED --restricted-enum GREEN --integer 3 --string green</kbd>
+Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.GREEN: 2&gt;, integer=3, string=&#x27;green&#x27;, string_or_enum=&#x27;red&#x27;, tuple_of_string_or_enum=(&#x27;red&#x27;, &lt;Color.RED: 1&gt;))</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./07_literals_and_unions.py --string-or-enum green</kbd>
+Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0, string=&#x27;red&#x27;, string_or_enum=&#x27;green&#x27;, tuple_of_string_or_enum=(&#x27;red&#x27;, &lt;Color.RED: 1&gt;))</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./07_literals_and_unions.py --string-or-enum RED</kbd>
+Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0, string=&#x27;red&#x27;, string_or_enum=&lt;Color.RED: 1&gt;, tuple_of_string_or_enum=(&#x27;red&#x27;, &lt;Color.RED: 1&gt;))</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./07_literals_and_unions.py --tuple-of-string-or-enum RED green BLUE</kbd>
+Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0, string=&#x27;red&#x27;, string_or_enum=&#x27;red&#x27;, tuple_of_string_or_enum=(&lt;Color.RED: 1&gt;, &#x27;green&#x27;, &lt;Color.BLUE: 3&gt;))</samp>
 </pre>
 
 </details>
@@ -958,7 +973,7 @@ class Commit:
     all: bool = False
 
 
-def main(cmd: Union[Checkout, Commit] = Checkout("main")) -> None:
+def main(cmd: Union[Checkout, Commit]) -> None:
     print(cmd)
 
 
@@ -972,15 +987,14 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./09_subparsers.py --help</kbd>
-usage: 09_subparsers.py [-h] [{checkout,commit}] ...
+usage: 09_subparsers.py [-h] {checkout,commit} ...
 
 optional arguments:
-  -h, --help           show this help message and exit
+  -h, --help         show this help message and exit
 
-optional subcommands:
-   (default: checkout)
+subcommands:
 
-  [{checkout,commit}]</samp>
+  {checkout,commit}</samp>
 </pre>
 
 <pre>
@@ -1006,15 +1020,15 @@ Commit(message=&#x27;hello&#x27;, all=True)</samp>
 
 <pre>
 <samp>$ <kbd>python ./09_subparsers.py checkout --help</kbd>
-usage: 09_subparsers.py checkout [-h] [--cmd.branch STR]
+usage: 09_subparsers.py checkout [-h] --cmd.branch STR
 
 Checkout a branch.
 
 optional arguments:
   -h, --help        show this help message and exit
 
-optional cmd arguments:
-  --cmd.branch STR  (default: main)</samp>
+required cmd arguments:
+  --cmd.branch STR</samp>
 </pre>
 
 <pre>

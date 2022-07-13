@@ -1,6 +1,6 @@
 import contextlib
 import io
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import pytest
 
@@ -99,3 +99,12 @@ def test_positional_booleans():
         dcargs.cli(main, args=["true"])
     with pytest.raises(SystemExit):
         dcargs.cli(main, args=["True", "false"])
+
+
+def test_unsupported_positional():
+    # Not super clear how to parse optional positional sequences...
+    def main(a: Optional[List[int]], /) -> None:
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=["--a", "5", "5"])

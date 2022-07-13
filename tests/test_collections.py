@@ -1,6 +1,6 @@
 import dataclasses
 import enum
-from typing import List, Optional, Sequence, Set, Tuple
+from typing import Any, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
 from typing_extensions import Literal
@@ -253,3 +253,19 @@ def test_nested_optional_types():
 
     assert dcargs.cli(A, args=["--x", "0", "1"]) == A((0, 1))
     assert dcargs.cli(A, args=["--x", "0", "None", "1"]) == A((0, None, 1))
+
+
+def test_union_over_collections():
+    def main(a: Union[Tuple[float, ...], Tuple[int, ...]]) -> Any:
+        return a
+
+    assert dcargs.cli(main, args="--a 3.3 3.3 7.0".split(" ")) == (3.3, 3.3, 7.0)
+    assert dcargs.cli(main, args="--a 3 3 7".split(" ")) == (3, 3, 7)
+
+
+def test_union_over_collections_2():
+    def main(a: Union[Tuple[str, float, str], Tuple[str, str, float]]) -> Any:
+        return a
+
+    assert dcargs.cli(main, args="--a 3.3 hey 7.0".split(" ")) == ("3.3", "hey", 7.0)
+    assert dcargs.cli(main, args="--a 3 3 hey".split(" ")) == ("3", 3.0, "hey")
