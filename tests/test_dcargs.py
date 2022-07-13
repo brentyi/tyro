@@ -261,6 +261,23 @@ def test_literal():
         assert dcargs.cli(A, args=["--x", "3"])
 
 
+def test_literal_bool():
+    def main(x: Literal[True]) -> bool:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "True"]) is True
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--x", "False"])
+
+    def main2(x: Literal[True, False]) -> bool:
+        return x
+
+    assert dcargs.cli(main2, args=["--x", "True"]) is True
+    assert dcargs.cli(main2, args=["--x", "False"]) is False
+    with pytest.raises(SystemExit):
+        dcargs.cli(main2, args=["--x", "Tru"])
+
+
 def test_literal_enum():
     class Color(enum.Enum):
         RED = enum.auto()

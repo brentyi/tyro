@@ -352,9 +352,9 @@ def _instantiator_from_union(
         metas.pop(0)
 
     metavar: Union[str, Tuple[str, ...]]
-    if isinstance(metas[0].metavar, str):
+    if all(map(lambda m: isinstance(m.metavar, str), metas)):
         metavar = "(" + "|".join(map(lambda x: cast(str, x.metavar), metas)) + ")"
-    else:
+    elif all(map(lambda m: isinstance(m.metavar, tuple), metas)):
         # Do our best to create a reasonable looking metavar.
         # This is imperfect!
         assert isinstance(metas[0].metavar, tuple)
@@ -364,6 +364,9 @@ def _instantiator_from_union(
                 zip(*map(lambda m: m.metavar, metas)),
             )
         )
+    else:
+        # Should never hit this case.
+        assert False
 
     def union_instantiator(string_or_strings: Union[str, List[str]]) -> Any:
         for instantiator, metadata in zip(instantiators, metas):
@@ -461,19 +464,19 @@ def _instantiator_from_literal(
     contained_type = type(next(iter(choices)))
     if issubclass(contained_type, enum.Enum):
         choices = tuple(map(lambda x: x.name, choices))
+    else:
+        choices = tuple(map(str, choices))
     instantiator, metadata = _instantiator_from_type_inner(
         contained_type,
         type_from_typevar,
         allow_sequences=False,
     )
-    assert (
-        # Choices provided by the contained type
-        metadata.choices is None
-        or len(set(choices) - set(metadata.choices)) == 0
-    )
+    if metadata.choices is not None:
+        assert all(map(lambda t: isinstance(t, str), metadata.choices))
+        assert len(set(choices) - set(metadata.choices)) == 0
     return instantiator, dataclasses.replace(
         metadata,
-        choices=tuple(map(str, choices)),
+        choices=choices,
         metavar="{" + ",".join(map(str, choices)) + "}",
         is_optional=False,
     )
