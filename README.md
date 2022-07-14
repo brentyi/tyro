@@ -313,7 +313,7 @@ if __name__ == "__main__":
 usage: 03_enums_and_containers.py [-h] --dataset-sources PATH [PATH ...]
                                   [--image-dimensions INT INT]
                                   [--optimizer-type {ADAM,SGD}]
-                                  [--checkpoint-interval (None|INT)]
+                                  [--checkpoint-interval None|INT]
 
 required arguments:
   --dataset-sources PATH [PATH ...]
@@ -325,7 +325,7 @@ optional arguments:
                         Height and width of some image data. (default: 32 32)
   --optimizer-type {ADAM,SGD}
                         Gradient-based optimizer to use. (default: ADAM)
-  --checkpoint-interval (None|INT)
+  --checkpoint-interval None|INT
                         Interval to save checkpoints at. (default: None)</samp>
 </pre>
 
@@ -786,8 +786,8 @@ if __name__ == "__main__":
 usage: 07_literals_and_unions.py [-h] [--enum {RED,GREEN,BLUE}]
                                  [--restricted-enum {RED,GREEN}]
                                  [--integer {0,1,2,3}] [--string {red,green}]
-                                 [--string-or-enum ({red,green}|{RED,GREEN,BLUE})]
-                                 [--tuple-of-string-or-enum ({red,green}|{RED,GREEN,BLUE}) [({red,green}|{RED,GREEN,BLUE}) ...]]
+                                 [--string-or-enum {red,green,RED,GREEN,BLUE}]
+                                 [--tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -797,9 +797,9 @@ optional arguments:
                         (default: RED)
   --integer {0,1,2,3}   (default: 0)
   --string {red,green}  (default: red)
-  --string-or-enum ({red,green}|{RED,GREEN,BLUE})
+  --string-or-enum {red,green,RED,GREEN,BLUE}
                         (default: red)
-  --tuple-of-string-or-enum ({red,green}|{RED,GREEN,BLUE}) [({red,green}|{RED,GREEN,BLUE}) ...]
+  --tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]
                         (default: red RED)</samp>
 </pre>
 

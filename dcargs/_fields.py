@@ -143,7 +143,8 @@ def field_list_from_callable(
         # Generate field list from function signature.
         field_list = []
         ignore_self = cls is not None
-        for param in inspect.signature(f).parameters.values():
+        params = inspect.signature(f).parameters.values()
+        for param in params:
             # For `__init__`, skip self parameter.
             if ignore_self:
                 ignore_self = False
@@ -158,6 +159,13 @@ def field_list_from_callable(
             helptext = docstring_from_arg_name.get(param.name)
             if helptext is None and cls is not None:
                 helptext = _docstrings.get_field_docstring(cls, param.name)
+
+            if param.name not in hints:
+                raise TypeError(
+                    f"Expected fully type-annotated callable, but {f} with arguments"
+                    f" {tuple(map(lambda p: p.name, params))} has no annotation for"
+                    f" '{param.name}'."
+                )
 
             field_list.append(
                 Field(

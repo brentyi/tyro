@@ -141,3 +141,11 @@ def test_unsupported_union():
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(main, args=["--a", "5", "5"])
+
+
+def test_missing_annotation():
+    def main(a) -> None:
+        pass
+
+    with pytest.raises(TypeError):
+        dcargs.cli(main, args=["--help"])

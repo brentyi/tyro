@@ -1,6 +1,7 @@
+import collections
 import dataclasses
 import enum
-from typing import Any, List, Optional, Sequence, Set, Tuple, Union
+from typing import Any, Deque, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
 
 import pytest
 from typing_extensions import Literal
@@ -203,6 +204,32 @@ def test_sets():
         x: Set[int]
 
     assert dcargs.cli(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
+    with pytest.raises(SystemExit):
+        dcargs.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.cli(A, args=[])
+
+
+def test_frozen_sets():
+    @dataclasses.dataclass
+    class A:
+        x: FrozenSet[int]
+
+    assert dcargs.cli(A, args=["--x", "1", "2", "3", "3"]) == A(x=frozenset({1, 2, 3}))
+    with pytest.raises(SystemExit):
+        dcargs.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        dcargs.cli(A, args=[])
+
+
+def test_deque():
+    @dataclasses.dataclass
+    class A:
+        x: Deque[int]
+
+    assert dcargs.cli(A, args=["--x", "1", "2", "3", "3"]) == A(
+        x=collections.deque([1, 2, 3, 3])
+    )
     with pytest.raises(SystemExit):
         dcargs.cli(A, args=["--x"])
     with pytest.raises(SystemExit):

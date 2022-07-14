@@ -38,11 +38,13 @@ import dataclasses
 import enum
 import inspect
 import warnings
+from collections import deque
 from typing import (
     Any,
     Callable,
     Dict,
     Hashable,
+    Iterable,
     List,
     Optional,
     Tuple,
@@ -141,7 +143,7 @@ def instantiator_from_type(
         pass
     elif not callable(typ):
         raise UnsupportedTypeAnnotationError(
-            f"Expected {typ} to be a `(arg: str) -> T` type converter, but is not"
+            f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
             " callable."
         )
     else:
@@ -151,7 +153,7 @@ def instantiator_from_type(
         for i, param in enumerate(signature.parameters.values()):
             if i == 0 and param.annotation not in (str, inspect.Parameter.empty):
                 raise UnsupportedTypeAnnotationError(
-                    f"Expected {typ} to be a `(arg: str) -> T` type converter, but got"
+                    f"Expected {typ} to be an `(arg: str) -> T` type converter, but got"
                     f" {signature}. You may have a nested type in a container, which is"
                     " unsupported."
                 )
@@ -165,7 +167,7 @@ def instantiator_from_type(
         # Raise an error if parameters look wrong.
         if not (param_count == 1 or (param_count == 0 and has_var_positional)):
             raise UnsupportedTypeAnnotationError(
-                f"Expected {typ} to be a `(arg: str) -> T` type converter, but got"
+                f"Expected {typ} to be an `(arg: str) -> T` type converter, but got"
                 f" {signature}. You may have a nested type in a container, which is"
                 " unsupported."
             )
@@ -238,7 +240,13 @@ def _instantiator_from_container_type(
         return instantiator_from_type(contained_type, type_from_typevar)
 
     for make, matched_origins in {
-        _instantiator_from_list_sequence_or_set: (collections.abc.Sequence, list, set),
+        _instantiator_from_list_sequence_or_set: (
+            collections.abc.Sequence,
+            frozenset,
+            list,
+            set,
+            deque,
+        ),
         _instantiator_from_tuple: (tuple,),
         _instantiator_from_dict: (dict, collections.abc.Mapping),
         _instantiator_from_union: (Union,),
@@ -305,6 +313,31 @@ def _instantiator_from_tuple(
         )
 
 
+def _join_union_metavars(metavars: Iterable[str]) -> str:
+    """Metavar generation helper for unions.
+
+    Examples:
+        None, INT => NONE|INT
+        {0,1,2}, {3,4} => {0,1,2,3,4}
+        None, {0,1,2}, {3,4} => None|{0,1,2,3,4}
+    """
+    metavars = tuple(metavars)
+    merged_metavars = [metavars[0]]
+    for i in range(1, len(metavars)):
+        prev = merged_metavars[-1]
+        curr = metavars[i]
+        if (
+            prev.startswith("{")
+            and prev.endswith("}")
+            and curr.startswith("{")
+            and curr.endswith("}")
+        ):
+            merged_metavars[-1] = prev[:-1] + "," + curr[1:]
+        else:
+            merged_metavars.append(curr)
+    return "|".join(merged_metavars)
+
+
 def _instantiator_from_union(
     typ: Type, type_from_typevar: Dict[TypeVar, Type]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
@@ -353,14 +386,13 @@ def _instantiator_from_union(
 
     metavar: Union[str, Tuple[str, ...]]
     if all(map(lambda m: isinstance(m.metavar, str), metas)):
-        metavar = "(" + "|".join(map(lambda x: cast(str, x.metavar), metas)) + ")"
+        metavar = _join_union_metavars(map(lambda x: cast(str, x.metavar), metas))
     elif all(map(lambda m: isinstance(m.metavar, tuple), metas)):
-        # Do our best to create a reasonable looking metavar.
-        # This is imperfect!
+        # Do our best to create a reasonable looking metavar. This is imperfect!
         assert isinstance(metas[0].metavar, tuple)
         metavar = tuple(
             map(
-                lambda metavars: "(" + "|".join(metavars) + ")",
+                lambda metavars: _join_union_metavars(metavars),
                 zip(*map(lambda m: m.metavar, metas)),
             )
         )

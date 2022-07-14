@@ -66,7 +66,9 @@ def instance_from_string(typ: Type[T], arg: str) -> T:
     assert len(get_args(typ)) == 0, f"Type {typ} cannot be instantiated."
     if typ is bool:
         return {"True": True, "False": False}[arg]  # type: ignore
-    elif issubclass(typ, enum.Enum):
+    elif isinstance(typ, type) and issubclass(typ, enum.Enum):
         return typ[arg]  # type: ignore
+    elif typ is bytes:
+        return bytes(arg, encoding="ascii")  # type: ignore
     else:
         return typ(arg)  # type: ignore
