@@ -72,7 +72,11 @@ def _is_possibly_nested_type(typ: Any) -> bool:
     # Nested types like nested (data)classes should have fully type-annotated inputs. If
     # any inputs are unannotated (for example, in the case of pathlib.Path), we can
     # assume the type is not nested.
-    for param in inspect.signature(typ).parameters.values():
+    try:
+        sig = inspect.signature(typ)
+    except ValueError:
+        return False
+    for param in sig.parameters.values():
         if param.annotation is inspect.Parameter.empty:
             return False
 

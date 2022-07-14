@@ -1,7 +1,7 @@
 import dataclasses
 import enum
 import pathlib
-from typing import Any, ClassVar, Optional, TypeVar, Union
+from typing import Any, AnyStr, ClassVar, Optional, TypeVar, Union
 
 import pytest
 from typing_extensions import Annotated, Final, Literal, TypeAlias
@@ -203,10 +203,11 @@ def test_optional():
 
 
 def test_union():
-    def main(x: Union[int, str]) -> Union[int, str]:
+    def main(x: Union[Literal[1, 2], Literal[3, 4, 5], str]) -> Union[int, str]:
         return x
 
     assert dcargs.cli(main, args=["--x", "5"]) == 5
+    assert dcargs.cli(main, args=["--x", "6"]) == "6"
     assert dcargs.cli(main, args=["--x", "five"]) == "five"
 
 
@@ -394,3 +395,19 @@ def test_any():
         return x
 
     assert dcargs.cli(main, args=["--x", "hello"]) == "hello"
+
+
+def test_bytes():
+    def main(x: bytes) -> bytes:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "hello"]) == b"hello"
+
+
+def test_any_str():
+    def main(x: AnyStr) -> AnyStr:
+        return x
+
+    # Use bytes when provided ascii-compatible inputs.
+    assert dcargs.cli(main, args=["--x", "hello"]) == b"hello"
+    assert dcargs.cli(main, args=["--x", "hello„"]) == "hello„"
