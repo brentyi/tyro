@@ -8,6 +8,8 @@ import itertools
 import shlex
 from typing import Any, Dict, Mapping, Optional, Set, Tuple, Type, TypeVar, Union
 
+import termcolor
+
 from . import _fields, _instantiators
 
 try:
@@ -33,10 +35,8 @@ class ArgumentDefinition:
 
         # Get keyword arguments, with None values removed.
         kwargs = dataclasses.asdict(self.lowered)
-        kwargs = dict(filter(lambda kv: kv[1] is not None, kwargs.items()))
-
-        # Pop lowered properties t
         kwargs.pop("instantiator")
+        kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flag = kwargs.pop("name_or_flag")
 
         # Note that the name must be passed in as a position argument.
@@ -53,6 +53,7 @@ class ArgumentDefinition:
             _rule_generate_helptext,
             _rule_set_name_or_flag,
             _rule_positional_special_handling,
+            _rule_bold_metavar,
         )
         return functools.reduce(
             lambda lowered, rule: rule(self, lowered),
@@ -71,6 +72,13 @@ class LoweredArgumentDefinition:
     # The main reason we use this instead of the standard 'type' argument is to enable
     # mixed-type tuples.
     instantiator: Optional[_instantiators.Instantiator] = None
+
+    def is_fixed(self) -> bool:
+        """If the instantiator is set to `None`, even after all argument
+        transformations, it means that we weren't able to determine a valid instantiator
+        for an argument. We then mark the argument as 'fixed', with a value always equal
+        to the field default."""
+        return self.instantiator is None
 
     # From here on out, all fields correspond 1:1 to inputs to argparse's
     # add_argument() method.
@@ -138,11 +146,24 @@ def _rule_recursive_instantiator_from_type(
     tuples."""
     if lowered.instantiator is not None:
         return lowered
+    try:
+        instantiator, metadata = _instantiators.instantiator_from_type(
+            arg.field.typ,  # type: ignore
+            arg.type_from_typevar,
+        )
+    except _instantiators.UnsupportedTypeAnnotationError as e:
+        if arg.field.default is None:
+            raise e
+        else:
+            # For fields with a default, we'll get by even if there's no instantiator
+            # available.
+            return dataclasses.replace(
+                lowered,
+                metavar=termcolor.colored("(fixed)", color="red"),
+                required=False,
+                default=_fields.MISSING,
+            )
 
-    instantiator, metadata = _instantiators.instantiator_from_type(
-        arg.field.typ,  # type: ignore
-        arg.type_from_typevar,
-    )
     return dataclasses.replace(
         lowered,
         instantiator=instantiator,
@@ -166,7 +187,11 @@ def _rule_convert_defaults_to_strings(
         else:
             return str(x)
 
-    if lowered.default is None or lowered.action is not None:
+    if (
+        lowered.default is None
+        or lowered.default is _fields.MISSING
+        or lowered.action is not None
+    ):
         return lowered
     elif lowered.nargs is not None and lowered.nargs != "?":
         if isinstance(lowered.default, Mapping):
@@ -199,26 +224,38 @@ def _rule_generate_helptext(
     elif arg.field.positional:
         help_parts.append(str(lowered.metavar))
 
-    if lowered.action is not None:
+    default = lowered.default
+    if lowered.is_fixed():
+        # For fixed args, we'll be missing the lowered default. Use field default
+        # instead.
+        assert default is _fields.MISSING
+        default = arg.field.default
+
+    if lowered.action == "store_true":
         # Don't show defaults for boolean flags.
-        # assert lowered.action in ("store_true", "store_false")
-        pass
+        assert lowered.action in ("store_true", "store_false")
     elif not lowered.required:
+        default_label = "value" if lowered.is_fixed() else "default"
         # Include default value in helptext. We intentionally don't use the % template
         # because the types of all arguments are set to strings, which will cause the
         # default to be casted to a string and introduce extra quotation marks.
-        if lowered.nargs is not None and hasattr(lowered.default, "__iter__"):
-            # For tuple types, we might have lowered.default as (0, 1, 2, 3).
-            # For list types, we might have lowered.default as [0, 1, 2, 3].
-            # For set types, we might have lowered.default as {0, 1, 2, 3}.
+        if lowered.nargs is not None and hasattr(default, "__iter__"):
+            # For tuple types, we might have default as (0, 1, 2, 3).
+            # For list types, we might have default as [0, 1, 2, 3].
+            # For set types, we might have default as {0, 1, 2, 3}.
             #
             # In all cases, we want to display (default: 0 1 2 3), for consistency with
             # the format that argparse expects when we set nargs.
-            assert lowered.default is not None  # Just for type checker.
-            default_parts = map(shlex.quote, map(str, lowered.default))
-            help_parts.append(f"(default: {' '.join(default_parts)})")
+            assert default is not None  # Just for type checker.
+            default_parts = map(shlex.quote, map(str, default))
+            default_text = f"({default_label}: {' '.join(default_parts)})"
         else:
-            help_parts.append(f"(default: {shlex.quote(str(lowered.default))})")
+            default_text = f"({default_label}: {shlex.quote(str(default))})"
+        help_parts.append(default_text)
+    else:
+        help_parts.append(
+            termcolor.colored("(required)", on_color="on_red")
+        )
 
     return dataclasses.replace(lowered, help=" ".join(help_parts))
 
@@ -257,3 +294,22 @@ def _rule_positional_special_handling(
         required=None,
         nargs="?" if not lowered.required else lowered.nargs,
     )
+
+
+def _rule_bold_metavar(
+    arg: ArgumentDefinition,
+    lowered: LoweredArgumentDefinition,
+) -> LoweredArgumentDefinition:
+    metavar = lowered.metavar
+
+    def _format(x: str) -> str:
+        return termcolor.colored(x, attrs=["bold"])
+
+    if isinstance(metavar, str):
+        metavar = _format(metavar)
+    elif isinstance(metavar, tuple):
+        metavar = tuple(map(_format, metavar))
+    else:
+        assert metavar is None
+
+    return dataclasses.replace(lowered, metavar=metavar)

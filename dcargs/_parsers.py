@@ -238,31 +238,24 @@ class ParserSpecification:
     def apply(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
 
+        # Generate helptext.
         parser.description = self.description
 
+        # Make argument groups.
         def format_group_name(nested_field_name: str, required: bool) -> str:
-            if required:
-                prefix = termcolor.colored("required", attrs=["bold"])
-            else:
-                prefix = termcolor.colored("optional", attrs=["bold", "dark"])
-            suffix = termcolor.colored("arguments", attrs=["bold"])
-
+            # if required:
+            #     prefix = termcolor.colored("required", attrs=["bold"])
+            # else:
+            #     prefix = termcolor.colored("optional", attrs=["bold", "dark"])
             if nested_field_name != "":
-                return " ".join(
-                    [
-                        prefix,
-                        termcolor.colored(nested_field_name, attrs=["bold"]),
-                        suffix,
-                    ]
+                return termcolor.colored(
+                    nested_field_name + " arguments", attrs=["bold"]
                 )
             else:
-                return " ".join([prefix, suffix])
+                return termcolor.colored("arguments", attrs=["bold"])
 
-        optional_group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
+        group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
             "": parser._action_groups[1],
-        }
-        required_group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
-            "": parser.add_argument_group(format_group_name("", required=True)),
         }
 
         # Break some API boundaries to rename the optional group.
@@ -278,29 +271,15 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            if arg.lowered.required:
-                target_groups, other_groups = (
-                    required_group_from_prefix,
-                    optional_group_from_prefix,
-                )
-            else:
-                target_groups, other_groups = (
-                    optional_group_from_prefix,
-                    required_group_from_prefix,
-                )
-
-            if arg.prefix not in target_groups:
+            if arg.prefix not in group_from_prefix:
                 nested_field_name = arg.prefix[:-1]
-                target_groups[arg.prefix] = parser.add_argument_group(
+                group_from_prefix[arg.prefix] = parser.add_argument_group(
                     format_group_name(nested_field_name, required=arg.lowered.required),
-                    # Add a description, but only to the first group for a field.
                     description=self.helptext_from_nested_class_field_name.get(
                         nested_field_name
-                    )
-                    if arg.prefix not in other_groups
-                    else None,
+                    ),
                 )
-            arg.add_argument(target_groups[arg.prefix])
+            arg.add_argument(group_from_prefix[arg.prefix])
 
         # Create subparser tree.
         if len(self.subparsers_from_name) > 0:

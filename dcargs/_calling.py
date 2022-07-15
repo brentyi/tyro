@@ -7,7 +7,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TypeVar, Uni
 
 from typing_extensions import get_args, get_origin
 
-from . import _fields, _parsers, _resolver, _strings
+from . import _arguments, _fields, _parsers, _resolver, _strings
 
 
 class InstantiationError(Exception):
@@ -22,7 +22,7 @@ def call_from_args(
     f: Callable[..., T],
     parser_definition: _parsers.ParserSpecification,
     default_instance: Optional[T],
-    value_from_arg: Dict[str, Any],
+    value_from_prefixed_field_name: Dict[str, Any],
     field_name_prefix: str,
     avoid_subparsers: bool,
 ) -> Tuple[T, Set[str]]:
@@ -36,15 +36,15 @@ def call_from_args(
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
 
-    def get_value_from_arg(arg: str) -> Any:
+    def get_value_from_arg(prefixed_field_name: str) -> Any:
         """Helper for getting values from `value_from_arg` + doing some extra
         asserts."""
-        assert arg in value_from_arg
-        assert arg not in consumed_keywords
-        consumed_keywords.add(arg)
-        return value_from_arg[arg]
+        assert prefixed_field_name in value_from_prefixed_field_name
+        assert prefixed_field_name not in consumed_keywords
+        consumed_keywords.add(prefixed_field_name)
+        return value_from_prefixed_field_name[prefixed_field_name]
 
-    arg_from_prefixed_field_name = {}
+    arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[arg.prefix + arg.field.name] = arg
 
@@ -62,14 +62,30 @@ def call_from_args(
         if prefixed_field_name in arg_from_prefixed_field_name:
             # Standard arguments.
             arg = arg_from_prefixed_field_name[prefixed_field_name]
-            value = get_value_from_arg(prefixed_field_name)
-            if value is not None:
-                try:
-                    assert arg.lowered.instantiator is not None
-                    value = arg.lowered.instantiator(value)
-                except ValueError as e:
+            if not arg.lowered.is_fixed():
+                value = get_value_from_arg(prefixed_field_name)
+                if value is not None:
+                    try:
+                        assert arg.lowered.instantiator is not None
+                        value = arg.lowered.instantiator(value)
+                    except ValueError as e:
+                        raise InstantiationError(
+                            f"Parsing error for {arg.lowered.name_or_flag}: {e.args[0]}"
+                        )
+            else:
+                assert arg.field.default is not _fields.MISSING
+                value = arg.field.default
+                if (
+                    value_from_prefixed_field_name.get(prefixed_field_name)
+                    is not _fields.MISSING
+                ):
+                    print(
+                        (type(value_from_prefixed_field_name.get(prefixed_field_name))),
+                        (type(_fields.MISSING)),
+                    )
                     raise InstantiationError(
-                        f"Parsing error for {arg.lowered.name_or_flag}: {e.args[0]}"
+                        f"{arg.lowered.name_or_flag} was passed in, but is a fixed"
+                        " argument that cannot be parsed"
                     )
         elif (
             prefixed_field_name
@@ -83,7 +99,7 @@ def call_from_args(
                 field_type,
                 parser_definition,
                 field.default,
-                value_from_arg,
+                value_from_prefixed_field_name,
                 field_name_prefix=prefixed_field_name + _strings.NESTED_FIELD_DELIMETER,
                 avoid_subparsers=avoid_subparsers,
             )
@@ -96,7 +112,7 @@ def call_from_args(
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
                 name=prefixed_field_name
             )
-            if subparser_dest in value_from_arg:
+            if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = get_value_from_arg(subparser_dest)
             else:
                 default_instance = parser_definition.subparsers_from_name[
@@ -135,7 +151,7 @@ def call_from_args(
                         subparser_name
                     ],
                     field.default if type(field.default) is chosen_f else None,
-                    value_from_arg,
+                    value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name
                     + _strings.NESTED_FIELD_DELIMETER,
                     avoid_subparsers=avoid_subparsers,

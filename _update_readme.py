@@ -6,11 +6,11 @@ import html
 import inspect
 import os
 import pathlib
-import re
 import shlex
 import subprocess
 
 import dcargs
+import dcargs._strings
 
 
 @dataclasses.dataclass(frozen=True)
@@ -74,9 +74,7 @@ def format_script_for_readme(path: pathlib.Path) -> str:
             encoding="utf8",
             env=dict(os.environ, **env_vars),
         ).stdout
-        output = re.sub(  # Strip colorcodes.
-            r"\x1b(\[.*?[@-~]|\].*?(\x07|\x1b\\))", "", output
-        ).strip()
+        output = dcargs._strings.strip_color_codes(output).strip()
         example_output_lines.extend(
             [
                 "",

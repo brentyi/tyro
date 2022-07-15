@@ -7,6 +7,7 @@ import pytest
 from typing_extensions import Literal, TypedDict
 
 import dcargs
+import dcargs._strings
 
 
 def test_basic_dict():
@@ -101,11 +102,14 @@ def test_helptext_and_default_instance_typeddict():
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
             dcargs.cli(HelptextTypedDict, default_instance={"z": 3}, args=["--help"])
-    helptext = f.getvalue()
+    helptext = dcargs._strings.strip_color_codes(f.getvalue())
     assert cast(str, HelptextTypedDict.__doc__) in helptext
-    assert ":\n  --x INT     Documentation 1\n" in helptext
-    assert "--y INT     Documentation 2\n" in helptext
-    assert "--z INT     Documentation 3 (default: 3)\n" in helptext
+    assert "--x INT" in helptext
+    assert "--y INT" in helptext
+    assert "--z INT" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert "Documentation 2 (required)" in helptext
+    assert "Documentation 3 (default: 3)\n" in helptext
 
 
 def test_basic_namedtuple():
@@ -161,11 +165,11 @@ def test_helptext_and_default_namedtuple():
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
             dcargs.cli(HelptextNamedTupleDefault, args=["--help"])
-    helptext = f.getvalue()
+    helptext = dcargs._strings.strip_color_codes(f.getvalue())
     assert cast(str, HelptextNamedTupleDefault.__doc__) in helptext
-    assert ":\n  --x INT     Documentation 1\n" in helptext
-    assert "--y INT     Documentation 2\n" in helptext
-    assert "--z INT     Documentation 3 (default: 3)\n" in helptext
+    assert "--x INT  Documentation 1 (required)\n" in helptext
+    assert "--y INT  Documentation 2 (required)\n" in helptext
+    assert "--z INT  Documentation 3 (default: 3)\n" in helptext
 
 
 def test_helptext_and_default_instance_namedtuple():
@@ -193,8 +197,8 @@ def test_helptext_and_default_instance_namedtuple():
                 ),
                 args=["--help"],
             )
-    helptext = f.getvalue()
+    helptext = dcargs._strings.strip_color_codes(f.getvalue())
     assert cast(str, HelptextNamedTuple.__doc__) in helptext
-    assert ":\n  --x INT     Documentation 1\n" in helptext
-    assert "--y INT     Documentation 2\n" in helptext
-    assert "--z INT     Documentation 3 (default: 3)\n" in helptext
+    assert "Documentation 1 (required)\n" in helptext
+    assert "Documentation 2 (required)\n" in helptext
+    assert "Documentation 3 (default: 3)\n" in helptext

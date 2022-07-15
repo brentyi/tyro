@@ -20,8 +20,19 @@ class Field:
     positional: bool
 
 
-class _MISSING_TYPE:
-    pass
+class _MISSING_TYPE:  # pragma: no cover
+    # Singleton pattern.
+    #  https://www.python.org/download/releases/2.2/descrintro/#__new__
+    def __new__(cls, *args, **kwds):
+        it = cls.__dict__.get("__it__")
+        if it is not None:
+            return it
+        cls.__it__ = it = object.__new__(cls)
+        it.init(*args, **kwds)
+        return it
+
+    def init(self, *args, **kwds):
+        pass
 
 
 MISSING: Any = _MISSING_TYPE()
@@ -96,7 +107,7 @@ def field_list_from_callable(
             if hasattr(default_instance, name):
                 default = getattr(default_instance, name)
             if default in _missing_types or default_instance in _missing_types:
-                default = MISSING
+                default = None
 
             field_list.append(
                 Field(
@@ -153,6 +164,7 @@ def field_list_from_callable(
             # Get default value.
             default = param.default
             if default in _missing_types:
+                # TODO: we should _fields.MISSING.
                 default = None
 
             # Get helptext from docstring.

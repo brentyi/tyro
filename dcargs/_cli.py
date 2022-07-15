@@ -103,7 +103,7 @@ def cli(
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_definition.apply(parser)
-    value_from_arg = vars(parser.parse_args(args=args))
+    value_from_prefixed_field_name = vars(parser.parse_args(args=args))
 
     try:
         # Attempt to call `f` using whatever was passed in.
@@ -111,7 +111,7 @@ def cli(
             f,
             parser_definition,
             default_instance,
-            value_from_arg,
+            value_from_prefixed_field_name,
             field_name_prefix="",
             avoid_subparsers=avoid_subparsers,
         )

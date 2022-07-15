@@ -166,17 +166,16 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./01_functions.py --help</kbd>
-usage: 01_functions.py [-h] --field1 STR [--field2 INT] [--flag]
+usage: 01_functions.py [-h] --field1 STR [--field2 INT]
+                       [--flag]
 
 Function, whose arguments will be populated from a CLI interface.
 
-required arguments:
-  --field1 STR  A string field.
-
-optional arguments:
-  -h, --help    show this help message and exit
+arguments:
+  -h, --help            show this help message and exit
+  --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag        A boolean flag.</samp>
+  --flag                A boolean flag.</samp>
 </pre>
 
 <pre>
@@ -228,18 +227,17 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./02_dataclasses.py --help</kbd>
-usage: 02_dataclasses.py [-h] --field1 STR [--field2 INT] [--flag]
+usage: 02_dataclasses.py [-h] --field1 STR [--field2 INT]
+                         [--flag]
 
 Description.
 This should show up in the helptext!
 
-required arguments:
-  --field1 STR  A string field.
-
-optional arguments:
-  -h, --help    show this help message and exit
+arguments:
+  -h, --help            show this help message and exit
+  --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag        A boolean flag.</samp>
+  --flag                A boolean flag.</samp>
 </pre>
 
 <pre>
@@ -310,17 +308,16 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./03_enums_and_containers.py --help</kbd>
-usage: 03_enums_and_containers.py [-h] --dataset-sources PATH [PATH ...]
+usage: 03_enums_and_containers.py [-h] --dataset-sources PATH
+                                  [PATH ...]
                                   [--image-dimensions INT INT]
                                   [--optimizer-type {ADAM,SGD}]
                                   [--checkpoint-interval None|INT]
 
-required arguments:
-  --dataset-sources PATH [PATH ...]
-                        Paths to load training data from. This can be multiple!
-
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
+  --dataset-sources PATH [PATH ...]
+                        Paths to load training data from. This can be multiple! (required)
   --image-dimensions INT INT
                         Height and width of some image data. (default: 32 32)
   --optimizer-type {ADAM,SGD}
@@ -382,6 +379,22 @@ if __name__ == "__main__":
 <br />
 
 **Example usage:**
+
+<pre>
+<samp>$ <kbd>python ./04_flags.py --help</kbd>
+usage: 04_flags.py [-h] --boolean {True,False}
+                   [--optional-boolean None|{True,False}] [--flag-a]
+                   [--no-flag-b]
+
+arguments:
+  -h, --help            show this help message and exit
+  --boolean {True,False}
+                        Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;. (required)
+  --optional-boolean None|{True,False}
+                        Optional boolean. Same as above, but can be omitted. (default: None)
+  --flag-a              Pass --flag-a in to set this value to True.
+  --no-flag-b           Pass --no-flag-b in to set this value to False. (default: True)</samp>
+</pre>
 
 <pre>
 <samp>$ <kbd>python ./04_flags.py --boolean True</kbd>
@@ -488,22 +501,23 @@ usage: 05_hierarchical_configs.py [-h]
                                   [--config.optimizer.weight-decay FLOAT]
                                   [--config.batch-size INT]
                                   [--config.train-steps INT]
-                                  [--config.seed INT] [--restore-checkpoint]
+                                  [--config.seed INT]
+                                  [--restore-checkpoint]
                                   [--checkpoint-interval INT]
                                   OUT_DIR
 
 Train a model.
 
 positional arguments:
-  OUT_DIR               Where to save logs and checkpoints.
+  OUT_DIR       Where to save logs and checkpoints. (required)
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
   --restore-checkpoint  Set to restore an existing checkpoint.
   --checkpoint-interval INT
                         Training steps between each checkpoint save. (default: 1000)
 
-optional config.optimizer arguments:
+config.optimizer arguments:
   Various configurable options for our optimizer.
 
   --config.optimizer.algorithm {ADAM,SGD}
@@ -513,14 +527,15 @@ optional config.optimizer arguments:
   --config.optimizer.weight-decay FLOAT
                         Coefficient for L2 regularization. (default: 0.01)
 
-optional config arguments:
+config arguments:
   Experiment configuration.
 
   --config.batch-size INT
                         Batch size. (default: 32)
   --config.train-steps INT
                         Total number of training steps. (default: 100000)
-  --config.seed INT     Random seed. This is helpful for making sure that our experiments are all
+  --config.seed INT
+                        Random seed. This is helpful for making sure that our experiments are all
                         reproducible! (default: 0)</samp>
 </pre>
 
@@ -571,11 +586,22 @@ one of multiple possible base configurations, and then use the CLI to either ove
 ```python
 import dataclasses
 import os
-from typing import Literal, Tuple, Union
+from typing import Callable, Literal, Tuple, Union
 
 import dcargs
 
 
+# Learning rate schedulers.
+def no_lr_scheduler(step: int) -> float:
+    return 1.0
+
+
+def linear_warmup_1000_scheduler(step: int) -> float:
+    assert step >= 0
+    return min(1.0, step / 1000.0)
+
+
+# Optimizer configs.
 @dataclasses.dataclass
 class AdamOptimizer:
     # Adam learning rate.
@@ -591,6 +617,7 @@ class SgdOptimizer:
     learning_rate: float = 3e-4
 
 
+# Overall experiment config.
 @dataclasses.dataclass(frozen=True)
 class ExperimentConfig:
     # Dataset to run experiment on.
@@ -598,6 +625,11 @@ class ExperimentConfig:
 
     # Optimizer parameters.
     optimizer: Union[AdamOptimizer, SgdOptimizer]
+
+    # Learning rate scheduler. Fields with types that `dcargs.cli()` does not support
+    # instantiating from the CLI (such as Callables) will always be kept at their
+    # default value.
+    lr_scheduler: Callable[[int], float]
 
     # Model size.
     num_layers: int
@@ -621,6 +653,7 @@ base_config_library = {
     "small": ExperimentConfig(
         dataset="mnist",
         optimizer=SgdOptimizer(),
+        lr_scheduler=no_lr_scheduler,
         batch_size=2048,
         num_layers=4,
         units=64,
@@ -632,6 +665,7 @@ base_config_library = {
     "big": ExperimentConfig(
         dataset="imagenet-50",
         optimizer=AdamOptimizer(),
+        lr_scheduler=linear_warmup_1000_scheduler,
         batch_size=32,
         num_layers=8,
         units=256,
@@ -668,24 +702,31 @@ if __name__ == "__main__":
 <pre>
 <samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --help</kbd>
 usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
-                          [--optimizer.learning-rate FLOAT] [--num-layers INT]
-                          [--units INT] [--batch-size INT] [--train-steps INT]
-                          --seed INT
+                          [--optimizer.learning-rate FLOAT]
+                          [--lr-scheduler fixed]
+                          [--num-layers INT] [--units INT]
+                          [--batch-size INT]
+                          [--train-steps INT] --seed INT
 
-required arguments:
-  --seed INT            Random seed. This is helpful for making sure that our experiments are all
-                        reproducible!
-
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
   --dataset {mnist,imagenet-50}
                         Dataset to run experiment on. (default: mnist)
-  --num-layers INT      Model size. (default: 4)
-  --units INT           Model size. (default: 64)
-  --batch-size INT      Batch size. (default: 2048)
-  --train-steps INT     Total number of training steps. (default: 30000)
+  --lr-scheduler (fixed)
+                        Learning rate scheduler. Fields with types that `dcargs.cli()` does not support
+                        instantiating from the CLI (such as Callables) will always be kept at their
+                        default value. (value: &#x27;&lt;function no_lr_scheduler at 0x7fb5254763a0&gt;&#x27;)
+  --num-layers INT
+                        Model size. (default: 4)
+  --units INT   Model size. (default: 64)
+  --batch-size INT
+                        Batch size. (default: 2048)
+  --train-steps INT
+                        Total number of training steps. (default: 30000)
+  --seed INT    Random seed. This is helpful for making sure that our experiments are all
+                        reproducible! (required)
 
-optional optimizer arguments:
+optimizer arguments:
   Optimizer parameters.
 
   --optimizer.learning-rate FLOAT
@@ -694,31 +735,38 @@ optional optimizer arguments:
 
 <pre>
 <samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
+ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), lr_scheduler=&lt;function no_lr_scheduler at 0x7fc74a7733a0&gt;, num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --help</kbd>
 usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
                           [--optimizer.learning-rate FLOAT]
-                          [--optimizer.betas FLOAT FLOAT] [--num-layers INT]
-                          [--units INT] [--batch-size INT] [--train-steps INT]
-                          --seed INT
+                          [--optimizer.betas FLOAT FLOAT]
+                          [--lr-scheduler fixed]
+                          [--num-layers INT] [--units INT]
+                          [--batch-size INT]
+                          [--train-steps INT] --seed INT
 
-required arguments:
-  --seed INT            Random seed. This is helpful for making sure that our experiments are all
-                        reproducible!
-
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
   --dataset {mnist,imagenet-50}
                         Dataset to run experiment on. (default: imagenet-50)
-  --num-layers INT      Model size. (default: 8)
-  --units INT           Model size. (default: 256)
-  --batch-size INT      Batch size. (default: 32)
-  --train-steps INT     Total number of training steps. (default: 100000)
+  --lr-scheduler (fixed)
+                        Learning rate scheduler. Fields with types that `dcargs.cli()` does not support
+                        instantiating from the CLI (such as Callables) will always be kept at their
+                        default value. (value: &#x27;&lt;function linear_warmup_1000_scheduler at 0x7ff2be2a0dc0&gt;&#x27;)
+  --num-layers INT
+                        Model size. (default: 8)
+  --units INT   Model size. (default: 256)
+  --batch-size INT
+                        Batch size. (default: 32)
+  --train-steps INT
+                        Total number of training steps. (default: 100000)
+  --seed INT    Random seed. This is helpful for making sure that our experiments are all
+                        reproducible! (required)
 
-optional optimizer arguments:
+optimizer arguments:
   Optimizer parameters.
 
   --optimizer.learning-rate FLOAT
@@ -729,7 +777,7 @@ optional optimizer arguments:
 
 <pre>
 <samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
+ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), lr_scheduler=&lt;function linear_warmup_1000_scheduler at 0x7fb97f898dc0&gt;, num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
 </pre>
 
 </details>
@@ -785,18 +833,21 @@ if __name__ == "__main__":
 <samp>$ <kbd>python ./07_literals_and_unions.py --help</kbd>
 usage: 07_literals_and_unions.py [-h] [--enum {RED,GREEN,BLUE}]
                                  [--restricted-enum {RED,GREEN}]
-                                 [--integer {0,1,2,3}] [--string {red,green}]
+                                 [--integer {0,1,2,3}]
+                                 [--string {red,green}]
                                  [--string-or-enum {red,green,RED,GREEN,BLUE}]
                                  [--tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]]
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
   --enum {RED,GREEN,BLUE}
                         (default: RED)
   --restricted-enum {RED,GREEN}
                         (default: RED)
-  --integer {0,1,2,3}   (default: 0)
-  --string {red,green}  (default: red)
+  --integer {0,1,2,3}
+                        (default: 0)
+  --string {red,green}
+                        (default: red)
   --string-or-enum {red,green,RED,GREEN,BLUE}
                         (default: red)
   --tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]
@@ -898,25 +949,26 @@ if __name__ == "__main__":
 <samp>$ <kbd>python ./08_positional_args.py --help</kbd>
 usage: 08_positional_args.py [-h] [--optimizer.algorithm {ADAM,SGD}]
                              [--optimizer.learning-rate FLOAT]
-                             [--optimizer.weight-decay FLOAT] [--force]
-                             [--verbose] [--background-rgb FLOAT FLOAT FLOAT]
+                             [--optimizer.weight-decay FLOAT]
+                             [--force] [--verbose]
+                             [--background-rgb FLOAT FLOAT FLOAT]
                              SOURCE DEST
 
 Command-line interface defined using a function signature. Note that this
 docstring is parsed to generate helptext.
 
 positional arguments:
-  SOURCE                Source path.
-  DEST                  Destination path.
+  SOURCE        Source path. (required)
+  DEST          Destination path. (required)
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
   --force               Do not prompt before overwriting.
   --verbose             Explain what is being done.
   --background-rgb FLOAT FLOAT FLOAT
                         Background color. Red by default. (default: 1.0 0.0 0.0)
 
-optional optimizer arguments:
+optimizer arguments:
   Configuration for our optimizer object.
 
   --optimizer.algorithm {ADAM,SGD}
@@ -989,7 +1041,7 @@ if __name__ == "__main__":
 <samp>$ <kbd>python ./09_subparsers.py --help</kbd>
 usage: 09_subparsers.py [-h] {checkout,commit} ...
 
-optional arguments:
+arguments:
   -h, --help         show this help message and exit
 
 subcommands:
@@ -1003,13 +1055,12 @@ usage: 09_subparsers.py commit [-h] --cmd.message STR [--cmd.all]
 
 Commit changes.
 
-optional arguments:
-  -h, --help         show this help message and exit
+arguments:
+  -h, --help            show this help message and exit
 
-required cmd arguments:
+cmd arguments:
   --cmd.message STR
-
-optional cmd arguments:
+                        (required)
   --cmd.all</samp>
 </pre>
 
@@ -1024,11 +1075,12 @@ usage: 09_subparsers.py checkout [-h] --cmd.branch STR
 
 Checkout a branch.
 
-optional arguments:
-  -h, --help        show this help message and exit
+arguments:
+  -h, --help            show this help message and exit
 
-required cmd arguments:
-  --cmd.branch STR</samp>
+cmd arguments:
+  --cmd.branch STR
+                        (required)</samp>
 </pre>
 
 <pre>
@@ -1125,7 +1177,7 @@ usage: 10_multiple_subparsers.py [-h] [{mnist-dataset,image-net-dataset}] ...
 
 Example training script.
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
 
 optional subcommands:
@@ -1140,10 +1192,10 @@ usage: 10_multiple_subparsers.py mnist-dataset [-h] [--dataset.binary]
                                                [{adam-optimizer,sgd-optimizer}]
                                                ...
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
 
-optional dataset arguments:
+dataset arguments:
   --dataset.binary      Set to load binary version of MNIST dataset.
 
 optional subcommands:
@@ -1211,16 +1263,17 @@ if __name__ == "__main__":
 <pre>
 <samp>$ <kbd>python ./11_dictionaries.py --help</kbd>
 usage: 11_dictionaries.py [-h] --standard-dict STR {True,False}
-                          [STR {True,False} ...] [--typed-dict.field1 STR]
-                          [--typed-dict.field2 INT] [--typed-dict.field3]
+                          [STR {True,False} ...]
+                          [--typed-dict.field1 STR]
+                          [--typed-dict.field2 INT]
+                          [--typed-dict.field3]
 
-required arguments:
-  --standard-dict STR {True,False} [STR {True,False} ...]
-
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
+  --standard-dict STR {True,False} [STR {True,False} ...]
+                        (required)
 
-optional typed_dict arguments:
+typed_dict arguments:
 
   --typed-dict.field1 STR
                         A string field. (default: hey)
@@ -1274,18 +1327,17 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./12_named_tuples.py --help</kbd>
-usage: 12_named_tuples.py [-h] --field1 STR [--field2 INT] [--flag]
+usage: 12_named_tuples.py [-h] --field1 STR [--field2 INT]
+                          [--flag]
 
 Description.
 This should show up in the helptext!
 
-required arguments:
-  --field1 STR  A string field.
-
-optional arguments:
-  -h, --help    show this help message and exit
+arguments:
+  -h, --help            show this help message and exit
+  --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag        A boolean flag.</samp>
+  --flag                A boolean flag.</samp>
 </pre>
 
 <pre>
@@ -1338,17 +1390,16 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./13_standard_classes.py --help</kbd>
-usage: 13_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
+usage: 13_standard_classes.py [-h] --field1 STR --field2 INT
+                              [--flag]
 
 Arguments.
 
-required arguments:
-  --field1 STR  A string field.
-  --field2 INT  A numeric field.
-
-optional arguments:
-  -h, --help    show this help message and exit
-  --flag        A boolean flag.</samp>
+arguments:
+  -h, --help            show this help message and exit
+  --field1 STR  A string field. (required)
+  --field2 INT  A numeric field. (required)
+  --flag                A boolean flag.</samp>
 </pre>
 
 <pre>
@@ -1411,54 +1462,76 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./14_generics.py --help</kbd>
-usage: 14_generics.py [-h] --point-continuous.x FLOAT --point-continuous.y
-                      FLOAT --point-continuous.z FLOAT
-                      --point-continuous.frame-id STR --point-discrete.x INT
-                      --point-discrete.y INT --point-discrete.z INT
-                      --point-discrete.frame-id STR --shape.a.x FLOAT
-                      --shape.a.y FLOAT --shape.a.z FLOAT --shape.a.frame-id
-                      STR --shape.b.x FLOAT --shape.b.y FLOAT --shape.b.z
-                      FLOAT --shape.b.frame-id STR --shape.c.x FLOAT
-                      --shape.c.y FLOAT --shape.c.z FLOAT --shape.c.frame-id
-                      STR
+usage: 14_generics.py [-h] --point-continuous.x FLOAT
+                      --point-continuous.y FLOAT --point-continuous.z
+                      FLOAT --point-continuous.frame-id STR
+                      --point-discrete.x INT --point-discrete.y
+                      INT --point-discrete.z INT
+                      --point-discrete.frame-id STR --shape.a.x
+                      FLOAT --shape.a.y FLOAT --shape.a.z
+                      FLOAT --shape.a.frame-id STR --shape.b.x
+                      FLOAT --shape.b.y FLOAT --shape.b.z
+                      FLOAT --shape.b.frame-id STR --shape.c.x
+                      FLOAT --shape.c.y FLOAT --shape.c.z
+                      FLOAT --shape.c.frame-id STR
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
 
-required point_continuous arguments:
+point_continuous arguments:
 
   --point-continuous.x FLOAT
+                        (required)
   --point-continuous.y FLOAT
+                        (required)
   --point-continuous.z FLOAT
+                        (required)
   --point-continuous.frame-id STR
+                        (required)
 
-required point_discrete arguments:
+point_discrete arguments:
 
   --point-discrete.x INT
+                        (required)
   --point-discrete.y INT
+                        (required)
   --point-discrete.z INT
+                        (required)
   --point-discrete.frame-id STR
+                        (required)
 
-required shape.a arguments:
+shape.a arguments:
 
   --shape.a.x FLOAT
+                        (required)
   --shape.a.y FLOAT
+                        (required)
   --shape.a.z FLOAT
+                        (required)
   --shape.a.frame-id STR
+                        (required)
 
-required shape.b arguments:
+shape.b arguments:
 
   --shape.b.x FLOAT
+                        (required)
   --shape.b.y FLOAT
+                        (required)
   --shape.b.z FLOAT
+                        (required)
   --shape.b.frame-id STR
+                        (required)
 
-required shape.c arguments:
+shape.c arguments:
 
   --shape.c.x FLOAT
+                        (required)
   --shape.c.y FLOAT
+                        (required)
   --shape.c.z FLOAT
-  --shape.c.frame-id STR</samp>
+                        (required)
+  --shape.c.frame-id STR
+                        (required)</samp>
 </pre>
 
 </details><!-- END EXAMPLES -->

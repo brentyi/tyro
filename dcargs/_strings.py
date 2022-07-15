@@ -72,3 +72,12 @@ def instance_from_string(typ: Type[T], arg: str) -> T:
         return bytes(arg, encoding="ascii")  # type: ignore
     else:
         return typ(arg)  # type: ignore
+
+
+@functools.lru_cache(maxsize=None)
+def _strip_regex() -> re.Pattern:
+    return re.compile(r"\x1b(\[.*?[@-~]|\].*?(\x07|\x1b\\))")
+
+
+def strip_color_codes(x: str):
+    return _strip_regex().sub("", x)
