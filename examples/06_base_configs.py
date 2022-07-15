@@ -3,15 +3,16 @@ one of multiple possible base configurations, and then use the CLI to either ove
 (existing) or fill in (missing) values.
 
 Usage:
-`BASE_CONFIG=small python ./06_base_configs.py --help`
-`BASE_CONFIG=small python ./06_base_configs.py --seed 94720`
-`BASE_CONFIG=big python ./06_base_configs.py --help`
-`BASE_CONFIG=big python ./06_base_configs.py --seed 94720`
+`python ./06_base_configs_argv.py`
+`python ./06_base_configs_argv.py small --help`
+`python ./06_base_configs_argv.py small --seed 94720`
+`python ./06_base_configs_argv.py big --help`
+`python ./06_base_configs_argv.py big --seed 94720`
 """
 
 import dataclasses
-import os
-from typing import Literal, Tuple, Union
+import sys
+from typing import Dict, Literal, Tuple, Type, TypeVar, Union
 
 import dcargs
 
@@ -80,22 +81,30 @@ base_config_library = {
     ),
 }
 
-if __name__ == "__main__":
-    # Get base configuration name from environment.
-    base_config_name = os.environ.get("BASE_CONFIG")
-    if base_config_name is None or base_config_name not in base_config_library:
-        raise SystemExit(
-            f"BASE_CONFIG should be set to one of {tuple(base_config_library.keys())}"
-        )
+
+T = TypeVar("T")
+
+
+def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
+    # Get base configuration name from the first positional argument.
+    if len(sys.argv) < 2 or sys.argv[1] not in base_library:
+        valid_usages = map(lambda k: f"{sys.argv[0]} {k} --help", base_library.keys())
+        raise SystemExit("usage:\n  " + "\n  ".join(valid_usages))
 
     # Get base configuration from our library, and use it for default CLI parameters.
-    base_config = base_config_library[base_config_name]
-    config = dcargs.cli(
-        ExperimentConfig,
-        default_instance=base_config,
+    default_instance = base_library[sys.argv[1]]
+    return dcargs.cli(
+        cls,
+        prog=" ".join(sys.argv[:2]),
+        args=sys.argv[2:],
+        default_instance=default_instance,
         # `avoid_subparsers` will avoid making a subparser for unions when a default is
         # provided; in this case, it simplifies our CLI but makes it less expressive
         # (cannot switch away from the base optimizer types).
         avoid_subparsers=True,
     )
+
+
+if __name__ == "__main__":
+    config = cli_with_base_configs(ExperimentConfig, base_config_library)
     print(config)

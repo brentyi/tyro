@@ -76,6 +76,8 @@ Args:
     f: Callable.
 
 Keyword Args:
+    prog: The name of the program printed in helptext. Mirrors argument from
+        `argparse.ArgumentParser()`.
     description: Description text for the parser, displayed when the --help flag is
         passed in. If not specified, `f`'s docstring is used. Mirrors argument from
         `argparse.ArgumentParser()`.
@@ -585,23 +587,13 @@ one of multiple possible base configurations, and then use the CLI to either ove
 
 ```python
 import dataclasses
-import os
-from typing import Callable, Literal, Tuple, Union
+import importlib
+import sys
+from typing import Dict, Literal, Tuple, Type, TypeVar, Union
 
 import dcargs
 
 
-# Learning rate schedulers.
-def no_lr_scheduler(step: int) -> float:
-    return 1.0
-
-
-def linear_warmup_1000_scheduler(step: int) -> float:
-    assert step >= 0
-    return min(1.0, step / 1000.0)
-
-
-# Optimizer configs.
 @dataclasses.dataclass
 class AdamOptimizer:
     # Adam learning rate.
@@ -617,7 +609,6 @@ class SgdOptimizer:
     learning_rate: float = 3e-4
 
 
-# Overall experiment config.
 @dataclasses.dataclass(frozen=True)
 class ExperimentConfig:
     # Dataset to run experiment on.
@@ -625,11 +616,6 @@ class ExperimentConfig:
 
     # Optimizer parameters.
     optimizer: Union[AdamOptimizer, SgdOptimizer]
-
-    # Learning rate scheduler. Fields with types that `dcargs.cli()` does not support
-    # instantiating from the CLI (such as Callables) will always be kept at their
-    # default value.
-    lr_scheduler: Callable[[int], float]
 
     # Model size.
     num_layers: int
@@ -653,7 +639,6 @@ base_config_library = {
     "small": ExperimentConfig(
         dataset="mnist",
         optimizer=SgdOptimizer(),
-        lr_scheduler=no_lr_scheduler,
         batch_size=2048,
         num_layers=4,
         units=64,
@@ -665,7 +650,6 @@ base_config_library = {
     "big": ExperimentConfig(
         dataset="imagenet-50",
         optimizer=AdamOptimizer(),
-        lr_scheduler=linear_warmup_1000_scheduler,
         batch_size=32,
         num_layers=8,
         units=256,
@@ -674,24 +658,32 @@ base_config_library = {
     ),
 }
 
-if __name__ == "__main__":
-    # Get base configuration name from environment.
-    base_config_name = os.environ.get("BASE_CONFIG")
-    if base_config_name is None or base_config_name not in base_config_library:
-        raise SystemExit(
-            f"BASE_CONFIG should be set to one of {tuple(base_config_library.keys())}"
-        )
+
+T = TypeVar("T")
+
+
+def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
+    # Get base configuration name from the first positional argument.
+    if len(sys.argv) < 2 or sys.argv[1] not in base_library:
+        valid_usages = map(lambda k: f"{sys.argv[0]} {k} --help", base_library.keys())
+        raise SystemExit(f"usage:\n  " + "\n  ".join(valid_usages))
 
     # Get base configuration from our library, and use it for default CLI parameters.
-    base_config = base_config_library[base_config_name]
-    config = dcargs.cli(
-        ExperimentConfig,
-        default_instance=base_config,
+    default_instance = base_library[sys.argv[1]]
+    return dcargs.cli(
+        cls,
+        prog=" ".join(sys.argv[:2]),
+        args=sys.argv[2:],
+        default_instance=default_instance,
         # `avoid_subparsers` will avoid making a subparser for unions when a default is
         # provided; in this case, it simplifies our CLI but makes it less expressive
         # (cannot switch away from the base optimizer types).
         avoid_subparsers=True,
     )
+
+
+if __name__ == "__main__":
+    config = cli_with_base_configs(ExperimentConfig, base_config_library)
     print(config)
 ```
 
@@ -700,22 +692,27 @@ if __name__ == "__main__":
 **Example usage:**
 
 <pre>
-<samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --help</kbd>
-usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
-                          [--optimizer.learning-rate FLOAT]
-                          [--lr-scheduler fixed]
-                          [--num-layers INT] [--units INT]
-                          [--batch-size INT]
-                          [--train-steps INT] --seed INT
+<samp>$ <kbd>python ./06_base_configs_argv.py</kbd>
+usage:
+  examples/06_base_configs.py small --help
+  examples/06_base_configs.py big --help</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./06_base_configs_argv.py small --help</kbd>
+usage: examples/06_base_configs.py small [-h]
+                                         [--dataset {mnist,imagenet-50}]
+                                         [--optimizer.learning-rate FLOAT]
+                                         [--num-layers INT]
+                                         [--units INT]
+                                         [--batch-size INT]
+                                         [--train-steps INT] --seed
+                                         INT
 
 arguments:
   -h, --help            show this help message and exit
   --dataset {mnist,imagenet-50}
                         Dataset to run experiment on. (default: mnist)
-  --lr-scheduler (fixed)
-                        Learning rate scheduler. Fields with types that `dcargs.cli()` does not support
-                        instantiating from the CLI (such as Callables) will always be kept at their
-                        default value. (value: &#x27;&lt;function no_lr_scheduler at 0x7fb5254763a0&gt;&#x27;)
   --num-layers INT
                         Model size. (default: 4)
   --units INT   Model size. (default: 64)
@@ -734,28 +731,26 @@ optimizer arguments:
 </pre>
 
 <pre>
-<samp>$ <kbd>BASE_CONFIG=small python ./06_base_configs.py --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), lr_scheduler=&lt;function no_lr_scheduler at 0x7fc74a7733a0&gt;, num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
+<samp>$ <kbd>python ./06_base_configs_argv.py small --seed 94720</kbd>
+ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --help</kbd>
-usage: 06_base_configs.py [-h] [--dataset {mnist,imagenet-50}]
-                          [--optimizer.learning-rate FLOAT]
-                          [--optimizer.betas FLOAT FLOAT]
-                          [--lr-scheduler fixed]
-                          [--num-layers INT] [--units INT]
-                          [--batch-size INT]
-                          [--train-steps INT] --seed INT
+<samp>$ <kbd>python ./06_base_configs_argv.py big --help</kbd>
+usage: examples/06_base_configs.py big [-h]
+                                       [--dataset {mnist,imagenet-50}]
+                                       [--optimizer.learning-rate FLOAT]
+                                       [--optimizer.betas FLOAT FLOAT]
+                                       [--num-layers INT]
+                                       [--units INT]
+                                       [--batch-size INT]
+                                       [--train-steps INT] --seed
+                                       INT
 
 arguments:
   -h, --help            show this help message and exit
   --dataset {mnist,imagenet-50}
                         Dataset to run experiment on. (default: imagenet-50)
-  --lr-scheduler (fixed)
-                        Learning rate scheduler. Fields with types that `dcargs.cli()` does not support
-                        instantiating from the CLI (such as Callables) will always be kept at their
-                        default value. (value: &#x27;&lt;function linear_warmup_1000_scheduler at 0x7ff2be2a0dc0&gt;&#x27;)
   --num-layers INT
                         Model size. (default: 8)
   --units INT   Model size. (default: 256)
@@ -776,8 +771,8 @@ optimizer arguments:
 </pre>
 
 <pre>
-<samp>$ <kbd>BASE_CONFIG=big python ./06_base_configs.py --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), lr_scheduler=&lt;function linear_warmup_1000_scheduler at 0x7fb97f898dc0&gt;, num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
+<samp>$ <kbd>python ./06_base_configs_argv.py big --seed 94720</kbd>
+ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
 </pre>
 
 </details>

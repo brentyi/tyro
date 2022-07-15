@@ -28,6 +28,7 @@ def parse(
 def cli(
     f: Callable[..., T],
     *,
+    prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[T] = None,
@@ -71,6 +72,8 @@ def cli(
         f: Callable.
 
     Keyword Args:
+        prog: The name of the program printed in helptext. Mirrors argument from
+            `argparse.ArgumentParser()`.
         description: Description text for the parser, displayed when the --help flag is
             passed in. If not specified, `f`'s docstring is used. Mirrors argument from
             `argparse.ArgumentParser()`.
@@ -100,6 +103,7 @@ def cli(
 
     # Parse using argparse!
     parser = argparse.ArgumentParser(
+        prog=prog,
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser_definition.apply(parser)
