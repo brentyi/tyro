@@ -2,6 +2,7 @@
 value, automatically converted to flags.
 
 Usage:
+`python ./04_flags.py --help`
 `python ./04_flags.py --boolean True`
 `python ./04_flags.py --boolean False --flag-a`
 `python ./04_flags.py --boolean False --no-flag-b`

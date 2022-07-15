@@ -1,7 +1,7 @@
 import dataclasses
 import enum
 import pathlib
-from typing import Any, AnyStr, ClassVar, Optional, TypeVar, Union
+from typing import Any, AnyStr, Callable, ClassVar, Optional, TypeVar, Union
 
 import pytest
 from typing_extensions import Annotated, Final, Literal, TypeAlias
@@ -411,3 +411,12 @@ def test_any_str():
     # Use bytes when provided ascii-compatible inputs.
     assert dcargs.cli(main, args=["--x", "hello"]) == b"hello"
     assert dcargs.cli(main, args=["--x", "hello„"]) == "hello„"
+
+
+def test_fixed():
+    def main(x: Callable[[int], int] = lambda x: x * 2) -> Callable[[int], int]:
+        return x
+
+    assert dcargs.cli(main, args=[])(3) == 6
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--x", "something"])
