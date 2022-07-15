@@ -68,13 +68,19 @@ def format_script_for_readme(path: pathlib.Path) -> str:
             env_vars = {
                 k: v for (k, v) in map(lambda x: x.split("="), args[:python_index])
             }
-        output = subprocess.run(
+        process_output = subprocess.run(
             args=["python", str(path)] + args[python_index + 2 :],
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             encoding="utf8",
             env=dict(os.environ, **env_vars),
-        ).stdout
-        output = dcargs._strings.strip_color_codes(output).strip()
+        )
+        if process_output.stderr != "":
+            output = dcargs._strings.strip_color_codes(process_output.stderr).strip()
+        elif process_output.stdout != "":
+            output = dcargs._strings.strip_color_codes(process_output.stdout).strip()
+        else:
+            assert False
         example_output_lines.extend(
             [
                 "",

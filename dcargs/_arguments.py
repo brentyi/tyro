@@ -253,9 +253,7 @@ def _rule_generate_helptext(
             default_text = f"({default_label}: {shlex.quote(str(default))})"
         help_parts.append(default_text)
     else:
-        help_parts.append(
-            termcolor.colored("(required)", on_color="on_red")
-        )
+        help_parts.append(termcolor.colored("(required)", on_color="on_red"))
 
     return dataclasses.replace(lowered, help=" ".join(help_parts))
 
