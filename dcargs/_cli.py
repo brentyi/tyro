@@ -1,6 +1,8 @@
 import argparse
 from typing import Callable, Optional, Sequence, TypeVar
 
+import argparse_color_formatter
+
 from . import _calling, _parsers
 
 T = TypeVar("T")
@@ -103,8 +105,7 @@ def cli(
 
     # Parse using argparse!
     parser = argparse.ArgumentParser(
-        prog=prog,
-        formatter_class=argparse.RawTextHelpFormatter,
+        prog=prog, formatter_class=argparse_color_formatter.ColorHelpFormatter
     )
     parser_definition.apply(parser)
     value_from_prefixed_field_name = vars(parser.parse_args(args=args))
@@ -126,7 +127,5 @@ def cli(
         print(e.args[0])
         raise SystemExit()
 
-    #  print(consumed_keywords)
-    #  print(value_from_arg.keys())
-    #  assert consumed_keywords == value_from_arg.keys()
+    # assert consumed_keywords == value_from_prefixed_field_name.keys()
     return out

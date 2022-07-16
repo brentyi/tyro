@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 import enum
 import pathlib
@@ -391,10 +392,10 @@ def test_type_alias():
 
 @pytest.mark.filterwarnings("ignore::Warning")
 def test_any():
-    def main(x: Any) -> Any:
+    def main(x: Any = 5) -> Any:
         return x
 
-    assert dcargs.cli(main, args=["--x", "hello"]) == "hello"
+    assert dcargs.cli(main, args=[]) == 5
 
 
 def test_bytes():
@@ -420,3 +421,7 @@ def test_fixed():
     assert dcargs.cli(main, args=[])(3) == 6
     with pytest.raises(SystemExit):
         dcargs.cli(main, args=["--x", "something"])
+
+
+def test_missing_singleton():
+    assert dcargs.MISSING is copy.deepcopy(dcargs.MISSING)

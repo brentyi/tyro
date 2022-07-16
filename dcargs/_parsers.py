@@ -242,24 +242,17 @@ class ParserSpecification:
         parser.description = self.description
 
         # Make argument groups.
-        def format_group_name(nested_field_name: str, required: bool) -> str:
-            # if required:
-            #     prefix = termcolor.colored("required", attrs=["bold"])
-            # else:
-            #     prefix = termcolor.colored("optional", attrs=["bold", "dark"])
-            if nested_field_name != "":
-                return termcolor.colored(
-                    nested_field_name + " arguments", attrs=["bold"]
-                )
-            else:
-                return termcolor.colored("arguments", attrs=["bold"])
+        def format_group_name(nested_field_name: str) -> str:
+            return termcolor.colored(
+                (nested_field_name + " arguments").strip(), attrs=["bold"]
+            )
 
         group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
             "": parser._action_groups[1],
         }
 
         # Break some API boundaries to rename the optional group.
-        parser._action_groups[1].title = format_group_name("", required=False)
+        parser._action_groups[1].title = format_group_name("")
         positional_group = parser.add_argument_group(
             termcolor.colored("positional arguments", attrs=["bold"])
         )
@@ -274,7 +267,7 @@ class ParserSpecification:
             if arg.prefix not in group_from_prefix:
                 nested_field_name = arg.prefix[:-1]
                 group_from_prefix[arg.prefix] = parser.add_argument_group(
-                    format_group_name(nested_field_name, required=arg.lowered.required),
+                    format_group_name(nested_field_name),
                     description=self.helptext_from_nested_class_field_name.get(
                         nested_field_name
                     ),

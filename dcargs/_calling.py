@@ -40,8 +40,6 @@ def call_from_args(
         """Helper for getting values from `value_from_arg` + doing some extra
         asserts."""
         assert prefixed_field_name in value_from_prefixed_field_name
-        assert prefixed_field_name not in consumed_keywords
-        consumed_keywords.add(prefixed_field_name)
         return value_from_prefixed_field_name[prefixed_field_name]
 
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
@@ -60,8 +58,11 @@ def call_from_args(
         )
 
         if prefixed_field_name in arg_from_prefixed_field_name:
+            assert prefixed_field_name not in consumed_keywords
+
             # Standard arguments.
             arg = arg_from_prefixed_field_name[prefixed_field_name]
+            consumed_keywords.add(prefixed_field_name)
             if not arg.lowered.is_fixed():
                 value = get_value_from_arg(prefixed_field_name)
                 if value is not None:

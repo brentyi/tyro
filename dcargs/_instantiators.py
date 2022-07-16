@@ -37,7 +37,6 @@ import collections.abc
 import dataclasses
 import enum
 import inspect
-import warnings
 from collections import deque
 from typing import (
     Any,
@@ -55,6 +54,7 @@ from typing import (
     overload,
 )
 
+import termcolor
 from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
 from . import _strings
@@ -93,6 +93,10 @@ _builtin_set = set(
 )
 
 
+def _format_metavar(x: str) -> str:
+    return termcolor.colored(x, attrs=["bold"])
+
+
 def instantiator_from_type(
     typ: Type, type_from_typevar: Dict[TypeVar, Type]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
@@ -111,23 +115,21 @@ def instantiator_from_type(
             type_from_typevar,
         )
 
+    # Handle Any.
     if typ is Any:
-        warnings.warn("Found field with type `Any`, which will be parsed as a string.")
-        return lambda arg: arg, InstantiatorMetadata(
-            nargs=None,
-            metavar="ANY",
-            choices=None,
-            is_optional=False,
-        )
+        raise UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
 
+    # Handle NoneType.
     if typ is NoneType:
 
-        def instantiator(_unused_string: str) -> None:
+        def instantiator(string: str) -> None:
+            if string != "None":
+                raise ValueError("Only valid argument is `None`.")
             return None
 
         return instantiator, InstantiatorMetadata(
             nargs=None,
-            metavar="None",
+            metavar="{" + _format_metavar("None") + "}",
             choices=("None",),
             is_optional=False,
         )
@@ -149,28 +151,35 @@ def instantiator_from_type(
     else:
         param_count = 0
         has_var_positional = False
-        signature = inspect.signature(typ)
-        for i, param in enumerate(signature.parameters.values()):
-            if i == 0 and param.annotation not in (str, inspect.Parameter.empty):
+        try:
+            signature = inspect.signature(typ)
+        except ValueError:
+            # No signature, this is often the case with pybind, etc.
+            signature = None
+
+        if signature is not None:
+            # Some checks we can do if the signature is available!
+            for i, param in enumerate(signature.parameters.values()):
+                if i == 0 and param.annotation not in (str, inspect.Parameter.empty):
+                    raise UnsupportedTypeAnnotationError(
+                        f"Expected {typ} to be an `(arg: str) -> T` type converter, but"
+                        f" got {signature}. You may have a nested type in a container,"
+                        " which is unsupported."
+                    )
+                if param.kind is inspect.Parameter.VAR_POSITIONAL:
+                    has_var_positional = True
+                elif param.default is inspect.Parameter.empty and param.kind is not (
+                    inspect.Parameter.VAR_KEYWORD
+                ):
+                    param_count += 1
+
+            # Raise an error if parameters look wrong.
+            if not (param_count == 1 or (param_count == 0 and has_var_positional)):
                 raise UnsupportedTypeAnnotationError(
                     f"Expected {typ} to be an `(arg: str) -> T` type converter, but got"
                     f" {signature}. You may have a nested type in a container, which is"
                     " unsupported."
                 )
-            if param.kind is inspect.Parameter.VAR_POSITIONAL:
-                has_var_positional = True
-            elif param.default is inspect.Parameter.empty and param.kind is not (
-                inspect.Parameter.VAR_KEYWORD
-            ):
-                param_count += 1
-
-        # Raise an error if parameters look wrong.
-        if not (param_count == 1 or (param_count == 0 and has_var_positional)):
-            raise UnsupportedTypeAnnotationError(
-                f"Expected {typ} to be an `(arg: str) -> T` type converter, but got"
-                f" {signature}. You may have a nested type in a container, which is"
-                " unsupported."
-            )
 
     # Special case `choices` for some types, as implemented in `instance_from_string()`.
     auto_choices: Optional[Tuple[str, ...]] = None
@@ -181,9 +190,9 @@ def instantiator_from_type(
 
     return lambda arg: _strings.instance_from_string(typ, arg), InstantiatorMetadata(
         nargs=None,
-        metavar=typ.__name__.upper()
+        metavar=_format_metavar(typ.__name__.upper())
         if auto_choices is None
-        else "{" + ",".join(map(str, auto_choices)) + "}",
+        else "{" + ",".join(map(_format_metavar, map(str, auto_choices))) + "}",
         choices=auto_choices,
         is_optional=False,
     )
@@ -307,7 +316,7 @@ def _instantiator_from_tuple(
             make(x) for make, x in zip(instantiators, strings)
         ), InstantiatorMetadata(
             nargs=len(types),
-            metavar=tuple(cast(str, m.metavar) for m in metas),
+            metavar=tuple(_format_metavar(cast(str, m.metavar)) for m in metas),
             choices=metas[0].choices,
             is_optional=False,
         )
@@ -319,7 +328,7 @@ def _join_union_metavars(metavars: Iterable[str]) -> str:
     Examples:
         None, INT => NONE|INT
         {0,1,2}, {3,4} => {0,1,2,3,4}
-        None, {0,1,2}, {3,4} => None|{0,1,2,3,4}
+        {0,1,2}, {3,4}, STR => {0,1,2,3,4}|STR
     """
     metavars = tuple(metavars)
     merged_metavars = [metavars[0]]
@@ -509,6 +518,6 @@ def _instantiator_from_literal(
     return instantiator, dataclasses.replace(
         metadata,
         choices=choices,
-        metavar="{" + ",".join(map(str, choices)) + "}",
+        metavar="{" + ",".join(map(_format_metavar, map(str, choices))) + "}",
         is_optional=False,
     )

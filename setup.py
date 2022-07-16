@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="dcargs",
-    version="0.1.6",
+    version="0.1.7",
     description="Strongly typed, zero-effort CLIs",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -21,6 +21,7 @@ setup(
         "typing_extensions>=4.3.0",
         "pyyaml",
         "termcolor",
+        "argparse-color-formatter",
         "backports.cached-property; python_version < '3.8.0'",
     ],
     extras_require={
