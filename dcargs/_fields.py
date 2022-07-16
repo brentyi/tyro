@@ -22,7 +22,7 @@ class Field:
 
 class _MISSING_TYPE:  # pragma: no cover
     # Singleton pattern.
-    #  https://www.python.org/download/releases/2.2/descrintro/#__new__
+    # https://www.python.org/download/releases/2.2/descrintro/#__new__
     def __new__(cls, *args, **kwds):
         it = cls.__dict__.get("__it__")
         if it is not None:

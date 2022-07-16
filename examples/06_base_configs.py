@@ -10,29 +10,25 @@ Usage:
 `python ./06_base_configs_argv.py big --seed 94720`
 """
 
-import dataclasses
 import sys
+from dataclasses import dataclass
 from typing import Dict, Literal, Tuple, Type, TypeVar, Union
 
 import dcargs
 
 
-@dataclasses.dataclass
+@dataclass(frozen=True)
 class AdamOptimizer:
-    # Adam learning rate.
     learning_rate: float = 1e-3
-
-    # Moving average parameters.
     betas: Tuple[float, float] = (0.9, 0.999)
 
 
-@dataclasses.dataclass
+@dataclass(frozen=True)
 class SgdOptimizer:
-    # SGD learning rate.
     learning_rate: float = 3e-4
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class ExperimentConfig:
     # Dataset to run experiment on.
     dataset: Literal["mnist", "imagenet-50"]
@@ -58,7 +54,7 @@ class ExperimentConfig:
 # Note that we could also define this library using separate YAML files (similar to
 # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
 # checking + IDE support.
-base_config_library = {
+base_configs = {
     "small": ExperimentConfig(
         dataset="mnist",
         optimizer=SgdOptimizer(),
@@ -85,7 +81,9 @@ base_config_library = {
 T = TypeVar("T")
 
 
-def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
+def cli_from_base_configs(base_library: Dict[str, T]) -> T:
+    """Populate an instance of `cls`, where the first positional argument is used to
+    select from a library of named base configs."""
     # Get base configuration name from the first positional argument.
     if len(sys.argv) < 2 or sys.argv[1] not in base_library:
         valid_usages = map(lambda k: f"{sys.argv[0]} {k} --help", base_library.keys())
@@ -94,7 +92,7 @@ def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
     # Get base configuration from our library, and use it for default CLI parameters.
     default_instance = base_library[sys.argv[1]]
     return dcargs.cli(
-        cls,
+        type(default_instance),
         prog=" ".join(sys.argv[:2]),
         args=sys.argv[2:],
         default_instance=default_instance,
@@ -106,5 +104,5 @@ def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
 
 
 if __name__ == "__main__":
-    config = cli_with_base_configs(ExperimentConfig, base_config_library)
+    config = cli_from_base_configs(base_configs)
     print(config)

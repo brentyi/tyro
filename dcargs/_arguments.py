@@ -53,7 +53,7 @@ class ArgumentDefinition:
             _rule_generate_helptext,
             _rule_set_name_or_flag,
             _rule_positional_special_handling,
-            _rule_bold_metavar,
+            # _rule_bold_metavar,
         )
         return functools.reduce(
             lambda lowered, rule: rule(self, lowered),
@@ -159,7 +159,7 @@ def _rule_recursive_instantiator_from_type(
             # available.
             return dataclasses.replace(
                 lowered,
-                metavar=termcolor.colored("(fixed)", color="red"),
+                metavar=termcolor.colored("(not parsable)", color="red"),
                 required=False,
                 default=_fields.MISSING,
             )
@@ -231,15 +231,16 @@ def _rule_generate_helptext(
         assert default is _fields.MISSING
         default = arg.field.default
 
-    if lowered.action == "store_true":
-        # Don't show defaults for boolean flags.
-        assert lowered.action in ("store_true", "store_false")
-    elif not lowered.required:
+    if not lowered.required:
         default_label = "value" if lowered.is_fixed() else "default"
         # Include default value in helptext. We intentionally don't use the % template
         # because the types of all arguments are set to strings, which will cause the
         # default to be casted to a string and introduce extra quotation marks.
-        if lowered.nargs is not None and hasattr(default, "__iter__"):
+        if lowered.action == "store_true":
+            default_text = f"(default: {arg.field.name}=False)"
+        elif lowered.action == "store_false":
+            default_text = f"(default: {arg.field.name}=True)"
+        elif lowered.nargs is not None and hasattr(default, "__iter__"):
             # For tuple types, we might have default as (0, 1, 2, 3).
             # For list types, we might have default as [0, 1, 2, 3].
             # For set types, we might have default as {0, 1, 2, 3}.
@@ -251,9 +252,9 @@ def _rule_generate_helptext(
             default_text = f"({default_label}: {' '.join(default_parts)})"
         else:
             default_text = f"({default_label}: {shlex.quote(str(default))})"
-        help_parts.append(default_text)
+        help_parts.append(termcolor.colored(default_text, attrs=["dark"]))
     else:
-        help_parts.append(termcolor.colored("(required)", on_color="on_red"))
+        help_parts.append(termcolor.colored("(required)", color="red", attrs=["bold"]))
 
     return dataclasses.replace(lowered, help=" ".join(help_parts))
 
@@ -292,22 +293,3 @@ def _rule_positional_special_handling(
         required=None,
         nargs="?" if not lowered.required else lowered.nargs,
     )
-
-
-def _rule_bold_metavar(
-    arg: ArgumentDefinition,
-    lowered: LoweredArgumentDefinition,
-) -> LoweredArgumentDefinition:
-    metavar = lowered.metavar
-
-    def _format(x: str) -> str:
-        return termcolor.colored(x, attrs=["bold"])
-
-    if isinstance(metavar, str):
-        metavar = _format(metavar)
-    elif isinstance(metavar, tuple):
-        metavar = tuple(map(_format, metavar))
-    else:
-        assert metavar is None
-
-    return dataclasses.replace(lowered, metavar=metavar)

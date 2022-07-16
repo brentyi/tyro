@@ -98,9 +98,11 @@ def format_script_for_readme(path: pathlib.Path) -> str:
             "<summary>",
             f"<strong>{index}. {title}</strong>",
             "</summary>",
+            "<blockquote>",
             "<br />",
-            "",
             description_text,
+            "",
+            "\n".join(example_usages),
             "",
             f"**Code ([link]({path})):**",
             "",
@@ -116,6 +118,7 @@ def format_script_for_readme(path: pathlib.Path) -> str:
         + example_output_lines
         + [
             "",
+            "</blockquote>",
             "</details>",
         ]
     )

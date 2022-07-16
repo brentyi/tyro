@@ -132,8 +132,8 @@ Ultimately, we aim to enable configuration interfaces that are:
 <summary>
 <strong>1. Functions</strong>
 </summary>
+<blockquote>
 <br />
-
 In the simplest case, `dcargs.cli()` can be used to run a function with arguments
 populated from the CLI.
 
@@ -168,8 +168,7 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./01_functions.py --help</kbd>
-usage: 01_functions.py [-h] --field1 STR [--field2 INT]
-                       [--flag]
+usage: 01_functions.py [-h] --field1 STR [--field2 INT] [--flag]
 
 Function, whose arguments will be populated from a CLI interface.
 
@@ -177,7 +176,7 @@ arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag                A boolean flag.</samp>
+  --flag                A boolean flag. (default: flag=False)</samp>
 </pre>
 
 <pre>
@@ -190,14 +189,15 @@ hello 3 False</samp>
 hello 3 True</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>2. Dataclasses</strong>
 </summary>
+<blockquote>
 <br />
-
 Common pattern: use `dcargs.cli()` to instantiate a dataclass.
 
 **Code ([link](examples/02_dataclasses.py)):**
@@ -229,17 +229,15 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./02_dataclasses.py --help</kbd>
-usage: 02_dataclasses.py [-h] --field1 STR [--field2 INT]
-                         [--flag]
+usage: 02_dataclasses.py [-h] --field1 STR [--field2 INT] [--flag]
 
-Description.
-This should show up in the helptext!
+Description. This should show up in the helptext!
 
 arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag                A boolean flag.</samp>
+  --flag                A boolean flag. (default: flag=False)</samp>
 </pre>
 
 <pre>
@@ -252,14 +250,15 @@ Args(field1=&#x27;hello&#x27;, field2=3, flag=False)</samp>
 Args(field1=&#x27;hello&#x27;, field2=3, flag=True)</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>3. Enums And Containers</strong>
 </summary>
+<blockquote>
 <br />
-
 We can generate argument parsers from more advanced type annotations, like enums and
 tuple types.
 
@@ -310,21 +309,21 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./03_enums_and_containers.py --help</kbd>
-usage: 03_enums_and_containers.py [-h] --dataset-sources PATH
-                                  [PATH ...]
+usage: 03_enums_and_containers.py [-h] --dataset-sources PATH [PATH ...]
                                   [--image-dimensions INT INT]
                                   [--optimizer-type {ADAM,SGD}]
-                                  [--checkpoint-interval None|INT]
+                                  [--checkpoint-interval {None}|INT]
 
 arguments:
   -h, --help            show this help message and exit
   --dataset-sources PATH [PATH ...]
-                        Paths to load training data from. This can be multiple! (required)
+                        Paths to load training data from. This can be
+                        multiple! (required)
   --image-dimensions INT INT
                         Height and width of some image data. (default: 32 32)
   --optimizer-type {ADAM,SGD}
                         Gradient-based optimizer to use. (default: ADAM)
-  --checkpoint-interval None|INT
+  --checkpoint-interval {None}|INT
                         Interval to save checkpoints at. (default: None)</samp>
 </pre>
 
@@ -338,14 +337,15 @@ TrainConfig(dataset_sources=(PosixPath(&#x27;data&#x27;),), image_dimensions=(16
 TrainConfig(dataset_sources=(PosixPath(&#x27;data&#x27;),), image_dimensions=(32, 32), optimizer_type=&lt;OptimizerType.SGD: 2&gt;, checkpoint_interval=None)</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>4. Flags</strong>
 </summary>
+<blockquote>
 <br />
-
 Booleans can either be expected to be explicitly passed in, or, if given a default
 value, automatically converted to flags.
 
@@ -385,17 +385,21 @@ if __name__ == "__main__":
 <pre>
 <samp>$ <kbd>python ./04_flags.py --help</kbd>
 usage: 04_flags.py [-h] --boolean {True,False}
-                   [--optional-boolean None|{True,False}] [--flag-a]
+                   [--optional-boolean {None,True,False}] [--flag-a]
                    [--no-flag-b]
 
 arguments:
   -h, --help            show this help message and exit
   --boolean {True,False}
-                        Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;. (required)
-  --optional-boolean None|{True,False}
-                        Optional boolean. Same as above, but can be omitted. (default: None)
-  --flag-a              Pass --flag-a in to set this value to True.
-  --no-flag-b           Pass --no-flag-b in to set this value to False. (default: True)</samp>
+                        Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;.
+                        (required)
+  --optional-boolean {None,True,False}
+                        Optional boolean. Same as above, but can be omitted.
+                        (default: None)
+  --flag-a              Pass --flag-a in to set this value to True. (default:
+                        flag_a=False)
+  --no-flag-b           Pass --no-flag-b in to set this value to False.
+                        (default: flag_b=True)</samp>
 </pre>
 
 <pre>
@@ -413,14 +417,15 @@ Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</samp>
 Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>5. Hierarchical Configs</strong>
 </summary>
+<blockquote>
 <br />
-
 Parsing of nested types (in this case nested dataclasses) enables hierarchical
 configuration objects that are both modular and highly expressive.
 
@@ -503,21 +508,22 @@ usage: 05_hierarchical_configs.py [-h]
                                   [--config.optimizer.weight-decay FLOAT]
                                   [--config.batch-size INT]
                                   [--config.train-steps INT]
-                                  [--config.seed INT]
-                                  [--restore-checkpoint]
+                                  [--config.seed INT] [--restore-checkpoint]
                                   [--checkpoint-interval INT]
                                   OUT_DIR
 
 Train a model.
 
 positional arguments:
-  OUT_DIR       Where to save logs and checkpoints. (required)
+  OUT_DIR               Where to save logs and checkpoints. (required)
 
 arguments:
   -h, --help            show this help message and exit
-  --restore-checkpoint  Set to restore an existing checkpoint.
+  --restore-checkpoint  Set to restore an existing checkpoint. (default:
+                        restore_checkpoint=False)
   --checkpoint-interval INT
-                        Training steps between each checkpoint save. (default: 1000)
+                        Training steps between each checkpoint save. (default:
+                        1000)
 
 config.optimizer arguments:
   Various configurable options for our optimizer.
@@ -537,8 +543,8 @@ config arguments:
   --config.train-steps INT
                         Total number of training steps. (default: 100000)
   --config.seed INT
-                        Random seed. This is helpful for making sure that our experiments are all
-                        reproducible! (default: 0)</samp>
+                        Random seed. This is helpful for making sure that our
+                        experiments are all reproducible! (default: 0)</samp>
 </pre>
 
 <pre>
@@ -571,14 +577,15 @@ seed: 0
 train_steps: 100000</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>6. Base Configs</strong>
 </summary>
+<blockquote>
 <br />
-
 We can integrate `dcargs.cli()` into common configuration patterns: here, we select
 one of multiple possible base configurations, and then use the CLI to either override
 (existing) or fill in (missing) values.
@@ -586,30 +593,25 @@ one of multiple possible base configurations, and then use the CLI to either ove
 **Code ([link](examples/06_base_configs.py)):**
 
 ```python
-import dataclasses
-import importlib
 import sys
+from dataclasses import dataclass
 from typing import Dict, Literal, Tuple, Type, TypeVar, Union
 
 import dcargs
 
 
-@dataclasses.dataclass
+@dataclass(frozen=True)
 class AdamOptimizer:
-    # Adam learning rate.
     learning_rate: float = 1e-3
-
-    # Moving average parameters.
     betas: Tuple[float, float] = (0.9, 0.999)
 
 
-@dataclasses.dataclass
+@dataclass(frozen=True)
 class SgdOptimizer:
-    # SGD learning rate.
     learning_rate: float = 3e-4
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclass(frozen=True)
 class ExperimentConfig:
     # Dataset to run experiment on.
     dataset: Literal["mnist", "imagenet-50"]
@@ -663,10 +665,12 @@ T = TypeVar("T")
 
 
 def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
+    """Populate an instance of `cls`, using a CLI lets the user select from a library of
+    base configs."""
     # Get base configuration name from the first positional argument.
     if len(sys.argv) < 2 or sys.argv[1] not in base_library:
         valid_usages = map(lambda k: f"{sys.argv[0]} {k} --help", base_library.keys())
-        raise SystemExit(f"usage:\n  " + "\n  ".join(valid_usages))
+        raise SystemExit("usage:\n  " + "\n  ".join(valid_usages))
 
     # Get base configuration from our library, and use it for default CLI parameters.
     default_instance = base_library[sys.argv[1]]
@@ -700,14 +704,11 @@ usage:
 
 <pre>
 <samp>$ <kbd>python ./06_base_configs_argv.py small --help</kbd>
-usage: examples/06_base_configs.py small [-h]
-                                         [--dataset {mnist,imagenet-50}]
+usage: examples/06_base_configs.py small [-h] [--dataset {mnist,imagenet-50}]
                                          [--optimizer.learning-rate FLOAT]
-                                         [--num-layers INT]
-                                         [--units INT]
+                                         [--num-layers INT] [--units INT]
                                          [--batch-size INT]
-                                         [--train-steps INT] --seed
-                                         INT
+                                         [--train-steps INT] --seed INT
 
 arguments:
   -h, --help            show this help message and exit
@@ -720,14 +721,14 @@ arguments:
                         Batch size. (default: 2048)
   --train-steps INT
                         Total number of training steps. (default: 30000)
-  --seed INT    Random seed. This is helpful for making sure that our experiments are all
-                        reproducible! (required)
+  --seed INT    Random seed. This is helpful for making sure that our
+                        experiments are all reproducible! (required)
 
 optimizer arguments:
   Optimizer parameters.
 
   --optimizer.learning-rate FLOAT
-                        SGD learning rate. (default: 0.0003)</samp>
+                        (default: 0.0003)</samp>
 </pre>
 
 <pre>
@@ -737,15 +738,12 @@ ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate
 
 <pre>
 <samp>$ <kbd>python ./06_base_configs_argv.py big --help</kbd>
-usage: examples/06_base_configs.py big [-h]
-                                       [--dataset {mnist,imagenet-50}]
+usage: examples/06_base_configs.py big [-h] [--dataset {mnist,imagenet-50}]
                                        [--optimizer.learning-rate FLOAT]
                                        [--optimizer.betas FLOAT FLOAT]
-                                       [--num-layers INT]
-                                       [--units INT]
-                                       [--batch-size INT]
-                                       [--train-steps INT] --seed
-                                       INT
+                                       [--num-layers INT] [--units INT]
+                                       [--batch-size INT] [--train-steps INT]
+                                       --seed INT
 
 arguments:
   -h, --help            show this help message and exit
@@ -758,16 +756,16 @@ arguments:
                         Batch size. (default: 32)
   --train-steps INT
                         Total number of training steps. (default: 100000)
-  --seed INT    Random seed. This is helpful for making sure that our experiments are all
-                        reproducible! (required)
+  --seed INT    Random seed. This is helpful for making sure that our
+                        experiments are all reproducible! (required)
 
 optimizer arguments:
   Optimizer parameters.
 
   --optimizer.learning-rate FLOAT
-                        Adam learning rate. (default: 0.001)
+                        (default: 0.001)
   --optimizer.betas FLOAT FLOAT
-                        Moving average parameters. (default: 0.9 0.999)</samp>
+                        (default: 0.9 0.999)</samp>
 </pre>
 
 <pre>
@@ -775,14 +773,15 @@ optimizer arguments:
 ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>7. Literals And Unions</strong>
 </summary>
+<blockquote>
 <br />
-
 `typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices;
 `typing.Union[]` can be used to restrict inputs to a fixed set of types.
 
@@ -828,8 +827,7 @@ if __name__ == "__main__":
 <samp>$ <kbd>python ./07_literals_and_unions.py --help</kbd>
 usage: 07_literals_and_unions.py [-h] [--enum {RED,GREEN,BLUE}]
                                  [--restricted-enum {RED,GREEN}]
-                                 [--integer {0,1,2,3}]
-                                 [--string {red,green}]
+                                 [--integer {0,1,2,3}] [--string {red,green}]
                                  [--string-or-enum {red,green,RED,GREEN,BLUE}]
                                  [--tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]]
 
@@ -869,14 +867,15 @@ Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0,
 Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0, string=&#x27;red&#x27;, string_or_enum=&#x27;red&#x27;, tuple_of_string_or_enum=(&lt;Color.RED: 1&gt;, &#x27;green&#x27;, &lt;Color.BLUE: 3&gt;))</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>8. Positional Args</strong>
 </summary>
+<blockquote>
 <br />
-
 Positional-only arguments in functions are converted to positional CLI arguments.
 
 **Code ([link](examples/08_positional_args.py)):**
@@ -944,24 +943,25 @@ if __name__ == "__main__":
 <samp>$ <kbd>python ./08_positional_args.py --help</kbd>
 usage: 08_positional_args.py [-h] [--optimizer.algorithm {ADAM,SGD}]
                              [--optimizer.learning-rate FLOAT]
-                             [--optimizer.weight-decay FLOAT]
-                             [--force] [--verbose]
-                             [--background-rgb FLOAT FLOAT FLOAT]
+                             [--optimizer.weight-decay FLOAT] [--force]
+                             [--verbose] [--background-rgb FLOAT FLOAT FLOAT]
                              SOURCE DEST
 
 Command-line interface defined using a function signature. Note that this
 docstring is parsed to generate helptext.
 
 positional arguments:
-  SOURCE        Source path. (required)
-  DEST          Destination path. (required)
+  SOURCE                Source path. (required)
+  DEST                  Destination path. (required)
 
 arguments:
   -h, --help            show this help message and exit
-  --force               Do not prompt before overwriting.
-  --verbose             Explain what is being done.
+  --force               Do not prompt before overwriting. (default:
+                        force=False)
+  --verbose             Explain what is being done. (default: verbose=False)
   --background-rgb FLOAT FLOAT FLOAT
-                        Background color. Red by default. (default: 1.0 0.0 0.0)
+                        Background color. Red by default. (default: 1.0 0.0
+                        0.0)
 
 optimizer arguments:
   Configuration for our optimizer object.
@@ -984,14 +984,15 @@ verbose=False
 background_rgb=(1.0, 0.0, 0.0)</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>9. Subparsers</strong>
 </summary>
+<blockquote>
 <br />
-
 Unions over nested types (classes or dataclasses) are populated using subparsers.
 
 **Code ([link](examples/09_subparsers.py)):**
@@ -1008,14 +1009,12 @@ import dcargs
 @dataclasses.dataclass(frozen=True)
 class Checkout:
     """Checkout a branch."""
-
     branch: str
 
 
 @dataclasses.dataclass(frozen=True)
 class Commit:
     """Commit changes."""
-
     message: str
     all: bool = False
 
@@ -1056,7 +1055,7 @@ arguments:
 cmd arguments:
   --cmd.message STR
                         (required)
-  --cmd.all</samp>
+  --cmd.all             (default: all=False)</samp>
 </pre>
 
 <pre>
@@ -1083,14 +1082,15 @@ cmd arguments:
 Checkout(branch=&#x27;main&#x27;)</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>10. Multiple Subparsers</strong>
 </summary>
+<blockquote>
 <br />
-
 Multiple unions over nested types are populated using a series of subparsers.
 
 **Code ([link](examples/10_multiple_subparsers.py)):**
@@ -1176,7 +1176,7 @@ arguments:
   -h, --help            show this help message and exit
 
 optional subcommands:
-  Dataset to train on.  (default: mnist-dataset)
+  Dataset to train on. (default: mnist-dataset)
 
   [{mnist-dataset,image-net-dataset}]</samp>
 </pre>
@@ -1192,6 +1192,7 @@ arguments:
 
 dataset arguments:
   --dataset.binary      Set to load binary version of MNIST dataset.
+                        (default: binary=False)
 
 optional subcommands:
   Optimizer to train with. (default: adam-optimizer)
@@ -1205,14 +1206,15 @@ MnistDataset(binary=False)
 AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>11. Dictionaries</strong>
 </summary>
+<blockquote>
 <br />
-
 Dictionary inputs can be specified using either a standard `Dict[K, V]` annotation,
 or a `TypedDict` type.
 
@@ -1258,10 +1260,8 @@ if __name__ == "__main__":
 <pre>
 <samp>$ <kbd>python ./11_dictionaries.py --help</kbd>
 usage: 11_dictionaries.py [-h] --standard-dict STR {True,False}
-                          [STR {True,False} ...]
-                          [--typed-dict.field1 STR]
-                          [--typed-dict.field2 INT]
-                          [--typed-dict.field3]
+                          [STR {True,False} ...] [--typed-dict.field1 STR]
+                          [--typed-dict.field2 INT] [--typed-dict.field3]
 
 arguments:
   -h, --help            show this help message and exit
@@ -1274,7 +1274,7 @@ typed_dict arguments:
                         A string field. (default: hey)
   --typed-dict.field2 INT
                         A numeric field. (default: 3)
-  --typed-dict.field3   A boolean field.</samp>
+  --typed-dict.field3   A boolean field. (default: field3=False)</samp>
 </pre>
 
 <pre>
@@ -1283,14 +1283,15 @@ Standard dict: {&#x27;key1&#x27;: True, &#x27;key2&#x27;: False}
 Typed dict: {&#x27;field1&#x27;: &#x27;hey&#x27;, &#x27;field2&#x27;: 3, &#x27;field3&#x27;: False}</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>12. Named Tuples</strong>
 </summary>
+<blockquote>
 <br />
-
 Example using `dcargs.cli()` to instantiate a named tuple.
 
 **Code ([link](examples/12_named_tuples.py)):**
@@ -1322,17 +1323,15 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./12_named_tuples.py --help</kbd>
-usage: 12_named_tuples.py [-h] --field1 STR [--field2 INT]
-                          [--flag]
+usage: 12_named_tuples.py [-h] --field1 STR [--field2 INT] [--flag]
 
-Description.
-This should show up in the helptext!
+Description. This should show up in the helptext!
 
 arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag                A boolean flag.</samp>
+  --flag                A boolean flag. (default: flag=False)</samp>
 </pre>
 
 <pre>
@@ -1340,14 +1339,15 @@ arguments:
 TupleType(field1=&#x27;hello&#x27;, field2=3, flag=False)</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>13. Standard Classes</strong>
 </summary>
+<blockquote>
 <br />
-
 In addition to functions and dataclasses, we can also generate CLIs from (the
 constructors of) standard Python classes.
 
@@ -1385,8 +1385,7 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./13_standard_classes.py --help</kbd>
-usage: 13_standard_classes.py [-h] --field1 STR --field2 INT
-                              [--flag]
+usage: 13_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
 
 Arguments.
 
@@ -1394,7 +1393,7 @@ arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field. (required)
-  --flag                A boolean flag.</samp>
+  --flag                A boolean flag. (default: flag=False)</samp>
 </pre>
 
 <pre>
@@ -1402,14 +1401,15 @@ arguments:
 [&#x27;hello&#x27;, 7, False]</samp>
 </pre>
 
+</blockquote>
 </details>
 
 <details>
 <summary>
 <strong>14. Generics</strong>
 </summary>
+<blockquote>
 <br />
-
 Example of parsing for generic dataclasses.
 
 **Code ([link](examples/14_generics.py)):**
@@ -1457,18 +1457,16 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./14_generics.py --help</kbd>
-usage: 14_generics.py [-h] --point-continuous.x FLOAT
-                      --point-continuous.y FLOAT --point-continuous.z
-                      FLOAT --point-continuous.frame-id STR
-                      --point-discrete.x INT --point-discrete.y
-                      INT --point-discrete.z INT
-                      --point-discrete.frame-id STR --shape.a.x
-                      FLOAT --shape.a.y FLOAT --shape.a.z
-                      FLOAT --shape.a.frame-id STR --shape.b.x
-                      FLOAT --shape.b.y FLOAT --shape.b.z
-                      FLOAT --shape.b.frame-id STR --shape.c.x
-                      FLOAT --shape.c.y FLOAT --shape.c.z
-                      FLOAT --shape.c.frame-id STR
+usage: 14_generics.py [-h] --point-continuous.x FLOAT --point-continuous.y
+                      FLOAT --point-continuous.z FLOAT
+                      --point-continuous.frame-id STR --point-discrete.x INT
+                      --point-discrete.y INT --point-discrete.z INT
+                      --point-discrete.frame-id STR --shape.a.x FLOAT
+                      --shape.a.y FLOAT --shape.a.z FLOAT --shape.a.frame-id
+                      STR --shape.b.x FLOAT --shape.b.y FLOAT --shape.b.z
+                      FLOAT --shape.b.frame-id STR --shape.c.x FLOAT
+                      --shape.c.y FLOAT --shape.c.z FLOAT --shape.c.frame-id
+                      STR
 
 arguments:
   -h, --help            show this help message and exit
@@ -1529,6 +1527,7 @@ shape.c arguments:
                         (required)</samp>
 </pre>
 
+</blockquote>
 </details><!-- END EXAMPLES -->
 
 ## Serialization
