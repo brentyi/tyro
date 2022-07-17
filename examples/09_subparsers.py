@@ -19,12 +19,14 @@ import dcargs
 @dataclasses.dataclass(frozen=True)
 class Checkout:
     """Checkout a branch."""
+
     branch: str
 
 
 @dataclasses.dataclass(frozen=True)
 class Commit:
     """Commit changes."""
+
     message: str
     all: bool = False
 

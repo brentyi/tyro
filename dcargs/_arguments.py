@@ -6,7 +6,7 @@ import enum
 import functools
 import itertools
 import shlex
-from typing import Any, Dict, Mapping, Optional, Set, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Mapping, Optional, Set, Type, TypeVar, Union
 
 import termcolor
 
@@ -38,6 +38,12 @@ class ArgumentDefinition:
         kwargs.pop("instantiator")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flag = kwargs.pop("name_or_flag")
+
+        # We're actually going to skip the default field: if an argument is unset, the
+        # MISSING value will be detected in _calling.py and the field default will
+        # directly be used. This helps reduce the likelihood of issues with converting
+        # the field default to a string format, then back to the desired type.
+        kwargs["default"] = _fields.MISSING_NONPROP
 
         # Note that the name must be passed in as a position argument.
         parser.add_argument(name_or_flag, **kwargs)
@@ -89,7 +95,9 @@ class LoweredArgumentDefinition:
     action: Optional[str] = None
     nargs: Optional[Union[int, str]] = None
     choices: Optional[Set[Any]] = None
-    metavar: Optional[Union[str, Tuple[str, ...]]] = None
+    # Note: unlike in vanilla argparse, our metavar is always a string. We handle
+    # sequences, multiple arguments, etc, manually.
+    metavar: Optional[str] = None
     help: Optional[str] = None
 
 
@@ -100,7 +108,7 @@ def _rule_handle_defaults(
     """Set `required=True` if a default value is set."""
 
     # Mark lowered as required if a default is set.
-    if arg.field.default is None or arg.field.default is _fields.MISSING:
+    if arg.field.default in _fields.MISSING_SINGLETONS:
         return dataclasses.replace(lowered, default=None, required=True)
 
     return dataclasses.replace(lowered, default=arg.field.default)
@@ -152,7 +160,7 @@ def _rule_recursive_instantiator_from_type(
             arg.type_from_typevar,
         )
     except _instantiators.UnsupportedTypeAnnotationError as e:
-        if arg.field.default is None:
+        if arg.field.default in _fields.MISSING_SINGLETONS:
             raise e
         else:
             # For fields with a default, we'll get by even if there's no instantiator
@@ -161,7 +169,7 @@ def _rule_recursive_instantiator_from_type(
                 lowered,
                 metavar=termcolor.colored("(not parsable)", color="red"),
                 required=False,
-                default=_fields.MISSING,
+                default=_fields.MISSING_PROP,
             )
 
     return dataclasses.replace(
@@ -169,7 +177,6 @@ def _rule_recursive_instantiator_from_type(
         instantiator=instantiator,
         choices=metadata.choices,
         nargs=metadata.nargs,
-        required=(not metadata.is_optional) and lowered.required,
         metavar=metadata.metavar,
     )
 
@@ -189,7 +196,7 @@ def _rule_convert_defaults_to_strings(
 
     if (
         lowered.default is None
-        or lowered.default is _fields.MISSING
+        or lowered.default in _fields.MISSING_SINGLETONS
         or lowered.action is not None
     ):
         return lowered
@@ -228,7 +235,7 @@ def _rule_generate_helptext(
     if lowered.is_fixed():
         # For fixed args, we'll be missing the lowered default. Use field default
         # instead.
-        assert default is _fields.MISSING
+        assert default in _fields.MISSING_SINGLETONS
         default = arg.field.default
 
     if not lowered.required:
@@ -237,9 +244,9 @@ def _rule_generate_helptext(
         # because the types of all arguments are set to strings, which will cause the
         # default to be casted to a string and introduce extra quotation marks.
         if lowered.action == "store_true":
-            default_text = f"(default: {arg.field.name}=False)"
+            default_text = f"(sets {arg.field.name}=True)"
         elif lowered.action == "store_false":
-            default_text = f"(default: {arg.field.name}=True)"
+            default_text = f"(sets {arg.field.name}=False)"
         elif lowered.nargs is not None and hasattr(default, "__iter__"):
             # For tuple types, we might have default as (0, 1, 2, 3).
             # For list types, we might have default as [0, 1, 2, 3].
@@ -254,7 +261,7 @@ def _rule_generate_helptext(
             default_text = f"({default_label}: {shlex.quote(str(default))})"
         help_parts.append(termcolor.colored(default_text, attrs=["dark"]))
     else:
-        help_parts.append(termcolor.colored("(required)", color="red", attrs=["bold"]))
+        help_parts.append(termcolor.colored("(required)", on_color="on_red"))
 
     return dataclasses.replace(lowered, help=" ".join(help_parts))
 
@@ -282,14 +289,26 @@ def _rule_positional_special_handling(
     if not arg.field.positional:
         return lowered
 
-    if lowered.nargs is not None and not lowered.required:
-        raise _instantiators.UnsupportedTypeAnnotationError(
-            "Optional sequences are not supported for positional arguments!"
-        )
+    metavar = (arg.prefix + arg.field.name).upper()
+    if lowered.nargs == "+":
+        metavar = f"{metavar} [{metavar} ...]"
+    elif isinstance(lowered.nargs, int):
+        metavar = " ".join((metavar,) * lowered.nargs)
+
+    if lowered.required:
+        nargs = lowered.nargs
+    else:
+        metavar = "[" + metavar + "]"
+        if lowered.nargs is None:
+            nargs = "?"
+        else:
+            # If lowered.nargs is either + or an int.
+            nargs = "*"
+
     return dataclasses.replace(
         lowered,
         dest=None,
-        metavar=(arg.prefix + arg.field.name).upper(),
-        required=None,
-        nargs="?" if not lowered.required else lowered.nargs,
+        required=None,  # Can't be passed in for positionals.
+        metavar=metavar,
+        nargs=nargs,
     )

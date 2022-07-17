@@ -3,7 +3,7 @@ namespaces."""
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar, Union
 
 from typing_extensions import get_args, get_origin
 
@@ -21,7 +21,7 @@ T = TypeVar("T")
 def call_from_args(
     f: Callable[..., T],
     parser_definition: _parsers.ParserSpecification,
-    default_instance: Optional[T],
+    default_instance: Union[T, _fields.NonpropagatingMissingType],
     value_from_prefixed_field_name: Dict[str, Any],
     field_name_prefix: str,
     avoid_subparsers: bool,
@@ -65,7 +65,7 @@ def call_from_args(
             consumed_keywords.add(prefixed_field_name)
             if not arg.lowered.is_fixed():
                 value = get_value_from_arg(prefixed_field_name)
-                if value is not None:
+                if value not in _fields.MISSING_SINGLETONS:
                     try:
                         assert arg.lowered.instantiator is not None
                         value = arg.lowered.instantiator(value)
@@ -73,20 +73,16 @@ def call_from_args(
                         raise InstantiationError(
                             f"Parsing error for {arg.lowered.name_or_flag}: {e.args[0]}"
                         )
+                else:
+                    value = arg.field.default
             else:
-                assert arg.field.default is not _fields.MISSING
+                assert arg.field.default not in _fields.MISSING_SINGLETONS
                 value = arg.field.default
-                if (
-                    value_from_prefixed_field_name.get(prefixed_field_name)
-                    is not _fields.MISSING
-                ):
-                    print(
-                        (type(value_from_prefixed_field_name.get(prefixed_field_name))),
-                        (type(_fields.MISSING)),
-                    )
+                parsed_value = value_from_prefixed_field_name.get(prefixed_field_name)
+                if parsed_value not in _fields.MISSING_SINGLETONS:
                     raise InstantiationError(
-                        f"{arg.lowered.name_or_flag} was passed in, but is a fixed"
-                        " argument that cannot be parsed"
+                        f"{arg.lowered.name_or_flag}={parsed_value} was passed in, but"
+                        " is a fixed argument that cannot be parsed"
                     )
         elif (
             prefixed_field_name

@@ -216,7 +216,8 @@ def test_helptext_hard_bool():
         with contextlib.redirect_stdout(f):
             dcargs.cli(HelptextHardString, args=["--help"])
     helptext = dcargs._strings.strip_color_codes(f.getvalue())
-    assert "--x         Helptext. 2% milk.\n" in helptext
+    assert "--x" in helptext
+    assert "Helptext. 2% milk." in helptext
 
 
 def test_helptext_with_inheritance():
@@ -361,7 +362,7 @@ def test_literal_helptext():
 def test_optional_literal_helptext():
     @dataclasses.dataclass
     class OptionalLiteralHelptext:
-        x: Optional[Literal[1, 2, 3]]
+        x: Optional[Literal[1, 2, 3]] = None
         """A number."""
 
     f = io.StringIO()
@@ -439,6 +440,6 @@ def test_optional_helptext():
             dcargs.cli(OptionalHelptext, args=["--help"])
     helptext = dcargs._strings.strip_color_codes(f.getvalue())
     assert cast(str, OptionalHelptext.__doc__) in helptext
-    assert "[--x {None}|INT]" in helptext
+    assert "--x {None}|INT" in helptext
     assert "--y {None}|INT [{None}|INT ...]\n" in helptext
     assert "[--z {None}|INT]\n" in helptext

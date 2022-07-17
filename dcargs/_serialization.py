@@ -116,7 +116,7 @@ def _make_loader(cls: Type) -> Type[yaml.Loader]:
 
     DataclassLoader.add_constructor(
         tag=MISSING_YAML_TAG_PREFIX,
-        constructor=lambda *_unused: _fields.MISSING,  # type: ignore
+        constructor=lambda *_unused: _fields.MISSING_PROP,  # type: ignore
     )
 
     return DataclassLoader
@@ -125,7 +125,7 @@ def _make_loader(cls: Type) -> Type[yaml.Loader]:
 def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
     class DataclassDumper(yaml.Dumper):
         def ignore_aliases(self, data):
-            return super().ignore_aliases(data) or data is _fields.MISSING
+            return super().ignore_aliases(data) or data is _fields.MISSING_PROP
 
     contained_types = list(_get_contained_special_types_from_instance(instance))
     contained_type_names = list(map(lambda cls: cls.__name__, contained_types))
@@ -163,7 +163,7 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
         DataclassDumper.add_representer(typ, make_representer(name))
 
     DataclassDumper.add_representer(
-        type(_fields.MISSING),
+        type(_fields.MISSING_PROP),
         lambda dumper, data: dumper.represent_scalar(
             tag=MISSING_YAML_TAG_PREFIX, value=""
         ),

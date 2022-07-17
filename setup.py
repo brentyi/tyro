@@ -30,6 +30,7 @@ setup(
             "pytest-cov",
             "omegaconf",
             "attrs",
+            "torch",
         ],
         "type-checking": [
             "mypy",

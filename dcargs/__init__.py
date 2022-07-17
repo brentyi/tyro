@@ -1,5 +1,5 @@
 from ._cli import cli, parse
-from ._fields import MISSING
+from ._fields import MISSING_PUBLIC as MISSING
 from ._instantiators import UnsupportedTypeAnnotationError
 from ._serialization import from_yaml, to_yaml
 
