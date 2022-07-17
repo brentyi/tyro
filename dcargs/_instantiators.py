@@ -76,9 +76,10 @@ NoneType = type(None)
 @dataclasses.dataclass
 class InstantiatorMetadata:
     nargs: Optional[Union[str, int]]
-    metavar: Union[str, Tuple[str, ...]]
+    # Note: unlike in vanilla argparse, our metavar is always a string. We handle
+    # sequences, multiple arguments, etc, manually.
+    metavar: str
     choices: Optional[Tuple[str, ...]]
-    is_optional: bool
 
 
 class UnsupportedTypeAnnotationError(Exception):
@@ -123,15 +124,15 @@ def instantiator_from_type(
     if typ is NoneType:
 
         def instantiator(string: str) -> None:
-            if string != "None":
-                raise ValueError("Only valid argument is `None`.")
+            # Note that other inputs should be caught by `choices` before the
+            # instantiator runs.
+            assert string == "None"
             return None
 
         return instantiator, InstantiatorMetadata(
             nargs=None,
             metavar="{" + _format_metavar("None") + "}",
             choices=("None",),
-            is_optional=False,
         )
 
     # Address container types. If a matching container is found, this will recursively
@@ -194,7 +195,6 @@ def instantiator_from_type(
         if auto_choices is None
         else "{" + ",".join(map(_format_metavar, map(str, auto_choices))) + "}",
         choices=auto_choices,
-        is_optional=False,
     )
 
 
@@ -289,9 +289,8 @@ def _instantiator_from_tuple(
         )
         return lambda strings: tuple([make(x) for x in strings]), InstantiatorMetadata(
             nargs="+",
-            metavar=inner_meta.metavar,
+            metavar=f"{inner_meta.metavar} [{inner_meta.metavar} ...]",
             choices=inner_meta.choices,
-            is_optional=False,
         )
 
     else:
@@ -312,13 +311,19 @@ def _instantiator_from_tuple(
                 " must match. This restricts mixing enums & literals with other"
                 " types."
             )
-        return lambda strings: tuple(
-            make(x) for make, x in zip(instantiators, strings)
-        ), InstantiatorMetadata(
+
+        def tuple_instantiator(strings: List[str]) -> Tuple[Any, ...]:
+            if len(strings) != len(instantiators):
+                raise ValueError(
+                    f"expected {len(instantiators)} arguments, but got {strings}"
+                )
+            out = tuple(make(x) for make, x in zip(instantiators, strings))
+            return out
+
+        return tuple_instantiator, InstantiatorMetadata(
             nargs=len(types),
-            metavar=tuple(_format_metavar(cast(str, m.metavar)) for m in metas),
+            metavar=" ".join((_format_metavar(cast(str, m.metavar)) for m in metas)),
             choices=metas[0].choices,
-            is_optional=False,
         )
 
 
@@ -329,6 +334,12 @@ def _join_union_metavars(metavars: Iterable[str]) -> str:
         None, INT => NONE|INT
         {0,1,2}, {3,4} => {0,1,2,3,4}
         {0,1,2}, {3,4}, STR => {0,1,2,3,4}|STR
+        {None}, INT [INT ...] => {None}|{INT [INT ...]}
+        STR, INT [INT ...] => STR|{INT [INT ...]}
+        STR, INT INT => STR|{INT INT}
+
+    The curly brackets are unfortunately overloaded but parentheses, square brackets,
+    and angle brackets all seem to interfere with some argparse internals.
     """
     metavars = tuple(metavars)
     merged_metavars = [metavars[0]]
@@ -344,6 +355,11 @@ def _join_union_metavars(metavars: Iterable[str]) -> str:
             merged_metavars[-1] = prev[:-1] + "," + curr[1:]
         else:
             merged_metavars.append(curr)
+
+    for i, m in enumerate(merged_metavars):
+        if " " in m:
+            merged_metavars[i] = "{" + m + "}"
+
     return "|".join(merged_metavars)
 
 
@@ -380,52 +396,68 @@ def _instantiator_from_union(
                 nargs = b.nargs
                 first = False
             elif nargs != b.nargs:
-                raise UnsupportedTypeAnnotationError(
-                    f"All options in {typ} must expect the same number of CLI"
-                    " arguments. (this is a limitation from argparse's nargs"
-                    " option)"
-                )
+                # Just be as general as possible if we see inconsistencies.
+                nargs = "+"
 
-    # Set metavar.
-    if nargs is not None and options[0] is NoneType:
-        # For optional types + sequences, the only way to set a field to None will
-        # be to omit its corresponding argument.
-        instantiators.pop(0)
-        metas.pop(0)
-
-    metavar: Union[str, Tuple[str, ...]]
-    if all(map(lambda m: isinstance(m.metavar, str), metas)):
-        metavar = _join_union_metavars(map(lambda x: cast(str, x.metavar), metas))
-    elif all(map(lambda m: isinstance(m.metavar, tuple), metas)):
-        # Do our best to create a reasonable looking metavar. This is imperfect!
-        assert isinstance(metas[0].metavar, tuple)
-        metavar = tuple(
-            map(
-                lambda metavars: _join_union_metavars(metavars),
-                zip(*map(lambda m: m.metavar, metas)),
-            )
-        )
-    else:
-        # Should never hit this case.
-        assert False
+    metavar: str
+    metavar = _join_union_metavars(map(lambda x: cast(str, x.metavar), metas))
 
     def union_instantiator(string_or_strings: Union[str, List[str]]) -> Any:
-        for instantiator, metadata in zip(instantiators, metas):
-            if metadata.choices is None or string_or_strings in metadata.choices:
+        metadata: InstantiatorMetadata
+        errors = []
+        for i, (instantiator, metadata) in enumerate(zip(instantiators, metas)):
+            # Check choices.
+            if metadata.choices is not None and (
+                (
+                    isinstance(string_or_strings, str)
+                    and string_or_strings not in metadata.choices
+                )
+                or (
+                    isinstance(string_or_strings, list)
+                    and any(x not in metadata.choices for x in string_or_strings)
+                )
+            ):
+                errors.append(
+                    f"{options[i]}: {string_or_strings} does not match choices"
+                    f" {metadata.choices}"
+                )
+                continue
+
+            # Try passing input directly into instantiator.
+            if metadata.nargs == nargs or (
+                isinstance(metadata.nargs, int) and nargs == "+"
+            ):
                 try:
                     return instantiator(string_or_strings)  # type: ignore
-                except ValueError:
+                except ValueError as e:
                     # Failed, try next instantiator.
-                    pass
+                    errors.append(f"{options[i]}: {e.args[0]}")
+
+            # Try passing unwrapped length-1 input into instantiator.
+            elif (
+                metadata.nargs is None
+                and nargs is not None
+                and len(string_or_strings) == 1
+            ):
+                try:
+                    return instantiator(string_or_strings[0])  # type: ignore
+                except ValueError as e:
+                    # Failed, try next instantiator.
+                    errors.append(f"{options[i]}: {e.args[0]}")
+            else:
+                errors.append(
+                    f"{options[i]}: did not attempt,"
+                    f" {metadata} {nargs} {len(string_or_strings)}"
+                )
         raise ValueError(
-            f"No type in {options} could be instantiated from {string_or_strings}."
+            f"no type in {options} could be instantiated from"
+            f" {string_or_strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
         )
 
     return union_instantiator, InstantiatorMetadata(
         nargs=nargs,
         metavar=metavar,
         choices=None,
-        is_optional=NoneType in options,
     )
 
 
@@ -466,7 +498,6 @@ def _instantiator_from_dict(
         nargs="+",
         metavar=f"{key_metadata.metavar} {val_metadata.metavar}",
         choices=None,
-        is_optional=False,
     )
 
 
@@ -488,9 +519,8 @@ def _instantiator_from_list_sequence_or_set(
         [make(x) for x in strings]
     ), InstantiatorMetadata(
         nargs="+",
-        metavar=inner_meta.metavar,
+        metavar=f"{inner_meta.metavar} [{inner_meta.metavar} ...]",
         choices=inner_meta.choices,
-        is_optional=False,
     )
 
 
@@ -519,5 +549,4 @@ def _instantiator_from_literal(
         metadata,
         choices=choices,
         metavar="{" + ",".join(map(_format_metavar, map(str, choices))) + "}",
-        is_optional=False,
     )

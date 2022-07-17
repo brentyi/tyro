@@ -12,7 +12,7 @@ Usage:
 
 import sys
 from dataclasses import dataclass
-from typing import Dict, Literal, Tuple, Type, TypeVar, Union
+from typing import Dict, Literal, Tuple, TypeVar, Union
 
 import dcargs
 

@@ -99,7 +99,7 @@ def format_script_for_readme(path: pathlib.Path) -> str:
             f"<strong>{index}. {title}</strong>",
             "</summary>",
             "<blockquote>",
-            "<br />",
+            "",
             description_text,
             "",
             "\n".join(example_usages),

@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, List, Tuple, TypeVar, Union
+from typing import Generic, List, Tuple, TypeVar
 
 import pytest
 from typing_extensions import Literal
@@ -133,14 +133,6 @@ def test_generic_inherited():
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(ChildClass, args=["--x", "1", "--y", "2", "--z", "3"])
-
-
-def test_unsupported_union():
-    def main(a: Union[Tuple[int, int], Tuple[int, int, int]]) -> None:
-        pass
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=["--a", "5", "5"])
 
 
 def test_missing_annotation():

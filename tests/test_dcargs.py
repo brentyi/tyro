@@ -2,9 +2,10 @@ import copy
 import dataclasses
 import enum
 import pathlib
-from typing import Any, AnyStr, Callable, ClassVar, Optional, TypeVar, Union
+from typing import Any, AnyStr, Callable, ClassVar, List, Optional, TypeVar, Union
 
 import pytest
+import torch
 from typing_extensions import Annotated, Final, Literal, TypeAlias
 
 import dcargs
@@ -198,12 +199,32 @@ def test_default_factory():
 def test_optional():
     @dataclasses.dataclass
     class A:
-        x: Optional[int]
+        x: Optional[int] = None
 
     assert dcargs.cli(A, args=[]) == A(x=None)
 
 
-def test_union():
+def test_union_basic():
+    def main(x: Union[int, str]) -> Union[int, str]:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "5"]) == 5
+    assert dcargs.cli(main, args=["--x", "6"]) == 6
+    assert dcargs.cli(main, args=["--x", "five"]) == "five"
+
+
+def test_union_with_list():
+    def main(x: Union[int, str, List[bool]]) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "5"]) == 5
+    assert dcargs.cli(main, args=["--x", "6"]) == 6
+    assert dcargs.cli(main, args=["--x", "five"]) == "five"
+    assert dcargs.cli(main, args=["--x", "True"]) == "True"
+    assert dcargs.cli(main, args=["--x", "True", "False"]) == [True, False]
+
+
+def test_union_literal():
     def main(x: Union[Literal[1, 2], Literal[3, 4, 5], str]) -> Union[int, str]:
         return x
 
@@ -299,7 +320,7 @@ def test_literal_enum():
 def test_optional_literal():
     @dataclasses.dataclass
     class A:
-        x: Optional[Literal[0, 1, 2]]
+        x: Optional[Literal[0, 1, 2]] = None
 
     assert dcargs.cli(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):
@@ -425,3 +446,10 @@ def test_fixed():
 
 def test_missing_singleton():
     assert dcargs.MISSING is copy.deepcopy(dcargs.MISSING)
+
+
+def test_torch_device():
+    def main(device: torch.device) -> torch.device:
+        return device
+
+    assert dcargs.cli(main, args=["--device", "cpu"]) == torch.device("cpu")

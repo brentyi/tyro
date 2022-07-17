@@ -101,10 +101,30 @@ def test_positional_booleans():
         dcargs.cli(main, args=["True", "false"])
 
 
-def test_unsupported_positional():
-    # Not super clear how to parse optional positional sequences...
-    def main(a: Optional[List[int]], /) -> None:
-        pass
+def test_optional_list():
+    def main(a: Optional[List[int]], /) -> Optional[List[int]]:
+        return a
 
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=["--a", "5", "5"])
+    assert dcargs.cli(main, args=["None"]) is None
+    assert dcargs.cli(main, args=["1", "2"]) == [1, 2]
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=[])
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["hm"])
+
+
+def test_optional_list_with_default():
+    def main(a: Optional[List[int]] = None, /) -> Optional[List[int]]:
+        return a
+
+    assert dcargs.cli(main, args=["None"]) is None
+    assert dcargs.cli(main, args=["5", "5"]) == [5, 5]
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["None", "5"])
+
+
+def test_positional_tuple():
+    def main(x: Tuple[int, int], y: Tuple[str, str], /):
+        return x, y
+
+    assert dcargs.cli(main, args="1 2 3 4".split(" ")) == ((1, 2), ("3", "4"))

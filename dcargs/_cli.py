@@ -1,9 +1,7 @@
 import argparse
-from typing import Callable, Optional, Sequence, TypeVar
+from typing import Callable, Optional, Sequence, TypeVar, Union
 
-import argparse_color_formatter
-
-from . import _calling, _parsers
+from . import _argparse_formatter, _calling, _fields, _parsers
 
 T = TypeVar("T")
 
@@ -92,20 +90,27 @@ def cli(
         The output of `f(...)`.
     """
 
+    default_instance_internal: Union[_fields.NonpropagatingMissingType, T]
+    if default_instance is None:
+        default_instance_internal = _fields.MISSING_NONPROP
+    else:
+        default_instance_internal = default_instance
+    del default_instance
+
     # Map a callable to the relevant CLI arguments + subparsers.
     parser_definition = _parsers.ParserSpecification.from_callable(
         f,
         description=description,
         parent_classes=set(),  # Used for recursive calls.
         parent_type_from_typevar=None,  # Used for recursive calls.
-        default_instance=default_instance,  # Overrides for default values.
+        default_instance=default_instance_internal,  # Overrides for default values.
         prefix="",  # Used for recursive calls.
         avoid_subparsers=avoid_subparsers,
     )
 
     # Parse using argparse!
     parser = argparse.ArgumentParser(
-        prog=prog, formatter_class=argparse_color_formatter.ColorHelpFormatter
+        prog=prog, formatter_class=_argparse_formatter.ColorHelpFormatter
     )
     parser_definition.apply(parser)
     value_from_prefixed_field_name = vars(parser.parse_args(args=args))
@@ -115,7 +120,7 @@ def cli(
         out, consumed_keywords = _calling.call_from_args(
             f,
             parser_definition,
-            default_instance,
+            default_instance_internal,
             value_from_prefixed_field_name,
             field_name_prefix="",
             avoid_subparsers=avoid_subparsers,

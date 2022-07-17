@@ -3,15 +3,11 @@
 
 Usage:
 `python ./07_literals_and_unions.py --help`
-`python ./07_literals_and_unions.py --enum RED --restricted-enum GREEN --integer 3 --string green`
-`python ./07_literals_and_unions.py --string-or-enum green`
-`python ./07_literals_and_unions.py --string-or-enum RED`
-`python ./07_literals_and_unions.py --tuple-of-string-or-enum RED green BLUE`
 """
 
 import dataclasses
 import enum
-from typing import Literal, Tuple, Union
+from typing import Literal, Optional, Tuple, Union
 
 import dcargs
 
@@ -24,11 +20,21 @@ class Color(enum.Enum):
 
 @dataclasses.dataclass(frozen=True)
 class Args:
-    enum: Color = Color.RED
+    # We can use Literal[] to restrict the set of allowable inputs, for example, over
+    # enums.
     restricted_enum: Literal[Color.RED, Color.GREEN] = Color.RED
-    integer: Literal[0, 1, 2, 3] = 0
-    string: Literal["red", "green"] = "red"
+
+    # Literals can also be marked Optional.
+    integer: Optional[Literal[0, 1, 2, 3]] = None
+
+    # Unions can be used to specify multiple allowable types.
+    union_over_types: Union[int, str] = 0
     string_or_enum: Union[Literal["red", "green"], Color] = "red"
+
+    # Unions also work over more complex nested types.
+    union_over_tuples: Union[Tuple[int, int], Tuple[str]] = ("1",)
+
+    # And can be nested in other types.
     tuple_of_string_or_enum: Tuple[Union[Literal["red", "green"], Color], ...] = (
         "red",
         Color.RED,

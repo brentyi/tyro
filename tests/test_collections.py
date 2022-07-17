@@ -99,7 +99,7 @@ def test_tuples_variable_bool():
 def test_tuples_variable_optional():
     @dataclasses.dataclass
     class A:
-        x: Optional[Tuple[int, ...]]
+        x: Optional[Tuple[int, ...]] = None
 
     assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     with pytest.raises(SystemExit):
@@ -250,7 +250,7 @@ def test_sets_with_default():
 def test_optional_sequences():
     @dataclasses.dataclass
     class A:
-        x: Optional[Sequence[int]]
+        x: Optional[Sequence[int]] = None
 
     assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
     with pytest.raises(SystemExit):
@@ -261,7 +261,7 @@ def test_optional_sequences():
 def test_optional_lists():
     @dataclasses.dataclass
     class A:
-        x: Optional[List[int]]
+        x: Optional[List[int]] = None
 
     assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
     with pytest.raises(SystemExit):
@@ -296,3 +296,19 @@ def test_union_over_collections_2():
 
     assert dcargs.cli(main, args="--a 3.3 hey 7.0".split(" ")) == ("3.3", "hey", 7.0)
     assert dcargs.cli(main, args="--a 3 3 hey".split(" ")) == ("3", 3.0, "hey")
+
+
+def test_union_over_collections_3():
+    def main(a: Union[Tuple[int, int], Tuple[int, int, int]]) -> Tuple[int, ...]:
+        return a
+
+    assert dcargs.cli(main, args=["--a", "5", "5"]) == (5, 5)
+    assert dcargs.cli(main, args=["--a", "1", "2", "3"]) == (1, 2, 3)
+
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--a", "5", "5", "2", "1"])
+
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--a"])
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=[])

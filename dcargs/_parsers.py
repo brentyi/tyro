@@ -99,7 +99,9 @@ class ParserSpecification:
         description: Optional[str],
         parent_classes: Set[Type],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
-        default_instance: Optional[T],
+        default_instance: Union[
+            T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
+        ],
         prefix: str,
         avoid_subparsers: bool,
     ) -> ParserSpecification:
@@ -330,7 +332,7 @@ class SubparsersSpecification:
     description: Optional[str]
     parser_from_name: Dict[str, ParserSpecification]
     required: bool
-    default_instance: Optional[Any]
+    default_instance: Any
     can_be_none: bool  # If underlying type is Optional[Something].
 
     @staticmethod
@@ -371,12 +373,15 @@ class SubparsersSpecification:
         can_be_none = options != options_no_none  # Optional[] type.
         if can_be_none:
             required = False
-        elif field.default is not None:
+        elif field.default not in _fields.MISSING_SINGLETONS:
             required = False
 
         # If there are any required arguments in the default subparser, we should mark
         # the subparser group as a whole as required.
-        if field.default is not None:
+        if (
+            field.default is not None
+            and field.default not in _fields.MISSING_SINGLETONS
+        ):
             default_parser = parser_from_name[
                 _strings.subparser_name_from_type(type(field.default))
             ]
@@ -393,7 +398,7 @@ class SubparsersSpecification:
         description_parts = []
         if field.helptext is not None:
             description_parts.append(field.helptext)
-        if not required and field.default is not None:
+        if not required and field.default not in _fields.MISSING_SINGLETONS:
             default = _strings.subparser_name_from_type(type(field.default))
             description_parts.append(f" (default: {default})")
 
@@ -405,6 +410,8 @@ class SubparsersSpecification:
             description=" ".join(description_parts),
             parser_from_name=parser_from_name,
             required=required,
-            default_instance=field.default,
+            default_instance=field.default
+            if field.default not in _fields.MISSING_SINGLETONS
+            else None,
             can_be_none=can_be_none,
         )

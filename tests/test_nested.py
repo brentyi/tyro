@@ -21,6 +21,21 @@ def test_nested():
         dcargs.cli(Nested, args=["--x", "1"])
 
 
+def test_nested_default_instance():
+    @dataclasses.dataclass
+    class B:
+        y: int = 1
+
+    @dataclasses.dataclass
+    class Nested:
+        x: int = 2
+        b: B = B()
+
+    assert dcargs.cli(
+        Nested, args=[], default_instance=Nested(x=1, b=B(y=2))
+    ) == Nested(x=1, b=B(y=2))
+
+
 def test_nested_default():
     @dataclasses.dataclass
     class B:

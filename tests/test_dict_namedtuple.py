@@ -169,7 +169,8 @@ def test_helptext_and_default_namedtuple():
     assert cast(str, HelptextNamedTupleDefault.__doc__) in helptext
     assert "--x INT  Documentation 1 (required)\n" in helptext
     assert "--y INT  Documentation 2 (required)\n" in helptext
-    assert "--z INT  Documentation 3 (default: 3)\n" in helptext
+    assert "--z INT" in helptext
+    assert "Documentation 3 (default: 3)\n" in helptext
 
 
 def test_helptext_and_default_instance_namedtuple():
@@ -184,13 +185,19 @@ def test_helptext_and_default_instance_namedtuple():
         z: int
         """Documentation 3"""
 
+    with pytest.raises(SystemExit):
+        dcargs.cli(
+            HelptextNamedTuple,
+            default_instance=dcargs.MISSING,
+            args=[],
+        )
+
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
             dcargs.cli(
                 HelptextNamedTuple,
                 default_instance=HelptextNamedTuple(
-                    # Sketchy, unsupported behavior...
                     x=dcargs.MISSING,
                     y=dcargs.MISSING,
                     z=3,
@@ -201,4 +208,5 @@ def test_helptext_and_default_instance_namedtuple():
     assert cast(str, HelptextNamedTuple.__doc__) in helptext
     assert "Documentation 1 (required)\n" in helptext
     assert "Documentation 2 (required)\n" in helptext
-    assert "Documentation 3 (default: 3)\n" in helptext
+    assert "Documentation 3" in helptext
+    assert "(default: 3)\n" in helptext

@@ -133,7 +133,7 @@ Ultimately, we aim to enable configuration interfaces that are:
 <strong>1. Functions</strong>
 </summary>
 <blockquote>
-<br />
+
 In the simplest case, `dcargs.cli()` can be used to run a function with arguments
 populated from the CLI.
 
@@ -146,16 +146,14 @@ import dcargs
 def main(
     field1: str,
     field2: int = 3,
-    flag: bool = False,
 ) -> None:
     """Function, whose arguments will be populated from a CLI interface.
 
     Args:
         field1: A string field.
         field2: A numeric field, with a default value.
-        flag: A boolean flag.
     """
-    print(field1, field2, flag)
+    print(field1, field2)
 
 
 if __name__ == "__main__":
@@ -168,25 +166,24 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./01_functions.py --help</kbd>
-usage: 01_functions.py [-h] --field1 STR [--field2 INT] [--flag]
+usage: 01_functions.py [-h] --field1 STR [--field2 INT]
 
 Function, whose arguments will be populated from a CLI interface.
 
 arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
-  --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag                A boolean flag. (default: flag=False)</samp>
+  --field2 INT  A numeric field, with a default value. (default: 3)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./01_functions.py --field1 hello</kbd>
-hello 3 False</samp>
+hello 3</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./01_functions.py --field1 hello --flag</kbd>
-hello 3 True</samp>
+<samp>$ <kbd>python ./01_functions.py --field1 hello --field2 10</kbd>
+hello 10</samp>
 </pre>
 
 </blockquote>
@@ -197,8 +194,9 @@ hello 3 True</samp>
 <strong>2. Dataclasses</strong>
 </summary>
 <blockquote>
-<br />
-Common pattern: use `dcargs.cli()` to instantiate a dataclass.
+
+Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted instance
+can be used as a typed alternative for an argparse namespace.
 
 **Code ([link](examples/02_dataclasses.py)):**
 
@@ -215,7 +213,6 @@ class Args:
 
     field1: str  # A string field.
     field2: int = 3  # A numeric field, with a default value.
-    flag: bool = False  # A boolean flag.
 
 
 if __name__ == "__main__":
@@ -229,25 +226,24 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./02_dataclasses.py --help</kbd>
-usage: 02_dataclasses.py [-h] --field1 STR [--field2 INT] [--flag]
+usage: 02_dataclasses.py [-h] --field1 STR [--field2 INT]
 
 Description. This should show up in the helptext!
 
 arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
-  --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag                A boolean flag. (default: flag=False)</samp>
+  --field2 INT  A numeric field, with a default value. (default: 3)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./02_dataclasses.py --field1 hello</kbd>
-Args(field1=&#x27;hello&#x27;, field2=3, flag=False)</samp>
+Args(field1=&#x27;hello&#x27;, field2=3)</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./02_dataclasses.py --field1 hello --flag</kbd>
-Args(field1=&#x27;hello&#x27;, field2=3, flag=True)</samp>
+<samp>$ <kbd>python ./02_dataclasses.py --field1 hello --field2 5</kbd>
+Args(field1=&#x27;hello&#x27;, field2=5)</samp>
 </pre>
 
 </blockquote>
@@ -258,7 +254,7 @@ Args(field1=&#x27;hello&#x27;, field2=3, flag=True)</samp>
 <strong>3. Enums And Containers</strong>
 </summary>
 <blockquote>
-<br />
+
 We can generate argument parsers from more advanced type annotations, like enums and
 tuple types.
 
@@ -345,7 +341,7 @@ TrainConfig(dataset_sources=(PosixPath(&#x27;data&#x27;),), image_dimensions=(32
 <strong>4. Flags</strong>
 </summary>
 <blockquote>
-<br />
+
 Booleans can either be expected to be explicitly passed in, or, if given a default
 value, automatically converted to flags.
 
@@ -384,9 +380,8 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./04_flags.py --help</kbd>
-usage: 04_flags.py [-h] --boolean {True,False}
-                   [--optional-boolean {None,True,False}] [--flag-a]
-                   [--no-flag-b]
+usage: 04_flags.py [-h] --boolean {True,False} --optional-boolean
+                   {None,True,False} [--flag-a] [--no-flag-b]
 
 arguments:
   -h, --help            show this help message and exit
@@ -395,26 +390,32 @@ arguments:
                         (required)
   --optional-boolean {None,True,False}
                         Optional boolean. Same as above, but can be omitted.
-                        (default: None)
-  --flag-a              Pass --flag-a in to set this value to True. (default:
-                        flag_a=False)
-  --no-flag-b           Pass --no-flag-b in to set this value to False.
-                        (default: flag_b=True)</samp>
+                        (required)
+  --flag-a              Pass --flag-a in to set this value to True. (sets
+                        flag_a=True)
+  --no-flag-b           Pass --no-flag-b in to set this value to False. (sets
+                        flag_b=False)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./04_flags.py --boolean True</kbd>
-Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</samp>
+usage: 04_flags.py [-h] --boolean {True,False} --optional-boolean
+                   {None,True,False} [--flag-a] [--no-flag-b]
+04_flags.py: error: the following arguments are required: --optional-boolean</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./04_flags.py --boolean False --flag-a</kbd>
-Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</samp>
+usage: 04_flags.py [-h] --boolean {True,False} --optional-boolean
+                   {None,True,False} [--flag-a] [--no-flag-b]
+04_flags.py: error: the following arguments are required: --optional-boolean</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./04_flags.py --boolean False --no-flag-b</kbd>
-Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</samp>
+usage: 04_flags.py [-h] --boolean {True,False} --optional-boolean
+                   {None,True,False} [--flag-a] [--no-flag-b]
+04_flags.py: error: the following arguments are required: --optional-boolean</samp>
 </pre>
 
 </blockquote>
@@ -425,7 +426,7 @@ Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</samp>
 <strong>5. Hierarchical Configs</strong>
 </summary>
 <blockquote>
-<br />
+
 Parsing of nested types (in this case nested dataclasses) enables hierarchical
 configuration objects that are both modular and highly expressive.
 
@@ -519,8 +520,8 @@ positional arguments:
 
 arguments:
   -h, --help            show this help message and exit
-  --restore-checkpoint  Set to restore an existing checkpoint. (default:
-                        restore_checkpoint=False)
+  --restore-checkpoint  Set to restore an existing checkpoint. (sets
+                        restore_checkpoint=True)
   --checkpoint-interval INT
                         Training steps between each checkpoint save. (default:
                         1000)
@@ -585,7 +586,7 @@ train_steps: 100000</samp>
 <strong>6. Base Configs</strong>
 </summary>
 <blockquote>
-<br />
+
 We can integrate `dcargs.cli()` into common configuration patterns: here, we select
 one of multiple possible base configurations, and then use the CLI to either override
 (existing) or fill in (missing) values.
@@ -595,7 +596,7 @@ one of multiple possible base configurations, and then use the CLI to either ove
 ```python
 import sys
 from dataclasses import dataclass
-from typing import Dict, Literal, Tuple, Type, TypeVar, Union
+from typing import Dict, Literal, Tuple, TypeVar, Union
 
 import dcargs
 
@@ -637,7 +638,7 @@ class ExperimentConfig:
 # Note that we could also define this library using separate YAML files (similar to
 # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
 # checking + IDE support.
-base_config_library = {
+base_configs = {
     "small": ExperimentConfig(
         dataset="mnist",
         optimizer=SgdOptimizer(),
@@ -664,9 +665,9 @@ base_config_library = {
 T = TypeVar("T")
 
 
-def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
-    """Populate an instance of `cls`, using a CLI lets the user select from a library of
-    base configs."""
+def cli_from_base_configs(base_library: Dict[str, T]) -> T:
+    """Populate an instance of `cls`, where the first positional argument is used to
+    select from a library of named base configs."""
     # Get base configuration name from the first positional argument.
     if len(sys.argv) < 2 or sys.argv[1] not in base_library:
         valid_usages = map(lambda k: f"{sys.argv[0]} {k} --help", base_library.keys())
@@ -675,7 +676,7 @@ def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
     # Get base configuration from our library, and use it for default CLI parameters.
     default_instance = base_library[sys.argv[1]]
     return dcargs.cli(
-        cls,
+        type(default_instance),
         prog=" ".join(sys.argv[:2]),
         args=sys.argv[2:],
         default_instance=default_instance,
@@ -687,7 +688,7 @@ def cli_with_base_configs(cls: Type[T], base_library: Dict[str, T]) -> T:
 
 
 if __name__ == "__main__":
-    config = cli_with_base_configs(ExperimentConfig, base_config_library)
+    config = cli_from_base_configs(base_configs)
     print(config)
 ```
 
@@ -781,7 +782,7 @@ ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learni
 <strong>7. Literals And Unions</strong>
 </summary>
 <blockquote>
-<br />
+
 `typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices;
 `typing.Union[]` can be used to restrict inputs to a fixed set of types.
 
@@ -790,7 +791,7 @@ ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learni
 ```python
 import dataclasses
 import enum
-from typing import Literal, Tuple, Union
+from typing import Literal, Optional, Tuple, Union
 
 import dcargs
 
@@ -803,11 +804,21 @@ class Color(enum.Enum):
 
 @dataclasses.dataclass(frozen=True)
 class Args:
-    enum: Color = Color.RED
+    # We can use Literal[] to restrict the set of allowable inputs, for example, over
+    # enums.
     restricted_enum: Literal[Color.RED, Color.GREEN] = Color.RED
-    integer: Literal[0, 1, 2, 3] = 0
-    string: Literal["red", "green"] = "red"
+
+    # Literals can also be marked Optional.
+    integer: Optional[Literal[0, 1, 2, 3]] = None
+
+    # Unions can be used to specify multiple allowable types.
+    union_over_types: Union[int, str] = 0
     string_or_enum: Union[Literal["red", "green"], Color] = "red"
+
+    # Unions also work over more complex nested types.
+    union_over_tuples: Union[Tuple[int, int], Tuple[str]] = ("1",)
+
+    # And can be nested in other types.
     tuple_of_string_or_enum: Tuple[Union[Literal["red", "green"], Color], ...] = (
         "red",
         Color.RED,
@@ -825,46 +836,31 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./07_literals_and_unions.py --help</kbd>
-usage: 07_literals_and_unions.py [-h] [--enum {RED,GREEN,BLUE}]
-                                 [--restricted-enum {RED,GREEN}]
-                                 [--integer {0,1,2,3}] [--string {red,green}]
+usage: 07_literals_and_unions.py [-h] [--restricted-enum {RED,GREEN}]
+                                 [--integer {None,0,1,2,3}]
+                                 [--union-over-types INT|STR]
                                  [--string-or-enum {red,green,RED,GREEN,BLUE}]
+                                 [--union-over-tuples {INT INT}|STR]
                                  [--tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]]
 
 arguments:
   -h, --help            show this help message and exit
-  --enum {RED,GREEN,BLUE}
-                        (default: RED)
   --restricted-enum {RED,GREEN}
-                        (default: RED)
-  --integer {0,1,2,3}
-                        (default: 0)
-  --string {red,green}
-                        (default: red)
+                        We can use Literal[] to restrict the set of allowable
+                        inputs, for example, over enums. (default: RED)
+  --integer {None,0,1,2,3}
+                        Literals can also be marked Optional. (default: None)
+  --union-over-types INT|STR
+                        Unions can be used to specify multiple allowable
+                        types. (default: 0)
   --string-or-enum {red,green,RED,GREEN,BLUE}
-                        (default: red)
+                        Unions can be used to specify multiple allowable
+                        types. (default: red)
+  --union-over-tuples {INT INT}|STR
+                        Unions also work over more complex nested types.
+                        (default: 1)
   --tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]
-                        (default: red RED)</samp>
-</pre>
-
-<pre>
-<samp>$ <kbd>python ./07_literals_and_unions.py --enum RED --restricted-enum GREEN --integer 3 --string green</kbd>
-Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.GREEN: 2&gt;, integer=3, string=&#x27;green&#x27;, string_or_enum=&#x27;red&#x27;, tuple_of_string_or_enum=(&#x27;red&#x27;, &lt;Color.RED: 1&gt;))</samp>
-</pre>
-
-<pre>
-<samp>$ <kbd>python ./07_literals_and_unions.py --string-or-enum green</kbd>
-Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0, string=&#x27;red&#x27;, string_or_enum=&#x27;green&#x27;, tuple_of_string_or_enum=(&#x27;red&#x27;, &lt;Color.RED: 1&gt;))</samp>
-</pre>
-
-<pre>
-<samp>$ <kbd>python ./07_literals_and_unions.py --string-or-enum RED</kbd>
-Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0, string=&#x27;red&#x27;, string_or_enum=&lt;Color.RED: 1&gt;, tuple_of_string_or_enum=(&#x27;red&#x27;, &lt;Color.RED: 1&gt;))</samp>
-</pre>
-
-<pre>
-<samp>$ <kbd>python ./07_literals_and_unions.py --tuple-of-string-or-enum RED green BLUE</kbd>
-Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0, string=&#x27;red&#x27;, string_or_enum=&#x27;red&#x27;, tuple_of_string_or_enum=(&lt;Color.RED: 1&gt;, &#x27;green&#x27;, &lt;Color.BLUE: 3&gt;))</samp>
+                        And can be nested in other types. (default: red RED)</samp>
 </pre>
 
 </blockquote>
@@ -875,7 +871,7 @@ Args(enum=&lt;Color.RED: 1&gt;, restricted_enum=&lt;Color.RED: 1&gt;, integer=0,
 <strong>8. Positional Args</strong>
 </summary>
 <blockquote>
-<br />
+
 Positional-only arguments in functions are converted to positional CLI arguments.
 
 **Code ([link](examples/08_positional_args.py)):**
@@ -956,9 +952,8 @@ positional arguments:
 
 arguments:
   -h, --help            show this help message and exit
-  --force               Do not prompt before overwriting. (default:
-                        force=False)
-  --verbose             Explain what is being done. (default: verbose=False)
+  --force               Do not prompt before overwriting. (sets force=True)
+  --verbose             Explain what is being done. (sets verbose=True)
   --background-rgb FLOAT FLOAT FLOAT
                         Background color. Red by default. (default: 1.0 0.0
                         0.0)
@@ -992,7 +987,7 @@ background_rgb=(1.0, 0.0, 0.0)</samp>
 <strong>9. Subparsers</strong>
 </summary>
 <blockquote>
-<br />
+
 Unions over nested types (classes or dataclasses) are populated using subparsers.
 
 **Code ([link](examples/09_subparsers.py)):**
@@ -1009,12 +1004,14 @@ import dcargs
 @dataclasses.dataclass(frozen=True)
 class Checkout:
     """Checkout a branch."""
+
     branch: str
 
 
 @dataclasses.dataclass(frozen=True)
 class Commit:
     """Commit changes."""
+
     message: str
     all: bool = False
 
@@ -1033,7 +1030,7 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./09_subparsers.py --help</kbd>
-usage: 09_subparsers.py [-h] {checkout,commit} ...
+usage: 09_subparsers.py [-h] {checkout,commit}
 
 arguments:
   -h, --help         show this help message and exit
@@ -1055,7 +1052,7 @@ arguments:
 cmd arguments:
   --cmd.message STR
                         (required)
-  --cmd.all             (default: all=False)</samp>
+  --cmd.all             (sets all=True)</samp>
 </pre>
 
 <pre>
@@ -1090,7 +1087,7 @@ Checkout(branch=&#x27;main&#x27;)</samp>
 <strong>10. Multiple Subparsers</strong>
 </summary>
 <blockquote>
-<br />
+
 Multiple unions over nested types are populated using a series of subparsers.
 
 **Code ([link](examples/10_multiple_subparsers.py)):**
@@ -1168,7 +1165,7 @@ AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999))</samp>
 
 <pre>
 <samp>$ <kbd>python ./10_multiple_subparsers.py --help</kbd>
-usage: 10_multiple_subparsers.py [-h] [{mnist-dataset,image-net-dataset}] ...
+usage: 10_multiple_subparsers.py [-h] [{mnist-dataset,image-net-dataset}]
 
 Example training script.
 
@@ -1191,8 +1188,8 @@ arguments:
   -h, --help            show this help message and exit
 
 dataset arguments:
-  --dataset.binary      Set to load binary version of MNIST dataset.
-                        (default: binary=False)
+  --dataset.binary      Set to load binary version of MNIST dataset. (sets
+                        binary=True)
 
 optional subcommands:
   Optimizer to train with. (default: adam-optimizer)
@@ -1214,7 +1211,7 @@ AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</samp>
 <strong>11. Dictionaries</strong>
 </summary>
 <blockquote>
-<br />
+
 Dictionary inputs can be specified using either a standard `Dict[K, V]` annotation,
 or a `TypedDict` type.
 
@@ -1260,12 +1257,12 @@ if __name__ == "__main__":
 <pre>
 <samp>$ <kbd>python ./11_dictionaries.py --help</kbd>
 usage: 11_dictionaries.py [-h] --standard-dict STR {True,False}
-                          [STR {True,False} ...] [--typed-dict.field1 STR]
-                          [--typed-dict.field2 INT] [--typed-dict.field3]
+                          [--typed-dict.field1 STR] [--typed-dict.field2 INT]
+                          [--typed-dict.field3]
 
 arguments:
   -h, --help            show this help message and exit
-  --standard-dict STR {True,False} [STR {True,False} ...]
+  --standard-dict STR {True,False}
                         (required)
 
 typed_dict arguments:
@@ -1274,7 +1271,7 @@ typed_dict arguments:
                         A string field. (default: hey)
   --typed-dict.field2 INT
                         A numeric field. (default: 3)
-  --typed-dict.field3   A boolean field. (default: field3=False)</samp>
+  --typed-dict.field3   A boolean field. (sets field3=True)</samp>
 </pre>
 
 <pre>
@@ -1291,7 +1288,7 @@ Typed dict: {&#x27;field1&#x27;: &#x27;hey&#x27;, &#x27;field2&#x27;: 3, &#x27;f
 <strong>12. Named Tuples</strong>
 </summary>
 <blockquote>
-<br />
+
 Example using `dcargs.cli()` to instantiate a named tuple.
 
 **Code ([link](examples/12_named_tuples.py)):**
@@ -1331,7 +1328,7 @@ arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag                A boolean flag. (default: flag=False)</samp>
+  --flag                A boolean flag. (sets flag=True)</samp>
 </pre>
 
 <pre>
@@ -1347,7 +1344,7 @@ TupleType(field1=&#x27;hello&#x27;, field2=3, flag=False)</samp>
 <strong>13. Standard Classes</strong>
 </summary>
 <blockquote>
-<br />
+
 In addition to functions and dataclasses, we can also generate CLIs from (the
 constructors of) standard Python classes.
 
@@ -1393,7 +1390,7 @@ arguments:
   -h, --help            show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field. (required)
-  --flag                A boolean flag. (default: flag=False)</samp>
+  --flag                A boolean flag. (sets flag=True)</samp>
 </pre>
 
 <pre>
@@ -1409,7 +1406,7 @@ arguments:
 <strong>14. Generics</strong>
 </summary>
 <blockquote>
-<br />
+
 Example of parsing for generic dataclasses.
 
 **Code ([link](examples/14_generics.py)):**

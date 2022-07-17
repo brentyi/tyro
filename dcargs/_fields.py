@@ -3,7 +3,7 @@ general callables."""
 import dataclasses
 import inspect
 import warnings
-from typing import Any, Callable, List, Optional, Type, TypeVar
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union
 
 import docstring_parser
 from typing_extensions import get_type_hints, is_typeddict
@@ -20,7 +20,7 @@ class Field:
     positional: bool
 
 
-class _MISSING_TYPE:  # pragma: no cover
+class _Singleton:
     # Singleton pattern.
     # https://www.python.org/download/releases/2.2/descrintro/#__new__
     def __new__(cls, *args, **kwds):
@@ -35,16 +35,38 @@ class _MISSING_TYPE:  # pragma: no cover
         pass
 
 
-MISSING: Any = _MISSING_TYPE()
+class PropagatingMissingType(_Singleton):  # pragma: no cover
+    pass
+
+
+class NonpropagatingMissingType(_Singleton):
+    pass
+
+
+# We have two types of missing sentinels: a propagating missing value, which when set as
+# a default will set all child values of nested structures as missing as well, and a
+# nonpropagating missing sentinel, which does not override child defaults.
+MISSING_PROP = PropagatingMissingType()
+MISSING_NONPROP = NonpropagatingMissingType()
+
+# Note that our "public" missing API will always be the propagating missing sentinel.
+MISSING_PUBLIC: Any = MISSING_PROP
 """Sentinel value to mark fields as missing. Should generally only be used to mark
 fields passed in as a `default_instance` for `dcargs.cli()` as required."""
 
-_missing_types = [dataclasses.MISSING, MISSING, inspect.Parameter.empty]
+
+MISSING_TYPE = Union[PropagatingMissingType, NonpropagatingMissingType]
+MISSING_SINGLETONS = [
+    dataclasses.MISSING,
+    MISSING_PROP,
+    MISSING_NONPROP,
+    inspect.Parameter.empty,
+]
 try:
     # Undocumented feature: support omegaconf dataclasses out of the box.
     import omegaconf
 
-    _missing_types.append(omegaconf.MISSING)
+    MISSING_SINGLETONS.append(omegaconf.MISSING)
 except ImportError:
     pass
 
@@ -52,7 +74,8 @@ T = TypeVar("T")
 
 
 def field_list_from_callable(
-    f: Callable[..., T], default_instance: Optional[T]
+    f: Callable[..., T],
+    default_instance: Union[T, PropagatingMissingType, NonpropagatingMissingType],
 ) -> List[Field]:
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
@@ -74,18 +97,16 @@ def field_list_from_callable(
     if cls is not None and is_typeddict(cls):
         # Handle typed dictionaries.
         field_list = []
-        no_default_instance = (
-            default_instance is None or default_instance in _missing_types
-        )
+        no_default_instance = default_instance in MISSING_SINGLETONS
         assert no_default_instance or isinstance(default_instance, dict)
         for name, typ in get_type_hints(cls).items():
             field_list.append(
                 Field(
                     name=name,
                     typ=typ,
-                    default=MISSING
+                    default=MISSING_PROP
                     if no_default_instance
-                    else default_instance.get(name, MISSING),  # type: ignore
+                    else default_instance.get(name, MISSING_PROP),  # type: ignore
                     helptext=_docstrings.get_field_docstring(cls, name),
                     positional=False,
                 )
@@ -103,11 +124,11 @@ def field_list_from_callable(
         # Note that _field_types is removed in Python 3.9.
         for name, typ in _resolver.get_type_hints(cls).items():
             # Get default, with priority for `default_instance`.
-            default = field_defaults.get(name)
+            default = field_defaults.get(name, MISSING_NONPROP)
             if hasattr(default_instance, name):
                 default = getattr(default_instance, name)
-            if default in _missing_types or default_instance in _missing_types:
-                default = None
+            if default_instance is MISSING_PROP:
+                default = MISSING_PROP
 
             field_list.append(
                 Field(
@@ -139,7 +160,7 @@ def field_list_from_callable(
     else:
         # Handle general callables.
         assert (
-            default_instance is None
+            default_instance in MISSING_SINGLETONS
         ), "`default_instance` is only supported for dataclass and TypedDict types."
 
         # Get type annotations, docstrings.
@@ -163,9 +184,6 @@ def field_list_from_callable(
 
             # Get default value.
             default = param.default
-            if default in _missing_types:
-                # TODO: we should _fields.MISSING.
-                default = None
 
             # Get helptext from docstring.
             helptext = docstring_from_arg_name.get(param.name)
@@ -213,11 +231,14 @@ def _get_dataclass_field_default(
     """Helper for getting the default instance for a field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
     # as well.
-    if parent_default_instance in _missing_types:
-        return MISSING
+    if parent_default_instance is MISSING_PROP:
+        return MISSING_PROP
 
     # Try grabbing default from parent instance.
-    if parent_default_instance is not None:
+    if (
+        parent_default_instance not in MISSING_SINGLETONS
+        and parent_default_instance is not None
+    ):
         # Populate default from some parent, eg `default_instance` in `dcargs.cli()`.
         if hasattr(parent_default_instance, field.name):
             return getattr(parent_default_instance, field.name)
@@ -230,7 +251,7 @@ def _get_dataclass_field_default(
             )
 
     # Try grabbing default from dataclass field.
-    if field.default not in _missing_types:
+    if field.default not in MISSING_SINGLETONS:
         default = field.default
         if dataclasses.is_dataclass(default):
             _ensure_dataclass_instance_used_as_default_is_frozen(field, default)
@@ -254,4 +275,4 @@ def _get_dataclass_field_default(
 
     # Otherwise, no default. This is different from MISSING, because MISSING propagates
     # to children. We could revisit this design to make it clearer.
-    return None
+    return MISSING_NONPROP

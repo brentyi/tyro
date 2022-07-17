@@ -4,7 +4,7 @@ populated from the CLI.
 Usage:
 `python ./01_functions.py --help`
 `python ./01_functions.py --field1 hello`
-`python ./01_functions.py --field1 hello --flag`
+`python ./01_functions.py --field1 hello --field2 10`
 """
 
 import dcargs
@@ -13,16 +13,14 @@ import dcargs
 def main(
     field1: str,
     field2: int = 3,
-    flag: bool = False,
 ) -> None:
     """Function, whose arguments will be populated from a CLI interface.
 
     Args:
         field1: A string field.
         field2: A numeric field, with a default value.
-        flag: A boolean flag.
     """
-    print(field1, field2, flag)
+    print(field1, field2)
 
 
 if __name__ == "__main__":
