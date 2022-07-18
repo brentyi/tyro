@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="dcargs",
-    version="0.1.7",
+    version="0.1.8",
     description="Strongly typed, zero-effort CLIs",
     long_description=long_description,
     long_description_content_type="text/markdown",

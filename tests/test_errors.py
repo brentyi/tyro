@@ -123,8 +123,16 @@ def test_generic_inherited():
         dcargs.cli(ChildClass, args=["--x", "1", "--y", "2", "--z", "3"])
 
 
-def test_missing_annotation():
-    def main(a) -> None:
+def test_missing_annotation_1():
+    def main(a, b) -> None:
+        pass
+
+    with pytest.raises(TypeError):
+        dcargs.cli(main, args=["--help"])
+
+
+def test_missing_annotation_2():
+    def main(*, a) -> None:
         pass
 
     with pytest.raises(TypeError):

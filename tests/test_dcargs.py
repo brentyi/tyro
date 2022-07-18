@@ -2,7 +2,7 @@ import copy
 import dataclasses
 import enum
 import pathlib
-from typing import Any, AnyStr, Callable, ClassVar, List, Optional, TypeVar, Union
+from typing import Any, AnyStr, Callable, ClassVar, Dict, List, Optional, TypeVar, Union
 
 import pytest
 import torch
@@ -453,3 +453,22 @@ def test_torch_device():
         return device
 
     assert dcargs.cli(main, args=["--device", "cpu"]) == torch.device("cpu")
+
+
+def test_torch_device_2():
+    assert dcargs.cli(torch.device, args=["cpu"]) == torch.device("cpu")
+
+
+def test_just_int():
+    assert dcargs.cli(int, args=["123"]) == 123
+
+
+def test_just_dict():
+    assert dcargs.cli(Dict[str, str], args="key value key2 value2".split(" ")) == {
+        "key": "value",
+        "key2": "value2",
+    }
+
+
+def test_just_list():
+    assert dcargs.cli(List[int], args="1 2 3 4".split(" ")) == [1, 2, 3, 4]
