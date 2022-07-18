@@ -263,6 +263,8 @@ def _rule_generate_helptext(
             default_text = f"(sets: {arg.field.name}=True)"
         elif lowered.action == "store_false":
             default_text = f"(sets: {arg.field.name}=False)"
+        elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
+            default_text = "(unset by default)"
         elif lowered.nargs is not None and hasattr(default, "__iter__"):
             # For tuple types, we might have default as (0, 1, 2, 3).
             # For list types, we might have default as [0, 1, 2, 3].

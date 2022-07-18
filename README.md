@@ -177,8 +177,8 @@ Returns:
 </summary>
 <blockquote>
 
-In the simplest case, `dcargs.cli()` can be used to run a function with
-arguments populated from the CLI.
+In the simplest case, `dcargs.cli()` can be used to run a function with arguments
+populated from the CLI.
 
 **Code ([link](examples/01_functions.py)):**
 
@@ -238,8 +238,8 @@ hello 10</samp>
 </summary>
 <blockquote>
 
-Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted
-instance can be used as a typed alternative for an argparse namespace.
+Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted instance
+can be used as a typed alternative for an argparse namespace.
 
 **Code ([link](examples/02_dataclasses.py)):**
 
@@ -299,8 +299,8 @@ Args(field1=&#x27;hello&#x27;, field2=5)</samp>
 </summary>
 <blockquote>
 
-We can generate argument parsers from more advanced type annotations, like enums
-and tuple types.
+We can generate argument parsers from more advanced type annotations, like enums and
+tuple types.
 
 **Code ([link](examples/03_enums_and_containers.py)):**
 
@@ -389,8 +389,8 @@ TrainConfig(dataset_sources=(PosixPath(&#x27;data&#x27;),), image_dimensions=(32
 </summary>
 <blockquote>
 
-Booleans can either be expected to be explicitly passed in, or, if given a
-default value, automatically converted to flags.
+Booleans can either be expected to be explicitly passed in, or, if given a default
+value, automatically converted to flags.
 
 **Code ([link](examples/04_flags.py)):**
 
@@ -629,9 +629,9 @@ usage: 05_hierarchical_configs.py [-h] --out-dir PATH
 </summary>
 <blockquote>
 
-We can integrate `dcargs.cli()` into common configuration patterns: here, we
-select one of multiple possible base configurations, and then use the CLI to
-either override (existing) or fill in (missing) values.
+We can integrate `dcargs.cli()` into common configuration patterns: here, we select
+one of multiple possible base configurations, and then use the CLI to either override
+(existing) or fill in (missing) values.
 
 **Code ([link](examples/06_base_configs.py)):**
 
@@ -775,7 +775,7 @@ arguments:
                         (required)
   --activation {&lt;class &#x27;torch.nn.modules.activation.ReLU&#x27;&gt;}
                         Activation to use. Not specifiable via the
-                        commandline. (not parsable)
+                        commandline. (fixed)
 
 optimizer arguments:
   Optimizer parameters.
@@ -814,7 +814,7 @@ arguments:
                         (required)
   --activation {&lt;class &#x27;torch.nn.modules.activation.GELU&#x27;&gt;}
                         Activation to use. Not specifiable via the
-                        commandline. (not parsable)
+                        commandline. (fixed)
 
 optimizer arguments:
   Optimizer parameters.
@@ -839,9 +839,8 @@ ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learni
 </summary>
 <blockquote>
 
-`typing.Literal[]` can be used to restrict inputs to a fixed set of literal
-choices; `typing.Union[]` can be used to restrict inputs to a fixed set of
-types.
+`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices;
+`typing.Union[]` can be used to restrict inputs to a fixed set of types.
 
 **Code ([link](examples/07_literals_and_unions.py)):**
 
@@ -932,8 +931,7 @@ arguments:
 </summary>
 <blockquote>
 
-Positional-only arguments in functions are converted to positional CLI
-arguments.
+Positional-only arguments in functions are converted to positional CLI arguments.
 
 **Code ([link](examples/08_positional_args.py)):**
 
@@ -1053,8 +1051,7 @@ background_rgb=(1.0, 0.0, 0.0)</samp>
 </summary>
 <blockquote>
 
-Unions over nested types (classes or dataclasses) are populated using
-subparsers.
+Unions over nested types (classes or dataclasses) are populated using subparsers.
 
 **Code ([link](examples/09_subparsers.py)):**
 
@@ -1275,11 +1272,8 @@ AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</samp>
 </summary>
 <blockquote>
 
-Dictionary inputs can be specified using either a standard `Dict[K, V]`
-annotation, or a `TypedDict` type.
-
-Note that setting `total=False` for `TypedDict` is currently not (but reasonably
-could be) supported.
+Dictionary inputs can be specified using either a standard `Dict[K, V]` annotation,
+or a `TypedDict` type.
 
 **Code ([link](examples/11_dictionaries.py)):**
 
@@ -1289,20 +1283,21 @@ from typing import Dict, Tuple, TypedDict
 import dcargs
 
 
-class DictionarySchema(TypedDict):
+class DictionarySchema(
+    TypedDict,
+    # Setting `total=False` specifies that not all keys need to exist.
+    total=False,
+):
     learning_rate: float
     betas: Tuple[float, float]
 
 
 def main(
+    typed_dict: DictionarySchema,
     standard_dict: Dict[str, float] = {
         "learning_rate": 3e-4,
         "beta1": 0.9,
         "beta2": 0.999,
-    },
-    typed_dict: DictionarySchema = {
-        "learning_rate": 3e-4,
-        "betas": (0.9, 0.999),
     },
 ) -> None:
     assert isinstance(standard_dict, dict)
@@ -1321,9 +1316,9 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./11_dictionaries.py --help</kbd>
-usage: 11_dictionaries.py [-h] [--standard-dict STR FLOAT [STR FLOAT ...]]
-                          [--typed-dict.learning-rate FLOAT]
+usage: 11_dictionaries.py [-h] [--typed-dict.learning-rate FLOAT]
                           [--typed-dict.betas FLOAT FLOAT]
+                          [--standard-dict STR FLOAT [STR FLOAT ...]]
 
 arguments:
   -h, --help            show this help message and exit
@@ -1334,9 +1329,23 @@ arguments:
 typed_dict arguments:
 
   --typed-dict.learning-rate FLOAT
-                        (default: 0.0003)
+                        Setting `total=False` specifies that not all keys need
+                        to exist. (unset by default)
   --typed-dict.betas FLOAT FLOAT
-                        (default: 0.9 0.999)</samp>
+                        Setting `total=False` specifies that not all keys need
+                        to exist. (unset by default)</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./11_dictionaries.py --typed-dict.learning-rate 3e-4</kbd>
+Standard dict: {&#x27;learning_rate&#x27;: 0.0003, &#x27;beta1&#x27;: 0.9, &#x27;beta2&#x27;: 0.999}
+Typed dict: {&#x27;learning_rate&#x27;: 0.0003}</samp>
+</pre>
+
+<pre>
+<samp>$ <kbd>python ./11_dictionaries.py --typed-dict.betas 0.9 0.999</kbd>
+Standard dict: {&#x27;learning_rate&#x27;: 0.0003, &#x27;beta1&#x27;: 0.9, &#x27;beta2&#x27;: 0.999}
+Typed dict: {&#x27;betas&#x27;: (0.9, 0.999)}</samp>
 </pre>
 
 </blockquote>

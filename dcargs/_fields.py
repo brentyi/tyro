@@ -9,7 +9,7 @@ from typing import Any, Callable, List, Optional, Type, TypeVar, Union
 import docstring_parser
 from typing_extensions import get_type_hints, is_typeddict
 
-from . import _docstrings, _resolver
+from . import _docstrings, _instantiators, _parsers, _resolver
 
 
 @dataclasses.dataclass(frozen=True)
@@ -44,11 +44,16 @@ class NonpropagatingMissingType(_Singleton):
     pass
 
 
+class ExcludeFromKwargsType(_Singleton):
+    pass
+
+
 # We have two types of missing sentinels: a propagating missing value, which when set as
 # a default will set all child values of nested structures as missing as well, and a
 # nonpropagating missing sentinel, which does not override child defaults.
 MISSING_PROP = PropagatingMissingType()
 MISSING_NONPROP = NonpropagatingMissingType()
+EXCLUDE_FROM_CALL = ExcludeFromKwargsType()
 
 # Note that our "public" missing API will always be the propagating missing sentinel.
 MISSING_PUBLIC: Any = MISSING_PROP
@@ -98,16 +103,28 @@ def field_list_from_callable(
     if cls is not None and is_typeddict(cls):
         # Handle typed dictionaries.
         field_list = []
-        no_default_instance = default_instance in MISSING_SINGLETONS
-        assert no_default_instance or isinstance(default_instance, dict)
+        valid_default_instance = (
+            default_instance not in MISSING_SINGLETONS
+            and default_instance is not EXCLUDE_FROM_CALL
+        )
+        assert not valid_default_instance or isinstance(default_instance, dict)
         for name, typ in get_type_hints(cls).items():
+            if valid_default_instance:
+                default = default_instance.get(name, MISSING_PROP)  # type: ignore
+            elif getattr(cls, "__total__") is False:
+                default = EXCLUDE_FROM_CALL
+                if _parsers.is_possibly_nested_type(typ):
+                    raise _instantiators.UnsupportedTypeAnnotationError(
+                        "`total=False` not supported for nested structures."
+                    )
+            else:
+                default = MISSING_PROP
+
             field_list.append(
                 FieldDefinition(
                     name=name,
                     typ=typ,
-                    default=MISSING_PROP
-                    if no_default_instance
-                    else default_instance.get(name, MISSING_PROP),  # type: ignore
+                    default=default,
                     helptext=_docstrings.get_field_docstring(cls, name),
                     positional=False,
                 )
