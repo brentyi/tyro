@@ -155,9 +155,10 @@ def call_from_args(
                 )
                 consumed_keywords |= consumed_keywords_child
 
-        if field.positional:
-            args.append(value)
-        else:
-            kwargs[field.name] = value
+        if value is not _fields.EXCLUDE_FROM_CALL:
+            if field.positional:
+                args.append(value)
+            else:
+                kwargs[field.name] = value
 
     return f(*args, **kwargs), consumed_keywords  # type: ignore

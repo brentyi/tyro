@@ -50,7 +50,7 @@ _known_parsable_types = set(
 )
 
 
-def _is_possibly_nested_type(typ: Any) -> bool:
+def is_possibly_nested_type(typ: Any) -> bool:
     """Heuristics for determining whether a type can be treated as a 'nested type',
     where a single field has multiple corresponding arguments (eg for nested
     dataclasses or classes).
@@ -189,10 +189,10 @@ class ParserSpecification:
                     continue
                 else:
                     field = dataclasses.replace(field, typ=type(field.default))
-                    assert _is_possibly_nested_type(field.typ)
+                    assert is_possibly_nested_type(field.typ)
 
             # (2) Handle nested callables.
-            if _is_possibly_nested_type(field.typ):
+            if is_possibly_nested_type(field.typ):
                 nested_parser = ParserSpecification.from_callable(
                     field.typ,
                     description=None,
@@ -361,7 +361,7 @@ class SubparsersSpecification:
         # We don't use sets here to retain order of subcommands.
         options = [type_from_typevar.get(typ, typ) for typ in get_args(field.typ)]
         options_no_none = [o for o in options if o != type(None)]  # noqa
-        if not all(map(_is_possibly_nested_type, options_no_none)):
+        if not all(map(is_possibly_nested_type, options_no_none)):
             return None
 
         parser_from_name: Dict[str, ParserSpecification] = {}

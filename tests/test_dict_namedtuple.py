@@ -63,22 +63,55 @@ def test_basic_typeddict():
     class ManyTypesTypedDict(TypedDict):
         i: int
         s: str
-        f: float
-        p: pathlib.Path
 
     assert dcargs.cli(
         ManyTypesTypedDict,
-        args=[
-            "--i",
-            "5",
-            "--s",
-            "5",
-            "--f",
-            "5",
-            "--p",
-            "~",
-        ],
-    ) == dict(i=5, s="5", f=5.0, p=pathlib.Path("~"))
+        args="--i 5 --s 5".split(" "),
+    ) == dict(i=5, s="5")
+
+    with pytest.raises(SystemExit):
+        dcargs.cli(ManyTypesTypedDict, args="--i 5".split(" "))
+
+    with pytest.raises(SystemExit):
+        dcargs.cli(ManyTypesTypedDict, args="--s 5".split(" "))
+
+
+def test_total_false_typeddict():
+    class ManyTypesTypedDict(TypedDict, total=False):
+        i: int
+        s: str
+
+    assert dcargs.cli(
+        ManyTypesTypedDict,
+        args="--i 5 --s 5".split(" "),
+    ) == dict(i=5, s="5")
+
+    assert dcargs.cli(ManyTypesTypedDict, args="--i 5".split(" ")) == dict(i=5)
+    assert dcargs.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
+
+
+def test_total_false_nested_typeddict():
+    class ChildTypedDict(TypedDict, total=False):
+        i: int
+        s: str
+
+    class ParentTypedDict(TypedDict, total=False):
+        child: ChildTypedDict
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(
+            ParentTypedDict,
+            args="--child.i 5 --child.s 5".split(" "),
+        )
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        assert (
+            dcargs.cli(
+                ParentTypedDict,
+                args=[""],
+            )
+            == {}
+        )
 
 
 def test_nested_typeddict():
