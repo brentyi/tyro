@@ -1,4 +1,4 @@
-"""Abstractions for creating argparse parsers from a dataclass definition."""
+"""Interface for generating `argparse.ArgumentParser()` definitions from callables."""
 
 from __future__ import annotations
 
@@ -25,7 +25,15 @@ import termcolor
 import typing_extensions
 from typing_extensions import get_args, get_origin, is_typeddict
 
-from . import _arguments, _docstrings, _fields, _instantiators, _resolver, _strings
+from . import (
+    _argparse_formatter,
+    _arguments,
+    _docstrings,
+    _fields,
+    _instantiators,
+    _resolver,
+    _strings,
+)
 
 T = TypeVar("T")
 
@@ -44,7 +52,7 @@ _known_parsable_types = set(
 
 def _is_possibly_nested_type(typ: Any) -> bool:
     """Heuristics for determining whether a type can be treated as a 'nested type',
-    where a single field has multiple corresponding argumentsi (eg for nested
+    where a single field has multiple corresponding arguments (eg for nested
     dataclasses or classes).
 
     Examples of when we return False: int, str, List[int], List[str], pathlib.Path, etc.
@@ -298,7 +306,10 @@ class ParserSpecification:
                         metavar=metavar,
                     )
                     for name, subparser_def in subparsers.parser_from_name.items():
-                        subparser = argparse_subparsers.add_parser(name)
+                        subparser = argparse_subparsers.add_parser(
+                            name,
+                            formatter_class=_argparse_formatter.ArgparseHelpFormatter,
+                        )
                         subparser_def.apply(subparser)
 
                         def _get_leaf_subparsers(
@@ -337,7 +348,7 @@ class SubparsersSpecification:
 
     @staticmethod
     def from_field(
-        field: _fields.Field,
+        field: _fields.FieldDefinition,
         type_from_typevar: Dict[TypeVar, Type],
         parent_classes: Set[Type],
         prefix: str,

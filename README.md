@@ -1,30 +1,98 @@
 # dcargs
 
+```bash
+pip install dcargs
+```
+
 ![build](https://github.com/brentyi/dcargs/workflows/build/badge.svg)
 ![mypy](https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master)
 ![lint](https://github.com/brentyi/dcargs/workflows/lint/badge.svg)
 [![codecov](https://codecov.io/gh/brentyi/dcargs/branch/master/graph/badge.svg)](https://codecov.io/gh/brentyi/dcargs)
 
 - [Overview](#overview)
+- [API](#api)
 - [Examples](#examples)
 - [Serialization](#serialization)
 - [Alternative tools](#alternative-tools)
 
 ## Overview
 
-```bash
-pip install dcargs
-```
-
 **`dcargs`** is a library for typed CLI interfaces and configuration objects.
 
-Our core interface generates an argument parser from a type-annotated callable
-_`f`_, which may be a function, class, or dataclass:
+Our core interface generates argument parsers from type-annotated callables. In
+the simplest case, this can be used as a drop-in replacement for `argparse`:
+
+<table>
+<tr>
+<td><strong>with argparse</strong></td>
+<td><strong>with dcargs</strong></td>
+</tr>
+<tr>
+<td>
 
 ```python
-dcargs.cli(
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--a", type=int, required=True)
+parser.add_argument("--b", type=int, default=1)
+args = parser.parse_args()
+
+print(args.a + args.b)
+```
+
+</td>
+<td>
+
+```python
+import dcargs
+
+def main(a: int, b: int = 3) -> None:
+    print(a + b)
+
+dcargs.cli(main)
+```
+
+</td>
+</tr>
+</table>
+
+The broader goal is a replacement for tools like `argparse`, `hydra`, and
+`ml_collections` that's:
+
+- **Low effort.** Standard Python type annotations, docstrings, and default
+  values are parsed to automatically generate argument parsers with informative
+  helptext.
+
+- **Expressive.** `dcargs.cli()` understands functions, classes, dataclasses,
+  and _nested_ classes and dataclasses, as well as frequently used annotations
+  like unions, literals, collections, and generics, which can be composed into
+  hierarchical configuration objects built on standard Python features.
+
+- **Typed.** Unlike dynamic configuration namespaces produced by libraries like
+  `argparse`, `YACS`, `abseil`, `hydra`, or `ml_collections`, typed outputs mean
+  that IDE-assisted autocomplete, rename, refactor, and go-to-definition
+  operations work out-of-the-box, as well as static checking tools like `mypy`
+  and `pyright`.
+
+- **Modular.** Most approaches to configuration objects require a centralized
+  definition of all configurable fields. Hierarchically nesting configuration
+  structures, however, makes it easy to distribute definitions, defaults, and
+  documentation of configurable fields across modules or source files. A model
+  configuration dataclass, for example, can be co-located in its entirety with
+  the model implementation and dropped into any experiment configuration with an
+  import — this eliminates redundancy and makes entire modules easy to port
+  across codebases.
+
+## API
+
+<!-- START SIGNATURE -->
+
+```python
+def cli(
     f: Callable[..., T],
     *,
+    prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[T] = None,
@@ -32,8 +100,10 @@ dcargs.cli(
 ) -> T
 ```
 
+<!-- END SIGNATURE -->
+
 <details>
-<summary><em>Docstring</em></summary>
+<summary><strong>Docstring</strong></summary>
 
 <!-- START DOCSTRING -->
 
@@ -98,33 +168,6 @@ Returns:
 
 </details>
 
----
-
-The goal is a tool that's lightweight enough for simple interactive scripts, but
-flexible enough to replace heavier configuration frameworks like `hydra` and
-`ml_collections`. Notably, `dcargs.cli()` supports _nested_ classes and
-dataclasses, which enable expressive hierarchical configuration objects built on
-standard Python features.
-
-Ultimately, we aim to enable configuration interfaces that are:
-
-- **Low-effort.** Type annotations, docstrings, and default values can be used
-  to automatically generate argument parsers with informative helptext. This
-  includes bells and whistles like enums, containers, etc.
-- **Strongly typed.** Unlike dynamic configuration namespaces produced by
-  libraries like `argparse`, `YACS`, `abseil`, `hydra`, or `ml_collections`,
-  typed outputs mean that IDE-assisted autocomplete, rename, refactor,
-  go-to-definition operations work out-of-the-box, as do static checking tools
-  like `mypy` and `pyright`.
-- **Modular.** Most approaches to configuration objects require a centralized
-  definition of all configurable fields. Supporting hierarchically nested
-  configuration structures, however, makes it easy to distribute definitions,
-  defaults, and documentation of configurable fields across modules or source
-  files. A model configuration dataclass, for example, can be co-located in its
-  entirety with the model implementation and dropped into any experiment
-  configuration with an import — this eliminates redundancy and makes the entire
-  module easy to port across codebases.
-
 ## Examples
 
 <!-- START EXAMPLES -->
@@ -134,8 +177,8 @@ Ultimately, we aim to enable configuration interfaces that are:
 </summary>
 <blockquote>
 
-In the simplest case, `dcargs.cli()` can be used to run a function with arguments
-populated from the CLI.
+In the simplest case, `dcargs.cli()` can be used to run a function with
+arguments populated from the CLI.
 
 **Code ([link](examples/01_functions.py)):**
 
@@ -171,7 +214,7 @@ usage: 01_functions.py [-h] --field1 STR [--field2 INT]
 Function, whose arguments will be populated from a CLI interface.
 
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help    show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)</samp>
 </pre>
@@ -195,8 +238,8 @@ hello 10</samp>
 </summary>
 <blockquote>
 
-Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted instance
-can be used as a typed alternative for an argparse namespace.
+Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted
+instance can be used as a typed alternative for an argparse namespace.
 
 **Code ([link](examples/02_dataclasses.py)):**
 
@@ -228,10 +271,11 @@ if __name__ == "__main__":
 <samp>$ <kbd>python ./02_dataclasses.py --help</kbd>
 usage: 02_dataclasses.py [-h] --field1 STR [--field2 INT]
 
-Description. This should show up in the helptext!
+Description.
+This should show up in the helptext!
 
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help    show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)</samp>
 </pre>
@@ -255,8 +299,8 @@ Args(field1=&#x27;hello&#x27;, field2=5)</samp>
 </summary>
 <blockquote>
 
-We can generate argument parsers from more advanced type annotations, like enums and
-tuple types.
+We can generate argument parsers from more advanced type annotations, like enums
+and tuple types.
 
 **Code ([link](examples/03_enums_and_containers.py)):**
 
@@ -316,11 +360,14 @@ arguments:
                         Paths to load training data from. This can be
                         multiple! (required)
   --image-dimensions INT INT
-                        Height and width of some image data. (default: 32 32)
+                        Height and width of some image data. (default: 32
+                        32)
   --optimizer-type {ADAM,SGD}
-                        Gradient-based optimizer to use. (default: ADAM)
+                        Gradient-based optimizer to use. (default:
+                        ADAM)
   --checkpoint-interval {None}|INT
-                        Interval to save checkpoints at. (default: None)</samp>
+                        Interval to save checkpoints at. (default:
+                        None)</samp>
 </pre>
 
 <pre>
@@ -342,8 +389,8 @@ TrainConfig(dataset_sources=(PosixPath(&#x27;data&#x27;),), image_dimensions=(32
 </summary>
 <blockquote>
 
-Booleans can either be expected to be explicitly passed in, or, if given a default
-value, automatically converted to flags.
+Booleans can either be expected to be explicitly passed in, or, if given a
+default value, automatically converted to flags.
 
 **Code ([link](examples/04_flags.py)):**
 
@@ -391,10 +438,10 @@ arguments:
   --optional-boolean {None,True,False}
                         Optional boolean. Same as above, but can be omitted.
                         (required)
-  --flag-a              Pass --flag-a in to set this value to True. (sets
+  --flag-a              Pass --flag-a in to set this value to True. (sets:
                         flag_a=True)
-  --no-flag-b           Pass --no-flag-b in to set this value to False. (sets
-                        flag_b=False)</samp>
+  --no-flag-b           Pass --no-flag-b in to set this value to False.
+                        (sets: flag_b=False)</samp>
 </pre>
 
 <pre>
@@ -475,7 +522,6 @@ class ExperimentConfig:
 
 def train(
     out_dir: pathlib.Path,
-    /,
     config: ExperimentConfig,
     restore_checkpoint: bool = False,
     checkpoint_interval: int = 1000,
@@ -503,7 +549,7 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./05_hierarchical_configs.py --help</kbd>
-usage: 05_hierarchical_configs.py [-h]
+usage: 05_hierarchical_configs.py [-h] --out-dir PATH
                                   [--config.optimizer.algorithm {ADAM,SGD}]
                                   [--config.optimizer.learning-rate FLOAT]
                                   [--config.optimizer.weight-decay FLOAT]
@@ -511,30 +557,30 @@ usage: 05_hierarchical_configs.py [-h]
                                   [--config.train-steps INT]
                                   [--config.seed INT] [--restore-checkpoint]
                                   [--checkpoint-interval INT]
-                                  OUT_DIR
 
 Train a model.
 
-positional arguments:
-  OUT_DIR               Where to save logs and checkpoints. (required)
-
 arguments:
   -h, --help            show this help message and exit
-  --restore-checkpoint  Set to restore an existing checkpoint. (sets
+  --out-dir PATH  Where to save logs and checkpoints.
+                        (required)
+  --restore-checkpoint  Set to restore an existing checkpoint. (sets:
                         restore_checkpoint=True)
   --checkpoint-interval INT
-                        Training steps between each checkpoint save. (default:
-                        1000)
+                        Training steps between each checkpoint save.
+                        (default: 1000)
 
 config.optimizer arguments:
   Various configurable options for our optimizer.
 
   --config.optimizer.algorithm {ADAM,SGD}
-                        Gradient-based optimizer to use. (default: ADAM)
+                        Gradient-based optimizer to use. (default:
+                        ADAM)
   --config.optimizer.learning-rate FLOAT
                         Learning rate to use. (default: 0.0003)
   --config.optimizer.weight-decay FLOAT
-                        Coefficient for L2 regularization. (default: 0.01)
+                        Coefficient for L2 regularization. (default:
+                        0.01)
 
 config arguments:
   Experiment configuration.
@@ -542,40 +588,36 @@ config arguments:
   --config.batch-size INT
                         Batch size. (default: 32)
   --config.train-steps INT
-                        Total number of training steps. (default: 100000)
-  --config.seed INT
-                        Random seed. This is helpful for making sure that our
+                        Total number of training steps. (default:
+                        100000)
+  --config.seed INT  Random seed. This is helpful for making sure that our
                         experiments are all reproducible! (default: 0)</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./05_hierarchical_configs.py . --config.optimizer.algorithm SGD</kbd>
-out_dir=PosixPath(&#x27;.&#x27;), restore_checkpoint=False, checkpoint_interval=1000
-config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
-# dcargs YAML.
-!dataclass:ExperimentConfig
-batch_size: 32
-optimizer: !dataclass:OptimizerConfig
-  algorithm: !enum:OptimizerType &#x27;SGD&#x27;
-  learning_rate: 0.0003
-  weight_decay: 0.01
-seed: 0
-train_steps: 100000</samp>
+usage: 05_hierarchical_configs.py [-h] --out-dir PATH
+                                  [--config.optimizer.algorithm {ADAM,SGD}]
+                                  [--config.optimizer.learning-rate FLOAT]
+                                  [--config.optimizer.weight-decay FLOAT]
+                                  [--config.batch-size INT]
+                                  [--config.train-steps INT]
+                                  [--config.seed INT] [--restore-checkpoint]
+                                  [--checkpoint-interval INT]
+05_hierarchical_configs.py: error: the following arguments are required: --out-dir</samp>
 </pre>
 
 <pre>
 <samp>$ <kbd>python ./05_hierarchical_configs.py . --restore-checkpoint</kbd>
-out_dir=PosixPath(&#x27;.&#x27;), restore_checkpoint=True, checkpoint_interval=1000
-config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
-# dcargs YAML.
-!dataclass:ExperimentConfig
-batch_size: 32
-optimizer: !dataclass:OptimizerConfig
-  algorithm: !enum:OptimizerType &#x27;ADAM&#x27;
-  learning_rate: 0.0003
-  weight_decay: 0.01
-seed: 0
-train_steps: 100000</samp>
+usage: 05_hierarchical_configs.py [-h] --out-dir PATH
+                                  [--config.optimizer.algorithm {ADAM,SGD}]
+                                  [--config.optimizer.learning-rate FLOAT]
+                                  [--config.optimizer.weight-decay FLOAT]
+                                  [--config.batch-size INT]
+                                  [--config.train-steps INT]
+                                  [--config.seed INT] [--restore-checkpoint]
+                                  [--checkpoint-interval INT]
+05_hierarchical_configs.py: error: the following arguments are required: --out-dir</samp>
 </pre>
 
 </blockquote>
@@ -587,16 +629,18 @@ train_steps: 100000</samp>
 </summary>
 <blockquote>
 
-We can integrate `dcargs.cli()` into common configuration patterns: here, we select
-one of multiple possible base configurations, and then use the CLI to either override
-(existing) or fill in (missing) values.
+We can integrate `dcargs.cli()` into common configuration patterns: here, we
+select one of multiple possible base configurations, and then use the CLI to
+either override (existing) or fill in (missing) values.
 
 **Code ([link](examples/06_base_configs.py)):**
 
 ```python
 import sys
 from dataclasses import dataclass
-from typing import Dict, Literal, Tuple, TypeVar, Union
+from typing import Callable, Dict, Literal, Tuple, TypeVar, Union
+
+from torch import nn
 
 import dcargs
 
@@ -634,6 +678,9 @@ class ExperimentConfig:
     # reproducible!
     seed: int
 
+    # Activation to use. Not specifiable via the commandline.
+    activation: Callable[[], nn.Module]
+
 
 # Note that we could also define this library using separate YAML files (similar to
 # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
@@ -649,6 +696,7 @@ base_configs = {
         # The dcargs.MISSING sentinel allows us to specify that the seed should have no
         # default, and needs to be populated from the CLI.
         seed=dcargs.MISSING,
+        activation=nn.ReLU,
     ),
     "big": ExperimentConfig(
         dataset="imagenet-50",
@@ -658,6 +706,7 @@ base_configs = {
         units=256,
         train_steps=100_000,
         seed=dcargs.MISSING,
+        activation=nn.GELU,
     ),
 }
 
@@ -710,20 +759,23 @@ usage: examples/06_base_configs.py small [-h] [--dataset {mnist,imagenet-50}]
                                          [--num-layers INT] [--units INT]
                                          [--batch-size INT]
                                          [--train-steps INT] --seed INT
+                                         [--activation {&lt;class &#x27;torch.nn.modules.activation.ReLU&#x27;&gt;}]
 
 arguments:
   -h, --help            show this help message and exit
   --dataset {mnist,imagenet-50}
                         Dataset to run experiment on. (default: mnist)
-  --num-layers INT
-                        Model size. (default: 4)
+  --num-layers INT  Model size. (default: 4)
   --units INT   Model size. (default: 64)
-  --batch-size INT
-                        Batch size. (default: 2048)
-  --train-steps INT
-                        Total number of training steps. (default: 30000)
+  --batch-size INT  Batch size. (default: 2048)
+  --train-steps INT  Total number of training steps. (default:
+                        30000)
   --seed INT    Random seed. This is helpful for making sure that our
-                        experiments are all reproducible! (required)
+                        experiments are all reproducible!
+                        (required)
+  --activation {&lt;class &#x27;torch.nn.modules.activation.ReLU&#x27;&gt;}
+                        Activation to use. Not specifiable via the
+                        commandline. (not parsable)
 
 optimizer arguments:
   Optimizer parameters.
@@ -734,7 +786,7 @@ optimizer arguments:
 
 <pre>
 <samp>$ <kbd>python ./06_base_configs_argv.py small --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720)</samp>
+ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class &#x27;torch.nn.modules.activation.ReLU&#x27;&gt;)</samp>
 </pre>
 
 <pre>
@@ -745,20 +797,24 @@ usage: examples/06_base_configs.py big [-h] [--dataset {mnist,imagenet-50}]
                                        [--num-layers INT] [--units INT]
                                        [--batch-size INT] [--train-steps INT]
                                        --seed INT
+                                       [--activation {&lt;class &#x27;torch.nn.modules.activation.GELU&#x27;&gt;}]
 
 arguments:
   -h, --help            show this help message and exit
   --dataset {mnist,imagenet-50}
-                        Dataset to run experiment on. (default: imagenet-50)
-  --num-layers INT
-                        Model size. (default: 8)
+                        Dataset to run experiment on. (default:
+                        imagenet-50)
+  --num-layers INT  Model size. (default: 8)
   --units INT   Model size. (default: 256)
-  --batch-size INT
-                        Batch size. (default: 32)
-  --train-steps INT
-                        Total number of training steps. (default: 100000)
+  --batch-size INT  Batch size. (default: 32)
+  --train-steps INT  Total number of training steps. (default:
+                        100000)
   --seed INT    Random seed. This is helpful for making sure that our
-                        experiments are all reproducible! (required)
+                        experiments are all reproducible!
+                        (required)
+  --activation {&lt;class &#x27;torch.nn.modules.activation.GELU&#x27;&gt;}
+                        Activation to use. Not specifiable via the
+                        commandline. (not parsable)
 
 optimizer arguments:
   Optimizer parameters.
@@ -771,7 +827,7 @@ optimizer arguments:
 
 <pre>
 <samp>$ <kbd>python ./06_base_configs_argv.py big --seed 94720</kbd>
-ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720)</samp>
+ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class &#x27;torch.nn.modules.activation.GELU&#x27;&gt;)</samp>
 </pre>
 
 </blockquote>
@@ -783,8 +839,9 @@ ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learni
 </summary>
 <blockquote>
 
-`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices;
-`typing.Union[]` can be used to restrict inputs to a fixed set of types.
+`typing.Literal[]` can be used to restrict inputs to a fixed set of literal
+choices; `typing.Union[]` can be used to restrict inputs to a fixed set of
+types.
 
 **Code ([link](examples/07_literals_and_unions.py)):**
 
@@ -847,9 +904,11 @@ arguments:
   -h, --help            show this help message and exit
   --restricted-enum {RED,GREEN}
                         We can use Literal[] to restrict the set of allowable
-                        inputs, for example, over enums. (default: RED)
+                        inputs, for example, over enums. (default:
+                        RED)
   --integer {None,0,1,2,3}
-                        Literals can also be marked Optional. (default: None)
+                        Literals can also be marked Optional. (default:
+                        None)
   --union-over-types INT|STR
                         Unions can be used to specify multiple allowable
                         types. (default: 0)
@@ -860,7 +919,8 @@ arguments:
                         Unions also work over more complex nested types.
                         (default: 1)
   --tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]
-                        And can be nested in other types. (default: red RED)</samp>
+                        And can be nested in other types. (default: red
+                        RED)</samp>
 </pre>
 
 </blockquote>
@@ -872,7 +932,8 @@ arguments:
 </summary>
 <blockquote>
 
-Positional-only arguments in functions are converted to positional CLI arguments.
+Positional-only arguments in functions are converted to positional CLI
+arguments.
 
 **Code ([link](examples/08_positional_args.py)):**
 
@@ -952,21 +1013,25 @@ positional arguments:
 
 arguments:
   -h, --help            show this help message and exit
-  --force               Do not prompt before overwriting. (sets force=True)
-  --verbose             Explain what is being done. (sets verbose=True)
+  --force               Do not prompt before overwriting. (sets:
+                        force=True)
+  --verbose             Explain what is being done. (sets:
+                        verbose=True)
   --background-rgb FLOAT FLOAT FLOAT
-                        Background color. Red by default. (default: 1.0 0.0
-                        0.0)
+                        Background color. Red by default. (default: 1.0
+                        0.0 0.0)
 
 optimizer arguments:
   Configuration for our optimizer object.
 
   --optimizer.algorithm {ADAM,SGD}
-                        Gradient-based optimizer to use. (default: ADAM)
+                        Gradient-based optimizer to use. (default:
+                        ADAM)
   --optimizer.learning-rate FLOAT
                         Learning rate to use. (default: 0.0003)
   --optimizer.weight-decay FLOAT
-                        Coefficient for L2 regularization. (default: 0.01)</samp>
+                        Coefficient for L2 regularization. (default:
+                        0.01)</samp>
 </pre>
 
 <pre>
@@ -988,7 +1053,8 @@ background_rgb=(1.0, 0.0, 0.0)</samp>
 </summary>
 <blockquote>
 
-Unions over nested types (classes or dataclasses) are populated using subparsers.
+Unions over nested types (classes or dataclasses) are populated using
+subparsers.
 
 **Code ([link](examples/09_subparsers.py)):**
 
@@ -1047,12 +1113,11 @@ usage: 09_subparsers.py commit [-h] --cmd.message STR [--cmd.all]
 Commit changes.
 
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help         show this help message and exit
 
 cmd arguments:
-  --cmd.message STR
-                        (required)
-  --cmd.all             (sets all=True)</samp>
+  --cmd.message STR  (required)
+  --cmd.all          (sets: all=True)</samp>
 </pre>
 
 <pre>
@@ -1067,11 +1132,10 @@ usage: 09_subparsers.py checkout [-h] --cmd.branch STR
 Checkout a branch.
 
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help        show this help message and exit
 
 cmd arguments:
-  --cmd.branch STR
-                        (required)</samp>
+  --cmd.branch STR  (required)</samp>
 </pre>
 
 <pre>
@@ -1173,7 +1237,7 @@ arguments:
   -h, --help            show this help message and exit
 
 optional subcommands:
-  Dataset to train on. (default: mnist-dataset)
+  Dataset to train on.  (default: mnist-dataset)
 
   [{mnist-dataset,image-net-dataset}]</samp>
 </pre>
@@ -1182,17 +1246,16 @@ optional subcommands:
 <samp>$ <kbd>python ./10_multiple_subparsers.py mnist-dataset --help</kbd>
 usage: 10_multiple_subparsers.py mnist-dataset [-h] [--dataset.binary]
                                                [{adam-optimizer,sgd-optimizer}]
-                                               ...
 
 arguments:
   -h, --help            show this help message and exit
 
 dataset arguments:
-  --dataset.binary      Set to load binary version of MNIST dataset. (sets
-                        binary=True)
+  --dataset.binary      Set to load binary version of MNIST dataset.
+                        (sets: binary=True)
 
 optional subcommands:
-  Optimizer to train with. (default: adam-optimizer)
+  Optimizer to train with.  (default: adam-optimizer)
 
   [{adam-optimizer,sgd-optimizer}]</samp>
 </pre>
@@ -1212,32 +1275,34 @@ AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</samp>
 </summary>
 <blockquote>
 
-Dictionary inputs can be specified using either a standard `Dict[K, V]` annotation,
-or a `TypedDict` type.
+Dictionary inputs can be specified using either a standard `Dict[K, V]`
+annotation, or a `TypedDict` type.
 
-Note that setting `total=False` for `TypedDict` is currently not (but reasonably could be)
-supported.
+Note that setting `total=False` for `TypedDict` is currently not (but reasonably
+could be) supported.
 
 **Code ([link](examples/11_dictionaries.py)):**
 
 ```python
-from typing import Dict, TypedDict
+from typing import Dict, Tuple, TypedDict
 
 import dcargs
 
 
 class DictionarySchema(TypedDict):
-    field1: str  # A string field.
-    field2: int  # A numeric field.
-    field3: bool  # A boolean field.
+    learning_rate: float
+    betas: Tuple[float, float]
 
 
 def main(
-    standard_dict: Dict[str, bool],
+    standard_dict: Dict[str, float] = {
+        "learning_rate": 3e-4,
+        "beta1": 0.9,
+        "beta2": 0.999,
+    },
     typed_dict: DictionarySchema = {
-        "field1": "hey",
-        "field2": 3,
-        "field3": False,
+        "learning_rate": 3e-4,
+        "betas": (0.9, 0.999),
     },
 ) -> None:
     assert isinstance(standard_dict, dict)
@@ -1256,28 +1321,22 @@ if __name__ == "__main__":
 
 <pre>
 <samp>$ <kbd>python ./11_dictionaries.py --help</kbd>
-usage: 11_dictionaries.py [-h] --standard-dict STR {True,False}
-                          [--typed-dict.field1 STR] [--typed-dict.field2 INT]
-                          [--typed-dict.field3]
+usage: 11_dictionaries.py [-h] [--standard-dict STR FLOAT [STR FLOAT ...]]
+                          [--typed-dict.learning-rate FLOAT]
+                          [--typed-dict.betas FLOAT FLOAT]
 
 arguments:
   -h, --help            show this help message and exit
-  --standard-dict STR {True,False}
-                        (required)
+  --standard-dict STR FLOAT [STR FLOAT ...]
+                        (default: learning_rate 0.0003 beta1 0.9 beta2
+                        0.999)
 
 typed_dict arguments:
 
-  --typed-dict.field1 STR
-                        A string field. (default: hey)
-  --typed-dict.field2 INT
-                        A numeric field. (default: 3)
-  --typed-dict.field3   A boolean field. (sets field3=True)</samp>
-</pre>
-
-<pre>
-<samp>$ <kbd>python ./11_dictionaries.py --standard-dict key1 True key2 False</kbd>
-Standard dict: {&#x27;key1&#x27;: True, &#x27;key2&#x27;: False}
-Typed dict: {&#x27;field1&#x27;: &#x27;hey&#x27;, &#x27;field2&#x27;: 3, &#x27;field3&#x27;: False}</samp>
+  --typed-dict.learning-rate FLOAT
+                        (default: 0.0003)
+  --typed-dict.betas FLOAT FLOAT
+                        (default: 0.9 0.999)</samp>
 </pre>
 
 </blockquote>
@@ -1322,13 +1381,14 @@ if __name__ == "__main__":
 <samp>$ <kbd>python ./12_named_tuples.py --help</kbd>
 usage: 12_named_tuples.py [-h] --field1 STR [--field2 INT] [--flag]
 
-Description. This should show up in the helptext!
+Description.
+This should show up in the helptext!
 
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help    show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field, with a default value. (default: 3)
-  --flag                A boolean flag. (sets flag=True)</samp>
+  --flag        A boolean flag. (sets: flag=True)</samp>
 </pre>
 
 <pre>
@@ -1387,10 +1447,10 @@ usage: 13_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
 Arguments.
 
 arguments:
-  -h, --help            show this help message and exit
+  -h, --help    show this help message and exit
   --field1 STR  A string field. (required)
   --field2 INT  A numeric field. (required)
-  --flag                A boolean flag. (sets flag=True)</samp>
+  --flag        A boolean flag. (sets: flag=True)</samp>
 </pre>
 
 <pre>
@@ -1492,34 +1552,25 @@ point_discrete arguments:
 
 shape.a arguments:
 
-  --shape.a.x FLOAT
-                        (required)
-  --shape.a.y FLOAT
-                        (required)
-  --shape.a.z FLOAT
-                        (required)
+  --shape.a.x FLOAT  (required)
+  --shape.a.y FLOAT  (required)
+  --shape.a.z FLOAT  (required)
   --shape.a.frame-id STR
                         (required)
 
 shape.b arguments:
 
-  --shape.b.x FLOAT
-                        (required)
-  --shape.b.y FLOAT
-                        (required)
-  --shape.b.z FLOAT
-                        (required)
+  --shape.b.x FLOAT  (required)
+  --shape.b.y FLOAT  (required)
+  --shape.b.z FLOAT  (required)
   --shape.b.frame-id STR
                         (required)
 
 shape.c arguments:
 
-  --shape.c.x FLOAT
-                        (required)
-  --shape.c.y FLOAT
-                        (required)
-  --shape.c.z FLOAT
-                        (required)
+  --shape.c.x FLOAT  (required)
+  --shape.c.y FLOAT  (required)
+  --shape.c.z FLOAT  (required)
   --shape.c.frame-id STR
                         (required)</samp>
 </pre>
@@ -1544,6 +1595,12 @@ PyYAML, etc), explicit type references enable custom tags that are robust
 against code reorganization and refactor, while a PyYAML backend enables
 serialization of arbitrary Python objects.
 
+Note that we generally prefer to use YAML purely for serialization, as opposed
+to a configuration interface that humans are expected to manually write or
+modify. Specifying things like loadable base configurations can be done directly
+in Python, which enables all of the usual autocompletion and type checking
+features.
+
 ## Alternative tools
 
 The core functionality of `dcargs` — generating argument parsers from type
@@ -1567,4 +1624,5 @@ Note that most of these other libraries are generally aimed specifically at
 _dataclasses_ rather than general typed callables, but offer other features that
 you might find useful, such as registration for custom types (`pyrallis`),
 different approaches for serialization and config files (`tap`, `pyrallis`),
-simultaneous parsing of multiple dataclasses (`simple-parsing`), etc.
+simultaneous parsing of multiple dataclasses (`simple-parsing`), etc. Pull
+requests are welcome if you're missing any of these. :slightly_smiling_face:

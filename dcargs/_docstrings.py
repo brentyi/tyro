@@ -1,4 +1,5 @@
-"""Helpers for parsing dataclass docstrings. Used for helptext generation."""
+"""Helpers for parsing docstrings. Used for helptext generation."""
+
 import dataclasses
 import functools
 import inspect

@@ -6,26 +6,27 @@ supported.
 
 Usage:
 `python ./11_dictionaries.py --help`
-`python ./11_dictionaries.py --standard-dict key1 True key2 False`
 """
 
-from typing import Dict, TypedDict
+from typing import Dict, Tuple, TypedDict
 
 import dcargs
 
 
 class DictionarySchema(TypedDict):
-    field1: str  # A string field.
-    field2: int  # A numeric field.
-    field3: bool  # A boolean field.
+    learning_rate: float
+    betas: Tuple[float, float]
 
 
 def main(
-    standard_dict: Dict[str, bool],
+    standard_dict: Dict[str, float] = {
+        "learning_rate": 3e-4,
+        "beta1": 0.9,
+        "beta2": 0.999,
+    },
     typed_dict: DictionarySchema = {
-        "field1": "hey",
-        "field2": 3,
-        "field3": False,
+        "learning_rate": 3e-4,
+        "betas": (0.9, 0.999),
     },
 ) -> None:
     assert isinstance(standard_dict, dict)

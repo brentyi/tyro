@@ -21,7 +21,6 @@ setup(
         "typing_extensions>=4.3.0",
         "pyyaml",
         "termcolor",
-        "argparse-color-formatter",
         "backports.cached-property; python_version < '3.8.0'",
     ],
     extras_require={

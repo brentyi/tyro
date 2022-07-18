@@ -312,3 +312,73 @@ def test_union_over_collections_3():
         dcargs.cli(main, args=["--a"])
     with pytest.raises(SystemExit):
         dcargs.cli(main, args=[])
+
+
+def test_choices_in_tuples_0():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[bool, bool]
+
+    assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, False))
+
+
+def test_choices_in_tuples_1():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[bool, Literal["True", "False"]]
+
+    assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, "False"))
+
+
+def test_choices_in_tuples_2():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[bool, Literal["True", "False", "None"]]
+
+    assert dcargs.cli(A, args=["--x", "True", "False"]).x == (True, "False")
+    assert dcargs.cli(A, args=["--x", "False", "None"]).x == (False, "None")
+    with pytest.raises(SystemExit):
+        dcargs.cli(A, args=["--x", "None", "False"])
+
+
+def test_nested_tuple_types():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[Tuple[int, int], Tuple[str, str]]
+
+    assert dcargs.cli(A, args="--x 5 5 5 5".split(" ")).x == ((5, 5), ("5", "5"))
+
+
+def test_variable_nested_tuple():
+    def main(x: Tuple[Tuple[int, str], ...]) -> tuple:
+        return x
+
+    assert dcargs.cli(main, args="--x 1 1 2 2".split(" ")) == ((1, "1"), (2, "2"))
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args="--x 1 1 2".split(" "))
+
+
+def test_super_nested():
+    def main(
+        x: Optional[
+            List[
+                Tuple[
+                    Optional[int],
+                    Literal[3, 4],
+                    Union[Tuple[int, int], Tuple[str, str]],
+                ]
+            ]
+        ] = None
+    ) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=[]) is None
+    assert dcargs.cli(main, args="--x None".split(" ")) is None
+    assert dcargs.cli(main, args="--x None 3 2 2".split(" ")) == [(None, 3, (2, 2))]
+    assert dcargs.cli(main, args="--x 2 3 x 2".split(" ")) == [(2, 3, ("x", "2"))]
+    assert dcargs.cli(main, args="--x 2 3 x 2 2 3 1 2".split(" ")) == [
+        (2, 3, ("x", "2")),
+        (2, 3, (1, 2)),
+    ]
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--help"])

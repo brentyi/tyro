@@ -123,7 +123,7 @@ def test_attrs_helptext():
         with contextlib.redirect_stdout(f):
             dcargs.cli(Helptext, args=["--help"])
     helptext = f.getvalue()
-    assert dcargs._strings.strip_color_codes(cast(str, Helptext.__doc__)) in helptext
+    assert dcargs._strings.strip_ansi_sequences(cast(str, Helptext.__doc__)) in helptext
 
     # Note that required detection seems to be broken here.
     assert "Documentation 1" in helptext

@@ -1,4 +1,4 @@
-"""Utilities for resolving generic types and forward references."""
+"""Utilities for resolving types and forward references."""
 
 import copy
 import dataclasses
@@ -60,7 +60,7 @@ def resolved_fields(cls: Type) -> List[dataclasses.Field]:
 def is_namedtuple(cls: Type) -> bool:
     return (
         hasattr(cls, "_fields")
-        # Remove in Python >=3.9.
+        # `_field_types` was removed in Python >=3.9.
         # and hasattr(cls, "_field_types")
         and hasattr(cls, "_field_defaults")
     )
