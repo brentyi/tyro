@@ -1,3 +1,5 @@
+"""Core public API."""
+
 import argparse
 from typing import Callable, Optional, Sequence, TypeVar, Union
 
@@ -109,11 +111,12 @@ def cli(
     )
 
     # Parse using argparse!
-    parser = argparse.ArgumentParser(
-        prog=prog, formatter_class=_argparse_formatter.ColorHelpFormatter
-    )
-    parser_definition.apply(parser)
-    value_from_prefixed_field_name = vars(parser.parse_args(args=args))
+    with _argparse_formatter.argparse_ansi_monkey_patch():
+        parser = argparse.ArgumentParser(
+            prog=prog, formatter_class=_argparse_formatter.ArgparseHelpFormatter
+        )
+        parser_definition.apply(parser)
+        value_from_prefixed_field_name = vars(parser.parse_args(args=args))
 
     try:
         # Attempt to call `f` using whatever was passed in.

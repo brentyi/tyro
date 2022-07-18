@@ -14,12 +14,15 @@ import dcargs._strings
 
 
 @dataclasses.dataclass(frozen=True)
-class Constants:
-    docstring_start: str = "<!-- START DOCSTRING -->"
-    docstring_marker_end: str = "<!-- END DOCSTRING -->"
+class Markers:
+    signature_start: str = "<!-- START SIGNATURE -->"
+    signature_end: str = "<!-- END SIGNATURE -->"
 
-    examples_marker_start: str = "<!-- START EXAMPLES -->"
-    examples_marker_end: str = "<!-- END EXAMPLES -->"
+    docstring_start: str = "<!-- START DOCSTRING -->"
+    docstring_end: str = "<!-- END DOCSTRING -->"
+
+    examples_start: str = "<!-- START EXAMPLES -->"
+    examples_end: str = "<!-- END EXAMPLES -->"
 
 
 def replace_between_markers(
@@ -76,9 +79,9 @@ def format_script_for_readme(path: pathlib.Path) -> str:
             env=dict(os.environ, **env_vars),
         )
         if process_output.stderr != "":
-            output = dcargs._strings.strip_color_codes(process_output.stderr).strip()
+            output = dcargs._strings.strip_ansi_sequences(process_output.stderr).strip()
         elif process_output.stdout != "":
-            output = dcargs._strings.strip_color_codes(process_output.stdout).strip()
+            output = dcargs._strings.strip_ansi_sequences(process_output.stdout).strip()
         else:
             assert False
         example_output_lines.extend(
@@ -124,7 +127,7 @@ def format_script_for_readme(path: pathlib.Path) -> str:
     )
 
 
-def get_examples_str(examples_dir: pathlib.Path, constants: Constants) -> str:
+def get_examples_str(examples_dir: pathlib.Path, markers: Markers) -> str:
     script_paths = filter(
         lambda p: not p.name.startswith("_"), sorted(examples_dir.glob("*.py"))
     )
@@ -143,26 +146,39 @@ REPO_ROOT = pathlib.Path(__file__).parent
 def main(
     readme_path: pathlib.Path = REPO_ROOT / "README.md",
     examples_dir: pathlib.Path = REPO_ROOT / "examples",
-    constants: Constants = Constants(),
+    markers: Markers = Markers(),
 ) -> None:
     """Helper script for generating the examples list in the README."""
 
     # Read.
     content = readme_path.read_text(encoding="utf8")
 
+    # Update signature.
+    signature_lines, _ = inspect.getsourcelines(dcargs.cli)
+    for i in range(len(signature_lines)):
+        if signature_lines[i].endswith(":\n"):
+            signature_lines = signature_lines[: i + 1]
+            break
+    content = replace_between_markers(
+        content,
+        markers.signature_start,
+        markers.signature_end,
+        "\n```python\n" + "".join(signature_lines).strip()[:-1] + "\n```\n",
+    )
+
     # Update examples.
     content = replace_between_markers(
         content,
-        constants.examples_marker_start,
-        constants.examples_marker_end,
-        get_examples_str(examples_dir, constants),
+        markers.examples_start,
+        markers.examples_end,
+        get_examples_str(examples_dir, markers),
     )
 
     # Update docstring.
     content = replace_between_markers(
         content,
-        constants.docstring_start,
-        constants.docstring_marker_end,
+        markers.docstring_start,
+        markers.docstring_end,
         f"\n\n```\n{inspect.getdoc(dcargs.cli)}\n```\n\n",
     )
 

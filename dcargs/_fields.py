@@ -1,5 +1,6 @@
-"""Abstractions for pulling out 'field' abstractions, which specify inputs, from
-general callables."""
+"""Abstractions for pulling out 'field' definitions, which specify inputs, types, and
+defaults, from general callables."""
+
 import dataclasses
 import inspect
 import warnings
@@ -12,7 +13,7 @@ from . import _docstrings, _resolver
 
 
 @dataclasses.dataclass(frozen=True)
-class Field:
+class FieldDefinition:
     name: str
     typ: Type
     default: Any
@@ -76,7 +77,7 @@ T = TypeVar("T")
 def field_list_from_callable(
     f: Callable[..., T],
     default_instance: Union[T, PropagatingMissingType, NonpropagatingMissingType],
-) -> List[Field]:
+) -> List[FieldDefinition]:
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
 
@@ -101,7 +102,7 @@ def field_list_from_callable(
         assert no_default_instance or isinstance(default_instance, dict)
         for name, typ in get_type_hints(cls).items():
             field_list.append(
-                Field(
+                FieldDefinition(
                     name=name,
                     typ=typ,
                     default=MISSING_PROP
@@ -131,7 +132,7 @@ def field_list_from_callable(
                 default = MISSING_PROP
 
             field_list.append(
-                Field(
+                FieldDefinition(
                     name=name,
                     typ=typ,
                     default=default,
@@ -148,7 +149,7 @@ def field_list_from_callable(
         ):
             default = _get_dataclass_field_default(dc_field, default_instance)
             field_list.append(
-                Field(
+                FieldDefinition(
                     name=dc_field.name,
                     typ=dc_field.type,
                     default=default,
@@ -198,7 +199,7 @@ def field_list_from_callable(
                 )
 
             field_list.append(
-                Field(
+                FieldDefinition(
                     name=param.name,
                     # Note that param.annotation does not resolve forward references.
                     typ=hints[param.name],

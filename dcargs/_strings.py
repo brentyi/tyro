@@ -1,11 +1,9 @@
-"""Utilities for working with strings."""
-import enum
+"""Utilities and constants for working with strings."""
+
 import functools
 import re
 import textwrap
-from typing import Type, TypeVar
-
-from typing_extensions import get_args
+from typing import Type
 
 from . import _resolver
 
@@ -44,40 +42,11 @@ def subparser_name_from_type(cls: Type) -> str:
     )
 
 
-T = TypeVar("T")
-
-
-def instance_from_string(typ: Type[T], arg: str) -> T:
-    """Given a type and and a string from the command-line, reconstruct an object. Not
-    intended to deal with containers.
-
-    This is intended to replace all calls to `type(string)`, which can cause unexpected
-    behavior. As an example, note that the following argparse code will always print
-    `True`, because `bool("True") == bool("False") == bool("0") == True`.
-    ```
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--flag", type=bool)
-
-    print(parser.parse_args().flag)
-    ```
-    """
-    assert len(get_args(typ)) == 0, f"Type {typ} cannot be instantiated."
-    if typ is bool:
-        return {"True": True, "False": False}[arg]  # type: ignore
-    elif isinstance(typ, type) and issubclass(typ, enum.Enum):
-        return typ[arg]  # type: ignore
-    elif typ is bytes:
-        return bytes(arg, encoding="ascii")  # type: ignore
-    else:
-        return typ(arg)  # type: ignore
-
-
 @functools.lru_cache(maxsize=None)
-def _strip_regex() -> re.Pattern:
-    return re.compile(r"\x1b(\[.*?[@-~]|\].*?(\x07|\x1b\\))")
+def _get_ansi_pattern() -> re.Pattern:
+    # https://stackoverflow.com/a/14693789
+    return re.compile(r"\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])")
 
 
-def strip_color_codes(x: str):
-    return _strip_regex().sub("", x)
+def strip_ansi_sequences(x: str):
+    return _get_ansi_pattern().sub("", x)

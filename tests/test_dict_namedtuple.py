@@ -1,7 +1,7 @@
 import contextlib
 import io
 import pathlib
-from typing import Any, Dict, Mapping, NamedTuple, cast
+from typing import Any, Dict, Mapping, NamedTuple, Tuple, Union, cast
 
 import pytest
 from typing_extensions import Literal, TypedDict
@@ -47,6 +47,16 @@ def test_dict_with_default():
         dcargs.cli(main, args="--params 5 Tru 3 False".split(" "))
     with pytest.raises(SystemExit):
         dcargs.cli(main, args="--params 4 Tru 3 False".split(" "))
+
+
+def test_tuple_in_dict():
+    def main(x: Dict[Union[Tuple[int, int], Tuple[str, str]], Tuple[int, int]]) -> dict:
+        return x
+
+    assert dcargs.cli(main, args="--x 1 1 2 2 3 3 4 4".split(" ")) == {
+        (1, 1): (2, 2),
+        (3, 3): (4, 4),
+    }
 
 
 def test_basic_typeddict():
@@ -102,7 +112,7 @@ def test_helptext_and_default_instance_typeddict():
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
             dcargs.cli(HelptextTypedDict, default_instance={"z": 3}, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = dcargs._strings.strip_ansi_sequences(f.getvalue())
     assert cast(str, HelptextTypedDict.__doc__) in helptext
     assert "--x INT" in helptext
     assert "--y INT" in helptext
@@ -165,7 +175,7 @@ def test_helptext_and_default_namedtuple():
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
             dcargs.cli(HelptextNamedTupleDefault, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = dcargs._strings.strip_ansi_sequences(f.getvalue())
     assert cast(str, HelptextNamedTupleDefault.__doc__) in helptext
     assert "--x INT  Documentation 1 (required)\n" in helptext
     assert "--y INT  Documentation 2 (required)\n" in helptext
@@ -204,7 +214,7 @@ def test_helptext_and_default_instance_namedtuple():
                 ),
                 args=["--help"],
             )
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = dcargs._strings.strip_ansi_sequences(f.getvalue())
     assert cast(str, HelptextNamedTuple.__doc__) in helptext
     assert "Documentation 1 (required)\n" in helptext
     assert "Documentation 2 (required)\n" in helptext

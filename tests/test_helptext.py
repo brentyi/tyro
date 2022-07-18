@@ -3,13 +3,22 @@ import dataclasses
 import enum
 import io
 import pathlib
-from typing import Generic, List, Optional, Tuple, TypeVar, Union, cast
+from collections.abc import Callable
+from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 import pytest
 from typing_extensions import Literal
 
 import dcargs
 import dcargs._strings
+
+
+def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
+    target = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(target):
+            dcargs.cli(f, args=args)
+    return dcargs._strings.strip_ansi_sequences(target.getvalue())
 
 
 def test_helptext():
@@ -25,11 +34,7 @@ def test_helptext():
         z: int = 3
         """Documentation 3"""
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(Helptext, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(Helptext)
     assert cast(str, Helptext.__doc__) in helptext
     assert "x INT" in helptext
     assert "y INT" in helptext
@@ -63,11 +68,7 @@ def test_helptext_inherited():
     class ChildClass(UnrelatedParentClass, ActualParentClass):
         pass
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(ChildClass, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(ChildClass)
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
 
@@ -96,20 +97,12 @@ def test_helptext_nested():
         """main_no_docstring."""
         pass
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(main_with_docstring, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(main_with_docstring)
     assert "Documented in function" in helptext and str(Inner.__doc__) not in helptext
     assert "Args:" not in helptext
     assert "Hello world!" in helptext
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(main_no_docstring, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(main_no_docstring)
     print(helptext)
     assert "Something" in helptext
     assert "Args:" not in helptext
@@ -127,11 +120,7 @@ def test_helptext_defaults():
         x: pathlib.Path = pathlib.Path("/some/path/to/a/file")
         y: Color = Color.RED
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(HelptextWithVariousDefaults, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(HelptextWithVariousDefaults)
     assert "show this help message and exit\n  --x PATH" in helptext
     assert "(default: /some/path/to/a/file)\n" in helptext
     assert "--y {RED,GREEN,BLUE}" in helptext
@@ -153,11 +142,7 @@ def test_multiline_helptext():
         """Documentation 3
         Next line of documentation 3"""
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(HelptextMultiline, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(HelptextMultiline)
     assert "Documentation 1 (required)\n" in helptext
     assert "Documentation 2" in helptext
     assert "documentation 2" in helptext
@@ -173,11 +158,7 @@ def test_grouped_helptext():
         y: int
         z: int = 3
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(HelptextGrouped, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(HelptextGrouped)
     assert "Documentation 1 (required)\n" in helptext
     assert "Description of both y and z. (required)\n" in helptext
     assert "Description of both y and z. (default: 3)\n" in helptext
@@ -189,11 +170,7 @@ def test_none_default_value_helptext():
         x: Optional[int] = None
         """An optional variable."""
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(Config, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(Config)
     assert "  --x {None}|INT" in helptext
     assert "An optional variable. (default: None)\n" in helptext
 
@@ -211,11 +188,7 @@ def test_helptext_hard_bool():
     # Note that the percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(HelptextHardString, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(HelptextHardString)
     assert "--x" in helptext
     assert "Helptext. 2% milk." in helptext
 
@@ -234,11 +207,7 @@ def test_helptext_with_inheritance():
     class Child(Parent):
         pass
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(Child, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(Child)
     assert "--x STR" in helptext
     assert "Helptext." in helptext
     assert "(default: 'This docstring" in helptext
@@ -263,11 +232,7 @@ def test_helptext_with_inheritance_overriden():
         """Helptext!"""
         # fmt: on
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(Child2, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(Child2)
     assert "--x STR" in helptext
     assert "Helptext! (default: 'This" in helptext
 
@@ -277,11 +242,7 @@ def test_tuple_helptext():
     class TupleHelptext:
         x: Tuple[int, str, float]
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(TupleHelptext, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(TupleHelptext)
     assert "--x INT STR FLOAT\n" in helptext
 
 
@@ -290,11 +251,7 @@ def test_tuple_helptext_defaults():
     class TupleHelptextDefaults:
         x: Tuple[int, str, str] = (5, "hello world", "hello")
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(TupleHelptextDefaults, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(TupleHelptextDefaults)
     assert "--x INT STR STR" in helptext
     assert "(default: 5 'hello world' hello)\n" in helptext
 
@@ -306,11 +263,7 @@ def test_generic_helptext():
     class GenericTupleHelptext(Generic[T]):
         x: T
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(GenericTupleHelptext[int], args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(GenericTupleHelptext[int])
     assert "--x INT\n" in helptext
 
 
@@ -321,11 +274,7 @@ def test_generic_tuple_helptext():
     class GenericTupleHelptext(Generic[T]):
         x: Tuple[T, T, T]
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(GenericTupleHelptext[int], args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(GenericTupleHelptext[int])
     assert "--x INT INT INT\n" in helptext
 
 
@@ -336,11 +285,7 @@ def test_generic_list_helptext():
     class GenericTupleHelptext(Generic[T]):
         x: List[T]
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(GenericTupleHelptext[int], args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(GenericTupleHelptext[int])
     assert "--x INT [INT ...]\n" in helptext
 
 
@@ -350,11 +295,7 @@ def test_literal_helptext():
         x: Literal[1, 2, 3]
         """A number."""
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(LiteralHelptext, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(LiteralHelptext)
     assert "--x {1,2,3}" in helptext
     assert "A number. (required)\n" in helptext
 
@@ -365,11 +306,7 @@ def test_optional_literal_helptext():
         x: Optional[Literal[1, 2, 3]] = None
         """A number."""
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(OptionalLiteralHelptext, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(OptionalLiteralHelptext)
     assert "--x {None,1,2,3}" in helptext
     assert "A number. (default: None)\n" in helptext
 
@@ -398,27 +335,20 @@ def test_multiple_subparsers_helptext():
             default_factory=Subcommand3
         )
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(MultipleSubparsers, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(MultipleSubparsers)
 
     assert "Field a description." in helptext
     assert "Field b description." not in helptext
     assert "Field c description." not in helptext
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(
-                MultipleSubparsers, args=["subcommand1", "subcommand1", "--help"]
-            )
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(
+        MultipleSubparsers, args=["subcommand1", "subcommand1", "--help"]
+    )
 
     assert "Field a description." not in helptext
     assert "Field b description." not in helptext
-    assert "Field c description. (default: subcommand3)" in helptext
+    assert "Field c description." in helptext
+    assert "(default: subcommand3)" in helptext
 
 
 def test_optional_helptext():
@@ -434,12 +364,93 @@ def test_optional_helptext():
         z: Optional[int] = 3
         """Documentation 3"""
 
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(OptionalHelptext, args=["--help"])
-    helptext = dcargs._strings.strip_color_codes(f.getvalue())
+    helptext = _get_helptext(OptionalHelptext)
     assert cast(str, OptionalHelptext.__doc__) in helptext
     assert "--x {None}|INT" in helptext
     assert "--y {None}|INT [{None}|INT ...]\n" in helptext
     assert "[--z {None}|INT]\n" in helptext
+
+
+def test_metavar_0():
+    def main(x: Union[Literal[0, 1, 2, 3], Tuple[int, int]]) -> None:
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x {0,1,2,3}|{INT INT}" in helptext
+
+
+def test_metavar_1():
+    def main(
+        x: Union[
+            Literal[0, 1, 2, 3],
+            Literal["hey,there", "hello"],
+            List[int],
+        ]
+    ) -> None:
+        pass
+
+    # The comma formatting is unfortunate, but matches argparse's default behavior.
+    helptext = _get_helptext(main)
+    assert "--x {0,1,2,3,hey,there,hello}|{INT [INT ...]}" in helptext
+
+
+def test_metavar_2():
+    def main(
+        x: Tuple[
+            Literal[0, 1, 2, 3],
+            Union[int, str],
+        ]
+    ) -> None:
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x {0,1,2,3} INT|STR" in helptext
+
+
+def test_metavar_3():
+    def main(
+        x: Union[
+            Literal[0, 1, 2, 3],
+            Union[Tuple[int, int], Tuple[str]],
+        ]
+    ) -> None:
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x {0,1,2,3}|{INT INT}|STR" in helptext
+
+
+def test_metavar_4():
+    def main(
+        x: Union[
+            Literal[0, 1, 2, 3],
+            Union[Tuple[int, int], Tuple[str, str, str]],
+            Literal[True],
+        ]
+    ) -> None:
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x {0,1,2,3}|{INT INT}|{STR STR STR}|{True}" in helptext
+
+
+def test_metavar_5():
+    def main(
+        x: List[
+            Union[Tuple[int, int], Tuple[str, str]],
+        ] = [(1, 1), (2, 2)]
+    ) -> None:
+        pass
+
+    helptext = _get_helptext(main)
+    assert "[--x {INT INT}|{STR STR} [{INT INT}|{STR STR} ...]]" in helptext
+
+
+def test_metavar_6():
+    def main(x: Dict[Union[Tuple[int, int], Tuple[str, str]], Tuple[int, int]]) -> dict:
+        return x
+
+    helptext = _get_helptext(main)
+    assert (
+        "--x {INT INT}|{STR STR} INT INT [{INT INT}|{STR STR} INT INT ...]" in helptext
+    )

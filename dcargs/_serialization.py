@@ -1,4 +1,4 @@
-"""Type-safe, human-readable serialization helpers."""
+"""Type-safe, human-readable serialization helpers for dataclasses."""
 
 import dataclasses
 import enum

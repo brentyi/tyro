@@ -12,7 +12,9 @@ Usage:
 
 import sys
 from dataclasses import dataclass
-from typing import Dict, Literal, Tuple, TypeVar, Union
+from typing import Callable, Dict, Literal, Tuple, TypeVar, Union
+
+from torch import nn
 
 import dcargs
 
@@ -50,6 +52,9 @@ class ExperimentConfig:
     # reproducible!
     seed: int
 
+    # Activation to use. Not specifiable via the commandline.
+    activation: Callable[[], nn.Module]
+
 
 # Note that we could also define this library using separate YAML files (similar to
 # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
@@ -65,6 +70,7 @@ base_configs = {
         # The dcargs.MISSING sentinel allows us to specify that the seed should have no
         # default, and needs to be populated from the CLI.
         seed=dcargs.MISSING,
+        activation=nn.ReLU,
     ),
     "big": ExperimentConfig(
         dataset="imagenet-50",
@@ -74,6 +80,7 @@ base_configs = {
         units=256,
         train_steps=100_000,
         seed=dcargs.MISSING,
+        activation=nn.GELU,
     ),
 }
 

@@ -1,3 +1,6 @@
+"""Rules for taking high-level field definitions and lowering them into inputs for
+argparse's `add_argument()`."""
+
 from __future__ import annotations
 
 import argparse
@@ -6,7 +9,18 @@ import enum
 import functools
 import itertools
 import shlex
-from typing import Any, Dict, Mapping, Optional, Set, Type, TypeVar, Union
+from typing import (
+    Any,
+    Dict,
+    Mapping,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+)
 
 import termcolor
 
@@ -25,7 +39,7 @@ class ArgumentDefinition:
     """Structure containing everything needed to define an argument."""
 
     prefix: str  # Prefix for nesting.
-    field: _fields.Field
+    field: _fields.FieldDefinition
     type_from_typevar: Dict[TypeVar, Type]
 
     def add_argument(
@@ -167,7 +181,9 @@ def _rule_recursive_instantiator_from_type(
             # available.
             return dataclasses.replace(
                 lowered,
-                metavar=termcolor.colored("(not parsable)", color="red"),
+                metavar=termcolor.colored(
+                    "{" + str(arg.field.default) + "}", color="red"
+                ),
                 required=False,
                 default=_fields.MISSING_PROP,
             )
@@ -188,11 +204,17 @@ def _rule_convert_defaults_to_strings(
     """Sets all default values to strings, as required as input to our instantiator
     functions. Special-cased for enums."""
 
-    def as_str(x: Any) -> str:
-        if isinstance(x, enum.Enum):
-            return x.name
+    def as_str(x: Any) -> Tuple[str, ...]:
+        if isinstance(x, str):
+            return (x,)
+        elif isinstance(x, enum.Enum):
+            return (x.name,)
+        elif isinstance(x, Mapping):
+            return tuple(itertools.chain(*map(as_str, itertools.chain(*x.items()))))
+        elif isinstance(x, Sequence):
+            return tuple(itertools.chain(*map(as_str, x)))
         else:
-            return str(x)
+            return (str(x),)
 
     if (
         lowered.default is None
@@ -200,16 +222,9 @@ def _rule_convert_defaults_to_strings(
         or lowered.action is not None
     ):
         return lowered
-    elif lowered.nargs is not None and lowered.nargs != "?":
-        if isinstance(lowered.default, Mapping):
-            return dataclasses.replace(
-                lowered,
-                default=tuple(map(as_str, itertools.chain(*lowered.default.items()))),
-            )
-        else:
-            return dataclasses.replace(
-                lowered, default=tuple(map(as_str, lowered.default))
-            )
+    elif lowered.nargs is None:
+        (str_default,) = as_str(lowered.default)
+        return dataclasses.replace(lowered, default=str_default)
     else:
         return dataclasses.replace(lowered, default=as_str(lowered.default))
 
@@ -239,14 +254,15 @@ def _rule_generate_helptext(
         default = arg.field.default
 
     if not lowered.required:
-        default_label = "value" if lowered.is_fixed() else "default"
         # Include default value in helptext. We intentionally don't use the % template
         # because the types of all arguments are set to strings, which will cause the
         # default to be casted to a string and introduce extra quotation marks.
-        if lowered.action == "store_true":
-            default_text = f"(sets {arg.field.name}=True)"
+        if lowered.instantiator is None:
+            default_text = "(fixed)"
+        elif lowered.action == "store_true":
+            default_text = f"(sets: {arg.field.name}=True)"
         elif lowered.action == "store_false":
-            default_text = f"(sets {arg.field.name}=False)"
+            default_text = f"(sets: {arg.field.name}=False)"
         elif lowered.nargs is not None and hasattr(default, "__iter__"):
             # For tuple types, we might have default as (0, 1, 2, 3).
             # For list types, we might have default as [0, 1, 2, 3].
@@ -256,12 +272,12 @@ def _rule_generate_helptext(
             # the format that argparse expects when we set nargs.
             assert default is not None  # Just for type checker.
             default_parts = map(shlex.quote, map(str, default))
-            default_text = f"({default_label}: {' '.join(default_parts)})"
+            default_text = f"(default: {' '.join(default_parts)})"
         else:
-            default_text = f"({default_label}: {shlex.quote(str(default))})"
+            default_text = f"(default: {shlex.quote(str(default))})"
         help_parts.append(termcolor.colored(default_text, attrs=["dark"]))
     else:
-        help_parts.append(termcolor.colored("(required)", on_color="on_red"))
+        help_parts.append(termcolor.colored("(required)", color="red", attrs=["bold"]))
 
     return dataclasses.replace(lowered, help=" ".join(help_parts))
 

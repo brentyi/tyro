@@ -57,8 +57,6 @@ from typing import (
 import termcolor
 from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
-from . import _strings
-
 # Most standard fields: these are converted from strings from the CLI.
 _StandardInstantiator = Callable[[str], Any]
 # Sequence fields! This should be used whenever argparse's `nargs` field is set.
@@ -75,7 +73,7 @@ NoneType = type(None)
 
 @dataclasses.dataclass
 class InstantiatorMetadata:
-    nargs: Optional[Union[str, int]]
+    nargs: Union[None, int, Literal["+"]]
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: str
@@ -189,13 +187,48 @@ def instantiator_from_type(
     elif isinstance(typ, type) and issubclass(typ, enum.Enum):
         auto_choices = tuple(x.name for x in typ)
 
-    return lambda arg: _strings.instance_from_string(typ, arg), InstantiatorMetadata(
+    def instantiator_base_case(string: str) -> Any:
+        """Given a type and and a string from the command-line, reconstruct an object. Not
+        intended to deal with containers.
+
+        This is intended to replace all calls to `type(string)`, which can cause unexpected
+        behavior. As an example, note that the following argparse code will always print
+        `True`, because `bool("True") == bool("False") == bool("0") == True`.
+        ```
+        import argparse
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--flag", type=bool)
+
+        print(parser.parse_args().flag)
+        ```
+        """
+        assert len(get_args(typ)) == 0, f"Type {typ} cannot be instantiated."
+        if typ is bool:
+            return {"True": True, "False": False}[string]  # type: ignore
+        elif isinstance(typ, type) and issubclass(typ, enum.Enum):
+            return typ[string]  # type: ignore
+        elif typ is bytes:
+            return bytes(string, encoding="ascii")  # type: ignore
+        else:
+            return typ(string)  # type: ignore
+
+    return instantiator_base_case, InstantiatorMetadata(
         nargs=None,
         metavar=_format_metavar(typ.__name__.upper())
         if auto_choices is None
         else "{" + ",".join(map(_format_metavar, map(str, auto_choices))) + "}",
         choices=auto_choices,
     )
+
+
+@overload
+def _instantiator_from_type_inner(
+    typ: Type,
+    type_from_typevar: Dict[TypeVar, Type],
+    allow_sequences: Literal["fixed_length"],
+) -> Tuple[Instantiator, InstantiatorMetadata]:
+    ...
 
 
 @overload
@@ -219,17 +252,21 @@ def _instantiator_from_type_inner(
 def _instantiator_from_type_inner(
     typ: Type,
     type_from_typevar: Dict[TypeVar, Type],
-    allow_sequences: bool,
+    allow_sequences: Literal["fixed_length", True, False],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""
     out = instantiator_from_type(typ, type_from_typevar)
-    if (
-        not allow_sequences
-        and out[1].nargs is not None
-        and get_origin(typ) is not Union
-    ):
-        raise UnsupportedTypeAnnotationError("Nested sequence types are not supported!")
+    if out[1].nargs is not None:
+        if allow_sequences is False:
+            # We currently only use allow_sequences=False for options in Literal types,
+            # which are evaluated using `type()`. It should not be possible to hit this
+            # condition from polling a runtime type.
+            assert False
+        if allow_sequences == "fixed_length" and not isinstance(out[1].nargs, int):
+            raise UnsupportedTypeAnnotationError(
+                f"Found an unsupported (variable-length) nested sequence of type {typ}."
+            )
     return out
 
 
@@ -249,7 +286,7 @@ def _instantiator_from_container_type(
         return instantiator_from_type(contained_type, type_from_typevar)
 
     for make, matched_origins in {
-        _instantiator_from_list_sequence_or_set: (
+        _instantiator_from_sequence: (
             collections.abc.Sequence,
             frozenset,
             list,
@@ -280,55 +317,57 @@ def _instantiator_from_tuple(
         # Ellipsis: variable argument counts. When an ellipsis is used, tuples must
         # contain only one type.
         assert len(typeset_no_ellipsis) == 1
-        (contained_type,) = typeset_no_ellipsis
-
-        make, inner_meta = _instantiator_from_type_inner(
-            contained_type,
-            type_from_typevar,
-            allow_sequences=False,
-        )
-        return lambda strings: tuple([make(x) for x in strings]), InstantiatorMetadata(
-            nargs="+",
-            metavar=f"{inner_meta.metavar} [{inner_meta.metavar} ...]",
-            choices=inner_meta.choices,
-        )
+        return _instantiator_from_sequence(typ, type_from_typevar)
 
     else:
         instantiators = []
         metas = []
+        nargs = 0
         for t in types:
             a, b = _instantiator_from_type_inner(
                 t,
                 type_from_typevar,
-                allow_sequences=False,
+                allow_sequences="fixed_length",
             )
             instantiators.append(a)
             metas.append(b)
+            assert type(b.nargs) in (int, NoneType)
+            nargs += 1 if b.nargs is None else b.nargs  # type: ignore
 
-        if len(set(m.choices for m in metas)) > 1:
-            raise UnsupportedTypeAnnotationError(
-                "Due to constraints in argparse, all choices in fixed-length tuples"
-                " must match. This restricts mixing enums & literals with other"
-                " types."
-            )
-
-        def tuple_instantiator(strings: List[str]) -> Tuple[Any, ...]:
-            if len(strings) != len(instantiators):
+        def fixed_length_tuple_instantiator(strings: List[str]) -> Any:
+            # Validate nargs.
+            if len(strings) != nargs:
                 raise ValueError(
-                    f"expected {len(instantiators)} arguments, but got {strings}"
+                    f"input {strings} is length {len(strings)}, but expected {nargs}."
                 )
-            out = tuple(make(x) for make, x in zip(instantiators, strings))
-            return out
 
-        return tuple_instantiator, InstantiatorMetadata(
-            nargs=len(types),
-            metavar=" ".join((_format_metavar(cast(str, m.metavar)) for m in metas)),
-            choices=metas[0].choices,
+            # Make tuple.
+            out = []
+            i = 0
+            for make, meta in zip(instantiators, metas):
+                inner_nargs = cast(Optional[int], meta.nargs)
+                if inner_nargs is None:
+                    if meta.choices is not None and strings[i] not in meta.choices:
+                        raise ValueError(
+                            f" {strings[i]} does not match choices {meta.choices}"
+                        )
+                    out.append(make(strings[i]))  # type: ignore
+                    i += 1
+                else:
+                    assert meta.choices is None
+                    out.append(make(strings[i : i + inner_nargs]))  # type: ignore
+                    i += inner_nargs
+            return tuple(out)
+
+        return fixed_length_tuple_instantiator, InstantiatorMetadata(
+            nargs=nargs,
+            metavar=" ".join(m.metavar for m in metas),
+            choices=None,
         )
 
 
 def _join_union_metavars(metavars: Iterable[str]) -> str:
-    """Metavar generation helper for unions.
+    """Metavar generation helper for unions. Could be revisited.
 
     Examples:
         None, INT => NONE|INT
@@ -338,8 +377,8 @@ def _join_union_metavars(metavars: Iterable[str]) -> str:
         STR, INT [INT ...] => STR|{INT [INT ...]}
         STR, INT INT => STR|{INT INT}
 
-    The curly brackets are unfortunately overloaded but parentheses, square brackets,
-    and angle brackets all seem to interfere with some argparse internals.
+    The curly brackets are unfortunately overloaded but alternatives all interfere with
+    argparse internals.
     """
     metavars = tuple(metavars)
     merged_metavars = [metavars[0]]
@@ -468,56 +507,98 @@ def _instantiator_from_dict(
     key_instantiator, key_metadata = _instantiator_from_type_inner(
         key_type,
         type_from_typevar,
-        allow_sequences=False,
+        allow_sequences="fixed_length",
     )
     val_instantiator, val_metadata = _instantiator_from_type_inner(
         val_type,
         type_from_typevar,
-        allow_sequences=False,
+        allow_sequences="fixed_length",
     )
+
+    key_nargs = cast(Optional[int], key_metadata.nargs)
+    key_nargs_int = 1 if key_nargs is None else key_nargs
+    val_nargs = cast(Optional[int], val_metadata.nargs)
+    val_nargs_int = 1 if key_nargs is None else key_nargs
+    assert type(key_nargs) in (int, NoneType)
+    assert type(val_nargs) in (int, NoneType)
+    pair_nargs = key_nargs_int + val_nargs_int
 
     def dict_instantiator(strings: List[str]) -> Any:
         out = {}
-        if len(strings) % 2 != 0:
+        if len(strings) % pair_nargs != 0:
             raise ValueError("incomplete set of key value pairs!")
-        for i in range(len(strings) // 2):
-            k = strings[i * 2]
-            v = strings[i * 2 + 1]
-            if key_metadata.choices is not None and k not in key_metadata.choices:
-                raise ValueError(
-                    f"invalid choice: {k} (choose from {key_metadata.choices}))"
-                )
-            if val_metadata.choices is not None and v not in val_metadata.choices:
-                raise ValueError(
-                    f"invalid choice: {v} (choose from {val_metadata.choices}))"
-                )
+
+        index = 0
+        for _ in range(len(strings) // pair_nargs):
+            k: Union[str, List[str]] = strings[index : index + key_nargs_int]
+            index += key_nargs_int
+            v: Union[str, List[str]] = strings[index : index + val_nargs_int]
+            index += val_nargs_int
+
+            if key_nargs is None:
+                (k,) = cast(List[str], k)
+                if key_metadata.choices is not None and k not in key_metadata.choices:
+                    raise ValueError(
+                        f"invalid choice: {k} (choose from {key_metadata.choices}))"
+                    )
+            if val_nargs is None:
+                (v,) = cast(List[str], v)
+                if val_metadata.choices is not None and v not in val_metadata.choices:
+                    raise ValueError(
+                        f"invalid choice: {v} (choose from {val_metadata.choices}))"
+                    )
             out[key_instantiator(k)] = val_instantiator(v)  # type: ignore
         return out
 
+    pair_metavar = f"{key_metadata.metavar} {val_metadata.metavar}"
     return dict_instantiator, InstantiatorMetadata(
         nargs="+",
-        metavar=f"{key_metadata.metavar} {val_metadata.metavar}",
+        metavar=f"{pair_metavar} [{pair_metavar} ...]",
         choices=None,
     )
 
 
-def _instantiator_from_list_sequence_or_set(
+def _instantiator_from_sequence(
     typ: Type, type_from_typevar: Dict[TypeVar, Type]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
-    (contained_type,) = get_args(typ)
+    """Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc."""
     container_type = get_origin(typ)
-    assert container_type is not None
     if container_type is collections.abc.Sequence:
         container_type = list
+
+    if container_type is tuple:
+        (contained_type, ell) = get_args(typ)
+        assert ell == Ellipsis
+    else:
+        (contained_type,) = get_args(typ)
 
     make, inner_meta = _instantiator_from_type_inner(
         contained_type,
         type_from_typevar,
-        allow_sequences=False,
+        allow_sequences="fixed_length",
     )
-    return lambda strings: container_type(
-        [make(x) for x in strings]
-    ), InstantiatorMetadata(
+
+    def sequence_instantiator(strings: List[str]) -> Any:
+        # Validate nargs.
+        assert type(inner_meta.nargs) in (int, NoneType)
+        if isinstance(inner_meta.nargs, int) and len(strings) % inner_meta.nargs != 0:
+            raise ValueError(
+                f"input {strings} is of length {len(strings)}, which is not divisible"
+                f" by {inner_meta.nargs}."
+            )
+
+        # Make tuple.
+        out = []
+        step = inner_meta.nargs if isinstance(inner_meta.nargs, int) else 1
+        for i in range(0, len(strings), step):
+            if inner_meta.nargs is None:
+                out.append(make(strings[i]))  # type: ignore
+            else:
+                out.append(make(strings[i : i + inner_meta.nargs]))  # type: ignore
+        assert container_type is not None
+        return container_type(out)
+
+    return sequence_instantiator, InstantiatorMetadata(
         nargs="+",
         metavar=f"{inner_meta.metavar} [{inner_meta.metavar} ...]",
         choices=inner_meta.choices,

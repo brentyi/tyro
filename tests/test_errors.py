@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, List, Tuple, TypeVar
+from typing import Generic, List, Tuple, TypeVar, Union
 
 import pytest
 from typing_extensions import Literal
@@ -7,41 +7,29 @@ from typing_extensions import Literal
 import dcargs
 
 
-def test_choices_in_tuples():
-    """Due to argparse limitations, all parameters of `choices` must match. In the
-    future, we might avoid this by implementing choice restrictions manually."""
-    # OK
-    @dataclasses.dataclass
-    class A:  # type: ignore
-        x: Tuple[bool, bool]
-
-    assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, False))
-
-    # OK
-    @dataclasses.dataclass
-    class A:  # type: ignore
-        x: Tuple[bool, Literal["True", "False"]]
-
-    assert dcargs.cli(A, args=["--x", "True", "False"]) == A((True, "False"))
-
-    # Not OK: same argument, different choices.
-    @dataclasses.dataclass
-    class A:
-        x: Tuple[bool, Literal["True", "False", "None"]]
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(A, args=["--x", "True", "False"])
-
-
-def test_nested_sequence_types():
-    """Unclear how to handle nested sequences, so we don't support them."""
-
+def test_ambiguous_collection_0():
     @dataclasses.dataclass
     class A:
         x: Tuple[Tuple[int, ...], ...]
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(A, args=["--x", "0", "1"])
+
+
+def test_ambiguous_collection_1():
+    def main(x: Tuple[List[str], List[str]]) -> None:
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=["--help"])
+
+
+def test_ambiguous_collection_2():
+    def main(x: List[Union[Tuple[int, int], Tuple[int, int, int]]]) -> None:
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=["--help"])
 
 
 def test_unsupported_literal():
