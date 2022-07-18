@@ -4,7 +4,7 @@ defaults, from general callables."""
 import dataclasses
 import inspect
 import warnings
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union, cast
 
 import docstring_parser
 from typing_extensions import get_type_hints, is_typeddict
@@ -89,7 +89,7 @@ def field_list_from_callable(
     `f` can be from a dataclass type, regular class type, or function."""
 
     # Unwrap generics.
-    f, _unused_type_from_typevar = _resolver.resolve_generic_types(f)
+    f, type_from_typevar = _resolver.resolve_generic_types(f)
 
     # If `f` is a type:
     #     1. Set cls to the type.
@@ -98,7 +98,6 @@ def field_list_from_callable(
     if isinstance(f, type):
         cls = f
         f = cls.__init__  # type: ignore
-        ignore_self = True
 
     if cls is not None and is_typeddict(cls):
         # Handle typed dictionaries.
@@ -181,51 +180,97 @@ def field_list_from_callable(
             default_instance in MISSING_SINGLETONS
         ), "`default_instance` is only supported for dataclass and TypedDict types."
 
-        # Get type annotations, docstrings.
-        hints = get_type_hints(f)
-        docstring = inspect.getdoc(f)
-        docstring_from_arg_name = {}
-        if docstring is not None:
-            for param_doc in docstring_parser.parse(docstring).params:
-                docstring_from_arg_name[param_doc.arg_name] = param_doc.description
-        del docstring
-
         # Generate field list from function signature.
         field_list = []
-        ignore_self = cls is not None
-        params = inspect.signature(f).parameters.values()
-        for param in params:
-            # For `__init__`, skip self parameter.
-            if ignore_self:
-                ignore_self = False
-                continue
+        params = list(inspect.signature(f).parameters.values())
+        if cls is not None:
+            # Ignore self parameter.
+            params = params[1:]
 
-            # Get default value.
-            default = param.default
+        try:
+            return _field_list_from_params(f, cls, params)
+        except TypeError as e:
+            # Try to support passing things like int, str, Dict[K,V], torch.device
+            # directly into dcargs.cli(). These aren't "type-annotated callables" but
+            # this a nice-to-have.
+            param_count = 0
+            has_kw_only = False
+            has_var_positional = False
+            for param in params:
+                if (
+                    param.kind
+                    in (
+                        inspect.Parameter.POSITIONAL_ONLY,
+                        inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                    )
+                    and param.default is inspect.Parameter.empty
+                ):
+                    param_count += 1
+                elif param.kind is inspect.Parameter.KEYWORD_ONLY:
+                    has_kw_only = True
+                elif param.kind is inspect.Parameter.VAR_POSITIONAL:
+                    has_var_positional = True
 
-            # Get helptext from docstring.
-            helptext = docstring_from_arg_name.get(param.name)
-            if helptext is None and cls is not None:
-                helptext = _docstrings.get_field_docstring(cls, param.name)
+            if not has_kw_only and (
+                param_count == 1 or (param_count == 0 and has_var_positional)
+            ):
+                # Things look ok!
+                if cls is not None:
+                    f = cls
+                return [
+                    FieldDefinition(
+                        name=_resolver.unwrap_origin(f).__name__,
+                        typ=cast(Type, f),
+                        default=MISSING_NONPROP,
+                        helptext=None,
+                        positional=True,
+                    )
+                ]
+            else:
+                raise e
 
-            if param.name not in hints:
-                raise TypeError(
-                    f"Expected fully type-annotated callable, but {f} with arguments"
-                    f" {tuple(map(lambda p: p.name, params))} has no annotation for"
-                    f" '{param.name}'."
-                )
 
-            field_list.append(
-                FieldDefinition(
-                    name=param.name,
-                    # Note that param.annotation does not resolve forward references.
-                    typ=hints[param.name],
-                    default=default,
-                    helptext=helptext,
-                    positional=param.kind is inspect.Parameter.POSITIONAL_ONLY,
-                )
+def _field_list_from_params(
+    f: Callable, cls: Optional[Type], params: List[inspect.Parameter]
+) -> List[FieldDefinition]:
+    # Get type annotations, docstrings.
+    docstring = inspect.getdoc(f)
+    docstring_from_arg_name = {}
+    if docstring is not None:
+        for param_doc in docstring_parser.parse(docstring).params:
+            docstring_from_arg_name[param_doc.arg_name] = param_doc.description
+    del docstring
+    hints = get_type_hints(f)
+
+    field_list = []
+    for param in params:
+        # Get default value.
+        default = param.default
+
+        # Get helptext from docstring.
+        helptext = docstring_from_arg_name.get(param.name)
+        if helptext is None and cls is not None:
+            helptext = _docstrings.get_field_docstring(cls, param.name)
+
+        if param.name not in hints:
+            raise TypeError(
+                f"Expected fully type-annotated callable, but {f} with arguments"
+                f" {tuple(map(lambda p: p.name, params))} has no annotation for"
+                f" '{param.name}'."
             )
-        return field_list
+
+        field_list.append(
+            FieldDefinition(
+                name=param.name,
+                # Note that param.annotation does not resolve forward references.
+                typ=hints[param.name],
+                default=default,
+                helptext=helptext,
+                positional=param.kind is inspect.Parameter.POSITIONAL_ONLY,
+            )
+        )
+
+    return field_list
 
 
 def _ensure_dataclass_instance_used_as_default_is_frozen(

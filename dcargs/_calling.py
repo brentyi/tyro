@@ -161,4 +161,4 @@ def call_from_args(
             else:
                 kwargs[field.name] = value
 
-    return f(*args, **kwargs), consumed_keywords  # type: ignore
+    return _resolver.unwrap_origin(f)(*args, **kwargs), consumed_keywords  # type: ignore
