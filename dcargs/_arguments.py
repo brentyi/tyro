@@ -73,7 +73,6 @@ class ArgumentDefinition:
             _rule_generate_helptext,
             _rule_set_name_or_flag,
             _rule_positional_special_handling,
-            # _rule_bold_metavar,
         )
         return functools.reduce(
             lambda lowered, rule: rule(self, lowered),

@@ -34,8 +34,16 @@ the simplest case, this can be used as a drop-in replacement for `argparse`:
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--a", type=int, required=True)
-parser.add_argument("--b", type=int, default=1)
+parser.add_argument(
+    "--a",
+    type=int,
+    required=True,
+)
+parser.add_argument(
+    "--b",
+    type=int,
+    default=3,
+)
 args = parser.parse_args()
 
 print(args.a + args.b)
@@ -57,16 +65,16 @@ dcargs.cli(main)
 </tr>
 </table>
 
-The broader goal is a replacement for tools like `argparse`, `hydra`, and
+The broader goal is also a replacement for tools like `hydra`, `gin-config`, and
 `ml_collections` that's:
 
 - **Low effort.** Standard Python type annotations, docstrings, and default
-  values are parsed to automatically generate argument parsers with informative
-  helptext.
+  values are parsed to automatically generate command-line interfaces with
+  informative helptext.
 
 - **Expressive.** `dcargs.cli()` understands functions, classes, dataclasses,
   and _nested_ classes and dataclasses, as well as frequently used annotations
-  like unions, literals, collections, and generics, which can be composed into
+  like unions, literals, and collections, which can be composed into
   hierarchical configuration objects built on standard Python features.
 
 - **Typed.** Unlike dynamic configuration namespaces produced by libraries like
@@ -177,8 +185,8 @@ Returns:
 </summary>
 <blockquote>
 
-In the simplest case, `dcargs.cli()` can be used to run a function with arguments
-populated from the CLI.
+In the simplest case, `dcargs.cli()` can be used to run a function with
+arguments populated from the CLI.
 
 **Code ([link](examples/01_functions.py)):**
 
@@ -238,8 +246,8 @@ hello 10</samp>
 </summary>
 <blockquote>
 
-Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted instance
-can be used as a typed alternative for an argparse namespace.
+Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted
+instance can be used as a typed alternative for an argparse namespace.
 
 **Code ([link](examples/02_dataclasses.py)):**
 
@@ -299,8 +307,8 @@ Args(field1=&#x27;hello&#x27;, field2=5)</samp>
 </summary>
 <blockquote>
 
-We can generate argument parsers from more advanced type annotations, like enums and
-tuple types.
+We can generate argument parsers from more advanced type annotations, like enums
+and tuple types.
 
 **Code ([link](examples/03_enums_and_containers.py)):**
 
@@ -389,8 +397,8 @@ TrainConfig(dataset_sources=(PosixPath(&#x27;data&#x27;),), image_dimensions=(32
 </summary>
 <blockquote>
 
-Booleans can either be expected to be explicitly passed in, or, if given a default
-value, automatically converted to flags.
+Booleans can either be expected to be explicitly passed in, or, if given a
+default value, automatically converted to flags.
 
 **Code ([link](examples/04_flags.py)):**
 
@@ -629,9 +637,9 @@ usage: 05_hierarchical_configs.py [-h] --out-dir PATH
 </summary>
 <blockquote>
 
-We can integrate `dcargs.cli()` into common configuration patterns: here, we select
-one of multiple possible base configurations, and then use the CLI to either override
-(existing) or fill in (missing) values.
+We can integrate `dcargs.cli()` into common configuration patterns: here, we
+select one of multiple possible base configurations, and then use the CLI to
+either override (existing) or fill in (missing) values.
 
 **Code ([link](examples/06_base_configs.py)):**
 
@@ -746,14 +754,14 @@ if __name__ == "__main__":
 **Example usage:**
 
 <pre>
-<samp>$ <kbd>python ./06_base_configs_argv.py</kbd>
+<samp>$ <kbd>python ./06_base_configs.py</kbd>
 usage:
   examples/06_base_configs.py small --help
   examples/06_base_configs.py big --help</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./06_base_configs_argv.py small --help</kbd>
+<samp>$ <kbd>python ./06_base_configs.py small --help</kbd>
 usage: examples/06_base_configs.py small [-h] [--dataset {mnist,imagenet-50}]
                                          [--optimizer.learning-rate FLOAT]
                                          [--num-layers INT] [--units INT]
@@ -785,12 +793,12 @@ optimizer arguments:
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./06_base_configs_argv.py small --seed 94720</kbd>
+<samp>$ <kbd>python ./06_base_configs.py small --seed 94720</kbd>
 ExperimentConfig(dataset=&#x27;mnist&#x27;, optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class &#x27;torch.nn.modules.activation.ReLU&#x27;&gt;)</samp>
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./06_base_configs_argv.py big --help</kbd>
+<samp>$ <kbd>python ./06_base_configs.py big --help</kbd>
 usage: examples/06_base_configs.py big [-h] [--dataset {mnist,imagenet-50}]
                                        [--optimizer.learning-rate FLOAT]
                                        [--optimizer.betas FLOAT FLOAT]
@@ -826,7 +834,7 @@ optimizer arguments:
 </pre>
 
 <pre>
-<samp>$ <kbd>python ./06_base_configs_argv.py big --seed 94720</kbd>
+<samp>$ <kbd>python ./06_base_configs.py big --seed 94720</kbd>
 ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class &#x27;torch.nn.modules.activation.GELU&#x27;&gt;)</samp>
 </pre>
 
@@ -839,8 +847,9 @@ ExperimentConfig(dataset=&#x27;imagenet-50&#x27;, optimizer=AdamOptimizer(learni
 </summary>
 <blockquote>
 
-`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices;
-`typing.Union[]` can be used to restrict inputs to a fixed set of types.
+`typing.Literal[]` can be used to restrict inputs to a fixed set of literal
+choices; `typing.Union[]` can be used to restrict inputs to a fixed set of
+types.
 
 **Code ([link](examples/07_literals_and_unions.py)):**
 
@@ -931,7 +940,8 @@ arguments:
 </summary>
 <blockquote>
 
-Positional-only arguments in functions are converted to positional CLI arguments.
+Positional-only arguments in functions are converted to positional CLI
+arguments.
 
 **Code ([link](examples/08_positional_args.py)):**
 
@@ -1051,7 +1061,8 @@ background_rgb=(1.0, 0.0, 0.0)</samp>
 </summary>
 <blockquote>
 
-Unions over nested types (classes or dataclasses) are populated using subparsers.
+Unions over nested types (classes or dataclasses) are populated using
+subparsers.
 
 **Code ([link](examples/09_subparsers.py)):**
 
@@ -1272,8 +1283,8 @@ AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</samp>
 </summary>
 <blockquote>
 
-Dictionary inputs can be specified using either a standard `Dict[K, V]` annotation,
-or a `TypedDict` type.
+Dictionary inputs can be specified using either a standard `Dict[K, V]`
+annotation, or a `TypedDict` type.
 
 **Code ([link](examples/11_dictionaries.py)):**
 
