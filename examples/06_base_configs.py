@@ -3,11 +3,11 @@ one of multiple possible base configurations, and then use the CLI to either ove
 (existing) or fill in (missing) values.
 
 Usage:
-`python ./06_base_configs_argv.py`
-`python ./06_base_configs_argv.py small --help`
-`python ./06_base_configs_argv.py small --seed 94720`
-`python ./06_base_configs_argv.py big --help`
-`python ./06_base_configs_argv.py big --seed 94720`
+`python ./06_base_configs.py`
+`python ./06_base_configs.py small --help`
+`python ./06_base_configs.py small --seed 94720`
+`python ./06_base_configs.py big --help`
+`python ./06_base_configs.py big --seed 94720`
 """
 
 import sys
