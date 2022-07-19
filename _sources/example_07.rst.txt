@@ -60,4 +60,4 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/07_literals_and_unions.py --help
+.. command-output:: python ../../examples/07_literals_and_unions.py --help

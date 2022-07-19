@@ -258,16 +258,40 @@
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/09_subparsers.py --help
-python: can't open file '/home/brent/dcargs/examples/09_subparsers.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/09_subparsers.py commit --help
-python: can't open file '/home/brent/dcargs/examples/09_subparsers.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/09_subparsers.py commit --cmd.message hello --cmd.all
-python: can't open file '/home/brent/dcargs/examples/09_subparsers.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/09_subparsers.py checkout --help
-python: can't open file '/home/brent/dcargs/examples/09_subparsers.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/09_subparsers.py checkout --cmd.branch main
-python: can't open file '/home/brent/dcargs/examples/09_subparsers.py': [Errno 2] No such file or directory</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/09_subparsers.py --help
+usage: 09_subparsers.py [-h] {checkout,commit}
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help         show this help message and exit
+
+subcommands:
+
+  {checkout,commit}</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/09_subparsers.py commit --help
+usage: 09_subparsers.py commit [-h] --cmd.message <span class="ansi-bold">STR</span> [--cmd.all]
+
+Commit changes.
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help         show this help message and exit
+
+<span class="ansi-bold">cmd arguments</span>:
+  --cmd.message <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --cmd.all          <span class="ansi-dark">(sets: all=True)</span></pre>
+<pre class="ansi-block literal-block">$ python ../../examples/09_subparsers.py commit --cmd.message hello --cmd.all
+Commit(message='hello', all=True)</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/09_subparsers.py checkout --help
+usage: 09_subparsers.py checkout [-h] --cmd.branch <span class="ansi-bold">STR</span>
+
+Checkout a branch.
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help        show this help message and exit
+
+<span class="ansi-bold">cmd arguments</span>:
+  --cmd.branch <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span></pre>
+<pre class="ansi-block literal-block">$ python ../../examples/09_subparsers.py checkout --cmd.branch main
+Checkout(branch='main')</pre>
 </section>
 </section>
 

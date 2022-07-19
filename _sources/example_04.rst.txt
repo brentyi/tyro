@@ -45,10 +45,10 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/04_flags.py --help
+.. command-output:: python ../../examples/04_flags.py --help
 
-.. command-output:: python /home/brent/dcargs/examples/04_flags.py --boolean True
+.. command-output:: python ../../examples/04_flags.py --boolean True
 
-.. command-output:: python /home/brent/dcargs/examples/04_flags.py --boolean False --flag-a
+.. command-output:: python ../../examples/04_flags.py --boolean False --flag-a
 
-.. command-output:: python /home/brent/dcargs/examples/04_flags.py --boolean False --no-flag-b
+.. command-output:: python ../../examples/04_flags.py --boolean False --no-flag-b

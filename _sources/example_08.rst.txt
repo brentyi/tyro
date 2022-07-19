@@ -72,6 +72,6 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/08_positional_args.py --help
+.. command-output:: python ../../examples/08_positional_args.py --help
 
-.. command-output:: python /home/brent/dcargs/examples/08_positional_args.py ./a ./b --optimizer.learning-rate 1e-5
+.. command-output:: python ../../examples/08_positional_args.py ./a ./b --optimizer.learning-rate 1e-5

@@ -78,10 +78,10 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/10_multiple_subparsers.py
+.. command-output:: python ../../examples/10_multiple_subparsers.py
 
-.. command-output:: python /home/brent/dcargs/examples/10_multiple_subparsers.py --help
+.. command-output:: python ../../examples/10_multiple_subparsers.py --help
 
-.. command-output:: python /home/brent/dcargs/examples/10_multiple_subparsers.py mnist-dataset --help
+.. command-output:: python ../../examples/10_multiple_subparsers.py mnist-dataset --help
 
-.. command-output:: python /home/brent/dcargs/examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4
+.. command-output:: python ../../examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4

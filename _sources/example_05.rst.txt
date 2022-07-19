@@ -82,8 +82,8 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/05_hierarchical_configs.py --help
+.. command-output:: python ../../examples/05_hierarchical_configs.py --help
 
-.. command-output:: python /home/brent/dcargs/examples/05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD
+.. command-output:: python ../../examples/05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD
 
-.. command-output:: python /home/brent/dcargs/examples/05_hierarchical_configs.py --out-dir . --restore-checkpoint
+.. command-output:: python ../../examples/05_hierarchical_configs.py --out-dir . --restore-checkpoint

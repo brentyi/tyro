@@ -254,14 +254,29 @@ value, automatically converted to flags.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/04_flags.py --help
-python: can't open file '/home/brent/dcargs/examples/04_flags.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/04_flags.py --boolean True
-python: can't open file '/home/brent/dcargs/examples/04_flags.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/04_flags.py --boolean False --flag-a
-python: can't open file '/home/brent/dcargs/examples/04_flags.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/04_flags.py --boolean False --no-flag-b
-python: can't open file '/home/brent/dcargs/examples/04_flags.py': [Errno 2] No such file or directory</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/04_flags.py --help
+usage: 04_flags.py [-h] --boolean {<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}
+                   [--optional-boolean {<span class="ansi-bold">None</span>,<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}] [--flag-a]
+                   [--no-flag-b]
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help            show this help message and exit
+  --boolean {<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}
+                        Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;.
+                        <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --optional-boolean {<span class="ansi-bold">None</span>,<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}
+                        Optional boolean. Same as above, but can be omitted.
+                        <span class="ansi-dark">(default: None)</span>
+  --flag-a              Pass --flag-a in to set this value to True. <span class="ansi-dark">(sets:
+                        flag_a=True)</span>
+  --no-flag-b           Pass --no-flag-b in to set this value to False.
+                        <span class="ansi-dark">(sets: flag_b=False)</span></pre>
+<pre class="ansi-block literal-block">$ python ../../examples/04_flags.py --boolean True
+Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/04_flags.py --boolean False --flag-a
+Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/04_flags.py --boolean False --no-flag-b
+Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
 </section>
 </section>
 

@@ -334,16 +334,31 @@ one of multiple possible base configurations, and then use the CLI to either ove
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/06_base_configs.py
-python: can't open file '/home/brent/dcargs/examples/06_base_configs.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/06_base_configs.py small --help
-python: can't open file '/home/brent/dcargs/examples/06_base_configs.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/06_base_configs.py small --seed 94720
-python: can't open file '/home/brent/dcargs/examples/06_base_configs.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/06_base_configs.py big --help
-python: can't open file '/home/brent/dcargs/examples/06_base_configs.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/06_base_configs.py big --seed 94720
-python: can't open file '/home/brent/dcargs/examples/06_base_configs.py': [Errno 2] No such file or directory</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/06_base_configs.py
+Traceback (most recent call last):
+  File &quot;../../examples/06_base_configs.py&quot;, line 17, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/06_base_configs.py small --help
+Traceback (most recent call last):
+  File &quot;../../examples/06_base_configs.py&quot;, line 17, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/06_base_configs.py small --seed 94720
+Traceback (most recent call last):
+  File &quot;../../examples/06_base_configs.py&quot;, line 17, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/06_base_configs.py big --help
+Traceback (most recent call last):
+  File &quot;../../examples/06_base_configs.py&quot;, line 17, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/06_base_configs.py big --seed 94720
+Traceback (most recent call last):
+  File &quot;../../examples/06_base_configs.py&quot;, line 17, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
 </section>
 </section>
 

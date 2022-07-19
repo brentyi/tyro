@@ -38,6 +38,6 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/12_named_tuples.py --help
+.. command-output:: python ../../examples/12_named_tuples.py --help
 
-.. command-output:: python /home/brent/dcargs/examples/12_named_tuples.py --field1 hello
+.. command-output:: python ../../examples/12_named_tuples.py --field1 hello

@@ -260,12 +260,31 @@ or a <cite>TypedDict</cite> type.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/11_dictionaries.py --help
-python: can't open file '/home/brent/dcargs/examples/11_dictionaries.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/11_dictionaries.py --typed-dict.learning-rate 3e-4
-python: can't open file '/home/brent/dcargs/examples/11_dictionaries.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/11_dictionaries.py --typed-dict.betas 0.9 0.999
-python: can't open file '/home/brent/dcargs/examples/11_dictionaries.py': [Errno 2] No such file or directory</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/11_dictionaries.py --help
+usage: 11_dictionaries.py [-h] [--typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>]
+                          [--typed-dict.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>]
+                          [--standard-dict <span class="ansi-bold">STR</span> <span class="ansi-bold">FLOAT</span> [<span class="ansi-bold">STR</span> <span class="ansi-bold">FLOAT</span> ...]]
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help            show this help message and exit
+  --standard-dict <span class="ansi-bold">STR</span> <span class="ansi-bold">FLOAT</span> [<span class="ansi-bold">STR</span> <span class="ansi-bold">FLOAT</span> ...]
+                        <span class="ansi-dark">(default: learning_rate 0.0003 beta1 0.9 beta2
+                        0.999)</span>
+
+<span class="ansi-bold">typed_dict arguments</span>:
+
+  --typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>
+                        Setting `total=False` specifies that not all keys need
+                        to exist. <span class="ansi-dark">(unset by default)</span>
+  --typed-dict.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>
+                        Setting `total=False` specifies that not all keys need
+                        to exist. <span class="ansi-dark">(unset by default)</span></pre>
+<pre class="ansi-block literal-block">$ python ../../examples/11_dictionaries.py --typed-dict.learning-rate 3e-4
+Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+Typed dict: {'learning_rate': 0.0003}</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/11_dictionaries.py --typed-dict.betas 0.9 0.999
+Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+Typed dict: {'betas': (0.9, 0.999)}</pre>
 </section>
 </section>
 

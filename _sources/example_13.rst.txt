@@ -44,6 +44,6 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/13_standard_classes.py --help
+.. command-output:: python ../../examples/13_standard_classes.py --help
 
-.. command-output:: python /home/brent/dcargs/examples/13_standard_classes.py --field1 hello --field2 7
+.. command-output:: python ../../examples/13_standard_classes.py --field1 hello --field2 7

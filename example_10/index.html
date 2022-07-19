@@ -287,14 +287,39 @@
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/10_multiple_subparsers.py
-python: can't open file '/home/brent/dcargs/examples/10_multiple_subparsers.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/10_multiple_subparsers.py --help
-python: can't open file '/home/brent/dcargs/examples/10_multiple_subparsers.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/10_multiple_subparsers.py mnist-dataset --help
-python: can't open file '/home/brent/dcargs/examples/10_multiple_subparsers.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4
-python: can't open file '/home/brent/dcargs/examples/10_multiple_subparsers.py': [Errno 2] No such file or directory</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/10_multiple_subparsers.py
+MnistDataset(binary=False)
+AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999))</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/10_multiple_subparsers.py --help
+usage: 10_multiple_subparsers.py [-h] [{mnist-dataset,image-net-dataset}]
+
+Example training script.
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help            show this help message and exit
+
+optional subcommands:
+  Dataset to train on.  (default: mnist-dataset)
+
+  [{mnist-dataset,image-net-dataset}]</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/10_multiple_subparsers.py mnist-dataset --help
+usage: 10_multiple_subparsers.py mnist-dataset [-h] [--dataset.binary]
+                                               [{adam-optimizer,sgd-optimizer}]
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help            show this help message and exit
+
+<span class="ansi-bold">dataset arguments</span>:
+  --dataset.binary      Set to load binary version of MNIST dataset.
+                        <span class="ansi-dark">(sets: binary=True)</span>
+
+optional subcommands:
+  Optimizer to train with.  (default: adam-optimizer)
+
+  [{adam-optimizer,sgd-optimizer}]</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4
+MnistDataset(binary=False)
+AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</pre>
 </section>
 </section>
 

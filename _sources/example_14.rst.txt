@@ -54,4 +54,4 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/14_generics.py --help
+.. command-output:: python ../../examples/14_generics.py --help

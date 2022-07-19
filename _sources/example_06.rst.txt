@@ -125,12 +125,12 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/06_base_configs.py
+.. command-output:: python ../../examples/06_base_configs.py
 
-.. command-output:: python /home/brent/dcargs/examples/06_base_configs.py small --help
+.. command-output:: python ../../examples/06_base_configs.py small --help
 
-.. command-output:: python /home/brent/dcargs/examples/06_base_configs.py small --seed 94720
+.. command-output:: python ../../examples/06_base_configs.py small --seed 94720
 
-.. command-output:: python /home/brent/dcargs/examples/06_base_configs.py big --help
+.. command-output:: python ../../examples/06_base_configs.py big --help
 
-.. command-output:: python /home/brent/dcargs/examples/06_base_configs.py big --seed 94720
+.. command-output:: python ../../examples/06_base_configs.py big --seed 94720

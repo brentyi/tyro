@@ -247,10 +247,19 @@
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/12_named_tuples.py --help
-python: can't open file '/home/brent/dcargs/examples/12_named_tuples.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/12_named_tuples.py --field1 hello
-python: can't open file '/home/brent/dcargs/examples/12_named_tuples.py': [Errno 2] No such file or directory</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/12_named_tuples.py --help
+usage: 12_named_tuples.py [-h] --field1 <span class="ansi-bold">STR</span> [--field2 <span class="ansi-bold">INT</span>] [--flag]
+
+Description.
+This should show up in the helptext!
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help    show this help message and exit
+  --field1 <span class="ansi-bold">STR</span>  A string field. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --field2 <span class="ansi-bold">INT</span>  A numeric field, with a default value. <span class="ansi-dark">(default: 3)</span>
+  --flag        A boolean flag. <span class="ansi-dark">(sets: flag=True)</span></pre>
+<pre class="ansi-block literal-block">$ python ../../examples/12_named_tuples.py --field1 hello
+TupleType(field1='hello', field2=3, flag=False)</pre>
 </section>
 </section>
 

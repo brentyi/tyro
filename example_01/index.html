@@ -248,12 +248,19 @@ populated from the CLI.</p>
 </section>
 <section id="usage">
 <h2>Usage<a class="headerlink" href="#usage" title="Permalink to this heading">#</a></h2>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/01_functions.py --help
-python: can't open file '/home/brent/dcargs/examples/01_functions.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/01_functions.py --field1 hello
-python: can't open file '/home/brent/dcargs/examples/01_functions.py': [Errno 2] No such file or directory</pre>
-<pre class="ansi-block literal-block">$ python /home/brent/dcargs/examples/01_functions.py --field1 hello --field2 10
-python: can't open file '/home/brent/dcargs/examples/01_functions.py': [Errno 2] No such file or directory</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/01_functions.py --help
+usage: 01_functions.py [-h] --field1 <span class="ansi-bold">STR</span> [--field2 <span class="ansi-bold">INT</span>]
+
+Function, whose arguments will be populated from a CLI interface.
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help    show this help message and exit
+  --field1 <span class="ansi-bold">STR</span>  A string field. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --field2 <span class="ansi-bold">INT</span>  A numeric field, with a default value. <span class="ansi-dark">(default: 3)</span></pre>
+<pre class="ansi-block literal-block">$ python ../../examples/01_functions.py --field1 hello
+hello 3</pre>
+<pre class="ansi-block literal-block">$ python ../../examples/01_functions.py --field1 hello --field2 10
+hello 10</pre>
 </section>
 </section>
 

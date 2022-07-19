@@ -51,8 +51,8 @@ Example
 Usage
 ------------------------------------------
 
-.. command-output:: python /home/brent/dcargs/examples/11_dictionaries.py --help
+.. command-output:: python ../../examples/11_dictionaries.py --help
 
-.. command-output:: python /home/brent/dcargs/examples/11_dictionaries.py --typed-dict.learning-rate 3e-4
+.. command-output:: python ../../examples/11_dictionaries.py --typed-dict.learning-rate 3e-4
 
-.. command-output:: python /home/brent/dcargs/examples/11_dictionaries.py --typed-dict.betas 0.9 0.999
+.. command-output:: python ../../examples/11_dictionaries.py --typed-dict.betas 0.9 0.999
