@@ -20,7 +20,7 @@ class Args:
     boolean: bool
 
     # Optional boolean. Same as above, but can be omitted.
-    optional_boolean: Optional[bool]
+    optional_boolean: Optional[bool] = None
 
     # Pass --flag-a in to set this value to True.
     flag_a: bool = False

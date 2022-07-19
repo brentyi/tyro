@@ -7,7 +7,7 @@ from typing import IO, Any, Optional, Set, Type, TypeVar, Union
 import yaml
 from typing_extensions import get_origin
 
-from . import _fields, _resolver
+from .. import _fields, _resolver
 
 ENUM_YAML_TAG_PREFIX = "!enum:"
 DATACLASS_YAML_TAG_PREFIX = "!dataclass:"
@@ -176,7 +176,12 @@ def from_yaml(
     stream: Union[str, IO[str], bytes, IO[bytes]],
 ) -> DataclassType:
     """Re-construct a dataclass instance from a yaml-compatible string, which should be
-    generated from `dcargs.to_yaml()`."""
+    generated from `dcargs.to_yaml()`.
+
+    Args:
+        cls: Type to reconstruct.
+        stream: YAML to read from.
+    """
     out = yaml.load(stream, Loader=_make_loader(cls))
     origin_cls = get_origin(cls)
     assert isinstance(out, origin_cls if origin_cls is not None else cls)
@@ -185,5 +190,9 @@ def from_yaml(
 
 def to_yaml(instance: Any) -> str:
     """Serialize a dataclass; returns a yaml-compatible string that can be deserialized
-    via `dcargs.from_yaml()`."""
+    via `dcargs.from_yaml()`.
+
+    Args:
+        instance: Dataclass instance to serialize.
+    """
     return "# dcargs YAML.\n" + yaml.dump(instance, Dumper=_make_dumper(instance))

@@ -57,8 +57,8 @@ EXCLUDE_FROM_CALL = ExcludeFromKwargsType()
 
 # Note that our "public" missing API will always be the propagating missing sentinel.
 MISSING_PUBLIC: Any = MISSING_PROP
-"""Sentinel value to mark fields as missing. Should generally only be used to mark
-fields passed in as a `default_instance` for `dcargs.cli()` as required."""
+"""Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
+`default_instance` for `dcargs.cli()` as required."""
 
 
 MISSING_TYPE = Union[PropagatingMissingType, NonpropagatingMissingType]

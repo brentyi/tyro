@@ -1,14 +1,15 @@
-from ._cli import cli, parse
+from . import extras
+from ._cli import cli
 from ._fields import MISSING_PUBLIC as MISSING
 from ._instantiators import UnsupportedTypeAnnotationError
-from ._serialization import from_yaml, to_yaml
 
 __all__ = [
+    "extras",
     "MISSING",
     "cli",
-    # Deprecated.
-    # "parse",
     "UnsupportedTypeAnnotationError",
-    "from_yaml",
-    "to_yaml",
 ]
+
+# Deprecated interface. We use a star import to prevent these from showing up in
+# autocomplete engines, etc.
+from ._deprecated import *  # noqa

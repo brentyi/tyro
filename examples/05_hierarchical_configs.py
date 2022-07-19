@@ -3,8 +3,8 @@ configuration objects that are both modular and highly expressive.
 
 Usage:
 `python ./05_hierarchical_configs.py --help`
-`python ./05_hierarchical_configs.py . --config.optimizer.algorithm SGD`
-`python ./05_hierarchical_configs.py . --restore-checkpoint`
+`python ./05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD`
+`python ./05_hierarchical_configs.py --out-dir . --restore-checkpoint`
 """
 
 import dataclasses
