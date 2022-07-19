@@ -21,6 +21,4 @@ Note that most of these other libraries are generally aimed specifically at
 _dataclasses_ rather than general typed callables, but offer other features that
 you might find useful, such as registration for custom types (`pyrallis`),
 different approaches for serialization and config files (`tap`, `pyrallis`),
-simultaneous parsing of multiple dataclasses (`simple-parsing`), etc. Pull
-requests are welcome if you're missing any of these. :slightly_smiling_face:
-
+simultaneous parsing of multiple dataclasses (`simple-parsing`), etc.
