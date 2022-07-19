@@ -1,0 +1,105 @@
+:orphan:
+
+:py:mod:`dcargs._fields`
+========================
+
+.. py:module:: dcargs._fields
+
+.. autoapi-nested-parse::
+
+   
+   Abstractions for pulling out 'field' definitions, which specify inputs, types, and
+   defaults, from general callables.
+
+
+Module Contents
+---------------
+
+.. py:class:: FieldDefinition
+
+   .. py:attribute:: name
+      :annotation: :str
+
+      
+
+   .. py:attribute:: typ
+      :annotation: :Type
+
+      
+
+   .. py:attribute:: default
+      :annotation: :Any
+
+      
+
+   .. py:attribute:: helptext
+      :annotation: :Optional[str]
+
+      
+
+   .. py:attribute:: positional
+      :annotation: :bool
+
+      
+
+
+.. py:class:: PropagatingMissingType
+
+   Bases: :py:obj:`_Singleton`
+
+
+.. py:class:: NonpropagatingMissingType
+
+   Bases: :py:obj:`_Singleton`
+
+
+.. py:class:: ExcludeFromKwargsType
+
+   Bases: :py:obj:`_Singleton`
+
+
+.. py:data:: MISSING_PROP
+   
+
+   
+
+.. py:data:: MISSING_NONPROP
+   
+
+   
+
+.. py:data:: EXCLUDE_FROM_CALL
+   
+
+   
+
+.. py:data:: MISSING_PUBLIC
+   :annotation: :Any
+
+   
+   Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
+   ``default_instance`` for ``dcargs.cli()`` as required.
+
+.. py:data:: MISSING_TYPE
+   
+
+   
+
+.. py:data:: MISSING_SINGLETONS
+   
+
+   
+
+.. py:data:: T
+   
+
+   
+
+.. py:function:: field_list_from_callable(f: Callable[Ellipsis, T], default_instance: Union[T, PropagatingMissingType, NonpropagatingMissingType]) -> List[FieldDefinition]
+
+   
+   Generate a list of generic 'field' objects corresponding to the inputs of some
+   annotated callable.
+
+   ``f`` can be from a dataclass type, regular class type, or function.
+

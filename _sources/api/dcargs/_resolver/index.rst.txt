@@ -1,0 +1,45 @@
+:orphan:
+
+:py:mod:`dcargs._resolver`
+==========================
+
+.. py:module:: dcargs._resolver
+
+.. autoapi-nested-parse::
+
+   
+   Utilities for resolving types and forward references.
+
+
+Module Contents
+---------------
+
+.. py:data:: TypeOrCallable
+   
+
+   
+
+.. py:function:: unwrap_origin(tp: TypeOrCallable) -> TypeOrCallable
+
+   
+   Returns the origin of tp if it exists. Otherwise, returns tp.
+
+.. py:function:: is_dataclass(cls: Union[Type, Callable]) -> bool
+
+   
+   Same as ``dataclasses.is_dataclass``\ , but also handles generic aliases.
+
+.. py:function:: resolve_generic_types(cls: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, Type]]
+
+   
+   If the input is a class: no-op. If it's a generic alias: returns the origin
+   class, and a mapping from typevars to concrete types.
+
+.. py:function:: resolved_fields(cls: Type) -> List[dataclasses.Field]
+
+   
+   Similar to dataclasses.fields, but resolves forward references.
+
+.. py:function:: is_namedtuple(cls: Type) -> bool
+
+

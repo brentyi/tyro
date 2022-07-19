@@ -1,0 +1,27 @@
+:orphan:
+
+:py:mod:`dcargs._argparse_formatter`
+====================================
+
+.. py:module:: dcargs._argparse_formatter
+
+
+Module Contents
+---------------
+
+.. py:function:: argparse_ansi_monkey_patch()
+
+   
+   Temporary monkey patch for making argparse ignore ANSI codes when wrapping usage
+   text.
+
+.. py:class:: ArgparseHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
+
+   Bases: :py:obj:`argparse.RawDescriptionHelpFormatter`
+
+   
+   Help message formatter which retains any formatting in descriptions.
+
+   Only the name of this class is considered a public API. All the methods
+   provided by the class are considered an implementation detail.
+

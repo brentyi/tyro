@@ -1,0 +1,53 @@
+:orphan:
+
+:py:mod:`dcargs.extras._serialization`
+======================================
+
+.. py:module:: dcargs.extras._serialization
+
+.. autoapi-nested-parse::
+
+   
+   Type-safe, human-readable serialization helpers for dataclasses.
+
+
+Module Contents
+---------------
+
+.. py:data:: ENUM_YAML_TAG_PREFIX
+   :annotation: = !enum:
+
+   
+
+.. py:data:: DATACLASS_YAML_TAG_PREFIX
+   :annotation: = !dataclass:
+
+   
+
+.. py:data:: MISSING_YAML_TAG_PREFIX
+   :annotation: = !missing
+
+   
+
+.. py:data:: DataclassType
+   
+
+   
+
+.. py:function:: from_yaml(cls: Type[DataclassType], stream: Union[str, IO[str], bytes, IO[bytes]]) -> DataclassType
+
+   
+   Re-construct a dataclass instance from a yaml-compatible string, which should be
+   generated from ``dcargs.to_yaml()``.
+
+   :param cls: Type to reconstruct.
+   :param stream: YAML to read from.
+
+.. py:function:: to_yaml(instance: Any) -> str
+
+   
+   Serialize a dataclass; returns a yaml-compatible string that can be deserialized
+   via ``dcargs.from_yaml()``.
+
+   :param instance: Dataclass instance to serialize.
+

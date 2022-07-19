@@ -1,0 +1,8 @@
+:orphan:
+
+:py:mod:`dcargs._deprecated`
+============================
+
+.. py:module:: dcargs._deprecated
+
+

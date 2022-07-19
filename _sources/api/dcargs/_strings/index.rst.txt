@@ -1,0 +1,40 @@
+:orphan:
+
+:py:mod:`dcargs._strings`
+=========================
+
+.. py:module:: dcargs._strings
+
+.. autoapi-nested-parse::
+
+   
+   Utilities and constants for working with strings.
+
+
+Module Contents
+---------------
+
+.. py:data:: NESTED_FIELD_DELIMETER
+   :annotation: :str = .
+
+   
+
+.. py:data:: SUBPARSER_DEST_FMT
+   :annotation: :str = {name} (positional)
+
+   
+
+.. py:function:: dedent(text: str) -> str
+
+   
+   Same as textwrap.dedent, but ignores the first line.
+
+.. py:function:: hyphen_separated_from_camel_case(name: str) -> str
+
+
+.. py:function:: subparser_name_from_type(cls: Type) -> str
+
+
+.. py:function:: strip_ansi_sequences(x: str)
+
+
