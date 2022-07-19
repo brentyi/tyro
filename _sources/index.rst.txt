@@ -45,7 +45,7 @@ The broader goal is also a replacement for tools like :code:`hydra`,
   informative helptext.
 
 - **Expressive.** :func:`dcargs.cli` understands functions, classes,
-  dataclasses, and _nested_ classes and dataclasses, as well as frequently used
+  dataclasses, and *nested* classes and dataclasses, as well as frequently used
   annotations like unions, literals, and collections, which can be composed into
   hierarchical configuration objects built on standard Python features.
 
