@@ -1,0 +1,31 @@
+name: docs
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    container:
+      image: python:3.8
+    steps:
+
+      # Check out source
+      - uses: actions/checkout@v2
+
+      # Build documentation
+      - name: Building documentation
+        run: |
+          apt-get update
+          apt-get install -y graphviz
+          pip install -e ".[testing]"
+          pip install -r docs/requirements.txt
+          sphinx-build docs/source docs/build -b dirhtml
+
+      # Deploy
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/build

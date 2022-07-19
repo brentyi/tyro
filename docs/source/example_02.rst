@@ -1,0 +1,45 @@
+2. Dataclasses
+==========================================
+
+Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted instance
+can be used as a typed alternative for an argparse namespace.
+
+
+
+
+Example
+------------------------------------------
+
+
+
+.. code-block:: python
+       :linenos:
+
+       import dataclasses
+       
+       import dcargs
+       
+       
+       @dataclasses.dataclass
+       class Args:
+           """Description.
+           This should show up in the helptext!"""
+       
+           field1: str  # A string field.
+           field2: int = 3  # A numeric field, with a default value.
+       
+       
+       if __name__ == "__main__":
+           args = dcargs.cli(Args)
+           print(args)
+
+
+
+Usage
+------------------------------------------
+
+.. command-output:: python ../../examples/02_dataclasses.py --help
+
+.. command-output:: python ../../examples/02_dataclasses.py --field1 hello
+
+.. command-output:: python ../../examples/02_dataclasses.py --field1 hello --field2 5

@@ -1,0 +1,9 @@
+sphinx
+# sphinx_rtd_theme
+furo
+sphinx_math_dollar
+sphinx-argparse
+sphinx-autoapi
+m2r2
+git+https://github.com/brentyi/sphinxcontrib-programoutput.git
+git+https://github.com/brentyi/ansi.git

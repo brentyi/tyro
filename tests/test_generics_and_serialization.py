@@ -12,7 +12,7 @@ T = TypeVar("T")
 
 
 def _check_serialization_identity(cls: Type[T], instance: T) -> None:
-    assert dcargs.from_yaml(cls, dcargs.to_yaml(instance)) == instance
+    assert dcargs.extras.from_yaml(cls, dcargs.extras.to_yaml(instance)) == instance
 
 
 ScalarType = TypeVar("ScalarType")
@@ -339,9 +339,11 @@ def test_serialize_missing():
         xyz: Tuple[ScalarType, ...]
 
     x = TupleGenericVariableMissing[int](xyz=(dcargs.MISSING, dcargs.MISSING))
-    assert dcargs.to_yaml(x).count("!missing") == 2
+    assert dcargs.extras.to_yaml(x).count("!missing") == 2
     _check_serialization_identity(TupleGenericVariableMissing[int], x)
     assert (
-        dcargs.from_yaml(TupleGenericVariableMissing[int], dcargs.to_yaml(x)).xyz[0]
+        dcargs.extras.from_yaml(
+            TupleGenericVariableMissing[int], dcargs.extras.to_yaml(x)
+        ).xyz[0]
         is dcargs.MISSING
     )
