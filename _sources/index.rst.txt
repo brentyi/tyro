@@ -17,16 +17,8 @@ replacement for :code:`argparse`:
       import argparse
 
       parser = argparse.ArgumentParser()
-      parser.add_argument(
-          "--a",
-          type=int,
-          required=True,
-      )
-      parser.add_argument(
-          "--b",
-          type=int,
-          default=3,
-      )
+      parser.add_argument("--a", type=int, required=True)
+      parser.add_argument("--b", type=int, default=3)
       args = parser.parse_args()
 
       print(args.a + args.b)
