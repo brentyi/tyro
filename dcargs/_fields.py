@@ -36,7 +36,7 @@ class _Singleton:
         pass
 
 
-class PropagatingMissingType(_Singleton):  # pragma: no cover
+class PropagatingMissingType(_Singleton):
     pass
 
 

@@ -1,5 +1,5 @@
-"""Parsing of nested types (in this case nested dataclasses) enables hierarchical
-configuration objects that are both modular and highly expressive.
+"""Structures (typically dataclasses) can be nested to build hierarchical configuration
+objects. This helps with modularity and grouping in larger projects.
 
 Usage:
 `python ./05_hierarchical_configs.py --help`
