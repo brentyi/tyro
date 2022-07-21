@@ -5,12 +5,16 @@ dcargs
 
 :code:`dcargs` is a library for typed CLI interfaces and configuration objects.
 
-Our core interface, :func:`dcargs.cli`, generates argument parsers from
-type-annotated callables. In the simplest case, this can be used as a drop-in
-replacement for :code:`argparse`:
+Our core interface, :func:`dcargs.cli()`, generates argument parsers from
+type-annotated callables: functions, classes, dataclasses, and *nested*
+dataclasses and classes.
+
+In the simplest case, this can be used as a drop-in replacement for
+:code:`argparse`:
 
 
-.. code:: python
+
+.. code-block::
 
       # With argparse.
 
@@ -24,7 +28,7 @@ replacement for :code:`argparse`:
       print(args.a + args.b)
 
 
-.. code:: python
+.. code-block::
 
       # With dcargs.
 
@@ -64,20 +68,27 @@ The broader goal is also a replacement for tools like :code:`hydra`,
   import — this eliminates redundancy and makes entire modules easy to port
   across codebases.
 
+.. toctree::
+   :caption: Getting started
+   :maxdepth: 1
+   :hidden:
+   :titlesonly:
+
+   installation
 
 .. toctree::
    :caption: Examples
-   :maxdepth: 5
+   :maxdepth: 1
+   :hidden:
    :titlesonly:
    :glob:
 
-   example_*
-
+   examples/*
 
 .. toctree::
    :caption: Notes
    :maxdepth: 5
-   :titlesonly:
+   :hidden:
    :glob:
 
    serialization
@@ -87,6 +98,7 @@ The broader goal is also a replacement for tools like :code:`hydra`,
 .. toctree::
    :caption: API Reference
    :maxdepth: 5
+   :hidden:
    :titlesonly:
 
    api/dcargs/index

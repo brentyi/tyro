@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="genindex/" /><link rel="search" title="Search" href="search/" /><link rel="next" title="1. Functions" href="example_01/" />
+<link rel="index" title="Index" href="genindex/" /><link rel="search" title="Search" href="search/" /><link rel="next" title="Installation" href="installation/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>dcargs</title>
@@ -158,22 +158,26 @@
   <input type="hidden" name="area" value="default">
 </form>
 <div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
-  <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+  <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="example_01/">1. Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_02/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_03/">3. Enums And Containers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_04/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_05/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_06/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_07/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_08/">8. Positional Args</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_09/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_10/">10. Multiple Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_11/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_12/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_13/">13. Standard Classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_14/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation/">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/01_functions/">1. Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/02_dataclasses/">2. Dataclasses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/04_flags/">4. Flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/05_hierarchical configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/06_base configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/07_literals and unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/09_subparsers/">9. Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/11_dictionaries/">11. Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/12_named tuples/">12. Named Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/13_standard classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/14_generics/">14. Generics</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -224,9 +228,11 @@
 <p><a class="reference external" href="https://github.com/brentyi/dcargs"><img alt="Build status icon" src="https://github.com/brentyi/dcargs/workflows/build/badge.svg" /></a> <a class="reference external" href="https://github.com/brentyi/dcargs"><img alt="Mypy status icon" src="https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master" /></a> <a class="reference external" href="https://github.com/brentyi/dcargs"><img alt="Lint status icon" src="https://github.com/brentyi/dcargs/workflows/lint/badge.svg" /></a> <a class="reference external" href="https://codecov.io/gh/brentyi/dcargs"><img alt="Test coverage status icon" src="https://codecov.io/gh/brentyi/dcargs/branch/master/graph/badge.svg" /></a> <a class="reference external" href="https://pypi.org/project/dcargs/"><img alt="Version icon" src="https://img.shields.io/pypi/pyversions/dcargs" /></a></p>
 <p><code class="code docutils literal notranslate"><span class="pre">dcargs</span></code> is a library for typed CLI interfaces and configuration objects.</p>
 <p>Our core interface, <a class="reference internal" href="api/dcargs/#dcargs.cli" title="dcargs.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">dcargs.cli()</span></code></a>, generates argument parsers from
-type-annotated callables. In the simplest case, this can be used as a drop-in
-replacement for <code class="code docutils literal notranslate"><span class="pre">argparse</span></code>:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># With argparse.</span>
+type-annotated callables: functions, classes, dataclasses, and <em>nested</em>
+dataclasses and classes.</p>
+<p>In the simplest case, this can be used as a drop-in replacement for
+<code class="code docutils literal notranslate"><span class="pre">argparse</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># With argparse.</span>
 
 <span class="kn">import</span> <span class="nn">argparse</span>
 
@@ -238,7 +244,7 @@ replacement for <code class="code docutils literal notranslate"><span class="pre
 <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># With dcargs.</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># With dcargs.</span>
 
 <span class="kn">import</span> <span class="nn">dcargs</span>
 
@@ -273,39 +279,12 @@ import — this eliminates redundancy and makes entire modules easy to port
 across codebases.</p></li>
 </ul>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="example_01/">1. Functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_02/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_03/">3. Enums And Containers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_04/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_05/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_06/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_07/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_08/">8. Positional Args</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_09/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_10/">10. Multiple Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_11/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_12/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_13/">13. Standard Classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="example_14/">14. Generics</a></li>
-</ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="serialization/">Serialization</a></li>
-<li class="toctree-l1"><a class="reference internal" href="alternatives/">Alternative tools</a></li>
-</ul>
 </div>
 <div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api/dcargs/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/dcargs/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
-</ul>
-</li>
-</ul>
+</div>
+<div class="toctree-wrapper compound">
 </div>
 </section>
 
@@ -314,12 +293,12 @@ across codebases.</p></li>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="example_01/">
+          <a class="next-page" href="installation/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">1. Functions</div>
+                <div class="title">Installation</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
