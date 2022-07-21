@@ -1,5 +1,5 @@
 """Dictionary inputs can be specified using either a standard `Dict[K, V]` annotation,
-or a `TypedDict` type.
+or a `TypedDict` subclass.
 
 Usage:
 `python ./11_dictionaries.py --help`

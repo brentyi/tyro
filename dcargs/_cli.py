@@ -114,5 +114,5 @@ def cli(
         print(e.args[0])
         raise SystemExit()
 
-    # assert consumed_keywords == value_from_prefixed_field_name.keys()
+    assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0
     return out

@@ -2,6 +2,12 @@
 one of multiple possible base configurations, and then use the CLI to either override
 (existing) or fill in (missing) values.
 
+Note that our interfaces don't prescribe any of the mechanics used for storing or
+choosing between base configurations. A Hydra-style YAML approach could just as easily
+be used for the config libary (although we generally prefer to avoid YAMLs; staying in
+Python is convenient for autocompletion and type checking). For selection, we could also
+avoid fussing with `sys.argv` by using a `BASE_CONFIG` environment variable.
+
 Usage:
 `python ./06_base_configs.py`
 `python ./06_base_configs.py small --help`

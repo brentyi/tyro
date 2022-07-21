@@ -1,5 +1,5 @@
 """We can generate argument parsers from more advanced type annotations, like enums and
-tuple types.
+container types.
 
 Usage:
 `python ./03_enums_and_containers.py --help`

@@ -5,8 +5,8 @@ As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for gener
 configuration use cases, we also introduce functions for human-readable
 dataclass serialization:
 
-- :func:`dcargs.to_yaml` and :func:`dcargs.from_yaml` convert between YAML-style
-  strings and dataclass instances.
+- :func:`dcargs.extras.to_yaml` and :func:`dcargs.extras.from_yaml` convert
+  between YAML-style strings and dataclass instances.
 
 The functions attempt to strike a balance between flexibility and robustness —
 in contrast to naively dumping or loading dataclass instances (via pickle,
