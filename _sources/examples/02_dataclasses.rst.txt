@@ -33,18 +33,24 @@ can be used as a typed alternative for an argparse namespace.
 
 ------------
 
-:kbd:`python examples/02_dataclasses.py --help`
+.. raw:: html
+
+        <kbd>python examples/02_dataclasses.py --help</kbd>
 
 .. program-output:: python ../../examples/02_dataclasses.py --help
 
 ------------
 
-:kbd:`python examples/02_dataclasses.py --field1 hello`
+.. raw:: html
+
+        <kbd>python examples/02_dataclasses.py --field1 hello</kbd>
 
 .. program-output:: python ../../examples/02_dataclasses.py --field1 hello
 
 ------------
 
-:kbd:`python examples/02_dataclasses.py --field1 hello --field2 5`
+.. raw:: html
+
+        <kbd>python examples/02_dataclasses.py --field1 hello --field2 5</kbd>
 
 .. program-output:: python ../../examples/02_dataclasses.py --field1 hello --field2 5

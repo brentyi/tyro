@@ -46,18 +46,24 @@ or a ``TypedDict`` subclass.
 
 ------------
 
-:kbd:`python examples/11_dictionaries.py --help`
+.. raw:: html
+
+        <kbd>python examples/11_dictionaries.py --help</kbd>
 
 .. program-output:: python ../../examples/11_dictionaries.py --help
 
 ------------
 
-:kbd:`python examples/11_dictionaries.py --typed-dict.learning-rate 3e-4`
+.. raw:: html
+
+        <kbd>python examples/11_dictionaries.py --typed-dict.learning-rate 3e-4</kbd>
 
 .. program-output:: python ../../examples/11_dictionaries.py --typed-dict.learning-rate 3e-4
 
 ------------
 
-:kbd:`python examples/11_dictionaries.py --typed-dict.betas 0.9 0.999`
+.. raw:: html
+
+        <kbd>python examples/11_dictionaries.py --typed-dict.betas 0.9 0.999</kbd>
 
 .. program-output:: python ../../examples/11_dictionaries.py --typed-dict.betas 0.9 0.999

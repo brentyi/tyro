@@ -17,7 +17,7 @@ Development
 ------------------------------------------
 
 If you're interested in development, :code:`dcargs` can also be installed from
-source:
+source.
 
 .. code-block::
 

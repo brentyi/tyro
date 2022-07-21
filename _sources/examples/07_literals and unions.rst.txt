@@ -55,6 +55,8 @@
 
 ------------
 
-:kbd:`python examples/07_literals_and_unions.py --help`
+.. raw:: html
+
+        <kbd>python examples/07_literals_and_unions.py --help</kbd>
 
 .. program-output:: python ../../examples/07_literals_and_unions.py --help

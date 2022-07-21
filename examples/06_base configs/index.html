@@ -231,7 +231,7 @@ one of multiple possible base configurations, and then use the CLI to either ove
 <p>Note that our interfaces don’t prescribe any of the mechanics used for storing or
 choosing between base configurations. A Hydra-style YAML approach could just as easily
 be used for the config libary (although we generally prefer to avoid YAMLs; staying in
-Python is convenient for autocompletion and type checking); for selection, we could also
+Python is convenient for autocompletion and type checking). For selection, we could also
 avoid fussing with <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code> by using a <code class="docutils literal notranslate"><span class="pre">BASE_CONFIG</span></code> environment variable.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="linenos">  2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
@@ -339,13 +339,11 @@ avoid fussing with <code class="docutils literal notranslate"><span class="pre">
 </pre></div>
 </div>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/06_base_configs.py</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage:
+<kbd>python examples/06_base_configs.py</kbd><pre class="ansi-block literal-block">usage:
   ../../examples/06_base_configs.py small --help
   ../../examples/06_base_configs.py big --help</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/06_base_configs.py</kbd> <kbd class="kbd docutils literal notranslate">small</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: ../../examples/06_base_configs.py small [-h]
+<kbd>python examples/06_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: ../../examples/06_base_configs.py small [-h]
                                                [--dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}]
                                                [--optimizer.learning-rate <span class="ansi-bold">FLOAT</span>]
                                                [--num-layers <span class="ansi-bold">INT</span>]
@@ -376,11 +374,9 @@ avoid fussing with <code class="docutils literal notranslate"><span class="pre">
   --optimizer.learning-rate <span class="ansi-bold">FLOAT</span>
                         <span class="ansi-dark">(default: 0.0003)</span></pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/06_base_configs.py</kbd> <kbd class="kbd docutils literal notranslate">small</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">seed</kbd> <kbd class="kbd docutils literal notranslate">94720</kbd></kbd></p>
-<pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</pre>
+<kbd>python examples/06_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/06_base_configs.py</kbd> <kbd class="kbd docutils literal notranslate">big</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: ../../examples/06_base_configs.py big [-h]
+<kbd>python examples/06_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: ../../examples/06_base_configs.py big [-h]
                                              [--dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}]
                                              [--optimizer.learning-rate <span class="ansi-bold">FLOAT</span>]
                                              [--optimizer.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>]
@@ -414,8 +410,7 @@ avoid fussing with <code class="docutils literal notranslate"><span class="pre">
   --optimizer.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>
                         <span class="ansi-dark">(default: 0.9 0.999)</span></pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/06_base_configs.py</kbd> <kbd class="kbd docutils literal notranslate">big</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">seed</kbd> <kbd class="kbd docutils literal notranslate">94720</kbd></kbd></p>
-<pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)</pre>
+<kbd>python examples/06_base_configs.py big --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)</pre>
 </section>
 
         </article>

@@ -33,12 +33,16 @@ Example using ``dcargs.cli()`` to instantiate a named tuple.
 
 ------------
 
-:kbd:`python examples/12_named_tuples.py --help`
+.. raw:: html
+
+        <kbd>python examples/12_named_tuples.py --help</kbd>
 
 .. program-output:: python ../../examples/12_named_tuples.py --help
 
 ------------
 
-:kbd:`python examples/12_named_tuples.py --field1 hello`
+.. raw:: html
+
+        <kbd>python examples/12_named_tuples.py --field1 hello</kbd>
 
 .. program-output:: python ../../examples/12_named_tuples.py --field1 hello

@@ -44,30 +44,40 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
 
 ------------
 
-:kbd:`python examples/09_subparsers.py --help`
+.. raw:: html
+
+        <kbd>python examples/09_subparsers.py --help</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py --help
 
 ------------
 
-:kbd:`python examples/09_subparsers.py commit --help`
+.. raw:: html
+
+        <kbd>python examples/09_subparsers.py commit --help</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py commit --help
 
 ------------
 
-:kbd:`python examples/09_subparsers.py commit --cmd.message hello --cmd.all`
+.. raw:: html
+
+        <kbd>python examples/09_subparsers.py commit --cmd.message hello --cmd.all</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py commit --cmd.message hello --cmd.all
 
 ------------
 
-:kbd:`python examples/09_subparsers.py checkout --help`
+.. raw:: html
+
+        <kbd>python examples/09_subparsers.py checkout --help</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py checkout --help
 
 ------------
 
-:kbd:`python examples/09_subparsers.py checkout --cmd.branch main`
+.. raw:: html
+
+        <kbd>python examples/09_subparsers.py checkout --cmd.branch main</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py checkout --cmd.branch main

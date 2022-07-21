@@ -73,24 +73,32 @@ Multiple unions over nested types are populated using a series of subparsers.
 
 ------------
 
-:kbd:`python examples/10_multiple_subparsers.py`
+.. raw:: html
+
+        <kbd>python examples/10_multiple_subparsers.py</kbd>
 
 .. program-output:: python ../../examples/10_multiple_subparsers.py
 
 ------------
 
-:kbd:`python examples/10_multiple_subparsers.py --help`
+.. raw:: html
+
+        <kbd>python examples/10_multiple_subparsers.py --help</kbd>
 
 .. program-output:: python ../../examples/10_multiple_subparsers.py --help
 
 ------------
 
-:kbd:`python examples/10_multiple_subparsers.py mnist-dataset --help`
+.. raw:: html
+
+        <kbd>python examples/10_multiple_subparsers.py mnist-dataset --help</kbd>
 
 .. program-output:: python ../../examples/10_multiple_subparsers.py mnist-dataset --help
 
 ------------
 
-:kbd:`python examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4`
+.. raw:: html
+
+        <kbd>python examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4</kbd>
 
 .. program-output:: python ../../examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4

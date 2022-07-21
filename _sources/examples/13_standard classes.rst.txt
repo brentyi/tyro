@@ -39,12 +39,16 @@ constructors of) standard Python classes.
 
 ------------
 
-:kbd:`python examples/13_standard_classes.py --help`
+.. raw:: html
+
+        <kbd>python examples/13_standard_classes.py --help</kbd>
 
 .. program-output:: python ../../examples/13_standard_classes.py --help
 
 ------------
 
-:kbd:`python examples/13_standard_classes.py --field1 hello --field2 7`
+.. raw:: html
+
+        <kbd>python examples/13_standard_classes.py --field1 hello --field2 7</kbd>
 
 .. program-output:: python ../../examples/13_standard_classes.py --field1 hello --field2 7

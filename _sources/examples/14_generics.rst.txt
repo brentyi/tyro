@@ -49,6 +49,8 @@ Example of parsing for generic dataclasses.
 
 ------------
 
-:kbd:`python examples/14_generics.py --help`
+.. raw:: html
+
+        <kbd>python examples/14_generics.py --help</kbd>
 
 .. program-output:: python ../../examples/14_generics.py --help

@@ -40,24 +40,32 @@ value, automatically converted to flags.
 
 ------------
 
-:kbd:`python examples/04_flags.py --help`
+.. raw:: html
+
+        <kbd>python examples/04_flags.py --help</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --help
 
 ------------
 
-:kbd:`python examples/04_flags.py --boolean True`
+.. raw:: html
+
+        <kbd>python examples/04_flags.py --boolean True</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --boolean True
 
 ------------
 
-:kbd:`python examples/04_flags.py --boolean False --flag-a`
+.. raw:: html
+
+        <kbd>python examples/04_flags.py --boolean False --flag-a</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --boolean False --flag-a
 
 ------------
 
-:kbd:`python examples/04_flags.py --boolean False --no-flag-b`
+.. raw:: html
+
+        <kbd>python examples/04_flags.py --boolean False --no-flag-b</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --boolean False --no-flag-b

@@ -266,8 +266,7 @@ container types.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/03_enums_and_containers.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: 03_enums_and_containers.py [-h] --dataset-sources <span class="ansi-bold">PATH</span> [<span class="ansi-bold">PATH</span> ...]
+<kbd>python examples/03_enums_and_containers.py --help</kbd><pre class="ansi-block literal-block">usage: 03_enums_and_containers.py [-h] --dataset-sources <span class="ansi-bold">PATH</span> [<span class="ansi-bold">PATH</span> ...]
                                   [--image-dimensions <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>]
                                   [--optimizer-type {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}]
                                   [--checkpoint-interval {<span class="ansi-bold">None</span>}|<span class="ansi-bold">INT</span>]
@@ -287,11 +286,9 @@ container types.</p>
                         Interval to save checkpoints at. <span class="ansi-dark">(default:
                         None)</span></pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/03_enums_and_containers.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">dataset</kbd>-<kbd class="kbd docutils literal notranslate">sources</kbd> <kbd class="kbd docutils literal notranslate">./data</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">image</kbd>-<kbd class="kbd docutils literal notranslate">dimensions</kbd> <kbd class="kbd docutils literal notranslate">16</kbd> <kbd class="kbd docutils literal notranslate">16</kbd></kbd></p>
-<pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(16, 16), optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, checkpoint_interval=None)</pre>
+<kbd>python examples/03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(16, 16), optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, checkpoint_interval=None)</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/03_enums_and_containers.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">dataset</kbd>-<kbd class="kbd docutils literal notranslate">sources</kbd> <kbd class="kbd docutils literal notranslate">./data</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">optimizer</kbd>-<kbd class="kbd docutils literal notranslate">type</kbd> <kbd class="kbd docutils literal notranslate">SGD</kbd></kbd></p>
-<pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(32, 32), optimizer_type=&lt;OptimizerType.SGD: 2&gt;, checkpoint_interval=None)</pre>
+<kbd>python examples/03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(32, 32), optimizer_type=&lt;OptimizerType.SGD: 2&gt;, checkpoint_interval=None)</pre>
 </section>
 
         </article>

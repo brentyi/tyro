@@ -34,18 +34,24 @@ populated from the CLI.
 
 ------------
 
-:kbd:`python examples/01_functions.py --help`
+.. raw:: html
+
+        <kbd>python examples/01_functions.py --help</kbd>
 
 .. program-output:: python ../../examples/01_functions.py --help
 
 ------------
 
-:kbd:`python examples/01_functions.py --field1 hello`
+.. raw:: html
+
+        <kbd>python examples/01_functions.py --field1 hello</kbd>
 
 .. program-output:: python ../../examples/01_functions.py --field1 hello
 
 ------------
 
-:kbd:`python examples/01_functions.py --field1 hello --field2 10`
+.. raw:: html
+
+        <kbd>python examples/01_functions.py --field1 hello --field2 10</kbd>
 
 .. program-output:: python ../../examples/01_functions.py --field1 hello --field2 10

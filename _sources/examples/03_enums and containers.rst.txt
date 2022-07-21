@@ -52,18 +52,24 @@ container types.
 
 ------------
 
-:kbd:`python examples/03_enums_and_containers.py --help`
+.. raw:: html
+
+        <kbd>python examples/03_enums_and_containers.py --help</kbd>
 
 .. program-output:: python ../../examples/03_enums_and_containers.py --help
 
 ------------
 
-:kbd:`python examples/03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16`
+.. raw:: html
+
+        <kbd>python examples/03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16</kbd>
 
 .. program-output:: python ../../examples/03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16
 
 ------------
 
-:kbd:`python examples/03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD`
+.. raw:: html
+
+        <kbd>python examples/03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD</kbd>
 
 .. program-output:: python ../../examples/03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD

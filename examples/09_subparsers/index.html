@@ -258,8 +258,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/09_subparsers.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: 09_subparsers.py [-h] {checkout,commit}
+<kbd>python examples/09_subparsers.py --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py [-h] {checkout,commit}
 
 <span class="ansi-bold">arguments</span>:
   -h, --help         show this help message and exit
@@ -268,8 +267,7 @@ subcommands:
 
   {checkout,commit}</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/09_subparsers.py</kbd> <kbd class="kbd docutils literal notranslate">commit</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: 09_subparsers.py commit [-h] --cmd.message <span class="ansi-bold">STR</span> [--cmd.all]
+<kbd>python examples/09_subparsers.py commit --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py commit [-h] --cmd.message <span class="ansi-bold">STR</span> [--cmd.all]
 
 Commit changes.
 
@@ -280,11 +278,9 @@ Commit changes.
   --cmd.message <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
   --cmd.all          <span class="ansi-dark">(sets: all=True)</span></pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/09_subparsers.py</kbd> <kbd class="kbd docutils literal notranslate">commit</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">cmd.message</kbd> <kbd class="kbd docutils literal notranslate">hello</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">cmd.all</kbd></kbd></p>
-<pre class="ansi-block literal-block">Commit(message='hello', all=True)</pre>
+<kbd>python examples/09_subparsers.py commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">Commit(message='hello', all=True)</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/09_subparsers.py</kbd> <kbd class="kbd docutils literal notranslate">checkout</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: 09_subparsers.py checkout [-h] --cmd.branch <span class="ansi-bold">STR</span>
+<kbd>python examples/09_subparsers.py checkout --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py checkout [-h] --cmd.branch <span class="ansi-bold">STR</span>
 
 Checkout a branch.
 
@@ -294,8 +290,7 @@ Checkout a branch.
 <span class="ansi-bold">cmd arguments</span>:
   --cmd.branch <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span></pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/09_subparsers.py</kbd> <kbd class="kbd docutils literal notranslate">checkout</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">cmd.branch</kbd> <kbd class="kbd docutils literal notranslate">main</kbd></kbd></p>
-<pre class="ansi-block literal-block">Checkout(branch='main')</pre>
+<kbd>python examples/09_subparsers.py checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">Checkout(branch='main')</pre>
 </section>
 
         </article>

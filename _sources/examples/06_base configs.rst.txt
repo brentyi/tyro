@@ -12,7 +12,7 @@ one of multiple possible base configurations, and then use the CLI to either ove
 Note that our interfaces don't prescribe any of the mechanics used for storing or
 choosing between base configurations. A Hydra-style YAML approach could just as easily
 be used for the config libary (although we generally prefer to avoid YAMLs; staying in
-Python is convenient for autocompletion and type checking); for selection, we could also
+Python is convenient for autocompletion and type checking). For selection, we could also
 avoid fussing with ``sys.argv`` by using a ``BASE_CONFIG`` environment variable.
 
 
@@ -126,30 +126,40 @@ avoid fussing with ``sys.argv`` by using a ``BASE_CONFIG`` environment variable.
 
 ------------
 
-:kbd:`python examples/06_base_configs.py`
+.. raw:: html
+
+        <kbd>python examples/06_base_configs.py</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py
 
 ------------
 
-:kbd:`python examples/06_base_configs.py small --help`
+.. raw:: html
+
+        <kbd>python examples/06_base_configs.py small --help</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py small --help
 
 ------------
 
-:kbd:`python examples/06_base_configs.py small --seed 94720`
+.. raw:: html
+
+        <kbd>python examples/06_base_configs.py small --seed 94720</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py small --seed 94720
 
 ------------
 
-:kbd:`python examples/06_base_configs.py big --help`
+.. raw:: html
+
+        <kbd>python examples/06_base_configs.py big --help</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py big --help
 
 ------------
 
-:kbd:`python examples/06_base_configs.py big --seed 94720`
+.. raw:: html
+
+        <kbd>python examples/06_base_configs.py big --seed 94720</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py big --seed 94720

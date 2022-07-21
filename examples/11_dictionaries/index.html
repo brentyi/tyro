@@ -260,8 +260,7 @@ or a <code class="docutils literal notranslate"><span class="pre">TypedDict</spa
 </pre></div>
 </div>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/11_dictionaries.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: 11_dictionaries.py [-h] [--typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>]
+<kbd>python examples/11_dictionaries.py --help</kbd><pre class="ansi-block literal-block">usage: 11_dictionaries.py [-h] [--typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>]
                           [--typed-dict.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>]
                           [--standard-dict <span class="ansi-bold">STR</span> <span class="ansi-bold">FLOAT</span> [<span class="ansi-bold">STR</span> <span class="ansi-bold">FLOAT</span> ...]]
 
@@ -280,12 +279,10 @@ or a <code class="docutils literal notranslate"><span class="pre">TypedDict</spa
                         Setting `total=False` specifies that not all keys need
                         to exist. <span class="ansi-dark">(unset by default)</span></pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/11_dictionaries.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">typed</kbd>-<kbd class="kbd docutils literal notranslate">dict.learning</kbd>-<kbd class="kbd docutils literal notranslate">rate</kbd> <kbd class="kbd docutils literal notranslate">3e</kbd>-<kbd class="kbd docutils literal notranslate">4</kbd></kbd></p>
-<pre class="ansi-block literal-block">Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+<kbd>python examples/11_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
 Typed dict: {'learning_rate': 0.0003}</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/11_dictionaries.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">typed</kbd>-<kbd class="kbd docutils literal notranslate">dict.betas</kbd> <kbd class="kbd docutils literal notranslate">0.9</kbd> <kbd class="kbd docutils literal notranslate">0.999</kbd></kbd></p>
-<pre class="ansi-block literal-block">Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+<kbd>python examples/11_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
 Typed dict: {'betas': (0.9, 0.999)}</pre>
 </section>
 

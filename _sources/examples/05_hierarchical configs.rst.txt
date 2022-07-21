@@ -77,18 +77,24 @@ objects. This helps with modularity and grouping in larger projects.
 
 ------------
 
-:kbd:`python examples/05_hierarchical_configs.py --help`
+.. raw:: html
+
+        <kbd>python examples/05_hierarchical_configs.py --help</kbd>
 
 .. program-output:: python ../../examples/05_hierarchical_configs.py --help
 
 ------------
 
-:kbd:`python examples/05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD`
+.. raw:: html
+
+        <kbd>python examples/05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd>
 
 .. program-output:: python ../../examples/05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD
 
 ------------
 
-:kbd:`python examples/05_hierarchical_configs.py --out-dir . --restore-checkpoint`
+.. raw:: html
+
+        <kbd>python examples/05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd>
 
 .. program-output:: python ../../examples/05_hierarchical_configs.py --out-dir . --restore-checkpoint

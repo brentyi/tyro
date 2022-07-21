@@ -254,8 +254,7 @@ value, automatically converted to flags.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/04_flags.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">help</kbd></kbd></p>
-<pre class="ansi-block literal-block">usage: 04_flags.py [-h] --boolean {<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}
+<kbd>python examples/04_flags.py --help</kbd><pre class="ansi-block literal-block">usage: 04_flags.py [-h] --boolean {<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}
                    [--optional-boolean {<span class="ansi-bold">None</span>,<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}] [--flag-a]
                    [--no-flag-b]
 
@@ -272,14 +271,11 @@ value, automatically converted to flags.</p>
   --no-flag-b           Pass --no-flag-b in to set this value to False.
                         <span class="ansi-dark">(sets: flag_b=False)</span></pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/04_flags.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">boolean</kbd> <kbd class="kbd docutils literal notranslate">True</kbd></kbd></p>
-<pre class="ansi-block literal-block">Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
+<kbd>python examples/04_flags.py --boolean True</kbd><pre class="ansi-block literal-block">Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/04_flags.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">boolean</kbd> <kbd class="kbd docutils literal notranslate">False</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">flag</kbd>-<kbd class="kbd docutils literal notranslate">a</kbd></kbd></p>
-<pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
+<kbd>python examples/04_flags.py --boolean False --flag-a</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
 <hr class="docutils" />
-<p><kbd class="kbd compound docutils literal notranslate"><kbd class="kbd docutils literal notranslate">python</kbd> <kbd class="kbd docutils literal notranslate">examples/04_flags.py</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">boolean</kbd> <kbd class="kbd docutils literal notranslate">False</kbd> <kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate"></kbd>-<kbd class="kbd docutils literal notranslate">no</kbd>-<kbd class="kbd docutils literal notranslate">flag</kbd>-<kbd class="kbd docutils literal notranslate">b</kbd></kbd></p>
-<pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
+<kbd>python examples/04_flags.py --boolean False --no-flag-b</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
 </section>
 
         </article>
