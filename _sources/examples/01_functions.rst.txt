@@ -36,7 +36,7 @@ populated from the CLI.
 
 .. raw:: html
 
-        <kbd>python examples/01_functions.py --help</kbd>
+        <kbd>python 01_functions.py --help</kbd>
 
 .. program-output:: python ../../examples/01_functions.py --help
 
@@ -44,7 +44,7 @@ populated from the CLI.
 
 .. raw:: html
 
-        <kbd>python examples/01_functions.py --field1 hello</kbd>
+        <kbd>python 01_functions.py --field1 hello</kbd>
 
 .. program-output:: python ../../examples/01_functions.py --field1 hello
 
@@ -52,6 +52,6 @@ populated from the CLI.
 
 .. raw:: html
 
-        <kbd>python examples/01_functions.py --field1 hello --field2 10</kbd>
+        <kbd>python 01_functions.py --field1 hello --field2 10</kbd>
 
 .. program-output:: python ../../examples/01_functions.py --field1 hello --field2 10

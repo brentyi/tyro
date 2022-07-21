@@ -281,7 +281,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python examples/08_positional_args.py --help</kbd><pre class="ansi-block literal-block">usage: 08_positional_args.py [-h] [--optimizer.algorithm {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}]
+<kbd>python 08_positional_args.py --help</kbd><pre class="ansi-block literal-block">usage: 08_positional_args.py [-h] [--optimizer.algorithm {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}]
                              [--optimizer.learning-rate <span class="ansi-bold">FLOAT</span>]
                              [--optimizer.weight-decay <span class="ansi-bold">FLOAT</span>] [--force]
                              [--verbose] [--background-rgb <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>]
@@ -316,7 +316,7 @@ docstring is parsed to generate helptext.
                         Coefficient for L2 regularization. <span class="ansi-dark">(default:
                         0.01)</span></pre>
 <hr class="docutils" />
-<kbd>python examples/08_positional_args.py ./a ./b --optimizer.learning-rate 1e-5</kbd><pre class="ansi-block literal-block">source=PosixPath('a')
+<kbd>python 08_positional_args.py ./a ./b --optimizer.learning-rate 1e-5</kbd><pre class="ansi-block literal-block">source=PosixPath('a')
 dest=PosixPath('b')
 optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=1e-05, weight_decay=0.01)
 force=False

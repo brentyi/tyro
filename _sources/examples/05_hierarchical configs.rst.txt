@@ -79,7 +79,7 @@ objects. This helps with modularity and grouping in larger projects.
 
 .. raw:: html
 
-        <kbd>python examples/05_hierarchical_configs.py --help</kbd>
+        <kbd>python 05_hierarchical_configs.py --help</kbd>
 
 .. program-output:: python ../../examples/05_hierarchical_configs.py --help
 
@@ -87,7 +87,7 @@ objects. This helps with modularity and grouping in larger projects.
 
 .. raw:: html
 
-        <kbd>python examples/05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd>
+        <kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd>
 
 .. program-output:: python ../../examples/05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD
 
@@ -95,6 +95,6 @@ objects. This helps with modularity and grouping in larger projects.
 
 .. raw:: html
 
-        <kbd>python examples/05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd>
+        <kbd>python 05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd>
 
 .. program-output:: python ../../examples/05_hierarchical_configs.py --out-dir . --restore-checkpoint

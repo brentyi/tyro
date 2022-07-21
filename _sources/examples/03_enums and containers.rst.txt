@@ -54,7 +54,7 @@ container types.
 
 .. raw:: html
 
-        <kbd>python examples/03_enums_and_containers.py --help</kbd>
+        <kbd>python 03_enums_and_containers.py --help</kbd>
 
 .. program-output:: python ../../examples/03_enums_and_containers.py --help
 
@@ -62,7 +62,7 @@ container types.
 
 .. raw:: html
 
-        <kbd>python examples/03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16</kbd>
+        <kbd>python 03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16</kbd>
 
 .. program-output:: python ../../examples/03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16
 
@@ -70,6 +70,6 @@ container types.
 
 .. raw:: html
 
-        <kbd>python examples/03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD</kbd>
+        <kbd>python 03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD</kbd>
 
 .. program-output:: python ../../examples/03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD

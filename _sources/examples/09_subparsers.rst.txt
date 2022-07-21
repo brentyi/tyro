@@ -46,7 +46,7 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
 
 .. raw:: html
 
-        <kbd>python examples/09_subparsers.py --help</kbd>
+        <kbd>python 09_subparsers.py --help</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py --help
 
@@ -54,7 +54,7 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
 
 .. raw:: html
 
-        <kbd>python examples/09_subparsers.py commit --help</kbd>
+        <kbd>python 09_subparsers.py commit --help</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py commit --help
 
@@ -62,7 +62,7 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
 
 .. raw:: html
 
-        <kbd>python examples/09_subparsers.py commit --cmd.message hello --cmd.all</kbd>
+        <kbd>python 09_subparsers.py commit --cmd.message hello --cmd.all</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py commit --cmd.message hello --cmd.all
 
@@ -70,7 +70,7 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
 
 .. raw:: html
 
-        <kbd>python examples/09_subparsers.py checkout --help</kbd>
+        <kbd>python 09_subparsers.py checkout --help</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py checkout --help
 
@@ -78,6 +78,6 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
 
 .. raw:: html
 
-        <kbd>python examples/09_subparsers.py checkout --cmd.branch main</kbd>
+        <kbd>python 09_subparsers.py checkout --cmd.branch main</kbd>
 
 .. program-output:: python ../../examples/09_subparsers.py checkout --cmd.branch main

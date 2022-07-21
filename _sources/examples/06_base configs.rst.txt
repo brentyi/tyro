@@ -128,7 +128,7 @@ avoid fussing with ``sys.argv`` by using a ``BASE_CONFIG`` environment variable.
 
 .. raw:: html
 
-        <kbd>python examples/06_base_configs.py</kbd>
+        <kbd>python 06_base_configs.py</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py
 
@@ -136,7 +136,7 @@ avoid fussing with ``sys.argv`` by using a ``BASE_CONFIG`` environment variable.
 
 .. raw:: html
 
-        <kbd>python examples/06_base_configs.py small --help</kbd>
+        <kbd>python 06_base_configs.py small --help</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py small --help
 
@@ -144,7 +144,7 @@ avoid fussing with ``sys.argv`` by using a ``BASE_CONFIG`` environment variable.
 
 .. raw:: html
 
-        <kbd>python examples/06_base_configs.py small --seed 94720</kbd>
+        <kbd>python 06_base_configs.py small --seed 94720</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py small --seed 94720
 
@@ -152,7 +152,7 @@ avoid fussing with ``sys.argv`` by using a ``BASE_CONFIG`` environment variable.
 
 .. raw:: html
 
-        <kbd>python examples/06_base_configs.py big --help</kbd>
+        <kbd>python 06_base_configs.py big --help</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py big --help
 
@@ -160,6 +160,6 @@ avoid fussing with ``sys.argv`` by using a ``BASE_CONFIG`` environment variable.
 
 .. raw:: html
 
-        <kbd>python examples/06_base_configs.py big --seed 94720</kbd>
+        <kbd>python 06_base_configs.py big --seed 94720</kbd>
 
 .. program-output:: python ../../examples/06_base_configs.py big --seed 94720

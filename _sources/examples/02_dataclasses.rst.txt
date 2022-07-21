@@ -35,7 +35,7 @@ can be used as a typed alternative for an argparse namespace.
 
 .. raw:: html
 
-        <kbd>python examples/02_dataclasses.py --help</kbd>
+        <kbd>python 02_dataclasses.py --help</kbd>
 
 .. program-output:: python ../../examples/02_dataclasses.py --help
 
@@ -43,7 +43,7 @@ can be used as a typed alternative for an argparse namespace.
 
 .. raw:: html
 
-        <kbd>python examples/02_dataclasses.py --field1 hello</kbd>
+        <kbd>python 02_dataclasses.py --field1 hello</kbd>
 
 .. program-output:: python ../../examples/02_dataclasses.py --field1 hello
 
@@ -51,6 +51,6 @@ can be used as a typed alternative for an argparse namespace.
 
 .. raw:: html
 
-        <kbd>python examples/02_dataclasses.py --field1 hello --field2 5</kbd>
+        <kbd>python 02_dataclasses.py --field1 hello --field2 5</kbd>
 
 .. program-output:: python ../../examples/02_dataclasses.py --field1 hello --field2 5

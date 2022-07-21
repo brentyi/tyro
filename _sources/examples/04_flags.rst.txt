@@ -42,7 +42,7 @@ value, automatically converted to flags.
 
 .. raw:: html
 
-        <kbd>python examples/04_flags.py --help</kbd>
+        <kbd>python 04_flags.py --help</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --help
 
@@ -50,7 +50,7 @@ value, automatically converted to flags.
 
 .. raw:: html
 
-        <kbd>python examples/04_flags.py --boolean True</kbd>
+        <kbd>python 04_flags.py --boolean True</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --boolean True
 
@@ -58,7 +58,7 @@ value, automatically converted to flags.
 
 .. raw:: html
 
-        <kbd>python examples/04_flags.py --boolean False --flag-a</kbd>
+        <kbd>python 04_flags.py --boolean False --flag-a</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --boolean False --flag-a
 
@@ -66,6 +66,6 @@ value, automatically converted to flags.
 
 .. raw:: html
 
-        <kbd>python examples/04_flags.py --boolean False --no-flag-b</kbd>
+        <kbd>python 04_flags.py --boolean False --no-flag-b</kbd>
 
 .. program-output:: python ../../examples/04_flags.py --boolean False --no-flag-b
