@@ -9,8 +9,7 @@ Our core interface, :func:`dcargs.cli()`, generates argument parsers from
 type-annotated callables: functions, classes, dataclasses, and *nested*
 dataclasses and classes.
 
-In the simplest case, this can be used as a drop-in replacement for
-:code:`argparse`:
+This can be used as a drop-in replacement for :code:`argparse`:
 
 
 
