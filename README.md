@@ -1,6 +1,11 @@
-<h1 align="center">dcargs</h1>
+<h1 align="">dcargs</h1>
 
-<p align="center">
+<p align="">
+    <em><a href="https://brentyi.github.io/dcargs">Documentation</a></em>
+    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+    <em><code>pip install dcargs</code></em>
+</p>
+<p align="">
     <img alt="build" src="https://github.com/brentyi/dcargs/workflows/build/badge.svg" />
     <img alt="mypy" src="https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master" />
     <img alt="lint" src="https://github.com/brentyi/dcargs/workflows/lint/badge.svg" />
@@ -12,29 +17,21 @@
     </a>
 </p>
 
-<p align="center">
-    <emph><code>pip install dcargs</code></emph>
-    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
-    <emph><a href="https://brentyi.github.io/dcargs">Documentation</a></emph>
-</p>
-
-<br />
-
-<p align="center">
+<p align="">
     <strong><code>dcargs</code></strong> is a library for typed CLI interfaces
     and configuration objects.
 </p>
 
-<p align="center">
+<p align="">
     Our core interface, <code>dcargs.cli()</code>, generates argument parsers from type-annotated
     <br />callables: functions, classes, dataclasses, and <em>nested</em> dataclasses and classes.
 </p>
 
-<p align="center">
+<p align="">
     This can be used as a drop-in replacement for <code>argparse</code>:
 </p>
 
-<table align="center">
+<table align="">
 <tr>
     <td><strong>with argparse</strong></td>
     <td><strong>with dcargs</strong></td>
@@ -78,7 +75,7 @@ dcargs.cli(main)
 </tr>
 </table>
 
-<p align="center">
+<p align="">
     For more sophisticated examples, see
     <a href="https://brentyi.github.io/dcargs">our documentation</a>.
 </p>
