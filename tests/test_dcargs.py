@@ -328,6 +328,16 @@ def test_optional_literal():
     assert dcargs.cli(A, args=[]) == A(x=None)
 
 
+def test_multitype_literal():
+    def main(x: Literal[0, "5"]) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=["--x", "0"]) == 0
+    assert dcargs.cli(main, args=["--x", "5"]) == "5"
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--x", "6"])
+
+
 def test_annotated():
     """Annotated[] is a no-op."""
 
