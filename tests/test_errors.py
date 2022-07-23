@@ -2,7 +2,6 @@ import dataclasses
 from typing import Generic, List, Tuple, TypeVar, Union
 
 import pytest
-from typing_extensions import Literal
 
 import dcargs
 
@@ -30,14 +29,6 @@ def test_ambiguous_collection_2():
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(main, args=["--help"])
-
-
-def test_unsupported_literal():
-    def main(x: Literal[0, "5"]) -> None:
-        return
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=[])
 
 
 # Must be global.

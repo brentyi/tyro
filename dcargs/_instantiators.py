@@ -609,25 +609,29 @@ def _instantiator_from_literal(
     typ: Type, type_from_typevar: Dict[TypeVar, Type]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     choices = get_args(typ)
-    if not len(set(map(type, choices))) == 1:
-        raise UnsupportedTypeAnnotationError(
-            "All choices in literal must have the same type!"
+    str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)
+
+    def instantiator(string: str) -> Any:
+        # Any situation where string is not in str_choices should be caught earlier.
+        assert string in str_choices
+        inner_type = type(choices[str_choices.index(string)])
+        inner_instantiator, metadata = _instantiator_from_type_inner(
+            inner_type,
+            type_from_typevar,
+            allow_sequences=False,
         )
-    contained_type = type(next(iter(choices)))
-    if issubclass(contained_type, enum.Enum):
-        choices = tuple(map(lambda x: x.name, choices))
-    else:
-        choices = tuple(map(str, choices))
-    instantiator, metadata = _instantiator_from_type_inner(
-        contained_type,
-        type_from_typevar,
-        allow_sequences=False,
-    )
-    if metadata.choices is not None:
-        assert all(map(lambda t: isinstance(t, str), metadata.choices))
-        assert len(set(choices) - set(metadata.choices)) == 0
-    return instantiator, dataclasses.replace(
-        metadata,
-        choices=choices,
-        metavar="{" + ",".join(map(_format_metavar, map(str, choices))) + "}",
+
+        # These should pass for all valid Literal types.
+        if inner_type is bool or issubclass(inner_type, enum.Enum):
+            assert metadata.choices is not None
+        else:
+            assert metadata.choices is None
+        assert metadata.nargs is None
+
+        return inner_instantiator(string)
+
+    return instantiator, InstantiatorMetadata(
+        nargs=None,
+        metavar="{" + ",".join(map(_format_metavar, str_choices)) + "}",
+        choices=str_choices,
     )
