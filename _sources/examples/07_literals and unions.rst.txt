@@ -32,6 +32,9 @@
            # enums.
            restricted_enum: Literal[Color.RED, Color.GREEN] = Color.RED
        
+           # Mixed types are okay.
+           mixed: Literal[Color.RED, Color.GREEN, "blue"] = "blue"
+       
            # Literals can also be marked Optional.
            integer: Optional[Literal[0, 1, 2, 3]] = None
        
