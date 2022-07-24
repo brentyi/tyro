@@ -176,11 +176,14 @@ def from_yaml(
     stream: Union[str, IO[str], bytes, IO[bytes]],
 ) -> DataclassType:
     """Re-construct a dataclass instance from a yaml-compatible string, which should be
-    generated from `dcargs.to_yaml()`.
+    generated from `dcargs.extra.to_yaml()`.
 
     Args:
         cls: Type to reconstruct.
         stream: YAML to read from.
+
+    Returns:
+        Instantiated dataclass.
     """
     out = yaml.load(stream, Loader=_make_loader(cls))
     origin_cls = get_origin(cls)
@@ -190,9 +193,12 @@ def from_yaml(
 
 def to_yaml(instance: Any) -> str:
     """Serialize a dataclass; returns a yaml-compatible string that can be deserialized
-    via `dcargs.from_yaml()`.
+    via `dcargs.extras.from_yaml()`.
 
     Args:
         instance: Dataclass instance to serialize.
+
+    Returns:
+        YAML string.
     """
     return "# dcargs YAML.\n" + yaml.dump(instance, Dumper=_make_dumper(instance))
