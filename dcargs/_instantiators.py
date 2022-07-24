@@ -1,11 +1,11 @@
 """Helper for using type annotations to recursively generate instantiator functions,
-which map strings (or, in some cases, sequences of strings) to the annotated type.
+which map sequences of strings to the annotated type.
 
 Some examples of type annotations and the desired instantiators:
 ```
     int
 
-        lambda string: int(str)
+        lambda strings: int(str[0])
 
     List[int]
 
@@ -32,7 +32,6 @@ Some examples of type annotations and the desired instantiators:
         )
 ```
 """
-
 import collections.abc
 import dataclasses
 import enum
@@ -57,27 +56,30 @@ from typing import (
 import termcolor
 from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
-# Most standard fields: these are converted from strings from the CLI.
-_StandardInstantiator = Callable[[str], Any]
-# Sequence fields! This should be used whenever argparse's `nargs` field is set.
-_SequenceInstantiator = Callable[[List[str]], Any]
+_StandardInstantiator = Callable[[List[str]], Any]
 # Special case: the only time that argparse doesn't give us a string is when the
 # argument action is set to `store_true` or `store_false`. In this case, we get
 # a bool directly, and the field action can be a no-op.
 _FlagInstantiator = Callable[[bool], bool]
 
-Instantiator = Union[_StandardInstantiator, _SequenceInstantiator, _FlagInstantiator]
+Instantiator = Union[_StandardInstantiator, _FlagInstantiator]
 
 NoneType = type(None)
 
 
 @dataclasses.dataclass
 class InstantiatorMetadata:
-    nargs: Union[None, int, Literal["+"]]
-    # Note: unlike in vanilla argparse, our metavar is always a string. We handle
+    # Unlike in vanilla argparse, we never set nargs to None. To make things simpler, we
+    # instead use nargs=1.
+    nargs: Union[int, Literal["+"]]
+    # Unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: str
     choices: Optional[Tuple[str, ...]]
+
+    def check_choices(self, strings: List[str]) -> None:
+        if self.choices is not None and any(s not in self.choices for s in strings):
+            raise ValueError(f"invalid choice: {strings} (choose from {self.choices}))")
 
 
 class UnsupportedTypeAnnotationError(Exception):
@@ -121,14 +123,14 @@ def instantiator_from_type(
     # Handle NoneType.
     if typ is NoneType:
 
-        def instantiator(string: str) -> None:
+        def instantiator(strings: List[str]) -> None:
             # Note that other inputs should be caught by `choices` before the
             # instantiator runs.
-            assert string == "None"
+            assert strings == ["None"]
             return None
 
         return instantiator, InstantiatorMetadata(
-            nargs=None,
+            nargs=1,
             metavar="{" + _format_metavar("None") + "}",
             choices=("None",),
         )
@@ -187,7 +189,7 @@ def instantiator_from_type(
     elif isinstance(typ, type) and issubclass(typ, enum.Enum):
         auto_choices = tuple(x.name for x in typ)
 
-    def instantiator_base_case(string: str) -> Any:
+    def instantiator_base_case(strings: List[str]) -> Any:
         """Given a type and and a string from the command-line, reconstruct an object. Not
         intended to deal with containers.
 
@@ -204,6 +206,7 @@ def instantiator_from_type(
         ```
         """
         assert len(get_args(typ)) == 0, f"Type {typ} cannot be instantiated."
+        (string,) = strings
         if typ is bool:
             return {"True": True, "False": False}[string]  # type: ignore
         elif isinstance(typ, type) and issubclass(typ, enum.Enum):
@@ -214,7 +217,7 @@ def instantiator_from_type(
             return typ(string)  # type: ignore
 
     return instantiator_base_case, InstantiatorMetadata(
-        nargs=None,
+        nargs=1,
         metavar=_format_metavar(typ.__name__.upper())
         if auto_choices is None
         else "{" + ",".join(map(_format_metavar, map(str, auto_choices))) + "}",
@@ -258,11 +261,10 @@ def _instantiator_from_type_inner(
     errors."""
     out = instantiator_from_type(typ, type_from_typevar)
     if out[1].nargs is not None:
-        if allow_sequences is False:
-            # We currently only use allow_sequences=False for options in Literal types,
-            # which are evaluated using `type()`. It should not be possible to hit this
-            # condition from polling a runtime type.
-            assert False
+        # We currently only use allow_sequences=False for options in Literal types,
+        # which are evaluated using `type()`. It should not be possible to hit this
+        # condition from polling a runtime type.
+        assert allow_sequences
         if allow_sequences == "fixed_length" and not isinstance(out[1].nargs, int):
             raise UnsupportedTypeAnnotationError(
                 f"Found an unsupported (variable-length) nested sequence of type {typ}."
@@ -320,8 +322,8 @@ def _instantiator_from_tuple(
         return _instantiator_from_sequence(typ, type_from_typevar)
 
     else:
-        instantiators = []
-        metas = []
+        instantiators: List[_StandardInstantiator] = []
+        metas: List[InstantiatorMetadata] = []
         nargs = 0
         for t in types:
             a, b = _instantiator_from_type_inner(
@@ -329,34 +331,22 @@ def _instantiator_from_tuple(
                 type_from_typevar,
                 allow_sequences="fixed_length",
             )
-            instantiators.append(a)
+            instantiators.append(a)  # type: ignore
             metas.append(b)
-            assert type(b.nargs) in (int, NoneType)
-            nargs += 1 if b.nargs is None else b.nargs  # type: ignore
+            assert isinstance(b.nargs, int)
+            nargs += b.nargs
 
         def fixed_length_tuple_instantiator(strings: List[str]) -> Any:
-            # Validate nargs.
-            if len(strings) != nargs:
-                raise ValueError(
-                    f"input {strings} is length {len(strings)}, but expected {nargs}."
-                )
+            assert len(strings) == nargs
 
             # Make tuple.
             out = []
             i = 0
             for make, meta in zip(instantiators, metas):
-                inner_nargs = cast(Optional[int], meta.nargs)
-                if inner_nargs is None:
-                    if meta.choices is not None and strings[i] not in meta.choices:
-                        raise ValueError(
-                            f" {strings[i]} does not match choices {meta.choices}"
-                        )
-                    out.append(make(strings[i]))  # type: ignore
-                    i += 1
-                else:
-                    assert meta.choices is None
-                    out.append(make(strings[i : i + inner_nargs]))  # type: ignore
-                    i += inner_nargs
+                assert isinstance(meta.nargs, int)
+                meta.check_choices(strings[i : i + meta.nargs])
+                out.append(make(strings[i : i + meta.nargs]))
+                i += meta.nargs
             return tuple(out)
 
         return fixed_length_tuple_instantiator, InstantiatorMetadata(
@@ -417,7 +407,7 @@ def _instantiator_from_union(
     # right.
     instantiators = []
     metas = []
-    nargs = None
+    nargs: Union[int, Literal["+"]] = 1
     first = True
     for t in options:
         a, b = _instantiator_from_type_inner(
@@ -441,56 +431,34 @@ def _instantiator_from_union(
     metavar: str
     metavar = _join_union_metavars(map(lambda x: cast(str, x.metavar), metas))
 
-    def union_instantiator(string_or_strings: Union[str, List[str]]) -> Any:
+    def union_instantiator(strings: List[str]) -> Any:
         metadata: InstantiatorMetadata
         errors = []
         for i, (instantiator, metadata) in enumerate(zip(instantiators, metas)):
             # Check choices.
-            if metadata.choices is not None and (
-                (
-                    isinstance(string_or_strings, str)
-                    and string_or_strings not in metadata.choices
-                )
-                or (
-                    isinstance(string_or_strings, list)
-                    and any(x not in metadata.choices for x in string_or_strings)
-                )
+            if metadata.choices is not None and any(
+                x not in metadata.choices for x in strings
             ):
                 errors.append(
-                    f"{options[i]}: {string_or_strings} does not match choices"
-                    f" {metadata.choices}"
+                    f"{options[i]}: {strings} does not match choices {metadata.choices}"
                 )
                 continue
 
-            # Try passing input directly into instantiator.
-            if metadata.nargs == nargs or (
-                isinstance(metadata.nargs, int) and nargs == "+"
-            ):
+            # Try passing input into instantiator.
+            if len(strings) == metadata.nargs or (metadata.nargs == "+"):
                 try:
-                    return instantiator(string_or_strings)  # type: ignore
-                except ValueError as e:
-                    # Failed, try next instantiator.
-                    errors.append(f"{options[i]}: {e.args[0]}")
-
-            # Try passing unwrapped length-1 input into instantiator.
-            elif (
-                metadata.nargs is None
-                and nargs is not None
-                and len(string_or_strings) == 1
-            ):
-                try:
-                    return instantiator(string_or_strings[0])  # type: ignore
+                    return instantiator(strings)  # type: ignore
                 except ValueError as e:
                     # Failed, try next instantiator.
                     errors.append(f"{options[i]}: {e.args[0]}")
             else:
                 errors.append(
-                    f"{options[i]}: did not attempt,"
-                    f" {metadata} {nargs} {len(string_or_strings)}"
+                    f"{options[i]}: input length {len(strings)} did not match expected"
+                    f" argument count {metadata.nargs}"
                 )
         raise ValueError(
             f"no type in {options} could be instantiated from"
-            f" {string_or_strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
+            f" {strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
         )
 
     return union_instantiator, InstantiatorMetadata(
@@ -504,24 +472,22 @@ def _instantiator_from_dict(
     typ: Type, type_from_typevar: Dict[TypeVar, Type]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     key_type, val_type = get_args(typ)
-    key_instantiator, key_metadata = _instantiator_from_type_inner(
+    key_instantiator, key_meta = _instantiator_from_type_inner(
         key_type,
         type_from_typevar,
         allow_sequences="fixed_length",
     )
-    val_instantiator, val_metadata = _instantiator_from_type_inner(
+    val_instantiator, val_meta = _instantiator_from_type_inner(
         val_type,
         type_from_typevar,
         allow_sequences="fixed_length",
     )
 
-    key_nargs = cast(Optional[int], key_metadata.nargs)
-    key_nargs_int = 1 if key_nargs is None else key_nargs
-    val_nargs = cast(Optional[int], val_metadata.nargs)
-    val_nargs_int = 1 if key_nargs is None else key_nargs
-    assert type(key_nargs) in (int, NoneType)
-    assert type(val_nargs) in (int, NoneType)
-    pair_nargs = key_nargs_int + val_nargs_int
+    key_nargs = cast(int, key_meta.nargs)  # Casts needed for mypy but not pyright!
+    val_nargs = cast(int, val_meta.nargs)
+    assert isinstance(key_nargs, int)
+    assert isinstance(val_nargs, int)
+    pair_nargs = key_nargs + val_nargs
 
     def dict_instantiator(strings: List[str]) -> Any:
         out = {}
@@ -530,27 +496,27 @@ def _instantiator_from_dict(
 
         index = 0
         for _ in range(len(strings) // pair_nargs):
-            k: Union[str, List[str]] = strings[index : index + key_nargs_int]
-            index += key_nargs_int
-            v: Union[str, List[str]] = strings[index : index + val_nargs_int]
-            index += val_nargs_int
+            k = strings[index : index + key_nargs]
+            index += key_nargs
+            v = strings[index : index + val_nargs]
+            index += val_nargs
 
-            if key_nargs is None:
-                (k,) = cast(List[str], k)
-                if key_metadata.choices is not None and k not in key_metadata.choices:
-                    raise ValueError(
-                        f"invalid choice: {k} (choose from {key_metadata.choices}))"
-                    )
-            if val_nargs is None:
-                (v,) = cast(List[str], v)
-                if val_metadata.choices is not None and v not in val_metadata.choices:
-                    raise ValueError(
-                        f"invalid choice: {v} (choose from {val_metadata.choices}))"
-                    )
+            if key_meta.choices is not None and any(
+                kj not in key_meta.choices for kj in k
+            ):
+                raise ValueError(
+                    f"invalid choice: {k} (choose from {key_meta.choices}))"
+                )
+            if val_meta.choices is not None and any(
+                vj not in val_meta.choices for vj in v
+            ):
+                raise ValueError(
+                    f"invalid choice: {v} (choose from {val_meta.choices}))"
+                )
             out[key_instantiator(k)] = val_instantiator(v)  # type: ignore
         return out
 
-    pair_metavar = f"{key_metadata.metavar} {val_metadata.metavar}"
+    pair_metavar = f"{key_meta.metavar} {val_meta.metavar}"
     return dict_instantiator, InstantiatorMetadata(
         nargs="+",
         metavar=f"{pair_metavar} [{pair_metavar} ...]",
@@ -591,10 +557,7 @@ def _instantiator_from_sequence(
         out = []
         step = inner_meta.nargs if isinstance(inner_meta.nargs, int) else 1
         for i in range(0, len(strings), step):
-            if inner_meta.nargs is None:
-                out.append(make(strings[i]))  # type: ignore
-            else:
-                out.append(make(strings[i : i + inner_meta.nargs]))  # type: ignore
+            out.append(make(strings[i : i + inner_meta.nargs]))  # type: ignore
         assert container_type is not None
         return container_type(out)
 
@@ -610,28 +573,13 @@ def _instantiator_from_literal(
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     choices = get_args(typ)
     str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)
-
-    def instantiator(string: str) -> Any:
-        # Any situation where string is not in str_choices should be caught earlier.
-        assert string in str_choices
-        inner_type = type(choices[str_choices.index(string)])
-        inner_instantiator, metadata = _instantiator_from_type_inner(
-            inner_type,
-            type_from_typevar,
-            allow_sequences=False,
-        )
-
-        # These should pass for all valid Literal types.
-        if inner_type is bool or issubclass(inner_type, enum.Enum):
-            assert metadata.choices is not None
-        else:
-            assert metadata.choices is None
-        assert metadata.nargs is None
-
-        return inner_instantiator(string)
-
-    return instantiator, InstantiatorMetadata(
-        nargs=None,
-        metavar="{" + ",".join(map(_format_metavar, str_choices)) + "}",
-        choices=str_choices,
+    return (
+        # Note that if string is not in str_choices, it will be caught from setting
+        # `choices` below.
+        lambda strings: choices[str_choices.index(strings[0])],
+        InstantiatorMetadata(
+            nargs=1,
+            metavar="{" + ",".join(map(_format_metavar, str_choices)) + "}",
+            choices=str_choices,
+        ),
     )

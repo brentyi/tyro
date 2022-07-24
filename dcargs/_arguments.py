@@ -221,9 +221,6 @@ def _rule_convert_defaults_to_strings(
         or lowered.action is not None
     ):
         return lowered
-    elif lowered.nargs is None:
-        (str_default,) = as_str(lowered.default)
-        return dataclasses.replace(lowered, default=str_default)
     else:
         return dataclasses.replace(lowered, default=as_str(lowered.default))
 
@@ -316,7 +313,9 @@ def _rule_positional_special_handling(
         nargs = lowered.nargs
     else:
         metavar = "[" + metavar + "]"
-        if lowered.nargs is None:
+        if lowered.nargs == 1:
+            # Optional positional arguments. Note that this needs to be special-cased in
+            # _calling.py.
             nargs = "?"
         else:
             # If lowered.nargs is either + or an int.
