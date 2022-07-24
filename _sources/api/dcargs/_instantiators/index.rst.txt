@@ -9,7 +9,7 @@
 
    
    Helper for using type annotations to recursively generate instantiator functions,
-   which map strings (or, in some cases, sequences of strings) to the annotated type.
+   which map sequences of strings to the annotated type.
 
    Some examples of type annotations and the desired instantiators:
 
@@ -17,7 +17,7 @@
 
           int
 
-              lambda string: int(str)
+              lambda strings: int(str[0])
 
           List[int]
 

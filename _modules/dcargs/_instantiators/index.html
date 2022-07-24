@@ -224,13 +224,13 @@
         <article role="main">
           <h1>Source code for dcargs._instantiators</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Helper for using type annotations to recursively generate instantiator functions,</span>
-<span class="sd">which map strings (or, in some cases, sequences of strings) to the annotated type.</span>
+<span class="sd">which map sequences of strings to the annotated type.</span>
 
 <span class="sd">Some examples of type annotations and the desired instantiators:</span>
 <span class="sd">```</span>
 <span class="sd">    int</span>
 
-<span class="sd">        lambda string: int(str)</span>
+<span class="sd">        lambda strings: int(str[0])</span>
 
 <span class="sd">    List[int]</span>
 

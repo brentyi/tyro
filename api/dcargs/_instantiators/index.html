@@ -226,11 +226,11 @@
           <section id="module-dcargs._instantiators">
 <span id="dcargs-instantiators"></span><h1><a class="reference internal" href="#module-dcargs._instantiators" title="dcargs._instantiators"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._instantiators</span></code></a><a class="headerlink" href="#module-dcargs._instantiators" title="Permalink to this heading">#</a></h1>
 <p>Helper for using type annotations to recursively generate instantiator functions,
-which map strings (or, in some cases, sequences of strings) to the annotated type.</p>
+which map sequences of strings to the annotated type.</p>
 <p>Some examples of type annotations and the desired instantiators:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nb">int</span>
 
-    <span class="k">lambda</span> <span class="n">string</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+    <span class="k">lambda</span> <span class="n">strings</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="nb">str</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 
