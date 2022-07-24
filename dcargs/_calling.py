@@ -65,7 +65,15 @@ def call_from_args(
             consumed_keywords.add(prefixed_field_name)
             if not arg.lowered.is_fixed():
                 value = get_value_from_arg(prefixed_field_name)
-                if value not in _fields.MISSING_SINGLETONS:
+
+                if value in _fields.MISSING_SINGLETONS:
+                    value = arg.field.default
+                else:
+                    if arg.lowered.nargs == "?":
+                        # Special case for optional positional arguments: this is the
+                        # only time that arguments don't come back as a list.
+                        value = [value]
+
                     try:
                         assert arg.lowered.instantiator is not None
                         value = arg.lowered.instantiator(value)
@@ -73,8 +81,6 @@ def call_from_args(
                         raise InstantiationError(
                             f"Parsing error for {arg.lowered.name_or_flag}: {e.args[0]}"
                         )
-                else:
-                    value = arg.field.default
             else:
                 assert arg.field.default not in _fields.MISSING_SINGLETONS
                 value = arg.field.default
