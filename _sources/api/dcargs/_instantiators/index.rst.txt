@@ -60,7 +60,7 @@ Module Contents
 .. py:class:: InstantiatorMetadata
 
    .. py:attribute:: nargs
-      :annotation: :Union[None, int, typing_extensions.Literal[+]]
+      :annotation: :Union[int, typing_extensions.Literal[+]]
 
       
 
@@ -73,6 +73,9 @@ Module Contents
       :annotation: :Optional[Tuple[str, Ellipsis]]
 
       
+
+   .. py:method:: check_choices(self, strings: List[str]) -> None
+
 
 
 .. py:exception:: UnsupportedTypeAnnotationError
