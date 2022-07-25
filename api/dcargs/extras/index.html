@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="prev" title="dcargs" href="../" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
@@ -231,16 +231,19 @@
 <dt class="sig sig-object py" id="dcargs.extras.from_yaml">
 <span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">DataclassType</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IO</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IO</span><span class="p"><span class="pre">[</span></span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataclassType</span></span></span><a class="reference internal" href="../../../_modules/dcargs/extras/_serialization/#from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.from_yaml" title="Permalink to this definition">#</a></dt>
 <dd><p>Re-construct a dataclass instance from a yaml-compatible string, which should be
-generated from <code class="docutils literal notranslate"><span class="pre">dcargs.to_yaml()</span></code>.</p>
+generated from <code class="docutils literal notranslate"><span class="pre">dcargs.extra.to_yaml()</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>cls</strong> (<em>Type</em><em>[</em><em>DataclassType</em><em>]</em>) – Type to reconstruct.</p></li>
 <li><p><strong>stream</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>IO</em><em>[</em><em>str</em><em>]</em><em>, </em><em>bytes</em><em>, </em><em>IO</em><em>[</em><em>bytes</em><em>]</em><em>]</em>) – YAML to read from.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>DataclassType</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Instantiated dataclass.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>DataclassType</p>
 </dd>
 </dl>
 </dd></dl>
@@ -249,13 +252,16 @@ generated from <code class="docutils literal notranslate"><span class="pre">dcar
 <dt class="sig sig-object py" id="dcargs.extras.to_yaml">
 <span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">to_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/dcargs/extras/_serialization/#to_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.to_yaml" title="Permalink to this definition">#</a></dt>
 <dd><p>Serialize a dataclass; returns a yaml-compatible string that can be deserialized
-via <code class="docutils literal notranslate"><span class="pre">dcargs.from_yaml()</span></code>.</p>
+via <code class="docutils literal notranslate"><span class="pre">dcargs.extras.from_yaml()</span></code>.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>instance</strong> (<em>Any</em>) – Dataclass instance to serialize.</p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>YAML string.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str</p>
 </dd>
 </dl>
 </dd></dl>

@@ -38,16 +38,20 @@ Module Contents
 
    
    Re-construct a dataclass instance from a yaml-compatible string, which should be
-   generated from ``dcargs.to_yaml()``.
+   generated from ``dcargs.extra.to_yaml()``.
 
    :param cls: Type to reconstruct.
    :param stream: YAML to read from.
+
+   :returns: Instantiated dataclass.
 
 .. py:function:: to_yaml(instance: Any) -> str
 
    
    Serialize a dataclass; returns a yaml-compatible string that can be deserialized
-   via ``dcargs.from_yaml()``.
+   via ``dcargs.extras.from_yaml()``.
 
    :param instance: Dataclass instance to serialize.
+
+   :returns: YAML string.
 

@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
@@ -238,10 +238,10 @@
 <span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#unwrap_origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.unwrap_origin" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns the origin of tp if it exists. Otherwise, returns tp.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>tp</strong> (<em>TypeOrCallable</em>) – </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>TypeOrCallable</p>
 </dd>
 </dl>
@@ -252,10 +252,10 @@
 <span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">is_dataclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#is_dataclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.is_dataclass" title="Permalink to this definition">#</a></dt>
 <dd><p>Same as <code class="docutils literal notranslate"><span class="pre">dataclasses.is_dataclass</span></code>, but also handles generic aliases.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>cls</strong> (<em>Union</em><em>[</em><em>Type</em><em>, </em><em>Callable</em><em>]</em>) – </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>
@@ -267,10 +267,10 @@
 <dd><p>If the input is a class: no-op. If it’s a generic alias: returns the origin
 class, and a mapping from typevars to concrete types.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>cls</strong> (<em>TypeOrCallable</em>) – </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Tuple[TypeOrCallable, Dict[TypeVar, Type]]</p>
 </dd>
 </dl>
@@ -281,10 +281,10 @@ class, and a mapping from typevars to concrete types.</p>
 <span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">resolved_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dataclasses.Field</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#resolved_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.resolved_fields" title="Permalink to this definition">#</a></dt>
 <dd><p>Similar to dataclasses.fields, but resolves forward references.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>cls</strong> (<em>Type</em>) – </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>List[dataclasses.Field]</p>
 </dd>
 </dl>
@@ -294,10 +294,10 @@ class, and a mapping from typevars to concrete types.</p>
 <dt class="sig sig-object py" id="dcargs._resolver.is_namedtuple">
 <span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">is_namedtuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#is_namedtuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.is_namedtuple" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>cls</strong> (<em>Type</em>) – </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>

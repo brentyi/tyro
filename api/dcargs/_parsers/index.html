@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
@@ -241,10 +241,10 @@ where a single field has multiple corresponding arguments (eg for nested
 dataclasses or classes).</p>
 <p>Examples of when we return False: int, str, List[int], List[str], pathlib.Path, etc.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>typ</strong> (<em>Any</em>) – </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>bool</p>
 </dd>
 </dl>
@@ -257,7 +257,7 @@ dataclasses or classes).</p>
 .. py:attribute:: description</p>
 <blockquote>
 <div><dl class="field-list simple">
-<dt class="field-odd">annotation<span class="colon">:</span></dt>
+<dt class="field-odd">annotation</dt>
 <dd class="field-odd"><p>:str</p>
 </dd>
 </dl>
@@ -287,7 +287,7 @@ dataclasses or classes).</p>
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_type_from_typevar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../_fields/#dcargs._fields.PropagatingMissingType" title="dcargs._fields.PropagatingMissingType"><span class="pre">dcargs._fields.PropagatingMissingType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../_fields/#dcargs._fields.NonpropagatingMissingType" title="dcargs._fields.NonpropagatingMissingType"><span class="pre">dcargs._fields.NonpropagatingMissingType</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_subparsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#dcargs._parsers.ParserSpecification" title="dcargs._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a></span></span><a class="reference internal" href="../../../_modules/dcargs/_parsers/#ParserSpecification.from_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._parsers.ParserSpecification.from_callable" title="Permalink to this definition">#</a></dt>
 <dd><p>Create a parser definition from a callable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>f</strong> (<em>Callable</em><em>[</em><em>Ellipsis</em><em>, </em><em>T</em><em>]</em>) – </p></li>
 <li><p><strong>description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
@@ -298,7 +298,7 @@ dataclasses or classes).</p>
 <li><p><strong>avoid_subparsers</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference internal" href="#dcargs._parsers.ParserSpecification" title="dcargs._parsers.ParserSpecification">ParserSpecification</a></p>
 </dd>
 </dl>
@@ -309,10 +309,10 @@ dataclasses or classes).</p>
 <span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">argparse.ArgumentParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_parsers/#ParserSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._parsers.ParserSpecification.apply" title="Permalink to this definition">#</a></dt>
 <dd><p>Create defined arguments and subparsers.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>parser</strong> (<em>argparse.ArgumentParser</em>) – </p>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>None</p>
 </dd>
 </dl>
@@ -327,7 +327,7 @@ dataclasses or classes).</p>
 .. py:attribute:: name</p>
 <blockquote>
 <div><dl class="field-list simple">
-<dt class="field-odd">annotation<span class="colon">:</span></dt>
+<dt class="field-odd">annotation</dt>
 <dd class="field-odd"><p>:str</p>
 </dd>
 </dl>
@@ -361,7 +361,7 @@ dataclasses or classes).</p>
 <dt class="sig sig-object py" id="dcargs._parsers.SubparsersSpecification.from_field">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_fields/#dcargs._fields.FieldDefinition" title="dcargs._fields.FieldDefinition"><span class="pre">dcargs._fields.FieldDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_from_typevar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_subparsers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification" title="dcargs._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_parsers/#SubparsersSpecification.from_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._parsers.SubparsersSpecification.from_field" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>field</strong> (<a class="reference internal" href="../_fields/#dcargs._fields.FieldDefinition" title="dcargs._fields.FieldDefinition"><em>dcargs._fields.FieldDefinition</em></a>) – </p></li>
 <li><p><strong>type_from_typevar</strong> (<em>Dict</em><em>[</em><em>TypeVar</em><em>, </em><em>Type</em><em>]</em>) – </p></li>
@@ -370,7 +370,7 @@ dataclasses or classes).</p>
 <li><p><strong>avoid_subparsers</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Optional[<a class="reference internal" href="#dcargs._parsers.SubparsersSpecification" title="dcargs._parsers.SubparsersSpecification">SubparsersSpecification</a>]</p>
 </dd>
 </dl>

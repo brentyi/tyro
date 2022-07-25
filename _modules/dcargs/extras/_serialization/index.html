@@ -401,11 +401,14 @@
     <span class="n">stream</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataclassType</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Re-construct a dataclass instance from a yaml-compatible string, which should be</span>
-<span class="sd">    generated from `dcargs.to_yaml()`.</span>
+<span class="sd">    generated from `dcargs.extra.to_yaml()`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        cls: Type to reconstruct.</span>
 <span class="sd">        stream: YAML to read from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Instantiated dataclass.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">_make_loader</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -415,10 +418,13 @@
 
 <div class="viewcode-block" id="to_yaml"><a class="viewcode-back" href="../../../../api/dcargs/extras/#dcargs.extras._serialization.to_yaml">[docs]</a><span class="k">def</span> <span class="nf">to_yaml</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Serialize a dataclass; returns a yaml-compatible string that can be deserialized</span>
-<span class="sd">    via `dcargs.from_yaml()`.</span>
+<span class="sd">    via `dcargs.extras.from_yaml()`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        instance: Dataclass instance to serialize.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        YAML string.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="s2">&quot;# dcargs YAML.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">Dumper</span><span class="o">=</span><span class="n">_make_dumper</span><span class="p">(</span><span class="n">instance</span><span class="p">))</span></div>
 </pre></div>
