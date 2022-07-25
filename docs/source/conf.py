@@ -6,7 +6,7 @@
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/stable/config
 
-from typing import Dict, List, Optional
+from typing import Dict, List
 
 import m2r2
 
@@ -50,9 +50,7 @@ extensions = [
     "sphinx.ext.napoleon",
     # "sphinx.ext.inheritance_diagram",
     "autoapi.extension",
-    #  "sphinx_math_dollar",
     "sphinx.ext.viewcode",
-    "sphinxarg.ext",
     "m2r2",
     "sphinxcontrib.programoutput",
     "sphinxcontrib.ansi",
@@ -98,7 +96,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language: Optional[str] = None
+language: str = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.

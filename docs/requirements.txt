@@ -1,9 +1,7 @@
-sphinx
-# sphinx_rtd_theme
-furo
-sphinx_math_dollar
-sphinx-argparse
-sphinx-autoapi
-m2r2
+sphinx==5.0.2
+furo==2022.6.21
+docutils==0.17.1
+sphinx-autoapi==1.8.4
+m2r2==0.3.2
 git+https://github.com/brentyi/sphinxcontrib-programoutput.git
 git+https://github.com/brentyi/ansi.git
