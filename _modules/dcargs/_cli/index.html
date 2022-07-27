@@ -228,9 +228,40 @@
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">assert_never</span>
+
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_calling</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="generate_parser"><a class="viewcode-back" href="../../../api/dcargs/#dcargs._cli.generate_parser">[docs]</a><span class="k">def</span> <span class="nf">generate_parser</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">avoid_subparsers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Returns the argparse parser that would be used under-the-hood if `dcargs.cli()`</span>
+<span class="sd">    was called with the same arguments.</span>
+
+<span class="sd">    This can be useful for libraries like argcomplete, pyzshcomplete, or shtab, which</span>
+<span class="sd">    enable autocompletion for argparse parsers.&quot;&quot;&quot;</span>
+    <span class="c1"># Potentially we could do some caching in the future, to reduce the redundant work</span>
+    <span class="c1"># done when both `generate_parser()` and `cli()` are called.</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">_cli_impl</span><span class="p">(</span>
+        <span class="s2">&quot;parser&quot;</span><span class="p">,</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+        <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
 
 
 <div class="viewcode-block" id="cli"><a class="viewcode-back" href="../../../api/dcargs/#dcargs._cli.cli">[docs]</a><span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
@@ -295,13 +326,32 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        The output of `f(...)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">_cli_impl</span><span class="p">(</span>
+        <span class="s2">&quot;f_out&quot;</span><span class="p">,</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+        <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span></div>
 
-    <span class="n">default_instance_internal</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">default_instance_internal</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">default_instance_internal</span> <span class="o">=</span> <span class="n">default_instance</span>
-    <span class="k">del</span> <span class="n">default_instance</span>
+
+<span class="k">def</span> <span class="nf">_cli_impl</span><span class="p">(</span>
+    <span class="n">_return_stage</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;parser&quot;</span><span class="p">,</span> <span class="s2">&quot;f_out&quot;</span><span class="p">],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">avoid_subparsers</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">]:</span>
+    <span class="n">default_instance_internal</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">,</span> <span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default_instance</span>
+    <span class="p">)</span>
 
     <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
     <span class="n">parser_definition</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
@@ -314,11 +364,13 @@
         <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
     <span class="p">)</span>
 
-    <span class="c1"># Parse using argparse!</span>
+    <span class="c1"># Generate parser!</span>
     <span class="k">with</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">argparse_ansi_monkey_patch</span><span class="p">():</span>
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
             <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ArgparseHelpFormatter</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="n">_return_stage</span> <span class="o">==</span> <span class="s2">&quot;parser&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">parser</span>
         <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
         <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">))</span>
 
@@ -340,7 +392,10 @@
         <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">()</span>
 
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">consumed_keywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="n">out</span></div>
+    <span class="k">if</span> <span class="n">_return_stage</span> <span class="o">==</span> <span class="s2">&quot;f_out&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="n">assert_never</span><span class="p">(</span><span class="n">_return_stage</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>

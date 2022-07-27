@@ -76,6 +76,15 @@ Package Contents
 
    :returns: The output of ``f(...)``.
 
+.. py:function:: generate_parser(f: Callable[Ellipsis, T], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default_instance: Optional[T] = None, avoid_subparsers: bool = False) -> argparse.ArgumentParser
+
+   
+   Returns the argparse parser that would be used under-the-hood if ``dcargs.cli()``
+   was called with the same arguments.
+
+   This can be useful for libraries like argcomplete, pyzshcomplete, or shtab, which
+   enable autocompletion for argparse parsers.
+
 .. py:data:: MISSING
    :annotation: :Any
 
