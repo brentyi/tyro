@@ -16,22 +16,18 @@ required.
 Development
 ------------------------------------------
 
-If you're interested in development, :code:`dcargs` can also be installed from
-source.
+If you're interested in development, the recommended way to install :code:`dcargs` is via `poetry`:
 
 .. code-block::
 
-      # Clone repository.
+      # Clone repository and install.
       git clone git@github.com:brentyi/dcargs.git
       cd dcargs
-
-      # Install development dependencies.
-      pip install -e ".[testing,type-checking]"
+      poetry install
 
       # Run tests.
       pytest
 
       # Check types.
       mypy --install-types .
-
 

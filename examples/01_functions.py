@@ -1,3 +1,5 @@
+# PYTHON_ARGCOMPLETE_OK
+
 """In the simplest case, `dcargs.cli()` can be used to run a function with arguments
 populated from the CLI.
 
