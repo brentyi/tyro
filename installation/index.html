@@ -235,14 +235,11 @@ required.</p>
 </section>
 <section id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this heading">#</a></h2>
-<p>If you’re interested in development, <code class="code docutils literal notranslate"><span class="pre">dcargs</span></code> can also be installed from
-source.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository.</span>
+<p>If you’re interested in development, the recommended way to install <code class="code docutils literal notranslate"><span class="pre">dcargs</span></code> is via <cite>poetry</cite>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository and install.</span>
 <span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">brentyi</span><span class="o">/</span><span class="n">dcargs</span><span class="o">.</span><span class="n">git</span>
 <span class="n">cd</span> <span class="n">dcargs</span>
-
-<span class="c1"># Install development dependencies.</span>
-<span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;.[testing,type-checking]&quot;</span>
+<span class="n">poetry</span> <span class="n">install</span>
 
 <span class="c1"># Run tests.</span>
 <span class="n">pytest</span>
