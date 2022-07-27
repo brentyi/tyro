@@ -1,3 +1,4 @@
+import argparse
 import copy
 import dataclasses
 import enum
@@ -27,6 +28,8 @@ def test_basic():
         s: str
         f: float
         p: pathlib.Path
+
+    assert isinstance(dcargs.generate_parser(ManyTypes), argparse.ArgumentParser)
 
     # We can directly pass a dataclass to `dcargs.cli()`:
     assert dcargs.cli(

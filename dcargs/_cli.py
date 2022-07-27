@@ -3,9 +3,40 @@
 import argparse
 from typing import Callable, Optional, Sequence, TypeVar, Union
 
+from typing_extensions import Literal, assert_never
+
 from . import _argparse_formatter, _calling, _fields, _parsers
 
 T = TypeVar("T")
+
+
+def generate_parser(
+    f: Callable[..., T],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[T] = None,
+    avoid_subparsers: bool = False,
+) -> argparse.ArgumentParser:
+    """Returns the argparse parser that would be used under-the-hood if `dcargs.cli()`
+    was called with the same arguments.
+
+    This can be useful for libraries like argcomplete, pyzshcomplete, or shtab, which
+    enable autocompletion for argparse parsers."""
+    # Potentially we could do some caching in the future, to reduce the redundant work
+    # done when both `generate_parser()` and `cli()` are called.
+    out = _cli_impl(
+        "parser",
+        f,
+        prog=prog,
+        description=description,
+        args=args,
+        default_instance=default_instance,
+        avoid_subparsers=avoid_subparsers,
+    )
+    assert isinstance(out, argparse.ArgumentParser)
+    return out
 
 
 def cli(
@@ -70,13 +101,32 @@ def cli(
     Returns:
         The output of `f(...)`.
     """
+    out = _cli_impl(
+        "f_out",
+        f,
+        prog=prog,
+        description=description,
+        args=args,
+        default_instance=default_instance,
+        avoid_subparsers=avoid_subparsers,
+    )
+    assert not isinstance(out, argparse.ArgumentParser)
+    return out
 
-    default_instance_internal: Union[_fields.NonpropagatingMissingType, T]
-    if default_instance is None:
-        default_instance_internal = _fields.MISSING_NONPROP
-    else:
-        default_instance_internal = default_instance
-    del default_instance
+
+def _cli_impl(
+    _return_stage: Literal["parser", "f_out"],
+    f: Callable[..., T],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[T] = None,
+    avoid_subparsers: bool = False,
+) -> Union[T, argparse.ArgumentParser]:
+    default_instance_internal: Union[_fields.NonpropagatingMissingType, T] = (
+        _fields.MISSING_NONPROP if default_instance is None else default_instance
+    )
 
     # Map a callable to the relevant CLI arguments + subparsers.
     parser_definition = _parsers.ParserSpecification.from_callable(
@@ -89,11 +139,13 @@ def cli(
         avoid_subparsers=avoid_subparsers,
     )
 
-    # Parse using argparse!
+    # Generate parser!
     with _argparse_formatter.argparse_ansi_monkey_patch():
         parser = argparse.ArgumentParser(
             prog=prog, formatter_class=_argparse_formatter.ArgparseHelpFormatter
         )
+        if _return_stage == "parser":
+            return parser
         parser_definition.apply(parser)
         value_from_prefixed_field_name = vars(parser.parse_args(args=args))
 
@@ -115,4 +167,7 @@ def cli(
         raise SystemExit()
 
     assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0
-    return out
+    if _return_stage == "f_out":
+        return out
+
+    assert_never(_return_stage)

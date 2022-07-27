@@ -1,12 +1,13 @@
 from . import extras
-from ._cli import cli
+from ._cli import cli, generate_parser
 from ._fields import MISSING_PUBLIC as MISSING
 from ._instantiators import UnsupportedTypeAnnotationError
 
 __all__ = [
     "extras",
-    "MISSING",
     "cli",
+    "generate_parser",
+    "MISSING",
     "UnsupportedTypeAnnotationError",
 ]
 
