@@ -1,6 +1,5 @@
 """Rules for taking high-level field definitions and lowering them into inputs for
 argparse's `add_argument()`."""
-
 from __future__ import annotations
 
 import argparse

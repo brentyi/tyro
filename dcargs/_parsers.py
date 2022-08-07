@@ -1,5 +1,4 @@
 """Interface for generating `argparse.ArgumentParser()` definitions from callables."""
-
 from __future__ import annotations
 
 import argparse
