@@ -1,4 +1,4 @@
-import dcargs._strings as _strings
+from dcargs import _strings as _strings
 
 
 def test_words_from_name():
