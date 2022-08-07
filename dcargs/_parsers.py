@@ -301,7 +301,7 @@ class ParserSpecification:
                         + _strings.SUBPARSER_DEST_FMT.format(name=subparsers.name),
                         description=subparsers.description,
                         required=subparsers.required,
-                        title=title,
+                        title=termcolor.colored(title, attrs=["bold"]),
                         metavar=metavar,
                     )
                     for name, subparser_def in subparsers.parser_from_name.items():
@@ -405,19 +405,27 @@ class SubparsersSpecification:
             ):
                 required = True
 
+        # Make description.
         description_parts = []
         if field.helptext is not None:
             description_parts.append(field.helptext)
         if not required and field.default not in _fields.MISSING_SINGLETONS:
             default = _strings.subparser_name_from_type(type(field.default))
             description_parts.append(f" (default: {default})")
+        description = (
+            # We use `None` instead of an empty string to prevent a line break from
+            # being created where the description would be.
+            " ".join(description_parts)
+            if len(description_parts) > 0
+            else None
+        )
 
         return SubparsersSpecification(
             name=field.name,
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.
-            description=" ".join(description_parts),
+            description=description,
             parser_from_name=parser_from_name,
             required=required,
             default_instance=field.default
