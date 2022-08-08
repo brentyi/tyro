@@ -454,3 +454,19 @@ def test_metavar_6():
     assert (
         "--x {INT INT}|{STR STR} INT INT [{INT INT}|{STR STR} INT INT ...]" in helptext
     )
+
+
+def test_comment_in_subclass_list():
+    @dataclasses.dataclass
+    class Something(
+        # This text should not show up in the helptext anywhere.
+        object,
+    ):
+        a: int
+
+        # But this text should!
+        b: int
+
+    helptext = _get_helptext(Something)
+    assert "This text should not" not in helptext
+    assert "But this text should!" in helptext
