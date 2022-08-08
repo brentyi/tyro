@@ -190,6 +190,17 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     #
     # In this case, 'Optimizer hyperparameters' will be treated as the docstring for all
     # 3 fields.
+
+    # Get first line of the class definition, excluding decorators. This logic is only
+    # needed for Python >= 3.9; in 3.8, we can simply use
+    # `tokenization.tokens[0].logical_line`.
+    classdef_logical_line = -1
+    for token in tokenization.tokens:
+        if token.content == "class":
+            classdef_logical_line = token.logical_line
+            break
+    assert classdef_logical_line != -1
+
     comments: List[str] = []
     current_actual_line = field_data.actual_line - 1
     while current_actual_line in tokenization.tokens_from_actual_line:
@@ -202,8 +213,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         # We don't look in the first logical line. This includes all comments that come
         # before the end parentheses in the class definition (eg comments in the
         # subclass list).
-        logical_line = actual_line_tokens[0].logical_line
-        if logical_line == tokenization.tokens[0].logical_line:
+        if actual_line_tokens[0].logical_line <= classdef_logical_line:
             break
 
         # Record single comments!
