@@ -12,6 +12,7 @@ typing-extensions = "^4.3.0"
 PyYAML = "^6.0"
 termcolor = "^1.1.0"
 "backports.cached-property" = { version = "^1.0.2", python = "~3.7" }
+colorama = {version = "^0.4.0", platform = "win32"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
