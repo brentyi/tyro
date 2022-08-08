@@ -1,27 +1,56 @@
 import argparse
 import contextlib
-from typing import Any
+from typing import Any, ContextManager, Generator
 
 from . import _strings
 
 
-@contextlib.contextmanager
-def argparse_ansi_monkey_patch():
-    """Temporary monkey patch for making argparse ignore ANSI codes when wrapping usage
-    text."""
+def ansi_context() -> ContextManager[None]:
+    """Context for working with ANSI codes + argparse:
+    - Applies a temporary monkey patch for making argparse ignore ANSI codes when
+      wrapping usage text.
+    - Enables support for Windows via colorama.
+    """
 
-    def monkeypatched_len(obj: Any) -> int:
-        if isinstance(obj, str):
-            return len(_strings.strip_ansi_sequences(obj))
+    @contextlib.contextmanager
+    def inner() -> Generator[None, None, None]:
+        def monkeypatched_len(obj: Any) -> int:
+            if isinstance(obj, str):
+                return len(_strings.strip_ansi_sequences(obj))
+            else:
+                return len(obj)
+
+        if not hasattr(argparse, "len"):
+            argparse.len = monkeypatched_len  # type: ignore
+            try:
+                # Use Colorama to support coloring in Windows shells.
+                import colorama  # type: ignore
+
+                # Notes:
+                #
+                # (1) This context manager looks very nice and local, but under-the-hood
+                # does some global operations which look likely to cause unexpected
+                # behavior if another library relies on `colorama.init()` and
+                # `colorama.deinit()`.
+                #
+                # (2) SSHed into a non-Windows machine from a WinAPI terminal => this
+                # won't work.
+                #
+                # Fixing these issues doesn't seem worth it: it doesn't seem like there
+                # are low-effort solutions for either problem, and more modern terminals
+                # in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.
+                with colorama.colorama_text():
+                    yield
+
+            except ImportError:
+                yield
+
+            del argparse.len  # type: ignore
         else:
-            return len(obj)
+            # No-op when the context manager is nested.
+            yield
 
-    if not hasattr(argparse, "len"):
-        argparse.len = monkeypatched_len  # type: ignore
-        yield
-        del argparse.len  # type: ignore
-    else:
-        yield
+    return inner()
 
 
 class ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):

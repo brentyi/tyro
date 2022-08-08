@@ -140,7 +140,7 @@ def _cli_impl(
     )
 
     # Generate parser!
-    with _argparse_formatter.argparse_ansi_monkey_patch():
+    with _argparse_formatter.ansi_context():
         parser = argparse.ArgumentParser(
             prog=prog, formatter_class=_argparse_formatter.ArgparseHelpFormatter
         )
