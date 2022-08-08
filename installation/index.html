@@ -229,23 +229,24 @@
 <h2>Standard<a class="headerlink" href="#standard" title="Permalink to this heading">#</a></h2>
 <p>Installation is supported on Python &gt;=3.7 via pip. This is typically all that’s
 required.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">dcargs</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install dcargs
 </pre></div>
 </div>
 </section>
 <section id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this heading">#</a></h2>
-<p>If you’re interested in development, the recommended way to install <code class="code docutils literal notranslate"><span class="pre">dcargs</span></code> is via <cite>poetry</cite>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository and install.</span>
-<span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">brentyi</span><span class="o">/</span><span class="n">dcargs</span><span class="o">.</span><span class="n">git</span>
-<span class="n">cd</span> <span class="n">dcargs</span>
-<span class="n">poetry</span> <span class="n">install</span>
+<p>If you’re interested in development, the recommended way to install <code class="docutils literal notranslate"><span class="pre">dcargs</span></code> is
+via <cite>``poetry`</cite> &lt;<a class="reference external" href="https://github.com/python-poetry/poetry">https://github.com/python-poetry/poetry</a>&gt;`_:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository and install.</span>
+git clone git@github.com:brentyi/dcargs.git
+<span class="nb">cd</span> dcargs
+poetry install
 
 <span class="c1"># Run tests.</span>
-<span class="n">pytest</span>
+poetry run pytest
 
 <span class="c1"># Check types.</span>
-<span class="n">mypy</span> <span class="o">--</span><span class="n">install</span><span class="o">-</span><span class="n">types</span> <span class="o">.</span>
+poetry run mypy --install-types .
 </pre></div>
 </div>
 </section>
