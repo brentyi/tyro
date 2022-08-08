@@ -254,7 +254,19 @@ value, automatically converted to flags.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_flags.py --help</kbd><pre class="ansi-block literal-block">usage: 04_flags.py [-h] --boolean {<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}
+<kbd>python 04_flags.py --help</kbd><pre class="ansi-block literal-block">_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+usage: 04_flags.py [-h] --boolean {<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}
                    [--optional-boolean {<span class="ansi-bold">None</span>,<span class="ansi-bold">True</span>,<span class="ansi-bold">False</span>}] [--flag-a]
                    [--no-flag-b]
 
@@ -271,11 +283,83 @@ value, automatically converted to flags.</p>
   --no-flag-b           Pass --no-flag-b in to set this value to False.
                         <span class="ansi-dark">(sets: flag_b=False)</span></pre>
 <hr class="docutils" />
-<kbd>python 04_flags.py --boolean True</kbd><pre class="ansi-block literal-block">Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
+<kbd>python 04_flags.py --boolean True</kbd><pre class="ansi-block literal-block">_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
 <hr class="docutils" />
-<kbd>python 04_flags.py --boolean False --flag-a</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
+<kbd>python 04_flags.py --boolean False --flag-a</kbd><pre class="ansi-block literal-block">_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
 <hr class="docutils" />
-<kbd>python 04_flags.py --boolean False --no-flag-b</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
+<kbd>python 04_flags.py --boolean False --no-flag-b</kbd><pre class="ansi-block literal-block">_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
+_Token(token_type=1, content='class', logical_line=1, actual_line=1)
+1
+Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
 </section>
 
         </article>
