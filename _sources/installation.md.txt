@@ -12,7 +12,7 @@ pip install dcargs
 ## Development
 
 If you're interested in development, the recommended way to install `dcargs` is
-via <a href="https://github.com/python-poetry/poetry"><code>poetry</code></a>:
+via [poetry](https://github.com/python-poetry/poetry).
 
 ```bash
 # Clone repository and install.
