@@ -417,7 +417,8 @@
     <span class="c1"># 3 fields.</span>
 
     <span class="c1"># Get first line of the class definition, excluding decorators. This logic is only</span>
-    <span class="c1"># needed for Python &gt;= 3.9.</span>
+    <span class="c1"># needed for Python &gt;= 3.9; in 3.8, we can simply use</span>
+    <span class="c1"># `tokenization.tokens[0].logical_line`.</span>
     <span class="n">classdef_logical_line</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
