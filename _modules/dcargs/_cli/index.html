@@ -369,9 +369,9 @@
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
             <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span> <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ArgparseHelpFormatter</span>
         <span class="p">)</span>
+        <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">_return_stage</span> <span class="o">==</span> <span class="s2">&quot;parser&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">parser</span>
-        <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
         <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">))</span>
 
     <span class="k">try</span><span class="p">:</span>
