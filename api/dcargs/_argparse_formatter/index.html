@@ -228,10 +228,19 @@
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="dcargs._argparse_formatter.argparse_ansi_monkey_patch">
-<span class="sig-prename descclassname"><span class="pre">dcargs._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">argparse_ansi_monkey_patch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dcargs/_argparse_formatter/#argparse_ansi_monkey_patch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._argparse_formatter.argparse_ansi_monkey_patch" title="Permalink to this definition">#</a></dt>
-<dd><p>Temporary monkey patch for making argparse ignore ANSI codes when wrapping usage
-text.</p>
+<dt class="sig sig-object py" id="dcargs._argparse_formatter.ansi_context">
+<span class="sig-prename descclassname"><span class="pre">dcargs._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">ansi_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_argparse_formatter/#ansi_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._argparse_formatter.ansi_context" title="Permalink to this definition">#</a></dt>
+<dd><p>Context for working with ANSI codes + argparse:</p>
+<ul class="simple">
+<li><p>Applies a temporary monkey patch for making argparse ignore ANSI codes when
+wrapping usage text.</p></li>
+<li><p>Enables support for Windows via colorama.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ContextManager[None]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
@@ -292,7 +301,7 @@ provided by the class are considered an implementation detail.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._argparse_formatter</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#dcargs._argparse_formatter.argparse_ansi_monkey_patch">argparse_ansi_monkey_patch</a></li>
+<li><a class="reference internal" href="#dcargs._argparse_formatter.ansi_context">ansi_context</a></li>
 <li><a class="reference internal" href="#dcargs._argparse_formatter.ArgparseHelpFormatter">ArgparseHelpFormatter</a></li>
 </ul>
 </li>

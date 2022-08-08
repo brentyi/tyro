@@ -225,28 +225,57 @@
           <h1>Source code for dcargs._argparse_formatter</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
 
 
-<div class="viewcode-block" id="argparse_ansi_monkey_patch"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.argparse_ansi_monkey_patch">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span> <span class="nf">argparse_ansi_monkey_patch</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;Temporary monkey patch for making argparse ignore ANSI codes when wrapping usage</span>
-<span class="sd">    text.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ansi_context"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.ansi_context">[docs]</a><span class="k">def</span> <span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Context for working with ANSI codes + argparse:</span>
+<span class="sd">    - Applies a temporary monkey patch for making argparse ignore ANSI codes when</span>
+<span class="sd">      wrapping usage text.</span>
+<span class="sd">    - Enables support for Windows via colorama.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">monkeypatched_len</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+    <span class="k">def</span> <span class="nf">inner</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="k">def</span> <span class="nf">monkeypatched_len</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">):</span>
+            <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatched_len</span>  <span class="c1"># type: ignore</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Use Colorama to support coloring in Windows shells.</span>
+                <span class="kn">import</span> <span class="nn">colorama</span>  <span class="c1"># type: ignore</span>
+
+                <span class="c1"># Notes:</span>
+                <span class="c1">#</span>
+                <span class="c1"># (1) This context manager looks very nice and local, but under-the-hood</span>
+                <span class="c1"># does some global operations which look likely to cause unexpected</span>
+                <span class="c1"># behavior if another library relies on `colorama.init()` and</span>
+                <span class="c1"># `colorama.deinit()`.</span>
+                <span class="c1">#</span>
+                <span class="c1"># (2) SSHed into a non-Windows machine from a WinAPI terminal =&gt; this</span>
+                <span class="c1"># won&#39;t work.</span>
+                <span class="c1">#</span>
+                <span class="c1"># Fixing these issues doesn&#39;t seem worth it: it doesn&#39;t seem like there</span>
+                <span class="c1"># are low-effort solutions for either problem, and more modern terminals</span>
+                <span class="c1"># in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.</span>
+                <span class="k">with</span> <span class="n">colorama</span><span class="o">.</span><span class="n">colorama_text</span><span class="p">():</span>
+                    <span class="k">yield</span>
+
+            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                <span class="k">yield</span>
+
+            <span class="k">del</span> <span class="n">argparse</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="c1"># No-op when the context manager is nested.</span>
+            <span class="k">yield</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">):</span>
-        <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatched_len</span>  <span class="c1"># type: ignore</span>
-        <span class="k">yield</span>
-        <span class="k">del</span> <span class="n">argparse</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># type: ignore</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">yield</span></div>
+    <span class="k">return</span> <span class="n">inner</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="ArgparseHelpFormatter"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.ArgparseHelpFormatter">[docs]</a><span class="k">class</span> <span class="nc">ArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>

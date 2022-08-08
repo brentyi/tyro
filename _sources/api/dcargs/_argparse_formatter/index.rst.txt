@@ -9,11 +9,15 @@
 Module Contents
 ---------------
 
-.. py:function:: argparse_ansi_monkey_patch()
+.. py:function:: ansi_context() -> ContextManager[None]
 
    
-   Temporary monkey patch for making argparse ignore ANSI codes when wrapping usage
-   text.
+   Context for working with ANSI codes + argparse:
+
+
+   * Applies a temporary monkey patch for making argparse ignore ANSI codes when
+     wrapping usage text.
+   * Enables support for Windows via colorama.
 
 .. py:class:: ArgparseHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
 
