@@ -144,9 +144,9 @@ def _cli_impl(
         parser = argparse.ArgumentParser(
             prog=prog, formatter_class=_argparse_formatter.ArgparseHelpFormatter
         )
+        parser_definition.apply(parser)
         if _return_stage == "parser":
             return parser
-        parser_definition.apply(parser)
         value_from_prefixed_field_name = vars(parser.parse_args(args=args))
 
     try:

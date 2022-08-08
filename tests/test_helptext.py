@@ -10,14 +10,23 @@ import pytest
 from typing_extensions import Literal
 
 import dcargs
+import dcargs._argparse_formatter
 import dcargs._strings
 
 
 def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     target = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(target):
-            dcargs.cli(f, args=args)
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        dcargs.cli(f, args=args)
+
+    # Check against dcargs.generate_parser(); this should return the same underlying
+    # parser.
+    target2 = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
+        with dcargs._argparse_formatter.argparse_ansi_monkey_patch():
+            dcargs.generate_parser(f).parse_args(args)
+    assert target.getvalue() == target2.getvalue()
+
     return dcargs._strings.strip_ansi_sequences(target.getvalue())
 
 
