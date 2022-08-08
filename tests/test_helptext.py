@@ -103,7 +103,6 @@ def test_helptext_nested():
     assert "Hello world!" in helptext
 
     helptext = _get_helptext(main_no_docstring)
-    print(helptext)
     assert "Something" in helptext
     assert "Args:" not in helptext
     assert "Hello world!" in helptext
