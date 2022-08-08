@@ -194,23 +194,28 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     current_actual_line = field_data.actual_line - 1
     while current_actual_line in tokenization.tokens_from_actual_line:
         actual_line_tokens = tokenization.tokens_from_actual_line[current_actual_line]
-        current_actual_line -= 1
 
         # We stop looking if we find an empty line.
         if len(actual_line_tokens) == 0:
             break
 
+        # We don't look in the first logical line. This includes all comments that come
+        # before the end parentheses in the class definition (eg comments in the
+        # subclass list).
+        logical_line = actual_line_tokens[0].logical_line
+        if logical_line == tokenization.tokens[0].logical_line:
+            break
+
         # Record single comments!
-        if (
-            len(actual_line_tokens) == 1
-            and actual_line_tokens[0].token_type == tokenize.COMMENT
-        ):
+        if len(actual_line_tokens) == 1:
             (comment_token,) = actual_line_tokens
             assert comment_token.content.startswith("#")
             comments.append(comment_token.content[1:].strip())
         elif len(comments) > 0:
             # Comments should be contiguous.
             break
+
+        current_actual_line -= 1
 
     if len(comments) > 0:
         return "\n".join(reversed(comments))
