@@ -291,28 +291,7 @@ objects. This helps with modularity and grouping in larger projects.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 05_hierarchical_configs.py --help</kbd><pre class="ansi-block literal-block">_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-usage: 05_hierarchical_configs.py [-h] --out-dir <span class="ansi-bold">PATH</span>
+<kbd>python 05_hierarchical_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 05_hierarchical_configs.py [-h] --out-dir <span class="ansi-bold">PATH</span>
                                   [--config.optimizer.algorithm {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}]
                                   [--config.optimizer.learning-rate <span class="ansi-bold">FLOAT</span>]
                                   [--config.optimizer.weight-decay <span class="ansi-bold">FLOAT</span>]
@@ -356,49 +335,7 @@ Train a model.
   --config.seed <span class="ansi-bold">INT</span>  Random seed. This is helpful for making sure that our
                         experiments are all reproducible! <span class="ansi-dark">(default: 0)</span></pre>
 <hr class="docutils" />
-<kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
+<kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
 config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
 # dcargs YAML.
 !dataclass:ExperimentConfig
@@ -410,49 +347,7 @@ optimizer: !dataclass:OptimizerConfig
 seed: 0
 train_steps: 100000</pre>
 <hr class="docutils" />
-<kbd>python 05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-_Token(token_type=62, content='utf-8', logical_line=1, actual_line=1)
-_Token(token_type=1, content='class', logical_line=1, actual_line=1)
-1
-out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
+<kbd>python 05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
 config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
 # dcargs YAML.
 !dataclass:ExperimentConfig

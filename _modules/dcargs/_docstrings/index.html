@@ -421,12 +421,10 @@
     <span class="c1"># `tokenization.tokens[0].logical_line`.</span>
     <span class="n">classdef_logical_line</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
     <span class="k">for</span> <span class="n">token</span> <span class="ow">in</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">token</span><span class="o">.</span><span class="n">content</span> <span class="o">==</span> <span class="s2">&quot;class&quot;</span><span class="p">:</span>
             <span class="n">classdef_logical_line</span> <span class="o">=</span> <span class="n">token</span><span class="o">.</span><span class="n">logical_line</span>
             <span class="k">break</span>
     <span class="k">assert</span> <span class="n">classdef_logical_line</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">classdef_logical_line</span><span class="p">)</span>
 
     <span class="n">comments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">current_actual_line</span> <span class="o">=</span> <span class="n">field_data</span><span class="o">.</span><span class="n">actual_line</span> <span class="o">-</span> <span class="mi">1</span>
