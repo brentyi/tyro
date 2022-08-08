@@ -16,9 +16,12 @@ def argparse_ansi_monkey_patch():
         else:
             return len(obj)
 
-    argparse.len = monkeypatched_len  # type: ignore
-    yield
-    del argparse.len  # type: ignore
+    if not hasattr(argparse, "len"):
+        argparse.len = monkeypatched_len  # type: ignore
+        yield
+        del argparse.len  # type: ignore
+    else:
+        yield
 
 
 class ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):

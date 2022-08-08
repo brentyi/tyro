@@ -24,7 +24,6 @@ def main(
     """
     print(field1, field2)
 
-parser = lambda: dcargs.generate_parser(main)
 
 if __name__ == "__main__":
     dcargs.cli(main)
