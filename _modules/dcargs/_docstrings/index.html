@@ -419,23 +419,28 @@
     <span class="n">current_actual_line</span> <span class="o">=</span> <span class="n">field_data</span><span class="o">.</span><span class="n">actual_line</span> <span class="o">-</span> <span class="mi">1</span>
     <span class="k">while</span> <span class="n">current_actual_line</span> <span class="ow">in</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens_from_actual_line</span><span class="p">:</span>
         <span class="n">actual_line_tokens</span> <span class="o">=</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens_from_actual_line</span><span class="p">[</span><span class="n">current_actual_line</span><span class="p">]</span>
-        <span class="n">current_actual_line</span> <span class="o">-=</span> <span class="mi">1</span>
 
         <span class="c1"># We stop looking if we find an empty line.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual_line_tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">break</span>
 
+        <span class="c1"># We don&#39;t look in the first logical line. This includes all comments that come</span>
+        <span class="c1"># before the end parentheses in the class definition (eg comments in the</span>
+        <span class="c1"># subclass list).</span>
+        <span class="n">logical_line</span> <span class="o">=</span> <span class="n">actual_line_tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logical_line</span>
+        <span class="k">if</span> <span class="n">logical_line</span> <span class="o">==</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">logical_line</span><span class="p">:</span>
+            <span class="k">break</span>
+
         <span class="c1"># Record single comments!</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">actual_line_tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-            <span class="ow">and</span> <span class="n">actual_line_tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">token_type</span> <span class="o">==</span> <span class="n">tokenize</span><span class="o">.</span><span class="n">COMMENT</span>
-        <span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual_line_tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="p">(</span><span class="n">comment_token</span><span class="p">,)</span> <span class="o">=</span> <span class="n">actual_line_tokens</span>
             <span class="k">assert</span> <span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
             <span class="n">comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Comments should be contiguous.</span>
             <span class="k">break</span>
+
+        <span class="n">current_actual_line</span> <span class="o">-=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">comments</span><span class="p">))</span>
