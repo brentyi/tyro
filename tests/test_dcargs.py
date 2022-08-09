@@ -485,3 +485,11 @@ def test_just_dict():
 
 def test_just_list():
     assert dcargs.cli(List[int], args="1 2 3 4".split(" ")) == [1, 2, 3, 4]
+
+
+def test_return_parser():
+    def main() -> argparse.ArgumentParser:
+        parser = argparse.ArgumentParser()
+        return parser
+
+    assert isinstance(dcargs.cli(main, args=[]), argparse.ArgumentParser)
