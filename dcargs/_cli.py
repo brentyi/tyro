@@ -1,7 +1,7 @@
 """Core public API."""
 
 import argparse
-from typing import Callable, Optional, Sequence, TypeVar, Union
+from typing import Callable, Optional, Sequence, TypeVar, Union, overload
 
 from typing_extensions import Literal, assert_never
 
@@ -110,8 +110,35 @@ def cli(
         default_instance=default_instance,
         avoid_subparsers=avoid_subparsers,
     )
-    assert not isinstance(out, argparse.ArgumentParser)
     return out
+
+
+@overload
+def _cli_impl(
+    _return_stage: Literal["parser"],
+    f: Callable[..., T],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[T] = None,
+    avoid_subparsers: bool = False,
+) -> argparse.ArgumentParser:
+    ...
+
+
+@overload
+def _cli_impl(
+    _return_stage: Literal["f_out"],
+    f: Callable[..., T],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[T] = None,
+    avoid_subparsers: bool = False,
+) -> T:
+    ...
 
 
 def _cli_impl(
