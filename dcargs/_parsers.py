@@ -57,14 +57,11 @@ def is_possibly_nested_type(typ: Any) -> bool:
     Examples of when we return False: int, str, List[int], List[str], pathlib.Path, etc.
     """
 
+    typ_orig = typ
     typ = _resolver.unwrap_origin(typ)
 
     # Nested types should be callable.
     if not callable(typ):
-        return False
-
-    # Known parsable types: builtins like int/str/float/bool, collections, annotations.
-    if typ in _known_parsable_types:
         return False
 
     # Simple heuristic: dataclasses should be treated as nested objects and are not
@@ -75,6 +72,20 @@ def is_possibly_nested_type(typ: Any) -> bool:
     # TypedDict types can be unpacked.
     if is_typeddict(typ):
         return True
+
+    # Fixed-length tuple types.
+    if typ is tuple:
+        types = get_args(typ_orig)
+
+        # Nested types must be fixed-length.
+        if Ellipsis in types:
+            return False
+
+        return any(map(is_possibly_nested_type, types))
+
+    # Known parsable types: builtins like int/str/float/bool, collections, annotations.
+    if typ in _known_parsable_types:
+        return False
 
     # Nested types like nested (data)classes should have fully type-annotated inputs. If
     # any inputs are unannotated (for example, in the case of pathlib.Path), we can
@@ -172,7 +183,7 @@ class ParserSpecification:
                 field,
                 type_from_typevar=type_from_typevar,
                 parent_classes=parent_classes,
-                prefix=prefix + field.name + _strings.NESTED_FIELD_DELIMETER,
+                prefix=_strings.make_field_name([prefix, field.name]),
                 avoid_subparsers=avoid_subparsers,
             )
             if subparsers_attempt is not None:
@@ -198,14 +209,14 @@ class ParserSpecification:
                     parent_classes=parent_classes,
                     parent_type_from_typevar=type_from_typevar,
                     default_instance=field.default,
-                    prefix=prefix + field.name + _strings.NESTED_FIELD_DELIMETER,
+                    prefix=_strings.make_field_name([prefix, field.name]),
                     avoid_subparsers=avoid_subparsers,
                 )
                 args.extend(nested_parser.args)
 
                 for k, v in nested_parser.helptext_from_nested_class_field_name.items():
                     helptext_from_nested_class_field_name[
-                        field.name + _strings.NESTED_FIELD_DELIMETER + k
+                        _strings.make_field_name([field.name, k])
                     ] = v
 
                 if field.helptext is not None:
@@ -274,11 +285,10 @@ class ParserSpecification:
                 continue
 
             if arg.prefix not in group_from_prefix:
-                nested_field_name = arg.prefix[:-1]
                 group_from_prefix[arg.prefix] = parser.add_argument_group(
-                    format_group_name(nested_field_name),
+                    format_group_name(arg.prefix),
                     description=self.helptext_from_nested_class_field_name.get(
-                        nested_field_name
+                        arg.prefix
                     ),
                 )
             arg.add_argument(group_from_prefix[arg.prefix])
@@ -297,8 +307,14 @@ class ParserSpecification:
                 for p in prev_subparser_tree_nodes:
                     # Add subparsers to every node in previous level of the tree.
                     argparse_subparsers = p.add_subparsers(
-                        dest=self.prefix
-                        + _strings.SUBPARSER_DEST_FMT.format(name=subparsers.name),
+                        dest=_strings.make_field_name(
+                            [
+                                self.prefix,
+                                _strings.SUBPARSER_DEST_FMT.format(
+                                    name=subparsers.name
+                                ),
+                            ]
+                        ),
                         description=subparsers.description,
                         required=subparsers.required,
                         title=termcolor.colored(title, attrs=["bold"]),

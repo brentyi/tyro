@@ -23,7 +23,7 @@ from typing import (
 
 import termcolor
 
-from . import _fields, _instantiators
+from . import _fields, _instantiators, _strings
 
 try:
     # Python >=3.8.
@@ -284,14 +284,20 @@ def _rule_set_name_or_flag(
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
     if arg.field.positional:
-        name_or_flag = arg.prefix + arg.field.name
+        name_or_flag = _strings.make_field_name([arg.prefix, arg.field.name])
     elif lowered.action == "store_false":
-        name_or_flag = "--" + (arg.prefix + "no-" + arg.field.name).replace("_", "-")
+        name_or_flag = "--" + _strings.make_field_name(
+            [arg.prefix, "no-" + arg.field.name]
+        ).replace("_", "-")
     else:
-        name_or_flag = "--" + (arg.prefix + arg.field.name).replace("_", "-")
+        name_or_flag = "--" + _strings.make_field_name(
+            [arg.prefix, arg.field.name]
+        ).replace("_", "-")
 
     return dataclasses.replace(
-        lowered, name_or_flag=name_or_flag, dest=arg.prefix + arg.field.name
+        lowered,
+        name_or_flag=name_or_flag,
+        dest=_strings.make_field_name([arg.prefix, arg.field.name]),
     )
 
 
@@ -302,7 +308,7 @@ def _rule_positional_special_handling(
     if not arg.field.positional:
         return lowered
 
-    metavar = (arg.prefix + arg.field.name).upper()
+    metavar = _strings.make_field_name([arg.prefix, arg.field.name]).upper()
     if lowered.nargs == "+":
         metavar = f"{metavar} [{metavar} ...]"
     elif isinstance(lowered.nargs, int):

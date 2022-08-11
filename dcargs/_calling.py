@@ -32,7 +32,7 @@ def call_from_args(
 
     f, type_from_typevar = _resolver.resolve_generic_types(f)
 
-    args: List[str] = []
+    args: List[Any] = []
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
 
@@ -44,11 +44,13 @@ def call_from_args(
 
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
-        arg_from_prefixed_field_name[arg.prefix + arg.field.name] = arg
+        arg_from_prefixed_field_name[
+            _strings.make_field_name([arg.prefix, arg.field.name])
+        ] = arg
 
     for field in _fields.field_list_from_callable(f, default_instance=default_instance):  # type: ignore
         value: Any
-        prefixed_field_name = field_name_prefix + field.name
+        prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
 
         # Resolve field type.
         field_type = (
@@ -103,7 +105,7 @@ def call_from_args(
                 parser_definition,
                 field.default,
                 value_from_prefixed_field_name,
-                field_name_prefix=prefixed_field_name + _strings.NESTED_FIELD_DELIMETER,
+                field_name_prefix=prefixed_field_name,
                 avoid_subparsers=avoid_subparsers,
             )
             consumed_keywords |= consumed_keywords_child
@@ -156,8 +158,7 @@ def call_from_args(
                     ],
                     field.default if type(field.default) is chosen_f else None,
                     value_from_prefixed_field_name,
-                    field_name_prefix=prefixed_field_name
-                    + _strings.NESTED_FIELD_DELIMETER,
+                    field_name_prefix=prefixed_field_name,
                     avoid_subparsers=avoid_subparsers,
                 )
                 consumed_keywords |= consumed_keywords_child
@@ -168,4 +169,9 @@ def call_from_args(
             else:
                 kwargs[field.name] = value
 
-    return _resolver.unwrap_origin(f)(*args, **kwargs), consumed_keywords  # type: ignore
+    unwrapped_f = _resolver.unwrap_origin(f)
+    if unwrapped_f is tuple:
+        assert len(args) == 0
+        return tuple(kwargs.values()), consumed_keywords  # type: ignore
+    else:
+        return unwrapped_f(*args, **kwargs), consumed_keywords  # type: ignore

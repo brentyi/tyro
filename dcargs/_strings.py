@@ -3,11 +3,30 @@
 import functools
 import re
 import textwrap
-from typing import Type
+from typing import List, Sequence, Type
 
 from . import _resolver
 
-NESTED_FIELD_DELIMETER: str = "."
+
+def make_field_name(parts: Sequence[str]) -> str:
+    """Join parts of a field name together. Used for nesting.
+
+    ('parent', 'child') => 'parent.child'
+    ('parents', '1', 'child') => 'parents:1.child'
+    """
+    out: List[str] = []
+    for i, p in enumerate([p for p in parts if len(p) > 0]):
+        if i > 0:
+            # Delimeter between parts. We use a colon before integers, which can
+            # currently only come from indices! (since field names can't start with
+            # digits)
+            out.append(":" if p[0].isdigit() else ".")
+
+        out.append(p)
+
+    return "".join(out)
+
+
 SUBPARSER_DEST_FMT: str = "{name} (positional)"
 
 
