@@ -5,7 +5,7 @@ import functools
 import inspect
 import io
 import tokenize
-from typing import Callable, Dict, List, Optional, Type
+from typing import Callable, Dict, Hashable, List, Optional, Type
 
 import docstring_parser
 from typing_extensions import get_origin, is_typeddict
@@ -233,6 +233,14 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     return None
 
 
+_builtins = set(
+    filter(
+        lambda x: isinstance(x, Hashable),  # type: ignore
+        __builtins__.values(),  # type: ignore
+    )
+)
+
+
 def get_callable_description(f: Callable) -> str:
     """Get description associated with a callable via docstring parsing.
 
@@ -240,6 +248,9 @@ def get_callable_description(f: Callable) -> str:
     the fields of the class if a docstring is not specified; this helper will ignore
     these docstrings."""
     f, _unused = _resolver.resolve_generic_types(f)
+
+    if _resolver.unwrap_origin(f) in _builtins:
+        return ""
 
     # Note inspect.getdoc() causes some corner cases with TypedDicts.
     docstring = f.__doc__

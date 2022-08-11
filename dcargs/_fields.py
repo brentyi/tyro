@@ -4,7 +4,7 @@ defaults, from general callables."""
 import dataclasses
 import inspect
 import warnings
-from typing import Any, Callable, List, Optional, Type, TypeVar, Union, cast
+from typing import Any, Callable, List, Optional, Type, TypeVar, Union, cast, get_args
 
 import docstring_parser
 from typing_extensions import get_type_hints, is_typeddict
@@ -170,6 +170,35 @@ def field_list_from_callable(
                     typ=dc_field.type,
                     default=default,
                     helptext=_docstrings.get_field_docstring(cls, dc_field.name),
+                    positional=False,
+                )
+            )
+        return field_list
+    elif _resolver.unwrap_origin(f) is tuple:
+        # Fixed-length tuples.
+        field_list = []
+        children = get_args(f)
+        assert Ellipsis not in children
+        for i, child in enumerate(children):
+            if default_instance in MISSING_SINGLETONS:
+                default_i = default_instance
+            else:
+                assert isinstance(default_instance, tuple)
+                assert len(default_instance) == len(
+                    children
+                ), "Tuple: length of annotation and type don't match."
+                default_i = default_instance[i]
+
+            field_list.append(
+                FieldDefinition(
+                    # We'd use an index operator h
+                    name=str(i),
+                    typ=child,
+                    default=default_i,
+                    helptext="",
+                    # This should really be positional=True, but the CLI is more
+                    # intuitive for mixed nested/non-nested types in tuples when we
+                    # stick with kwargs. Tuples are special-cased in _calling.py.
                     positional=False,
                 )
             )

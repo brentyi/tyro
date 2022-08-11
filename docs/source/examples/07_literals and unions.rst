@@ -32,7 +32,7 @@
            # enums.
            restricted_enum: Literal[Color.RED, Color.GREEN] = Color.RED
        
-           # Mixed types are okay.
+           # Or mix them with other types!
            mixed: Literal[Color.RED, Color.GREEN, "blue"] = "blue"
        
            # Literals can also be marked Optional.

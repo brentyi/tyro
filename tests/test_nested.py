@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 
 import pytest
 
@@ -600,3 +600,28 @@ def test_nested_subparsers_multiple():
             )
         ),
     ) == MultipleSubparsers(Subcommand2(Subcommand1(3)), Subcommand2(Subcommand1(7)))
+
+
+def test_tuple_nesting():
+    @dataclasses.dataclass(frozen=True)
+    class Color:
+        r: int
+        g: int
+        b: int
+
+    @dataclasses.dataclass(frozen=True)
+    class Location:
+        x: float
+        y: float
+        z: float
+
+    def main(x: Tuple[Tuple[Color], Location, float]):
+        return x
+
+    assert dcargs.cli(
+        main,
+        args=(
+            "--x:0:0.r 255 --x:0:0.g 0 --x:0:0.b 0 --x:1.x 5.0 --x:1.y 0.0"
+            " --x:1.z 2.0 --x:2 4.0".split(" ")
+        ),
+    ) == ((Color(255, 0, 0),), Location(5.0, 0.0, 2.0), 4.0)

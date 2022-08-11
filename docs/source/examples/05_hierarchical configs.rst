@@ -16,6 +16,7 @@ objects. This helps with modularity and grouping in larger projects.
        import dataclasses
        import enum
        import pathlib
+       from typing import Tuple
        
        import dcargs
        
@@ -25,7 +26,7 @@ objects. This helps with modularity and grouping in larger projects.
            SGD = enum.auto()
        
        
-       @dataclasses.dataclass(frozen=True)
+       @dataclasses.dataclass
        class OptimizerConfig:
            # Gradient-based optimizer to use.
            algorithm: OptimizerType = OptimizerType.ADAM
@@ -37,10 +38,10 @@ objects. This helps with modularity and grouping in larger projects.
            weight_decay: float = 1e-2
        
        
-       @dataclasses.dataclass(frozen=True)
+       @dataclasses.dataclass
        class ExperimentConfig:
            # Various configurable options for our optimizer.
-           optimizer: OptimizerConfig
+           optimizer: Tuple[OptimizerConfig, OptimizerConfig, OptimizerConfig]
        
            # Batch size.
            batch_size: int = 32
@@ -68,7 +69,9 @@ objects. This helps with modularity and grouping in larger projects.
                checkpoint_interval: Training steps between each checkpoint save.
            """
            print(f"{out_dir=}, {restore_checkpoint=}, {checkpoint_interval=}")
+           print()
            print(f"{config=}")
+           print()
            print(dcargs.to_yaml(config))
        
        
