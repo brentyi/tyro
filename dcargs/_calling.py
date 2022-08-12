@@ -3,7 +3,7 @@ namespaces."""
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
 
 from typing_extensions import get_args, get_origin
 
@@ -174,8 +174,16 @@ def call_from_args(
                 kwargs[field.name] = value
 
     unwrapped_f = _resolver.unwrap_origin(f)
-    if unwrapped_f is tuple:
-        assert len(args) == 0
-        return tuple(kwargs.values()), consumed_keywords  # type: ignore
+    unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
+    if unwrapped_f in (tuple, list, set):
+        if len(args) == 0:
+            # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
+            # use keyword arguments.
+            return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
+        else:
+            # When tuples are directly parsed (eg Tuple[int, int]), we end up with a
+            # single set of positional arguments.
+            assert len(args) == 1
+            return unwrapped_f(args[0]), consumed_keywords  # type: ignore
     else:
         return unwrapped_f(*args, **kwargs), consumed_keywords  # type: ignore

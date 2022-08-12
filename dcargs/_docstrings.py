@@ -217,7 +217,10 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
             break
 
         # Record single comments!
-        if len(actual_line_tokens) == 1:
+        if (
+            len(actual_line_tokens) == 1
+            and actual_line_tokens[0].token_type is tokenize.COMMENT
+        ):
             (comment_token,) = actual_line_tokens
             assert comment_token.content.startswith("#")
             comments.append(comment_token.content[1:].strip())

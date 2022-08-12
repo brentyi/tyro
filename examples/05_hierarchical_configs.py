@@ -10,7 +10,6 @@ Usage:
 import dataclasses
 import enum
 import pathlib
-from typing import Tuple
 
 import dcargs
 
@@ -35,7 +34,7 @@ class OptimizerConfig:
 @dataclasses.dataclass
 class ExperimentConfig:
     # Various configurable options for our optimizer.
-    optimizer: Tuple[OptimizerConfig, OptimizerConfig, OptimizerConfig]
+    optimizer: OptimizerConfig
 
     # Batch size.
     batch_size: int = 32

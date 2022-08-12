@@ -116,10 +116,10 @@ class ParserSpecification:
                     continue
                 else:
                     field = dataclasses.replace(field, typ=type(field.default))
-                    assert _fields.is_possibly_nested_type(field.typ, field.default)
+                    assert _fields.is_nested_type(field.typ, field.default)
 
             # (2) Handle nested callables.
-            if _fields.is_possibly_nested_type(field.typ, field.default):
+            if _fields.is_nested_type(field.typ, field.default):
                 nested_parser = ParserSpecification.from_callable(
                     field.typ,
                     description=None,
@@ -295,7 +295,7 @@ class SubparsersSpecification:
         options_no_none = [o for o in options if o != type(None)]  # noqa
         if not all(
             [
-                _fields.is_possibly_nested_type(o, _fields.MISSING_NONPROP)
+                _fields.is_nested_type(o, _fields.MISSING_NONPROP)
                 for o in options_no_none
             ]
         ):

@@ -5,6 +5,7 @@ from __future__ import annotations
 import dataclasses
 import pathlib
 import shlex
+import shutil
 from typing import Iterable
 
 import m2r2
@@ -68,6 +69,10 @@ def main(
     examples_dir: pathlib.Path = REPO_ROOT / "examples",
     sphinx_source_dir: pathlib.Path = REPO_ROOT / "docs" / "source",
 ) -> None:
+    example_doc_dir = sphinx_source_dir / "examples"
+    shutil.rmtree(example_doc_dir)
+    example_doc_dir.mkdir()
+
     for path in get_example_paths(examples_dir):
         ex = ExampleMetadata.from_path(path)
         path_for_sphinx = pathlib.Path("..") / ".." / path.relative_to(REPO_ROOT)
@@ -100,9 +105,8 @@ def main(
             ]
 
         (
-            sphinx_source_dir
-            / "examples"
-            / f"{ex.index_with_zero}_{ex.title.lower()}.rst"
+            example_doc_dir
+            / f"{ex.index_with_zero}_{ex.title.lower().replace(' ', '_')}.rst"
         ).write_text(
             "\n".join(
                 [
