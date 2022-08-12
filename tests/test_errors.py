@@ -118,7 +118,7 @@ def test_missing_annotation_1():
     def main(a, b) -> None:
         pass
 
-    with pytest.raises(TypeError):
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(main, args=["--help"])
 
 
@@ -126,5 +126,5 @@ def test_missing_annotation_2():
     def main(*, a) -> None:
         pass
 
-    with pytest.raises(TypeError):
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(main, args=["--help"])

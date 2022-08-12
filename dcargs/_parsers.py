@@ -2,27 +2,12 @@
 from __future__ import annotations
 
 import argparse
-import collections.abc
 import dataclasses
-import inspect
 import itertools
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Hashable,
-    List,
-    Optional,
-    Set,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
 import termcolor
-import typing_extensions
-from typing_extensions import get_args, get_origin, is_typeddict
+from typing_extensions import get_args, get_origin
 
 from . import (
     _argparse_formatter,
@@ -35,70 +20,6 @@ from . import (
 )
 
 T = TypeVar("T")
-
-
-_known_parsable_types = set(
-    filter(
-        lambda x: isinstance(x, Hashable),  # type: ignore
-        itertools.chain(
-            __builtins__.values(),  # type: ignore
-            vars(typing_extensions).values(),
-            vars(collections.abc).values(),
-        ),
-    )
-)
-
-
-def is_possibly_nested_type(typ: Any) -> bool:
-    """Heuristics for determining whether a type can be treated as a 'nested type',
-    where a single field has multiple corresponding arguments (eg for nested
-    dataclasses or classes).
-
-    Examples of when we return False: int, str, List[int], List[str], pathlib.Path, etc.
-    """
-
-    typ_orig = typ
-    typ = _resolver.unwrap_origin(typ)
-
-    # Nested types should be callable.
-    if not callable(typ):
-        return False
-
-    # Simple heuristic: dataclasses should be treated as nested objects and are not
-    # parsable.
-    if dataclasses.is_dataclass(typ):
-        return True
-
-    # TypedDict types can be unpacked.
-    if is_typeddict(typ):
-        return True
-
-    # Fixed-length tuple types.
-    if typ is tuple:
-        types = get_args(typ_orig)
-
-        # Nested types must be fixed-length.
-        if Ellipsis in types:
-            return False
-
-        return any(map(is_possibly_nested_type, types))
-
-    # Known parsable types: builtins like int/str/float/bool, collections, annotations.
-    if typ in _known_parsable_types:
-        return False
-
-    # Nested types like nested (data)classes should have fully type-annotated inputs. If
-    # any inputs are unannotated (for example, in the case of pathlib.Path), we can
-    # assume the type is not nested.
-    try:
-        sig = inspect.signature(typ)
-    except ValueError:
-        return False
-    for param in sig.parameters.values():
-        if param.annotation is inspect.Parameter.empty:
-            return False
-
-    return True
 
 
 @dataclasses.dataclass(frozen=True)
@@ -151,32 +72,28 @@ class ParserSpecification:
         subparsers_from_name = {}
 
         for field in _fields.field_list_from_callable(
-            f=f, default_instance=default_instance
+            f=f, default_instance=default_instance, root_field=True
         ):
             field = dataclasses.replace(
                 field,
-                typ=type_from_typevar.get(field.typ, field.typ),  # type: ignore
+                typ=_resolver.type_from_typevar_constraints(
+                    type_from_typevar.get(  # type: ignore
+                        field.typ,
+                        field.typ,
+                    )
+                ),
             )
             if isinstance(field.typ, TypeVar):
-                if field.typ.__bound__ is not None:
-                    # Try to infer type from TypeVar bound.
-                    field = dataclasses.replace(field, typ=field.typ.__bound__)
-                elif len(field.typ.__constraints__) > 0:
-                    # Try to infer type from TypeVar constraints.
-                    field = dataclasses.replace(
-                        field, typ=Union.__getitem__(field.typ.__constraints__)  # type: ignore
-                    )
-                else:
-                    # Found an unbound TypeVar. This could be because inheriting from
-                    # generics is currently not implemented. It's unclear whether this is
-                    # feasible, because generics are lost in the mro:
-                    # https://github.com/python/typing/issues/777
-                    raise _instantiators.UnsupportedTypeAnnotationError(
-                        f"Field {field.name} has an unbound TypeVar: {field.typ}. Note"
-                        " that inheriting from generics is currently not implemented."
-                        " It's unclear whether this is feasible, because generics are"
-                        " lost in the mro: https://github.com/python/typing/issues/777"
-                    )
+                # Found an unbound TypeVar. This could be because inheriting from
+                # generics is currently not implemented. It's unclear whether this is
+                # feasible, because generics are lost in the mro:
+                # https://github.com/python/typing/issues/777
+                raise _instantiators.UnsupportedTypeAnnotationError(
+                    f"Field {field.name} has an unbound TypeVar: {field.typ}. Note"
+                    " that inheriting from generics is currently not implemented."
+                    " It's unclear whether this is feasible, because generics are"
+                    " lost in the mro: https://github.com/python/typing/issues/777"
+                )
 
             # (1) Handle Unions over callables; these result in subparsers.
             subparsers_attempt = SubparsersSpecification.from_field(
@@ -199,10 +116,10 @@ class ParserSpecification:
                     continue
                 else:
                     field = dataclasses.replace(field, typ=type(field.default))
-                    assert is_possibly_nested_type(field.typ)
+                    assert _fields.is_possibly_nested_type(field.typ, field.default)
 
             # (2) Handle nested callables.
-            if is_possibly_nested_type(field.typ):
+            if _fields.is_possibly_nested_type(field.typ, field.default):
                 nested_parser = ParserSpecification.from_callable(
                     field.typ,
                     description=None,
@@ -376,7 +293,12 @@ class SubparsersSpecification:
         # We don't use sets here to retain order of subcommands.
         options = [type_from_typevar.get(typ, typ) for typ in get_args(field.typ)]
         options_no_none = [o for o in options if o != type(None)]  # noqa
-        if not all(map(is_possibly_nested_type, options_no_none)):
+        if not all(
+            [
+                _fields.is_possibly_nested_type(o, _fields.MISSING_NONPROP)
+                for o in options_no_none
+            ]
+        ):
             return None
 
         parser_from_name: Dict[str, ParserSpecification] = {}
