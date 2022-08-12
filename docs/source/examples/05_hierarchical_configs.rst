@@ -16,7 +16,6 @@ objects. This helps with modularity and grouping in larger projects.
        import dataclasses
        import enum
        import pathlib
-       from typing import Tuple
        
        import dcargs
        
@@ -41,7 +40,7 @@ objects. This helps with modularity and grouping in larger projects.
        @dataclasses.dataclass
        class ExperimentConfig:
            # Various configurable options for our optimizer.
-           optimizer: Tuple[OptimizerConfig, OptimizerConfig, OptimizerConfig]
+           optimizer: OptimizerConfig
        
            # Batch size.
            batch_size: int = 32

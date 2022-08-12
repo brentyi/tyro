@@ -3,7 +3,18 @@ import copy
 import dataclasses
 import enum
 import pathlib
-from typing import Any, AnyStr, Callable, ClassVar, Dict, List, Optional, TypeVar, Union
+from typing import (
+    Any,
+    AnyStr,
+    Callable,
+    ClassVar,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import pytest
 import torch
@@ -485,6 +496,15 @@ def test_just_dict():
 
 def test_just_list():
     assert dcargs.cli(List[int], args="1 2 3 4".split(" ")) == [1, 2, 3, 4]
+
+
+def test_just_tuple():
+    assert dcargs.cli(Tuple[int, int, int, int], args="1 2 3 4".split(" ")) == (
+        1,
+        2,
+        3,
+        4,
+    )
 
 
 def test_return_parser():

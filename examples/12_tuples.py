@@ -3,17 +3,16 @@
 Usage:
 `python ./12_tuples.py --help`
 `python ./12_tuples.py --color 127 127 127`
-`python ./12_tuples.py --two_colors[1].r 127 --two_colors[1].g 0 --two_colors[1].b 0`
+`python ./12_tuples.py --two_colors:1.r 127 --two_colors:1.g 0 --two_colors:1.b 0`
 """
 
-import dataclasses
 from typing import NamedTuple, Tuple
 
 import dcargs
 
 
-@dataclasses.dataclass
-class Color:
+# Named tuples are interpreted as nested structures.
+class Color(NamedTuple):
     r: int
     g: int
     b: int

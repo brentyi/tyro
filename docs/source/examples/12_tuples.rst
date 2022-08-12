@@ -12,14 +12,13 @@ Example using ``dcargs.cli()`` to instantiate tuple types.
 .. code-block:: python
        :linenos:
 
-       import dataclasses
        from typing import NamedTuple, Tuple
        
        import dcargs
        
        
-       @dataclasses.dataclass
-       class Color:
+       # Named tuples are interpreted as nested structures.
+       class Color(NamedTuple):
            r: int
            g: int
            b: int
@@ -61,6 +60,6 @@ Example using ``dcargs.cli()`` to instantiate tuple types.
 
 .. raw:: html
 
-        <kbd>python 12_tuples.py '--two_colors[1].r' 127 '--two_colors[1].g' 0 '--two_colors[1].b' 0</kbd>
+        <kbd>python 12_tuples.py --two_colors:1.r 127 --two_colors:1.g 0 --two_colors:1.b 0</kbd>
 
-.. program-output:: python ../../examples/12_tuples.py '--two_colors[1].r' 127 '--two_colors[1].g' 0 '--two_colors[1].b' 0
+.. program-output:: python ../../examples/12_tuples.py --two_colors:1.r 127 --two_colors:1.g 0 --two_colors:1.b 0

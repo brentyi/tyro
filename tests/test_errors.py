@@ -68,11 +68,8 @@ def test_nested_annotation():
     def main(arg: List[OneStringArg]) -> List[OneStringArg]:  # type: ignore
         return arg
 
-    assert dcargs.cli(main, args=["--arg", "0", "1", "2"]) == [
-        OneStringArg("0"),
-        OneStringArg("1"),
-        OneStringArg("2"),
-    ]
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=["--arg", "0", "1", "2"])
 
     @dataclasses.dataclass
     class TwoStringArg:

@@ -17,9 +17,8 @@ def make_field_name(parts: Sequence[str]) -> str:
     out: List[str] = []
     for i, p in enumerate([p for p in parts if len(p) > 0]):
         if i > 0:
-            # Delimeter between parts. We use a colon before integers, which can
-            # currently only come from indices! (since field names can't start with
-            # digits)
+            # Delimeter between parts. We use a colon before integers, which are
+            # typically indices.
             out.append(":" if p[0].isdigit() else ".")
 
         out.append(p)
