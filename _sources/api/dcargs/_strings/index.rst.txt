@@ -14,10 +14,13 @@
 Module Contents
 ---------------
 
-.. py:data:: NESTED_FIELD_DELIMETER
-   :annotation: :str = .
+.. py:function:: make_field_name(parts: Sequence[str]) -> str
 
    
+   Join parts of a field name together. Used for nesting.
+
+   ('parent', 'child') => 'parent.child'
+   ('parents', '1', 'child') => 'parents:1.child'
 
 .. py:data:: SUBPARSER_DEST_FMT
    :annotation: :str = {name} (positional)

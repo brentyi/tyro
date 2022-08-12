@@ -166,18 +166,19 @@
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">1. Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../02_dataclasses/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_flags/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../05_hierarchical configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../06_base configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../07_literals and unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_hierarchical_configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_base_configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_literals_and_unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_positional_args/">8. Positional Args</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10_multiple_subparsers/">10. Multiple Subparsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../11_dictionaries/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../12_named tuples/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../13_standard classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../15_nesting_in_containers/">15. Nesting In Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -227,24 +228,33 @@
 <h1>1. Functions<a class="headerlink" href="#functions" title="Permalink to this heading">#</a></h1>
 <p>In the simplest case, <code class="docutils literal notranslate"><span class="pre">dcargs.cli()</span></code> can be used to run a function with arguments
 populated from the CLI.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dcargs</span>
-<span class="linenos"> 2</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span>In the simplest case, `dcargs.cli()` can be used to run a function with arguments
+<span class="linenos"> 2</span>populated from the CLI.
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
-<span class="linenos"> 5</span>    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="linenos"> 6</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-<span class="linenos"> 7</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 8</span>    <span class="sd">&quot;&quot;&quot;Function, whose arguments will be populated from a CLI interface.</span>
+<span class="linenos"> 4</span>Usage:
+<span class="linenos"> 5</span>`python ./01_functions.py --help`
+<span class="linenos"> 6</span>`python ./01_functions.py --field1 hello`
+<span class="linenos"> 7</span>`python ./01_functions.py --field1 hello --field2 10`
+<span class="linenos"> 8</span>&quot;&quot;&quot;
 <span class="linenos"> 9</span>
-<span class="linenos">10</span><span class="sd">    Args:</span>
-<span class="linenos">11</span><span class="sd">        field1: A string field.</span>
-<span class="linenos">12</span><span class="sd">        field2: A numeric field, with a default value.</span>
-<span class="linenos">13</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">14</span>    <span class="nb">print</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">)</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span>
-<span class="linenos">17</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">18</span>    <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+<span class="linenos">10</span>import dcargs
+<span class="linenos">11</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>def main(
+<span class="linenos">14</span>    field1: str,
+<span class="linenos">15</span>    field2: int = 3,
+<span class="linenos">16</span>) -&gt; None:
+<span class="linenos">17</span>    &quot;&quot;&quot;Function, whose arguments will be populated from a CLI interface.
+<span class="linenos">18</span>
+<span class="linenos">19</span>    Args:
+<span class="linenos">20</span>        field1: A string field.
+<span class="linenos">21</span>        field2: A numeric field, with a default value.
+<span class="linenos">22</span>    &quot;&quot;&quot;
+<span class="linenos">23</span>    print(field1, field2)
+<span class="linenos">24</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span>if __name__ == &quot;__main__&quot;:
+<span class="linenos">27</span>    dcargs.cli(main)
 </pre></div>
 </div>
 <hr class="docutils" />

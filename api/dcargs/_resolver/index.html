@@ -166,18 +166,19 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/01_functions/">1. Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_dataclasses/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_flags/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals and unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base_configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals_and_unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional_args/">8. Positional Args</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple_subparsers/">10. Multiple Subparsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/11_dictionaries/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_named tuples/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -303,6 +304,21 @@ class, and a mapping from typevars to concrete types.</p>
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="dcargs._resolver.type_from_typevar_constraints">
+<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">type_from_typevar_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TypeVar</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">TypeVar</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#type_from_typevar_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.type_from_typevar_constraints" title="Permalink to this definition">#</a></dt>
+<dd><p>Try to concretize a type from a TypeVar’s bounds or constraints. Identity if
+unsuccessful.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>typ</strong> (<em>Union</em><em>[</em><em>Type</em><em>, </em><em>TypeVar</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Union[Type, TypeVar]</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -358,6 +374,7 @@ class, and a mapping from typevars to concrete types.</p>
 <li><a class="reference internal" href="#dcargs._resolver.resolve_generic_types">resolve_generic_types</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.resolved_fields">resolved_fields</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.is_namedtuple">is_namedtuple</a></li>
+<li><a class="reference internal" href="#dcargs._resolver.type_from_typevar_constraints">type_from_typevar_constraints</a></li>
 </ul>
 </li>
 </ul>

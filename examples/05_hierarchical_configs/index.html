@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="6. Base Configs" href="../06_base configs/" /><link rel="prev" title="4. Flags" href="../04_flags/" />
+<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="6. Base Configs" href="../06_base_configs/" /><link rel="prev" title="4. Flags" href="../04_flags/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>5. Hierarchical Configs - dcargs</title>
@@ -166,18 +166,19 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_functions/">1. Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../02_dataclasses/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_flags/">4. Flags</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../06_base configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../07_literals and unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_base_configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_literals_and_unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_positional_args/">8. Positional Args</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10_multiple_subparsers/">10. Multiple Subparsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../11_dictionaries/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../12_named tuples/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../13_standard classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../15_nesting_in_containers/">15. Nesting In Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -239,7 +240,7 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">10</span>    <span class="n">SGD</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">13</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">14</span><span class="k">class</span> <span class="nc">OptimizerConfig</span><span class="p">:</span>
 <span class="linenos">15</span>    <span class="c1"># Gradient-based optimizer to use.</span>
 <span class="linenos">16</span>    <span class="n">algorithm</span><span class="p">:</span> <span class="n">OptimizerType</span> <span class="o">=</span> <span class="n">OptimizerType</span><span class="o">.</span><span class="n">ADAM</span>
@@ -251,7 +252,7 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">22</span>    <span class="n">weight_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span>
 <span class="linenos">23</span>
 <span class="linenos">24</span>
-<span class="linenos">25</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">25</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">26</span><span class="k">class</span> <span class="nc">ExperimentConfig</span><span class="p">:</span>
 <span class="linenos">27</span>    <span class="c1"># Various configurable options for our optimizer.</span>
 <span class="linenos">28</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">OptimizerConfig</span>
@@ -282,12 +283,14 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">53</span><span class="sd">        checkpoint_interval: Training steps between each checkpoint save.</span>
 <span class="linenos">54</span><span class="sd">    &quot;&quot;&quot;</span>
 <span class="linenos">55</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">out_dir</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">restore_checkpoint</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">checkpoint_interval</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">56</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">57</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dcargs</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
-<span class="linenos">58</span>
-<span class="linenos">59</span>
-<span class="linenos">60</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">61</span>    <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="linenos">56</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos">57</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">58</span>    <span class="nb">print</span><span class="p">()</span>
+<span class="linenos">59</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dcargs</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
+<span class="linenos">60</span>
+<span class="linenos">61</span>
+<span class="linenos">62</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">63</span>    <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -336,7 +339,9 @@ Train a model.
                         experiments are all reproducible! <span class="ansi-dark">(default: 0)</span></pre>
 <hr class="docutils" />
 <kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
+
 config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
+
 # dcargs YAML.
 !dataclass:ExperimentConfig
 batch_size: 32
@@ -348,7 +353,9 @@ seed: 0
 train_steps: 100000</pre>
 <hr class="docutils" />
 <kbd>python 05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
+
 config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
+
 # dcargs YAML.
 !dataclass:ExperimentConfig
 batch_size: 32
@@ -365,7 +372,7 @@ train_steps: 100000</pre>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../06_base configs/">
+          <a class="next-page" href="../06_base_configs/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>

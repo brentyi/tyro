@@ -165,18 +165,19 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/01_functions/">1. Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_dataclasses/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_flags/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals and unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base_configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals_and_unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional_args/">8. Positional Args</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple_subparsers/">10. Multiple Subparsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/11_dictionaries/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_named tuples/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -227,27 +228,12 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Any</span><span class="p">,</span>
-    <span class="n">Callable</span><span class="p">,</span>
-    <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">Hashable</span><span class="p">,</span>
-    <span class="n">List</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
-    <span class="n">Set</span><span class="p">,</span>
-    <span class="n">Type</span><span class="p">,</span>
-    <span class="n">TypeVar</span><span class="p">,</span>
-    <span class="n">Union</span><span class="p">,</span>
-    <span class="n">cast</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">import</span> <span class="nn">termcolor</span>
-<span class="kn">import</span> <span class="nn">typing_extensions</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_argparse_formatter</span><span class="p">,</span>
@@ -260,59 +246,6 @@
 <span class="p">)</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
-
-
-<span class="n">_known_parsable_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-    <span class="nb">filter</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">),</span>  <span class="c1"># type: ignore</span>
-        <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
-            <span class="n">__builtins__</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
-            <span class="nb">vars</span><span class="p">(</span><span class="n">typing_extensions</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
-            <span class="nb">vars</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
-        <span class="p">),</span>
-    <span class="p">)</span>
-<span class="p">)</span>
-
-
-<div class="viewcode-block" id="is_possibly_nested_type"><a class="viewcode-back" href="../../../api/dcargs/_parsers/#dcargs._parsers.is_possibly_nested_type">[docs]</a><span class="k">def</span> <span class="nf">is_possibly_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Heuristics for determining whether a type can be treated as a &#39;nested type&#39;,</span>
-<span class="sd">    where a single field has multiple corresponding arguments (eg for nested</span>
-<span class="sd">    dataclasses or classes).</span>
-
-<span class="sd">    Examples of when we return False: int, str, List[int], List[str], pathlib.Path, etc.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-
-    <span class="c1"># Nested types should be callable.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="c1"># Known parsable types: builtins like int/str/float/bool, collections, annotations.</span>
-    <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_known_parsable_types</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="c1"># Simple heuristic: dataclasses should be treated as nested objects and are not</span>
-    <span class="c1"># parsable.</span>
-    <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="c1"># TypedDict types can be unpacked.</span>
-    <span class="k">if</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
-        <span class="k">return</span> <span class="kc">True</span>
-
-    <span class="c1"># Nested types like nested (data)classes should have fully type-annotated inputs. If</span>
-    <span class="c1"># any inputs are unannotated (for example, in the case of pathlib.Path), we can</span>
-    <span class="c1"># assume the type is not nested.</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">sig</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span>
-
-    <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="ParserSpecification"><a class="viewcode-back" href="../../../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -365,39 +298,35 @@
         <span class="n">subparsers_from_name</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
-            <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span>
+            <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">root_field</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">):</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                 <span class="n">field</span><span class="p">,</span>
-                <span class="n">typ</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">),</span>  <span class="c1"># type: ignore</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">_resolver</span><span class="o">.</span><span class="n">type_from_typevar_constraints</span><span class="p">(</span>
+                    <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                        <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
+                        <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">),</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="o">.</span><span class="n">__bound__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="c1"># Try to infer type from TypeVar bound.</span>
-                    <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="o">.</span><span class="n">__bound__</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="o">.</span><span class="n">__constraints__</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="c1"># Try to infer type from TypeVar constraints.</span>
-                    <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                        <span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="o">.</span><span class="n">__constraints__</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="c1"># Found an unbound TypeVar. This could be because inheriting from</span>
-                    <span class="c1"># generics is currently not implemented. It&#39;s unclear whether this is</span>
-                    <span class="c1"># feasible, because generics are lost in the mro:</span>
-                    <span class="c1"># https://github.com/python/typing/issues/777</span>
-                    <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Note&quot;</span>
-                        <span class="s2">&quot; that inheriting from generics is currently not implemented.&quot;</span>
-                        <span class="s2">&quot; It&#39;s unclear whether this is feasible, because generics are&quot;</span>
-                        <span class="s2">&quot; lost in the mro: https://github.com/python/typing/issues/777&quot;</span>
-                    <span class="p">)</span>
+                <span class="c1"># Found an unbound TypeVar. This could be because inheriting from</span>
+                <span class="c1"># generics is currently not implemented. It&#39;s unclear whether this is</span>
+                <span class="c1"># feasible, because generics are lost in the mro:</span>
+                <span class="c1"># https://github.com/python/typing/issues/777</span>
+                <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Note&quot;</span>
+                    <span class="s2">&quot; that inheriting from generics is currently not implemented.&quot;</span>
+                    <span class="s2">&quot; It&#39;s unclear whether this is feasible, because generics are&quot;</span>
+                    <span class="s2">&quot; lost in the mro: https://github.com/python/typing/issues/777&quot;</span>
+                <span class="p">)</span>
 
             <span class="c1"># (1) Handle Unions over callables; these result in subparsers.</span>
             <span class="n">subparsers_attempt</span> <span class="o">=</span> <span class="n">SubparsersSpecification</span><span class="o">.</span><span class="n">from_field</span><span class="p">(</span>
                 <span class="n">field</span><span class="p">,</span>
                 <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">NESTED_FIELD_DELIMETER</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
                 <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">subparsers_attempt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -413,24 +342,24 @@
                     <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
-                    <span class="k">assert</span> <span class="n">is_possibly_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">)</span>
+                    <span class="k">assert</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
 
             <span class="c1"># (2) Handle nested callables.</span>
-            <span class="k">if</span> <span class="n">is_possibly_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
                 <span class="n">nested_parser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
                     <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
                     <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                     <span class="n">parent_type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
                     <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                    <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">NESTED_FIELD_DELIMETER</span><span class="p">,</span>
+                    <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
                     <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
 
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
-                        <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">NESTED_FIELD_DELIMETER</span> <span class="o">+</span> <span class="n">k</span>
+                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
                 <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -499,11 +428,10 @@
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">prefix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_prefix</span><span class="p">:</span>
-                <span class="n">nested_field_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
                 <span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
-                    <span class="n">format_group_name</span><span class="p">(</span><span class="n">nested_field_name</span><span class="p">),</span>
+                    <span class="n">format_group_name</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">),</span>
                     <span class="n">description</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                        <span class="n">nested_field_name</span>
+                        <span class="n">arg</span><span class="o">.</span><span class="n">prefix</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">])</span>
@@ -522,8 +450,14 @@
                 <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prev_subparser_tree_nodes</span><span class="p">:</span>
                     <span class="c1"># Add subparsers to every node in previous level of the tree.</span>
                     <span class="n">argparse_subparsers</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
-                        <span class="n">dest</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span>
-                        <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">SUBPARSER_DEST_FMT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">subparsers</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                        <span class="n">dest</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
+                            <span class="p">[</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
+                                <span class="n">_strings</span><span class="o">.</span><span class="n">SUBPARSER_DEST_FMT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">name</span><span class="o">=</span><span class="n">subparsers</span><span class="o">.</span><span class="n">name</span>
+                                <span class="p">),</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
                         <span class="n">description</span><span class="o">=</span><span class="n">subparsers</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
                         <span class="n">required</span><span class="o">=</span><span class="n">subparsers</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
                         <span class="n">title</span><span class="o">=</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">]),</span>
@@ -585,7 +519,12 @@
         <span class="c1"># We don&#39;t use sets here to retain order of subcommands.</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">type_from_typevar</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span> <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">)]</span>
         <span class="n">options_no_none</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="n">o</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span>  <span class="c1"># noqa</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">is_possibly_nested_type</span><span class="p">,</span> <span class="n">options_no_none</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options_no_none</span>
+            <span class="p">]</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>

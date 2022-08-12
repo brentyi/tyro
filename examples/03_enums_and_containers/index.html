@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="14. Generics" href="../14_generics/" /><link rel="prev" title="12. Named Tuples" href="../12_named tuples/" />
+<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="4. Flags" href="../04_flags/" /><link rel="prev" title="2. Dataclasses" href="../02_dataclasses/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>13. Standard Classes - dcargs</title>
+        <title>3. Enums And Containers - dcargs</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -166,18 +166,19 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_functions/">1. Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../02_dataclasses/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_flags/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../05_hierarchical configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../06_base configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../07_literals and unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_hierarchical_configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_base_configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_literals_and_unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_positional_args/">8. Positional Args</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10_multiple_subparsers/">10. Multiple Subparsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../11_dictionaries/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../12_named tuples/">12. Named Tuples</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../15_nesting_in_containers/">15. Nesting In Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -223,47 +224,72 @@
           </label>
         </div>
         <article role="main">
-          <section id="standard-classes">
-<h1>13. Standard Classes<a class="headerlink" href="#standard-classes" title="Permalink to this heading">#</a></h1>
-<p>In addition to functions and dataclasses, we can also generate CLIs from (the
-constructors of) standard Python classes.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dcargs</span>
-<span class="linenos"> 2</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 5</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-<span class="linenos"> 6</span>        <span class="bp">self</span><span class="p">,</span>
-<span class="linenos"> 7</span>        <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="linenos"> 8</span>        <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="linenos"> 9</span>        <span class="n">flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="linenos">10</span>    <span class="p">):</span>
-<span class="linenos">11</span>        <span class="sd">&quot;&quot;&quot;Arguments.</span>
+          <section id="enums-and-containers">
+<h1>3. Enums And Containers<a class="headerlink" href="#enums-and-containers" title="Permalink to this heading">#</a></h1>
+<p>We can generate argument parsers from more advanced type annotations, like enums and
+container types.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">enum</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">dcargs</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">OptimizerType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="linenos">10</span>    <span class="n">ADAM</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+<span class="linenos">11</span>    <span class="n">SGD</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span><span class="sd">        Args:</span>
-<span class="linenos">14</span><span class="sd">            field1: A string field.</span>
-<span class="linenos">15</span><span class="sd">            field2: A numeric field.</span>
-<span class="linenos">16</span><span class="sd">            flag: A boolean flag.</span>
-<span class="linenos">17</span><span class="sd">        &quot;&quot;&quot;</span>
-<span class="linenos">18</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">,</span> <span class="n">flag</span><span class="p">]</span>
-<span class="linenos">19</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">15</span><span class="k">class</span> <span class="nc">TrainConfig</span><span class="p">:</span>
+<span class="linenos">16</span>    <span class="c1"># Example of a variable-length tuple. `typing.List`, `typing.Sequence`,</span>
+<span class="linenos">17</span>    <span class="c1"># `typing.Set`, `typing.Dict`, etc are all supported as well.</span>
+<span class="linenos">18</span>    <span class="n">dataset_sources</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="linenos">19</span>    <span class="sd">&quot;&quot;&quot;Paths to load training data from. This can be multiple!&quot;&quot;&quot;</span>
 <span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">22</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
-<span class="linenos">23</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="linenos">21</span>    <span class="c1"># Fixed-length tuples are also okay.</span>
+<span class="linenos">22</span>    <span class="n">image_dimensions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="linenos">23</span>    <span class="sd">&quot;&quot;&quot;Height and width of some image data.&quot;&quot;&quot;</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>    <span class="c1"># Enums are handled seamlessly.</span>
+<span class="linenos">26</span>    <span class="n">optimizer_type</span><span class="p">:</span> <span class="n">OptimizerType</span> <span class="o">=</span> <span class="n">OptimizerType</span><span class="o">.</span><span class="n">ADAM</span>
+<span class="linenos">27</span>    <span class="sd">&quot;&quot;&quot;Gradient-based optimizer to use.&quot;&quot;&quot;</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="c1"># We can also explicitly mark arguments as optional.</span>
+<span class="linenos">30</span>    <span class="n">checkpoint_interval</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="linenos">31</span>    <span class="sd">&quot;&quot;&quot;Interval to save checkpoints at.&quot;&quot;&quot;</span>
+<span class="linenos">32</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">35</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">TrainConfig</span><span class="p">)</span>
+<span class="linenos">36</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 13_standard_classes.py --help</kbd><pre class="ansi-block literal-block">usage: 13_standard_classes.py [-h] --field1 <span class="ansi-bold">STR</span> --field2 <span class="ansi-bold">INT</span> [--flag]
-
-Arguments.
+<kbd>python 03_enums_and_containers.py --help</kbd><pre class="ansi-block literal-block">usage: 03_enums_and_containers.py [-h] --dataset-sources <span class="ansi-bold">PATH</span> [<span class="ansi-bold">PATH</span> ...]
+                                  [--image-dimensions <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>]
+                                  [--optimizer-type {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}]
+                                  [--checkpoint-interval {<span class="ansi-bold">None</span>}|<span class="ansi-bold">INT</span>]
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help    show this help message and exit
-  --field1 <span class="ansi-bold">STR</span>  A string field. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --field2 <span class="ansi-bold">INT</span>  A numeric field. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --flag        A boolean flag. <span class="ansi-dark">(sets: flag=True)</span></pre>
+  -h, --help            show this help message and exit
+  --dataset-sources <span class="ansi-bold">PATH</span> [<span class="ansi-bold">PATH</span> ...]
+                        Paths to load training data from. This can be
+                        multiple! <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --image-dimensions <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>
+                        Height and width of some image data. <span class="ansi-dark">(default: 32
+                        32)</span>
+  --optimizer-type {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}
+                        Gradient-based optimizer to use. <span class="ansi-dark">(default:
+                        ADAM)</span>
+  --checkpoint-interval {<span class="ansi-bold">None</span>}|<span class="ansi-bold">INT</span>
+                        Interval to save checkpoints at. <span class="ansi-dark">(default:
+                        None)</span></pre>
 <hr class="docutils" />
-<kbd>python 13_standard_classes.py --field1 hello --field2 7</kbd><pre class="ansi-block literal-block">['hello', 7, False]</pre>
+<kbd>python 03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(16, 16), optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, checkpoint_interval=None)</pre>
+<hr class="docutils" />
+<kbd>python 03_enums_and_containers.py --dataset-sources ./data --optimizer-type SGD</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(32, 32), optimizer_type=&lt;OptimizerType.SGD: 2&gt;, checkpoint_interval=None)</pre>
 </section>
 
         </article>
@@ -271,23 +297,23 @@ Arguments.
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../14_generics/">
+          <a class="next-page" href="../04_flags/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">14. Generics</div>
+                <div class="title">4. Flags</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../12_named tuples/">
+          <a class="prev-page" href="../02_dataclasses/">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">12. Named Tuples</div>
+                <div class="title">2. Dataclasses</div>
                 
               </div>
             </a>

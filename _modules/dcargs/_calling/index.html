@@ -165,18 +165,19 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/01_functions/">1. Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_dataclasses/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_flags/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals and unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base_configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals_and_unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional_args/">8. Positional Args</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple_subparsers/">10. Multiple Subparsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/11_dictionaries/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_named tuples/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -228,7 +229,7 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
@@ -257,7 +258,7 @@
 
     <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-    <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">consumed_keywords</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
@@ -269,11 +270,17 @@
 
     <span class="n">arg_from_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
-        <span class="n">arg_from_prefixed_field_name</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
+        <span class="n">arg_from_prefixed_field_name</span><span class="p">[</span>
+            <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
 
-    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+        <span class="n">root_field</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">):</span>  <span class="c1"># type: ignore</span>
         <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
-        <span class="n">prefixed_field_name</span> <span class="o">=</span> <span class="n">field_name_prefix</span> <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">prefixed_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field_name_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
 
         <span class="c1"># Resolve field type.</span>
         <span class="n">field_type</span> <span class="o">=</span> <span class="p">(</span>
@@ -328,7 +335,7 @@
                 <span class="n">parser_definition</span><span class="p">,</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
-                <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">NESTED_FIELD_DELIMETER</span><span class="p">,</span>
+                <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>
                 <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
@@ -381,8 +388,7 @@
                     <span class="p">],</span>
                     <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="n">chosen_f</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
-                    <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span>
-                    <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">NESTED_FIELD_DELIMETER</span><span class="p">,</span>
+                    <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>
                     <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
@@ -393,7 +399,20 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">kwargs</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="k">return</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span></div>
+    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">is</span> <span class="n">Sequence</span> <span class="k">else</span> <span class="n">unwrapped_f</span>  <span class="c1"># type: ignore</span>
+    <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># When tuples are used as nested structures (eg Tuple[SomeDataclass]), we</span>
+            <span class="c1"># use keyword arguments.</span>
+            <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># When tuples are directly parsed (eg Tuple[int, int]), we end up with a</span>
+            <span class="c1"># single set of positional arguments.</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span></div>
 </pre></div>
         </article>
       </div>

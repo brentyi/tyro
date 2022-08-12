@@ -165,18 +165,19 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/01_functions/">1. Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_dataclasses/">2. Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums and containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_flags/">4. Flags</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals and unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional args/">8. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base_configs/">6. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals_and_unions/">7. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional_args/">8. Positional Args</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple_subparsers/">10. Multiple Subparsers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/11_dictionaries/">11. Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_named tuples/">12. Named Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -230,7 +231,7 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">tokenize</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="kn">import</span> <span class="nn">docstring_parser</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
@@ -442,7 +443,10 @@
             <span class="k">break</span>
 
         <span class="c1"># Record single comments!</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">actual_line_tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">actual_line_tokens</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="ow">and</span> <span class="n">actual_line_tokens</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">token_type</span> <span class="ow">is</span> <span class="n">tokenize</span><span class="o">.</span><span class="n">COMMENT</span>
+        <span class="p">):</span>
             <span class="p">(</span><span class="n">comment_token</span><span class="p">,)</span> <span class="o">=</span> <span class="n">actual_line_tokens</span>
             <span class="k">assert</span> <span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
             <span class="n">comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
@@ -458,6 +462,14 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
+<span class="n">_builtins</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+    <span class="nb">filter</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">),</span>  <span class="c1"># type: ignore</span>
+        <span class="n">__builtins__</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
 <div class="viewcode-block" id="get_callable_description"><a class="viewcode-back" href="../../../api/dcargs/_docstrings/#dcargs._docstrings.get_callable_description">[docs]</a><span class="k">def</span> <span class="nf">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get description associated with a callable via docstring parsing.</span>
 
@@ -465,6 +477,9 @@
 <span class="sd">    the fields of the class if a docstring is not specified; this helper will ignore</span>
 <span class="sd">    these docstrings.&quot;&quot;&quot;</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">_unused</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_builtins</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
     <span class="c1"># Note inspect.getdoc() causes some corner cases with TypedDicts.</span>
     <span class="n">docstring</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__doc__</span>

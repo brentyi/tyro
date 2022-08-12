@@ -43,3 +43,9 @@ Module Contents
 .. py:function:: is_namedtuple(cls: Type) -> bool
 
 
+.. py:function:: type_from_typevar_constraints(typ: Union[Type, TypeVar]) -> Union[Type, TypeVar]
+
+   
+   Try to concretize a type from a TypeVar's bounds or constraints. Identity if
+   unsuccessful.
+
