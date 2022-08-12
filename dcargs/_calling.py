@@ -48,7 +48,11 @@ def call_from_args(
             _strings.make_field_name([arg.prefix, arg.field.name])
         ] = arg
 
-    for field in _fields.field_list_from_callable(f, default_instance=default_instance):  # type: ignore
+    for field in _fields.field_list_from_callable(
+        f,
+        default_instance=default_instance,
+        root_field=True,
+    ):  # type: ignore
         value: Any
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
 

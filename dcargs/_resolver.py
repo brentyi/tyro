@@ -64,3 +64,16 @@ def is_namedtuple(cls: Type) -> bool:
         # and hasattr(cls, "_field_types")
         and hasattr(cls, "_field_defaults")
     )
+
+
+def type_from_typevar_constraints(typ: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
+    """Try to concretize a type from a TypeVar's bounds or constraints. Identity if
+    unsuccessful."""
+    if isinstance(typ, TypeVar):
+        if typ.__bound__ is not None:
+            # Try to infer type from TypeVar bound.
+            return typ.__bound__
+        elif len(typ.__constraints__) > 0:
+            # Try to infer type from TypeVar constraints.
+            return Union.__getitem__(typ.__constraints__)  # type: ignore
+    return typ
