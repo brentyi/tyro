@@ -9,13 +9,12 @@ Our core interface, :func:`dcargs.cli()`, generates argument parsers from
 type-annotated callables: functions, classes, dataclasses, and *nested*
 dataclasses and classes.
 
-This can be used as a drop-in replacement for :code:`argparse`:
-
+This can be used as a replacement for :code:`argparse`:
 
 
 .. code-block::
 
-      # With argparse.
+      """Sum two numbers with argparse."""
 
       import argparse
 
@@ -29,7 +28,7 @@ This can be used as a drop-in replacement for :code:`argparse`:
 
 .. code-block::
 
-      # With dcargs.
+      """Sum two numbers by calling a function with dcargs."""
 
       import dcargs
 
@@ -38,6 +37,22 @@ This can be used as a drop-in replacement for :code:`argparse`:
 
       dcargs.cli(main)
 
+
+.. code-block::
+
+      """Sum two numbers by instantiating a dataclass with dcargs."""
+
+      from dataclasses import dataclass
+
+      import dcargs
+
+      @dataclass
+      class Args:
+          a: int
+          b: int = 3
+
+      args = dcargs.cli(Args)
+      print(args.a + args.b)
 
 
 The broader goal is also a replacement for tools like :code:`hydra`,

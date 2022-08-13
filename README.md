@@ -24,11 +24,11 @@
 
 <p align="">
     Our core interface, <code>dcargs.cli()</code>, generates argument parsers from type-annotated
-    <br />callables: functions, classes, dataclasses, and <em>nested</em> dataclasses and classes.
+    <br />callables: functions, dataclasses, classes, and <em>nested</em> dataclasses and classes.
 </p>
 
 <p align="">
-    This can be used as a drop-in replacement for <code>argparse</code>:
+    This can be used as a replacement for <code>argparse</code>:
 </p>
 
 <table align="">
@@ -36,13 +36,13 @@
     <td><strong>with argparse</strong></td>
     <td><strong>with dcargs</strong></td>
 </tr>
-
 <tr>
 <td>
 
 ```python
-import argparse
+"""Sum two numbers from argparse."""
 
+import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--a",
@@ -63,12 +63,34 @@ print(args.a + args.b)
 <td>
 
 ```python
+"""Sum two numbers by calling a
+function with dcargs."""
+
 import dcargs
 
 def main(a: int, b: int = 3) -> None:
     print(a + b)
 
 dcargs.cli(main)
+```
+
+---
+
+```python
+"""Sum two numbers by instantiating
+a dataclass with dcargs."""
+
+from dataclasses import dataclass
+
+import dcargs
+
+@dataclass
+class Args:
+    a: int
+    b: int = 3
+
+args = dcargs.cli(Args)
+print(args.a + args.b)
 ```
 
 </td>

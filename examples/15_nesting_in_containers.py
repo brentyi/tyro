@@ -37,7 +37,7 @@ class Args:
     color_tuple: Tuple[RGB, HSL]
 
     # Examples of nested structures in variable-length containers. These need a default
-    # provided for length inference -- we don't currently support specifying dynamic
+    # provided for length inference; we don't currently support specifying dynamic
     # container lengths directly from the commandline.
     color_tuple_alt: Tuple[Color, ...] = (
         RGB(255, 0, 0),
