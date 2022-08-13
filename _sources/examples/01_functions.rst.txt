@@ -13,15 +13,6 @@ populated from the CLI.
 .. code-block:: python
        :linenos:
 
-       In the simplest case, `dcargs.cli()` can be used to run a function with arguments
-       populated from the CLI.
-       
-       Usage:
-       `python ./01_functions.py --help`
-       `python ./01_functions.py --field1 hello`
-       `python ./01_functions.py --field1 hello --field2 10`
-       """
-       
        import dcargs
        
        

@@ -259,14 +259,14 @@ parsing default values.</p>
 <span class="linenos">28</span>    <span class="n">color_tuple</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">RGB</span><span class="p">,</span> <span class="n">HSL</span><span class="p">]</span>
 <span class="linenos">29</span>
 <span class="linenos">30</span>    <span class="c1"># Examples of nested structures in variable-length containers. These need a default</span>
-<span class="linenos">31</span>    <span class="c1"># provided for length inference -- we don&#39;t currently support specifying dynamic</span>
+<span class="linenos">31</span>    <span class="c1"># provided for length inference; we don&#39;t currently support specifying dynamic</span>
 <span class="linenos">32</span>    <span class="c1"># container lengths directly from the commandline.</span>
 <span class="linenos">33</span>    <span class="n">color_tuple_alt</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
 <span class="linenos">34</span>        <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 <span class="linenos">35</span>        <span class="n">HSL</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 <span class="linenos">36</span>    <span class="p">)</span>
 <span class="linenos">37</span>    <span class="n">color_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
-<span class="linenos">38</span>        <span class="c1"># Note that we can&#39;t use mutable values as defaults directly.</span>
+<span class="linenos">38</span>        <span class="c1"># We can&#39;t use mutable values as defaults directly.</span>
 <span class="linenos">39</span>        <span class="n">default_factory</span><span class="o">=</span><span class="p">{</span>
 <span class="linenos">40</span>            <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 <span class="linenos">41</span>            <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>

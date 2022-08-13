@@ -45,14 +45,14 @@ parsing default values.
            color_tuple: Tuple[RGB, HSL]
        
            # Examples of nested structures in variable-length containers. These need a default
-           # provided for length inference -- we don't currently support specifying dynamic
+           # provided for length inference; we don't currently support specifying dynamic
            # container lengths directly from the commandline.
            color_tuple_alt: Tuple[Color, ...] = (
                RGB(255, 0, 0),
                HSL(0, 255, 0),
            )
            color_map: Dict[str, RGB] = dataclasses.field(
-               # Note that we can't use mutable values as defaults directly.
+               # We can't use mutable values as defaults directly.
                default_factory={
                    "red": RGB(255, 0, 0),
                    "green": RGB(0, 255, 0),
