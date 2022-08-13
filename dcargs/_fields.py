@@ -402,9 +402,7 @@ def _field_list_from_sequence(
     for i, default_i in enumerate(default_instance):  # type: ignore
         field_list.append(
             FieldDefinition(
-                # We'd use an index operator h
                 name=str(i),
-                # This will currently break for generics...!
                 typ=contained_type
                 if contained_type not in MISSING_SINGLETONS
                 else type(default_i),
@@ -429,7 +427,6 @@ def _field_list_from_dict(
         field_list.append(
             FieldDefinition(
                 name=str(k),
-                # TODO: this will fail for generic types.
                 typ=type(v),
                 default=v,
                 helptext=None,
