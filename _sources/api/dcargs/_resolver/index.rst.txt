@@ -49,3 +49,14 @@ Module Contents
    Try to concretize a type from a TypeVar's bounds or constraints. Identity if
    unsuccessful.
 
+.. py:data:: TypeT
+   
+
+   
+
+.. py:function:: narrow_type(typ: TypeT, default_instance: Any) -> TypeT
+
+   
+   Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
+   should parse as Cat.
+

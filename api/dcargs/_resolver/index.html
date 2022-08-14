@@ -319,6 +319,29 @@ unsuccessful.</p>
 </dl>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="dcargs._resolver.TypeT">
+<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">TypeT</span></span><a class="headerlink" href="#dcargs._resolver.TypeT" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dcargs._resolver.narrow_type">
+<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeT</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#narrow_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.narrow_type" title="Permalink to this definition">#</a></dt>
+<dd><p>Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
+should parse as Cat.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typ</strong> (<em>TypeT</em>) – </p></li>
+<li><p><strong>default_instance</strong> (<em>Any</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>TypeT</p>
+</dd>
+</dl>
+</dd></dl>
+
 </section>
 </section>
 
@@ -375,6 +398,8 @@ unsuccessful.</p>
 <li><a class="reference internal" href="#dcargs._resolver.resolved_fields">resolved_fields</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.is_namedtuple">is_namedtuple</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.type_from_typevar_constraints">type_from_typevar_constraints</a></li>
+<li><a class="reference internal" href="#dcargs._resolver.TypeT">TypeT</a></li>
+<li><a class="reference internal" href="#dcargs._resolver.narrow_type">narrow_type</a></li>
 </ul>
 </li>
 </ul>

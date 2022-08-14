@@ -228,7 +228,7 @@
 
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_type_hints</span>
 
@@ -302,6 +302,24 @@
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__constraints__</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Try to infer type from TypeVar constraints.</span>
             <span class="k">return</span> <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__constraints__</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+    <span class="k">return</span> <span class="n">typ</span></div>
+
+
+<span class="c1"># Be a little bit permissive with types here, since we often blur the lines between</span>
+<span class="c1"># Callable[..., T] and Type[T]... this could be cleaned up!</span>
+<span class="n">TypeT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeT&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="narrow_type"><a class="viewcode-back" href="../../../api/dcargs/_resolver/#dcargs._resolver.narrow_type">[docs]</a><span class="k">def</span> <span class="nf">narrow_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeT</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat, we</span>
+<span class="sd">    should parse as Cat.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">potential_subclass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
+        <span class="n">superclass</span> <span class="o">=</span> <span class="n">typ</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">potential_subclass</span><span class="p">,</span> <span class="n">superclass</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeT</span><span class="p">,</span> <span class="n">potential_subclass</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">pass</span>
     <span class="k">return</span> <span class="n">typ</span></div>
 </pre></div>
         </article>

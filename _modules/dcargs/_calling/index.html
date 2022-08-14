@@ -256,6 +256,7 @@
 
 <span class="sd">    Returns the output of `f` and a set of used arguments.&quot;&quot;&quot;</span>
 
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>

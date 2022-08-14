@@ -371,19 +371,8 @@
 <span class="sd">    dcargs.cli(); the logic can likely be refactored.&quot;&quot;&quot;</span>
 
     <span class="c1"># Unwrap generics.</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-
-    <span class="c1"># Type narrowing: if we annotate as Animal but specify a default instance of Cat, we</span>
-    <span class="c1"># should parse as Cat.</span>
-    <span class="c1">#</span>
-    <span class="c1"># TODO: this will not currently handle generics correctly. We should write tests for</span>
-    <span class="c1"># this.</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">potential_subclass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">potential_subclass</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">)):</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">potential_subclass</span>  <span class="c1"># type: ignore</span>
-    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-        <span class="k">pass</span>
 
     <span class="c1"># If `f` is a type:</span>
     <span class="c1">#     1. Set cls to the type.</span>
@@ -629,9 +618,7 @@
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
-                <span class="n">typ</span><span class="o">=</span><span class="n">contained_type</span>
-                <span class="k">if</span> <span class="n">contained_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
-                <span class="k">else</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_i</span><span class="p">),</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">contained_type</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="n">positional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
