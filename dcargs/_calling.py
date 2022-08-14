@@ -119,6 +119,8 @@ def call_from_args(
             assert len(parser_definition.subparsers_from_name) > 0
             assert field.name in parser_definition.subparsers_from_name
 
+            subparser_def = parser_definition.subparsers_from_name[field.name]
+
             subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
                 name=prefixed_field_name
             )
@@ -126,25 +128,23 @@ def call_from_args(
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = get_value_from_arg(subparser_dest)
             else:
-                default_instance = parser_definition.subparsers_from_name[
-                    field.name
-                ].default_instance
-                assert default_instance is not None
+                default_instance = subparser_def.default_instance
+                # assert default_instance is not None
                 subparser_name = None
+
             if subparser_name is None:
-                # No subparser selected -- this should only happen when we do either
-                # Optional[Union[A, B, ...]] or Union[A, B, None], or have a
+                # No subparser selected -- this should only happen when we have a
                 # default/default_factory set.
                 assert (
                     type(None) in get_args(field_type)
-                    or parser_definition.subparsers_from_name[
-                        field.name
-                    ].default_instance
-                    is not None
+                    or subparser_def.default_instance is not None
                 )
-                value = parser_definition.subparsers_from_name[
-                    field.name
-                ].default_instance
+                value = subparser_def.default_instance
+            elif subparser_def.can_be_none and subparser_name == "None":
+                # do either
+                # Optional[Union[A, B, ...]] or Union[A, B, None], or have a
+                # default/default_factory set.
+                value = None
             else:
                 options = map(
                     lambda x: x if x not in type_from_typevar else type_from_typevar[x],
@@ -158,9 +158,7 @@ def call_from_args(
                 assert chosen_f is not None
                 value, consumed_keywords_child = call_from_args(
                     chosen_f,
-                    parser_definition.subparsers_from_name[field.name].parser_from_name[
-                        subparser_name
-                    ],
+                    subparser_def.parser_from_name[subparser_name],
                     field.default if type(field.default) is chosen_f else None,
                     value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name,

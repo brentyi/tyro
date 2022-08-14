@@ -216,57 +216,9 @@ class ParserSpecification:
         if len(self.subparsers_from_name) > 0:
             prev_subparser_tree_nodes = [parser]  # Root node.
             for subparsers in self.subparsers_from_name.values():
-                title = "subcommands"
-                metavar = "{" + ",".join(subparsers.parser_from_name.keys()) + "}"
-                if not subparsers.required:
-                    title = "optional " + title
-                    metavar = f"[{metavar}]"
-
-                subparser_tree_nodes = []
-                for p in prev_subparser_tree_nodes:
-                    # Add subparsers to every node in previous level of the tree.
-                    argparse_subparsers = p.add_subparsers(
-                        dest=_strings.make_field_name(
-                            [
-                                self.prefix,
-                                _strings.SUBPARSER_DEST_FMT.format(
-                                    name=subparsers.name
-                                ),
-                            ]
-                        ),
-                        description=subparsers.description,
-                        required=subparsers.required,
-                        title=termcolor.colored(title, attrs=["bold"]),
-                        metavar=metavar,
-                    )
-                    for name, subparser_def in subparsers.parser_from_name.items():
-                        subparser = argparse_subparsers.add_parser(
-                            name,
-                            formatter_class=_argparse_formatter.ArgparseHelpFormatter,
-                        )
-                        subparser_def.apply(subparser)
-
-                        def _get_leaf_subparsers(
-                            node: argparse.ArgumentParser,
-                        ) -> List[argparse.ArgumentParser]:
-                            if node._subparsers is None:
-                                return [node]
-                            else:
-                                # Magic!
-                                return list(
-                                    itertools.chain(
-                                        *map(
-                                            _get_leaf_subparsers,
-                                            node._subparsers._actions[
-                                                -1
-                                            ]._name_parser_map.values(),  # type: ignore
-                                        )
-                                    )
-                                )
-
-                        subparser_tree_nodes.extend(_get_leaf_subparsers(subparser))
-
-                prev_subparser_tree_nodes = subparser_tree_nodes
+                prev_subparser_tree_nodes = subparsers.apply(
+                    self, prev_subparser_tree_nodes
+                )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -303,6 +255,7 @@ class SubparsersSpecification:
         ):
             return None
 
+        # Add subparser for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:
             subparser_name = _strings.subparser_name_from_type(option)
@@ -311,19 +264,18 @@ class SubparsersSpecification:
                 description=None,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
+                # Only pass default in if it corresponds to this open.
+                # TODO: this will break for generics!
                 default_instance=field.default
-                if isinstance(field.default, _resolver.unwrap_origin(option))
-                else None,
+                if isinstance(field.default, _resolver.unwrap_origin(option))  # type: ignore
+                else _fields.MISSING_NONPROP,
                 prefix=prefix,
                 avoid_subparsers=avoid_subparsers,
             )
 
         # Optional if: type hint is Optional[], or a default instance is provided.
         required = True
-        can_be_none = options != options_no_none  # Optional[] type.
-        if can_be_none:
-            required = False
-        elif field.default not in _fields.MISSING_SINGLETONS:
+        if field.default not in _fields.MISSING_SINGLETONS:
             required = False
 
         # If there are any required arguments in the default subparser, we should mark
@@ -350,7 +302,9 @@ class SubparsersSpecification:
         if field.helptext is not None:
             description_parts.append(field.helptext)
         if not required and field.default not in _fields.MISSING_SINGLETONS:
-            default = _strings.subparser_name_from_type(type(field.default))
+            default = field.default
+            if default is not None:
+                default = _strings.subparser_name_from_type(type(default))
             description_parts.append(f" (default: {default})")
         description = (
             # We use `None` instead of an empty string to prevent a line break from
@@ -368,8 +322,78 @@ class SubparsersSpecification:
             description=description,
             parser_from_name=parser_from_name,
             required=required,
-            default_instance=field.default
-            if field.default not in _fields.MISSING_SINGLETONS
-            else None,
-            can_be_none=can_be_none,
+            default_instance=field.default,
+            # if field.default not in _fields.MISSING_SINGLETONS
+            # else None,
+            can_be_none=options != options_no_none,
         )
+
+    def apply(
+        self,
+        parent_parser: ParserSpecification,
+        prev_subparser_tree_nodes: List[argparse.ArgumentParser],
+    ) -> List[argparse.ArgumentParser]:
+        title = "subcommands"
+        metavar = (
+            "{"
+            + ",".join(
+                (("None",) if self.can_be_none else ())
+                + tuple(self.parser_from_name.keys())
+            )
+            + "}"
+        )
+        if not self.required:
+            title = "optional " + title
+            metavar = f"[{metavar}]"
+
+        subparser_tree_nodes: List[argparse.ArgumentParser] = []
+        for p in prev_subparser_tree_nodes:
+            # Add subparsers to every node in previous level of the tree.
+            argparse_subparsers = p.add_subparsers(
+                dest=_strings.make_field_name(
+                    [
+                        parent_parser.prefix,
+                        _strings.SUBPARSER_DEST_FMT.format(name=self.name),
+                    ]
+                ),
+                description=self.description,
+                required=self.required,
+                title=termcolor.colored(title, attrs=["bold"]),
+                metavar=metavar,
+            )
+
+            if self.can_be_none:
+                subparser = argparse_subparsers.add_parser(
+                    name="None",
+                    formatter_class=_argparse_formatter.ArgparseHelpFormatter,
+                )
+                subparser_tree_nodes.append(subparser)
+
+            for name, subparser_def in self.parser_from_name.items():
+                subparser = argparse_subparsers.add_parser(
+                    name,
+                    formatter_class=_argparse_formatter.ArgparseHelpFormatter,
+                )
+                subparser_def.apply(subparser)
+
+                def _get_leaf_subparsers(
+                    node: argparse.ArgumentParser,
+                ) -> List[argparse.ArgumentParser]:
+                    if node._subparsers is None:
+                        return [node]
+                    else:
+                        # Magic!
+                        return list(
+                            itertools.chain(
+                                *map(
+                                    _get_leaf_subparsers,
+                                    node._subparsers._actions[
+                                        -1
+                                    ]._name_parser_map.values(),  # type: ignore
+                                )
+                            )
+                        )
+
+                subparser_tree_nodes.extend(_get_leaf_subparsers(subparser))
+
+        return subparser_tree_nodes
