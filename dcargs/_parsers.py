@@ -48,6 +48,7 @@ class ParserSpecification:
 
         # Resolve generic types.
         f, type_from_typevar = _resolver.resolve_generic_types(f)
+        f = _resolver.narrow_type(f, default_instance)
         if parent_type_from_typevar is not None:
             for typevar, typ in type_from_typevar.items():
                 if typ in parent_type_from_typevar:
@@ -120,6 +121,9 @@ class ParserSpecification:
 
             # (2) Handle nested callables.
             if _fields.is_nested_type(field.typ, field.default):
+                field = dataclasses.replace(
+                    field, typ=_resolver.narrow_type(field.typ, field.default)
+                )
                 nested_parser = ParserSpecification.from_callable(
                     field.typ,
                     description=None,
@@ -141,9 +145,7 @@ class ParserSpecification:
                 else:
                     helptext_from_nested_class_field_name[
                         field.name
-                    ] = _docstrings.get_callable_description(
-                        _resolver.resolve_generic_types(field.typ)[0]
-                    )
+                    ] = _docstrings.get_callable_description(field.typ)
                 continue
 
             # (3) Handle primitive types. These produce a single argument!

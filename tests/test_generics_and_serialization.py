@@ -347,3 +347,26 @@ def test_serialize_missing():
         ).xyz[0]
         is dcargs.MISSING
     )
+
+
+def test_generic_inherited_type_narrowing():
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class ActualParentClass(Generic[T]):
+        x: T  # Documentation 1
+
+        # Documentation 2
+        y: T
+
+        z: T = 3  # type: ignore
+        """Documentation 3"""
+
+    @dataclasses.dataclass
+    class ChildClass(ActualParentClass[int]):
+        a: int = 7
+
+    def main(x: ActualParentClass[int] = ChildClass(5, 5)) -> ActualParentClass:
+        return x
+
+    assert dcargs.cli(main, args="--x.x 3".split(" ")) == ChildClass(3, 5, 3)

@@ -146,18 +146,7 @@ def field_list_from_callable(
 
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
-
-    # Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
-    # should parse as Cat.
-    #
-    # TODO: this will not currently handle generics correctly. We should write tests for
-    # this.
-    try:
-        potential_subclass = type(default_instance)
-        if issubclass(potential_subclass, cast(Type, f)):
-            f = potential_subclass  # type: ignore
-    except TypeError:
-        pass
+    f = _resolver.narrow_type(f, default_instance)
 
     # If `f` is a type:
     #     1. Set cls to the type.
@@ -403,9 +392,7 @@ def _field_list_from_sequence(
         field_list.append(
             FieldDefinition(
                 name=str(i),
-                typ=contained_type
-                if contained_type not in MISSING_SINGLETONS
-                else type(default_i),
+                typ=contained_type,
                 default=default_i,
                 helptext="",
                 positional=False,

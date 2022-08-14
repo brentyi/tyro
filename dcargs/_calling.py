@@ -31,6 +31,7 @@ def call_from_args(
     Returns the output of `f` and a set of used arguments."""
 
     f, type_from_typevar = _resolver.resolve_generic_types(f)
+    f = _resolver.narrow_type(f, default_instance)
 
     args: List[Any] = []
     kwargs: Dict[str, Any] = {}
