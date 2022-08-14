@@ -31,7 +31,7 @@ class Commit:
     all: bool = False
 
 
-def main(cmd: Union[Checkout, Commit]) -> None:
+def main(cmd: Union[Checkout, Commit] = Checkout(dcargs.MISSING)) -> None:
     print(cmd)
 
 

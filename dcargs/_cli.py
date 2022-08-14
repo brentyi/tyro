@@ -193,7 +193,10 @@ def _cli_impl(
         print(e.args[0])
         raise SystemExit()
 
-    assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0
+    assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (
+        f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
+        f" {consumed_keywords}"
+    )
     if _return_stage == "f_out":
         return out
 

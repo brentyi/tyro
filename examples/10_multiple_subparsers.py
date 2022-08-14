@@ -46,8 +46,8 @@ class SgdOptimizer:
 
 
 def train(
-    dataset: Union[MnistDataset, ImageNetDataset] = MnistDataset(),
-    optimizer: Union[AdamOptimizer, SgdOptimizer] = AdamOptimizer(),
+    dataset: Union[MnistDataset, ImageNetDataset, None],  # = MnistDataset(),
+    optimizer: Union[AdamOptimizer, SgdOptimizer, None],  # = AdamOptimizer(),
 ) -> None:
     """Example training script.
 

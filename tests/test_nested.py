@@ -113,7 +113,7 @@ def test_optional_nested():
     @dataclasses.dataclass
     class OptionalNested:
         x: int
-        b: Optional[OptionalNestedChild]
+        b: Optional[OptionalNestedChild] = None
 
     assert dcargs.cli(OptionalNested, args=["--x", "1"]) == OptionalNested(x=1, b=None)
     with pytest.raises(SystemExit):
@@ -343,9 +343,9 @@ def test_optional_subparser():
     assert dcargs.cli(
         OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--bc.z", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalSMTPServer(z=3))
-    assert dcargs.cli(OptionalSubparser, args=["--x", "1"]) == OptionalSubparser(
-        x=1, bc=None
-    )
+    assert dcargs.cli(
+        OptionalSubparser, args=["--x", "1", "None"]
+    ) == OptionalSubparser(x=1, bc=None)
 
     with pytest.raises(SystemExit):
         # Wrong field.
