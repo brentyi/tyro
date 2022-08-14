@@ -2,7 +2,7 @@
 
 import copy
 import dataclasses
-from typing import Callable, Dict, List, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, List, Tuple, Type, TypeVar, Union, cast
 
 from typing_extensions import get_args, get_origin, get_type_hints
 
@@ -76,4 +76,22 @@ def type_from_typevar_constraints(typ: Union[Type, TypeVar]) -> Union[Type, Type
         elif len(typ.__constraints__) > 0:
             # Try to infer type from TypeVar constraints.
             return Union.__getitem__(typ.__constraints__)  # type: ignore
+    return typ
+
+
+# Be a little bit permissive with types here, since we often blur the lines between
+# Callable[..., T] and Type[T]... this could be cleaned up!
+TypeT = TypeVar("TypeT", bound=Callable)
+
+
+def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
+    """Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
+    should parse as Cat."""
+    try:
+        potential_subclass = type(default_instance)
+        superclass = typ
+        if issubclass(potential_subclass, superclass):  # type: ignore
+            return cast(TypeT, potential_subclass)
+    except TypeError:
+        pass
     return typ

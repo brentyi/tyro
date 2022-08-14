@@ -4,7 +4,7 @@ import enum
 import io
 import pathlib
 from collections.abc import Callable
-from typing import Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
+from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 import pytest
 from typing_extensions import Literal
@@ -80,6 +80,39 @@ def test_helptext_inherited():
     helptext = _get_helptext(ChildClass)
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
+
+
+def test_helptext_inherited_default_override():
+    @dataclasses.dataclass
+    class ParentClass:
+        """This docstring should __not__ be printed as a description."""
+
+        x: int  # Documentation 1
+
+        # Documentation 2
+        y: int
+
+        # fmt: off
+
+        z: int = 3
+        def some_method(self) -> None:  # noqa
+            """Coverage stress test."""
+        # fmt: on
+
+    @dataclasses.dataclass
+    class ChildClass(ParentClass):
+        """This docstring should be printed as a description."""
+
+        pass
+
+    def main(x: ParentClass = ChildClass(x=5, y=5)) -> Any:
+        return x
+
+    helptext = _get_helptext(main)
+    assert "Documentation 1" in helptext
+    assert "Documentation 2" in helptext
+    assert "__not__" not in helptext
+    assert "should be printed" in helptext
 
 
 def test_helptext_nested():
