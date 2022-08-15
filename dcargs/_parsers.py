@@ -72,9 +72,10 @@ class ParserSpecification:
         helptext_from_nested_class_field_name = {}
         subparsers_from_name = {}
 
-        for field in _fields.field_list_from_callable(
+        field_list = _fields.field_list_from_callable(
             f=f, default_instance=default_instance, root_field=True
-        ):
+        )
+        for field in field_list:
             field = dataclasses.replace(
                 field,
                 typ=_resolver.type_from_typevar_constraints(
@@ -265,10 +266,8 @@ class SubparsersSpecification:
                 description=None,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
-                # Only pass default in if it corresponds to this option.
-                # TODO: this will break for generics!
                 default_instance=field.default
-                if isinstance(field.default, _resolver.unwrap_origin(option))  # type: ignore
+                if type(field.default) == _resolver.unwrap_origin(option)  # type: ignore
                 else _fields.MISSING_NONPROP,
                 prefix=prefix,
                 avoid_subparsers=avoid_subparsers,
@@ -285,6 +284,13 @@ class SubparsersSpecification:
             field.default is not None
             and field.default not in _fields.MISSING_SINGLETONS
         ):
+            # It's really hard to concretize a generic type at runtime, so we just...
+            # don't. :-)
+            if hasattr(type(field.default), "__parameters__"):
+                raise _instantiators.UnsupportedTypeAnnotationError(
+                    "Default values for generic subparsers are not supported."
+                )
+
             default_parser = parser_from_name[
                 _strings.subparser_name_from_type(prefix, type(field.default))
             ]

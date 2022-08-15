@@ -35,7 +35,7 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
            all: bool = False
        
        
-       def main(cmd: Union[Checkout, Commit]) -> None:
+       def main(cmd: Union[Checkout, Commit, None]) -> None:
            print(cmd)
        
        
@@ -54,30 +54,30 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
 
 .. raw:: html
 
-        <kbd>python 09_subparsers.py commit --help</kbd>
+        <kbd>python 09_subparsers.py cmd:commit --help</kbd>
 
-.. program-output:: python ../../examples/09_subparsers.py commit --help
-
-------------
-
-.. raw:: html
-
-        <kbd>python 09_subparsers.py commit --cmd.message hello --cmd.all</kbd>
-
-.. program-output:: python ../../examples/09_subparsers.py commit --cmd.message hello --cmd.all
+.. program-output:: python ../../examples/09_subparsers.py cmd:commit --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 09_subparsers.py checkout --help</kbd>
+        <kbd>python 09_subparsers.py cmd:commit --cmd.message hello --cmd.all</kbd>
 
-.. program-output:: python ../../examples/09_subparsers.py checkout --help
+.. program-output:: python ../../examples/09_subparsers.py cmd:commit --cmd.message hello --cmd.all
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 09_subparsers.py checkout --cmd.branch main</kbd>
+        <kbd>python 09_subparsers.py cmd:checkout --help</kbd>
 
-.. program-output:: python ../../examples/09_subparsers.py checkout --cmd.branch main
+.. program-output:: python ../../examples/09_subparsers.py cmd:checkout --help
+
+------------
+
+.. raw:: html
+
+        <kbd>python 09_subparsers.py cmd:checkout --cmd.branch main</kbd>
+
+.. program-output:: python ../../examples/09_subparsers.py cmd:checkout --cmd.branch main

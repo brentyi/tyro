@@ -77,6 +77,8 @@ class ExcludeFromCallType(_Singleton):
 # nonpropagating missing sentinel, which does not override child defaults.
 MISSING_PROP = PropagatingMissingType()
 MISSING_NONPROP = NonpropagatingMissingType()
+
+# When total=False in a TypedDict, we exclude fields from the constructor by default.
 EXCLUDE_FROM_CALL = ExcludeFromCallType()
 
 # Note that our "public" missing API will always be the propagating missing sentinel.
@@ -102,7 +104,9 @@ except ImportError:
 
 T = TypeVar("T")
 
-DefaultInstanceT = Union[T, PropagatingMissingType, NonpropagatingMissingType]
+DefaultInstanceT = Union[
+    T, PropagatingMissingType, NonpropagatingMissingType, ExcludeFromCallType
+]
 
 _known_parsable_types = set(
     filter(
@@ -324,7 +328,11 @@ def _field_list_from_tuple(
             assert isinstance(default_instance, tuple)
             children = tuple(type(x) for x in default_instance)
 
-    if default_instance in MISSING_SINGLETONS:
+    if (
+        default_instance in MISSING_SINGLETONS
+        # EXCLUDE_FROM_CALL indicates we're inside a TypedDict, with total=False.
+        or default_instance is EXCLUDE_FROM_CALL
+    ):
         default_instance = (default_instance,) * len(children)
 
     for i, child in enumerate(children):

@@ -1,4 +1,5 @@
 import contextlib
+import dataclasses
 import io
 import pathlib
 from typing import Any, Dict, Mapping, NamedTuple, Tuple, Union, cast
@@ -112,6 +113,47 @@ def test_total_false_nested_typeddict():
             )
             == {}
         )
+
+
+def test_total_false_typeddict_with_nested():
+    @dataclasses.dataclass
+    class Inner:
+        j: float
+
+    class ManyTypesTypedDict(TypedDict, total=False):
+        i: int
+        s: Inner
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(
+            ManyTypesTypedDict,
+            args="".split(" "),
+        )
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(
+            ManyTypesTypedDict,
+            args="--x.i 5 --x.s 5 5".split(" "),
+        )
+
+
+def test_total_false_typeddict_with_tuple():
+    class ManyTypesTypedDict(TypedDict, total=False):
+        i: int
+        s: Tuple[str, str]
+
+    assert (
+        dcargs.cli(
+            ManyTypesTypedDict,
+            args=[],
+        )
+        == dict()
+    )
+
+    assert dcargs.cli(
+        ManyTypesTypedDict,
+        args="--i 5 --s 5 5".split(" "),
+    ) == dict(i=5, s=("5", "5"))
 
 
 def test_nested_typeddict():
