@@ -118,16 +118,16 @@ def test_optional_nested():
     assert dcargs.cli(OptionalNested, args=["--x", "1"]) == OptionalNested(x=1, b=None)
     with pytest.raises(SystemExit):
         dcargs.cli(
-            OptionalNested, args=["--x", "1", "optional-nested-child", "--b.y", "3"]
+            OptionalNested, args=["--x", "1", "b:optional-nested-child", "--b.y", "3"]
         )
     with pytest.raises(SystemExit):
         dcargs.cli(
-            OptionalNested, args=["--x", "1", "optional-nested-child", "--b.z", "3"]
+            OptionalNested, args=["--x", "1", "b:optional-nested-child", "--b.z", "3"]
         )
 
     assert dcargs.cli(
         OptionalNested,
-        args=["--x", "1", "optional-nested-child", "--b.y", "2", "--b.z", "3"],
+        args=["--x", "1", "b:optional-nested-child", "--b.y", "2", "--b.z", "3"],
     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
 
 
@@ -146,10 +146,10 @@ def test_subparser():
         bc: Union[HTTPServer, SMTPServer]
 
     assert dcargs.cli(
-        Subparser, args=["--x", "1", "http-server", "--bc.y", "3"]
+        Subparser, args=["--x", "1", "bc:http-server", "--bc.y", "3"]
     ) == Subparser(x=1, bc=HTTPServer(y=3))
     assert dcargs.cli(
-        Subparser, args=["--x", "1", "smtp-server", "--bc.z", "3"]
+        Subparser, args=["--x", "1", "bc:smtp-server", "--bc.z", "3"]
     ) == Subparser(x=1, bc=SMTPServer(z=3))
 
     with pytest.raises(SystemExit):
@@ -157,10 +157,10 @@ def test_subparser():
         dcargs.cli(Subparser, args=["--x", "1"])
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.cli(Subparser, args=["--x", "1", "http-server", "--bc.z", "3"])
+        dcargs.cli(Subparser, args=["--x", "1", "bc:http-server", "--bc.z", "3"])
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.cli(Subparser, args=["--x", "1", "smtp-server", "--bc.y", "3"])
+        dcargs.cli(Subparser, args=["--x", "1", "bc:smtp-server", "--bc.y", "3"])
 
 
 def test_subparser_with_default():
@@ -181,17 +181,17 @@ def test_subparser_with_default():
 
     assert (
         dcargs.cli(
-            DefaultSubparser, args=["--x", "1", "default-http-server", "--bc.y", "5"]
+            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "5"]
         )
         == dcargs.cli(DefaultSubparser, args=["--x", "1"])
         == DefaultSubparser(x=1, bc=DefaultHTTPServer(y=5))
     )
     assert dcargs.cli(
-        DefaultSubparser, args=["--x", "1", "default-smtp-server", "--bc.z", "3"]
+        DefaultSubparser, args=["--x", "1", "bc:default-smtp-server", "--bc.z", "3"]
     ) == DefaultSubparser(x=1, bc=DefaultSMTPServer(z=3))
     assert (
         dcargs.cli(
-            DefaultSubparser, args=["--x", "1", "default-http-server", "--bc.y", "8"]
+            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "8"]
         )
         == dcargs.cli(
             DefaultSubparser,
@@ -224,7 +224,7 @@ def test_subparser_with_default_instance():
     assert (
         dcargs.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "default-instance-http-server", "--bc.y", "5"],
+            args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "5"],
         )
         == dcargs.cli(
             DefaultInstanceSubparser,
@@ -235,7 +235,7 @@ def test_subparser_with_default_instance():
         )
         == dcargs.cli(
             DefaultInstanceSubparser,
-            args=["default-instance-http-server"],
+            args=["bc:default-instance-http-server"],
             default_instance=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=5)
             ),
@@ -244,7 +244,7 @@ def test_subparser_with_default_instance():
     )
     assert dcargs.cli(
         DefaultInstanceSubparser,
-        args=["default-instance-smtp-server", "--bc.z", "3"],
+        args=["bc:default-instance-smtp-server", "--bc.z", "3"],
         default_instance=DefaultInstanceSubparser(
             x=1, bc=DefaultInstanceHTTPServer(y=5)
         ),
@@ -252,7 +252,7 @@ def test_subparser_with_default_instance():
     assert (
         dcargs.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "default-instance-http-server", "--bc.y", "8"],
+            args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "8"],
         )
         == dcargs.cli(
             DefaultInstanceSubparser,
@@ -287,7 +287,7 @@ def test_avoid_subparser_with_default_instance():
     assert (
         dcargs.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "default-instance-http-server", "--bc.y", "5"],
+            args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "5"],
         )
         == dcargs.cli(
             DefaultInstanceSubparser,
@@ -301,7 +301,7 @@ def test_avoid_subparser_with_default_instance():
     )
     assert dcargs.cli(
         DefaultInstanceSubparser,
-        args=["default-instance-smtp-server", "--bc.z", "3"],
+        args=["bc:default-instance-smtp-server", "--bc.z", "3"],
         default_instance=DefaultInstanceSubparser(
             x=1, bc=DefaultInstanceHTTPServer(y=5)
         ),
@@ -309,7 +309,7 @@ def test_avoid_subparser_with_default_instance():
     assert (
         dcargs.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "default-instance-http-server", "--bc.y", "8"],
+            args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "8"],
         )
         == dcargs.cli(
             DefaultInstanceSubparser,
@@ -338,24 +338,26 @@ def test_optional_subparser():
         bc: Optional[Union[OptionalHTTPServer, OptionalSMTPServer]]
 
     assert dcargs.cli(
-        OptionalSubparser, args=["--x", "1", "optional-http-server", "--bc.y", "3"]
+        OptionalSubparser, args=["--x", "1", "bc:optional-http-server", "--bc.y", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalHTTPServer(y=3))
     assert dcargs.cli(
-        OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--bc.z", "3"]
+        OptionalSubparser, args=["--x", "1", "bc:optional-smtp-server", "--bc.z", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalSMTPServer(z=3))
     assert dcargs.cli(
-        OptionalSubparser, args=["--x", "1", "None"]
+        OptionalSubparser, args=["--x", "1", "bc:None"]
     ) == OptionalSubparser(x=1, bc=None)
 
     with pytest.raises(SystemExit):
         # Wrong field.
         dcargs.cli(
-            OptionalSubparser, args=["--x", "1", "optional-http-server", "--bc.z", "3"]
+            OptionalSubparser,
+            args=["--x", "1", "bc:optional-http-server", "--bc.z", "3"],
         )
     with pytest.raises(SystemExit):
         # Wrong field.
         dcargs.cli(
-            OptionalSubparser, args=["--x", "1", "optional-smtp-server", "--bc.y", "3"]
+            OptionalSubparser,
+            args=["--x", "1", "bc:optional-smtp-server", "--bc.y", "3"],
         )
 
 
@@ -410,22 +412,28 @@ def test_multiple_subparsers():
         dcargs.cli(MultipleSubparsers, args=[])
 
     assert dcargs.cli(
-        MultipleSubparsers, args="subcommand1 subcommand2 subcommand3".split(" ")
+        MultipleSubparsers, args="a:subcommand1 b:subcommand2 c:subcommand3".split(" ")
     ) == MultipleSubparsers(Subcommand1(), Subcommand2(), Subcommand3())
 
     assert dcargs.cli(
         MultipleSubparsers,
-        args="subcommand1 --a.x 5 subcommand2 --b.y 7 subcommand3 --c.z 3".split(" "),
+        args="a:subcommand1 --a.x 5 b:subcommand2 --b.y 7 c:subcommand3 --c.z 3".split(
+            " "
+        ),
     ) == MultipleSubparsers(Subcommand1(x=5), Subcommand2(y=7), Subcommand3(z=3))
 
     assert dcargs.cli(
         MultipleSubparsers,
-        args="subcommand2 --a.y 5 subcommand1 --b.x 7 subcommand3 --c.z 3".split(" "),
+        args="a:subcommand2 --a.y 5 b:subcommand1 --b.x 7 c:subcommand3 --c.z 3".split(
+            " "
+        ),
     ) == MultipleSubparsers(Subcommand2(y=5), Subcommand1(x=7), Subcommand3(z=3))
 
     assert dcargs.cli(
         MultipleSubparsers,
-        args="subcommand3 --a.z 5 subcommand1 --b.x 7 subcommand3 --c.z 3".split(" "),
+        args="a:subcommand3 --a.z 5 b:subcommand1 --b.x 7 c:subcommand3 --c.z 3".split(
+            " "
+        ),
     ) == MultipleSubparsers(Subcommand3(z=5), Subcommand1(x=7), Subcommand3(z=3))
 
 
@@ -456,12 +464,12 @@ def test_multiple_subparsers_with_default():
 
     assert dcargs.cli(
         MultipleSubparsers,
-        args=["subcommand1", "--a.x", "5"],
+        args=["a:subcommand1", "--a.x", "5"],
     ) == MultipleSubparsers(Subcommand1(x=5), Subcommand2(y=7), Subcommand3(z=3))
 
     assert dcargs.cli(
         MultipleSubparsers,
-        args="subcommand1 --a.x 3".split(" "),
+        args="a:subcommand1 --a.x 3".split(" "),
     ) == MultipleSubparsers(Subcommand1(x=3), Subcommand2(y=7), Subcommand3(z=3))
 
     with pytest.raises(SystemExit):
@@ -478,7 +486,7 @@ def test_multiple_subparsers_with_default():
         dcargs.cli(
             MultipleSubparsers,
             args=[
-                "subcommand1",
+                "a:subcommand1",
             ],
             default_instance=MultipleSubparsers(
                 Subcommand1(),
@@ -489,7 +497,7 @@ def test_multiple_subparsers_with_default():
     with pytest.raises(SystemExit):
         dcargs.cli(
             MultipleSubparsers,
-            args=["subcommand1", "subcommand2"],
+            args=["a:subcommand1", "b:subcommand2"],
             default_instance=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
@@ -499,7 +507,7 @@ def test_multiple_subparsers_with_default():
     with pytest.raises(SystemExit):
         dcargs.cli(
             MultipleSubparsers,
-            args=["subcommand1", "subcommand2", "subcommand3"],
+            args=["a:subcommand1", "b:subcommand2", "c:subcommand3"],
             default_instance=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
@@ -508,7 +516,7 @@ def test_multiple_subparsers_with_default():
         )
     assert dcargs.cli(
         MultipleSubparsers,
-        args=["subcommand1", "subcommand2", "subcommand3", "--c.z", "3"],
+        args=["a:subcommand1", "b:subcommand2", "c:subcommand3", "--c.z", "3"],
         default_instance=MultipleSubparsers(
             Subcommand1(),
             Subcommand2(),
@@ -517,7 +525,7 @@ def test_multiple_subparsers_with_default():
     ) == MultipleSubparsers(Subcommand1(x=0), Subcommand2(y=1), Subcommand3(z=3))
     assert dcargs.cli(
         MultipleSubparsers,
-        args=["subcommand1", "subcommand2", "subcommand2"],
+        args=["a:subcommand1", "b:subcommand2", "c:subcommand2"],
         default_instance=MultipleSubparsers(
             Subcommand1(),
             Subcommand2(),
@@ -546,19 +554,19 @@ def test_nested_subparsers_with_default():
     with pytest.raises(SystemExit):
         dcargs.cli(MultipleSubparsers, args=[])
     with pytest.raises(SystemExit):
-        dcargs.cli(MultipleSubparsers, args=["subcommand2"])
+        dcargs.cli(MultipleSubparsers, args=["a:subcommand2"])
 
     assert dcargs.cli(
-        MultipleSubparsers, args="subcommand1 --a.x 3".split(" ")
+        MultipleSubparsers, args="a:subcommand1 --a.x 3".split(" ")
     ) == MultipleSubparsers(Subcommand1(3))
     assert dcargs.cli(
-        MultipleSubparsers, args="subcommand2 subcommand3 --a.y.z 2".split(" ")
+        MultipleSubparsers, args="a:subcommand2 a.y:subcommand3 --a.y.z 2".split(" ")
     ) == MultipleSubparsers(Subcommand2(Subcommand3()))
     assert dcargs.cli(
-        MultipleSubparsers, args="subcommand2 subcommand3 --a.y.z 7".split(" ")
+        MultipleSubparsers, args="a:subcommand2 a.y:subcommand3 --a.y.z 7".split(" ")
     ) == MultipleSubparsers(Subcommand2(Subcommand3(7)))
     assert dcargs.cli(
-        MultipleSubparsers, args="subcommand2 subcommand1 --a.y.x 7".split(" ")
+        MultipleSubparsers, args="a:subcommand2 a.y:subcommand1 --a.y.x 7".split(" ")
     ) == MultipleSubparsers(Subcommand2(Subcommand1(7)))
 
 
@@ -583,21 +591,21 @@ def test_nested_subparsers_multiple():
     with pytest.raises(SystemExit):
         dcargs.cli(MultipleSubparsers, args=[])
     assert dcargs.cli(
-        MultipleSubparsers, args="subcommand1 subcommand1".split(" ")
+        MultipleSubparsers, args="a:subcommand1 b:subcommand1".split(" ")
     ) == MultipleSubparsers(Subcommand1(), Subcommand1())
     assert dcargs.cli(
-        MultipleSubparsers, args="subcommand1 subcommand2 subcommand1".split(" ")
+        MultipleSubparsers,
+        args="a:subcommand1 b:subcommand2 b.y:subcommand1".split(" "),
     ) == MultipleSubparsers(Subcommand1(), Subcommand2(Subcommand1()))
     assert dcargs.cli(
         MultipleSubparsers,
-        args="subcommand2 subcommand1 subcommand2 subcommand1".split(" "),
+        args="a:subcommand2 a.y:subcommand1 b:subcommand2 b.y:subcommand1".split(" "),
     ) == MultipleSubparsers(Subcommand2(Subcommand1()), Subcommand2(Subcommand1()))
     assert dcargs.cli(
         MultipleSubparsers,
         args=(
-            "subcommand2 subcommand1 --a.y.x 3 subcommand2 subcommand1 --b.y.x 7".split(
-                " "
-            )
+            "a:subcommand2 a.y:subcommand1 --a.y.x 3 b:subcommand2 b.y:subcommand1"
+            " --b.y.x 7".split(" ")
         ),
     ) == MultipleSubparsers(Subcommand2(Subcommand1(3)), Subcommand2(Subcommand1(7)))
 
@@ -621,7 +629,7 @@ def test_tuple_nesting():
     assert dcargs.cli(
         main,
         args=(
-            "--x:0:0.r 255 --x:0:0.g 0 --x:0:0.b 0 --x:1.x 5.0 --x:1.y 0.0"
-            " --x:1.z 2.0 --x:2 4.0".split(" ")
+            "--x.0.0.r 255 --x.0.0.g 0 --x.0.0.b 0 --x.1.x 5.0 --x.1.y 0.0"
+            " --x.1.z 2.0 --x.2 4.0".split(" ")
         ),
     ) == ((Color(255, 0, 0),), Location(5.0, 0.0, 2.0), 4.0)

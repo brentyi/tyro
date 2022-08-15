@@ -2,10 +2,10 @@
 
 Usage:
 `python ./09_subparsers.py --help`
-`python ./09_subparsers.py commit --help`
-`python ./09_subparsers.py commit --cmd.message hello --cmd.all`
-`python ./09_subparsers.py checkout --help`
-`python ./09_subparsers.py checkout --cmd.branch main`
+`python ./09_subparsers.py cmd:commit --help`
+`python ./09_subparsers.py cmd:commit --cmd.message hello --cmd.all`
+`python ./09_subparsers.py cmd:checkout --help`
+`python ./09_subparsers.py cmd:checkout --cmd.branch main`
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ class Commit:
     all: bool = False
 
 
-def main(cmd: Union[Checkout, Commit] = Checkout(dcargs.MISSING)) -> None:
+def main(cmd: Union[Checkout, Commit, None]) -> None:
     print(cmd)
 
 

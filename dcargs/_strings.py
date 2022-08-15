@@ -3,7 +3,7 @@
 import functools
 import re
 import textwrap
-from typing import List, Sequence, Type
+from typing import List, Sequence, Type, Union
 
 from . import _resolver
 
@@ -17,9 +17,7 @@ def make_field_name(parts: Sequence[str]) -> str:
     out: List[str] = []
     for i, p in enumerate([p for p in parts if len(p) > 0]):
         if i > 0:
-            # Delimeter between parts. We use a colon before integers, which are
-            # typically indices.
-            out.append(":" if p[0].isdigit() else ".")
+            out.append(".")
 
         out.append(p)
 
@@ -46,7 +44,7 @@ def hyphen_separated_from_camel_case(name: str) -> str:
     return _camel_separator_pattern().sub(r"-\1", name).lower()
 
 
-def subparser_name_from_type(cls: Type) -> str:
+def _subparser_name_from_type(cls: Type) -> str:
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
     if len(type_from_typevar) == 0:
         assert hasattr(cls, "__name__")
@@ -54,10 +52,14 @@ def subparser_name_from_type(cls: Type) -> str:
 
     return "-".join(
         map(
-            subparser_name_from_type,
+            _subparser_name_from_type,
             [cls] + list(type_from_typevar.values()),
         )
     )
+
+
+def subparser_name_from_type(prefix: str, cls: Union[Type, None]) -> str:
+    return f"{prefix}:{_subparser_name_from_type(cls) if cls is not None else 'None'}"
 
 
 @functools.lru_cache(maxsize=None)

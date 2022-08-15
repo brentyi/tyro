@@ -383,13 +383,13 @@ def test_multiple_subparsers_helptext():
     assert "Field c description." not in helptext
 
     helptext = _get_helptext(
-        MultipleSubparsers, args=["subcommand1", "subcommand1", "--help"]
+        MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
     )
 
     assert "Field a description." not in helptext
     assert "Field b description." not in helptext
     assert "Field c description." in helptext
-    assert "(default: subcommand3)" in helptext
+    assert "(default: c:subcommand3)" in helptext
 
 
 def test_optional_helptext():

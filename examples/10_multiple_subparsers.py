@@ -3,8 +3,8 @@
 Usage:
 `python ./10_multiple_subparsers.py`
 `python ./10_multiple_subparsers.py --help`
-`python ./10_multiple_subparsers.py mnist-dataset --help`
-`python ./10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4`
+`python ./10_multiple_subparsers.py dataset:mnist --help`
+`python ./10_multiple_subparsers.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4`
 """
 from __future__ import annotations
 
@@ -17,13 +17,13 @@ import dcargs
 
 
 @dataclasses.dataclass
-class MnistDataset:
+class Mnist:
     binary: bool = False
     """Set to load binary version of MNIST dataset."""
 
 
 @dataclasses.dataclass
-class ImageNetDataset:
+class ImageNet:
     subset: Literal[50, 100, 1000]
     """Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""
 
@@ -32,13 +32,13 @@ class ImageNetDataset:
 
 
 @dataclasses.dataclass
-class AdamOptimizer:
+class Adam:
     learning_rate: float = 1e-3
     betas: Tuple[float, float] = (0.9, 0.999)
 
 
 @dataclasses.dataclass
-class SgdOptimizer:
+class Sgd:
     learning_rate: float = 3e-4
 
 
@@ -46,8 +46,8 @@ class SgdOptimizer:
 
 
 def train(
-    dataset: Union[MnistDataset, ImageNetDataset, None],  # = MnistDataset(),
-    optimizer: Union[AdamOptimizer, SgdOptimizer, None],  # = AdamOptimizer(),
+    dataset: Union[Mnist, ImageNet] = Mnist(),
+    optimizer: Union[Adam, Sgd] = Adam(),
 ) -> None:
     """Example training script.
 

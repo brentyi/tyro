@@ -17,7 +17,7 @@ def test_nested_tuple_fixed_single():
     def main(x: Tuple[Color]) -> Any:
         return x
 
-    assert dcargs.cli(main, args="--x:0.r 255 --x:0.g 127 --x:0.b 5".split(" ")) == (
+    assert dcargs.cli(main, args="--x.0.r 255 --x.0.g 127 --x.0.b 5".split(" ")) == (
         Color(255, 127, 5),
     )
 
@@ -29,7 +29,7 @@ def test_nested_tuple_fixed_two():
     assert dcargs.cli(
         main,
         args=(
-            "--x:0.r 255 --x:0.g 127 --x:0.b 5 --x:1.r 255 --x:1.g 127 --x:1.b 0"
+            "--x.0.r 255 --x.0.g 127 --x.0.b 5 --x.1.r 255 --x.1.g 127 --x.1.b 0"
         ).split(" "),
     ) == (
         Color(255, 127, 5),
@@ -44,8 +44,8 @@ def test_nested_tuple_fixed_three():
     assert dcargs.cli(
         main,
         args=(
-            "--x:0.r 255 --x:0.g 127 --x:0.b 5 --x:1 94709 --x:2.r 255 --x:2.g 127"
-            " --x:2.b 0"
+            "--x.0.r 255 --x.0.g 127 --x.0.b 5 --x.1 94709 --x.2.r 255 --x.2.g 127"
+            " --x.2.b 0"
         ).split(" "),
     ) == (
         Color(255, 127, 5),
@@ -61,8 +61,8 @@ def test_nested_tuple_recursive():
     assert dcargs.cli(
         main,
         args=(
-            "--x:0.r 255 --x:0.g 127 --x:0.b 5 --x:1:0.r 255 --x:1:0.g 127 --x:1:0.b 0"
-            " --x:1:1.r 255 --x:1:1.g 127 --x:1:1.b 0"
+            "--x.0.r 255 --x.0.g 127 --x.0.b 5 --x.1.0.r 255 --x.1.0.g 127 --x.1.0.b 0"
+            " --x.1.1.r 255 --x.1.1.g 127 --x.1.1.b 0"
         ).split(" "),
     ) == (
         Color(255, 127, 5),
@@ -96,7 +96,7 @@ def test_list_ok():
         return x
 
     assert dcargs.cli(main, args=[]) == [Color(255, 0, 0)]
-    assert dcargs.cli(main, args="--x:0.r 127".split(" ")) == [Color(127, 0, 0)]
+    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
 def test_tuple_in_list():
@@ -104,7 +104,7 @@ def test_tuple_in_list():
         return x
 
     assert dcargs.cli(main, args=[]) == [(Color(255, 0, 0),)]
-    assert dcargs.cli(main, args="--x:0:0.r 127".split(" ")) == [(Color(127, 0, 0),)]
+    assert dcargs.cli(main, args="--x.0.0.r 127".split(" ")) == [(Color(127, 0, 0),)]
 
 
 def test_tuple_variable():
@@ -112,7 +112,7 @@ def test_tuple_variable():
         return x
 
     assert dcargs.cli(main, args=[]) == (Color(255, 0, 0), Color(255, 0, 127))
-    assert dcargs.cli(main, args="--x:0.r 127".split(" ")) == (
+    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == (
         Color(127, 0, 0),
         Color(255, 0, 127),
     )
@@ -154,7 +154,7 @@ def test_dict_nested():
         return x
 
     assert dcargs.cli(main, args=[])["green"] == (Color(0, 255, 0), 10)
-    assert dcargs.cli(main, args="--x.green:0.g 127 --x.green:1 2".split(" "))[
+    assert dcargs.cli(main, args="--x.green.0.g 127 --x.green.1 2".split(" "))[
         "green"
     ] == (Color(0, 127, 0), 2)
 
@@ -174,7 +174,7 @@ def test_generic_in_tuple():
     assert dcargs.cli(
         main,
         args=(
-            "--x:0.r 0.5 --x:0.g 0.2 --x:0.b 0.3 --x:1.r 25 --x:1.g 2 --x:1.b 3".split(
+            "--x.0.r 0.5 --x.0.g 0.2 --x.0.b 0.3 --x.1.r 25 --x.1.g 2 --x.1.b 3".split(
                 " "
             )
         ),
@@ -201,7 +201,7 @@ def test_generic_in_tuple_with_default():
     assert dcargs.cli(
         main,
         args=(
-            "--x:0.r 0.5 --x:0.g 0.2 --x:0.b 0.3 --x:1.r 25 --x:1.g 2 --x:1.b 3".split(
+            "--x.0.r 0.5 --x.0.g 0.2 --x.0.b 0.3 --x.1.r 25 --x.1.g 2 --x.1.b 3".split(
                 " "
             )
         ),
@@ -228,7 +228,7 @@ def test_generic_in_variable_tuple_with_default():
     assert dcargs.cli(
         main,
         args=(
-            "--x:0.r 0.5 --x:0.g 0.9 --x:0.b 0.3 --x:1.r 25 --x:1.g 2 --x:1.b 3".split(
+            "--x.0.r 0.5 --x.0.g 0.9 --x.0.b 0.3 --x.1.r 25 --x.1.g 2 --x.1.b 3".split(
                 " "
             )
         ),

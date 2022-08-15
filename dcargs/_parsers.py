@@ -228,6 +228,7 @@ class SubparsersSpecification:
     name: str
     description: Optional[str]
     parser_from_name: Dict[str, ParserSpecification]
+    prefix: str
     required: bool
     default_instance: Any
     can_be_none: bool  # If underlying type is Optional[Something].
@@ -258,13 +259,13 @@ class SubparsersSpecification:
         # Add subparser for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:
-            subparser_name = _strings.subparser_name_from_type(option)
+            subparser_name = _strings.subparser_name_from_type(prefix, option)
             parser_from_name[subparser_name] = ParserSpecification.from_callable(
                 option,
                 description=None,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
-                # Only pass default in if it corresponds to this open.
+                # Only pass default in if it corresponds to this option.
                 # TODO: this will break for generics!
                 default_instance=field.default
                 if isinstance(field.default, _resolver.unwrap_origin(option))  # type: ignore
@@ -285,7 +286,7 @@ class SubparsersSpecification:
             and field.default not in _fields.MISSING_SINGLETONS
         ):
             default_parser = parser_from_name[
-                _strings.subparser_name_from_type(type(field.default))
+                _strings.subparser_name_from_type(prefix, type(field.default))
             ]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
                 required = True
@@ -304,7 +305,7 @@ class SubparsersSpecification:
         if not required and field.default not in _fields.MISSING_SINGLETONS:
             default = field.default
             if default is not None:
-                default = _strings.subparser_name_from_type(type(default))
+                default = _strings.subparser_name_from_type(prefix, type(default))
             description_parts.append(f" (default: {default})")
         description = (
             # We use `None` instead of an empty string to prevent a line break from
@@ -321,6 +322,7 @@ class SubparsersSpecification:
             # the user to include it in the docstring.
             description=description,
             parser_from_name=parser_from_name,
+            prefix=prefix,
             required=required,
             default_instance=field.default,
             # if field.default not in _fields.MISSING_SINGLETONS
@@ -337,7 +339,11 @@ class SubparsersSpecification:
         metavar = (
             "{"
             + ",".join(
-                (("None",) if self.can_be_none else ())
+                (
+                    (_strings.subparser_name_from_type(self.prefix, None),)
+                    if self.can_be_none
+                    else ()
+                )
                 + tuple(self.parser_from_name.keys())
             )
             + "}"
@@ -364,7 +370,7 @@ class SubparsersSpecification:
 
             if self.can_be_none:
                 subparser = argparse_subparsers.add_parser(
-                    name="None",
+                    name=_strings.subparser_name_from_type(self.prefix, None),
                     formatter_class=_argparse_formatter.ArgparseHelpFormatter,
                 )
                 subparser_tree_nodes.append(subparser)
