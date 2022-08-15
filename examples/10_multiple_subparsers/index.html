@@ -288,10 +288,10 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 10_multiple_subparsers.py</kbd><pre class="ansi-block literal-block">MnistDataset(binary=False)
-AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999))</pre>
+<kbd>python 10_multiple_subparsers.py</kbd><pre class="ansi-block literal-block">Mnist(binary=False)
+Adam(learning_rate=0.001, betas=(0.9, 0.999))</pre>
 <hr class="docutils" />
-<kbd>python 10_multiple_subparsers.py --help</kbd><pre class="ansi-block literal-block">usage: 10_multiple_subparsers.py [-h] [{mnist-dataset,image-net-dataset}]
+<kbd>python 10_multiple_subparsers.py --help</kbd><pre class="ansi-block literal-block">usage: 10_multiple_subparsers.py [-h] [{dataset:mnist,dataset:image-net}]
 
 Example training script.
 
@@ -299,27 +299,15 @@ Example training script.
   -h, --help            show this help message and exit
 
 <span class="ansi-bold">optional subcommands</span>:
-  Dataset to train on.  (default: mnist-dataset)
+  Dataset to train on.  (default: dataset:mnist)
 
-  [{mnist-dataset,image-net-dataset}]</pre>
+  [{dataset:mnist,dataset:image-net}]</pre>
 <hr class="docutils" />
-<kbd>python 10_multiple_subparsers.py mnist-dataset --help</kbd><pre class="ansi-block literal-block">usage: 10_multiple_subparsers.py mnist-dataset [-h] [--dataset.binary]
-                                               [{adam-optimizer,sgd-optimizer}]
-
-<span class="ansi-bold">arguments</span>:
-  -h, --help            show this help message and exit
-
-<span class="ansi-bold">dataset arguments</span>:
-  --dataset.binary      Set to load binary version of MNIST dataset.
-                        <span class="ansi-dark">(sets: binary=True)</span>
-
-<span class="ansi-bold">optional subcommands</span>:
-  Optimizer to train with.  (default: adam-optimizer)
-
-  [{adam-optimizer,sgd-optimizer}]</pre>
+<kbd>python 10_multiple_subparsers.py mnist-dataset --help</kbd><pre class="ansi-block literal-block">usage: 10_multiple_subparsers.py [-h] [{dataset:mnist,dataset:image-net}]
+10_multiple_subparsers.py: error: argument [{dataset:mnist,dataset:image-net}]: invalid choice: 'mnist-dataset' (choose from 'dataset:mnist', 'dataset:image-net')</pre>
 <hr class="docutils" />
-<kbd>python 10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">MnistDataset(binary=False)
-AdamOptimizer(learning_rate=0.0003, betas=(0.9, 0.999))</pre>
+<kbd>python 10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">usage: 10_multiple_subparsers.py [-h] [{dataset:mnist,dataset:image-net}]
+10_multiple_subparsers.py: error: argument [{dataset:mnist,dataset:image-net}]: invalid choice: 'mnist-dataset' (choose from 'dataset:mnist', 'dataset:image-net')</pre>
 </section>
 
         </article>

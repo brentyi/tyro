@@ -327,6 +327,11 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="dcargs._parsers.SubparsersSpecification.prefix">
+<span class="sig-name descname"><span class="pre">prefix</span></span><em class="property"><span class="w"> </span><span class="pre">:str</span></em><a class="headerlink" href="#dcargs._parsers.SubparsersSpecification.prefix" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="dcargs._parsers.SubparsersSpecification.required">
 <span class="sig-name descname"><span class="pre">required</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#dcargs._parsers.SubparsersSpecification.required" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -356,6 +361,22 @@
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Optional[<a class="reference internal" href="#dcargs._parsers.SubparsersSpecification" title="dcargs._parsers.SubparsersSpecification">SubparsersSpecification</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="dcargs._parsers.SubparsersSpecification.apply">
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#dcargs._parsers.ParserSpecification" title="dcargs._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prev_subparser_tree_nodes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">argparse.ArgumentParser</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">argparse.ArgumentParser</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_parsers/#SubparsersSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._parsers.SubparsersSpecification.apply" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>parent_parser</strong> (<a class="reference internal" href="#dcargs._parsers.ParserSpecification" title="dcargs._parsers.ParserSpecification"><em>ParserSpecification</em></a>) – </p></li>
+<li><p><strong>prev_subparser_tree_nodes</strong> (<em>List</em><em>[</em><em>argparse.ArgumentParser</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[argparse.ArgumentParser]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -424,10 +445,12 @@
 <li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification">SubparsersSpecification</a><ul>
 <li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.description">description</a></li>
 <li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.parser_from_name">parser_from_name</a></li>
+<li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.prefix">prefix</a></li>
 <li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.required">required</a></li>
 <li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.default_instance">default_instance</a></li>
 <li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.can_be_none">can_be_none</a></li>
 <li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.from_field">from_field</a></li>
+<li><a class="reference internal" href="#dcargs._parsers.SubparsersSpecification.apply">apply</a></li>
 </ul>
 </li>
 </ul>

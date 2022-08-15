@@ -79,6 +79,11 @@ Module Contents
 
       
 
+   .. py:attribute:: prefix
+      :annotation: :str
+
+      
+
    .. py:attribute:: required
       :annotation: :bool
 
@@ -96,6 +101,9 @@ Module Contents
 
    .. py:method:: from_field(field: dcargs._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, Type], parent_classes: Set[Type], prefix: str, avoid_subparsers: bool) -> Optional[SubparsersSpecification]
       :staticmethod:
+
+
+   .. py:method:: apply(self, parent_parser: ParserSpecification, prev_subparser_tree_nodes: List[argparse.ArgumentParser]) -> List[argparse.ArgumentParser]
 
 
 

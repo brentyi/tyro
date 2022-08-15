@@ -35,7 +35,7 @@ Module Contents
 .. py:function:: hyphen_separated_from_camel_case(name: str) -> str
 
 
-.. py:function:: subparser_name_from_type(cls: Type) -> str
+.. py:function:: subparser_name_from_type(prefix: str, cls: Union[Type, None]) -> str
 
 
 .. py:function:: strip_ansi_sequences(x: str)
