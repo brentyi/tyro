@@ -250,7 +250,7 @@
 <span class="linenos">21</span>    <span class="nb">all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">cmd</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Checkout</span><span class="p">,</span> <span class="n">Commit</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">24</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">cmd</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Checkout</span><span class="p">,</span> <span class="n">Commit</span><span class="p">,</span> <span class="kc">None</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos">25</span>    <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 <span class="linenos">26</span>
 <span class="linenos">27</span>
@@ -267,17 +267,30 @@
 <span class="ansi-bold">subcommands</span>:
   {cmd:None,cmd:checkout,cmd:commit}</pre>
 <hr class="docutils" />
-<kbd>python 09_subparsers.py commit --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py [-h] {cmd:None,cmd:checkout,cmd:commit}
-09_subparsers.py: error: argument {cmd:None,cmd:checkout,cmd:commit}: invalid choice: 'commit' (choose from 'cmd:None', 'cmd:checkout', 'cmd:commit')</pre>
+<kbd>python 09_subparsers.py cmd:commit --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py cmd:commit [-h] --cmd.message <span class="ansi-bold">STR</span> [--cmd.all]
+
+Commit changes.
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help         show this help message and exit
+
+<span class="ansi-bold">cmd arguments</span>:
+  --cmd.message <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --cmd.all          <span class="ansi-dark">(sets: all=True)</span></pre>
 <hr class="docutils" />
-<kbd>python 09_subparsers.py commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py [-h] {cmd:None,cmd:checkout,cmd:commit}
-09_subparsers.py: error: argument {cmd:None,cmd:checkout,cmd:commit}: invalid choice: 'commit' (choose from 'cmd:None', 'cmd:checkout', 'cmd:commit')</pre>
+<kbd>python 09_subparsers.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">Commit(message='hello', all=True)</pre>
 <hr class="docutils" />
-<kbd>python 09_subparsers.py checkout --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py [-h] {cmd:None,cmd:checkout,cmd:commit}
-09_subparsers.py: error: argument {cmd:None,cmd:checkout,cmd:commit}: invalid choice: 'checkout' (choose from 'cmd:None', 'cmd:checkout', 'cmd:commit')</pre>
+<kbd>python 09_subparsers.py cmd:checkout --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py cmd:checkout [-h] --cmd.branch <span class="ansi-bold">STR</span>
+
+Checkout a branch.
+
+<span class="ansi-bold">arguments</span>:
+  -h, --help        show this help message and exit
+
+<span class="ansi-bold">cmd arguments</span>:
+  --cmd.branch <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span></pre>
 <hr class="docutils" />
-<kbd>python 09_subparsers.py checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py [-h] {cmd:None,cmd:checkout,cmd:commit}
-09_subparsers.py: error: argument {cmd:None,cmd:checkout,cmd:commit}: invalid choice: 'checkout' (choose from 'cmd:None', 'cmd:checkout', 'cmd:commit')</pre>
+<kbd>python 09_subparsers.py cmd:checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">Checkout(branch='main')</pre>
 </section>
 
         </article>

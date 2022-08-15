@@ -23,13 +23,13 @@ Multiple unions over nested types are populated using a series of subparsers.
        
        
        @dataclasses.dataclass
-       class MnistDataset:
+       class Mnist:
            binary: bool = False
            """Set to load binary version of MNIST dataset."""
        
        
        @dataclasses.dataclass
-       class ImageNetDataset:
+       class ImageNet:
            subset: Literal[50, 100, 1000]
            """Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""
        
@@ -38,13 +38,13 @@ Multiple unions over nested types are populated using a series of subparsers.
        
        
        @dataclasses.dataclass
-       class AdamOptimizer:
+       class Adam:
            learning_rate: float = 1e-3
            betas: Tuple[float, float] = (0.9, 0.999)
        
        
        @dataclasses.dataclass
-       class SgdOptimizer:
+       class Sgd:
            learning_rate: float = 3e-4
        
        
@@ -52,8 +52,8 @@ Multiple unions over nested types are populated using a series of subparsers.
        
        
        def train(
-           dataset: Union[MnistDataset, ImageNetDataset] = MnistDataset(),
-           optimizer: Union[AdamOptimizer, SgdOptimizer] = AdamOptimizer(),
+           dataset: Union[Mnist, ImageNet] = Mnist(),
+           optimizer: Union[Adam, Sgd] = Adam(),
        ) -> None:
            """Example training script.
        
@@ -91,14 +91,14 @@ Multiple unions over nested types are populated using a series of subparsers.
 
 .. raw:: html
 
-        <kbd>python 10_multiple_subparsers.py mnist-dataset --help</kbd>
+        <kbd>python 10_multiple_subparsers.py dataset:mnist --help</kbd>
 
-.. program-output:: python ../../examples/10_multiple_subparsers.py mnist-dataset --help
+.. program-output:: python ../../examples/10_multiple_subparsers.py dataset:mnist --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4</kbd>
+        <kbd>python 10_multiple_subparsers.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4</kbd>
 
-.. program-output:: python ../../examples/10_multiple_subparsers.py mnist-dataset adam-optimizer --optimizer.learning-rate 3e-4
+.. program-output:: python ../../examples/10_multiple_subparsers.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4

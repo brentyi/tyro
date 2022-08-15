@@ -284,11 +284,7 @@ This should show up in the helptext!
 <hr class="docutils" />
 <kbd>python 12_tuples.py --color 127 127 127</kbd><pre class="ansi-block literal-block">TupleType(color=(127, 127, 127), two_colors=(Color(r=255, g=0, b=0), Color(r=0, g=255, b=0)))</pre>
 <hr class="docutils" />
-<kbd>python 12_tuples.py --two-colors:1.r 127 --two-colors:1.g 0 --two-colors:1.b 0</kbd><pre class="ansi-block literal-block">usage: 12_tuples.py [-h] [--color <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>] [--two-colors.0.r <span class="ansi-bold">INT</span>]
-                    [--two-colors.0.g <span class="ansi-bold">INT</span>] [--two-colors.0.b <span class="ansi-bold">INT</span>]
-                    [--two-colors.1.r <span class="ansi-bold">INT</span>] [--two-colors.1.g <span class="ansi-bold">INT</span>]
-                    [--two-colors.1.b <span class="ansi-bold">INT</span>]
-12_tuples.py: error: unrecognized arguments: --two-colors:1.r 127 --two-colors:1.g 0 --two-colors:1.b 0</pre>
+<kbd>python 12_tuples.py --two-colors.1.r 127 --two-colors.1.g 0 --two-colors.1.b 0</kbd><pre class="ansi-block literal-block">TupleType(color=(255, 0, 0), two_colors=(Color(r=255, g=0, b=0), Color(r=127, g=0, b=0)))</pre>
 </section>
 
         </article>
