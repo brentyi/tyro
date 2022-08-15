@@ -3,7 +3,7 @@
 Usage:
 `python ./12_tuples.py --help`
 `python ./12_tuples.py --color 127 127 127`
-`python ./12_tuples.py --two-colors:1.r 127 --two-colors:1.g 0 --two-colors:1.b 0`
+`python ./12_tuples.py --two-colors.1.r 127 --two-colors.1.g 0 --two-colors.1.b 0`
 """
 
 from typing import NamedTuple, Tuple

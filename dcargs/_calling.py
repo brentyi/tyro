@@ -140,7 +140,11 @@ def call_from_args(
                     or subparser_def.default_instance is not None
                 )
                 value = subparser_def.default_instance
-            elif subparser_def.can_be_none and subparser_name == "None":
+            elif (
+                subparser_def.can_be_none
+                and subparser_name
+                == _strings.subparser_name_from_type(prefixed_field_name, None)
+            ):
                 # do either
                 # Optional[Union[A, B, ...]] or Union[A, B, None], or have a
                 # default/default_factory set.
@@ -152,7 +156,10 @@ def call_from_args(
                 )
                 chosen_f = None
                 for option in options:
-                    if _strings.subparser_name_from_type(option) == subparser_name:
+                    if (
+                        _strings.subparser_name_from_type(prefixed_field_name, option)
+                        == subparser_name
+                    ):
                         chosen_f = option
                         break
                 assert chosen_f is not None
