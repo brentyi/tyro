@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional, Tuple, Union
+from typing import Any, Generic, Optional, Tuple, TypeVar, Union
 
 import pytest
 
@@ -633,3 +633,23 @@ def test_tuple_nesting():
             " --x.1.z 2.0 --x.2 4.0".split(" ")
         ),
     ) == ((Color(255, 0, 0),), Location(5.0, 0.0, 2.0), 4.0)
+
+
+def test_generic_subparsers():
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class A(Generic[T]):
+        x: T
+
+    def main(x: Union[A[int], A[float]]) -> Any:
+        return x
+
+    assert dcargs.cli(main, args="x:a-float --x.x 3.2".split(" ")) == A(3.2)
+    assert dcargs.cli(main, args="x:a-int --x.x 3".split(" ")) == A(3)
+
+    def main_with_default(x: Union[A[int], A[float]] = A(5)) -> Any:
+        return x
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main_with_default, args=[])

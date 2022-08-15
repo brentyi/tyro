@@ -9,7 +9,7 @@ from typing import Generic, TypeVar
 
 import dcargs
 
-ScalarType = TypeVar("ScalarType")
+ScalarType = TypeVar("ScalarType", int, float)
 ShapeType = TypeVar("ShapeType")
 
 
@@ -30,8 +30,6 @@ class Triangle:
 
 @dataclasses.dataclass(frozen=True)
 class Args(Generic[ShapeType]):
-    point_continuous: Point3[float]
-    point_discrete: Point3[int]
     shape: ShapeType
 
 
