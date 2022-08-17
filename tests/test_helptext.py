@@ -7,6 +7,7 @@ from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
 import pytest
+import torch.nn as nn
 from typing_extensions import Literal
 
 import dcargs
@@ -511,3 +512,23 @@ def test_comment_in_subclass_list():
     helptext = _get_helptext(Something)
     assert "This text should not" not in helptext
     assert "But this text should!" in helptext
+
+
+def test_unparsable():
+    @dataclasses.dataclass
+    class Struct:
+        a: int = 5
+        b: str = "7"
+
+    def main(x: Any = Struct()):
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x {fixed}" in helptext
+
+    def main(x: Callable = nn.ReLU):
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x {fixed}" in helptext
+    assert "(fixed to: <class 'torch.nn" in helptext
