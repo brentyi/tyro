@@ -179,9 +179,7 @@ def _rule_recursive_instantiator_from_type(
             # available.
             return dataclasses.replace(
                 lowered,
-                metavar=termcolor.colored(
-                    "{" + str(arg.field.default) + "}", color="red"
-                ),
+                metavar=termcolor.colored("{fixed}", color="red"),
                 required=False,
                 default=_fields.MISSING_PROP,
             )
@@ -253,7 +251,9 @@ def _rule_generate_helptext(
         # because the types of all arguments are set to strings, which will cause the
         # default to be casted to a string and introduce extra quotation marks.
         if lowered.instantiator is None:
-            default_text = "(fixed)"
+            # Intentionally not quoted via shlex, since this can't actually be passed
+            # in via the commandline.
+            default_text = f"(fixed to: {str(arg.field.default)})"
         elif lowered.action == "store_true":
             default_text = f"(sets: {arg.field.name}=True)"
         elif lowered.action == "store_false":

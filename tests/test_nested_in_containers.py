@@ -1,12 +1,12 @@
 import dataclasses
-from typing import Any, Dict, Generic, List, Tuple, TypeVar
+from typing import Any, Dict, Generic, List, Set, Tuple, TypeVar
 
 import pytest
 
 import dcargs
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class Color:
     r: int
     g: int
@@ -82,6 +82,23 @@ def test_tuple_bad():
         dcargs.cli(main, args=[])
 
 
+def test_set_bad():
+    # Unable to infer input length.
+    def main(x: Set[Color]) -> None:
+        pass
+
+    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
+        dcargs.cli(main, args=[])
+
+
+def test_set_ok():
+    def main(x: Set[Color] = {Color(255, 0, 0)}) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=[]) == {Color(255, 0, 0)}
+    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == {Color(127, 0, 0)}
+
+
 def test_list_bad():
     # Unable to infer input length.
     def main(x: List[Color]) -> None:
@@ -93,6 +110,14 @@ def test_list_bad():
 
 def test_list_ok():
     def main(x: List[Color] = [Color(255, 0, 0)]) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=[]) == [Color(255, 0, 0)]
+    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
+
+
+def test_list_object():
+    def main(x: List[object] = [Color(255, 0, 0)]) -> Any:
         return x
 
     assert dcargs.cli(main, args=[]) == [Color(255, 0, 0)]
