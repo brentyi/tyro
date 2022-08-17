@@ -1,4 +1,5 @@
 import dataclasses
+import enum
 from typing import Any, Dict, Generic, List, Set, Tuple, TypeVar
 
 import pytest
@@ -165,6 +166,41 @@ def test_dict_ok():
     assert dcargs.cli(main, args="--x.green.g 127".split(" "))["green"] == Color(
         0, 127, 0
     )
+
+
+def test_dict_key_int():
+    def main(
+        x: Dict[int, Color] = {
+            0: Color(255, 0, 0),
+            1: Color(0, 255, 0),
+            2: Color(0, 0, 255),
+        }
+    ) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=[])[1] == Color(0, 255, 0)
+    assert dcargs.cli(main, args="--x.1.g 127".split(" "))[1] == Color(0, 127, 0)
+
+
+def test_dict_key_enum():
+    class ColorType(enum.Enum):
+        RED = enum.auto()
+        GREEN = enum.auto()
+        BLUE = enum.auto()
+
+    def main(
+        x: Dict[ColorType, Color] = {
+            ColorType.RED: Color(255, 0, 0),
+            ColorType.GREEN: Color(0, 255, 0),
+            ColorType.BLUE: Color(0, 0, 255),
+        }
+    ) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=[])[ColorType.GREEN] == Color(0, 255, 0)
+    assert dcargs.cli(main, args="--x.GREEN.g 127".split(" "))[
+        ColorType.GREEN
+    ] == Color(0, 127, 0)
 
 
 def test_dict_nested():

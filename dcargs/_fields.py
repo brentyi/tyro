@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import collections
 import dataclasses
+import enum
 import inspect
 import itertools
 import typing
@@ -25,6 +26,11 @@ class FieldDefinition:
     default: Any
     helptext: Optional[str]
     positional: bool
+
+    # Override the name in our kwargs. Currently only used for dictionary types when
+    # the key values aren't strings, but in the future could be used whenever the
+    # user-facing argument name doesn't match the keyword expected by our callable.
+    name_override: Optional[Any] = None
 
 
 class _Singleton:
@@ -423,11 +429,13 @@ def _try_field_list_from_dict(
     for k, v in cast(dict, default_instance).items():
         field_list.append(
             FieldDefinition(
-                name=str(k),
+                name=str(k) if not isinstance(k, enum.Enum) else k.name,
                 typ=type(v),
                 default=v,
                 helptext=None,
                 positional=False,
+                # Dictionary specific key:
+                name_override=k,
             )
         )
     return field_list
