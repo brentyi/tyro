@@ -15,14 +15,6 @@
 Module Contents
 ---------------
 
-.. py:exception:: UnsupportedNestedTypeAnnotationError
-
-   Bases: :py:obj:`dcargs._instantiators.UnsupportedTypeAnnotationError`
-
-   
-   Narrower version of UnsupportedNestedTypeAnnotationError, which signifies that a type
-   cannot correspond to a nested field. It may still be parsed directly.
-
 .. py:class:: FieldDefinition
 
    .. py:attribute:: name
@@ -98,29 +90,28 @@ Module Contents
 
    
 
-.. py:data:: T
-   
+.. py:class:: UnsupportedNestedTypeMessage
 
    
+   Reason why a callable cannot be treated as a nested type.
+   .. py:attribute:: message
+      :annotation: :str
 
-.. py:data:: DefaultInstanceT
+      
+
+
+.. py:function:: is_nested_type(typ: Type, default_instance: _DefaultInstance) -> bool
+
    
+   Determine whether a type should be treated as a 'nested type', where a single
+   type can be broken down into multiple fields (eg for nested dataclasses or
+   classes).
 
-   
-
-.. py:function:: is_nested_type(typ: Any, default_instance: Any) -> bool
-
-   
-   Determine whether a type should be treated as a 'nested type', where a single field
-   has multiple corresponding arguments (eg for nested dataclasses or classes).
-
-.. py:function:: field_list_from_callable(f: Callable[Ellipsis, T], default_instance: DefaultInstanceT, root_field: bool = False) -> List[FieldDefinition]
+.. py:function:: field_list_from_callable(f: Union[Callable, Type], default_instance: _DefaultInstance, root_field: bool = False) -> List[FieldDefinition]
 
    
    Generate a list of generic 'field' objects corresponding to the inputs of some
    annotated callable.
-
-   ``f`` can be from a dataclass type, regular class type, or function.
 
    If ``root_field`` is set to True, we treat ``int``\ , ``torch.device``\ , etc as nested
    fields. This is to make sure that these types can be passed directly into

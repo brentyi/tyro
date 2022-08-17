@@ -230,14 +230,6 @@
 defaults, from general callables.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
-<dl class="py exception">
-<dt class="sig sig-object py" id="dcargs._fields.UnsupportedNestedTypeAnnotationError">
-<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">UnsupportedNestedTypeAnnotationError</span></span><a class="reference internal" href="../../../_modules/dcargs/_fields/#UnsupportedNestedTypeAnnotationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._fields.UnsupportedNestedTypeAnnotationError" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../_instantiators/#dcargs._instantiators.UnsupportedTypeAnnotationError" title="dcargs._instantiators.UnsupportedTypeAnnotationError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dcargs._instantiators.UnsupportedTypeAnnotationError</span></code></a></p>
-<p>Narrower version of UnsupportedNestedTypeAnnotationError, which signifies that a type
-cannot correspond to a nested field. It may still be parsed directly.</p>
-</dd></dl>
-
 <dl class="py class">
 <dt class="sig sig-object py" id="dcargs._fields.FieldDefinition">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">FieldDefinition</span></span><a class="reference internal" href="../../../_modules/dcargs/_fields/#FieldDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._fields.FieldDefinition" title="Permalink to this definition">#</a></dt>
@@ -318,26 +310,31 @@ cannot correspond to a nested field. It may still be parsed directly.</p>
 <span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">MISSING_SINGLETONS</span></span><a class="headerlink" href="#dcargs._fields.MISSING_SINGLETONS" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="dcargs._fields.T">
-<span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">T</span></span><a class="headerlink" href="#dcargs._fields.T" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="dcargs._fields.DefaultInstanceT">
-<span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">DefaultInstanceT</span></span><a class="headerlink" href="#dcargs._fields.DefaultInstanceT" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
+<dl class="py class">
+<dt class="sig sig-object py" id="dcargs._fields.UnsupportedNestedTypeMessage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">UnsupportedNestedTypeMessage</span></span><a class="reference internal" href="../../../_modules/dcargs/_fields/#UnsupportedNestedTypeMessage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._fields.UnsupportedNestedTypeMessage" title="Permalink to this definition">#</a></dt>
+<dd><p>Reason why a callable cannot be treated as a nested type.
+.. py:attribute:: message</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">annotation</dt>
+<dd class="field-odd"><p>:str</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dcargs._fields.is_nested_type">
-<span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">is_nested_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_fields/#is_nested_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._fields.is_nested_type" title="Permalink to this definition">#</a></dt>
-<dd><p>Determine whether a type should be treated as a ‘nested type’, where a single field
-has multiple corresponding arguments (eg for nested dataclasses or classes).</p>
+<span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">is_nested_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_fields/#is_nested_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._fields.is_nested_type" title="Permalink to this definition">#</a></dt>
+<dd><p>Determine whether a type should be treated as a ‘nested type’, where a single
+type can be broken down into multiple fields (eg for nested dataclasses or
+classes).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>typ</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>default_instance</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>typ</strong> (<em>Type</em>) – </p></li>
+<li><p><strong>default_instance</strong> (<em>_DefaultInstance</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -348,18 +345,17 @@ has multiple corresponding arguments (eg for nested dataclasses or classes).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="dcargs._fields.field_list_from_callable">
-<span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">field_list_from_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DefaultInstanceT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dcargs._fields.FieldDefinition" title="dcargs._fields.FieldDefinition"><span class="pre">FieldDefinition</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_fields/#field_list_from_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._fields.field_list_from_callable" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">dcargs._fields.</span></span><span class="sig-name descname"><span class="pre">field_list_from_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_DefaultInstance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#dcargs._fields.FieldDefinition" title="dcargs._fields.FieldDefinition"><span class="pre">FieldDefinition</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_fields/#field_list_from_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._fields.field_list_from_callable" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a list of generic ‘field’ objects corresponding to the inputs of some
 annotated callable.</p>
-<p><code class="docutils literal notranslate"><span class="pre">f</span></code> can be from a dataclass type, regular class type, or function.</p>
 <p>If <code class="docutils literal notranslate"><span class="pre">root_field</span></code> is set to True, we treat <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">torch.device</span></code>, etc as nested
 fields. This is to make sure that these types can be passed directly into
 dcargs.cli(); the logic can likely be refactored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> (<em>Callable</em><em>[</em><em>Ellipsis</em><em>, </em><em>T</em><em>]</em>) – </p></li>
-<li><p><strong>default_instance</strong> (<em>DefaultInstanceT</em>) – </p></li>
+<li><p><strong>f</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>Type</em><em>]</em>) – </p></li>
+<li><p><strong>default_instance</strong> (<em>_DefaultInstance</em>) – </p></li>
 <li><p><strong>root_field</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
@@ -418,7 +414,6 @@ dcargs.cli(); the logic can likely be refactored.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._fields</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#dcargs._fields.UnsupportedNestedTypeAnnotationError">UnsupportedNestedTypeAnnotationError</a></li>
 <li><a class="reference internal" href="#dcargs._fields.FieldDefinition">FieldDefinition</a><ul>
 <li><a class="reference internal" href="#dcargs._fields.FieldDefinition.name">name</a></li>
 <li><a class="reference internal" href="#dcargs._fields.FieldDefinition.typ">typ</a></li>
@@ -436,8 +431,7 @@ dcargs.cli(); the logic can likely be refactored.</p>
 <li><a class="reference internal" href="#dcargs._fields.MISSING_PUBLIC">MISSING_PUBLIC</a></li>
 <li><a class="reference internal" href="#dcargs._fields.MISSING_TYPE">MISSING_TYPE</a></li>
 <li><a class="reference internal" href="#dcargs._fields.MISSING_SINGLETONS">MISSING_SINGLETONS</a></li>
-<li><a class="reference internal" href="#dcargs._fields.T">T</a></li>
-<li><a class="reference internal" href="#dcargs._fields.DefaultInstanceT">DefaultInstanceT</a></li>
+<li><a class="reference internal" href="#dcargs._fields.UnsupportedNestedTypeMessage">UnsupportedNestedTypeMessage</a></li>
 <li><a class="reference internal" href="#dcargs._fields.is_nested_type">is_nested_type</a></li>
 <li><a class="reference internal" href="#dcargs._fields.field_list_from_callable">field_list_from_callable</a></li>
 </ul>
