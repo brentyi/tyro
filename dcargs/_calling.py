@@ -177,7 +177,9 @@ def call_from_args(
             if field.positional:
                 args.append(value)
             else:
-                kwargs[field.name] = value
+                kwargs[
+                    field.name if field.name_override is None else field.name_override
+                ] = value
 
     unwrapped_f = _resolver.unwrap_origin(f)
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
@@ -191,5 +193,10 @@ def call_from_args(
             # single set of positional arguments.
             assert len(args) == 1
             return unwrapped_f(args[0]), consumed_keywords  # type: ignore
+    elif unwrapped_f is dict:
+        for arg in args:
+            assert isinstance(arg, dict)
+            kwargs.update(arg)
+        return kwargs, consumed_keywords  # type: ignore
     else:
         return unwrapped_f(*args, **kwargs), consumed_keywords  # type: ignore
