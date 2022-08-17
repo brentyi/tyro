@@ -231,6 +231,7 @@
 
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">typing</span>
@@ -250,7 +251,12 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">Type</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
     <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-    <span class="n">positional</span><span class="p">:</span> <span class="nb">bool</span></div>
+    <span class="n">positional</span><span class="p">:</span> <span class="nb">bool</span>
+
+    <span class="c1"># Override the name in our kwargs. Currently only used for dictionary types when</span>
+    <span class="c1"># the key values aren&#39;t strings, but in the future could be used whenever the</span>
+    <span class="c1"># user-facing argument name doesn&#39;t match the keyword expected by our callable.</span>
+    <span class="n">name_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
 
 
 <span class="k">class</span> <span class="nc">_Singleton</span><span class="p">:</span>
@@ -649,11 +655,13 @@
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span> <span class="k">else</span> <span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">),</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">positional</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="c1"># Dictionary specific key:</span>
+                <span class="n">name_override</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">field_list</span>

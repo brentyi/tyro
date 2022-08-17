@@ -42,6 +42,11 @@ Module Contents
 
       
 
+   .. py:attribute:: name_override
+      :annotation: :Optional[Any]
+
+      
+
 
 .. py:class:: PropagatingMissingType
 
