@@ -1,39 +1,21 @@
 """Abstractions for pulling out 'field' definitions, which specify inputs, types, and
 defaults, from general callables."""
 
+from __future__ import annotations
+
 import collections
 import dataclasses
 import inspect
 import itertools
 import typing
 import warnings
-from typing import (
-    Any,
-    Callable,
-    Hashable,
-    Iterable,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Hashable, Iterable, List, Optional, Type, Union, cast
 
 import docstring_parser
 import typing_extensions
 from typing_extensions import get_args, get_type_hints, is_typeddict
 
 from . import _docstrings, _instantiators, _resolver
-
-
-class UnsupportedNestedTypeAnnotationError(
-    _instantiators.UnsupportedTypeAnnotationError
-):
-    """Narrower version of UnsupportedNestedTypeAnnotationError, which signifies that a type
-    cannot correspond to a nested field. It may still be parsed directly."""
-
-    pass
 
 
 @dataclasses.dataclass(frozen=True)
@@ -102,10 +84,47 @@ try:
 except ImportError:
     pass
 
-T = TypeVar("T")
 
-DefaultInstanceT = Union[
-    T, PropagatingMissingType, NonpropagatingMissingType, ExcludeFromCallType
+@dataclasses.dataclass(frozen=True)
+class UnsupportedNestedTypeMessage:
+    """Reason why a callable cannot be treated as a nested type."""
+
+    message: str
+
+
+def is_nested_type(typ: Type, default_instance: _DefaultInstance) -> bool:
+    """Determine whether a type should be treated as a 'nested type', where a single
+    type can be broken down into multiple fields (eg for nested dataclasses or
+    classes)."""
+    return not isinstance(
+        _try_field_list_from_callable(typ, default_instance, root_field=False),
+        UnsupportedNestedTypeMessage,
+    )
+
+
+def field_list_from_callable(
+    f: Union[Callable, Type],
+    default_instance: _DefaultInstance,
+    root_field: bool = False,
+) -> List[FieldDefinition]:
+    """Generate a list of generic 'field' objects corresponding to the inputs of some
+    annotated callable.
+
+    If `root_field` is set to True, we treat `int`, `torch.device`, etc as nested
+    fields. This is to make sure that these types can be passed directly into
+    dcargs.cli(); the logic can likely be refactored."""
+    out = _try_field_list_from_callable(f, default_instance, root_field)
+
+    if isinstance(out, UnsupportedNestedTypeMessage):
+        raise _instantiators.UnsupportedTypeAnnotationError(out.message)
+    return out
+
+
+# Implementation details below.
+
+
+_DefaultInstance = Union[
+    Any, PropagatingMissingType, NonpropagatingMissingType, ExcludeFromCallType
 ]
 
 _known_parsable_types = set(
@@ -121,33 +140,11 @@ _known_parsable_types = set(
 )
 
 
-def is_nested_type(typ: Any, default_instance: Any) -> bool:
-    """Determine whether a type should be treated as a 'nested type', where a single field
-    has multiple corresponding arguments (eg for nested dataclasses or classes)."""
-
-    try:
-        # This implementation will result in some computational redundancy, but is nice
-        # for reusing logic. Could be revisited.
-        field_list_from_callable(typ, default_instance, root_field=False)
-        return True
-    except UnsupportedNestedTypeAnnotationError:
-        return False
-
-
-def field_list_from_callable(
-    f: Callable[..., T],
-    default_instance: DefaultInstanceT,
-    root_field: bool = False,
-) -> List[FieldDefinition]:
-    """Generate a list of generic 'field' objects corresponding to the inputs of some
-    annotated callable.
-
-    `f` can be from a dataclass type, regular class type, or function.
-
-    If `root_field` is set to True, we treat `int`, `torch.device`, etc as nested
-    fields. This is to make sure that these types can be passed directly into
-    dcargs.cli(); the logic can likely be refactored."""
-
+def _try_field_list_from_callable(
+    f: Union[Callable, Type],
+    default_instance: _DefaultInstance,
+    root_field: bool,
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.narrow_type(f, default_instance)
@@ -164,66 +161,71 @@ def field_list_from_callable(
 
     # Try special cases.
     if cls is not None and is_typeddict(cls):
-        return _field_list_from_typeddict(cls, default_instance)
+        return _try_field_list_from_typeddict(cls, default_instance)
 
     elif cls is not None and _resolver.is_namedtuple(cls):
-        return _field_list_from_namedtuple(cls, default_instance)
+        return _try_field_list_from_namedtuple(cls, default_instance)
 
     elif cls is not None and _resolver.is_dataclass(cls):
-        return _field_list_from_dataclass(cls, default_instance)
+        return _try_field_list_from_dataclass(cls, default_instance)
 
     # Standard container types. These are special because they can be nested structures
-    # when
-    try:
-        # Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will
-        # be populated if we annotated as just `tuple`.
-        if f_origin is tuple or cls is tuple:
-            out = _field_list_from_tuple(f, default_instance)
-            return out
+    # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
+    # single arguments otherwise (eg Tuple[int, int]).
+    #
+    # Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will
+    # be populated if we annotated as just `tuple`.
+    container_fields = None
+    if f_origin is tuple or cls is tuple:
+        container_fields = _field_list_from_tuple(f, default_instance)
+    elif f_origin in (list, set, typing.Sequence) or cls in (
+        list,
+        set,
+        typing.Sequence,
+    ):
+        contained_type: Any
+        if len(get_args(f)) == 0:
+            if default_instance in MISSING_SINGLETONS:
+                raise _instantiators.UnsupportedTypeAnnotationError(
+                    f"Sequence type {cls} needs either an explicit type or a"
+                    " default to infer from."
+                )
+            assert isinstance(default_instance, Iterable)
+        else:
+            (contained_type,) = get_args(f)
+        f_origin = list if f_origin is typing.Sequence else f_origin  # type: ignore
 
-        elif f_origin in (list, set, typing.Sequence) or cls in (
-            list,
-            set,
-            typing.Sequence,
-        ):
-            if len(get_args(f)) == 0:
-                if default_instance in MISSING_SINGLETONS:
-                    raise _instantiators.UnsupportedTypeAnnotationError(
-                        f"Sequence type {cls} needs either an explicit type or a"
-                        " default to infer from."
-                    )
-                assert isinstance(default_instance, Iterable)
-                contained_type = MISSING_NONPROP
-            else:
-                (contained_type,) = get_args(f)
-            f_origin = list if f_origin is typing.Sequence else f_origin  # type: ignore
-            return _field_list_from_sequence(
-                contained_type,  # type: ignore
-                default_instance,
-            )
-        elif f_origin is dict:
-            return _field_list_from_dict(f, default_instance)
-    except UnsupportedNestedTypeAnnotationError as e:
-        # For the root field case, we can try again in the general case.
-        if not root_field:
-            raise e
+        container_fields = _try_field_list_from_sequence(
+            contained_type, default_instance
+        )
+    elif f_origin is dict:
+        container_fields = _try_field_list_from_dict(f, default_instance)
+
+    # Check if one of the container types matched.
+    if container_fields is not None:
+        # Found fields!
+        if not isinstance(container_fields, UnsupportedNestedTypeMessage):
+            return container_fields
+        # Got an error -> give up if not the root field.
+        elif not root_field:
+            assert isinstance(container_fields, UnsupportedNestedTypeMessage)
+            return container_fields
 
     # General cases.
     if not root_field and (
         (cls is not None and cls in _known_parsable_types)
         or _resolver.unwrap_origin(f) in _known_parsable_types
     ):
-        raise UnsupportedNestedTypeAnnotationError(f"{f} should be parsed directly!")
-
+        return UnsupportedNestedTypeMessage(f"{f} should be parsed directly!")
     else:
-        return _field_list_from_general_callable(
+        return _try_field_list_from_general_callable(
             f, cls, default_instance, root_field=root_field
         )
 
 
-def _field_list_from_typeddict(
-    cls: Type[T], default_instance: DefaultInstanceT
-) -> List[FieldDefinition]:
+def _try_field_list_from_typeddict(
+    cls: Type, default_instance: _DefaultInstance
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     field_list = []
     valid_default_instance = (
         default_instance not in MISSING_SINGLETONS
@@ -236,7 +238,7 @@ def _field_list_from_typeddict(
         elif getattr(cls, "__total__") is False:
             default = EXCLUDE_FROM_CALL
             if is_nested_type(typ, MISSING_NONPROP):
-                raise UnsupportedNestedTypeAnnotationError(
+                return UnsupportedNestedTypeMessage(
                     "`total=False` not supported for nested structures."
                 )
         else:
@@ -254,9 +256,9 @@ def _field_list_from_typeddict(
     return field_list
 
 
-def _field_list_from_namedtuple(
-    cls: Type[T], default_instance: DefaultInstanceT
-) -> List[FieldDefinition]:
+def _try_field_list_from_namedtuple(
+    cls: Type, default_instance: _DefaultInstance
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle NamedTuples.
     #
     # TODO: in terms of helptext, we currently do display the default NamedTuple
@@ -286,9 +288,9 @@ def _field_list_from_namedtuple(
     return field_list
 
 
-def _field_list_from_dataclass(
-    cls: Type[T], default_instance: DefaultInstanceT
-) -> List[FieldDefinition]:
+def _try_field_list_from_dataclass(
+    cls: Type, default_instance: _DefaultInstance
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle dataclasses.
     field_list = []
     for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
@@ -306,13 +308,13 @@ def _field_list_from_dataclass(
 
 
 def _field_list_from_tuple(
-    f: Callable, default_instance: DefaultInstanceT
-) -> List[FieldDefinition]:
+    f: Union[Callable, Type], default_instance: _DefaultInstance
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Fixed-length tuples.
     field_list = []
     children = get_args(f)
     if Ellipsis in children:
-        return _field_list_from_sequence(
+        return _try_field_list_from_sequence(
             next(iter(set(children) - {Ellipsis})), default_instance
         )
 
@@ -357,24 +359,24 @@ def _field_list_from_tuple(
     if not contains_nested:
         # We could also check for variable length children, which can be populated when
         # the tuple is interpreted as a nested field but not a directly parsed one.
-        raise UnsupportedNestedTypeAnnotationError(
+        return UnsupportedNestedTypeMessage(
             "Tuple does not contain any nested structures."
         )
 
     return field_list
 
 
-def _field_list_from_sequence(
+def _try_field_list_from_sequence(
     contained_type: Type,
-    default_instance: DefaultInstanceT,
-) -> List[FieldDefinition]:
+    default_instance: _DefaultInstance,
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # When no default instance is specified:
     #     If we have List[int] => this can be parsed as a single field.
     #     If we have List[SomeStruct] => OK.
     if default_instance in MISSING_SINGLETONS and not is_nested_type(
         contained_type, MISSING_NONPROP
     ):
-        raise UnsupportedNestedTypeAnnotationError(
+        return UnsupportedNestedTypeMessage(
             f"Sequence containing type {contained_type} should be parsed directly!"
         )
 
@@ -384,7 +386,7 @@ def _field_list_from_sequence(
     if isinstance(default_instance, Iterable) and all(
         [not is_nested_type(type(x), x) for x in default_instance]
     ):
-        raise UnsupportedNestedTypeAnnotationError(
+        return UnsupportedNestedTypeMessage(
             f"Sequence with default {default_instance} should be parsed directly!"
         )
     if default_instance in MISSING_SINGLETONS:
@@ -409,12 +411,12 @@ def _field_list_from_sequence(
     return field_list
 
 
-def _field_list_from_dict(
-    f: Callable,
-    default_instance: DefaultInstanceT,
-) -> List[FieldDefinition]:
+def _try_field_list_from_dict(
+    f: Union[Callable, Type],
+    default_instance: _DefaultInstance,
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     if default_instance in MISSING_SINGLETONS:
-        raise UnsupportedNestedTypeAnnotationError(
+        return UnsupportedNestedTypeMessage(
             "Nested dictionary structures must have a default instance specified."
         )
     field_list = []
@@ -431,22 +433,22 @@ def _field_list_from_dict(
     return field_list
 
 
-def _field_list_from_general_callable(
-    f: Callable,
+def _try_field_list_from_general_callable(
+    f: Union[Callable, Type],
     cls: Optional[Type],
-    default_instance: DefaultInstanceT,
+    default_instance: _DefaultInstance,
     root_field: bool,
-) -> List[FieldDefinition]:
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle general callables.
     if default_instance not in MISSING_SINGLETONS:
-        raise UnsupportedNestedTypeAnnotationError(
+        return UnsupportedNestedTypeMessage(
             "`default_instance` is supported only for select types:"
             " dataclasses, lists, NamedTuple, TypedDict, etc."
         )
 
     # Generate field list from function signature.
     if not callable(f):
-        raise UnsupportedNestedTypeAnnotationError(
+        return UnsupportedNestedTypeMessage(
             f"Cannot extract annotations from {f}, which is not a callable type."
         )
     params = list(inspect.signature(f).parameters.values())
@@ -454,15 +456,14 @@ def _field_list_from_general_callable(
         # Ignore self parameter.
         params = params[1:]
 
-    try:
-        return _field_list_from_params(f, cls, params)
-    except (UnsupportedNestedTypeAnnotationError, TypeError) as e:
-        if not root_field:
-            raise e
+    out = _field_list_from_params(f, cls, params)
+    if not isinstance(out, UnsupportedNestedTypeMessage):
+        return out
 
-        # Try to support passing things like int, str, Dict[K,V], torch.device
-        # directly into dcargs.cli(). These aren't "type-annotated callables" but
-        # this a nice-to-have.
+    # Try to support passing things like int, str, Dict[K,V], torch.device
+    # directly into dcargs.cli(). These aren't "type-annotated callables" but
+    # this a nice-to-have.
+    if root_field:
         param_count = 0
         has_kw_only = False
         has_var_positional = False
@@ -486,7 +487,7 @@ def _field_list_from_general_callable(
         ):
             # Things look ok!
             if cls is not None:
-                f = cls
+                f = cls  # type: ignore
             return [
                 FieldDefinition(
                     name=_resolver.unwrap_origin(f).__name__,
@@ -496,13 +497,15 @@ def _field_list_from_general_callable(
                     positional=True,
                 )
             ]
-        else:
-            raise e
+
+    # Return error message.
+    assert isinstance(out, UnsupportedNestedTypeMessage)
+    return out
 
 
 def _field_list_from_params(
-    f: Callable, cls: Optional[Type], params: List[inspect.Parameter]
-) -> List[FieldDefinition]:
+    f: Union[Callable, Type], cls: Optional[Type], params: List[inspect.Parameter]
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)
     docstring_from_arg_name = {}
@@ -515,7 +518,7 @@ def _field_list_from_params(
     try:
         hints = get_type_hints(f)
     except TypeError:
-        raise UnsupportedNestedTypeAnnotationError(f"Could not get hints for {f}!")
+        return UnsupportedNestedTypeMessage(f"Could not get hints for {f}!")
 
     field_list = []
     for param in params:
@@ -528,7 +531,7 @@ def _field_list_from_params(
             helptext = _docstrings.get_field_docstring(cls, param.name)
 
         if param.name not in hints:
-            raise UnsupportedNestedTypeAnnotationError(
+            return UnsupportedNestedTypeMessage(
                 f"Expected fully type-annotated callable, but {f} with arguments"
                 f" {tuple(map(lambda p: p.name, params))} has no annotation for"
                 f" '{param.name}'."
@@ -600,8 +603,7 @@ def _get_dataclass_field_default(
         # Special case to ignore default_factory if we write:
         # `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.
         #
-        # In other words, treat it the same way as:
-        # `field: Dataclass`.
+        # In other words, treat it the same way as: `field: Dataclass`.
         #
         # The only time this matters is when we our dataclass has a `__post_init__`
         # function that mutates the dataclass. We choose here to use the default values
