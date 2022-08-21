@@ -18,7 +18,7 @@ Usage distinctions are the result of two API goals:
 - **Strict typing.** Any type that can be annotated and unambiguously parsed
   with an `argparse`-style CLI interface should work out-of-the-box; any public
   API that isn't statically analyzable shouldn't be implemented.
-  - In contrast, many similar libraries still implement features that depend on
+  - In contrast, many similar libraries implement features that depend on
     dynamic argparse-style namespaces, or string-based accessors that can't be
     statically checked.
 
