@@ -3,13 +3,14 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="dcargs" href="../api/dcargs/" /><link rel="prev" title="Serialization" href="../serialization/" />
+<link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Serialization" href="../serialization/" /><link rel="prev" title="15. Nesting In Containers" href="../examples/15_nesting_in_containers/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>Alternative tools - dcargs</title>
+        <title>Goals and alternatives - dcargs</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css" />
     <link rel="stylesheet" type="text/css" href="../_static/ansi.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
     
@@ -138,7 +139,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -182,8 +183,8 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../serialization/">Serialization</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Alternative tools</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -218,36 +219,68 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <section id="alternative-tools">
-<h1>Alternative tools<a class="headerlink" href="#alternative-tools" title="Permalink to this heading">#</a></h1>
+          <section id="goals-and-alternatives">
+<h1>Goals and alternatives<a class="headerlink" href="#goals-and-alternatives" title="Permalink to this heading">#</a></h1>
+<section id="design-goals">
+<h2>Design goals<a class="headerlink" href="#design-goals" title="Permalink to this heading">#</a></h2>
 <p>The core functionality of <code class="docutils literal notranslate"><span class="pre">dcargs</span></code> — generating argument parsers from type
-annotations — can be found as a subset of the features offered by many other
-libraries. A summary of some distinguishing features:</p>
+annotations — overlaps significantly with features offered by other libraries.
+Usage distinctions are the result of two API goals:</p>
+<ul class="simple">
+<li><p><strong>One uninvasive function.</strong> Whenever possible, learning to use <code class="docutils literal notranslate"><span class="pre">dcargs</span></code>
+should reduce to learning to write (type-annotated) Python. For example, types
+are specified using standard annotations, helptext using docstrings, choices
+using the standard <code class="docutils literal notranslate"><span class="pre">typing.Literal</span></code> type, subparsers with <code class="docutils literal notranslate"><span class="pre">typing.Union</span></code> of
+nested types, and positional arguments with <code class="docutils literal notranslate"><span class="pre">/</span></code>.</p>
+<ul>
+<li><p>In contrast, similar libraries have more expansive APIs (sometimes spanning
+dozens of specialized class and functions), and often require
+library-specific structures, decorators, or metadata formats for configuring
+parsing behavior.</p></li>
+</ul>
+</li>
+<li><p><strong>Strict typing.</strong> Any type that can be annotated and unambiguously parsed
+with an <code class="docutils literal notranslate"><span class="pre">argparse</span></code>-style CLI interface should work out-of-the-box; any public
+API that isn’t statically analyzable shouldn’t be implemented.</p>
+<ul>
+<li><p>In contrast, many similar libraries still implement features that depend on
+dynamic argparse-style namespaces, or string-based accessors that can’t be
+statically checked.</p></li>
+</ul>
+</li>
+</ul>
+<p>More concretely, we can also compare specific features. A noncomprehensive set:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
-<col style="width: 14%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
+<col style="width: 10%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"></th>
+<th class="head"><p>Dataclasses</p></th>
+<th class="head"><p>Functions</p></th>
 <th class="head"><p>Literals</p></th>
 <th class="head"><p>Generics</p></th>
 <th class="head"><p>Docstrings as helptext</p></th>
-<th class="head"><p>Nesting</p></th>
+<th class="head"><p>Nested structures</p></th>
 <th class="head"><p>Subparsers</p></th>
-<th class="head"><p>Containers</p></th>
+<th class="head"><p>Dictionaries</p></th>
+<th class="head"><p>Lists, tuples</p></th>
 </tr>
 </thead>
 <tbody>
@@ -258,48 +291,69 @@ libraries. A summary of some distinguishing features:</p>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclass/">argparse-dataclass</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclasses/">argparse-dataclasses</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference external" href="https://github.com/roee30/datargs">datargs</a></p></td>
 <td><p>✓</p></td>
 <td></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-literals" id="id1">1</a></p></td>
+<td></td>
 <td></td>
 <td></td>
 <td><p>✓</p></td>
+<td></td>
 <td><p>✓</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/swansonk14/typed-argument-parser">tap</a></p></td>
-<td><p>✓</p></td>
+<td></td>
 <td></td>
 <td><p>✓</p></td>
 <td></td>
 <td><p>✓</p></td>
+<td></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-tap-subparsers" id="id2">2</a></p></td>
+<td></td>
 <td><p>✓</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference external" href="https://github.com/lebrice/SimpleParsing">simple-parsing</a></p></td>
-<td><p><a class="reference external" href="https://github.com/lebrice/SimpleParsing/pull/86">soon</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-literals" id="id3">3</a></p></td>
 <td></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-subparsers" id="id4">4</a></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclass/">argparse-dataclass</a></p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclasses/">argparse-dataclasses</a></p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/malte-soe/dataclass-cli">dataclass-cli</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
 <td></td>
 <td></td>
 <td></td>
@@ -308,37 +362,128 @@ libraries. A summary of some distinguishing features:</p>
 <td></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/clout/">clout</a></p></td>
+<td><p>✓</p></td>
+<td></td>
 <td></td>
 <td></td>
 <td></td>
 <td><p>✓</p></td>
+<td></td>
 <td></td>
 <td></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py">hf_argparser</a></p></td>
+<td><p>✓</p></td>
 <td></td>
 <td></td>
 <td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://typer.tiangolo.com/">typer</a></p></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id5">5</a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/eladrich/pyrallis/">pyrallis</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
 <td></td>
 <td></td>
 <td><p>✓</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/eladrich/pyrallis/">pyrallis</a></p></td>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/mosaicml/yahp">yahp</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id6">6</a></p></td>
+<td><p>✓</p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-yahp-subparsers" id="id7">7</a></p></td>
+<td></td>
+<td><p>✓</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html">omegaconf</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
 <td></td>
 <td></td>
 <td><p>✓</p></td>
-<td><p>✓</p></td>
 <td></td>
+<td><p>✓</p></td>
 <td><p>✓</p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>Note that most of these other libraries are generally aimed specifically at
-<em>dataclasses</em> rather than general typed callables, but offer other features that
-you might find useful, such as registration for custom types (<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>),
-different approaches for serialization and config files (<code class="docutils literal notranslate"><span class="pre">tap</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>),
-simultaneous parsing of multiple dataclasses (<code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>), etc.</p>
+<!-- prettier-ignore-start --><!-- prettier-ignore-end --><p>Note that most of these other libraries are generally aimed specifically at only
+one of <em>dataclasses</em> (<code class="docutils literal notranslate"><span class="pre">datargs</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>, <code class="docutils literal notranslate"><span class="pre">argparse-dataclass</span></code>,
+<code class="docutils literal notranslate"><span class="pre">argparse-dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">dataclass-cli</span></code>, <code class="docutils literal notranslate"><span class="pre">clout</span></code>, <code class="docutils literal notranslate"><span class="pre">hf_argparser</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>,
+<code class="docutils literal notranslate"><span class="pre">yahp</span></code>), <em>custom structures</em> (<code class="docutils literal notranslate"><span class="pre">tap</span></code>), or <em>functions</em> (<code class="docutils literal notranslate"><span class="pre">typer</span></code>) rather than
+general typed callables, but offer other features that you might find useful,
+such as registration for custom types (<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>), built-in approaches for
+serialization and config files (<code class="docutils literal notranslate"><span class="pre">tap</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>, <code class="docutils literal notranslate"><span class="pre">yahp</span></code>) and, opportunities
+for integration with fields generated using standard argparse definitions
+(<code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>).</p>
+</section>
+<section id="note-on-configuration-systems">
+<h2>Note on configuration systems<a class="headerlink" href="#note-on-configuration-systems" title="Permalink to this heading">#</a></h2>
+<p>Our API is designed to be used to configure general applications and
+computational experiments written in Python, but intentionally tries to avoid
+building a full configuration framework (eg <code class="docutils literal notranslate"><span class="pre">hydra</span></code>). These frameworks can
+typically be broken into three components with varying levels of integration,
+which include syntax and logic for <strong>(1)</strong> defining configurable fields, <strong>(2)</strong>
+saving and choosing between a set of base configurations, and <strong>(3)</strong> overriding
+configurable values at the command-line.</p>
+<p>We take advantage of modern Python features for <strong>(1)</strong> and focus completely on
+<strong>(3)</strong> in a way that’s agnostic to a project’s preferred approach for <strong>(2)</strong>.
+<strong>(2)</strong> is left as an exercise to the user; it tends to be the most open-ended
+and varied in terms of project and personal preferences, but is typically
+straightforward to implement given <strong>(1)</strong>.</p>
+<p>In contrast, popular libraries oriented toward configuration often strive to be
+more “batteries-included”, which is convenient but requires prescribing things
+like specific formats, processes, or even directory structures for working with
+saved configurations. This requires a lot more moving parts, which can be
+limiting if any one of them is insufficient for a particular use case. (or if
+you just don’t like working with YAML formats)</p>
+<dl class="footnote brackets">
+<dt class="label" id="fn-datargs-literals"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Not supported for mixed types (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>).</p>
+</dd>
+<dt class="label" id="fn-tap-subparsers"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>Supported but not strongly typed.</p>
+</dd>
+<dt class="label" id="fn-simp-literals"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>Not supported for mixed (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>) or in container (eg <code class="docutils literal notranslate"><span class="pre">List[Literal[1,</span> <span class="pre">2]]</span></code>) types.</p>
+</dd>
+<dt class="label" id="fn-simp-subparsers"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
+<dd><p>Supported but not strongly typed.</p>
+</dd>
+<dt class="label" id="fn-typer-containers"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">typer</span></code> limit itself to positional arguments, which can be more readable in certain cases but means that only one variable-length argument (such as <code class="docutils literal notranslate"><span class="pre">List[int]</span></code>) is supported per argument parser.</p>
+</dd>
+<dt class="label" id="fn-yahp-docstrings"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
+<dd><p>Via the <code class="docutils literal notranslate"><span class="pre">hp.auto()</span></code> function, which can parse docstrings from external classes. Usage is different from the more direct parsing that <code class="docutils literal notranslate"><span class="pre">dcargs</span></code>, <code class="docutils literal notranslate"><span class="pre">tap</span></code>, and <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>/<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code> support.</p>
+</dd>
+<dt class="label" id="fn-yahp-subparsers"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
+<dd><p>Supported but not strongly typed.</p>
+</dd>
+</dl>
+</section>
 </section>
 
         </article>
@@ -346,23 +491,23 @@ simultaneous parsing of multiple dataclasses (<code class="docutils literal notr
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../api/dcargs/">
+          <a class="next-page" href="../serialization/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></div>
+                <div class="title">Serialization</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../serialization/">
+          <a class="prev-page" href="../examples/15_nesting_in_containers/">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Serialization</div>
+                <div class="title">15. Nesting In Containers</div>
                 
               </div>
             </a>
@@ -391,8 +536,28 @@ simultaneous parsing of multiple dataclasses (<code class="docutils literal notr
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Goals and alternatives</a><ul>
+<li><a class="reference internal" href="#design-goals">Design goals</a></li>
+<li><a class="reference internal" href="#note-on-configuration-systems">Note on configuration systems</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

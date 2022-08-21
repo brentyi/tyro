@@ -35,11 +35,14 @@ Unions over nested types (classes or dataclasses) are populated using subparsers
            all: bool = False
        
        
-       def main(cmd: Union[Checkout, Commit, None]) -> None:
+       def main(cmd: Union[Checkout, Commit]) -> None:
            print(cmd)
        
        
        if __name__ == "__main__":
+           # Note that we can also pass `Union[Checkout, Command]` directly into
+           # `dcargs.cli()`; this is understood by dcargs and pyright, but unfortunately not by
+           # mypy.
            dcargs.cli(main)
 
 ------------
