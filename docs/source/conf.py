@@ -390,3 +390,4 @@ def docstring(app, what, name, obj, options, lines):
 
 def setup(app):
     app.connect("autodoc-process-docstring", docstring)
+    app.add_stylesheet("css/compact_table_header.css")
