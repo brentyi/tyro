@@ -3,9 +3,15 @@
 import functools
 import re
 import textwrap
-from typing import List, Sequence, Type, Union
+from typing import Iterable, List, Sequence, Type, Union
 
 from . import _resolver
+
+dummy_field_name = "__dcargs_dummy_field_name__"
+
+
+def _strip_dummy_field_names(parts: Iterable[str]) -> Iterable[str]:
+    return filter(lambda name: len(name) > 0 and name != dummy_field_name, parts)
 
 
 def make_field_name(parts: Sequence[str]) -> str:
@@ -15,7 +21,7 @@ def make_field_name(parts: Sequence[str]) -> str:
     ('parents', '1', 'child') => 'parents:1.child'
     """
     out: List[str] = []
-    for i, p in enumerate([p for p in parts if len(p) > 0]):
+    for i, p in enumerate(_strip_dummy_field_names(parts)):
         if i > 0:
             out.append(".")
 
@@ -24,7 +30,8 @@ def make_field_name(parts: Sequence[str]) -> str:
     return "".join(out)
 
 
-SUBPARSER_DEST_FMT: str = "{name} (positional)"
+def make_subparser_dest(name: str) -> str:
+    return f"{name} (positional)"
 
 
 def dedent(text: str) -> str:
@@ -59,7 +66,10 @@ def _subparser_name_from_type(cls: Type) -> str:
 
 
 def subparser_name_from_type(prefix: str, cls: Union[Type, None]) -> str:
-    return f"{prefix}:{_subparser_name_from_type(cls) if cls is not None else 'None'}"
+    suffix = _subparser_name_from_type(cls) if cls is not None else "None"
+    if len(prefix) == 0:
+        return suffix
+    return f"{prefix}:{suffix}"
 
 
 @functools.lru_cache(maxsize=None)

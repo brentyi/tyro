@@ -51,6 +51,8 @@ class ArgumentDefinition:
         kwargs.pop("instantiator")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flag = kwargs.pop("name_or_flag")
+        if len(name_or_flag) == 0:
+            name_or_flag = _strings.dummy_field_name
 
         # We're actually going to skip the default field: if an argument is unset, the
         # MISSING value will be detected in _calling.py and the field default will
@@ -236,7 +238,9 @@ def _rule_generate_helptext(
         # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
         docstring_help = docstring_help.replace("%", "%%")
         help_parts.append(docstring_help)
-    elif arg.field.positional:
+    elif arg.field.positional and arg.field.name != _strings.dummy_field_name:
+        # Place the type in the helptext. Note that we skip this for dummy fields, which
+        # will sitll have the type in the metavar.
         help_parts.append(str(lowered.metavar))
 
     default = lowered.default
@@ -330,6 +334,6 @@ def _rule_positional_special_handling(
         lowered,
         dest=None,
         required=None,  # Can't be passed in for positionals.
-        metavar=metavar,
+        metavar=metavar if len(metavar) > 0 else lowered.metavar,
         nargs=nargs,
     )

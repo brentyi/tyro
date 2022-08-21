@@ -163,6 +163,25 @@ def test_subparser():
         dcargs.cli(Subparser, args=["--x", "1", "bc:smtp-server", "--bc.y", "3"])
 
 
+def test_subparser_root():
+    @dataclasses.dataclass
+    class HTTPServer:
+        y: int
+
+    @dataclasses.dataclass
+    class SMTPServer:
+        z: int
+
+    @dataclasses.dataclass
+    class Subparser:
+        x: int
+        bc: Union[HTTPServer, SMTPServer]
+
+    assert dcargs.cli(
+        Union[HTTPServer, SMTPServer], args=["http-server", "--y", "3"]  # type: ignore
+    ) == HTTPServer(y=3)
+
+
 def test_subparser_with_default():
     @dataclasses.dataclass
     class DefaultHTTPServer:

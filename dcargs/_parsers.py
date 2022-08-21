@@ -73,7 +73,7 @@ class ParserSpecification:
         subparsers_from_name = {}
 
         field_list = _fields.field_list_from_callable(
-            f=f, default_instance=default_instance, root_field=True
+            f=f, default_instance=default_instance
         )
         for field in field_list:
             field = dataclasses.replace(
@@ -365,7 +365,7 @@ class SubparsersSpecification:
                 dest=_strings.make_field_name(
                     [
                         parent_parser.prefix,
-                        _strings.SUBPARSER_DEST_FMT.format(name=self.name),
+                        _strings.make_subparser_dest(name=self.name),
                     ]
                 ),
                 description=self.description,
