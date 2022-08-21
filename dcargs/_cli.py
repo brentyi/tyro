@@ -1,11 +1,12 @@
 """Core public API."""
 
 import argparse
-from typing import Callable, Optional, Sequence, TypeVar, Union, overload
+import dataclasses
+from typing import Callable, Optional, Sequence, Type, TypeVar, Union, cast, overload
 
 from typing_extensions import Literal, assert_never
 
-from . import _argparse_formatter, _calling, _fields, _parsers
+from . import _argparse_formatter, _calling, _fields, _parsers, _strings
 
 T = TypeVar("T")
 
@@ -155,6 +156,20 @@ def _cli_impl(
         _fields.MISSING_NONPROP if default_instance is None else default_instance
     )
 
+    if not _fields.is_nested_type(cast(Type, f), default_instance_internal):
+        dummy_field = dataclasses.field(
+            default=default_instance
+            if default_instance is not None
+            else dataclasses.MISSING
+        )
+        f = dataclasses.make_dataclass(
+            cls_name="",
+            fields=[(_strings.dummy_field_name, cast(Type, f), dummy_field)],
+        )
+        dummy_wrapped = True
+    else:
+        dummy_wrapped = False
+
     # Map a callable to the relevant CLI arguments + subparsers.
     parser_definition = _parsers.ParserSpecification.from_callable(
         f,
@@ -175,6 +190,12 @@ def _cli_impl(
         if _return_stage == "parser":
             return parser
         value_from_prefixed_field_name = vars(parser.parse_args(args=args))
+
+    if dummy_wrapped:
+        value_from_prefixed_field_name = {
+            k.replace(_strings.dummy_field_name, ""): v
+            for k, v in value_from_prefixed_field_name.items()
+        }
 
     try:
         # Attempt to call `f` using whatever was passed in.
@@ -197,6 +218,9 @@ def _cli_impl(
         f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
         f" {consumed_keywords}"
     )
+
+    if dummy_wrapped:
+        out = getattr(out, _strings.dummy_field_name)
     if _return_stage == "f_out":
         return out
 

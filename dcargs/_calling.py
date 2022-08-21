@@ -50,9 +50,7 @@ def call_from_args(
         ] = arg
 
     for field in _fields.field_list_from_callable(
-        f,
-        default_instance=default_instance,
-        root_field=True,
+        f, default_instance=default_instance
     ):  # type: ignore
         value: Any
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
@@ -121,9 +119,7 @@ def call_from_args(
 
             subparser_def = parser_definition.subparsers_from_name[field.name]
 
-            subparser_dest = _strings.SUBPARSER_DEST_FMT.format(
-                name=prefixed_field_name
-            )
+            subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)
             consumed_keywords.add(subparser_dest)
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = get_value_from_arg(subparser_dest)
