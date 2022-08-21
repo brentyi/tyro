@@ -14,6 +14,11 @@
 Module Contents
 ---------------
 
+.. py:data:: dummy_field_name
+   :annotation: = __dcargs_dummy_field_name__
+
+   
+
 .. py:function:: make_field_name(parts: Sequence[str]) -> str
 
    
@@ -22,10 +27,8 @@ Module Contents
    ('parent', 'child') => 'parent.child'
    ('parents', '1', 'child') => 'parents:1.child'
 
-.. py:data:: SUBPARSER_DEST_FMT
-   :annotation: :str = {name} (positional)
+.. py:function:: make_subparser_dest(name: str) -> str
 
-   
 
 .. py:function:: dedent(text: str) -> str
 

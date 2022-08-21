@@ -276,9 +276,7 @@
         <span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
 
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">,</span>
-        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
-        <span class="n">root_field</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span>
     <span class="p">):</span>  <span class="c1"># type: ignore</span>
         <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
         <span class="n">prefixed_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field_name_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
@@ -347,9 +345,7 @@
 
             <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_name</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 
-            <span class="n">subparser_dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">SUBPARSER_DEST_FMT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">prefixed_field_name</span>
-            <span class="p">)</span>
+            <span class="n">subparser_dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">)</span>
             <span class="n">consumed_keywords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">subparser_dest</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">subparser_dest</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="p">:</span>
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">subparser_dest</span><span class="p">)</span>

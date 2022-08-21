@@ -227,11 +227,12 @@
 <span></span><span class="sd">&quot;&quot;&quot;Core public API.&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">argparse</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">assert_never</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_calling</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_calling</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_strings</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
@@ -381,6 +382,20 @@
         <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default_instance</span>
     <span class="p">)</span>
 
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
+        <span class="n">dummy_field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">default_instance</span>
+            <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span>
+        <span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">make_dataclass</span><span class="p">(</span>
+            <span class="n">cls_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">fields</span><span class="o">=</span><span class="p">[(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">dummy_field</span><span class="p">)],</span>
+        <span class="p">)</span>
+        <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
     <span class="n">parser_definition</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
         <span class="n">f</span><span class="p">,</span>
@@ -401,6 +416,12 @@
         <span class="k">if</span> <span class="n">_return_stage</span> <span class="o">==</span> <span class="s2">&quot;parser&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">parser</span>
         <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">dummy_wrapped</span><span class="p">:</span>
+        <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">):</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
@@ -423,6 +444,9 @@
         <span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">, but only consumed&quot;</span>
         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">consumed_keywords</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">dummy_wrapped</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">_return_stage</span> <span class="o">==</span> <span class="s2">&quot;f_out&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">out</span>
 
