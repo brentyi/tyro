@@ -1,0 +1,22 @@
+/* This stylesheet is currently overfit to the comparison table. Should be
+ * revisited if we add more tables to the documentation. */
+table.docutils thead,
+table.docutils tr,
+table.docutils th {
+  background: none;
+}
+table.docutils thead th {
+  position: relative;
+  height: 12em;
+  text-align: left;
+  border: 0;
+}
+table.docutils thead th p {
+  transform: rotate(300deg);
+  width: 1em;
+  overflow: visible;
+  white-space: nowrap;
+  position: absolute;
+  bottom: 0;
+  z-index: 1;
+}
