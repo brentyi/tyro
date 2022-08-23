@@ -309,32 +309,6 @@ def test_generic_subparsers_in_container():
     )
 
 
-def test_generic_inherited():
-    class UnrelatedParentClass:
-        pass
-
-    T = TypeVar("T")
-
-    @dataclasses.dataclass
-    class ActualParentClass(Generic[T]):
-        x: T  # Documentation 1
-
-        # Documentation 2
-        y: T
-
-        z: T = 3  # type: ignore
-        """Documentation 3"""
-
-    @dataclasses.dataclass
-    class ChildClass(UnrelatedParentClass, ActualParentClass[int]):
-        pass
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        assert dcargs.cli(
-            ChildClass, args=["--x", "1", "--y", "2", "--z", "3"]
-        ) == ChildClass(1, 2, 3)
-
-
 def test_serialize_missing():
     @dataclasses.dataclass
     class TupleGenericVariableMissing(Generic[ScalarType]):

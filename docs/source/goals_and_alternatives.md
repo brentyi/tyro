@@ -60,17 +60,17 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [^simp_subparsers]: Supported but not strongly typed.
 [^yahp_subparsers]: Supported but not strongly typed.
 [^datargs_literals]: Not supported for mixed types (eg `Literal[5, "five"]`).
-[^typer_containers]: `typer` limit itself to positional arguments, which can be more readable in certain cases but means that only one variable-length argument (such as `List[int]`) is supported per argument parser.
+[^typer_containers]: `typer` uses positional arguments for all required fields, which means that only one variable-length argument (such as `List[int]`) without a default is supported per argument parser.
 [^yahp_docstrings]: Via the `hp.auto()` function, which can parse docstrings from external classes. Usage is different from the more direct parsing that `dcargs`, `tap`, and `simple-parsing`/`pyrallis` support.
 
 <!-- prettier-ignore-end -->
 
 Note that most of these other libraries are generally aimed specifically at only
-one of _dataclasses_ (`datargs`, `simple-parsing`, `argparse-dataclass`,
+one of dataclasses (`datargs`, `simple-parsing`, `argparse-dataclass`,
 `argparse-dataclasses`, `dataclass-cli`, `clout`, `hf_argparser`, `pyrallis`,
-`yahp`), _custom structures_ (`tap`), or _functions_ (`typer`) rather than
-general typed callables, but offer other features that you might find useful,
-such as registration for custom types (`pyrallis`), built-in approaches for
+`yahp`), custom structures (`tap`), or functions (`typer`) rather than general
+typed callables, but offer other features that you might find useful, such as
+registration for custom types (`pyrallis`), built-in approaches for
 serialization and config files (`tap`, `pyrallis`, `yahp`) and, opportunities
 for integration with fields generated using standard argparse definitions
 (`simple-parsing`).
@@ -79,21 +79,21 @@ for integration with fields generated using standard argparse definitions
 
 Our API is designed to be used to configure general applications and
 computational experiments written in Python, but intentionally tries to avoid
-building a full configuration framework (eg `hydra`). These frameworks can
-typically be broken into three components with varying levels of integration,
-which include syntax and logic for **(1)** defining configurable fields, **(2)**
-saving and choosing between a set of base configurations, and **(3)** overriding
-configurable values at the command-line.
+building a full configuration framework (for example, `hydra`). These frameworks
+can typically be broken into three components with varying levels of
+integration, which include syntax and logic for **(1)** defining configurable
+fields, **(2)** saving and choosing between a set of base configurations, and
+**(3)** overriding configurable values at the command-line.
 
-We take advantage of modern Python features for **(1)** and focus completely on
-**(3)** in a way that's agnostic to a project's preferred approach for **(2)**.
-**(2)** is left as an exercise to the user; it tends to be the most open-ended
-and varied in terms of project and personal preferences, but is typically
-straightforward to implement given **(1)**.
+`dcargs` is meant to take advantage of modern Python features for **(1)** and
+focus completely on **(3)** in a way that's agnostic to a project's preferred
+approach for **(2)**. **(2)** is left as an exercise to the user; it tends to be
+the most open-ended and varied in terms of project and personal preferences, but
+is typically straightforward to implement given **(1)**.
 
 In contrast, popular libraries oriented toward configuration often strive to be
 more "batteries-included", which is convenient but requires prescribing things
-like specific formats, processes, or even directory structures for working with
-saved configurations. This requires a lot more moving parts, which can be
-limiting if any one of them is insufficient for a particular use case. (or if
-you just don't like working with YAML formats)
+like specific formats, processes, or directory structures for working with saved
+configurations. This requires more moving parts, which can be limiting if any
+one of them is insufficient for a particular use case. (or if you just don't
+like working with YAML formats)

@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, List, Tuple, TypeVar, Union
+from typing import List, Tuple, Union
 
 import pytest
 
@@ -81,34 +81,6 @@ def test_nested_annotation():
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(main, args=[])
-
-
-def test_generic_inherited():
-    """Inheriting from generics is currently not implemented. It's unclear whether this
-    is feasible, because generics are lost in the mro:
-    https://github.com/python/typing/issues/777"""
-
-    class UnrelatedParentClass:
-        pass
-
-    T = TypeVar("T")
-
-    @dataclasses.dataclass
-    class ActualParentClass(Generic[T]):
-        x: T  # Documentation 1
-
-        # Documentation 2
-        y: T
-
-        z: T = 3  # type: ignore
-        """Documentation 3"""
-
-    @dataclasses.dataclass
-    class ChildClass(UnrelatedParentClass, ActualParentClass[int]):
-        pass
-
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(ChildClass, args=["--x", "1", "--y", "2", "--z", "3"])
 
 
 def test_missing_annotation_1():
