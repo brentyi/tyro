@@ -30,13 +30,26 @@ def resolve_generic_types(
     class, and a mapping from typevars to concrete types."""
 
     origin_cls = get_origin(cls)
+
+    type_from_typevars = {}
     if origin_cls is not None and hasattr(origin_cls, "__parameters__"):
         typevars = origin_cls.__parameters__
         typevar_values = get_args(cls)
         assert len(typevars) == len(typevar_values)
-        return origin_cls, dict(zip(typevars, typevar_values))
-    else:
-        return cls, {}
+        cls = origin_cls
+        type_from_typevars.update(dict(zip(typevars, typevar_values)))
+
+    if hasattr(cls, "__orig_bases__"):
+        bases = getattr(cls, "__orig_bases__")
+        for base in bases:
+            origin_base = unwrap_origin(base)
+            if origin_base is base or not hasattr(origin_base, "__parameters__"):
+                continue
+            typevars = origin_base.__parameters__
+            typevar_values = get_args(base)
+            type_from_typevars.update(dict(zip(typevars, typevar_values)))
+
+    return cls, type_from_typevars
 
 
 def resolved_fields(cls: Type) -> List[dataclasses.Field]:

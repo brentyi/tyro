@@ -672,3 +672,28 @@ def test_generic_subparsers():
 
     with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
         dcargs.cli(main_with_default, args=[])
+
+
+def test_generic_inherited():
+    class UnrelatedParentClass:
+        pass
+
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class ActualParentClass(Generic[T]):
+        x: T  # Documentation 1
+
+        # Documentation 2
+        y: T
+
+        z: T = 3  # type: ignore
+        """Documentation 3"""
+
+    @dataclasses.dataclass
+    class ChildClass(UnrelatedParentClass, ActualParentClass[int]):
+        pass
+
+    assert dcargs.cli(
+        ChildClass, args=["--x", "1", "--y", "2", "--z", "3"]
+    ) == ChildClass(x=1, y=2, z=3)

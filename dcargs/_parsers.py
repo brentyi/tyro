@@ -86,15 +86,8 @@ class ParserSpecification:
                 ),
             )
             if isinstance(field.typ, TypeVar):
-                # Found an unbound TypeVar. This could be because inheriting from
-                # generics is currently not implemented. It's unclear whether this is
-                # feasible, because generics are lost in the mro:
-                # https://github.com/python/typing/issues/777
                 raise _instantiators.UnsupportedTypeAnnotationError(
-                    f"Field {field.name} has an unbound TypeVar: {field.typ}. Note"
-                    " that inheriting from generics is currently not implemented."
-                    " It's unclear whether this is feasible, because generics are"
-                    " lost in the mro: https://github.com/python/typing/issues/777"
+                    f"Field {field.name} has an unbound TypeVar: {field.typ}."
                 )
 
             # (1) Handle Unions over callables; these result in subparsers.
