@@ -313,15 +313,8 @@
                 <span class="p">),</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
-                <span class="c1"># Found an unbound TypeVar. This could be because inheriting from</span>
-                <span class="c1"># generics is currently not implemented. It&#39;s unclear whether this is</span>
-                <span class="c1"># feasible, because generics are lost in the mro:</span>
-                <span class="c1"># https://github.com/python/typing/issues/777</span>
                 <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">. Note&quot;</span>
-                    <span class="s2">&quot; that inheriting from generics is currently not implemented.&quot;</span>
-                    <span class="s2">&quot; It&#39;s unclear whether this is feasible, because generics are&quot;</span>
-                    <span class="s2">&quot; lost in the mro: https://github.com/python/typing/issues/777&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
             <span class="c1"># (1) Handle Unions over callables; these result in subparsers.</span>

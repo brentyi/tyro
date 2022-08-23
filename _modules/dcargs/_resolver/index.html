@@ -257,13 +257,26 @@
 <span class="sd">    class, and a mapping from typevars to concrete types.&quot;&quot;&quot;</span>
 
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+    <span class="n">type_from_typevars</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="n">origin_cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="p">,</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">):</span>
         <span class="n">typevars</span> <span class="o">=</span> <span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span>
         <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevars</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevar_values</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">origin_cls</span><span class="p">,</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">,</span> <span class="p">{}</span></div>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">origin_cls</span>
+        <span class="n">type_from_typevars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">):</span>
+        <span class="n">bases</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+            <span class="n">origin_base</span> <span class="o">=</span> <span class="n">unwrap_origin</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">origin_base</span> <span class="ow">is</span> <span class="n">base</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_base</span><span class="p">,</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">typevars</span> <span class="o">=</span> <span class="n">origin_base</span><span class="o">.</span><span class="n">__parameters__</span>
+            <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+            <span class="n">type_from_typevars</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">type_from_typevars</span></div>
 
 
 <div class="viewcode-block" id="resolved_fields"><a class="viewcode-back" href="../../../api/dcargs/_resolver/#dcargs._resolver.resolved_fields">[docs]</a><span class="k">def</span> <span class="nf">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">]:</span>

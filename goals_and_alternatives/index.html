@@ -431,11 +431,11 @@ statically checked.</p></li>
 </table>
 </div>
 <!-- prettier-ignore-start --><!-- prettier-ignore-end --><p>Note that most of these other libraries are generally aimed specifically at only
-one of <em>dataclasses</em> (<code class="docutils literal notranslate"><span class="pre">datargs</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>, <code class="docutils literal notranslate"><span class="pre">argparse-dataclass</span></code>,
+one of dataclasses (<code class="docutils literal notranslate"><span class="pre">datargs</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>, <code class="docutils literal notranslate"><span class="pre">argparse-dataclass</span></code>,
 <code class="docutils literal notranslate"><span class="pre">argparse-dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">dataclass-cli</span></code>, <code class="docutils literal notranslate"><span class="pre">clout</span></code>, <code class="docutils literal notranslate"><span class="pre">hf_argparser</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>,
-<code class="docutils literal notranslate"><span class="pre">yahp</span></code>), <em>custom structures</em> (<code class="docutils literal notranslate"><span class="pre">tap</span></code>), or <em>functions</em> (<code class="docutils literal notranslate"><span class="pre">typer</span></code>) rather than
-general typed callables, but offer other features that you might find useful,
-such as registration for custom types (<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>), built-in approaches for
+<code class="docutils literal notranslate"><span class="pre">yahp</span></code>), custom structures (<code class="docutils literal notranslate"><span class="pre">tap</span></code>), or functions (<code class="docutils literal notranslate"><span class="pre">typer</span></code>) rather than general
+typed callables, but offer other features that you might find useful, such as
+registration for custom types (<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>), built-in approaches for
 serialization and config files (<code class="docutils literal notranslate"><span class="pre">tap</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>, <code class="docutils literal notranslate"><span class="pre">yahp</span></code>) and, opportunities
 for integration with fields generated using standard argparse definitions
 (<code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>).</p>
@@ -444,22 +444,22 @@ for integration with fields generated using standard argparse definitions
 <h2>Note on configuration systems<a class="headerlink" href="#note-on-configuration-systems" title="Permalink to this heading">#</a></h2>
 <p>Our API is designed to be used to configure general applications and
 computational experiments written in Python, but intentionally tries to avoid
-building a full configuration framework (eg <code class="docutils literal notranslate"><span class="pre">hydra</span></code>). These frameworks can
-typically be broken into three components with varying levels of integration,
-which include syntax and logic for <strong>(1)</strong> defining configurable fields, <strong>(2)</strong>
-saving and choosing between a set of base configurations, and <strong>(3)</strong> overriding
-configurable values at the command-line.</p>
-<p>We take advantage of modern Python features for <strong>(1)</strong> and focus completely on
-<strong>(3)</strong> in a way that’s agnostic to a project’s preferred approach for <strong>(2)</strong>.
-<strong>(2)</strong> is left as an exercise to the user; it tends to be the most open-ended
-and varied in terms of project and personal preferences, but is typically
-straightforward to implement given <strong>(1)</strong>.</p>
+building a full configuration framework (for example, <code class="docutils literal notranslate"><span class="pre">hydra</span></code>). These frameworks
+can typically be broken into three components with varying levels of
+integration, which include syntax and logic for <strong>(1)</strong> defining configurable
+fields, <strong>(2)</strong> saving and choosing between a set of base configurations, and
+<strong>(3)</strong> overriding configurable values at the command-line.</p>
+<p><code class="docutils literal notranslate"><span class="pre">dcargs</span></code> is meant to take advantage of modern Python features for <strong>(1)</strong> and
+focus completely on <strong>(3)</strong> in a way that’s agnostic to a project’s preferred
+approach for <strong>(2)</strong>. <strong>(2)</strong> is left as an exercise to the user; it tends to be
+the most open-ended and varied in terms of project and personal preferences, but
+is typically straightforward to implement given <strong>(1)</strong>.</p>
 <p>In contrast, popular libraries oriented toward configuration often strive to be
 more “batteries-included”, which is convenient but requires prescribing things
-like specific formats, processes, or even directory structures for working with
-saved configurations. This requires a lot more moving parts, which can be
-limiting if any one of them is insufficient for a particular use case. (or if
-you just don’t like working with YAML formats)</p>
+like specific formats, processes, or directory structures for working with saved
+configurations. This requires more moving parts, which can be limiting if any
+one of them is insufficient for a particular use case. (or if you just don’t
+like working with YAML formats)</p>
 <dl class="footnote brackets">
 <dt class="label" id="fn-datargs-literals"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
 <dd><p>Not supported for mixed types (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>).</p>
@@ -474,7 +474,7 @@ you just don’t like working with YAML formats)</p>
 <dd><p>Supported but not strongly typed.</p>
 </dd>
 <dt class="label" id="fn-typer-containers"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">typer</span></code> limit itself to positional arguments, which can be more readable in certain cases but means that only one variable-length argument (such as <code class="docutils literal notranslate"><span class="pre">List[int]</span></code>) is supported per argument parser.</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">typer</span></code> uses positional arguments for all required fields, which means that only one variable-length argument (such as <code class="docutils literal notranslate"><span class="pre">List[int]</span></code>) without a default is supported per argument parser.</p>
 </dd>
 <dt class="label" id="fn-yahp-docstrings"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
 <dd><p>Via the <code class="docutils literal notranslate"><span class="pre">hp.auto()</span></code> function, which can parse docstrings from external classes. Usage is different from the more direct parsing that <code class="docutils literal notranslate"><span class="pre">dcargs</span></code>, <code class="docutils literal notranslate"><span class="pre">tap</span></code>, and <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>/<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code> support.</p>
