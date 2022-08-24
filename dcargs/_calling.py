@@ -115,15 +115,16 @@ def call_from_args(
         else:
             # Unions over dataclasses (subparsers). This is the only other option.
             assert len(parser_definition.subparsers_from_name) > 0
-            assert field.name in parser_definition.subparsers_from_name
+            assert prefixed_field_name in parser_definition.subparsers_from_name
 
-            subparser_def = parser_definition.subparsers_from_name[field.name]
+            subparser_def = parser_definition.subparsers_from_name[prefixed_field_name]
 
             subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)
             consumed_keywords.add(subparser_dest)
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = get_value_from_arg(subparser_dest)
             else:
+                assert subparser_def.default_instance not in _fields.MISSING_SINGLETONS
                 default_instance = subparser_def.default_instance
                 # assert default_instance is not None
                 subparser_name = None
