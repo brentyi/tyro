@@ -103,15 +103,13 @@ class ParserSpecification:
                     not avoid_subparsers
                     # Required subparsers => must create a subparser.
                     or subparsers_attempt.required
-                    # If the output can be None, the only way to specify whether this is
-                    # or isn't None is with a subparser.
-                    or subparsers_attempt.can_be_none
                 ):
-                    subparsers_from_name[subparsers_attempt.name] = subparsers_attempt
+                    subparsers_from_name[
+                        _strings.make_field_name([prefix, subparsers_attempt.name])
+                    ] = subparsers_attempt
                     continue
                 else:
                     field = dataclasses.replace(field, typ=type(field.default))
-                    assert _fields.is_nested_type(field.typ, field.default)
 
             # (2) Handle nested callables.
             if _fields.is_nested_type(field.typ, field.default):
@@ -129,6 +127,10 @@ class ParserSpecification:
                 )
                 args.extend(nested_parser.args)
 
+                # Include nested subparsers.
+                subparsers_from_name.update(nested_parser.subparsers_from_name)
+
+                # Include nested strings.
                 for k, v in nested_parser.helptext_from_nested_class_field_name.items():
                     helptext_from_nested_class_field_name[
                         _strings.make_field_name([field.name, k])
@@ -355,12 +357,7 @@ class SubparsersSpecification:
         for p in prev_subparser_tree_nodes:
             # Add subparsers to every node in previous level of the tree.
             argparse_subparsers = p.add_subparsers(
-                dest=_strings.make_field_name(
-                    [
-                        parent_parser.prefix,
-                        _strings.make_subparser_dest(name=self.name),
-                    ]
-                ),
+                dest=_strings.make_subparser_dest(self.prefix),
                 description=self.description,
                 required=self.required,
                 title=termcolor.colored(title, attrs=["bold"]),

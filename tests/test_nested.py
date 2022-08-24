@@ -697,3 +697,34 @@ def test_generic_inherited():
     assert dcargs.cli(
         ChildClass, args=["--x", "1", "--y", "2", "--z", "3"]
     ) == ChildClass(x=1, y=2, z=3)
+
+
+def test_subparser_in_nested():
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+
+    @dataclasses.dataclass
+    class Nested2:
+        subcommand: Union[A, B]
+
+    @dataclasses.dataclass
+    class Nested1:
+        nested2: Nested2
+
+    @dataclasses.dataclass
+    class Parent:
+        nested1: Nested1
+
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:a --nested1.nested2.subcommand.a 3".split(" "),
+    ) == Parent(Nested1(Nested2(A(3))))
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:b --nested1.nested2.subcommand.b 7".split(" "),
+    ) == Parent(Nested1(Nested2(B(7))))
