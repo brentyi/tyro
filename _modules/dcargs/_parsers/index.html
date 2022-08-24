@@ -330,15 +330,13 @@
                     <span class="ow">not</span> <span class="n">avoid_subparsers</span>
                     <span class="c1"># Required subparsers =&gt; must create a subparser.</span>
                     <span class="ow">or</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">required</span>
-                    <span class="c1"># If the output can be None, the only way to specify whether this is</span>
-                    <span class="c1"># or isn&#39;t None is with a subparser.</span>
-                    <span class="ow">or</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">can_be_none</span>
                 <span class="p">):</span>
-                    <span class="n">subparsers_from_name</span><span class="p">[</span><span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparsers_attempt</span>
+                    <span class="n">subparsers_from_name</span><span class="p">[</span>
+                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">subparsers_attempt</span>
                     <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
-                    <span class="k">assert</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
 
             <span class="c1"># (2) Handle nested callables.</span>
             <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
@@ -356,6 +354,10 @@
                 <span class="p">)</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
 
+                <span class="c1"># Include nested subparsers.</span>
+                <span class="n">subparsers_from_name</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_name</span><span class="p">)</span>
+
+                <span class="c1"># Include nested strings.</span>
                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
                         <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
@@ -582,12 +584,7 @@
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">prev_subparser_tree_nodes</span><span class="p">:</span>
             <span class="c1"># Add subparsers to every node in previous level of the tree.</span>
             <span class="n">argparse_subparsers</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
-                <span class="n">dest</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">parent_parser</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span>
-                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
-                    <span class="p">]</span>
-                <span class="p">),</span>
+                <span class="n">dest</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">),</span>
                 <span class="n">description</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
                 <span class="n">required</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
                 <span class="n">title</span><span class="o">=</span><span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">]),</span>

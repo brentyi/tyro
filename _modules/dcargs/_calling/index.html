@@ -342,15 +342,16 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Unions over dataclasses (subparsers). This is the only other option.</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-            <span class="k">assert</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_name</span>
+            <span class="k">assert</span> <span class="n">prefixed_field_name</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_name</span>
 
-            <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_name</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_name</span><span class="p">[</span><span class="n">prefixed_field_name</span><span class="p">]</span>
 
             <span class="n">subparser_dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">)</span>
             <span class="n">consumed_keywords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">subparser_dest</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">subparser_dest</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="p">:</span>
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">subparser_dest</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
                 <span class="n">default_instance</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span>
                 <span class="c1"># assert default_instance is not None</span>
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="kc">None</span>
