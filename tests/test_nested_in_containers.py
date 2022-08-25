@@ -125,6 +125,14 @@ def test_list_object():
     assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
+def test_list_any():
+    def main(x: List[Any] = [Color(255, 0, 0)]) -> Any:
+        return x
+
+    assert dcargs.cli(main, args=[]) == [Color(255, 0, 0)]
+    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
+
+
 def test_tuple_in_list():
     def main(x: List[Tuple[Color]] = [(Color(255, 0, 0),)]) -> Any:
         return x
@@ -320,3 +328,46 @@ def test_generic_in_dict_with_default():
         main,
         args="--x.int.g 0".split(" "),
     ) == {"float": GenericColor(0.5, 0.2, 0.3), "int": GenericColor(25, 0, 3)}
+
+
+def test_generic_in_double_nested_dict_with_default():
+    ScalarType = TypeVar("ScalarType", int, float)
+
+    @dataclasses.dataclass
+    class GenericColor(Generic[ScalarType]):
+        r: ScalarType
+        g: ScalarType
+        b: ScalarType
+
+    def main(
+        x: Dict[str, Dict[str, GenericColor]] = {
+            "hello": {
+                "float": GenericColor(0.5, 0.2, 0.3),
+                "int": GenericColor[int](25, 2, 3),
+            }
+        }
+    ) -> Any:
+        return x
+
+    assert dcargs.cli(main, args="--x.hello.float.g 0.1".split(" "),)["hello"][
+        "float"
+    ] == GenericColor(0.5, 0.1, 0.3)
+    assert dcargs.cli(main, args="--x.hello.int.g 0".split(" "),) == {
+        "hello": {"float": GenericColor(0.5, 0.2, 0.3), "int": GenericColor(25, 0, 3)}
+    }
+
+
+def test_double_nested_dict_with_inferred_type():
+    def main(
+        x: Dict[str, Any] = {
+            "hello": {
+                "a": Color(5, 2, 3),
+                "b": Color(25, 2, 3),
+            }
+        }
+    ) -> Any:
+        return x
+
+    assert dcargs.cli(main, args="--x.hello.a.g 1".split(" "),)["hello"][
+        "a"
+    ] == Color(5, 1, 3)

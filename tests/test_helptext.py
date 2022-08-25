@@ -515,7 +515,6 @@ def test_comment_in_subclass_list():
 
 
 def test_unparsable():
-    @dataclasses.dataclass
     class Struct:
         a: int = 5
         b: str = "7"
