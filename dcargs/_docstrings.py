@@ -1,9 +1,11 @@
 """Helpers for parsing docstrings. Used for helptext generation."""
 
+import collections.abc
 import dataclasses
 import functools
 import inspect
 import io
+import itertools
 import tokenize
 from typing import Callable, Dict, Generic, Hashable, List, Optional, Type
 
@@ -236,10 +238,10 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     return None
 
 
-_builtins = set(
+_callable_description_blocklist = set(
     filter(
         lambda x: isinstance(x, Hashable),  # type: ignore
-        __builtins__.values(),  # type: ignore
+        itertools.chain(__builtins__.values(), vars(collections.abc).values()),  # type: ignore
     )
 )
 
@@ -250,9 +252,9 @@ def get_callable_description(f: Callable) -> str:
     Note that the `dataclasses.dataclass` will automatically populate __doc__ based on
     the fields of the class if a docstring is not specified; this helper will ignore
     these docstrings."""
-    f, _unused = _resolver.resolve_generic_types(f)
 
-    if _resolver.unwrap_origin(f) in _builtins:
+    f, _unused = _resolver.resolve_generic_types(f)
+    if _resolver.unwrap_origin(f) in _callable_description_blocklist:
         return ""
 
     # Note inspect.getdoc() causes some corner cases with TypedDicts.

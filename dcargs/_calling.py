@@ -180,6 +180,7 @@ def call_from_args(
 
     unwrapped_f = _resolver.unwrap_origin(f)
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
+    unwrapped_f = _resolver.narrow_type(unwrapped_f, default_instance)
     if unwrapped_f in (tuple, list, set):
         if len(args) == 0:
             # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we

@@ -36,18 +36,12 @@ def test_dict_with_default():
         return params
 
     assert dcargs.cli(main, args=[]) == {5: False, 1: True}
-    assert dcargs.cli(main, args="--params 5 True 3 False".split(" ")) == {
+    assert dcargs.cli(main, args="--params.5 --params.no-1".split(" ")) == {
         5: True,
-        3: False,
+        1: False,
     }
     with pytest.raises(SystemExit):
         dcargs.cli(main, args="--params".split(" "))
-    with pytest.raises(SystemExit):
-        dcargs.cli(main, args="--params 5 Tru 3 False".split(" "))
-    with pytest.raises(SystemExit):
-        dcargs.cli(main, args="--params 5 Tru 3 False".split(" "))
-    with pytest.raises(SystemExit):
-        dcargs.cli(main, args="--params 4 Tru 3 False".split(" "))
 
 
 def test_tuple_in_dict():
