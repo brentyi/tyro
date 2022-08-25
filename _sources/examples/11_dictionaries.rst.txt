@@ -13,7 +13,9 @@ or a ``TypedDict`` subclass.
 .. code-block:: python
        :linenos:
 
-       from typing import Dict, Tuple, TypedDict
+       from typing import Dict, Mapping, Tuple, TypedDict
+       
+       from frozendict import frozendict  # type: ignore
        
        import dcargs
        
@@ -34,11 +36,19 @@ or a ``TypedDict`` subclass.
                "beta1": 0.9,
                "beta2": 0.999,
            },
+           frozen_dict: Mapping[str, float] = frozendict(
+               {
+                   "num_epochs": 20,
+                   "batch_size": 64,
+               }
+           ),
        ) -> None:
-           assert isinstance(standard_dict, dict)
            assert isinstance(typed_dict, dict)
-           print("Standard dict:", standard_dict)
+           assert isinstance(standard_dict, dict)
+           assert isinstance(frozen_dict, frozendict)
            print("Typed dict:", typed_dict)
+           print("Standard dict:", standard_dict)
+           print("Frozen dict:", frozen_dict)
        
        
        if __name__ == "__main__":

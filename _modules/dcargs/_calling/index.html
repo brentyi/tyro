@@ -407,6 +407,7 @@
 
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">is</span> <span class="n">Sequence</span> <span class="k">else</span> <span class="n">unwrapped_f</span>  <span class="c1"># type: ignore</span>
+    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># When tuples are used as nested structures (eg Tuple[SomeDataclass]), we</span>

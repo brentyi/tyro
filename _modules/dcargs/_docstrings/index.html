@@ -227,10 +227,12 @@
           <h1>Source code for dcargs._docstrings</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Helpers for parsing docstrings. Used for helptext generation.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">tokenize</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
@@ -463,10 +465,10 @@
     <span class="k">return</span> <span class="kc">None</span></div>
 
 
-<span class="n">_builtins</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+<span class="n">_callable_description_blocklist</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
     <span class="nb">filter</span><span class="p">(</span>
         <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">),</span>  <span class="c1"># type: ignore</span>
-        <span class="n">__builtins__</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+        <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">__builtins__</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="nb">vars</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span>  <span class="c1"># type: ignore</span>
     <span class="p">)</span>
 <span class="p">)</span>
 
@@ -477,9 +479,9 @@
 <span class="sd">    Note that the `dataclasses.dataclass` will automatically populate __doc__ based on</span>
 <span class="sd">    the fields of the class if a docstring is not specified; this helper will ignore</span>
 <span class="sd">    these docstrings.&quot;&quot;&quot;</span>
-    <span class="n">f</span><span class="p">,</span> <span class="n">_unused</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_builtins</span><span class="p">:</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">_unused</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_callable_description_blocklist</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
     <span class="c1"># Note inspect.getdoc() causes some corner cases with TypedDicts.</span>
