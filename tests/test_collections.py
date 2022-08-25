@@ -1,7 +1,18 @@
 import collections
 import dataclasses
 import enum
-from typing import Any, Deque, FrozenSet, List, Optional, Sequence, Set, Tuple, Union
+from typing import (
+    Any,
+    Deque,
+    Dict,
+    FrozenSet,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    Union,
+)
 
 import pytest
 from typing_extensions import Literal
@@ -382,3 +393,31 @@ def test_super_nested():
     ]
     with pytest.raises(SystemExit):
         dcargs.cli(main, args=["--help"])
+
+
+def test_dict_no_annotation():
+    def main(x: Dict[str, Any] = {"int": 5, "str": "5"}):
+        return x
+
+    assert dcargs.cli(main, args=[]) == {"int": 5, "str": "5"}
+    assert dcargs.cli(main, args="--x.int 3 --x.str 7".split(" ")) == {
+        "int": 3,
+        "str": "7",
+    }
+
+
+def test_double_dict_no_annotation():
+    def main(
+        x: Dict[str, Any] = {
+            "wow": {"int": 5, "str": "5"},
+        }
+    ):
+        return x
+
+    assert dcargs.cli(main, args=[]) == {"wow": {"int": 5, "str": "5"}}
+    assert dcargs.cli(main, args="--x.wow.int 3 --x.wow.str 7".split(" ")) == {
+        "wow": {
+            "int": 3,
+            "str": "7",
+        }
+    }

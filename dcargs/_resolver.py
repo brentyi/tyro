@@ -103,7 +103,7 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
     try:
         potential_subclass = type(default_instance)
         superclass = typ
-        if issubclass(potential_subclass, superclass):  # type: ignore
+        if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
             return cast(TypeT, potential_subclass)
     except TypeError:
         pass

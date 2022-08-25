@@ -198,7 +198,7 @@ def _try_field_list_from_callable(
         container_fields = _try_field_list_from_sequence(
             contained_type, default_instance
         )
-    elif f_origin is dict:
+    elif f_origin is dict or cls is dict:
         container_fields = _try_field_list_from_dict(f, default_instance)
 
     # Check if one of the container types matched.
