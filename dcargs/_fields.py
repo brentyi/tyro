@@ -4,13 +4,25 @@ defaults, from general callables."""
 from __future__ import annotations
 
 import collections
+import collections.abc
 import dataclasses
 import enum
 import inspect
 import itertools
 import typing
 import warnings
-from typing import Any, Callable, Hashable, Iterable, List, Optional, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Hashable,
+    Iterable,
+    List,
+    Mapping,
+    Optional,
+    Type,
+    Union,
+    cast,
+)
 
 import docstring_parser
 import typing_extensions
@@ -198,7 +210,10 @@ def _try_field_list_from_callable(
         container_fields = _try_field_list_from_sequence(
             contained_type, default_instance
         )
-    elif f_origin is dict or cls is dict:
+    elif f_origin in (collections.abc.Mapping, dict) or cls in (
+        collections.abc.Mapping,
+        dict,
+    ):
         container_fields = _try_field_list_from_dict(f, default_instance)
 
     # Check if one of the container types matched.

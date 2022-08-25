@@ -1,7 +1,8 @@
 import dataclasses
-from typing import Any, Generic, Optional, Tuple, TypeVar, Union
+from typing import Any, Generic, Mapping, Optional, Tuple, TypeVar, Union
 
 import pytest
+from frozendict import frozendict  # type: ignore
 
 import dcargs
 
@@ -728,3 +729,19 @@ def test_subparser_in_nested():
         Parent,
         args="nested1.nested2.subcommand:b --nested1.nested2.subcommand.b 7".split(" "),
     ) == Parent(Nested1(Nested2(B(7))))
+
+
+def test_frozen_dict():
+    def main(
+        x: Mapping[str, float] = frozendict(
+            {
+                "num_epochs": 20,
+                "batch_size": 64,
+            }
+        )
+    ):
+        return x
+
+    assert hash(dcargs.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
+        frozendict({"num_epochs": 10, "batch_size": 64})
+    )

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcargs"
-version = "0.2.3"
+version = "0.2.4"
 description = "Strongly typed, zero-effort CLI interfaces"
 authors = ["brentyi <brentyi@berkeley.edu>"]
 include = ["./dcargs/**/*"]
@@ -17,6 +17,7 @@ PyYAML = "^6.0"
 termcolor = "^1.1.0"
 "backports.cached-property" = { version = "^1.0.2", python = "~3.7" }
 colorama = {version = "^0.4.0", platform = "win32"}
+frozendict = "^2.3.4"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
