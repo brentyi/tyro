@@ -330,7 +330,7 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">potential_subclass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
         <span class="n">superclass</span> <span class="o">=</span> <span class="n">typ</span>
-        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">potential_subclass</span><span class="p">,</span> <span class="n">superclass</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">superclass</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">potential_subclass</span><span class="p">,</span> <span class="n">superclass</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeT</span><span class="p">,</span> <span class="n">potential_subclass</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="k">pass</span>
