@@ -266,7 +266,7 @@
 <kbd>python 09_subparsers.py --help</kbd><pre class="ansi-block literal-block">usage: 09_subparsers.py [-h] {cmd:checkout,cmd:commit}
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help               show this help message and exit
+  -h, --help                 show this help message and exit
 
 <span class="ansi-bold">subcommands</span>:
   {cmd:checkout,cmd:commit}</pre>
@@ -276,11 +276,11 @@
 Commit changes.
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help       show this help message and exit
+  -h, --help         show this help message and exit
 
 <span class="ansi-bold">cmd arguments</span>:
-  --cmd.message <span class="ansi-bold">STR</span><span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --cmd.all        <span class="ansi-dark">(sets: all=True)</span></pre>
+  --cmd.message <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --cmd.all          <span class="ansi-dark">(sets: all=True)</span></pre>
 <hr class="docutils" />
 <kbd>python 09_subparsers.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">Commit(message='hello', all=True)</pre>
 <hr class="docutils" />
@@ -289,10 +289,10 @@ Commit changes.
 Checkout a branch.
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help      show this help message and exit
+  -h, --help        show this help message and exit
 
 <span class="ansi-bold">cmd arguments</span>:
-  --cmd.branch <span class="ansi-bold">STR</span><span class="ansi-bold"></span><span class="ansi-red">(required)</span></pre>
+  --cmd.branch <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span></pre>
 <hr class="docutils" />
 <kbd>python 09_subparsers.py cmd:checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">Checkout(branch='main')</pre>
 </section>
