@@ -24,21 +24,21 @@ Usage distinctions are the result of two API goals:
 
 More concretely, we can also compare specific features. A noncomprehensive set:
 
-|                                              | Dataclasses | Functions | Literals             | Generics | Docstrings as helptext | Nested structures | Subparsers          | Dictionaries | Lists, tuples        |
-| -------------------------------------------- | ----------- | --------- | -------------------- | -------- | ---------------------- | ----------------- | ------------------- | ------------ | -------------------- |
-| **dcargs**                                   | ✓           | ✓         | ✓                    | ✓        | ✓                      | ✓                 | ✓                   | ✓            | ✓                    |
-| [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |          |                        |                   |                     |              |                      |
-| [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |          |                        |                   |                     |              |                      |
-| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |          |                        |                   | ✓                   |              | ✓                    |
-| [tap][tap]                                   |             |           | ✓                    |          | ✓                      |                   | ✓[^tap_subparsers]  |              | ✓                    |
-| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    |          | ✓                      | ✓                 | ✓[^simp_subparsers] | ✓            | ✓                    |
-| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |          |                        |                   |                     |              |                      |
-| [clout][clout]                               | ✓           |           |                      |          |                        | ✓                 |                     |              |                      |
-| [hf_argparser][hf_argparser]                 | ✓           |           |                      |          |                        |                   |                     | ✓            | ✓                    |
-| [typer][typer]                               |             | ✓         |                      |          |                        |                   | ✓                   |              | ~[^typer_containers] |
-| [pyrallis][pyrallis]                         | ✓           |           |                      |          | ✓                      | ✓                 |                     |              | ✓                    |
-| [yahp][yahp]                                 | ✓           |           |                      |          | ~[^yahp_docstrings]    | ✓                 | ✓[^yahp_subparsers] |              | ✓                    |
-| [omegaconf][omegaconf]                       | ✓           |           |                      |          |                        | ✓                 |                     | ✓            | ✓                    |
+|                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structures | Unions over primitives | Unions over nested types  | Lists, tuples        | Dictionaries | Generics |
+| -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | ----------------- | ---------------------- | ------------------------- | -------------------- | ------------ | -------- |
+| [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |                        |                   |                        |                           |                      |              |          |
+| [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |                        |                   |                        |                           |                      |              |          |
+| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                   |                        | ✓[^datargs_unions_nested] | ✓                    |              |          |
+| [tap][tap]                                   |             |           | ✓                    | ✓                      |                   | ✓                      | ~[^tap_unions_nested]     | ✓                    |              |          |
+| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓                 | ✓                      | ✓[^simp_unions_nested]    | ✓                    | ✓            |          |
+| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                   |                        |                           |                      |              |          |
+| [clout][clout]                               | ✓           |           |                      |                        | ✓                 |                        |                           |                      |              |          |
+| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                   |                        |                           | ✓                    | ✓            |          |
+| [typer][typer]                               |             | ✓         |                      |                        |                   |                        | ~[^typer_unions_nested]   | ~[^typer_containers] |              |          |
+| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓                 |                        |                           | ✓                    |              |          |
+| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓                 | ✓                      | ~[^yahp_unions_nested]    | ✓                    |              |          |
+| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓                 |                        |                           | ✓                    | ✓            |          |
+| **dcargs**                                   | ✓           | ✓         | ✓                    | ✓                      | ✓                 | ✓                      | ✓                         | ✓                    | ✓            | ✓        |
 
 <!-- prettier-ignore-start -->
 
@@ -55,10 +55,12 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [yahp]: https://github.com/mosaicml/yahp
 [omegaconf]: https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html
 
-[^tap_subparsers]: Supported but not strongly typed.
+[^datargs_unions_nested]: One allowed per class.
+[^tap_unions_nested]: Not supported, but API exists for creating subparsers that accomplish a similar goal.
+[^simp_unions_nested]: One allowed per class.
+[^yahp_unions_nested]: Not supported, but similar functionality available via ["registries"](https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html).
+[^typer_unions_nested]: Not supported, but API exists for creating subparsers that accomplish a similar goal.
 [^simp_literals]: Not supported for mixed (eg `Literal[5, "five"]`) or in container (eg `List[Literal[1, 2]]`) types.
-[^simp_subparsers]: Supported but not strongly typed.
-[^yahp_subparsers]: Supported but not strongly typed.
 [^datargs_literals]: Not supported for mixed types (eg `Literal[5, "five"]`).
 [^typer_containers]: `typer` uses positional arguments for all required fields, which means that only one variable-length argument (such as `List[int]`) without a default is supported per argument parser.
 [^yahp_docstrings]: Via the `hp.auto()` function, which can parse docstrings from external classes. Usage is different from the more direct parsing that `dcargs`, `tap`, and `simple-parsing`/`pyrallis` support.
