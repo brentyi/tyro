@@ -9,6 +9,9 @@
 Module Contents
 ---------------
 
+.. py:function:: monkeypatch_len(obj: Any) -> int
+
+
 .. py:function:: ansi_context() -> ContextManager[None]
 
    
@@ -19,7 +22,7 @@ Module Contents
      wrapping usage text.
    * Enables support for Windows via colorama.
 
-.. py:class:: ArgparseHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
+.. py:class:: ArgparseHelpFormatter(prog, indent_increment=2, max_help_position=64, width=None)
 
    Bases: :py:obj:`argparse.RawDescriptionHelpFormatter`
 

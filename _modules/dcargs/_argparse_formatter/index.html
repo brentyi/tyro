@@ -227,9 +227,20 @@
           <h1>Source code for dcargs._argparse_formatter</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">re</span> <span class="k">as</span> <span class="nn">_re</span>
+<span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">ngettext</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
+
+
+<div class="viewcode-block" id="monkeypatch_len"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.monkeypatch_len">[docs]</a><span class="k">def</span> <span class="nf">monkeypatch_len</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ansi_context"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.ansi_context">[docs]</a><span class="k">def</span> <span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
@@ -241,14 +252,9 @@
 
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span> <span class="nf">inner</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="k">def</span> <span class="nf">monkeypatched_len</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">):</span>
-            <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatched_len</span>  <span class="c1"># type: ignore</span>
+            <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Use Colorama to support coloring in Windows shells.</span>
                 <span class="kn">import</span> <span class="nn">colorama</span>  <span class="c1"># type: ignore</span>
@@ -281,11 +287,81 @@
 
 
 <div class="viewcode-block" id="ArgparseHelpFormatter"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.ArgparseHelpFormatter">[docs]</a><span class="k">class</span> <span class="nc">ArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prog</span><span class="p">,</span>
+        <span class="n">indent_increment</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="n">max_help_position</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>  <span class="c1"># Usually 24</span>
+        <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Override _format_args() to ignore nargs and always expect single string</span>
 <span class="sd">        metavars.&quot;&quot;&quot;</span>
         <span class="n">get_metavar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metavar_formatter</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">get_metavar</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">get_metavar</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_format_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="c1"># determine the required width and the entry label</span>
+        <span class="n">help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_help_position</span><span class="p">)</span>
+        <span class="n">help_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">-</span> <span class="n">help_position</span><span class="p">,</span> <span class="mi">11</span><span class="p">)</span>
+        <span class="n">action_width</span> <span class="o">=</span> <span class="n">help_position</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_indent</span> <span class="o">-</span> <span class="mi">2</span>
+        <span class="n">action_header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_action_invocation</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+        <span class="c1"># no help; start on same line and add a final newline</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="p">:</span>
+            <span class="n">tup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_indent</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">action_header</span>
+            <span class="n">action_header</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%*s%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">tup</span>
+
+        <span class="c1"># short action name; start on the same line and pad two spaces</span>
+        <span class="k">elif</span> <span class="n">monkeypatch_len</span><span class="p">(</span><span class="n">action_header</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">action_width</span><span class="p">:</span>
+            <span class="c1"># Original:</span>
+            <span class="c1"># tup = self._current_indent, &quot;&quot;, action_width, action_header</span>
+            <span class="c1"># action_header = &quot;%*s%-*s  &quot; % tup</span>
+            <span class="c1"># &lt;new&gt;</span>
+            <span class="n">action_header</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_indent</span>
+                <span class="o">+</span> <span class="n">action_header</span>
+                <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">action_width</span> <span class="o">-</span> <span class="n">monkeypatch_len</span><span class="p">(</span><span class="n">action_header</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="c1"># &lt;/new&gt;</span>
+            <span class="n">indent_first</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># long action name; start on the next line</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_indent</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">action_header</span>
+            <span class="n">action_header</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%*s%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">tup</span>
+            <span class="n">indent_first</span> <span class="o">=</span> <span class="n">help_position</span>
+
+        <span class="c1"># collect the pieces of the action help</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">action_header</span><span class="p">]</span>
+
+        <span class="c1"># if there was help for the action, add lines of help text</span>
+        <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="p">:</span>
+            <span class="n">help_text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expand_help</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="c1"># &lt;new&gt;</span>
+            <span class="c1"># Respect existing line breaks.</span>
+            <span class="n">help_lines</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
+                    <span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split_lines</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">help_width</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">help_text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="c1"># &lt;/new&gt;</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%*s%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">indent_first</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">help_lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">help_lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%*s%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">help_position</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">line</span><span class="p">))</span>
+
+        <span class="c1"># or add a newline if the description doesn&#39;t end with one</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">action_header</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># if there are any sub-actions, add their help as well</span>
+        <span class="k">for</span> <span class="n">subaction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iter_indented_subactions</span><span class="p">(</span><span class="n">action</span><span class="p">):</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_format_action</span><span class="p">(</span><span class="n">subaction</span><span class="p">))</span>
+
+        <span class="c1"># return a single string</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_join_parts</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span></div>
 </pre></div>
         </article>
       </div>

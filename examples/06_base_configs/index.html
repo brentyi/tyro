@@ -355,26 +355,25 @@ avoid fussing with <code class="docutils literal notranslate"><span class="pre">
                                                [--activation <span class="ansi-red">{fixed}</span>]
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help            show this help message and exit
-  --dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}
-                        Dataset to run experiment on. <span class="ansi-dark">(default: mnist)</span>
-  --num-layers <span class="ansi-bold">INT</span>  Model size. <span class="ansi-dark">(default: 4)</span>
-  --units <span class="ansi-bold">INT</span>   Model size. <span class="ansi-dark">(default: 64)</span>
-  --batch-size <span class="ansi-bold">INT</span>  Batch size. <span class="ansi-dark">(default: 2048)</span>
-  --train-steps <span class="ansi-bold">INT</span>  Total number of training steps. <span class="ansi-dark">(default:
-                        30000)</span>
-  --seed <span class="ansi-bold">INT</span>    Random seed. This is helpful for making sure that our
-                        experiments are all reproducible!
-                        <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --activation <span class="ansi-red">{fixed}</span>  Activation to use. Not specifiable via the
-                        commandline. <span class="ansi-dark">(fixed to: &lt;class
-                        'torch.nn.modules.activation.ReLU'&gt;)</span>
+  -h, --help                     show this help message and exit
+  --dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}  Dataset to run experiment on. <span class="ansi-dark">(default:
+                                   mnist)</span>
+  --num-layers <span class="ansi-bold">INT</span>               Model size. <span class="ansi-dark">(default: 4)</span>
+  --units <span class="ansi-bold">INT</span>                    Model size. <span class="ansi-dark">(default: 64)</span>
+  --batch-size <span class="ansi-bold">INT</span>               Batch size. <span class="ansi-dark">(default: 2048)</span>
+  --train-steps <span class="ansi-bold">INT</span>              Total number of training steps.
+                                   <span class="ansi-dark">(default: 30000)</span>
+  --seed <span class="ansi-bold">INT</span>                     Random seed. This is helpful for making
+                                   sure that our experiments are all
+                                   reproducible! <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --activation <span class="ansi-red">{fixed}</span>           Activation to use. Not specifiable via the
+                                   commandline. <span class="ansi-dark">(fixed to: &lt;class
+                                   'torch.nn.modules.activation.ReLU'&gt;)</span>
 
 <span class="ansi-bold">optimizer arguments</span>:
   Optimizer parameters.
 
-  --optimizer.learning-rate <span class="ansi-bold">FLOAT</span>
-                        <span class="ansi-dark">(default: 0.0003)</span></pre>
+  --optimizer.learning-rate <span class="ansi-bold">FLOAT</span><span class="ansi-dark">(default: 0.0003)</span></pre>
 <hr class="docutils" />
 <kbd>python 06_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</pre>
 <hr class="docutils" />
@@ -388,29 +387,26 @@ avoid fussing with <code class="docutils literal notranslate"><span class="pre">
                                              [--activation <span class="ansi-red">{fixed}</span>]
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help            show this help message and exit
-  --dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}
-                        Dataset to run experiment on. <span class="ansi-dark">(default:
-                        imagenet-50)</span>
-  --num-layers <span class="ansi-bold">INT</span>  Model size. <span class="ansi-dark">(default: 8)</span>
-  --units <span class="ansi-bold">INT</span>   Model size. <span class="ansi-dark">(default: 256)</span>
-  --batch-size <span class="ansi-bold">INT</span>  Batch size. <span class="ansi-dark">(default: 32)</span>
-  --train-steps <span class="ansi-bold">INT</span>  Total number of training steps. <span class="ansi-dark">(default:
-                        100000)</span>
-  --seed <span class="ansi-bold">INT</span>    Random seed. This is helpful for making sure that our
-                        experiments are all reproducible!
-                        <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --activation <span class="ansi-red">{fixed}</span>  Activation to use. Not specifiable via the
-                        commandline. <span class="ansi-dark">(fixed to: &lt;class
-                        'torch.nn.modules.activation.GELU'&gt;)</span>
+  -h, --help                     show this help message and exit
+  --dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}  Dataset to run experiment on. <span class="ansi-dark">(default:
+                                   imagenet-50)</span>
+  --num-layers <span class="ansi-bold">INT</span>               Model size. <span class="ansi-dark">(default: 8)</span>
+  --units <span class="ansi-bold">INT</span>                    Model size. <span class="ansi-dark">(default: 256)</span>
+  --batch-size <span class="ansi-bold">INT</span>               Batch size. <span class="ansi-dark">(default: 32)</span>
+  --train-steps <span class="ansi-bold">INT</span>              Total number of training steps.
+                                   <span class="ansi-dark">(default: 100000)</span>
+  --seed <span class="ansi-bold">INT</span>                     Random seed. This is helpful for making
+                                   sure that our experiments are all
+                                   reproducible! <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --activation <span class="ansi-red">{fixed}</span>           Activation to use. Not specifiable via the
+                                   commandline. <span class="ansi-dark">(fixed to: &lt;class
+                                   'torch.nn.modules.activation.GELU'&gt;)</span>
 
 <span class="ansi-bold">optimizer arguments</span>:
   Optimizer parameters.
 
-  --optimizer.learning-rate <span class="ansi-bold">FLOAT</span>
-                        <span class="ansi-dark">(default: 0.001)</span>
-  --optimizer.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>
-                        <span class="ansi-dark">(default: 0.9 0.999)</span></pre>
+  --optimizer.learning-rate <span class="ansi-bold">FLOAT</span><span class="ansi-dark">(default: 0.001)</span>
+  --optimizer.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>  <span class="ansi-dark">(default: 0.9 0.999)</span></pre>
 <hr class="docutils" />
 <kbd>python 06_base_configs.py big --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)</pre>
 </section>

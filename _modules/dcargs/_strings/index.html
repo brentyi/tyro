@@ -232,6 +232,8 @@
 <span class="kn">import</span> <span class="nn">textwrap</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
+<span class="kn">import</span> <span class="nn">termcolor</span>
+
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_resolver</span>
 
 <span class="n">dummy_field_name</span> <span class="o">=</span> <span class="s2">&quot;__dcargs_dummy_field_name__&quot;</span>
@@ -307,6 +309,18 @@
 
 <div class="viewcode-block" id="strip_ansi_sequences"><a class="viewcode-back" href="../../../api/dcargs/_strings/#dcargs._strings.strip_ansi_sequences">[docs]</a><span class="k">def</span> <span class="nf">strip_ansi_sequences</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">_get_ansi_pattern</span><span class="p">()</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="format_metavar"><a class="viewcode-back" href="../../../api/dcargs/_strings/#dcargs._strings.format_metavar">[docs]</a><span class="k">def</span> <span class="nf">format_metavar</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">attrs</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;bold&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="multi_metavar_from_single"><a class="viewcode-back" href="../../../api/dcargs/_strings/#dcargs._strings.multi_metavar_from_single">[docs]</a><span class="k">def</span> <span class="nf">multi_metavar_from_single</span><span class="p">(</span><span class="n">single</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">single</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">32</span><span class="p">:</span>
+        <span class="c1"># Shorten long metavars</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">single</span><span class="si">}</span><span class="s2"> [...]&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">single</span><span class="si">}</span><span class="s2"> [</span><span class="si">{</span><span class="n">single</span><span class="si">}</span><span class="s2"> ...]&quot;</span></div>
 </pre></div>
         </article>
       </div>
