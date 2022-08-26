@@ -246,9 +246,11 @@ def test_helptext_and_default_namedtuple():
             dcargs.cli(HelptextNamedTupleDefault, args=["--help"])
     helptext = dcargs._strings.strip_ansi_sequences(f.getvalue())
     assert cast(str, HelptextNamedTupleDefault.__doc__) in helptext
-    assert "--x INT  Documentation 1 (required)\n" in helptext
-    assert "--y INT  Documentation 2 (required)\n" in helptext
+    assert "--x INT" in helptext
+    assert "--y INT" in helptext
     assert "--z INT" in helptext
+    assert "Documentation 1 (required)\n" in helptext
+    assert "Documentation 2 (required)\n" in helptext
     assert "Documentation 3 (default: 3)\n" in helptext
 
 

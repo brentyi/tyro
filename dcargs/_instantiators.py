@@ -56,6 +56,8 @@ from typing import (
 import termcolor
 from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
+from . import _strings
+
 _StandardInstantiator = Callable[[List[str]], Any]
 # Special case: the only time that argparse doesn't give us a string is when the
 # argument action is set to `store_true` or `store_false`. In this case, we get
@@ -94,10 +96,6 @@ _builtin_set = set(
 )
 
 
-def _format_metavar(x: str) -> str:
-    return termcolor.colored(x, attrs=["bold"])
-
-
 def instantiator_from_type(
     typ: Type, type_from_typevar: Dict[TypeVar, Type]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
@@ -131,7 +129,7 @@ def instantiator_from_type(
 
         return instantiator, InstantiatorMetadata(
             nargs=1,
-            metavar="{" + _format_metavar("None") + "}",
+            metavar="{" + _strings.format_metavar("None") + "}",
             choices=("None",),
         )
 
@@ -218,9 +216,9 @@ def instantiator_from_type(
 
     return instantiator_base_case, InstantiatorMetadata(
         nargs=1,
-        metavar=_format_metavar(typ.__name__.upper())
+        metavar=_strings.format_metavar(typ.__name__.upper())
         if auto_choices is None
-        else "{" + ",".join(map(_format_metavar, map(str, auto_choices))) + "}",
+        else "{" + ",".join(map(_strings.format_metavar, map(str, auto_choices))) + "}",
         choices=auto_choices,
     )
 
@@ -519,7 +517,7 @@ def _instantiator_from_dict(
     pair_metavar = f"{key_meta.metavar} {val_meta.metavar}"
     return dict_instantiator, InstantiatorMetadata(
         nargs="+",
-        metavar=f"{pair_metavar} [{pair_metavar} ...]",
+        metavar=_strings.multi_metavar_from_single(pair_metavar),
         choices=None,
     )
 
@@ -563,7 +561,7 @@ def _instantiator_from_sequence(
 
     return sequence_instantiator, InstantiatorMetadata(
         nargs="+",
-        metavar=f"{inner_meta.metavar} [{inner_meta.metavar} ...]",
+        metavar=_strings.multi_metavar_from_single(inner_meta.metavar),
         choices=inner_meta.choices,
     )
 
@@ -579,7 +577,7 @@ def _instantiator_from_literal(
         lambda strings: choices[str_choices.index(strings[0])],
         InstantiatorMetadata(
             nargs=1,
-            metavar="{" + ",".join(map(_format_metavar, str_choices)) + "}",
+            metavar="{" + ",".join(map(_strings.format_metavar, str_choices)) + "}",
             choices=str_choices,
         ),
     )
