@@ -96,7 +96,7 @@ class ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             action_header = (
                 " " * self._current_indent
                 + action_header
-                + " " * (action_width - monkeypatch_len(action_header))
+                + " " * (action_width - monkeypatch_len(action_header) + 2)
             )
             # </new>
             indent_first = 0
