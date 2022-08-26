@@ -259,31 +259,177 @@ statically checked.</p></li>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
-<col style="width: 10%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 9%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"></th>
 <th class="head"><p>Dataclasses</p></th>
 <th class="head"><p>Functions</p></th>
 <th class="head"><p>Literals</p></th>
-<th class="head"><p>Generics</p></th>
 <th class="head"><p>Docstrings as helptext</p></th>
 <th class="head"><p>Nested structures</p></th>
-<th class="head"><p>Subparsers</p></th>
-<th class="head"><p>Dictionaries</p></th>
+<th class="head"><p>Unions over primitives</p></th>
+<th class="head"><p>Unions over nested types</p></th>
 <th class="head"><p>Lists, tuples</p></th>
+<th class="head"><p>Dictionaries</p></th>
+<th class="head"><p>Generics</p></th>
 </tr>
 </thead>
 <tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclass/">argparse-dataclass</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclasses/">argparse-dataclasses</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/roee30/datargs">datargs</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-literals" id="id1">1</a></p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-unions-nested" id="id2">2</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/swansonk14/typed-argument-parser">tap</a></p></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-tap-unions-nested" id="id3">3</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/lebrice/SimpleParsing">simple-parsing</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-literals" id="id4">4</a></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-unions-nested" id="id5">5</a></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/malte-soe/dataclass-cli">dataclass-cli</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/clout/">clout</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py">hf_argparser</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://typer.tiangolo.com/">typer</a></p></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-unions-nested" id="id6">6</a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id7">7</a></p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/eladrich/pyrallis/">pyrallis</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/mosaicml/yahp">yahp</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id8">8</a></p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-unions-nested" id="id9">9</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html">omegaconf</a></p></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+</tr>
 <tr class="row-even"><td><p><strong>dcargs</strong></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
@@ -293,137 +439,6 @@ statically checked.</p></li>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-<td><p>✓</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclass/">argparse-dataclass</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://pypi.org/project/argparse-dataclasses/">argparse-dataclasses</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/roee30/datargs">datargs</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-literals" id="id1">1</a></p></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>✓</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/swansonk14/typed-argument-parser">tap</a></p></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-tap-subparsers" id="id2">2</a></p></td>
-<td></td>
-<td><p>✓</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/lebrice/SimpleParsing">simple-parsing</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-literals" id="id3">3</a></p></td>
-<td></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-subparsers" id="id4">4</a></p></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/malte-soe/dataclass-cli">dataclass-cli</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://pypi.org/project/clout/">clout</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/huggingface/transformers/blob/master/src/transformers/hf_argparser.py">hf_argparser</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://typer.tiangolo.com/">typer</a></p></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id5">5</a></p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://github.com/eladrich/pyrallis/">pyrallis</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/mosaicml/yahp">yahp</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id6">6</a></p></td>
-<td><p>✓</p></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-yahp-subparsers" id="id7">7</a></p></td>
-<td></td>
-<td><p>✓</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference external" href="https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html">omegaconf</a></p></td>
-<td><p>✓</p></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td><p>✓</p></td>
-<td></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 </tr>
@@ -464,23 +479,29 @@ like working with YAML formats)</p>
 <dt class="label" id="fn-datargs-literals"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
 <dd><p>Not supported for mixed types (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>).</p>
 </dd>
-<dt class="label" id="fn-tap-subparsers"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
-<dd><p>Supported but not strongly typed.</p>
+<dt class="label" id="fn-datargs-unions-nested"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
+<dd><p>One allowed per class.</p>
 </dd>
-<dt class="label" id="fn-simp-literals"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dt class="label" id="fn-tap-unions-nested"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
+<dd><p>Not supported, but API exists for creating subparsers that accomplish a similar goal.</p>
+</dd>
+<dt class="label" id="fn-simp-literals"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
 <dd><p>Not supported for mixed (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>) or in container (eg <code class="docutils literal notranslate"><span class="pre">List[Literal[1,</span> <span class="pre">2]]</span></code>) types.</p>
 </dd>
-<dt class="label" id="fn-simp-subparsers"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
-<dd><p>Supported but not strongly typed.</p>
+<dt class="label" id="fn-simp-unions-nested"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
+<dd><p>One allowed per class.</p>
 </dd>
-<dt class="label" id="fn-typer-containers"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
+<dt class="label" id="fn-typer-unions-nested"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
+<dd><p>Not supported, but API exists for creating subparsers that accomplish a similar goal.</p>
+</dd>
+<dt class="label" id="fn-typer-containers"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">typer</span></code> uses positional arguments for all required fields, which means that only one variable-length argument (such as <code class="docutils literal notranslate"><span class="pre">List[int]</span></code>) without a default is supported per argument parser.</p>
 </dd>
-<dt class="label" id="fn-yahp-docstrings"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
+<dt class="label" id="fn-yahp-docstrings"><span class="brackets"><a class="fn-backref" href="#id8">8</a></span></dt>
 <dd><p>Via the <code class="docutils literal notranslate"><span class="pre">hp.auto()</span></code> function, which can parse docstrings from external classes. Usage is different from the more direct parsing that <code class="docutils literal notranslate"><span class="pre">dcargs</span></code>, <code class="docutils literal notranslate"><span class="pre">tap</span></code>, and <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>/<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code> support.</p>
 </dd>
-<dt class="label" id="fn-yahp-subparsers"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
-<dd><p>Supported but not strongly typed.</p>
+<dt class="label" id="fn-yahp-unions-nested"><span class="brackets"><a class="fn-backref" href="#id9">9</a></span></dt>
+<dd><p>Not supported, but similar functionality available via <a class="reference external" href="https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html">“registries”</a>.</p>
 </dd>
 </dl>
 </section>
