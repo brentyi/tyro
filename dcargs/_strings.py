@@ -5,6 +5,8 @@ import re
 import textwrap
 from typing import Iterable, List, Sequence, Type, Union
 
+import termcolor
+
 from . import _resolver
 
 dummy_field_name = "__dcargs_dummy_field_name__"
@@ -80,3 +82,15 @@ def _get_ansi_pattern() -> re.Pattern:
 
 def strip_ansi_sequences(x: str):
     return _get_ansi_pattern().sub("", x)
+
+
+def format_metavar(x: str) -> str:
+    return termcolor.colored(x, attrs=["bold"])
+
+
+def multi_metavar_from_single(single: str) -> str:
+    if len(strip_ansi_sequences(single)) >= 32:
+        # Shorten long metavars
+        return f"{single} [...]"
+    else:
+        return f"{single} [{single} ...]"
