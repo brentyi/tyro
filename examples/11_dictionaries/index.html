@@ -281,23 +281,30 @@ or a <code class="docutils literal notranslate"><span class="pre">TypedDict</spa
                           [--frozen-dict.batch-size <span class="ansi-bold">INT</span>]
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help                           show this help message and exit
+  -h, --help              show this help message and exit
 
 <span class="ansi-bold">typed_dict arguments</span>:
 
-  --typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>     <span class="ansi-dark">(unset by default)</span>
-  --typed-dict.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>       <span class="ansi-dark">(unset by default)</span>
+  --typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>
+                          <span class="ansi-dark">(unset by default)</span>
+  --typed-dict.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>
+                          <span class="ansi-dark">(unset by default)</span>
 
 <span class="ansi-bold">standard_dict arguments</span>:
 
-  --standard-dict.learning-rate <span class="ansi-bold">FLOAT</span>  <span class="ansi-dark">(default: 0.0003)</span>
-  --standard-dict.beta1 <span class="ansi-bold">FLOAT</span>          <span class="ansi-dark">(default: 0.9)</span>
-  --standard-dict.beta2 <span class="ansi-bold">FLOAT</span>          <span class="ansi-dark">(default: 0.999)</span>
+  --standard-dict.learning-rate <span class="ansi-bold">FLOAT</span>
+                          <span class="ansi-dark">(default: 0.0003)</span>
+  --standard-dict.beta1 <span class="ansi-bold">FLOAT</span>
+                          <span class="ansi-dark">(default: 0.9)</span>
+  --standard-dict.beta2 <span class="ansi-bold">FLOAT</span>
+                          <span class="ansi-dark">(default: 0.999)</span>
 
 <span class="ansi-bold">frozen_dict arguments</span>:
 
-  --frozen-dict.num-epochs <span class="ansi-bold">INT</span>         <span class="ansi-dark">(default: 20)</span>
-  --frozen-dict.batch-size <span class="ansi-bold">INT</span>         <span class="ansi-dark">(default: 64)</span></pre>
+  --frozen-dict.num-epochs <span class="ansi-bold">INT</span>
+                          <span class="ansi-dark">(default: 20)</span>
+  --frozen-dict.batch-size <span class="ansi-bold">INT</span>
+                          <span class="ansi-dark">(default: 64)</span></pre>
 <hr class="docutils" />
 <kbd>python 11_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Typed dict: {'learning_rate': 0.0003}
 Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}

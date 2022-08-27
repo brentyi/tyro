@@ -22,13 +22,6 @@ Module Contents
      wrapping usage text.
    * Enables support for Windows via colorama.
 
-.. py:class:: ArgparseHelpFormatter(prog, indent_increment=2, max_help_position=64, width=None)
+.. py:function:: make_formatter_class(field_count: int) -> Any
 
-   Bases: :py:obj:`argparse.RawDescriptionHelpFormatter`
-
-   
-   Help message formatter which retains any formatting in descriptions.
-
-   Only the name of this class is considered a public API. All the methods
-   provided by the class are considered an implementation detail.
 

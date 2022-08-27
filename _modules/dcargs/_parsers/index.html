@@ -594,14 +594,16 @@
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_be_none</span><span class="p">:</span>
                 <span class="n">subparser</span> <span class="o">=</span> <span class="n">argparse_subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                    <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ArgparseHelpFormatter</span><span class="p">,</span>
+                    <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">make_formatter_class</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
                 <span class="p">)</span>
                 <span class="n">subparser_tree_nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subparser</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">subparser_def</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="n">subparser</span> <span class="o">=</span> <span class="n">argparse_subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
                     <span class="n">name</span><span class="p">,</span>
-                    <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ArgparseHelpFormatter</span><span class="p">,</span>
+                    <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">make_formatter_class</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+                    <span class="p">),</span>
                 <span class="p">)</span>
                 <span class="n">subparser_def</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">subparser</span><span class="p">)</span>
 

@@ -274,15 +274,19 @@ container types.</p>
                                   [--checkpoint-interval {<span class="ansi-bold">None</span>}|<span class="ansi-bold">INT</span>]
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help                         show this help message and exit
-  --dataset-sources <span class="ansi-bold">PATH</span> [<span class="ansi-bold">PATH</span> ...]  Paths to load training data from. This
-                                     can be multiple! <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --image-dimensions <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>         Height and width of some image data.
-                                     <span class="ansi-dark">(default: 32 32)</span>
-  --optimizer-type {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}        Gradient-based optimizer to use.
-                                     <span class="ansi-dark">(default: ADAM)</span>
-  --checkpoint-interval {<span class="ansi-bold">None</span>}|<span class="ansi-bold">INT</span>   Interval to save checkpoints at.
-                                     <span class="ansi-dark">(default: None)</span></pre>
+  -h, --help              show this help message and exit
+  --dataset-sources <span class="ansi-bold">PATH</span> [<span class="ansi-bold">PATH</span> ...]
+                          Paths to load training data from. This can be
+                          multiple! <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --image-dimensions <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>
+                          Height and width of some image data. <span class="ansi-dark">(default:
+                          32 32)</span>
+  --optimizer-type {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}
+                          Gradient-based optimizer to use. <span class="ansi-dark">(default:
+                          ADAM)</span>
+  --checkpoint-interval {<span class="ansi-bold">None</span>}|<span class="ansi-bold">INT</span>
+                          Interval to save checkpoints at. <span class="ansi-dark">(default:
+                          None)</span></pre>
 <hr class="docutils" />
 <kbd>python 03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(16, 16), optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, checkpoint_interval=None)</pre>
 <hr class="docutils" />

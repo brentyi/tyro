@@ -227,11 +227,10 @@
           <h1>Source code for dcargs._argparse_formatter</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">re</span> <span class="k">as</span> <span class="nn">_re</span>
-<span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
-<span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">ngettext</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
 
@@ -252,7 +251,6 @@
 
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span> <span class="nf">inner</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">):</span>
             <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
             <span class="k">try</span><span class="p">:</span>
@@ -286,14 +284,20 @@
     <span class="k">return</span> <span class="n">inner</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="ArgparseHelpFormatter"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.ArgparseHelpFormatter">[docs]</a><span class="k">class</span> <span class="nc">ArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">prog</span><span class="p">,</span>
-        <span class="n">indent_increment</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-        <span class="n">max_help_position</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>  <span class="c1"># Usually 24</span>
-        <span class="n">width</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
+<div class="viewcode-block" id="make_formatter_class"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.make_formatter_class">[docs]</a><span class="k">def</span> <span class="nf">make_formatter_class</span><span class="p">(</span><span class="n">field_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">_ArgparseHelpFormatter</span><span class="p">,</span> <span class="n">field_count</span><span class="o">=</span><span class="n">field_count</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">_ArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="n">indent_increment</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span> <span class="o">-</span> <span class="mi">2</span>
+        <span class="n">max_help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># Usual is 24.</span>
+
+        <span class="c1"># Try to make helptext more concise when we have a lot of fields!</span>
+        <span class="k">if</span> <span class="n">field_count</span> <span class="o">&gt;</span> <span class="mi">16</span> <span class="ow">and</span> <span class="n">width</span> <span class="o">&gt;=</span> <span class="mi">100</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">max_help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">96</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Usual is 24.</span>
+
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">):</span>
@@ -301,6 +305,17 @@
 <span class="sd">        metavars.&quot;&quot;&quot;</span>
         <span class="n">get_metavar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metavar_formatter</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">get_metavar</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="c1"># Patch to avoid super long arguments from shifting the helptext of all of the</span>
+        <span class="c1"># fields.</span>
+        <span class="n">prev_max_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">&gt;=</span> <span class="mi">40</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_help_position</span> <span class="o">+</span> <span class="mi">2</span>
+        <span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">=</span> <span class="n">prev_max_length</span>
 
     <span class="k">def</span> <span class="nf">_format_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
         <span class="c1"># determine the required width and the entry label</span>
@@ -361,7 +376,7 @@
             <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_format_action</span><span class="p">(</span><span class="n">subaction</span><span class="p">))</span>
 
         <span class="c1"># return a single string</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_join_parts</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_join_parts</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
 </pre></div>
         </article>
       </div>

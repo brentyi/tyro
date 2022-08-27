@@ -85,11 +85,6 @@ Module Contents
    Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
    ``default_instance`` for ``dcargs.cli()`` as required.
 
-.. py:data:: MISSING_TYPE
-   
-
-   
-
 .. py:data:: MISSING_SINGLETONS
    
 

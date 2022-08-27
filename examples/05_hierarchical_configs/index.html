@@ -307,36 +307,38 @@ objects. This helps with modularity and grouping in larger projects.</p>
 Train a model.
 
 <span class="ansi-bold">arguments</span>:
-  -h, --help                               show this help message and exit
-  --out-dir <span class="ansi-bold">PATH</span>                           Where to save logs and checkpoints.
-                                           <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --restore-checkpoint                     Set to restore an existing
-                                           checkpoint. <span class="ansi-dark">(sets:
-                                           restore_checkpoint=True)</span>
-  --checkpoint-interval <span class="ansi-bold">INT</span>                Training steps between each
-                                           checkpoint save. <span class="ansi-dark">(default:
-                                           1000)</span>
+  -h, --help              show this help message and exit
+  --out-dir <span class="ansi-bold">PATH</span>          Where to save logs and checkpoints.
+                          <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
+  --restore-checkpoint    Set to restore an existing checkpoint. <span class="ansi-dark">(sets:
+                          restore_checkpoint=True)</span>
+  --checkpoint-interval <span class="ansi-bold">INT</span>
+                          Training steps between each checkpoint save.
+                          <span class="ansi-dark">(default: 1000)</span>
 
 <span class="ansi-bold">config.optimizer arguments</span>:
   Various configurable options for our optimizer.
 
-  --config.optimizer.algorithm {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}  Gradient-based optimizer to use.
-                                           <span class="ansi-dark">(default: ADAM)</span>
-  --config.optimizer.learning-rate <span class="ansi-bold">FLOAT</span>   Learning rate to use. <span class="ansi-dark">(default:
-                                           0.0003)</span>
-  --config.optimizer.weight-decay <span class="ansi-bold">FLOAT</span>    Coefficient for L2 regularization.
-                                           <span class="ansi-dark">(default: 0.01)</span>
+  --config.optimizer.algorithm {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}
+                          Gradient-based optimizer to use. <span class="ansi-dark">(default:
+                          ADAM)</span>
+  --config.optimizer.learning-rate <span class="ansi-bold">FLOAT</span>
+                          Learning rate to use. <span class="ansi-dark">(default: 0.0003)</span>
+  --config.optimizer.weight-decay <span class="ansi-bold">FLOAT</span>
+                          Coefficient for L2 regularization. <span class="ansi-dark">(default:
+                          0.01)</span>
 
 <span class="ansi-bold">config arguments</span>:
   Experiment configuration.
 
-  --config.batch-size <span class="ansi-bold">INT</span>                  Batch size. <span class="ansi-dark">(default: 32)</span>
-  --config.train-steps <span class="ansi-bold">INT</span>                 Total number of training steps.
-                                           <span class="ansi-dark">(default: 100000)</span>
-  --config.seed <span class="ansi-bold">INT</span>                        Random seed. This is helpful for
-                                           making sure that our experiments
-                                           are all
-                                           reproducible! <span class="ansi-dark">(default: 0)</span></pre>
+  --config.batch-size <span class="ansi-bold">INT</span>
+                          Batch size. <span class="ansi-dark">(default: 32)</span>
+  --config.train-steps <span class="ansi-bold">INT</span>
+                          Total number of training steps. <span class="ansi-dark">(default:
+                          100000)</span>
+  --config.seed <span class="ansi-bold">INT</span>       Random seed. This is helpful for making sure that
+                          our experiments are all
+                          reproducible! <span class="ansi-dark">(default: 0)</span></pre>
 <hr class="docutils" />
 <kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
 
