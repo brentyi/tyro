@@ -184,7 +184,10 @@ def _cli_impl(
     # Generate parser!
     with _argparse_formatter.ansi_context():
         parser = argparse.ArgumentParser(
-            prog=prog, formatter_class=_argparse_formatter.ArgparseHelpFormatter
+            prog=prog,
+            formatter_class=_argparse_formatter.make_formatter_class(
+                len(parser_definition.args)
+            ),
         )
         parser_definition.apply(parser)
         if _return_stage == "parser":

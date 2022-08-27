@@ -1,10 +1,9 @@
 import argparse
 import contextlib
+import functools
 import itertools
-import re as _re
-from gettext import gettext as _
-from gettext import ngettext
-from typing import Any, ContextManager, Generator
+import shutil
+from typing import Any, ContextManager, Generator, Type
 
 from . import _strings
 
@@ -25,7 +24,6 @@ def ansi_context() -> ContextManager[None]:
 
     @contextlib.contextmanager
     def inner() -> Generator[None, None, None]:
-
         if not hasattr(argparse, "len"):
             argparse.len = monkeypatch_len  # type: ignore
             try:
@@ -59,14 +57,20 @@ def ansi_context() -> ContextManager[None]:
     return inner()
 
 
-class ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
-    def __init__(
-        self,
-        prog,
-        indent_increment=2,
-        max_help_position=64,  # Usually 24
-        width=None,
-    ):
+def make_formatter_class(field_count: int) -> Any:
+    return functools.partial(_ArgparseHelpFormatter, field_count=field_count)
+
+
+class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def __init__(self, prog, *, field_count: int):
+        indent_increment = 2
+        width = shutil.get_terminal_size().columns - 2
+        max_help_position = min(36, width // 3)  # Usual is 24.
+
+        # Try to make helptext more concise when we have a lot of fields!
+        if field_count > 16 and width >= 100:  # pragma: no cover
+            max_help_position = min(96, width // 2)  # Usual is 24.
+
         super().__init__(prog, indent_increment, max_help_position, width)
 
     def _format_args(self, action, default_metavar):
@@ -74,6 +78,17 @@ class ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         metavars."""
         get_metavar = self._metavar_formatter(action, default_metavar)
         return get_metavar(1)[0]
+
+    def add_argument(self, action):  # pragma: no cover
+        # Patch to avoid super long arguments from shifting the helptext of all of the
+        # fields.
+        prev_max_length = self._action_max_length
+        super().add_argument(action)
+        if (
+            self._action_max_length >= 40
+            and self._action_max_length > self._max_help_position + 2
+        ):
+            self._action_max_length = prev_max_length
 
     def _format_action(self, action):
         # determine the required width and the entry label

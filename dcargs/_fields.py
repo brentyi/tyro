@@ -11,18 +11,7 @@ import inspect
 import itertools
 import typing
 import warnings
-from typing import (
-    Any,
-    Callable,
-    Hashable,
-    Iterable,
-    List,
-    Mapping,
-    Optional,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Hashable, Iterable, List, Optional, Type, Union, cast
 
 import docstring_parser
 import typing_extensions
@@ -87,7 +76,6 @@ MISSING_PUBLIC: Any = MISSING_PROP
 `default_instance` for `dcargs.cli()` as required."""
 
 
-MISSING_TYPE = Union[PropagatingMissingType, NonpropagatingMissingType]
 MISSING_SINGLETONS = [
     dataclasses.MISSING,
     MISSING_PROP,

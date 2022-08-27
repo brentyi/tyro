@@ -53,7 +53,6 @@ from typing import (
     overload,
 )
 
-import termcolor
 from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
 from . import _strings
