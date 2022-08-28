@@ -16,7 +16,8 @@ Subpackages
 Package Contents
 ----------------
 
-.. py:function:: cli(f: Callable[Ellipsis, T], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default_instance: Optional[T] = None, avoid_subparsers: bool = False) -> T
+.. py:function:: cli(f: Type[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default_instance: Optional[OutT] = None, avoid_subparsers: bool = False) -> OutT
+              cli(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default_instance: Optional[OutT] = None, avoid_subparsers: bool = False) -> OutT
 
    
    Call ``f(...)``\ , with arguments populated from an automatically generated CLI
@@ -76,7 +77,8 @@ Package Contents
 
    :returns: The output of ``f(...)``.
 
-.. py:function:: generate_parser(f: Callable[Ellipsis, T], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default_instance: Optional[T] = None, avoid_subparsers: bool = False) -> argparse.ArgumentParser
+.. py:function:: generate_parser(f: Type[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default_instance: Optional[OutT] = None, avoid_subparsers: bool = False) -> argparse.ArgumentParser
+              generate_parser(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default_instance: Optional[OutT] = None, avoid_subparsers: bool = False) -> argparse.ArgumentParser
 
    
    Returns the argparse parser that would be used under-the-hood if ``dcargs.cli()``

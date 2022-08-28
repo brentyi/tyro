@@ -570,7 +570,9 @@
         <span class="n">default_i</span> <span class="o">=</span> <span class="n">default_instance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="p">(</span>
-                <span class="c1"># We&#39;d use an index operator h</span>
+                <span class="c1"># Ideally we&#39;d have --tuple[0] instead of --tuple.0 as the command-line</span>
+                <span class="c1"># argument, but in practice the brackets are annoying because they</span>
+                <span class="c1"># require escaping.</span>
                 <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                 <span class="n">typ</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
