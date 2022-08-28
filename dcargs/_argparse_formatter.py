@@ -3,7 +3,7 @@ import contextlib
 import functools
 import itertools
 import shutil
-from typing import Any, ContextManager, Generator, Type
+from typing import Any, ContextManager, Generator
 
 from . import _strings
 
