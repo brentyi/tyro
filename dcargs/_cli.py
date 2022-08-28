@@ -8,47 +8,52 @@ from typing_extensions import Literal, assert_never
 
 from . import _argparse_formatter, _calling, _fields, _parsers, _strings
 
-T = TypeVar("T")
+OutT = TypeVar("OutT")
 
 
-def generate_parser(
-    f: Callable[..., T],
+# Overload notes:
+# 1. Type[T] is almost a subtype of Callable[..., T]; the difference is types like
+#    Union[T1, T2] which fall under the former but not the latter.
+# 2. We really shouldn't need an overload here. But as of 1.1.268, it seems like it's
+#    needed for pyright to understand that Union types are OK to pass in directly.
+#    Hopefully we can just switch to a Union[Type[...], Callable[...]] in the future.
+
+
+@overload
+def cli(
+    f: Type[OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[T] = None,
+    default_instance: Optional[OutT] = None,
     avoid_subparsers: bool = False,
-) -> argparse.ArgumentParser:
-    """Returns the argparse parser that would be used under-the-hood if `dcargs.cli()`
-    was called with the same arguments.
+) -> OutT:
+    ...
 
-    This can be useful for libraries like argcomplete, pyzshcomplete, or shtab, which
-    enable autocompletion for argparse parsers."""
-    # Potentially we could do some caching in the future, to reduce the redundant work
-    # done when both `generate_parser()` and `cli()` are called.
-    out = _cli_impl(
-        "parser",
-        f,
-        prog=prog,
-        description=description,
-        args=args,
-        default_instance=default_instance,
-        avoid_subparsers=avoid_subparsers,
-    )
-    assert isinstance(out, argparse.ArgumentParser)
-    return out
+
+@overload
+def cli(
+    f: Callable[..., OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[OutT] = None,
+    avoid_subparsers: bool = False,
+) -> OutT:
+    ...
 
 
 def cli(
-    f: Callable[..., T],
+    f: Union[Type[OutT], Callable[..., OutT]],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[T] = None,
+    default_instance: Optional[OutT] = None,
     avoid_subparsers: bool = False,
-) -> T:
+) -> OutT:
     """Call `f(...)`, with arguments populated from an automatically generated CLI
     interface.
 
@@ -115,14 +120,67 @@ def cli(
 
 
 @overload
-def _cli_impl(
-    _return_stage: Literal["parser"],
-    f: Callable[..., T],
+def generate_parser(
+    f: Type[OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[T] = None,
+    default_instance: Optional[OutT] = None,
+    avoid_subparsers: bool = False,
+) -> argparse.ArgumentParser:
+    ...
+
+
+@overload
+def generate_parser(
+    f: Callable[..., OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[OutT] = None,
+    avoid_subparsers: bool = False,
+) -> argparse.ArgumentParser:
+    ...
+
+
+def generate_parser(
+    f: Union[Type[OutT], Callable[..., OutT]],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[OutT] = None,
+    avoid_subparsers: bool = False,
+) -> argparse.ArgumentParser:
+    """Returns the argparse parser that would be used under-the-hood if `dcargs.cli()`
+    was called with the same arguments.
+
+    This can be useful for libraries like argcomplete, pyzshcomplete, or shtab, which
+    enable autocompletion for argparse parsers."""
+    out = _cli_impl(
+        "parser",
+        f,
+        prog=prog,
+        description=description,
+        args=args,
+        default_instance=default_instance,
+        avoid_subparsers=avoid_subparsers,
+    )
+    assert isinstance(out, argparse.ArgumentParser)
+    return out
+
+
+@overload
+def _cli_impl(
+    _return_stage: Literal["parser"],
+    f: Callable[..., OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default_instance: Optional[OutT] = None,
     avoid_subparsers: bool = False,
 ) -> argparse.ArgumentParser:
     ...
@@ -131,36 +189,39 @@ def _cli_impl(
 @overload
 def _cli_impl(
     _return_stage: Literal["f_out"],
-    f: Callable[..., T],
+    f: Callable[..., OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[T] = None,
+    default_instance: Optional[OutT] = None,
     avoid_subparsers: bool = False,
-) -> T:
+) -> OutT:
     ...
 
 
 def _cli_impl(
     _return_stage: Literal["parser", "f_out"],
-    f: Callable[..., T],
+    f: Callable[..., OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[T] = None,
+    default_instance: Optional[OutT] = None,
     avoid_subparsers: bool = False,
-) -> Union[T, argparse.ArgumentParser]:
-    default_instance_internal: Union[_fields.NonpropagatingMissingType, T] = (
+) -> Union[OutT, argparse.ArgumentParser]:
+    default_instance_internal: Union[_fields.NonpropagatingMissingType, OutT] = (
         _fields.MISSING_NONPROP if default_instance is None else default_instance
     )
 
     if not _fields.is_nested_type(cast(Type, f), default_instance_internal):
-        dummy_field = dataclasses.field(
-            default=default_instance
-            if default_instance is not None
-            else dataclasses.MISSING
+        dummy_field = cast(
+            dataclasses.Field,
+            dataclasses.field(
+                default=default_instance
+                if default_instance is not None
+                else dataclasses.MISSING
+            ),
         )
         f = dataclasses.make_dataclass(
             cls_name="",

@@ -343,7 +343,9 @@ def _field_list_from_tuple(
         default_i = default_instance[i]  # type: ignore
         field_list.append(
             FieldDefinition(
-                # We'd use an index operator h
+                # Ideally we'd have --tuple[0] instead of --tuple.0 as the command-line
+                # argument, but in practice the brackets are annoying because they
+                # require escaping.
                 name=str(i),
                 typ=child,
                 default=default_i,
