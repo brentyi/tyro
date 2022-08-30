@@ -761,3 +761,165 @@ def test_frozen_dict():
     assert hash(dcargs.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
         frozendict({"num_epochs": 10, "batch_size": 64})
     )
+
+
+def test_subparser_in_nested_with_metadata():
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+        a: A = A(5)
+
+    @dataclasses.dataclass
+    class Nested2:
+        subcommand: Union[
+            Annotated[A, dcargs.metadata.subcommand("command-a", default=A(7))],
+            Annotated[B, dcargs.metadata.subcommand("command-b", default=B(9))],
+        ]
+
+    @dataclasses.dataclass
+    class Nested1:
+        nested2: Nested2
+
+    @dataclasses.dataclass
+    class Parent:
+        nested1: Nested1
+
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-a".split(" "),
+    ) == Parent(Nested1(Nested2(A(7))))
+    assert dcargs.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(A(3))))
+
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-b".split(" "),
+    ) == Parent(Nested1(Nested2(B(9))))
+    assert dcargs.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-b --nested1.nested2.subcommand.b 7".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(B(7))))
+
+
+def test_subparser_in_nested_with_metadata_generic():
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+        a: A = A(5)
+
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class Nested2(Generic[T]):
+        subcommand: T
+
+    @dataclasses.dataclass
+    class Nested1:
+        nested2: Nested2[
+            Union[
+                Annotated[A, dcargs.metadata.subcommand("command-a", default=A(7))],
+                Annotated[B, dcargs.metadata.subcommand("command-b", default=B(9))],
+            ]
+        ]
+
+    @dataclasses.dataclass
+    class Parent:
+        nested1: Nested1
+
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-a".split(" "),
+    ) == Parent(Nested1(Nested2(A(7))))
+    assert dcargs.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(A(3))))
+
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-b".split(" "),
+    ) == Parent(Nested1(Nested2(B(9))))
+    assert dcargs.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-b --nested1.nested2.subcommand.b 7".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(B(7))))
+
+
+def test_subparser_in_nested_with_metadata_generic_alt():
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+        a: A = A(5)
+
+    T = TypeVar("T")
+
+    @dataclasses.dataclass
+    class Nested2(Generic[T]):
+        subcommand: Union[
+            Annotated[T, dcargs.metadata.subcommand("command-a", default=A(7))],
+            Annotated[B, dcargs.metadata.subcommand("command-b", default=B(9))],
+        ]
+
+    @dataclasses.dataclass
+    class Nested1:
+        nested2: Nested2[A]
+
+    @dataclasses.dataclass
+    class Parent:
+        nested1: Nested1
+
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-a".split(" "),
+    ) == Parent(Nested1(Nested2(A(7))))
+    assert dcargs.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(A(3))))
+
+    assert dcargs.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-b".split(" "),
+    ) == Parent(Nested1(Nested2(B(9))))
+    assert dcargs.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-b --nested1.nested2.subcommand.b 7".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(B(7))))

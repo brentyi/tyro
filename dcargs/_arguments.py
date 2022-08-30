@@ -23,7 +23,7 @@ from typing import (
 
 import termcolor
 
-from . import _fields, _instantiators, _strings
+from . import _fields, _instantiators, _resolver, _strings
 
 try:
     # Python >=3.8.
@@ -132,7 +132,7 @@ def _rule_handle_boolean_flags(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
-    if arg.type_from_typevar.get(arg.field.typ, arg.field.typ) is not bool:  # type: ignore
+    if _resolver.apply_type_from_typevar(arg.field.typ, arg.type_from_typevar) is not bool:  # type: ignore
         return lowered
 
     if lowered.default is False and not arg.field.positional:

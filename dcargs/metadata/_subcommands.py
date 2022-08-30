@@ -13,6 +13,9 @@ class _SubcommandConfiguration:
     description: Optional[str]
     default: Any
 
+    def __hash__(self) -> int:
+        return object.__hash__(self)
+
 
 def subcommand(
     name: str,
