@@ -1,5 +1,6 @@
 """Utilities for resolving types and forward references."""
 
+import collections.abc
 import copy
 import dataclasses
 from typing import (
@@ -15,7 +16,7 @@ from typing import (
     cast,
 )
 
-from typing_extensions import get_args, get_origin, get_type_hints
+from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
 TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
 
@@ -43,13 +44,13 @@ def resolve_generic_types(
 
     origin_cls = get_origin(cls)
 
-    type_from_typevars = {}
+    type_from_typevar = {}
     if origin_cls is not None and hasattr(origin_cls, "__parameters__"):
         typevars = origin_cls.__parameters__
         typevar_values = get_args(cls)
         assert len(typevars) == len(typevar_values)
         cls = origin_cls
-        type_from_typevars.update(dict(zip(typevars, typevar_values)))
+        type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
     if hasattr(cls, "__orig_bases__"):
         bases = getattr(cls, "__orig_bases__")
@@ -59,9 +60,9 @@ def resolve_generic_types(
                 continue
             typevars = origin_base.__parameters__
             typevar_values = get_args(base)
-            type_from_typevars.update(dict(zip(typevars, typevar_values)))
+            type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
-    return cls, type_from_typevars
+    return cls, type_from_typevar
 
 
 def resolved_fields(cls: Type) -> List[dataclasses.Field]:
@@ -154,3 +155,21 @@ def unwrap_annotated(
             len(targets) == 1
         ), f"Found two instances of {search_type} in metadata, but only expected one."
         return args[0], targets[0]
+
+
+def apply_type_from_typevar(
+    typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type]
+) -> TypeOrCallable:
+    if typ in type_from_typevar:
+        return type_from_typevar[typ]  # type: ignore
+
+    if len(get_args(typ)) > 0:
+        args = get_args(typ)
+        if get_origin(typ) is Annotated:
+            args = args[:1]
+        if get_origin(typ) is collections.abc.Callable:
+            assert isinstance(args[0], list)
+            args = tuple(args[0]) + args[1:]
+        return typ.copy_with(tuple(apply_type_from_typevar(x, type_from_typevar) for x in args))  # type: ignore
+
+    return typ

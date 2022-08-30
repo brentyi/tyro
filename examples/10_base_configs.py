@@ -9,7 +9,7 @@ Python is convenient for autocompletion and type checking). For selection, we co
 avoid fussing with `sys.argv` by using a `BASE_CONFIG` environment variable.
 
 Usage:
-`python ./10_base_configs.py`
+`python ./10_base_configs.py --help`
 `python ./10_base_configs.py small --help`
 `python ./10_base_configs.py small --seed 94720`
 `python ./10_base_configs.py big --help`
@@ -17,10 +17,9 @@ Usage:
 """
 
 from dataclasses import dataclass
-from typing import Callable, Literal, Mapping, Tuple, Type, TypeVar, Union
+from typing import Callable, Literal, Tuple, Union
 
 from torch import nn
-from typing_extensions import Annotated, reveal_type
 
 import dcargs
 
@@ -98,5 +97,4 @@ if __name__ == "__main__":
         # provided; it simplifies our CLI but makes it less expressive.
         avoid_subparsers=True,
     )
-    reveal_type(config)  # Should ExperimentConfig, both staticaly and dynamically.
     print(config)

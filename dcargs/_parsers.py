@@ -80,9 +80,9 @@ class ParserSpecification:
             field = dataclasses.replace(
                 field,
                 typ=_resolver.type_from_typevar_constraints(
-                    type_from_typevar.get(  # type: ignore
+                    _resolver.apply_type_from_typevar(
                         field.typ,
-                        field.typ,
+                        type_from_typevar,
                     )
                 ),
             )
@@ -243,7 +243,10 @@ class SubparsersSpecification:
             return None
 
         # We don't use sets here to retain order of subcommands.
-        options = [type_from_typevar.get(typ, typ) for typ in get_args(field.typ)]
+        options = [
+            _resolver.apply_type_from_typevar(typ, type_from_typevar)
+            for typ in get_args(field.typ)
+        ]
         options_no_none = [o for o in options if o != type(None)]  # noqa
         if not all(
             [
@@ -283,7 +286,7 @@ class SubparsersSpecification:
             subparser = dataclasses.replace(
                 subparser,
                 helptext_from_nested_class_field_name={
-                    _strings.make_field_name([field.name, k]): v
+                    _strings.make_field_name([prefix, k]): v
                     for k, v in subparser.helptext_from_nested_class_field_name.items()
                 },
             )
