@@ -54,7 +54,18 @@ def hyphen_separated_from_camel_case(name: str) -> str:
 
 
 def _subparser_name_from_type(cls: Type) -> str:
+    from .metadata import _subcommands  # Prevent circular imports
+
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
+    cls, subcommand_config = _resolver.unwrap_annotated(
+        cls, _subcommands._SubcommandConfiguration
+    )
+
+    # Subparser name from `dcargs.metadata.subcommand()`.
+    if subcommand_config is not None:
+        return subcommand_config.name
+
+    # Subparser name from class name.
     if len(type_from_typevar) == 0:
         assert hasattr(cls, "__name__")
         return hyphen_separated_from_camel_case(cls.__name__)  # type: ignore

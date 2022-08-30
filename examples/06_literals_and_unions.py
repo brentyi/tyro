@@ -2,7 +2,7 @@
 `typing.Union[]` can be used to restrict inputs to a fixed set of types.
 
 Usage:
-`python ./07_literals_and_unions.py --help`
+`python ./06_literals_and_unions.py --help`
 """
 
 import dataclasses

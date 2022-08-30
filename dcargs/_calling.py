@@ -56,11 +56,7 @@ def call_from_args(
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
 
         # Resolve field type.
-        field_type = (
-            type_from_typevar[field.typ]  # type: ignore
-            if field.typ in type_from_typevar
-            else field.typ
-        )
+        field_type = type_from_typevar.get(field.typ, field.typ)  # type: ignore
 
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords
@@ -148,7 +144,7 @@ def call_from_args(
                 value = None
             else:
                 options = map(
-                    lambda x: x if x not in type_from_typevar else type_from_typevar[x],
+                    lambda x: type_from_typevar.get(x, x),
                     get_args(field_type),
                 )
                 chosen_f = None

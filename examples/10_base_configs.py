@@ -9,18 +9,18 @@ Python is convenient for autocompletion and type checking). For selection, we co
 avoid fussing with `sys.argv` by using a `BASE_CONFIG` environment variable.
 
 Usage:
-`python ./06_base_configs.py`
-`python ./06_base_configs.py small --help`
-`python ./06_base_configs.py small --seed 94720`
-`python ./06_base_configs.py big --help`
-`python ./06_base_configs.py big --seed 94720`
+`python ./10_base_configs.py`
+`python ./10_base_configs.py small --help`
+`python ./10_base_configs.py small --seed 94720`
+`python ./10_base_configs.py big --help`
+`python ./10_base_configs.py big --seed 94720`
 """
 
-import sys
 from dataclasses import dataclass
-from typing import Callable, Dict, Literal, Tuple, TypeVar, Union
+from typing import Callable, Literal, Mapping, Tuple, Type, TypeVar, Union
 
 from torch import nn
+from typing_extensions import Annotated, reveal_type
 
 import dcargs
 
@@ -91,31 +91,12 @@ base_configs = {
 }
 
 
-T = TypeVar("T")
-
-
-def cli_from_base_configs(base_library: Dict[str, T]) -> T:
-    """Populate an instance of `cls`, where the first positional argument is used to
-    select from a library of named base configs."""
-    # Get base configuration name from the first positional argument.
-    if len(sys.argv) < 2 or sys.argv[1] not in base_library:
-        valid_usages = map(lambda k: f"{sys.argv[0]} {k} --help", base_library.keys())
-        raise SystemExit("usage:\n  " + "\n  ".join(valid_usages))
-
-    # Get base configuration from our library, and use it for default CLI parameters.
-    default_instance = base_library[sys.argv[1]]
-    return dcargs.cli(
-        type(default_instance),
-        prog=" ".join(sys.argv[:2]),
-        args=sys.argv[2:],
-        default_instance=default_instance,
+if __name__ == "__main__":
+    config = dcargs.cli(
+        dcargs.extras.union_type_from_mapping(base_configs),
         # `avoid_subparsers` will avoid making a subparser for unions when a default is
-        # provided; in this case, it simplifies our CLI but makes it less expressive
-        # (cannot switch away from the base optimizer types).
+        # provided; it simplifies our CLI but makes it less expressive.
         avoid_subparsers=True,
     )
-
-
-if __name__ == "__main__":
-    config = cli_from_base_configs(base_configs)
+    reveal_type(config)  # Should ExperimentConfig, both staticaly and dynamically.
     print(config)

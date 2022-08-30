@@ -18,6 +18,7 @@ from . import (
     _resolver,
     _strings,
 )
+from . import metadata as _metadata
 
 T = TypeVar("T")
 
@@ -255,18 +256,38 @@ class SubparsersSpecification:
         # Add subparser for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:
-            subparser_name = _strings.subparser_name_from_type(prefix, option)
-            parser_from_name[subparser_name] = ParserSpecification.from_callable(
+            name = _strings.subparser_name_from_type(prefix, option)
+            option, subcommand_config = _resolver.unwrap_annotated(
+                option, _metadata._subcommands._SubcommandConfiguration
+            )
+            if subcommand_config is None:
+                subcommand_config = _metadata._subcommands._SubcommandConfiguration(
+                    "unused",
+                    description=None,
+                    default=(
+                        field.default
+                        if type(field.default) is _resolver.unwrap_origin(option)
+                        else _fields.MISSING_NONPROP
+                    ),
+                )
+
+            subparser = ParserSpecification.from_callable(
                 option,
-                description=None,
+                description=subcommand_config.description,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
-                default_instance=field.default
-                if type(field.default) == _resolver.unwrap_origin(option)  # type: ignore
-                else _fields.MISSING_NONPROP,
+                default_instance=subcommand_config.default,
                 prefix=prefix,
                 avoid_subparsers=avoid_subparsers,
             )
+            subparser = dataclasses.replace(
+                subparser,
+                helptext_from_nested_class_field_name={
+                    _strings.make_field_name([field.name, k]): v
+                    for k, v in subparser.helptext_from_nested_class_field_name.items()
+                },
+            )
+            parser_from_name[name] = subparser
 
         # Optional if: type hint is Optional[], or a default instance is provided.
         required = True
@@ -286,9 +307,14 @@ class SubparsersSpecification:
                     "Default values for generic subparsers are not supported."
                 )
 
-            default_parser = parser_from_name[
-                _strings.subparser_name_from_type(prefix, type(field.default))
-            ]
+            default_name = _strings.subparser_name_from_type(
+                prefix, type(field.default)
+            )
+            assert default_name in parser_from_name, (
+                "Default with type {type(field.default)} was passed in, but no matching"
+                " subparser."
+            )
+            default_parser = parser_from_name[default_name]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
                 required = True
             if any(

@@ -2,18 +2,30 @@
 
 import copy
 import dataclasses
-from typing import Any, Callable, Dict, List, Tuple, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from typing_extensions import get_args, get_origin, get_type_hints
 
 TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
 
 
-def unwrap_origin(tp: TypeOrCallable) -> TypeOrCallable:
-    """Returns the origin of tp if it exists. Otherwise, returns tp."""
-    origin = get_origin(tp)
+def unwrap_origin(typ: TypeOrCallable) -> TypeOrCallable:
+    """Returns the origin of typ if it exists. Otherwise, returns typ."""
+    typ, _ = unwrap_annotated(typ)
+    origin = get_origin(typ)
     if origin is None:
-        return tp
+        return typ
     else:
         return origin
 
@@ -57,7 +69,7 @@ def resolved_fields(cls: Type) -> List[dataclasses.Field]:
 
     assert dataclasses.is_dataclass(cls)
     fields = []
-    annotations = get_type_hints(cls)
+    annotations = get_type_hints(cls, include_extras=True)
     for field in dataclasses.fields(cls):
         # Avoid mutating original field.
         field = copy.copy(field)
@@ -108,3 +120,37 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
     except TypeError:
         pass
     return typ
+
+
+MetadataType = TypeVar("MetadataType")
+
+
+def unwrap_annotated(
+    typ: TypeOrCallable, search_type: Optional[Type[MetadataType]] = None
+) -> Tuple[TypeOrCallable, Optional[MetadataType]]:
+    """Helper for parsing typing.Annotated types.
+
+    Examples:
+    - int, int => (int, ())
+    - Annotated[int, 1], int => (int, 1)
+    - Annotated[int, "1"], int => (int, None)
+    """
+    if not hasattr(typ, "__metadata__"):
+        return typ, None
+
+    args = get_args(typ)
+    assert len(args) >= 2
+
+    # Don't search for a specific metadata type if `None` is passed in.
+    if search_type is None:
+        return args[0], None
+
+    # Look through metadata for desired metadata type.
+    targets = tuple(x for x in args[1:] if isinstance(x, search_type))
+    if len(targets) == 0:
+        return args[0], None
+    else:
+        assert (
+            len(targets) == 1
+        ), f"Found two instances of {search_type} in metadata, but only expected one."
+        return args[0], targets[0]
