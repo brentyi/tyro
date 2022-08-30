@@ -8,7 +8,7 @@ from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, ca
 
 import pytest
 import torch.nn as nn
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
 
 import dcargs
 import dcargs._argparse_formatter
@@ -39,7 +39,7 @@ def test_helptext():
         x: int  # Documentation 1
 
         # Documentation 2
-        y: int
+        y: Annotated[int, "ignored"]
 
         z: int = 3
         """Documentation 3"""
@@ -525,9 +525,9 @@ def test_unparsable():
     helptext = _get_helptext(main)
     assert "--x {fixed}" in helptext
 
-    def main(x: Callable = nn.ReLU):
+    def main2(x: Callable = nn.ReLU):
         pass
 
-    helptext = _get_helptext(main)
+    helptext = _get_helptext(main2)
     assert "--x {fixed}" in helptext
     assert "(fixed to: <class 'torch.nn" in helptext

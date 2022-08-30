@@ -145,6 +145,14 @@ def _try_field_list_from_callable(
     f: Union[Callable, Type],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    from . import metadata as _metadata
+
+    f, subcommand_config = _resolver.unwrap_annotated(
+        f, _metadata._subcommands._SubcommandConfiguration
+    )
+    if subcommand_config is not None:
+        default_instance = subcommand_config.default
+
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.narrow_type(f, default_instance)
@@ -156,7 +164,7 @@ def _try_field_list_from_callable(
     if isinstance(f, type):
         cls = f
         f = cls.__init__  # type: ignore
-        f_origin: Callable = cls
+        f_origin: Callable = cls  # type: ignore
     f_origin = _resolver.unwrap_origin(f)
 
     # Try special cases.
@@ -191,6 +199,7 @@ def _try_field_list_from_callable(
                     " default to infer from."
                 )
             assert isinstance(default_instance, Iterable)
+            contained_type = next(iter(default_instance))
         else:
             (contained_type,) = get_args(f)
         f_origin = list if f_origin is typing.Sequence else f_origin  # type: ignore
@@ -232,7 +241,7 @@ def _try_field_list_from_typeddict(
         and default_instance is not EXCLUDE_FROM_CALL
     )
     assert not valid_default_instance or isinstance(default_instance, dict)
-    for name, typ in get_type_hints(cls).items():
+    for name, typ in get_type_hints(cls, include_extras=True).items():
         if valid_default_instance:
             default = default_instance.get(name, MISSING_PROP)  # type: ignore
         elif getattr(cls, "__total__") is False:
@@ -268,7 +277,7 @@ def _try_field_list_from_namedtuple(
     field_defaults = getattr(cls, "_field_defaults")
 
     # Note that _field_types is removed in Python 3.9.
-    for name, typ in _resolver.get_type_hints(cls).items():
+    for name, typ in get_type_hints(cls, include_extras=True).items():
         # Get default, with priority for `default_instance`.
         default = field_defaults.get(name, MISSING_NONPROP)
         if hasattr(default_instance, name):
@@ -483,7 +492,7 @@ def _field_list_from_params(
 
     # This will throw a type error for torch.device, typing.Dict, etc.
     try:
-        hints = get_type_hints(f)
+        hints = get_type_hints(f, include_extras=True)
     except TypeError:
         return UnsupportedNestedTypeMessage(f"Could not get hints for {f}!")
 

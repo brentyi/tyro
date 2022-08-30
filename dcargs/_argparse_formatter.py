@@ -136,7 +136,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 )
             )
             # </new>
-            parts.append("%*s%s\n" % (indent_first, "", help_lines[0]))
+            parts.append("%*s%s\n" % (indent_first, "", help_lines[0]))  # type: ignore
             for line in help_lines[1:]:
                 parts.append("%*s%s\n" % (help_position, "", line))
 

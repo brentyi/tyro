@@ -3,6 +3,7 @@ from typing import Any, Generic, Mapping, Optional, Tuple, TypeVar, Union
 
 import pytest
 from frozendict import frozendict  # type: ignore
+from typing_extensions import Annotated
 
 import dcargs
 
@@ -16,6 +17,21 @@ def test_nested():
     class Nested:
         x: int
         b: B
+
+    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    with pytest.raises(SystemExit):
+        dcargs.cli(Nested, args=["--x", "1"])
+
+
+def test_nested_annotated():
+    @dataclasses.dataclass
+    class B:
+        y: int
+
+    @dataclasses.dataclass
+    class Nested:
+        x: int
+        b: Annotated[B, "this should be ignored"]
 
     assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):

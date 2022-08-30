@@ -1,10 +1,10 @@
 """Multiple unions over nested types are populated using a series of subparsers.
 
 Usage:
-`python ./10_multiple_subparsers.py`
-`python ./10_multiple_subparsers.py --help`
-`python ./10_multiple_subparsers.py dataset:mnist --help`
-`python ./10_multiple_subparsers.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4`
+`python ./09_multiple_subparsers.py`
+`python ./09_multiple_subparsers.py --help`
+`python ./09_multiple_subparsers.py dataset:mnist --help`
+`python ./09_multiple_subparsers.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4`
 """
 from __future__ import annotations
 
