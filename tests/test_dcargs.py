@@ -468,6 +468,19 @@ def test_fixed():
         dcargs.cli(main, args=["--x", "something"])
 
 
+def test_fixed_dataclass_type():
+    @dataclasses.dataclass
+    class Dummy:
+        pass
+
+    def main(x: Callable = Dummy) -> Callable:
+        return x
+
+    assert dcargs.cli(main, args=[]) is Dummy
+    with pytest.raises(SystemExit):
+        dcargs.cli(main, args=["--x", "something"])
+
+
 def test_missing_singleton():
     assert dcargs.MISSING is copy.deepcopy(dcargs.MISSING)
 
