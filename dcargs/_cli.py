@@ -152,16 +152,19 @@ def get_parser(
     was called with the same arguments.
 
     This can be useful for libraries like argcomplete, pyzshcomplete, or shtab, which
-    enable autocompletion for argparse parsers."""
-    out = _cli_impl(
-        "parser",
-        f,
-        prog=prog,
-        description=description,
-        args=args,
-        default=default,
-        **deprecated_kwargs,
-    )
+    enable autocompletion for argparse parsers.
+
+    To reduce compatibility issues, strips out color formatting."""
+    with _argparse_formatter.dummy_termcolor_context():
+        out = _cli_impl(
+            "parser",
+            f,
+            prog=prog,
+            description=description,
+            args=args,
+            default=default,
+            **deprecated_kwargs,
+        )
     assert isinstance(out, argparse.ArgumentParser)
     return out
 
