@@ -24,7 +24,7 @@ from typing import (
 import termcolor
 
 from . import _fields, _instantiators, _resolver, _strings
-from .metadata import _markers
+from .conf import _markers
 
 try:
     # Python >=3.8.
@@ -139,7 +139,7 @@ def _rule_handle_boolean_flags(
     if (
         arg.field.default in _fields.MISSING_SINGLETONS
         or arg.field.positional
-        or _markers.FLAGS_OFF in arg.field.markers
+        or _markers.FLAG_CONVERSION_OFF in arg.field.markers
     ):
         # Treat bools as a normal parameter.
         return lowered

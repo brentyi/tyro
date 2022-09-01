@@ -54,7 +54,7 @@ def hyphen_separated_from_camel_case(name: str) -> str:
 
 
 def _subparser_name_from_type(cls: Type) -> str:
-    from .metadata import _subcommands  # Prevent circular imports
+    from .conf import _subcommands  # Prevent circular imports
 
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
     cls, found_subcommand_configs = _resolver.unwrap_annotated(

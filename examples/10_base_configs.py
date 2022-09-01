@@ -105,7 +105,7 @@ if __name__ == "__main__":
     #     Union[
     #         Annotated[
     #             ExperimentConfig,
-    #             dcargs.metadata.subcommand(
+    #             dcargs.conf.subcommand(
     #                 "small",
     #                 default=base_configs["small"],
     #                 description=descriptions["small"],
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #         ],
     #         Annotated[
     #             ExperimentConfig,
-    #             dcargs.metadata.subcommand(
+    #             dcargs.conf.subcommand(
     #                 "big",
     #                 default=base_configs["big"],
     #                 description=descriptions["big"],

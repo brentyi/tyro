@@ -17,8 +17,8 @@ from . import (
     _instantiators,
     _resolver,
     _strings,
+    conf,
 )
-from . import metadata as _metadata
 
 T = TypeVar("T")
 
@@ -47,7 +47,7 @@ class ParserSpecification:
         """Create a parser definition from a callable."""
 
         # Resolve generic types.
-        markers = _resolver.unwrap_annotated(f, _metadata._markers.Marker)[1]
+        markers = _resolver.unwrap_annotated(f, conf._markers.Marker)[1]
         f, type_from_typevar = _resolver.resolve_generic_types(f)
         f = _resolver.narrow_type(f, default_instance)
         if parent_type_from_typevar is not None:
@@ -94,7 +94,7 @@ class ParserSpecification:
                 )
 
             # (1) Handle fields marked as fixed.
-            if _metadata._markers.FIXED in field.markers:
+            if conf._markers.FIXED in field.markers:
                 args.append(
                     _arguments.ArgumentDefinition(
                         prefix=prefix,
@@ -114,7 +114,7 @@ class ParserSpecification:
             if subparsers_attempt is not None:
                 if (
                     not subparsers_attempt.required
-                    and _metadata._markers.SUBCOMMANDS_OFF in field.markers
+                    and conf._markers.AVOID_SUBCOMMANDS in field.markers
                 ):
                     # Don't make a subparser.
                     field = dataclasses.replace(field, typ=type(field.default))
@@ -285,12 +285,12 @@ class SubparsersSpecification:
         for option in options_no_none:
             name = _strings.subparser_name_from_type(prefix, option)
             option, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _metadata._subcommands._SubcommandConfiguration
+                option, conf._subcommands._SubcommandConfiguration
             )
             if len(found_subcommand_configs) == 0:
                 # Make a dummy subcommand config.
                 found_subcommand_configs = (
-                    _metadata._subcommands._SubcommandConfiguration(
+                    conf._subcommands._SubcommandConfiguration(
                         "unused",
                         description=None,
                         default=(

@@ -19,7 +19,7 @@ def test_avoid_subparser_with_default_instance():
     @dataclasses.dataclass
     class DefaultInstanceSubparser:
         x: int
-        bc: dcargs.metadata.SubcommandsOff[
+        bc: dcargs.conf.AvoidSubcommands[
             Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
         ]
 
@@ -73,7 +73,7 @@ def test_avoid_subparser_with_default_instance_recursive():
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "5"],
         )
         == dcargs.cli(
-            dcargs.metadata.SubcommandsOff[DefaultInstanceSubparser],
+            dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "--bc.y", "5"],
             default_instance=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=3)
@@ -90,11 +90,11 @@ def test_avoid_subparser_with_default_instance_recursive():
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceSMTPServer(z=3))
     assert (
         dcargs.cli(
-            dcargs.metadata.SubcommandsOff[DefaultInstanceSubparser],
+            dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "8"],
         )
         == dcargs.cli(
-            dcargs.metadata.SubcommandsOff[DefaultInstanceSubparser],
+            dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--bc.y", "8"],
             default_instance=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=7)
@@ -117,8 +117,8 @@ def test_subparser_in_nested_with_metadata():
     @dataclasses.dataclass
     class Nested2:
         subcommand: Union[
-            Annotated[A, dcargs.metadata.subcommand("command-a", default=A(7))],
-            Annotated[B, dcargs.metadata.subcommand("command-b", default=B(9))],
+            Annotated[A, dcargs.conf.subcommand("command-a", default=A(7))],
+            Annotated[B, dcargs.conf.subcommand("command-b", default=B(9))],
         ]
 
     @dataclasses.dataclass
@@ -176,8 +176,8 @@ def test_subparser_in_nested_with_metadata_generic():
     class Nested1:
         nested2: Nested2[
             Union[
-                Annotated[A, dcargs.metadata.subcommand("command-a", default=A(7))],
-                Annotated[B, dcargs.metadata.subcommand("command-b", default=B(9))],
+                Annotated[A, dcargs.conf.subcommand("command-a", default=A(7))],
+                Annotated[B, dcargs.conf.subcommand("command-b", default=B(9))],
             ]
         ]
 
@@ -227,8 +227,8 @@ def test_subparser_in_nested_with_metadata_generic_alt():
     @dataclasses.dataclass
     class Nested2(Generic[T]):
         subcommand: Union[
-            Annotated[T, dcargs.metadata.subcommand("command-a", default=A(7))],
-            Annotated[B, dcargs.metadata.subcommand("command-b", default=B(9))],
+            Annotated[T, dcargs.conf.subcommand("command-a", default=A(7))],
+            Annotated[B, dcargs.conf.subcommand("command-b", default=B(9))],
         ]
 
     @dataclasses.dataclass
@@ -280,7 +280,7 @@ def test_flag():
     ) == A(True)
 
     assert dcargs.cli(
-        dcargs.metadata.FlagsOff[A],
+        dcargs.conf.FlagConversionOff[A],
         args=["--x", "True"],
         default_instance=A(False),
     ) == A(True)
@@ -291,7 +291,7 @@ def test_fixed():
 
     @dataclasses.dataclass
     class A:
-        x: dcargs.metadata.Fixed[bool]
+        x: dcargs.conf.Fixed[bool]
 
     assert dcargs.cli(
         A,
@@ -301,7 +301,7 @@ def test_fixed():
 
     with pytest.raises(SystemExit):
         assert dcargs.cli(
-            dcargs.metadata.FlagsOff[A],
+            dcargs.conf.FlagConversionOff[A],
             args=["--x", "True"],
             default_instance=A(False),
         ) == A(True)
@@ -322,8 +322,8 @@ def test_fixed_recursive():
 
     with pytest.raises(SystemExit):
         assert dcargs.cli(
-            dcargs.metadata.Fixed[
-                dcargs.metadata.FlagsOff[A],
+            dcargs.conf.Fixed[
+                dcargs.conf.FlagConversionOff[A],
             ],
             args=["--x", "True"],
             default_instance=A(False),

@@ -2,7 +2,7 @@ from typing import Mapping, Type, TypeVar, Union
 
 from typing_extensions import Annotated
 
-from ..metadata import subcommand
+from ..conf import subcommand
 
 T = TypeVar("T")
 
@@ -27,11 +27,11 @@ def subcommand_union_from_mapping(
     Union[
         Annotated[
             Config,
-            dcargs.metadata.subcommand("small", default=Config(...))
+            dcargs.conf.subcommand("small", default=Config(...))
         ],
         Annotated[
             Config,
-            dcargs.metadata.subcommand("big", default=Config(...))
+            dcargs.conf.subcommand("big", default=Config(...))
         ]
     ]
     ```
