@@ -346,8 +346,8 @@ class SubparsersSpecification:
                 prefix, type(field.default)
             )
             assert default_name in parser_from_name, (
-                "Default with type {type(field.default)} was passed in, but no matching"
-                " subparser."
+                f"Default with type {type(field.default)} was passed in, but no"
+                " matching subparser."
             )
             default_parser = parser_from_name[default_name]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
