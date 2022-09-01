@@ -25,7 +25,7 @@ def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     target2 = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
         with dcargs._argparse_formatter.ansi_context():
-            dcargs.generate_parser(f).parse_args(args)
+            dcargs.get_parser(f).parse_args(args)
     assert target.getvalue() == target2.getvalue()
 
     return dcargs._strings.strip_ansi_sequences(target.getvalue())

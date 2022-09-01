@@ -1,12 +1,12 @@
 """Core public API."""
-
 import argparse
 import dataclasses
+import warnings
 from typing import Callable, Optional, Sequence, Type, TypeVar, Union, cast, overload
 
 from typing_extensions import Literal, assert_never
 
-from . import _argparse_formatter, _calling, _fields, _parsers, _strings
+from . import _argparse_formatter, _calling, _fields, _parsers, _strings, conf
 
 OutT = TypeVar("OutT")
 
@@ -26,7 +26,7 @@ def cli(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
 ) -> OutT:
     ...
 
@@ -38,7 +38,7 @@ def cli(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
 ) -> OutT:
     ...
 
@@ -49,7 +49,8 @@ def cli(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
+    **deprecated_kwargs,
 ) -> OutT:
     """Call `f(...)`, with arguments populated from an automatically generated CLI
     interface.
@@ -94,7 +95,7 @@ def cli(
             `argparse.ArgumentParser()`.
         args: If set, parse arguments from a sequence of strings instead of the
             commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
-        default_instance: An instance of `T` to use for default values; only supported
+        default: An instance of `T` to use for default values; only supported
             if `T` is a dataclass, TypedDict, or NamedTuple. Helpful for merging CLI
             arguments with values loaded from elsewhere. (for example, a config object
             loaded from a yaml file)
@@ -108,42 +109,44 @@ def cli(
         prog=prog,
         description=description,
         args=args,
-        default_instance=default_instance,
+        default=default,
+        **deprecated_kwargs,
     )
     return out
 
 
 @overload
-def generate_parser(
+def get_parser(
     f: Type[OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
 ) -> argparse.ArgumentParser:
     ...
 
 
 @overload
-def generate_parser(
+def get_parser(
     f: Callable[..., OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
 ) -> argparse.ArgumentParser:
     ...
 
 
-def generate_parser(
+def get_parser(
     f: Union[Type[OutT], Callable[..., OutT]],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
+    **deprecated_kwargs,
 ) -> argparse.ArgumentParser:
     """Returns the argparse parser that would be used under-the-hood if `dcargs.cli()`
     was called with the same arguments.
@@ -156,7 +159,8 @@ def generate_parser(
         prog=prog,
         description=description,
         args=args,
-        default_instance=default_instance,
+        default=default,
+        **deprecated_kwargs,
     )
     assert isinstance(out, argparse.ArgumentParser)
     return out
@@ -170,7 +174,8 @@ def _cli_impl(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
+    **deprecated_kwargs,
 ) -> argparse.ArgumentParser:
     ...
 
@@ -183,7 +188,8 @@ def _cli_impl(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
+    **deprecated_kwargs,
 ) -> OutT:
     ...
 
@@ -195,19 +201,37 @@ def _cli_impl(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default_instance: Optional[OutT] = None,
+    default: Optional[OutT] = None,
+    **deprecated_kwargs,
 ) -> Union[OutT, argparse.ArgumentParser]:
+
+    if "default_instance" in deprecated_kwargs:
+        warnings.warn(
+            "`default_instance=` is deprecated! use `default=` instead.", stacklevel=2
+        )
+        default = deprecated_kwargs["default_instance"]
+    if deprecated_kwargs.get("avoid_subparsers", False):
+        f = conf.AvoidSubcommands[f]
+        warnings.warn(
+            "`avoid_subparsers=` is deprecated! use `dcargs.conf.AvoidSubparsers[]` instead.",
+            stacklevel=2,
+        )
+
+    # Internally, we distinguish between two concepts:
+    # - "default", which is used for individual arguments.
+    # - "default_instance", which is used for _fields_ (which may be broken down into
+    #   one or many arguments, depending on various factors).
+    #
+    # This could be revisited.
     default_instance_internal: Union[_fields.NonpropagatingMissingType, OutT] = (
-        _fields.MISSING_NONPROP if default_instance is None else default_instance
+        _fields.MISSING_NONPROP if default is None else default
     )
 
     if not _fields.is_nested_type(cast(Type, f), default_instance_internal):
         dummy_field = cast(
             dataclasses.Field,
             dataclasses.field(
-                default=default_instance
-                if default_instance is not None
-                else dataclasses.MISSING
+                default=default if default is not None else dataclasses.MISSING
             ),
         )
         f = dataclasses.make_dataclass(
@@ -224,6 +248,7 @@ def _cli_impl(
         description=description,
         parent_classes=set(),  # Used for recursive calls.
         parent_type_from_typevar=None,  # Used for recursive calls.
+        parent_markers=(),  # Used for recursive calls.
         default_instance=default_instance_internal,  # Overrides for default values.
         prefix="",  # Used for recursive calls.
     )

@@ -4,7 +4,19 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import itertools
-from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import termcolor
 from typing_extensions import get_args, get_origin
@@ -39,6 +51,7 @@ class ParserSpecification:
         description: Optional[str],
         parent_classes: Set[Type],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
+        parent_markers: Tuple[conf._markers.Marker, ...],
         default_instance: Union[
             T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
         ],
@@ -47,7 +60,9 @@ class ParserSpecification:
         """Create a parser definition from a callable."""
 
         # Resolve generic types.
-        markers = _resolver.unwrap_annotated(f, conf._markers.Marker)[1]
+        markers = (
+            parent_markers + _resolver.unwrap_annotated(f, conf._markers.Marker)[1]
+        )
         f, type_from_typevar = _resolver.resolve_generic_types(f)
         f = _resolver.narrow_type(f, default_instance)
         if parent_type_from_typevar is not None:
@@ -122,10 +137,6 @@ class ParserSpecification:
                     subparsers_from_name[
                         _strings.make_field_name([prefix, subparsers_attempt.name])
                     ] = subparsers_attempt
-
-                    for subparser_def in subparsers_attempt.parser_from_name.values():
-                        for arg in subparser_def.args:
-                            arg.field.markers.extend(field.markers)
                     continue
 
             # (3) Handle nested callables.
@@ -142,13 +153,11 @@ class ParserSpecification:
                     description=None,
                     parent_classes=parent_classes,
                     parent_type_from_typevar=type_from_typevar,
+                    parent_markers=markers,
                     default_instance=field.default,
                     prefix=_strings.make_field_name([prefix, field.name]),
                 )
                 args.extend(nested_parser.args)
-
-                for arg in nested_parser.args:
-                    arg.field.markers.extend(field.markers)
 
                 # Include nested subparsers.
                 subparsers_from_name.update(nested_parser.subparsers_from_name)
@@ -307,6 +316,7 @@ class SubparsersSpecification:
                 description=found_subcommand_configs[0].description,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
+                parent_markers=tuple(field.markers),
                 default_instance=found_subcommand_configs[0].default,
                 prefix=prefix,
             )

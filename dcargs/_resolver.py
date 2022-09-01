@@ -113,7 +113,9 @@ TypeT = TypeVar("TypeT", bound=Callable)
 
 def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
     """Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
-    should parse as Cat."""
+    should parse as Cat.
+
+    Note that Union types are intentionally excluded here."""
     try:
         potential_subclass = type(default_instance)
         superclass = unwrap_annotated(typ)[0]
