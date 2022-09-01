@@ -757,7 +757,7 @@
 <span class="sd">    frozen.&quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
     <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__dataclass_params__</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__dataclass_params__</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Mutable type </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> is used as a default value for `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">`. This is&quot;</span>
             <span class="s2">&quot; dangerous! Consider using `dataclasses.field(default_factory=...)` or&quot;</span>
@@ -793,7 +793,9 @@
     <span class="c1"># Try grabbing default from dataclass field.</span>
     <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
         <span class="n">default</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
-        <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
+        <span class="c1"># Note that dataclasses.is_dataclass() will also return true for dataclass</span>
+        <span class="c1"># _types_, not just instances.</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
             <span class="n">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">default</span>
 
