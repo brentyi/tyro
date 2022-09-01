@@ -539,7 +539,7 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
     frozen."""
     assert dataclasses.is_dataclass(default_instance)
     cls = type(default_instance)
-    if not cls.__dataclass_params__.frozen:
+    if not cls.__dataclass_params__.frozen:  # type: ignore
         warnings.warn(
             f"Mutable type {cls} is used as a default value for `{field.name}`. This is"
             " dangerous! Consider using `dataclasses.field(default_factory=...)` or"
@@ -575,7 +575,9 @@ def _get_dataclass_field_default(
     # Try grabbing default from dataclass field.
     if field.default not in MISSING_SINGLETONS:
         default = field.default
-        if dataclasses.is_dataclass(default):
+        # Note that dataclasses.is_dataclass() will also return true for dataclass
+        # _types_, not just instances.
+        if type(default) is not type and dataclasses.is_dataclass(default):
             _ensure_dataclass_instance_used_as_default_is_frozen(field, default)
         return default
 
