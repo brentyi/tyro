@@ -1,4 +1,4 @@
-from typing import Mapping, Type, TypeVar, Union
+from typing import Mapping, Tuple, Type, TypeVar, Union
 
 from typing_extensions import Annotated
 
@@ -7,7 +7,9 @@ from ..metadata import subcommand
 T = TypeVar("T")
 
 
-def union_type_from_mapping(base_mapping: Mapping[str, T]) -> Type[T]:
+def union_type_from_mapping(
+    base_mapping: Mapping[Union[str, Tuple[str, str]], T]
+) -> Type[T]:
     """Returns a Union type for defining subcommands that choose between nested types.
 
     For example, when `base_mapping` is set to:
@@ -68,7 +70,12 @@ def union_type_from_mapping(base_mapping: Mapping[str, T]) -> Type[T]:
     return Union.__getitem__(  # type: ignore
         tuple(
             Annotated.__class_getitem__(  # type: ignore
-                (type(v), subcommand(k, default=v))
+                (
+                    type(v),
+                    subcommand(k, default=v)
+                    if isinstance(k, str)
+                    else subcommand(k[0], default=v, description=k[1]),
+                )
             )
             for k, v in base_mapping.items()
         )

@@ -175,7 +175,10 @@ def _rule_recursive_instantiator_from_type(
         )
     except _instantiators.UnsupportedTypeAnnotationError as e:
         if arg.field.default in _fields.MISSING_SINGLETONS:
-            raise e
+            raise _instantiators.UnsupportedTypeAnnotationError(
+                "Unsupported type annotation for the field"
+                f" {_strings.make_field_name([arg.prefix, arg.field.name])}. To suppress this error, assign the field a default value."
+            ) from e
         else:
             # For fields with a default, we'll get by even if there's no instantiator
             # available.

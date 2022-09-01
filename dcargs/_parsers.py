@@ -397,6 +397,7 @@ class SubparsersSpecification:
                 subparser = argparse_subparsers.add_parser(
                     name=_strings.subparser_name_from_type(self.prefix, None),
                     formatter_class=_argparse_formatter.make_formatter_class(0),
+                    help="",
                 )
                 subparser_tree_nodes.append(subparser)
 
@@ -406,6 +407,7 @@ class SubparsersSpecification:
                     formatter_class=_argparse_formatter.make_formatter_class(
                         len(subparser_def.args)
                     ),
+                    help=subparser_def.description,
                 )
                 subparser_def.apply(subparser)
 
