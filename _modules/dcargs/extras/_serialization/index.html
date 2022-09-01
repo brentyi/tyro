@@ -229,10 +229,11 @@
 
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">enum</span>
+<span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">yaml</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_origin</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_resolver</span>
 
@@ -275,15 +276,21 @@
     <span class="n">contained_dataclasses</span> <span class="o">=</span> <span class="p">{</span><span class="bp">cls</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">handle_type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="c1"># Handle dataclasses.</span>
         <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="n">typ</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent_contained_dataclasses</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_get_contained_special_types_from_type</span><span class="p">(</span>
                 <span class="n">typ</span><span class="p">,</span>
                 <span class="n">_parent_contained_dataclasses</span><span class="o">=</span><span class="n">contained_dataclasses</span>
                 <span class="o">|</span> <span class="n">parent_contained_dataclasses</span><span class="p">,</span>
             <span class="p">)</span>
+
+        <span class="c1"># Handle enums.</span>
         <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">enum</span><span class="o">.</span><span class="n">EnumMeta</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">{</span><span class="n">typ</span><span class="p">}</span>
-        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="c1"># Handle Union, Annotated, List, etc. No-op when there are no args.</span>
+        <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="nb">set</span><span class="o">.</span><span class="n">union</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="n">handle_type</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)),</span> <span class="nb">set</span><span class="p">())</span>
 
     <span class="c1"># Handle generics.</span>
     <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
