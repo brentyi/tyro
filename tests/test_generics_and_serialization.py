@@ -366,14 +366,13 @@ def test_pculbertson():
         subclass: Union[TypeA, TypeB] = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
-    wrapper2 = dcargs.extras.from_yaml(
+    dcargs.extras.from_yaml(
         Wrapper, dcargs.extras.to_yaml(wrapper1)
     )  # Errors, no constructor for TypeA
 
 
 def test_annotated():
     # https://github.com/brentyi/dcargs/issues/7
-    from typing import Union
 
     @dataclasses.dataclass
     class TypeA:
@@ -381,9 +380,9 @@ def test_annotated():
 
     @dataclasses.dataclass
     class Wrapper:
-        subclass: Annotated[int, TypeA] = TypeA(1)
+        subclass: Annotated[TypeA, int] = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
-    wrapper2 = dcargs.extras.from_yaml(
+    dcargs.extras.from_yaml(
         Wrapper, dcargs.extras.to_yaml(wrapper1)
     )  # Errors, no constructor for TypeA
