@@ -27,7 +27,6 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> OutT:
     ...
 
@@ -40,7 +39,6 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> OutT:
     ...
 
@@ -52,7 +50,6 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> OutT:
     """Call `f(...)`, with arguments populated from an automatically generated CLI
     interface.
@@ -101,8 +98,6 @@ def cli(
             if `T` is a dataclass, TypedDict, or NamedTuple. Helpful for merging CLI
             arguments with values loaded from elsewhere. (for example, a config object
             loaded from a yaml file)
-        avoid_subparsers: Avoid creating a subparser when defaults are provided for
-            unions over nested types. Generates cleaner but less expressive CLIs.
 
     Returns:
         The output of `f(...)`.
@@ -114,7 +109,6 @@ def cli(
         description=description,
         args=args,
         default_instance=default_instance,
-        avoid_subparsers=avoid_subparsers,
     )
     return out
 
@@ -127,7 +121,6 @@ def generate_parser(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> argparse.ArgumentParser:
     ...
 
@@ -140,7 +133,6 @@ def generate_parser(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> argparse.ArgumentParser:
     ...
 
@@ -152,7 +144,6 @@ def generate_parser(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> argparse.ArgumentParser:
     """Returns the argparse parser that would be used under-the-hood if `dcargs.cli()`
     was called with the same arguments.
@@ -166,7 +157,6 @@ def generate_parser(
         description=description,
         args=args,
         default_instance=default_instance,
-        avoid_subparsers=avoid_subparsers,
     )
     assert isinstance(out, argparse.ArgumentParser)
     return out
@@ -181,7 +171,6 @@ def _cli_impl(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> argparse.ArgumentParser:
     ...
 
@@ -195,7 +184,6 @@ def _cli_impl(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> OutT:
     ...
 
@@ -208,7 +196,6 @@ def _cli_impl(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default_instance: Optional[OutT] = None,
-    avoid_subparsers: bool = False,
 ) -> Union[OutT, argparse.ArgumentParser]:
     default_instance_internal: Union[_fields.NonpropagatingMissingType, OutT] = (
         _fields.MISSING_NONPROP if default_instance is None else default_instance
@@ -239,7 +226,6 @@ def _cli_impl(
         parent_type_from_typevar=None,  # Used for recursive calls.
         default_instance=default_instance_internal,  # Overrides for default values.
         prefix="",  # Used for recursive calls.
-        avoid_subparsers=avoid_subparsers,
     )
 
     # Generate parser!
@@ -269,7 +255,6 @@ def _cli_impl(
             default_instance_internal,
             value_from_prefixed_field_name,
             field_name_prefix="",
-            avoid_subparsers=avoid_subparsers,
         )
     except _calling.InstantiationError as e:
         # Emulate argparse's error behavior when invalid arguments are passed in.

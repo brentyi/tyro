@@ -104,8 +104,6 @@ def test_helptext_inherited_default_override():
     class ChildClass(ParentClass):
         """This docstring should be printed as a description."""
 
-        pass
-
     def main(x: ParentClass = ChildClass(x=5, y=5)) -> Any:
         return x
 
@@ -127,7 +125,6 @@ def test_helptext_nested():
             Args:
                 a (int): Hello world!
             """
-            pass
 
     def main_with_docstring(a: Inner) -> None:
         """main_with_docstring.
@@ -138,7 +135,6 @@ def test_helptext_nested():
 
     def main_no_docstring(a: Inner) -> None:
         """main_no_docstring."""
-        pass
 
     helptext = _get_helptext(main_with_docstring)
     assert "Documented in function" in helptext and str(Inner.__doc__) not in helptext

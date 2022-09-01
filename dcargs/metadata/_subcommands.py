@@ -6,9 +6,6 @@ from .._fields import MISSING_NONPROP
 
 @dataclasses.dataclass(frozen=True)
 class _SubcommandConfiguration:
-    # Things we could potentially add:
-    # - `description`
-    # - `avoid_subparsers`
     name: str
     description: Optional[str]
     default: Any
@@ -24,9 +21,7 @@ def subcommand(
     default: Any = MISSING_NONPROP,
 ) -> Any:
     """Returns a metadata object for configuring subcommands with `typing.Annotated`.
-    Use of this function is supported but discouraged unless absolutely necessary.
-
-    ---
+    This is useful but can make code harder to read, so usage is discouraged.
 
     Consider the standard approach for creating subcommands:
 
@@ -36,8 +31,7 @@ def subcommand(
     )
     ```
 
-    This will create two subcommands: nested-type-a and nested-type-b.
-
+    This will create two subcommands: `nested-type-a` and `nested-type-b`.
 
     Annotating each type with `dcargs.metadata.subcommand()` allows us to override for
     each subcommand the (a) name and (b) defaults.

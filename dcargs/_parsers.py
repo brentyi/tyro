@@ -43,11 +43,11 @@ class ParserSpecification:
             T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
         ],
         prefix: str,
-        avoid_subparsers: bool,
     ) -> ParserSpecification:
         """Create a parser definition from a callable."""
 
         # Resolve generic types.
+        markers = _resolver.unwrap_annotated(f, _metadata._markers.Marker)[1]
         f, type_from_typevar = _resolver.resolve_generic_types(f)
         f = _resolver.narrow_type(f, default_instance)
         if parent_type_from_typevar is not None:
@@ -86,36 +86,56 @@ class ParserSpecification:
                     )
                 ),
             )
+            field.markers.extend(markers)  # TODO: would be nice to avoid this mutation!
+
             if isinstance(field.typ, TypeVar):
                 raise _instantiators.UnsupportedTypeAnnotationError(
                     f"Field {field.name} has an unbound TypeVar: {field.typ}."
                 )
 
-            # (1) Handle Unions over callables; these result in subparsers.
+            # (1) Handle fields marked as fixed.
+            if _metadata._markers.FIXED in field.markers:
+                args.append(
+                    _arguments.ArgumentDefinition(
+                        prefix=prefix,
+                        field=field,
+                        type_from_typevar=type_from_typevar,
+                    )
+                )
+                continue
+
+            # (2) Handle Unions over callables; these result in subparsers.
             subparsers_attempt = SubparsersSpecification.from_field(
                 field,
                 type_from_typevar=type_from_typevar,
                 parent_classes=parent_classes,
                 prefix=_strings.make_field_name([prefix, field.name]),
-                avoid_subparsers=avoid_subparsers,
             )
             if subparsers_attempt is not None:
                 if (
-                    not avoid_subparsers
-                    # Required subparsers => must create a subparser.
-                    or subparsers_attempt.required
+                    not subparsers_attempt.required
+                    and _metadata._markers.SUBCOMMANDS_OFF in field.markers
                 ):
+                    # Don't make a subparser.
+                    field = dataclasses.replace(field, typ=type(field.default))
+                else:
                     subparsers_from_name[
                         _strings.make_field_name([prefix, subparsers_attempt.name])
                     ] = subparsers_attempt
-                    continue
-                else:
-                    field = dataclasses.replace(field, typ=type(field.default))
 
-            # (2) Handle nested callables.
+                    for subparser_def in subparsers_attempt.parser_from_name.values():
+                        for arg in subparser_def.args:
+                            arg.field.markers.extend(field.markers)
+                    continue
+
+            # (3) Handle nested callables.
             if _fields.is_nested_type(field.typ, field.default):
                 field = dataclasses.replace(
-                    field, typ=_resolver.narrow_type(field.typ, field.default)
+                    field,
+                    typ=_resolver.narrow_type(
+                        field.typ,
+                        field.default,
+                    ),
                 )
                 nested_parser = ParserSpecification.from_callable(
                     field.typ,
@@ -124,9 +144,11 @@ class ParserSpecification:
                     parent_type_from_typevar=type_from_typevar,
                     default_instance=field.default,
                     prefix=_strings.make_field_name([prefix, field.name]),
-                    avoid_subparsers=avoid_subparsers,
                 )
                 args.extend(nested_parser.args)
+
+                for arg in nested_parser.args:
+                    arg.field.markers.extend(field.markers)
 
                 # Include nested subparsers.
                 subparsers_from_name.update(nested_parser.subparsers_from_name)
@@ -145,10 +167,12 @@ class ParserSpecification:
                     ] = _docstrings.get_callable_description(field.typ)
                 continue
 
-            # (3) Handle primitive types. These produce a single argument!
+            # (4) Handle primitive types. These produce a single argument!
             args.append(
                 _arguments.ArgumentDefinition(
-                    prefix=prefix, field=field, type_from_typevar=type_from_typevar
+                    prefix=prefix,
+                    field=field,
+                    type_from_typevar=type_from_typevar,
                 )
             )
 
@@ -236,16 +260,16 @@ class SubparsersSpecification:
         type_from_typevar: Dict[TypeVar, Type],
         parent_classes: Set[Type],
         prefix: str,
-        avoid_subparsers: bool,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
-        if get_origin(field.typ) is not Union:
+        typ = _resolver.unwrap_annotated(field.typ)[0]
+        if get_origin(typ) is not Union:
             return None
 
         # We don't use sets here to retain order of subcommands.
         options = [
             _resolver.apply_type_from_typevar(typ, type_from_typevar)
-            for typ in get_args(field.typ)
+            for typ in get_args(typ)
         ]
         options_no_none = [o for o in options if o != type(None)]  # noqa
         if not all(
@@ -260,28 +284,31 @@ class SubparsersSpecification:
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:
             name = _strings.subparser_name_from_type(prefix, option)
-            option, subcommand_config = _resolver.unwrap_annotated(
+            option, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _metadata._subcommands._SubcommandConfiguration
             )
-            if subcommand_config is None:
-                subcommand_config = _metadata._subcommands._SubcommandConfiguration(
-                    "unused",
-                    description=None,
-                    default=(
-                        field.default
-                        if type(field.default) is _resolver.unwrap_origin(option)
-                        else _fields.MISSING_NONPROP
+            if len(found_subcommand_configs) == 0:
+                # Make a dummy subcommand config.
+                found_subcommand_configs = (
+                    _metadata._subcommands._SubcommandConfiguration(
+                        "unused",
+                        description=None,
+                        default=(
+                            field.default
+                            if type(field.default)
+                            is _resolver.unwrap_origin_strip_extras(option)
+                            else _fields.MISSING_NONPROP
+                        ),
                     ),
                 )
 
             subparser = ParserSpecification.from_callable(
                 option,
-                description=subcommand_config.description,
+                description=found_subcommand_configs[0].description,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
-                default_instance=subcommand_config.default,
+                default_instance=found_subcommand_configs[0].default,
                 prefix=prefix,
-                avoid_subparsers=avoid_subparsers,
             )
             subparser = dataclasses.replace(
                 subparser,

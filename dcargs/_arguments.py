@@ -24,6 +24,7 @@ from typing import (
 import termcolor
 
 from . import _fields, _instantiators, _resolver, _strings
+from .metadata import _markers
 
 try:
     # Python >=3.8.
@@ -95,9 +96,9 @@ class LoweredArgumentDefinition:
 
     def is_fixed(self) -> bool:
         """If the instantiator is set to `None`, even after all argument
-        transformations, it means that we weren't able to determine a valid instantiator
-        for an argument. We then mark the argument as 'fixed', with a value always equal
-        to the field default."""
+        transformations, it means that we don't have a valid instantiator for an
+        argument. We then mark the argument as 'fixed', with a value always equal to the
+        field default."""
         return self.instantiator is None
 
     # From here on out, all fields correspond 1:1 to inputs to argparse's
@@ -135,23 +136,32 @@ def _rule_handle_boolean_flags(
     if _resolver.apply_type_from_typevar(arg.field.typ, arg.type_from_typevar) is not bool:  # type: ignore
         return lowered
 
-    if lowered.default is False and not arg.field.positional:
+    if (
+        arg.field.default in _fields.MISSING_SINGLETONS
+        or arg.field.positional
+        or _markers.FLAGS_OFF in arg.field.markers
+    ):
+        # Treat bools as a normal parameter.
+        return lowered
+    elif arg.field.default is False:
         # Default `False` => --flag passed in flips to `True`.
         return dataclasses.replace(
             lowered,
             action="store_true",
             instantiator=lambda x: x,  # argparse will directly give us a bool!
         )
-    elif lowered.default is True and not arg.field.positional:
+    elif arg.field.default is True:
         # Default `True` => --no-flag passed in flips to `False`.
         return dataclasses.replace(
             lowered,
             action="store_false",
             instantiator=lambda x: x,  # argparse will directly give us a bool!
         )
-    else:
-        # Treat bools as a normal parameter.
-        return lowered
+
+    assert False, (
+        "Expected a boolean as a default for {arg.field.name}, but got"
+        " {lowered.default}."
+    )
 
 
 def _rule_recursive_instantiator_from_type(
@@ -166,6 +176,14 @@ def _rule_recursive_instantiator_from_type(
     Conversions from strings to our desired types happen in the instantiator; this is a
     bit more flexible, and lets us handle more complex types like enums and multi-type
     tuples."""
+    if _markers.FIXED in arg.field.markers:
+        return dataclasses.replace(
+            lowered,
+            instantiator=None,
+            metavar=termcolor.colored("{fixed}", color="red"),
+            required=False,
+            default=_fields.MISSING_PROP,
+        )
     if lowered.instantiator is not None:
         return lowered
     try:
@@ -177,7 +195,8 @@ def _rule_recursive_instantiator_from_type(
         if arg.field.default in _fields.MISSING_SINGLETONS:
             raise _instantiators.UnsupportedTypeAnnotationError(
                 "Unsupported type annotation for the field"
-                f" {_strings.make_field_name([arg.prefix, arg.field.name])}. To suppress this error, assign the field a default value."
+                f" {_strings.make_field_name([arg.prefix, arg.field.name])}. To"
+                " suppress this error, assign the field a default value."
             ) from e
         else:
             # For fields with a default, we'll get by even if there's no instantiator

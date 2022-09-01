@@ -17,7 +17,8 @@ import docstring_parser
 import typing_extensions
 from typing_extensions import get_args, get_type_hints, is_typeddict
 
-from . import _docstrings, _instantiators, _resolver, _strings
+from . import _docstrings, _instantiators, _resolver, _singleton, _strings
+from .metadata import _markers
 
 
 @dataclasses.dataclass(frozen=True)
@@ -27,37 +28,32 @@ class FieldDefinition:
     default: Any
     helptext: Optional[str]
     positional: bool
+    markers: List[_markers.Marker] = dataclasses.field(default_factory=list)
 
     # Override the name in our kwargs. Currently only used for dictionary types when
     # the key values aren't strings, but in the future could be used whenever the
     # user-facing argument name doesn't match the keyword expected by our callable.
     name_override: Optional[Any] = None
 
-
-class _Singleton:
-    # Singleton pattern.
-    # https://www.python.org/download/releases/2.2/descrintro/#__new__
-    def __new__(cls, *args, **kwds):
-        it = cls.__dict__.get("__it__")
-        if it is not None:
-            return it
-        cls.__it__ = it = object.__new__(cls)
-        it.init(*args, **kwds)
-        return it
-
-    def init(self, *args, **kwds):
-        pass
+    def __post_init__(self):  #
+        # Auto-populate markers if unset; this is meant to not run when we do
+        # dataclasses.replace, etc. TODO: the whole markers design, handling of
+        # Annotated[], etc, should be revisited...
+        if len(self.markers) == 0:
+            self.markers.extend(
+                _resolver.unwrap_annotated(self.typ, _markers.Marker)[1]
+            )
 
 
-class PropagatingMissingType(_Singleton):
+class PropagatingMissingType(_singleton.Singleton):
     pass
 
 
-class NonpropagatingMissingType(_Singleton):
+class NonpropagatingMissingType(_singleton.Singleton):
     pass
 
 
-class ExcludeFromCallType(_Singleton):
+class ExcludeFromCallType(_singleton.Singleton):
     pass
 
 
@@ -147,11 +143,11 @@ def _try_field_list_from_callable(
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     from . import metadata as _metadata
 
-    f, subcommand_config = _resolver.unwrap_annotated(
+    f, found_subcommand_configs = _resolver.unwrap_annotated(
         f, _metadata._subcommands._SubcommandConfiguration
     )
-    if subcommand_config is not None:
-        default_instance = subcommand_config.default
+    if len(found_subcommand_configs) > 0:
+        default_instance = found_subcommand_configs[0].default
 
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
@@ -165,7 +161,7 @@ def _try_field_list_from_callable(
         cls = f
         f = cls.__init__  # type: ignore
         f_origin: Callable = cls  # type: ignore
-    f_origin = _resolver.unwrap_origin(f)
+    f_origin = _resolver.unwrap_origin_strip_extras(f)
 
     # Try special cases.
     if cls is not None and is_typeddict(cls):
@@ -224,9 +220,9 @@ def _try_field_list_from_callable(
             return container_fields
 
     # General cases.
-    if (cls is not None and cls in _known_parsable_types) or _resolver.unwrap_origin(
-        f
-    ) in _known_parsable_types:
+    if (
+        cls is not None and cls in _known_parsable_types
+    ) or _resolver.unwrap_origin_strip_extras(f) in _known_parsable_types:
         return UnsupportedNestedTypeMessage(f"{f} should be parsed directly!")
     else:
         return _try_field_list_from_general_callable(f, cls, default_instance)
