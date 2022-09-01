@@ -108,75 +108,70 @@ class ParserSpecification:
                     f"Field {field.name} has an unbound TypeVar: {field.typ}."
                 )
 
-            # (1) Handle fields marked as fixed.
-            if conf._markers.FIXED in field.markers:
-                args.append(
-                    _arguments.ArgumentDefinition(
-                        prefix=prefix,
-                        field=field,
-                        type_from_typevar=type_from_typevar,
-                    )
-                )
-                continue
-
-            # (2) Handle Unions over callables; these result in subparsers.
-            subparsers_attempt = SubparsersSpecification.from_field(
-                field,
-                type_from_typevar=type_from_typevar,
-                parent_classes=parent_classes,
-                prefix=_strings.make_field_name([prefix, field.name]),
-            )
-            if subparsers_attempt is not None:
-                if (
-                    not subparsers_attempt.required
-                    and conf._markers.AVOID_SUBCOMMANDS in field.markers
-                ):
-                    # Don't make a subparser.
-                    field = dataclasses.replace(field, typ=type(field.default))
-                else:
-                    subparsers_from_name[
-                        _strings.make_field_name([prefix, subparsers_attempt.name])
-                    ] = subparsers_attempt
-                    continue
-
-            # (3) Handle nested callables.
-            if _fields.is_nested_type(field.typ, field.default):
-                field = dataclasses.replace(
+            if conf._markers.FIXED not in field.markers:
+                # (1) Handle Unions over callables; these result in subparsers.
+                subparsers_attempt = SubparsersSpecification.from_field(
                     field,
-                    typ=_resolver.narrow_type(
-                        field.typ,
-                        field.default,
-                    ),
-                )
-                nested_parser = ParserSpecification.from_callable(
-                    field.typ,
-                    description=None,
+                    type_from_typevar=type_from_typevar,
                     parent_classes=parent_classes,
-                    parent_type_from_typevar=type_from_typevar,
-                    parent_markers=markers,
-                    default_instance=field.default,
                     prefix=_strings.make_field_name([prefix, field.name]),
                 )
-                args.extend(nested_parser.args)
+                if subparsers_attempt is not None:
+                    if (
+                        not subparsers_attempt.required
+                        and conf._markers.AVOID_SUBCOMMANDS in field.markers
+                    ):
+                        # Don't make a subparser.
+                        field = dataclasses.replace(field, typ=type(field.default))
+                    else:
+                        subparsers_from_name[
+                            _strings.make_field_name([prefix, subparsers_attempt.name])
+                        ] = subparsers_attempt
+                        continue
 
-                # Include nested subparsers.
-                subparsers_from_name.update(nested_parser.subparsers_from_name)
+                # (2) Handle nested callables.
+                if _fields.is_nested_type(field.typ, field.default):
+                    field = dataclasses.replace(
+                        field,
+                        typ=_resolver.narrow_type(
+                            field.typ,
+                            field.default,
+                        ),
+                    )
+                    nested_parser = ParserSpecification.from_callable(
+                        field.typ,
+                        description=None,
+                        parent_classes=parent_classes,
+                        parent_type_from_typevar=type_from_typevar,
+                        parent_markers=markers,
+                        default_instance=field.default,
+                        prefix=_strings.make_field_name([prefix, field.name]),
+                    )
+                    args.extend(nested_parser.args)
 
-                # Include nested strings.
-                for k, v in nested_parser.helptext_from_nested_class_field_name.items():
-                    helptext_from_nested_class_field_name[
-                        _strings.make_field_name([field.name, k])
-                    ] = v
+                    # Include nested subparsers.
+                    subparsers_from_name.update(nested_parser.subparsers_from_name)
 
-                if field.helptext is not None:
-                    helptext_from_nested_class_field_name[field.name] = field.helptext
-                else:
-                    helptext_from_nested_class_field_name[
-                        field.name
-                    ] = _docstrings.get_callable_description(field.typ)
-                continue
+                    # Include nested strings.
+                    for (
+                        k,
+                        v,
+                    ) in nested_parser.helptext_from_nested_class_field_name.items():
+                        helptext_from_nested_class_field_name[
+                            _strings.make_field_name([field.name, k])
+                        ] = v
 
-            # (4) Handle primitive types. These produce a single argument!
+                    if field.helptext is not None:
+                        helptext_from_nested_class_field_name[
+                            field.name
+                        ] = field.helptext
+                    else:
+                        helptext_from_nested_class_field_name[
+                            field.name
+                        ] = _docstrings.get_callable_description(field.typ)
+                    continue
+
+            # (3) Handle primitive or fixed types. These produce a single argument!
             args.append(
                 _arguments.ArgumentDefinition(
                     prefix=prefix,

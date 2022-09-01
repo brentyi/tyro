@@ -31,9 +31,7 @@ def test_avoid_subparser_with_default():
         == dcargs.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "--bc.y", "5"],
-            default=DefaultInstanceSubparser(
-                x=1, bc=DefaultInstanceHTTPServer(y=3)
-            ),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
@@ -45,9 +43,7 @@ def test_avoid_subparser_with_default():
         == dcargs.cli(
             DefaultInstanceSubparser,
             args=["--bc.y", "8"],
-            default=DefaultInstanceSubparser(
-                x=1, bc=DefaultInstanceHTTPServer(y=7)
-            ),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )
@@ -75,18 +71,14 @@ def test_avoid_subparser_with_default_recursive():
         == dcargs.cli(
             dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "--bc.y", "5"],
-            default=DefaultInstanceSubparser(
-                x=1, bc=DefaultInstanceHTTPServer(y=3)
-            ),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
     assert dcargs.cli(
         DefaultInstanceSubparser,
         args=["bc:default-instance-smtp-server", "--bc.z", "3"],
-        default=DefaultInstanceSubparser(
-            x=1, bc=DefaultInstanceHTTPServer(y=5)
-        ),
+        default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceSMTPServer(z=3))
     assert (
         dcargs.cli(
@@ -96,9 +88,7 @@ def test_avoid_subparser_with_default_recursive():
         == dcargs.cli(
             dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--bc.y", "8"],
-            default=DefaultInstanceSubparser(
-                x=1, bc=DefaultInstanceHTTPServer(y=7)
-            ),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )

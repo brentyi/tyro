@@ -1,10 +1,10 @@
-"""Multiple unions over nested types are populated using a series of subparsers.
+"""Multiple unions over nested types are populated using a series of subcommands.
 
 Usage:
-`python ./09_multiple_subparsers.py`
-`python ./09_multiple_subparsers.py --help`
-`python ./09_multiple_subparsers.py dataset:mnist --help`
-`python ./09_multiple_subparsers.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4`
+`python ./09_multiple_subcommands.py`
+`python ./09_multiple_subcommands.py --help`
+`python ./09_multiple_subcommands.py dataset:mnist --help`
+`python ./09_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4`
 """
 from __future__ import annotations
 

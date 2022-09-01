@@ -204,16 +204,16 @@ def _cli_impl(
     default: Optional[OutT] = None,
     **deprecated_kwargs,
 ) -> Union[OutT, argparse.ArgumentParser]:
-
     if "default_instance" in deprecated_kwargs:
         warnings.warn(
             "`default_instance=` is deprecated! use `default=` instead.", stacklevel=2
         )
         default = deprecated_kwargs["default_instance"]
     if deprecated_kwargs.get("avoid_subparsers", False):
-        f = conf.AvoidSubcommands[f]
+        f = conf.AvoidSubcommands[f]  # type: ignore
         warnings.warn(
-            "`avoid_subparsers=` is deprecated! use `dcargs.conf.AvoidSubparsers[]` instead.",
+            "`avoid_subparsers=` is deprecated! use `dcargs.conf.AvoidSubparsers[]`"
+            " instead.",
             stacklevel=2,
         )
 

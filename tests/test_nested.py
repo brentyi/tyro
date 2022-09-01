@@ -53,7 +53,7 @@ def test_nested_default():
     )
 
 
-def test_nested_default():
+def test_nested_default_alternate():
     @dataclasses.dataclass
     class B:
         y: int = 3
@@ -243,7 +243,7 @@ def test_subparser_with_default():
         dcargs.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
-def test_subparser_with_default():
+def test_subparser_with_default_alternate():
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0

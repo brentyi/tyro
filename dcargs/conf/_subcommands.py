@@ -49,4 +49,4 @@ def subcommand(
     )
     ```
     """
-    return _SubcommandConfiguration(name, description, default)
+    return _SubcommandConfiguration(name, default, description)
