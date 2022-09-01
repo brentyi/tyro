@@ -17,8 +17,9 @@ import docstring_parser
 import typing_extensions
 from typing_extensions import get_args, get_type_hints, is_typeddict
 
+from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
-from .metadata import _markers
+from .conf import _markers
 
 
 @dataclasses.dataclass(frozen=True)
@@ -141,10 +142,8 @@ def _try_field_list_from_callable(
     f: Union[Callable, Type],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    from . import metadata as _metadata
-
     f, found_subcommand_configs = _resolver.unwrap_annotated(
-        f, _metadata._subcommands._SubcommandConfiguration
+        f, conf._subcommands._SubcommandConfiguration
     )
     if len(found_subcommand_configs) > 0:
         default_instance = found_subcommand_configs[0].default

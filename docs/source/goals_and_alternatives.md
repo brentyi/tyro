@@ -12,7 +12,7 @@ Usage distinctions are the result of two API goals:
   using the standard `typing.Literal` type, subparsers with `typing.Union` of
   nested types, and positional arguments with `/`.
   - In contrast, similar libraries have more expansive APIs (sometimes spanning
-    dozens of specialized class and functions), and often require
+    dozens of specialized class and functions), and require more
     library-specific structures, decorators, or metadata formats for configuring
     parsing behavior.
 - **Strict typing.** Any type that can be annotated and unambiguously parsed
