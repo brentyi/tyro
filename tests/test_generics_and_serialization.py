@@ -5,6 +5,7 @@ import io
 from typing import Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
+from typing_extensions import Annotated
 
 import dcargs
 
@@ -346,3 +347,43 @@ def test_generic_inherited_type_narrowing():
         return x
 
     assert dcargs.cli(main, args="--x.x 3".split(" ")) == ChildClass(3, 5, 3)
+
+
+def test_pculbertson():
+    # https://github.com/brentyi/dcargs/issues/7
+    from typing import Union
+
+    @dataclasses.dataclass
+    class TypeA:
+        data: int
+
+    @dataclasses.dataclass
+    class TypeB:
+        data: int
+
+    @dataclasses.dataclass
+    class Wrapper:
+        subclass: Union[TypeA, TypeB] = TypeA(1)
+
+    wrapper1 = Wrapper()  # Create Wrapper object.
+    wrapper2 = dcargs.extras.from_yaml(
+        Wrapper, dcargs.extras.to_yaml(wrapper1)
+    )  # Errors, no constructor for TypeA
+
+
+def test_annotated():
+    # https://github.com/brentyi/dcargs/issues/7
+    from typing import Union
+
+    @dataclasses.dataclass
+    class TypeA:
+        data: int
+
+    @dataclasses.dataclass
+    class Wrapper:
+        subclass: Annotated[int, TypeA] = TypeA(1)
+
+    wrapper1 = Wrapper()  # Create Wrapper object.
+    wrapper2 = dcargs.extras.from_yaml(
+        Wrapper, dcargs.extras.to_yaml(wrapper1)
+    )  # Errors, no constructor for TypeA
