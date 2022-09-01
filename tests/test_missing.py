@@ -29,7 +29,7 @@ def test_missing_dataclass():
     assert dcargs.cli(Args2, args=["--b", "7"]) == Args2(5, 7, 3)
 
 
-def test_missing_default_instance():
+def test_missing_default():
     @dataclasses.dataclass
     class Args2:
         a: int
@@ -40,16 +40,16 @@ def test_missing_default_instance():
         dcargs.cli(
             Args2,
             args=[],
-            default_instance=Args2(5, dcargs.MISSING, 3),
+            default=Args2(5, dcargs.MISSING, 3),
         )
     assert dcargs.cli(
         Args2,
         args=["--b", "7"],
-        default_instance=Args2(5, dcargs.MISSING, 3),
+        default=Args2(5, dcargs.MISSING, 3),
     ) == Args2(5, 7, 3)
 
 
-def test_missing_nested_default_instance():
+def test_missing_nested_default():
     @dataclasses.dataclass
     class Child:
         a: int = 5
@@ -64,10 +64,10 @@ def test_missing_nested_default_instance():
         dcargs.cli(
             Parent,
             args=[],
-            default_instance=Parent(child=dcargs.MISSING),
+            default=Parent(child=dcargs.MISSING),
         )
     assert dcargs.cli(
         Parent,
         args=["--child.a", "5", "--child.b", "7", "--child.c", "3"],
-        default_instance=Parent(child=dcargs.MISSING),
+        default=Parent(child=dcargs.MISSING),
     ) == Parent(Child(5, 7, 3))

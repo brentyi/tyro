@@ -7,7 +7,7 @@ from typing_extensions import Annotated
 import dcargs
 
 
-def test_avoid_subparser_with_default_instance():
+def test_avoid_subparser_with_default():
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -31,7 +31,7 @@ def test_avoid_subparser_with_default_instance():
         == dcargs.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "--bc.y", "5"],
-            default_instance=DefaultInstanceSubparser(
+            default=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=3)
             ),
         )
@@ -45,7 +45,7 @@ def test_avoid_subparser_with_default_instance():
         == dcargs.cli(
             DefaultInstanceSubparser,
             args=["--bc.y", "8"],
-            default_instance=DefaultInstanceSubparser(
+            default=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=7)
             ),
         )
@@ -53,7 +53,7 @@ def test_avoid_subparser_with_default_instance():
     )
 
 
-def test_avoid_subparser_with_default_instance_recursive():
+def test_avoid_subparser_with_default_recursive():
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -75,7 +75,7 @@ def test_avoid_subparser_with_default_instance_recursive():
         == dcargs.cli(
             dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "--bc.y", "5"],
-            default_instance=DefaultInstanceSubparser(
+            default=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=3)
             ),
         )
@@ -84,7 +84,7 @@ def test_avoid_subparser_with_default_instance_recursive():
     assert dcargs.cli(
         DefaultInstanceSubparser,
         args=["bc:default-instance-smtp-server", "--bc.z", "3"],
-        default_instance=DefaultInstanceSubparser(
+        default=DefaultInstanceSubparser(
             x=1, bc=DefaultInstanceHTTPServer(y=5)
         ),
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceSMTPServer(z=3))
@@ -96,7 +96,7 @@ def test_avoid_subparser_with_default_instance_recursive():
         == dcargs.cli(
             dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--bc.y", "8"],
-            default_instance=DefaultInstanceSubparser(
+            default=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=7)
             ),
         )
@@ -276,13 +276,13 @@ def test_flag():
     assert dcargs.cli(
         A,
         args=["--x"],
-        default_instance=A(False),
+        default=A(False),
     ) == A(True)
 
     assert dcargs.cli(
         dcargs.conf.FlagConversionOff[A],
         args=["--x", "True"],
-        default_instance=A(False),
+        default=A(False),
     ) == A(True)
 
 
@@ -296,14 +296,14 @@ def test_fixed():
     assert dcargs.cli(
         A,
         args=[],
-        default_instance=A(True),
+        default=A(True),
     ) == A(True)
 
     with pytest.raises(SystemExit):
         assert dcargs.cli(
             dcargs.conf.FlagConversionOff[A],
             args=["--x", "True"],
-            default_instance=A(False),
+            default=A(False),
         ) == A(True)
 
 
@@ -317,7 +317,7 @@ def test_fixed_recursive():
     assert dcargs.cli(
         A,
         args=["--x"],
-        default_instance=A(False),
+        default=A(False),
     ) == A(True)
 
     with pytest.raises(SystemExit):
@@ -326,5 +326,5 @@ def test_fixed_recursive():
                 dcargs.conf.FlagConversionOff[A],
             ],
             args=["--x", "True"],
-            default_instance=A(False),
+            default=A(False),
         ) == A(True)

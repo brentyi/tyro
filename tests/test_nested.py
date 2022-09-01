@@ -38,7 +38,7 @@ def test_nested_annotated():
         dcargs.cli(Nested, args=["--x", "1"])
 
 
-def test_nested_default_instance():
+def test_nested_default():
     @dataclasses.dataclass
     class B:
         y: int = 1
@@ -48,9 +48,9 @@ def test_nested_default_instance():
         x: int = 2
         b: B = B()
 
-    assert dcargs.cli(
-        Nested, args=[], default_instance=Nested(x=1, b=B(y=2))
-    ) == Nested(x=1, b=B(y=2))
+    assert dcargs.cli(Nested, args=[], default=Nested(x=1, b=B(y=2))) == Nested(
+        x=1, b=B(y=2)
+    )
 
 
 def test_nested_default():
@@ -66,7 +66,7 @@ def test_nested_default():
     assert (
         Nested(x=1, b=B(y=3))
         == dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"])
-        == dcargs.cli(Nested, args=[], default_instance=Nested(x=1, b=B(y=3)))
+        == dcargs.cli(Nested, args=[], default=Nested(x=1, b=B(y=3)))
     )
     assert dcargs.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=3))
 
@@ -232,7 +232,7 @@ def test_subparser_with_default():
         == dcargs.cli(
             DefaultSubparser,
             args=[],
-            default_instance=DefaultSubparser(x=1, bc=DefaultHTTPServer(y=8)),
+            default=DefaultSubparser(x=1, bc=DefaultHTTPServer(y=8)),
         )
         == DefaultSubparser(x=1, bc=DefaultHTTPServer(y=8))
     )
@@ -243,7 +243,7 @@ def test_subparser_with_default():
         dcargs.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
-def test_subparser_with_default_instance():
+def test_subparser_with_default():
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -265,25 +265,19 @@ def test_subparser_with_default_instance():
         == dcargs.cli(
             DefaultInstanceSubparser,
             args=[],
-            default_instance=DefaultInstanceSubparser(
-                x=1, bc=DefaultInstanceHTTPServer(y=5)
-            ),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
         )
         == dcargs.cli(
             DefaultInstanceSubparser,
             args=["bc:default-instance-http-server"],
-            default_instance=DefaultInstanceSubparser(
-                x=1, bc=DefaultInstanceHTTPServer(y=5)
-            ),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
     assert dcargs.cli(
         DefaultInstanceSubparser,
         args=["bc:default-instance-smtp-server", "--bc.z", "3"],
-        default_instance=DefaultInstanceSubparser(
-            x=1, bc=DefaultInstanceHTTPServer(y=5)
-        ),
+        default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceSMTPServer(z=3))
     assert (
         dcargs.cli(
@@ -293,9 +287,7 @@ def test_subparser_with_default_instance():
         == dcargs.cli(
             DefaultInstanceSubparser,
             args=[],
-            default_instance=DefaultInstanceSubparser(
-                x=1, bc=DefaultInstanceHTTPServer(y=8)
-            ),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )
@@ -459,7 +451,7 @@ def test_multiple_subparsers_with_default():
         dcargs.cli(
             MultipleSubparsers,
             args=[],
-            default_instance=MultipleSubparsers(
+            default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
                 Subcommand3(dcargs.MISSING),
@@ -471,7 +463,7 @@ def test_multiple_subparsers_with_default():
             args=[
                 "a:subcommand1",
             ],
-            default_instance=MultipleSubparsers(
+            default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
                 Subcommand3(dcargs.MISSING),
@@ -481,7 +473,7 @@ def test_multiple_subparsers_with_default():
         dcargs.cli(
             MultipleSubparsers,
             args=["a:subcommand1", "b:subcommand2"],
-            default_instance=MultipleSubparsers(
+            default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
                 Subcommand3(dcargs.MISSING),
@@ -491,7 +483,7 @@ def test_multiple_subparsers_with_default():
         dcargs.cli(
             MultipleSubparsers,
             args=["a:subcommand1", "b:subcommand2", "c:subcommand3"],
-            default_instance=MultipleSubparsers(
+            default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
                 Subcommand3(dcargs.MISSING),
@@ -500,7 +492,7 @@ def test_multiple_subparsers_with_default():
     assert dcargs.cli(
         MultipleSubparsers,
         args=["a:subcommand1", "b:subcommand2", "c:subcommand3", "--c.z", "3"],
-        default_instance=MultipleSubparsers(
+        default=MultipleSubparsers(
             Subcommand1(),
             Subcommand2(),
             Subcommand3(dcargs.MISSING),
@@ -509,7 +501,7 @@ def test_multiple_subparsers_with_default():
     assert dcargs.cli(
         MultipleSubparsers,
         args=["a:subcommand1", "b:subcommand2", "c:subcommand2"],
-        default_instance=MultipleSubparsers(
+        default=MultipleSubparsers(
             Subcommand1(),
             Subcommand2(),
             Subcommand3(dcargs.MISSING),

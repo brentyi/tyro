@@ -40,7 +40,7 @@ def test_basic():
         f: float
         p: pathlib.Path
 
-    assert isinstance(dcargs.generate_parser(ManyTypes), argparse.ArgumentParser)
+    assert isinstance(dcargs.get_parser(ManyTypes), argparse.ArgumentParser)
 
     # We can directly pass a dataclass to `dcargs.cli()`:
     assert dcargs.cli(
