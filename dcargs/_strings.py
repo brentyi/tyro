@@ -57,13 +57,13 @@ def _subparser_name_from_type(cls: Type) -> str:
     from .metadata import _subcommands  # Prevent circular imports
 
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
-    cls, subcommand_config = _resolver.unwrap_annotated(
+    cls, found_subcommand_configs = _resolver.unwrap_annotated(
         cls, _subcommands._SubcommandConfiguration
     )
 
     # Subparser name from `dcargs.metadata.subcommand()`.
-    if subcommand_config is not None:
-        return subcommand_config.name
+    if len(found_subcommand_configs) > 0:
+        return found_subcommand_configs[0].name
 
     # Subparser name from class name.
     if len(type_from_typevar) == 0:
@@ -82,7 +82,7 @@ def subparser_name_from_type(prefix: str, cls: Union[Type, None]) -> str:
     suffix = _subparser_name_from_type(cls) if cls is not None else "None"
     if len(prefix) == 0:
         return suffix
-    return f"{prefix}:{suffix}"
+    return f"{prefix}:{suffix}".replace("_", "-")
 
 
 @functools.lru_cache(maxsize=None)

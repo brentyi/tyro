@@ -21,8 +21,9 @@ from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
 
 
-def unwrap_origin(typ: TypeOrCallable) -> TypeOrCallable:
-    """Returns the origin of typ if it exists. Otherwise, returns typ."""
+def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
+    """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise, returns typ."""
+    # TODO: Annotated[] handling should be revisited...
     typ, _ = unwrap_annotated(typ)
     origin = get_origin(typ)
     if origin is None:
@@ -33,7 +34,7 @@ def unwrap_origin(typ: TypeOrCallable) -> TypeOrCallable:
 
 def is_dataclass(cls: Union[Type, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
-    return dataclasses.is_dataclass(unwrap_origin(cls))
+    return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))
 
 
 def resolve_generic_types(
@@ -55,7 +56,7 @@ def resolve_generic_types(
     if hasattr(cls, "__orig_bases__"):
         bases = getattr(cls, "__orig_bases__")
         for base in bases:
-            origin_base = unwrap_origin(base)
+            origin_base = unwrap_origin_strip_extras(base)
             if origin_base is base or not hasattr(origin_base, "__parameters__"):
                 continue
             typevars = origin_base.__parameters__
@@ -115,8 +116,12 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
     should parse as Cat."""
     try:
         potential_subclass = type(default_instance)
-        superclass = typ
+        superclass = unwrap_annotated(typ)[0]
         if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
+            if get_origin(typ) is Annotated:
+                return Annotated.__class_getitem__(  # type: ignore
+                    (potential_subclass,) + get_args(typ)[1:]
+                )
             return cast(TypeT, potential_subclass)
     except TypeError:
         pass
@@ -128,7 +133,7 @@ MetadataType = TypeVar("MetadataType")
 
 def unwrap_annotated(
     typ: TypeOrCallable, search_type: Optional[Type[MetadataType]] = None
-) -> Tuple[TypeOrCallable, Optional[MetadataType]]:
+) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]:
     """Helper for parsing typing.Annotated types.
 
     Examples:
@@ -137,24 +142,18 @@ def unwrap_annotated(
     - Annotated[int, "1"], int => (int, None)
     """
     if not hasattr(typ, "__metadata__"):
-        return typ, None
+        return typ, ()
 
     args = get_args(typ)
     assert len(args) >= 2
 
     # Don't search for a specific metadata type if `None` is passed in.
     if search_type is None:
-        return args[0], None
+        return args[0], ()
 
     # Look through metadata for desired metadata type.
     targets = tuple(x for x in args[1:] if isinstance(x, search_type))
-    if len(targets) == 0:
-        return args[0], None
-    else:
-        assert (
-            len(targets) == 1
-        ), f"Found two instances of {search_type} in metadata, but only expected one."
-        return args[0], targets[0]
+    return args[0], targets
 
 
 def apply_type_from_typevar(

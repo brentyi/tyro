@@ -254,7 +254,8 @@ def get_callable_description(f: Callable) -> str:
     these docstrings."""
 
     f, _unused = _resolver.resolve_generic_types(f)
-    if _resolver.unwrap_origin(f) in _callable_description_blocklist:
+    f = _resolver.unwrap_origin_strip_extras(f)
+    if f in _callable_description_blocklist:
         return ""
 
     # Note inspect.getdoc() causes some corner cases with TypedDicts.
