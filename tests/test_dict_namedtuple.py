@@ -254,7 +254,7 @@ def test_helptext_and_default_namedtuple():
     assert "Documentation 3 (default: 3)\n" in helptext
 
 
-def test_helptext_and_default_namedtuple():
+def test_helptext_and_default_namedtuple_alternate():
     class HelptextNamedTuple(NamedTuple):
         """This docstring should be printed as a description."""
 
