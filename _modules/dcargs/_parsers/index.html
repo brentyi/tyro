@@ -482,8 +482,8 @@
         <span class="c1"># Add subparser for each option.</span>
         <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_no_none</span><span class="p">:</span>
-            <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
-            <span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+            <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
                 <span class="n">option</span><span class="p">,</span>
                 <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
@@ -494,6 +494,16 @@
                 <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
                 <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
             <span class="p">)</span>
+
+            <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>
+            <span class="n">subparser</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="n">subparser</span><span class="p">,</span>
+                <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="p">{</span>
+                    <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">k</span><span class="p">]):</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">subparser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">parser_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser</span>
 
         <span class="c1"># Optional if: type hint is Optional[], or a default instance is provided.</span>
         <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
