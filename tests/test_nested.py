@@ -700,3 +700,30 @@ def test_frozen_dict():
     assert hash(dcargs.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
         frozendict({"num_epochs": 10, "batch_size": 64})
     )
+
+
+def test_nested_in_subparser():
+    # https://github.com/brentyi/dcargs/issues/9
+    @dataclasses.dataclass(frozen=True)
+    class Subtype:
+        data: int = 1
+
+    @dataclasses.dataclass(frozen=True)
+    class TypeA:
+        subtype: Subtype = Subtype(1)
+
+    @dataclasses.dataclass(frozen=True)
+    class TypeB:
+        subtype: Subtype = Subtype(2)
+
+    @dataclasses.dataclass(frozen=True)
+    class Wrapper:
+        supertype: Union[TypeA, TypeB] = TypeA()
+
+    assert dcargs.cli(Wrapper, args=[]) == Wrapper()
+    assert (
+        dcargs.cli(
+            Wrapper, args="supertype:type-a --supertype.subtype.data 1".split(" ")
+        )
+        == Wrapper()
+    )
