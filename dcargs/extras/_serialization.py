@@ -2,10 +2,11 @@
 
 import dataclasses
 import enum
+import functools
 from typing import IO, Any, Optional, Set, Type, TypeVar, Union
 
 import yaml
-from typing_extensions import get_origin
+from typing_extensions import get_args, get_origin
 
 from .. import _fields, _resolver
 
@@ -48,15 +49,21 @@ def _get_contained_special_types_from_type(
     contained_dataclasses = {cls}
 
     def handle_type(typ) -> Set[Type]:
+        print(typ)
+        # Handle dataclasses.
         if _resolver.is_dataclass(typ) and typ not in parent_contained_dataclasses:
             return _get_contained_special_types_from_type(
                 typ,
                 _parent_contained_dataclasses=contained_dataclasses
                 | parent_contained_dataclasses,
             )
+
+        # Handle enums.
         elif type(typ) is enum.EnumMeta:
             return {typ}
-        return set()
+
+        # Handle Union, Annotated, List, etc. No-op when there are no args.
+        return functools.reduce(set.union, map(handle_type, get_args(typ)), set())
 
     # Handle generics.
     for typ in type_from_typevar.values():

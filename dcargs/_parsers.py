@@ -315,6 +315,8 @@ class SubparsersSpecification:
                 default_instance=found_subcommand_configs[0].default,
                 prefix=prefix,
             )
+
+            # Apply prefix to helptext in nested classes in subparsers.
             subparser = dataclasses.replace(
                 subparser,
                 helptext_from_nested_class_field_name={
