@@ -1,6 +1,7 @@
 """The :mod:`dcargs.extras` submodule contains helpers that complement :func:`dcargs.cli()`, but
 aren't considered part of the core interface."""
 
+from . import _lazy_config
 from ._base_configs import union_type_from_mapping
 from ._serialization import from_yaml, to_yaml
 

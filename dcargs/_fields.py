@@ -145,6 +145,12 @@ def _try_field_list_from_callable(
     f: Union[Callable, Type],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+
+    if hasattr(f, "__dcargs_mock_type__"):
+        return _try_field_list_from_callable(
+            getattr(f, "__dcargs_mock_type__"), default_instance
+        )
+
     from . import metadata as _metadata
 
     f, subcommand_config = _resolver.unwrap_annotated(
@@ -456,7 +462,7 @@ def _try_field_list_from_general_callable(
     # Handle general callables.
     if default_instance not in MISSING_SINGLETONS:
         return UnsupportedNestedTypeMessage(
-            "`default_instance` is supported only for select types:"
+            "default instances are supported only for select types:"
             " dataclasses, lists, NamedTuple, TypedDict, etc."
         )
 
