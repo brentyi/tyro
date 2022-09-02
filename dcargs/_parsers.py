@@ -255,8 +255,8 @@ class SubparsersSpecification:
         # Add subparser for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options_no_none:
-            subparser_name = _strings.subparser_name_from_type(prefix, option)
-            parser_from_name[subparser_name] = ParserSpecification.from_callable(
+            name = _strings.subparser_name_from_type(prefix, option)
+            subparser = ParserSpecification.from_callable(
                 option,
                 description=None,
                 parent_classes=parent_classes,
@@ -267,6 +267,16 @@ class SubparsersSpecification:
                 prefix=prefix,
                 avoid_subparsers=avoid_subparsers,
             )
+
+            # Apply prefix to helptext in nested classes in subparsers.
+            subparser = dataclasses.replace(
+                subparser,
+                helptext_from_nested_class_field_name={
+                    _strings.make_field_name([prefix, k]): v
+                    for k, v in subparser.helptext_from_nested_class_field_name.items()
+                },
+            )
+            parser_from_name[name] = subparser
 
         # Optional if: type hint is Optional[], or a default instance is provided.
         required = True
