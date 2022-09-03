@@ -3,7 +3,7 @@
 import functools
 import re
 import textwrap
-from typing import Iterable, List, Sequence, Type, Union
+from typing import Iterable, List, Sequence, Tuple, Type, Union
 
 import termcolor
 
@@ -53,7 +53,7 @@ def hyphen_separated_from_camel_case(name: str) -> str:
     return _camel_separator_pattern().sub(r"-\1", name).lower()
 
 
-def _subparser_name_from_type(cls: Type) -> str:
+def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     from .conf import _subcommands  # Prevent circular imports
 
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
@@ -63,24 +63,29 @@ def _subparser_name_from_type(cls: Type) -> str:
 
     # Subparser name from `dcargs.metadata.subcommand()`.
     if len(found_subcommand_configs) > 0:
-        return found_subcommand_configs[0].name
+        return found_subcommand_configs[0].name, found_subcommand_configs[0].prefix_name
 
     # Subparser name from class name.
     if len(type_from_typevar) == 0:
         assert hasattr(cls, "__name__")
-        return hyphen_separated_from_camel_case(cls.__name__)  # type: ignore
+        return hyphen_separated_from_camel_case(cls.__name__), True  # type: ignore
 
-    return "-".join(
-        map(
-            _subparser_name_from_type,
-            [cls] + list(type_from_typevar.values()),
-        )
+    return (
+        "-".join(
+            map(
+                lambda x: _subparser_name_from_type(x)[0],
+                [cls] + list(type_from_typevar.values()),
+            )
+        ),
+        True,
     )
 
 
 def subparser_name_from_type(prefix: str, cls: Union[Type, None]) -> str:
-    suffix = _subparser_name_from_type(cls) if cls is not None else "None"
-    if len(prefix) == 0:
+    suffix, use_prefix = (
+        _subparser_name_from_type(cls) if cls is not None else ("None", True)
+    )
+    if len(prefix) == 0 or not use_prefix:
         return suffix
     return f"{prefix}:{suffix}".replace("_", "-")
 

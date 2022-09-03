@@ -44,12 +44,12 @@ def _get_contained_special_types_from_type(
         else _parent_contained_dataclasses
     )
 
+    cls, _ = _resolver.unwrap_annotated(cls)
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
 
     contained_dataclasses = {cls}
 
     def handle_type(typ) -> Set[Type]:
-        print(typ)
         # Handle dataclasses.
         if _resolver.is_dataclass(typ) and typ not in parent_contained_dataclasses:
             return _get_contained_special_types_from_type(

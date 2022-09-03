@@ -9,6 +9,7 @@ class _SubcommandConfiguration:
     name: str
     default: Any
     description: Optional[str]
+    prefix_name: bool
 
     def __hash__(self) -> int:
         return object.__hash__(self)
@@ -19,6 +20,7 @@ def subcommand(
     *,
     default: Any = MISSING_NONPROP,
     description: Optional[str] = None,
+    prefix_name: bool = True,
 ) -> Any:
     """Returns a metadata object for configuring subcommands with `typing.Annotated`.
     This is useful but can make code harder to read, so usage is discouraged.
@@ -34,19 +36,20 @@ def subcommand(
     This will create two subcommands: `nested-type-a` and `nested-type-b`.
 
     Annotating each type with `dcargs.metadata.subcommand()` allows us to override for
-    each subcommand the (a) name, (b) defaults, and (c) helptext.
+    each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix
+    the name or not.
 
     ```python
     dcargs.cli(
         Union[
             Annotated[
-                NestedTypeA, subcommand("a", default=NestedTypeA(...), description="...")
+                NestedTypeA, subcommand("a", ...)
             ],
             Annotated[
-                NestedTypeA, subcommand("b", default=NestedTypeA(...), description="...")
+                NestedTypeA, subcommand("b", ...)
             ],
         ]
     )
     ```
     """
-    return _SubcommandConfiguration(name, default, description)
+    return _SubcommandConfiguration(name, default, description, prefix_name)

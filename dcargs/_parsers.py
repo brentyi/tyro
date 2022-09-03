@@ -39,6 +39,7 @@ T = TypeVar("T")
 class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
+    f: Callable
     description: str
     args: List[_arguments.ArgumentDefinition]
     helptext_from_nested_class_field_name: Dict[str, Optional[str]]
@@ -190,6 +191,7 @@ class ParserSpecification:
             )
 
         return ParserSpecification(
+            f=f,
             description=description
             if description is not None
             else _docstrings.get_callable_description(f),
@@ -303,6 +305,7 @@ class SubparsersSpecification:
                             is _resolver.unwrap_origin_strip_extras(option)
                             else _fields.MISSING_NONPROP
                         ),
+                        prefix_name=True,
                     ),
                 )
 
@@ -333,6 +336,7 @@ class SubparsersSpecification:
 
         # If there are any required arguments in the default subparser, we should mark
         # the subparser group as a whole as required.
+        default_name = None
         if (
             field.default is not None
             and field.default not in _fields.MISSING_SINGLETONS
@@ -347,10 +351,20 @@ class SubparsersSpecification:
             default_name = _strings.subparser_name_from_type(
                 prefix, type(field.default)
             )
-            assert default_name in parser_from_name, (
-                f"Default with type {type(field.default)} was passed in, but no"
-                " matching subparser."
-            )
+            if default_name not in parser_from_name:
+                # If we can't find the subparser by name, search by type. This is needed
+                # when the user renames their subcommands. (eg via dcargs.conf.subcommand)
+                default_name = None
+                for name, parser in parser_from_name.items():
+                    if type(field.default) is _resolver.unwrap_origin_strip_extras(
+                        parser.f
+                    ):
+                        default_name = name
+                        break
+                assert default_name is not None, (
+                    f"Default with type {type(field.default)} was passed in, but no"
+                    " matching subparser."
+                )
             default_parser = parser_from_name[default_name]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
                 required = True
@@ -367,10 +381,7 @@ class SubparsersSpecification:
         if field.helptext is not None:
             description_parts.append(field.helptext)
         if not required and field.default not in _fields.MISSING_SINGLETONS:
-            default = field.default
-            if default is not None:
-                default = _strings.subparser_name_from_type(prefix, type(default))
-            description_parts.append(f" (default: {default})")
+            description_parts.append(f" (default: {default_name})")
         description = (
             # We use `None` instead of an empty string to prevent a line break from
             # being created where the description would be.
