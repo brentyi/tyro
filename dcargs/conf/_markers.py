@@ -22,9 +22,15 @@ def _make_marker(description: str) -> Marker:
 
 T = TypeVar("T", bound=Type)
 
+POSITIONAL = _make_marker("Positional")
+Positional = Annotated[T, POSITIONAL]
+"""A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
+argument."""
+
+
 FIXED = _make_marker("Fixed")
 Fixed = Annotated[T, FIXED]
-"""A type `T` can be annotated as `Fixed[T]` if we don't want dcargs to parse it. A
+"""A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it. A
 default value should be set instead."""
 
 FLAG_CONVERSION_OFF = _make_marker("FlagConversionOff")

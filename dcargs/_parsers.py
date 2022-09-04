@@ -4,19 +4,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import itertools
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
 import termcolor
 from typing_extensions import get_args, get_origin
@@ -29,8 +17,8 @@ from . import (
     _instantiators,
     _resolver,
     _strings,
-    conf,
 )
+from .conf import _markers, _subcommands
 
 T = TypeVar("T")
 
@@ -52,7 +40,6 @@ class ParserSpecification:
         description: Optional[str],
         parent_classes: Set[Type],
         parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
-        parent_markers: Tuple[conf._markers.Marker, ...],
         default_instance: Union[
             T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
         ],
@@ -61,9 +48,6 @@ class ParserSpecification:
         """Create a parser definition from a callable."""
 
         # Resolve generic types.
-        markers = (
-            parent_markers + _resolver.unwrap_annotated(f, conf._markers.Marker)[1]
-        )
         f, type_from_typevar = _resolver.resolve_generic_types(f)
         f = _resolver.narrow_type(f, default_instance)
         if parent_type_from_typevar is not None:
@@ -95,6 +79,7 @@ class ParserSpecification:
         for field in field_list:
             field = dataclasses.replace(
                 field,
+                # Resolve generic types.
                 typ=_resolver.type_from_typevar_constraints(
                     _resolver.apply_type_from_typevar(
                         field.typ,
@@ -102,14 +87,13 @@ class ParserSpecification:
                     )
                 ),
             )
-            field.markers.extend(markers)  # TODO: would be nice to avoid this mutation!
 
             if isinstance(field.typ, TypeVar):
                 raise _instantiators.UnsupportedTypeAnnotationError(
                     f"Field {field.name} has an unbound TypeVar: {field.typ}."
                 )
 
-            if conf._markers.FIXED not in field.markers:
+            if _markers.FIXED not in field.markers:
                 # (1) Handle Unions over callables; these result in subparsers.
                 subparsers_attempt = SubparsersSpecification.from_field(
                     field,
@@ -120,7 +104,7 @@ class ParserSpecification:
                 if subparsers_attempt is not None:
                     if (
                         not subparsers_attempt.required
-                        and conf._markers.AVOID_SUBCOMMANDS in field.markers
+                        and _markers.AVOID_SUBCOMMANDS in field.markers
                     ):
                         # Don't make a subparser.
                         field = dataclasses.replace(field, typ=type(field.default))
@@ -144,7 +128,6 @@ class ParserSpecification:
                         description=None,
                         parent_classes=parent_classes,
                         parent_type_from_typevar=type_from_typevar,
-                        parent_markers=markers,
                         default_instance=field.default,
                         prefix=_strings.make_field_name([prefix, field.name]),
                     )
@@ -226,7 +209,7 @@ class ParserSpecification:
 
         # Add each argument.
         for arg in self.args:
-            if arg.field.positional:
+            if arg.field.is_positional():
                 arg.add_argument(positional_group)
                 continue
 
@@ -291,12 +274,12 @@ class SubparsersSpecification:
         for option in options_no_none:
             name = _strings.subparser_name_from_type(prefix, option)
             option, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, conf._subcommands._SubcommandConfiguration
+                option, _subcommands._SubcommandConfiguration
             )
             if len(found_subcommand_configs) == 0:
                 # Make a dummy subcommand config.
                 found_subcommand_configs = (
-                    conf._subcommands._SubcommandConfiguration(
+                    _subcommands._SubcommandConfiguration(
                         "unused",
                         description=None,
                         default=(
@@ -314,7 +297,6 @@ class SubparsersSpecification:
                 description=found_subcommand_configs[0].description,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
-                parent_markers=tuple(field.markers),
                 default_instance=found_subcommand_configs[0].default,
                 prefix=prefix,
             )
@@ -353,7 +335,7 @@ class SubparsersSpecification:
             )
             if default_name not in parser_from_name:
                 # If we can't find the subparser by name, search by type. This is needed
-                # when the user renames their subcommands. (eg via dcargs.conf.subcommand)
+                # when the user renames their subcommands. (eg via dcargs.subcommand)
                 default_name = None
                 for name, parser in parser_from_name.items():
                     if type(field.default) is _resolver.unwrap_origin_strip_extras(

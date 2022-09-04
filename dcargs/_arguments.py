@@ -138,7 +138,7 @@ def _rule_handle_boolean_flags(
 
     if (
         arg.field.default in _fields.MISSING_SINGLETONS
-        or arg.field.positional
+        or arg.field.is_positional()
         or _markers.FLAG_CONVERSION_OFF in arg.field.markers
     ):
         # Treat bools as a normal parameter.
@@ -260,9 +260,9 @@ def _rule_generate_helptext(
         # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
         docstring_help = docstring_help.replace("%", "%%")
         help_parts.append(docstring_help)
-    elif arg.field.positional and arg.field.name != _strings.dummy_field_name:
+    elif arg.field.is_positional() and arg.field.name != _strings.dummy_field_name:
         # Place the type in the helptext. Note that we skip this for dummy fields, which
-        # will sitll have the type in the metavar.
+        # will still have the type in the metavar.
         help_parts.append(str(lowered.metavar))
 
     default = lowered.default
@@ -309,7 +309,7 @@ def _rule_set_name_or_flag(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
-    if arg.field.positional:
+    if arg.field.is_positional():
         name_or_flag = _strings.make_field_name([arg.prefix, arg.field.name])
     elif lowered.action == "store_false":
         name_or_flag = "--" + _strings.make_field_name(
@@ -331,7 +331,7 @@ def _rule_positional_special_handling(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
-    if not arg.field.positional:
+    if not arg.field.is_positional():
         return lowered
 
     metavar = _strings.make_field_name([arg.prefix, arg.field.name]).upper()
