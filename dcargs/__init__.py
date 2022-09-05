@@ -1,5 +1,5 @@
 from . import conf, extras
-from ._cli import cli, get_parser
+from ._cli import cli
 from ._fields import MISSING_PUBLIC as MISSING
 from ._instantiators import UnsupportedTypeAnnotationError
 
@@ -7,7 +7,6 @@ __all__ = [
     "conf",
     "extras",
     "cli",
-    "get_parser",
     "MISSING",
     "UnsupportedTypeAnnotationError",
 ]

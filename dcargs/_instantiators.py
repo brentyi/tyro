@@ -22,13 +22,11 @@ Some examples of type annotations and the desired instantiators:
     Tuple[int, float]
 
         lambda strings: tuple(
-            [
-                typ(x)
-                for typ, x in zip(
-                    (int, float),
-                    strings,
-                )
-            ]
+            typ(x)
+            for typ, x in zip(
+                (int, float),
+                strings,
+            )
         )
 ```
 """
