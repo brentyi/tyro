@@ -1,10 +1,11 @@
 """Core public API."""
 import argparse
 import dataclasses
+import sys
 import warnings
 from typing import Callable, Optional, Sequence, Type, TypeVar, Union, cast, overload
 
-from typing_extensions import Literal, assert_never
+import shtab
 
 from . import _argparse_formatter, _calling, _fields, _parsers, _strings, conf
 
@@ -103,110 +104,6 @@ def cli(
     Returns:
         The output of `f(...)`.
     """
-    out = _cli_impl(
-        "f_out",
-        f,
-        prog=prog,
-        description=description,
-        args=args,
-        default=default,
-        **deprecated_kwargs,
-    )
-    return out
-
-
-@overload
-def get_parser(
-    f: Type[OutT],
-    *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
-) -> argparse.ArgumentParser:
-    ...
-
-
-@overload
-def get_parser(
-    f: Callable[..., OutT],
-    *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
-) -> argparse.ArgumentParser:
-    ...
-
-
-def get_parser(
-    f: Union[Type[OutT], Callable[..., OutT]],
-    *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
-    **deprecated_kwargs,
-) -> argparse.ArgumentParser:
-    """Returns the argparse parser that would be used under-the-hood if `dcargs.cli()`
-    was called with the same arguments.
-
-    This can be useful for libraries like argcomplete, pyzshcomplete, or shtab, which
-    enable autocompletion for argparse parsers.
-
-    To reduce compatibility issues, strips out color formatting."""
-    with _argparse_formatter.dummy_termcolor_context():
-        out = _cli_impl(
-            "parser",
-            f,
-            prog=prog,
-            description=description,
-            args=args,
-            default=default,
-            **deprecated_kwargs,
-        )
-    assert isinstance(out, argparse.ArgumentParser)
-    return out
-
-
-@overload
-def _cli_impl(
-    _return_stage: Literal["parser"],
-    f: Callable[..., OutT],
-    *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
-    **deprecated_kwargs,
-) -> argparse.ArgumentParser:
-    ...
-
-
-@overload
-def _cli_impl(
-    _return_stage: Literal["f_out"],
-    f: Callable[..., OutT],
-    *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
-    **deprecated_kwargs,
-) -> OutT:
-    ...
-
-
-def _cli_impl(
-    _return_stage: Literal["parser", "f_out"],
-    f: Callable[..., OutT],
-    *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
-    **deprecated_kwargs,
-) -> Union[OutT, argparse.ArgumentParser]:
     if "default_instance" in deprecated_kwargs:
         warnings.warn(
             "`default_instance=` is deprecated! use `default=` instead.", stacklevel=2
@@ -255,8 +152,24 @@ def _cli_impl(
         prefix="",  # Used for recursive calls.
     )
 
+    # If we pass in the --dcargs-print-completion flag: turn termcolor off, and ge the
+    # shell we want to generate a completion script for (bash/zsh/tcsh).
+    args = sys.argv[1:] if args is None else args
+    print_completion = len(args) >= 2 and args[0] == "--dcargs-print-completion"
+
+    formatting_context = _argparse_formatter.ansi_context()
+    completion_shell = None
+    if print_completion:
+        formatting_context = _argparse_formatter.dummy_termcolor_context()
+        completion_shell = args[1]
+        assert completion_shell in (
+            "bash",
+            "zsh",
+            "tcsh",
+        ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
+
     # Generate parser!
-    with _argparse_formatter.ansi_context():
+    with formatting_context:
         parser = argparse.ArgumentParser(
             prog=prog,
             formatter_class=_argparse_formatter.make_formatter_class(
@@ -264,9 +177,19 @@ def _cli_impl(
             ),
         )
         parser_definition.apply(parser)
-        if _return_stage == "parser":
-            return parser
+
+        if print_completion:
+            print(
+                shtab.complete(
+                    parser=parser,
+                    shell=completion_shell,
+                    root_prefix=f"dcargs_{parser.prog}",
+                )
+            )
+            raise SystemExit()
+
         value_from_prefixed_field_name = vars(parser.parse_args(args=args))
+        value_from_prefixed_field_name.pop("dcargs_print_completion")
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
@@ -297,7 +220,4 @@ def _cli_impl(
 
     if dummy_wrapped:
         out = getattr(out, _strings.dummy_field_name)
-    if _return_stage == "f_out":
-        return out
-
-    assert_never(_return_stage)
+    return out

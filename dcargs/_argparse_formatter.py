@@ -184,13 +184,4 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         return out
 
     def _fill_text(self, text, width, indent):
-        text = self._whitespace_matcher.sub(" ", text).strip()
-        import textwrap as textwrap
-
-        # Sketchy, but seems to work.
-        textwrap.len = monkeypatch_len  # type: ignore
-        out = textwrap.fill(
-            text, width, initial_indent=indent, subsequent_indent=indent
-        )
-        del textwrap.len  # type: ignore
-        return out
+        return "".join(indent + line for line in text.splitlines(keepends=True))
