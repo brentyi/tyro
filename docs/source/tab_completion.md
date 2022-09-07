@@ -14,7 +14,7 @@ written somewhere where your shell will find it.
 For zsh, one option is to emulate the pattern used for completions in
 [poetry](https://python-poetry.org/docs):
 
-```
+```bash
 # Set up zsh autocompletion for 01_functions.py, which is located in
 # dcargs/examples.
 
@@ -23,12 +23,12 @@ mkdir -p ~/.zfunc
 
 # (2) Write completion script. The name here (_01_functions_py) doesn't matter,
 # as long as it's prefixed with an underscore.
-python 01_functions.py > ~/.zfunc/_01_functions_py
+python 01_functions.py --dcargs-print-completion zsh > ~/.zfunc/_01_functions_py
 ```
 
 And if it's not in your `.zshrc` already:
 
-```
+```bash
 # (3) Add .zfunc to our function search path, then initialize completions.
 # Ideally this should go in your .zshrc!
 fpath+=~/.zfunc
