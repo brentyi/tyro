@@ -20,14 +20,14 @@ def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         dcargs.cli(f, args=args)
 
-    # Check against dcargs.generate_parser(); this should return the same underlying
-    # parser.
+    # Check helptext with vs without termcolor. This can help catch text wrapping bugs
+    # caused by ANSI sequences.
     target2 = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
-        with dcargs._argparse_formatter.ansi_context():
-            dcargs.get_parser(f).parse_args(args)
-    assert dcargs._strings.strip_ansi_sequences(target.getvalue()) == target2.getvalue()
+        with dcargs._argparse_formatter.dummy_termcolor_context():
+            dcargs.cli(f, args=args)
 
+    assert target2.getvalue() == dcargs._strings.strip_ansi_sequences(target.getvalue())
     return target2.getvalue()
 
 
