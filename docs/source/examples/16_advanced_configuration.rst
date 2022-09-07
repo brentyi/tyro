@@ -55,7 +55,8 @@ Features here are supported, but generally unnecessary and should be used sparin
                Union[CheckoutArgs, CommitArgs]
            ] = CheckoutArgs("main")
        
-           # `dcargs.conf.subcommand()` can be used to configure subcommands in a Union.
+           # `dcargs.conf.subcommand()` can be used to configure subcommands in a Union. Here,
+           # we make the subcommand names more succinct.
            renamed_subcommand: Union[
                Annotated[
                    CheckoutArgs, dcargs.conf.subcommand(name="checkout", prefix_name=False)
