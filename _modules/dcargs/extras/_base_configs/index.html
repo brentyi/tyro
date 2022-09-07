@@ -237,12 +237,18 @@
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="subcommand_union_from_mapping"><a class="viewcode-back" href="../../../../api/dcargs/extras/#dcargs.extras._base_configs.subcommand_union_from_mapping">[docs]</a><span class="k">def</span> <span class="nf">subcommand_union_from_mapping</span><span class="p">(</span>
-    <span class="n">default_from_name</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span> <span class="n">descriptions</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+<div class="viewcode-block" id="subcommand_type_from_defaults"><a class="viewcode-back" href="../../../../api/dcargs/extras/#dcargs.extras._base_configs.subcommand_type_from_defaults">[docs]</a><span class="k">def</span> <span class="nf">subcommand_type_from_defaults</span><span class="p">(</span>
+    <span class="n">defaults</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
+    <span class="n">descriptions</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">prefix_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Returns a Union type for defining subcommands that choose between nested types.</span>
+    <span class="sd">&quot;&quot;&quot;Construct a Union type for defining subcommands that choose between defaults.</span>
 
-<span class="sd">    For example, when `default` is set to:</span>
+<span class="sd">    This can most commonly be used to create a &quot;base configuration&quot; pattern:</span>
+<span class="sd">        https://brentyi.github.io/dcargs/examples/10_base_configs/</span>
+
+<span class="sd">    For example, when `defaults` is set to:</span>
 
 <span class="sd">    ```python</span>
 <span class="sd">    {</span>
@@ -266,7 +272,7 @@
 <span class="sd">    ]</span>
 <span class="sd">    ```</span>
 
-<span class="sd">    This can be used directly in dcargs.cli:</span>
+<span class="sd">    The resulting type can be used directly in dcargs.cli:</span>
 
 <span class="sd">    ```python</span>
 <span class="sd">    config = dcargs.cli(subcommand_union_from_mapping(default_from_name))</span>
@@ -300,9 +306,17 @@
     <span class="k">return</span> <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="nb">tuple</span><span class="p">(</span>
             <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-                <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">),</span> <span class="n">subcommand</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">descriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">)))</span>
+                <span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">),</span>
+                    <span class="n">subcommand</span><span class="p">(</span>
+                        <span class="n">k</span><span class="p">,</span>
+                        <span class="n">default</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+                        <span class="n">description</span><span class="o">=</span><span class="n">descriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">k</span><span class="p">),</span>
+                        <span class="n">prefix_name</span><span class="o">=</span><span class="n">prefix_names</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">default_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">)</span>
     <span class="p">)</span></div>
 </pre></div>

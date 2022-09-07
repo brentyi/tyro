@@ -15,7 +15,7 @@ Module Contents
 ---------------
 
 .. py:data:: dummy_field_name
-   :annotation: = __dcargs_dummy_field_name__
+   :annotation: = __dcargs_dummy_field__
 
    
 

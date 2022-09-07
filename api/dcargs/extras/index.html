@@ -235,10 +235,14 @@ aren’t considered part of the core interface.</p>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading">#</a></h2>
 <dl class="py function">
-<dt class="sig sig-object py" id="dcargs.extras.subcommand_union_from_mapping">
-<span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">subcommand_union_from_mapping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default_from_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/extras/_base_configs/#subcommand_union_from_mapping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.subcommand_union_from_mapping" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns a Union type for defining subcommands that choose between nested types.</p>
-<p>For example, when <code class="docutils literal notranslate"><span class="pre">default</span></code> is set to:</p>
+<dt class="sig sig-object py" id="dcargs.extras.subcommand_type_from_defaults">
+<span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">subcommand_type_from_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/extras/_base_configs/#subcommand_type_from_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.subcommand_type_from_defaults" title="Permalink to this definition">#</a></dt>
+<dd><p>Construct a Union type for defining subcommands that choose between defaults.</p>
+<dl class="simple">
+<dt>This can most commonly be used to create a “base configuration” pattern:</dt><dd><p><a class="reference external" href="https://brentyi.github.io/dcargs/examples/10_base_configs/">https://brentyi.github.io/dcargs/examples/10_base_configs/</a></p>
+</dd>
+</dl>
+<p>For example, when <code class="docutils literal notranslate"><span class="pre">defaults</span></code> is set to:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
     <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
@@ -258,7 +262,7 @@ aren’t considered part of the core interface.</p>
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>This can be used directly in dcargs.cli:</p>
+<p>The resulting type can be used directly in dcargs.cli:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">subcommand_union_from_mapping</span><span class="p">(</span><span class="n">default_from_name</span><span class="p">))</span>
 <span class="n">reveal_type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>  <span class="c1"># Should be correct!</span>
 </pre></div>
@@ -286,8 +290,9 @@ necessary we can work around this with an <code class="docutils literal notransl
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>default_from_name</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>T</em><em>]</em>) – </p></li>
+<li><p><strong>defaults</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>T</em><em>]</em>) – </p></li>
 <li><p><strong>descriptions</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>prefix_names</strong> (<em>bool</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -418,7 +423,7 @@ future version of <code class="code docutils literal notranslate"><span class="p
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a><ul>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
-<li><a class="reference internal" href="#dcargs.extras.subcommand_union_from_mapping">subcommand_union_from_mapping</a></li>
+<li><a class="reference internal" href="#dcargs.extras.subcommand_type_from_defaults">subcommand_type_from_defaults</a></li>
 <li><a class="reference internal" href="#dcargs.extras.from_yaml">from_yaml</a></li>
 <li><a class="reference internal" href="#dcargs.extras.to_yaml">to_yaml</a></li>
 </ul>
