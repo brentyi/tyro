@@ -127,6 +127,9 @@ def cli(
         _fields.MISSING_NONPROP if default is None else default
     )
 
+    # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
+    # For example: passing in f=int will result in a dataclass with a single field
+    # typed as int.
     if not _fields.is_nested_type(cast(Type, f), default_instance_internal):
         dummy_field = cast(
             dataclasses.Field,
@@ -174,11 +177,10 @@ def cli(
         parser_definition.apply(parser)
 
         if print_completion:
-            assert completion_shell in (
-                "bash",
-                "zsh",
-                "tcsh",
-            ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
+            assert completion_shell in ("bash", "zsh", "tcsh",), (
+                "Shell should be one `bash`, `zsh`, or `tcsh`, but got"
+                f" {completion_shell}"
+            )
             print(
                 shtab.complete(
                     parser=parser,
