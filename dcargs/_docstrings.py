@@ -150,6 +150,12 @@ def get_class_tokenization_with_field(
 def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
 
+    docstring = inspect.getdoc(cls)
+    if docstring is not None:
+        for param_doc in docstring_parser.parse(docstring).params:
+            if param_doc.arg_name == field_name:
+                return param_doc.description
+
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
         return None
@@ -277,17 +283,16 @@ def get_callable_description(f: Callable) -> str:
         default_doc = f.__name__ + str(inspect.signature(f)).replace(" -> None", "")
         if docstring == default_doc:
             return ""
-        return docstring
-    else:
-        parsed_docstring = docstring_parser.parse(docstring)
-        return "\n".join(
-            list(
-                filter(
-                    lambda x: x is not None,  # type: ignore
-                    [
-                        parsed_docstring.short_description,
-                        parsed_docstring.long_description,
-                    ],
-                )
+
+    parsed_docstring = docstring_parser.parse(docstring)
+    return "\n".join(
+        list(
+            filter(
+                lambda x: x is not None,  # type: ignore
+                [
+                    parsed_docstring.short_description,
+                    parsed_docstring.long_description,
+                ],
             )
         )
+    )

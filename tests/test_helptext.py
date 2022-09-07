@@ -54,6 +54,58 @@ def test_helptext():
     assert "Documentation 3 (default: 3)\n" in helptext
 
 
+def test_helptext_from_class_docstring():
+    @dataclasses.dataclass
+    class Helptext2:
+        """This docstring should be printed as a description.
+
+        Attributes:
+            x: Documentation 1
+            y: Documentation 2
+            z: Documentation 3
+        """
+
+        x: int
+        y: Annotated[int, "ignored"]
+        z: int = 3
+
+    helptext = _get_helptext(Helptext2)
+    assert "This docstring should be printed as a description" in helptext
+    assert "Attributes" not in helptext
+    assert "x INT" in helptext
+    assert "y INT" in helptext
+    assert "z INT" in helptext
+    assert "Documentation 1 (required)\n" in helptext
+    assert "Documentation 2 (required)\n" in helptext
+    assert "Documentation 3 (default: 3)\n" in helptext
+
+
+def test_helptext_from_class_docstring_args():
+    @dataclasses.dataclass
+    class Helptext3:
+        """This docstring should be printed as a description.
+
+        Args:
+            x: Documentation 1
+            y: Documentation 2
+            z: Documentation 3
+        """
+
+        x: int
+        y: Annotated[int, "ignored"]
+        z: int = 3
+
+    helptext = _get_helptext(Helptext3)
+    assert "This docstring should be printed as a description" in helptext
+    assert "Args" not in helptext
+    assert "x INT" in helptext
+    assert "y INT" in helptext
+    assert "z INT" in helptext
+    assert "Documentation 1 (required)\n" in helptext
+    assert "Documentation 2 (required)\n" in helptext
+    assert "Documentation 3 (default: 3)\n" in helptext
+
+
 def test_helptext_inherited():
     class UnrelatedParentClass:
         pass
