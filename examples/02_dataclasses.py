@@ -15,12 +15,7 @@ import dcargs
 @dataclasses.dataclass
 class Args:
     """Description.
-    This should show up in the helptext!
-
-    Args:
-        field1: A string field!!!
-        field2: An int field!!!
-    """
+    This should show up in the helptext!"""
 
     field1: str  # A string field.
     field2: int = 3  # A numeric field, with a default value.

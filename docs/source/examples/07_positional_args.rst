@@ -7,6 +7,8 @@
 
 Positional-only arguments in functions are converted to positional CLI arguments.
 
+For more general positional arguments, see :func:`dcargs.conf.Positional`.
+
 
 
 .. code-block:: python

@@ -30,8 +30,9 @@ argument."""
 
 FIXED = _make_marker("Fixed")
 Fixed = Annotated[T, FIXED]
-"""A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it. A
-default value should be set instead."""
+"""A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a
+default value should be set instead. Note that fields with defaults that can't be parsed
+will also be marked as fixed automatically."""
 
 FLAG_CONVERSION_OFF = _make_marker("FlagConversionOff")
 FlagConversionOff = Annotated[T, FLAG_CONVERSION_OFF]

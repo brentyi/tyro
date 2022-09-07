@@ -336,7 +336,11 @@ class SubparsersSpecification:
             if default_name not in parser_from_name:
                 # If we can't find the subparser by name, search by type. This is needed
                 # when the user renames their subcommands. (eg via dcargs.subcommand)
+                #
+                # TODO: this will display some weird behaviors if multiple subcommands
+                # have the same type.
                 default_name = None
+
                 for name, parser in parser_from_name.items():
                     if type(field.default) is _resolver.unwrap_origin_strip_extras(
                         parser.f
