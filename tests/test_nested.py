@@ -38,6 +38,31 @@ def test_nested_annotated():
         dcargs.cli(Nested, args=["--x", "1"])
 
 
+def test_nested_accidental_underscores():
+    @dataclasses.dataclass
+    class B:
+        arg_name: str
+
+    @dataclasses.dataclass
+    class Nested:
+        x: int
+        child_struct: B
+
+    assert (
+        dcargs.cli(Nested, args=["--x", "1", "--child-struct.arg-name", "three_five"])
+        == dcargs.cli(
+            Nested, args=["--x", "1", "--child_struct.arg_name", "three_five"]
+        )
+        == dcargs.cli(
+            Nested, args=["--x", "1", "--child_struct.arg-name", "three_five"]
+        )
+        == dcargs.cli(Nested, args=["--x", "1", "--child_struct.arg_name=three_five"])
+        == Nested(x=1, child_struct=B(arg_name="three_five"))
+    )
+    with pytest.raises(SystemExit):
+        dcargs.cli(Nested, args=["--x", "1"])
+
+
 def test_nested_default():
     @dataclasses.dataclass
     class B:

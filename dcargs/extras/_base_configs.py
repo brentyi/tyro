@@ -7,12 +7,18 @@ from ..conf import subcommand
 T = TypeVar("T")
 
 
-def subcommand_union_from_mapping(
-    default_from_name: Mapping[str, T], descriptions: Mapping[str, str] = {}
+def subcommand_type_from_defaults(
+    defaults: Mapping[str, T],
+    descriptions: Mapping[str, str] = {},
+    *,
+    prefix_names: bool = True,
 ) -> Type[T]:
-    """Returns a Union type for defining subcommands that choose between nested types.
+    """Construct a Union type for defining subcommands that choose between defaults.
 
-    For example, when `default` is set to:
+    This can most commonly be used to create a "base configuration" pattern:
+        https://brentyi.github.io/dcargs/examples/10_base_configs/
+
+    For example, when `defaults` is set to:
 
     ```python
     {
@@ -36,7 +42,7 @@ def subcommand_union_from_mapping(
     ]
     ```
 
-    This can be used directly in dcargs.cli:
+    The resulting type can be used directly in dcargs.cli:
 
     ```python
     config = dcargs.cli(subcommand_union_from_mapping(default_from_name))
@@ -70,8 +76,16 @@ def subcommand_union_from_mapping(
     return Union.__getitem__(  # type: ignore
         tuple(
             Annotated.__class_getitem__(  # type: ignore
-                (type(v), subcommand(k, default=v, description=descriptions.get(k)))
+                (
+                    type(v),
+                    subcommand(
+                        k,
+                        default=v,
+                        description=descriptions.get(k),
+                        prefix_name=prefix_names,
+                    ),
+                )
             )
-            for k, v in default_from_name.items()
+            for k, v in defaults.items()
         )
     )

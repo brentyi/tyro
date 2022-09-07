@@ -15,7 +15,7 @@ def test_union_from_mapping():
         "two": A(2),
         "three": A(3),
     }
-    ConfigUnion = dcargs.extras.subcommand_union_from_mapping(base_configs)
+    ConfigUnion = dcargs.extras.subcommand_type_from_defaults(base_configs)
 
     assert dcargs.cli(ConfigUnion, args="one".split(" ")) == A(1)
     assert dcargs.cli(ConfigUnion, args="two".split(" ")) == A(2)
@@ -32,7 +32,7 @@ def test_union_from_mapping_in_function():
 
     # Hack for mypy. Not needed for pyright.
     ConfigUnion = A
-    ConfigUnion = dcargs.extras.subcommand_union_from_mapping(base_configs)  # type: ignore
+    ConfigUnion = dcargs.extras.subcommand_type_from_defaults(base_configs)  # type: ignore
 
     def main(config: ConfigUnion, flag: bool = False) -> Optional[A]:
         if flag:

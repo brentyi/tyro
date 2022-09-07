@@ -9,7 +9,7 @@ import termcolor
 
 from . import _resolver
 
-dummy_field_name = "__dcargs_dummy_field_name__"
+dummy_field_name = "__dcargs_dummy_field__"
 
 
 def _strip_dummy_field_names(parts: Iterable[str]) -> Iterable[str]:

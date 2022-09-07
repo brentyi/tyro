@@ -158,12 +158,26 @@ def cli(
         prefix="",  # Used for recursive calls.
     )
 
+    # Read and fix arguments. If the user passes in --field_name instead of
+    # --field-name, correct for them.
+    args = sys.argv[1:] if args is None else args
+
+    def fix_arg(arg: str) -> str:
+        if not arg.startswith("--"):
+            return arg
+        if "=" in arg:
+            arg, _, val = arg.partition("=")
+            return arg.replace("_", "-") + "=" + val
+        else:
+            return arg.replace("_", "-")
+
+    args = list(map(fix_arg, args))
+
     # If we pass in the --dcargs-print-completion flag: turn termcolor off, and get the
     # shell we want to generate a completion script for (bash/zsh/tcsh).
     #
     # Note that shtab also offers an add_argument_to() functions that fulfills a similar
     # goal, but manual parsing of argv is convenient for turning off colors.
-    args = sys.argv[1:] if args is None else args
     print_completion = len(args) >= 2 and args[0] == "--dcargs-print-completion"
 
     formatting_context = _argparse_formatter.ansi_context()
