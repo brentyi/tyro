@@ -97,9 +97,9 @@ base_configs["big"] = ExperimentConfig(
 
 if __name__ == "__main__":
     config = dcargs.cli(
-        dcargs.extras.subcommand_union_from_mapping(base_configs, descriptions),
+        dcargs.extras.subcommand_type_from_defaults(base_configs, descriptions),
     )
-    # Note that this is equivalent to:
+    # ^Note that this is equivalent to:
     #
     # config = dcargs.cli(
     #     Union[

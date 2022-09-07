@@ -34,7 +34,7 @@ class OptimizerConfig:
 @dataclasses.dataclass
 class ExperimentConfig:
     # Various configurable options for our optimizer.
-    optimizer: OptimizerConfig
+    optimizer_config: OptimizerConfig
 
     # Batch size.
     batch_size: int = 32
