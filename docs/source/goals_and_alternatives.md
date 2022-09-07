@@ -6,18 +6,17 @@ The core functionality of `dcargs` — generating argument parsers from type
 annotations — overlaps significantly with features offered by other libraries.
 Usage distinctions are the result of two API goals:
 
-- **One uninvasive function.** Whenever possible, learning to use `dcargs`
-  should reduce to learning to write (type-annotated) Python. For example, types
-  are specified using standard annotations, helptext using docstrings, choices
-  using the standard `typing.Literal` type, subparsers with `typing.Union` of
-  nested types, and positional arguments with `/`.
-  - In contrast, similar libraries have more expansive APIs (sometimes spanning
-    dozens of specialized class and functions), and often require
+- **One uninvasive function.** For all core functionality, learning to use
+  `dcargs` should reduce to learning to write (type-annotated) Python. For
+  example, types are specified using standard annotations, helptext using
+  docstrings, choices using the standard `typing.Literal` type, subcommands with
+  `typing.Union` of nested types, and positional arguments with `/`.
+  - In contrast, similar libraries have more expansive APIs , and require more
     library-specific structures, decorators, or metadata formats for configuring
     parsing behavior.
 - **Strict typing.** Any type that can be annotated and unambiguously parsed
   with an `argparse`-style CLI interface should work out-of-the-box; any public
-  API that isn't statically analyzable shouldn't be implemented.
+  API that isn't statically analyzable should be avoided.
   - In contrast, many similar libraries implement features that depend on
     dynamic argparse-style namespaces, or string-based accessors that can't be
     statically checked.
@@ -56,10 +55,10 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [omegaconf]: https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html
 
 [^datargs_unions_nested]: One allowed per class.
-[^tap_unions_nested]: Not supported, but API exists for creating subparsers that accomplish a similar goal.
+[^tap_unions_nested]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
 [^simp_unions_nested]: One allowed per class.
 [^yahp_unions_nested]: Not supported, but similar functionality available via ["registries"](https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html).
-[^typer_unions_nested]: Not supported, but API exists for creating subparsers that accomplish a similar goal.
+[^typer_unions_nested]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
 [^simp_literals]: Not supported for mixed (eg `Literal[5, "five"]`) or in container (eg `List[Literal[1, 2]]`) types.
 [^datargs_literals]: Not supported for mixed types (eg `Literal[5, "five"]`).
 [^typer_containers]: `typer` uses positional arguments for all required fields, which means that only one variable-length argument (such as `List[int]`) without a default is supported per argument parser.

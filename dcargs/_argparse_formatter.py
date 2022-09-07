@@ -5,6 +5,8 @@ import itertools
 import shutil
 from typing import Any, ContextManager, Generator
 
+import termcolor
+
 from . import _strings
 
 
@@ -13,6 +15,22 @@ def monkeypatch_len(obj: Any) -> int:
         return len(_strings.strip_ansi_sequences(obj))
     else:
         return len(obj)
+
+
+def dummy_termcolor_context() -> ContextManager[None]:
+    """Context for turning termcolor off."""
+
+    def dummy_colored(*args, **kwargs) -> str:
+        return args[0]
+
+    @contextlib.contextmanager
+    def inner() -> Generator[None, None, None]:
+        orig_colored = termcolor.colored
+        termcolor.colored = dummy_colored
+        yield
+        termcolor.colored = orig_colored
+
+    return inner()
 
 
 def ansi_context() -> ContextManager[None]:
@@ -25,6 +43,7 @@ def ansi_context() -> ContextManager[None]:
     @contextlib.contextmanager
     def inner() -> Generator[None, None, None]:
         if not hasattr(argparse, "len"):
+            # Sketchy, but seems to work.
             argparse.len = monkeypatch_len  # type: ignore
             try:
                 # Use Colorama to support coloring in Windows shells.
@@ -136,7 +155,8 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 )
             )
             # </new>
-            parts.append("%*s%s\n" % (indent_first, "", help_lines[0]))
+
+            parts.append("%*s%s\n" % (indent_first, "", help_lines[0]))  # type: ignore
             for line in help_lines[1:]:
                 parts.append("%*s%s\n" % (help_position, "", line))
 
@@ -150,3 +170,18 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         # return a single string
         return self._join_parts(parts)
+
+    def _split_lines(self, text, width):
+        text = self._whitespace_matcher.sub(" ", text).strip()
+        # The textwrap module is used only for formatting help.
+        # Delay its import for speeding up the common usage of argparse.
+        import textwrap as textwrap
+
+        # Sketchy, but seems to work.
+        textwrap.len = monkeypatch_len  # type: ignore
+        out = textwrap.wrap(text, width)
+        del textwrap.len  # type: ignore
+        return out
+
+    def _fill_text(self, text, width, indent):
+        return "".join(indent + line for line in text.splitlines(keepends=True))

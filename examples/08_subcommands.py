@@ -1,11 +1,14 @@
-"""Unions over nested types (classes or dataclasses) are populated using subparsers.
+"""Unions over nested types (classes or dataclasses) are populated using subcommands.
+
+For configuring subcommands beyond what can be expressed with type annotations, see
+:func:`dcargs.conf.subcommand()`.
 
 Usage:
-`python ./09_subparsers.py --help`
-`python ./09_subparsers.py cmd:commit --help`
-`python ./09_subparsers.py cmd:commit --cmd.message hello --cmd.all`
-`python ./09_subparsers.py cmd:checkout --help`
-`python ./09_subparsers.py cmd:checkout --cmd.branch main`
+`python ./08_subcommands.py --help`
+`python ./08_subcommands.py cmd:commit --help`
+`python ./08_subcommands.py cmd:commit --cmd.message hello --cmd.all`
+`python ./08_subcommands.py cmd:checkout --help`
+`python ./08_subcommands.py cmd:checkout --cmd.branch main`
 """
 
 from __future__ import annotations

@@ -5,7 +5,7 @@ from __future__ import annotations
 
 from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
 
-from typing_extensions import get_args, get_origin
+from typing_extensions import get_args
 
 from . import _arguments, _fields, _parsers, _resolver, _strings
 
@@ -24,7 +24,6 @@ def call_from_args(
     default_instance: Union[T, _fields.NonpropagatingMissingType],
     value_from_prefixed_field_name: Dict[str, Any],
     field_name_prefix: str,
-    avoid_subparsers: bool,
 ) -> Tuple[T, Set[str]]:
     """Call `f` with arguments specified by a dictionary of values from argparse.
 
@@ -56,11 +55,7 @@ def call_from_args(
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
 
         # Resolve field type.
-        field_type = (
-            type_from_typevar[field.typ]  # type: ignore
-            if field.typ in type_from_typevar
-            else field.typ
-        )
+        field_type = _resolver.apply_type_from_typevar(field.typ, type_from_typevar)  # type: ignore
 
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords
@@ -100,8 +95,7 @@ def call_from_args(
             in parser_definition.helptext_from_nested_class_field_name
         ):
             # Nested callable.
-            if get_origin(field_type) is Union:
-                assert avoid_subparsers
+            if _resolver.unwrap_origin_strip_extras(field_type) is Union:
                 field_type = type(field.default)
             value, consumed_keywords_child = call_from_args(
                 field_type,
@@ -109,7 +103,6 @@ def call_from_args(
                 field.default,
                 value_from_prefixed_field_name,
                 field_name_prefix=prefixed_field_name,
-                avoid_subparsers=avoid_subparsers,
             )
             consumed_keywords |= consumed_keywords_child
         else:
@@ -148,8 +141,8 @@ def call_from_args(
                 value = None
             else:
                 options = map(
-                    lambda x: x if x not in type_from_typevar else type_from_typevar[x],
-                    get_args(field_type),
+                    lambda x: _resolver.apply_type_from_typevar(x, type_from_typevar),
+                    get_args(_resolver.unwrap_annotated(field_type)[0]),
                 )
                 chosen_f = None
                 for option in options:
@@ -166,19 +159,18 @@ def call_from_args(
                     field.default if type(field.default) is chosen_f else None,
                     value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name,
-                    avoid_subparsers=avoid_subparsers,
                 )
                 consumed_keywords |= consumed_keywords_child
 
         if value is not _fields.EXCLUDE_FROM_CALL:
-            if field.positional:
+            if field.is_positional():
                 args.append(value)
             else:
                 kwargs[
                     field.name if field.name_override is None else field.name_override
                 ] = value
 
-    unwrapped_f = _resolver.unwrap_origin(f)
+    unwrapped_f = _resolver.unwrap_origin_strip_extras(f)
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
     unwrapped_f = _resolver.narrow_type(unwrapped_f, default_instance)
     if unwrapped_f in (tuple, list, set):
