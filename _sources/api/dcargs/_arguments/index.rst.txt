@@ -103,8 +103,8 @@ Module Contents
 
       
       If the instantiator is set to ``None``\ , even after all argument
-      transformations, it means that we weren't able to determine a valid instantiator
-      for an argument. We then mark the argument as 'fixed', with a value always equal
-      to the field default.
+      transformations, it means that we don't have a valid instantiator for an
+      argument. We then mark the argument as 'fixed', with a value always equal to the
+      field default.
 
 

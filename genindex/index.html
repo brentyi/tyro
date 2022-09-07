@@ -168,25 +168,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_flags/">4. Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/06_base_configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/07_literals_and_unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/08_positional_args/">8. Positional Args</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/10_multiple_subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/06_literals_and_unions/">6. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/07_positional_args/">7. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/08_subcommands/">8. Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/09_multiple_subcommands/">9. Multiple Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/10_base_configs/">10. Base Configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/11_dictionaries/">11. Dictionaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/12_tuples/">12. Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/14_generics/">14. Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/16_advanced_configuration/">16. Advanced Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../goals_and_alternatives/">Goals and alternatives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../serialization/">Serialization</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/dcargs/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/dcargs/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/dcargs/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
 </ul>
 </li>
@@ -236,20 +239,32 @@
 </li>
         <li><a href="../api/dcargs/_arguments/#dcargs._arguments.ArgumentDefinition.add_argument">add_argument() (dcargs._arguments.ArgumentDefinition method)</a>
 </li>
+        <li><a href="../api/dcargs/_fields/#dcargs._fields.FieldDefinition.add_markers">add_markers() (dcargs._fields.FieldDefinition method)</a>
+</li>
         <li><a href="../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.ansi_context">ansi_context() (in module dcargs._argparse_formatter)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.apply">apply() (dcargs._parsers.ParserSpecification method)</a>
 
         <ul>
           <li><a href="../api/dcargs/_parsers/#dcargs._parsers.SubparsersSpecification.apply">(dcargs._parsers.SubparsersSpecification method)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/_resolver/#dcargs._resolver.apply_type_from_typevar">apply_type_from_typevar() (in module dcargs._resolver)</a>
+</li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.args">args (dcargs._parsers.ParserSpecification attribute)</a>
 </li>
         <li><a href="../api/dcargs/_arguments/#dcargs._arguments.ArgumentDefinition">ArgumentDefinition (class in dcargs._arguments)</a>
 </li>
+        <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.AVOID_SUBCOMMANDS">AVOID_SUBCOMMANDS (in module dcargs.conf._markers)</a>
+</li>
+        <li><a href="../api/dcargs/conf/#dcargs.conf.AvoidSubcommands">AvoidSubcommands (in module dcargs.conf)</a>
+
+        <ul>
+          <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.AvoidSubcommands">(in module dcargs.conf._markers)</a>
+</li>
+        </ul></li>
     </ul></td>
   </tr></table>
 </section>
@@ -346,8 +361,6 @@
           <li><a href="../api/dcargs/_fields/#module-dcargs._fields">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     dcargs._instantiators
 
@@ -369,6 +382,15 @@
           <li><a href="../api/dcargs/_resolver/#module-dcargs._resolver">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    dcargs._singleton
+
+        <ul>
+          <li><a href="../api/dcargs/_singleton/#module-dcargs._singleton">module</a>
+</li>
+        </ul></li>
         <li>
     dcargs._strings
 
@@ -377,10 +399,38 @@
 </li>
         </ul></li>
         <li>
+    dcargs.conf
+
+        <ul>
+          <li><a href="../api/dcargs/conf/#module-dcargs.conf">module</a>
+</li>
+        </ul></li>
+        <li>
+    dcargs.conf._markers
+
+        <ul>
+          <li><a href="../api/dcargs/conf/_markers/#module-dcargs.conf._markers">module</a>
+</li>
+        </ul></li>
+        <li>
+    dcargs.conf._subcommands
+
+        <ul>
+          <li><a href="../api/dcargs/conf/_subcommands/#module-dcargs.conf._subcommands">module</a>
+</li>
+        </ul></li>
+        <li>
     dcargs.extras
 
         <ul>
           <li><a href="../api/dcargs/extras/#module-dcargs.extras">module</a>
+</li>
+        </ul></li>
+        <li>
+    dcargs.extras._base_configs
+
+        <ul>
+          <li><a href="../api/dcargs/extras/_base_configs/#module-dcargs.extras._base_configs">module</a>
 </li>
         </ul></li>
         <li>
@@ -400,11 +450,17 @@
         </ul></li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.SubparsersSpecification.default_instance">default_instance (dcargs._parsers.SubparsersSpecification attribute)</a>
 </li>
-        <li><a href="../api/dcargs/_parsers/#dcargs._parsers.SubparsersSpecification.description">description (dcargs._parsers.SubparsersSpecification attribute)</a>
+        <li><a href="../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.description">description (dcargs._parsers.ParserSpecification attribute)</a>
+
+        <ul>
+          <li><a href="../api/dcargs/_parsers/#dcargs._parsers.SubparsersSpecification.description">(dcargs._parsers.SubparsersSpecification attribute)</a>
 </li>
+        </ul></li>
         <li><a href="../api/dcargs/_arguments/#dcargs._arguments.LoweredArgumentDefinition.dest">dest (dcargs._arguments.LoweredArgumentDefinition attribute)</a>
 </li>
         <li><a href="../api/dcargs/_strings/#dcargs._strings.dummy_field_name">dummy_field_name (in module dcargs._strings)</a>
+</li>
+        <li><a href="../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.dummy_termcolor_context">dummy_termcolor_context() (in module dcargs._argparse_formatter)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -436,10 +492,24 @@
 </li>
         <li><a href="../api/dcargs/_fields/#dcargs._fields.FieldDefinition">FieldDefinition (class in dcargs._fields)</a>
 </li>
-        <li><a href="../api/dcargs/_strings/#dcargs._strings.format_metavar">format_metavar() (in module dcargs._strings)</a>
+        <li><a href="../api/dcargs/conf/#dcargs.conf.Fixed">Fixed (in module dcargs.conf)</a>
+</li>
+        <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.FIXED">FIXED (in module dcargs.conf._markers)</a>
+</li>
+        <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.Fixed">Fixed (in module dcargs.conf._markers)</a>
+</li>
+        <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.FLAG_CONVERSION_OFF">FLAG_CONVERSION_OFF (in module dcargs.conf._markers)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/conf/#dcargs.conf.FlagConversionOff">FlagConversionOff (in module dcargs.conf)</a>
+
+        <ul>
+          <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.FlagConversionOff">(in module dcargs.conf._markers)</a>
+</li>
+        </ul></li>
+        <li><a href="../api/dcargs/_strings/#dcargs._strings.format_metavar">format_metavar() (in module dcargs._strings)</a>
+</li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.from_callable">from_callable() (dcargs._parsers.ParserSpecification static method)</a>
 </li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.SubparsersSpecification.from_field">from_field() (dcargs._parsers.SubparsersSpecification static method)</a>
@@ -458,16 +528,10 @@
   <h2>G</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="../api/dcargs/#dcargs.generate_parser">generate_parser() (in module dcargs)</a>
-
-        <ul>
-          <li><a href="../api/dcargs/_cli/#dcargs._cli.generate_parser">(in module dcargs._cli)</a>
-</li>
-        </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/dcargs/_docstrings/#dcargs._docstrings.get_callable_description">get_callable_description() (in module dcargs._docstrings)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/dcargs/_docstrings/#dcargs._docstrings.get_class_tokenization_with_field">get_class_tokenization_with_field() (in module dcargs._docstrings)</a>
 </li>
         <li><a href="../api/dcargs/_docstrings/#dcargs._docstrings.get_field_docstring">get_field_docstring() (in module dcargs._docstrings)</a>
@@ -498,6 +562,8 @@
   <h2>I</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/_singleton/#dcargs._singleton.Singleton.init">init() (dcargs._singleton.Singleton method)</a>
+</li>
         <li><a href="../api/dcargs/_calling/#dcargs._calling.InstantiationError">InstantiationError</a>
 </li>
         <li><a href="../api/dcargs/_instantiators/#dcargs._instantiators.Instantiator">Instantiator (in module dcargs._instantiators)</a>
@@ -515,6 +581,8 @@
         <li><a href="../api/dcargs/_resolver/#dcargs._resolver.is_namedtuple">is_namedtuple() (in module dcargs._resolver)</a>
 </li>
         <li><a href="../api/dcargs/_fields/#dcargs._fields.is_nested_type">is_nested_type() (in module dcargs._fields)</a>
+</li>
+        <li><a href="../api/dcargs/_fields/#dcargs._fields.FieldDefinition.is_positional">is_positional() (dcargs._fields.FieldDefinition method)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -538,11 +606,19 @@
   <h2>M</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/_fields/#dcargs._fields.FieldDefinition.make">make() (dcargs._fields.FieldDefinition static method)</a>
+</li>
         <li><a href="../api/dcargs/_strings/#dcargs._strings.make_field_name">make_field_name() (in module dcargs._strings)</a>
 </li>
         <li><a href="../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.make_formatter_class">make_formatter_class() (in module dcargs._argparse_formatter)</a>
 </li>
         <li><a href="../api/dcargs/_strings/#dcargs._strings.make_subparser_dest">make_subparser_dest() (in module dcargs._strings)</a>
+</li>
+        <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.Marker">Marker (class in dcargs.conf._markers)</a>
+</li>
+        <li><a href="../api/dcargs/_fields/#dcargs._fields.FieldDefinition.markers">markers (dcargs._fields.FieldDefinition attribute)</a>
+</li>
+        <li><a href="../api/dcargs/_resolver/#dcargs._resolver.MetadataType">MetadataType (in module dcargs._resolver)</a>
 </li>
         <li><a href="../api/dcargs/_arguments/#dcargs._arguments.LoweredArgumentDefinition.metavar">metavar (dcargs._arguments.LoweredArgumentDefinition attribute)</a>
 
@@ -588,9 +664,19 @@
 </li>
           <li><a href="../api/dcargs/_resolver/#module-dcargs._resolver">dcargs._resolver</a>
 </li>
+          <li><a href="../api/dcargs/_singleton/#module-dcargs._singleton">dcargs._singleton</a>
+</li>
           <li><a href="../api/dcargs/_strings/#module-dcargs._strings">dcargs._strings</a>
 </li>
+          <li><a href="../api/dcargs/conf/#module-dcargs.conf">dcargs.conf</a>
+</li>
+          <li><a href="../api/dcargs/conf/_markers/#module-dcargs.conf._markers">dcargs.conf._markers</a>
+</li>
+          <li><a href="../api/dcargs/conf/_subcommands/#module-dcargs.conf._subcommands">dcargs.conf._subcommands</a>
+</li>
           <li><a href="../api/dcargs/extras/#module-dcargs.extras">dcargs.extras</a>
+</li>
+          <li><a href="../api/dcargs/extras/_base_configs/#module-dcargs.extras._base_configs">dcargs.extras._base_configs</a>
 </li>
           <li><a href="../api/dcargs/extras/_serialization/#module-dcargs.extras._serialization">dcargs.extras._serialization</a>
 </li>
@@ -651,10 +737,14 @@
 </li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification">ParserSpecification (class in dcargs._parsers)</a>
 </li>
-        <li><a href="../api/dcargs/_fields/#dcargs._fields.FieldDefinition.positional">positional (dcargs._fields.FieldDefinition attribute)</a>
+        <li><a href="../api/dcargs/conf/#dcargs.conf.Positional">Positional (in module dcargs.conf)</a>
+</li>
+        <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.POSITIONAL">POSITIONAL (in module dcargs.conf._markers)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.Positional">Positional (in module dcargs.conf._markers)</a>
+</li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.prefix">prefix (dcargs._parsers.ParserSpecification attribute)</a>
 
         <ul>
@@ -691,12 +781,26 @@
   <h2>S</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/_singleton/#dcargs._singleton.Singleton">Singleton (class in dcargs._singleton)</a>
+</li>
         <li><a href="../api/dcargs/_strings/#dcargs._strings.strip_ansi_sequences">strip_ansi_sequences() (in module dcargs._strings)</a>
 </li>
-        <li><a href="../api/dcargs/_strings/#dcargs._strings.subparser_name_from_type">subparser_name_from_type() (in module dcargs._strings)</a>
+        <li><a href="../api/dcargs/conf/#dcargs.conf.subcommand">subcommand() (in module dcargs.conf)</a>
+
+        <ul>
+          <li><a href="../api/dcargs/conf/_subcommands/#dcargs.conf._subcommands.subcommand">(in module dcargs.conf._subcommands)</a>
 </li>
+        </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/extras/#dcargs.extras.subcommand_union_from_mapping">subcommand_union_from_mapping() (in module dcargs.extras)</a>
+
+        <ul>
+          <li><a href="../api/dcargs/extras/_base_configs/#dcargs.extras._base_configs.subcommand_union_from_mapping">(in module dcargs.extras._base_configs)</a>
+</li>
+        </ul></li>
+        <li><a href="../api/dcargs/_strings/#dcargs._strings.subparser_name_from_type">subparser_name_from_type() (in module dcargs._strings)</a>
+</li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.subparsers_from_name">subparsers_from_name (dcargs._parsers.ParserSpecification attribute)</a>
 </li>
         <li><a href="../api/dcargs/_parsers/#dcargs._parsers.SubparsersSpecification">SubparsersSpecification (class in dcargs._parsers)</a>
@@ -713,6 +817,10 @@
 
         <ul>
           <li><a href="../api/dcargs/_parsers/#dcargs._parsers.T">(in module dcargs._parsers)</a>
+</li>
+          <li><a href="../api/dcargs/conf/_markers/#dcargs.conf._markers.T">(in module dcargs.conf._markers)</a>
+</li>
+          <li><a href="../api/dcargs/extras/_base_configs/#dcargs.extras._base_configs.T">(in module dcargs.extras._base_configs)</a>
 </li>
         </ul></li>
         <li><a href="../api/dcargs/extras/#dcargs.extras.to_yaml">to_yaml() (in module dcargs.extras)</a>
@@ -743,11 +851,13 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/dcargs/_fields/#dcargs._fields.UnsupportedNestedTypeMessage">UnsupportedNestedTypeMessage (class in dcargs._fields)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/dcargs/#dcargs.UnsupportedTypeAnnotationError">UnsupportedTypeAnnotationError</a>, <a href="../api/dcargs/_instantiators/#dcargs._instantiators.UnsupportedTypeAnnotationError">[1]</a>
 </li>
-        <li><a href="../api/dcargs/_resolver/#dcargs._resolver.unwrap_origin">unwrap_origin() (in module dcargs._resolver)</a>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/dcargs/_resolver/#dcargs._resolver.unwrap_annotated">unwrap_annotated() (in module dcargs._resolver)</a>
+</li>
+        <li><a href="../api/dcargs/_resolver/#dcargs._resolver.unwrap_origin_strip_extras">unwrap_origin_strip_extras() (in module dcargs._resolver)</a>
 </li>
     </ul></td>
   </tr></table>

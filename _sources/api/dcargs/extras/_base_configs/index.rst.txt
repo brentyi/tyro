@@ -1,0 +1,76 @@
+:orphan:
+
+:py:mod:`dcargs.extras._base_configs`
+=====================================
+
+.. py:module:: dcargs.extras._base_configs
+
+
+Module Contents
+---------------
+
+.. py:data:: T
+   
+
+   
+
+.. py:function:: subcommand_union_from_mapping(default_from_name: Mapping[str, T], descriptions: Mapping[str, str] = {}) -> Type[T]
+
+   
+   Returns a Union type for defining subcommands that choose between nested types.
+
+   For example, when ``default`` is set to:
+
+   .. code-block:: python
+
+      {
+          "small": Config(...),
+          "big": Config(...),
+      }
+
+   We return:
+
+   .. code-block:: python
+
+      Union[
+          Annotated[
+              Config,
+              dcargs.conf.subcommand("small", default=Config(...))
+          ],
+          Annotated[
+              Config,
+              dcargs.conf.subcommand("big", default=Config(...))
+          ]
+      ]
+
+   This can be used directly in dcargs.cli:
+
+   .. code-block:: python
+
+      config = dcargs.cli(subcommand_union_from_mapping(default_from_name))
+      reveal_type(config)  # Should be correct!
+
+   Or to generate annotations for classes and functions:
+
+   .. code-block:: python
+
+      SelectableConfig = subcommand_union_from_mapping(default_from_name)
+
+      def train(
+          config: SelectableConfig,
+          checkpoint_path: Optional[pathlib.Path] = None,
+      ) -> None:
+          ...
+
+      dcargs.cli(train)
+
+   Note that Pyright understands the latter case, but mypy does not. If mypy support is
+   necessary we can work around this with an ``if TYPE_CHECKING`` guard:
+
+   .. code-block:: python
+
+      if TYPE_CHECKING:
+          SelectableConfig = ExperimentConfig
+      else:
+          SelectableConfig = subcommand_union_from_mapping(base_mapping)
+

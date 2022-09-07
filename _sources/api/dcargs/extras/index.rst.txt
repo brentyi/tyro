@@ -3,15 +3,93 @@
 
 .. py:module:: dcargs.extras
 
+.. autoapi-nested-parse::
+
+   
+   The :mod:`dcargs.extras` submodule contains helpers that complement :func:`dcargs.cli()`, but
+   aren't considered part of the core interface.
+
 
 Package Contents
 ----------------
+
+.. py:function:: subcommand_union_from_mapping(default_from_name: Mapping[str, T], descriptions: Mapping[str, str] = {}) -> Type[T]
+
+   
+   Returns a Union type for defining subcommands that choose between nested types.
+
+   For example, when ``default`` is set to:
+
+   .. code-block:: python
+
+      {
+          "small": Config(...),
+          "big": Config(...),
+      }
+
+   We return:
+
+   .. code-block:: python
+
+      Union[
+          Annotated[
+              Config,
+              dcargs.conf.subcommand("small", default=Config(...))
+          ],
+          Annotated[
+              Config,
+              dcargs.conf.subcommand("big", default=Config(...))
+          ]
+      ]
+
+   This can be used directly in dcargs.cli:
+
+   .. code-block:: python
+
+      config = dcargs.cli(subcommand_union_from_mapping(default_from_name))
+      reveal_type(config)  # Should be correct!
+
+   Or to generate annotations for classes and functions:
+
+   .. code-block:: python
+
+      SelectableConfig = subcommand_union_from_mapping(default_from_name)
+
+      def train(
+          config: SelectableConfig,
+          checkpoint_path: Optional[pathlib.Path] = None,
+      ) -> None:
+          ...
+
+      dcargs.cli(train)
+
+   Note that Pyright understands the latter case, but mypy does not. If mypy support is
+   necessary we can work around this with an ``if TYPE_CHECKING`` guard:
+
+   .. code-block:: python
+
+      if TYPE_CHECKING:
+          SelectableConfig = ExperimentConfig
+      else:
+          SelectableConfig = subcommand_union_from_mapping(base_mapping)
 
 .. py:function:: from_yaml(cls: Type[DataclassType], stream: Union[str, IO[str], bytes, IO[bytes]]) -> DataclassType
 
    
    Re-construct a dataclass instance from a yaml-compatible string, which should be
-   generated from ``dcargs.extra.to_yaml()``.
+   generated from ``dcargs.extras.to_yaml()``.
+
+   As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+   configuration use cases, we also introduce functions for human-readable dataclass
+   serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+   to strike a balance between flexibility and robustness — in contrast to naively
+   dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+   references enable custom tags that are robust against code reorganization and
+   refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+   .. warning::
+       Serialization functionality is stable but deprecated. It may be removed in a
+       future version of :code:`dcargs`.
 
    :param cls: Type to reconstruct.
    :param stream: YAML to read from.
@@ -23,6 +101,18 @@ Package Contents
    
    Serialize a dataclass; returns a yaml-compatible string that can be deserialized
    via ``dcargs.extras.from_yaml()``.
+
+   As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+   configuration use cases, we also introduce functions for human-readable dataclass
+   serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+   to strike a balance between flexibility and robustness — in contrast to naively
+   dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+   references enable custom tags that are robust against code reorganization and
+   refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+   .. warning::
+       Serialization functionality is stable but deprecated. It may be removed in a
+       future version of :code:`dcargs`.
 
    :param instance: Dataclass instance to serialize.
 

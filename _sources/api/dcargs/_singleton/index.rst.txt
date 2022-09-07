@@ -1,0 +1,17 @@
+:orphan:
+
+:py:mod:`dcargs._singleton`
+===========================
+
+.. py:module:: dcargs._singleton
+
+
+Module Contents
+---------------
+
+.. py:class:: Singleton
+
+   .. py:method:: init(self, *args, **kwds)
+
+
+

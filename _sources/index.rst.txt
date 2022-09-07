@@ -105,8 +105,9 @@ The broader goal is also a replacement for tools like :code:`hydra`,
    :hidden:
    :glob:
 
+   helptext_generation
+   tab_completion
    goals_and_alternatives
-   serialization
 
 
 .. toctree::

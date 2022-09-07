@@ -23,6 +23,11 @@ Module Contents
 
    
    Each parser contains a list of arguments and optionally some subparsers.
+   .. py:attribute:: f
+      :annotation: :Callable
+
+      
+
    .. py:attribute:: description
       :annotation: :str
 
@@ -48,7 +53,7 @@ Module Contents
 
       
 
-   .. py:method:: from_callable(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type], parent_type_from_typevar: Optional[Dict[TypeVar, Type]], default_instance: Union[T, dcargs._fields.PropagatingMissingType, dcargs._fields.NonpropagatingMissingType], prefix: str, avoid_subparsers: bool) -> ParserSpecification
+   .. py:method:: from_callable(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type], parent_type_from_typevar: Optional[Dict[TypeVar, Type]], default_instance: Union[T, dcargs._fields.PropagatingMissingType, dcargs._fields.NonpropagatingMissingType], prefix: str) -> ParserSpecification
       :staticmethod:
 
       
@@ -99,7 +104,7 @@ Module Contents
 
       
 
-   .. py:method:: from_field(field: dcargs._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, Type], parent_classes: Set[Type], prefix: str, avoid_subparsers: bool) -> Optional[SubparsersSpecification]
+   .. py:method:: from_field(field: dcargs._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, Type], parent_classes: Set[Type], prefix: str) -> Optional[SubparsersSpecification]
       :staticmethod:
 
 

@@ -12,6 +12,11 @@ Module Contents
 .. py:function:: monkeypatch_len(obj: Any) -> int
 
 
+.. py:function:: dummy_termcolor_context() -> ContextManager[None]
+
+   
+   Context for turning termcolor off.
+
 .. py:function:: ansi_context() -> ContextManager[None]
 
    

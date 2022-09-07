@@ -37,8 +37,8 @@ Module Contents
 
       
 
-   .. py:attribute:: positional
-      :annotation: :bool
+   .. py:attribute:: markers
+      :annotation: :FrozenSet[dcargs.conf._markers.Marker]
 
       
 
@@ -47,20 +47,30 @@ Module Contents
 
       
 
+   .. py:method:: make(name: str, typ: Type, default: Any, helptext: Optional[str], *, markers: Tuple[dcargs.conf._markers.Marker, Ellipsis] = (), name_override: Optional[Any] = None)
+      :staticmethod:
+
+
+   .. py:method:: add_markers(self, markers: Tuple[dcargs.conf._markers.Marker, Ellipsis]) -> FieldDefinition
+
+
+   .. py:method:: is_positional(self) -> bool
+
+
 
 .. py:class:: PropagatingMissingType
 
-   Bases: :py:obj:`_Singleton`
+   Bases: :py:obj:`dcargs._singleton.Singleton`
 
 
 .. py:class:: NonpropagatingMissingType
 
-   Bases: :py:obj:`_Singleton`
+   Bases: :py:obj:`dcargs._singleton.Singleton`
 
 
 .. py:class:: ExcludeFromCallType
 
-   Bases: :py:obj:`_Singleton`
+   Bases: :py:obj:`dcargs._singleton.Singleton`
 
 
 .. py:data:: MISSING_PROP

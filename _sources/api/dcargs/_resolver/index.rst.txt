@@ -19,10 +19,10 @@ Module Contents
 
    
 
-.. py:function:: unwrap_origin(tp: TypeOrCallable) -> TypeOrCallable
+.. py:function:: unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable
 
    
-   Returns the origin of tp if it exists. Otherwise, returns tp.
+   Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise, returns typ.
 
 .. py:function:: is_dataclass(cls: Union[Type, Callable]) -> bool
 
@@ -59,4 +59,26 @@ Module Contents
    
    Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
    should parse as Cat.
+
+   Note that Union types are intentionally excluded here.
+
+.. py:data:: MetadataType
+   
+
+   
+
+.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: Optional[Type[MetadataType]] = None) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+
+   
+   Helper for parsing typing.Annotated types.
+
+   Examples:
+
+
+   * int, int => (int, ())
+   * Annotated[int, 1], int => (int, 1)
+   * Annotated[int, "1"], int => (int, None)
+
+.. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type]) -> TypeOrCallable
+
 

@@ -34,13 +34,11 @@
           Tuple[int, float]
 
               lambda strings: tuple(
-                  [
-                      typ(x)
-                      for typ, x in zip(
-                          (int, float),
-                          strings,
-                      )
-                  ]
+                  typ(x)
+                  for typ, x in zip(
+                      (int, float),
+                      strings,
+                  )
               )
 
 

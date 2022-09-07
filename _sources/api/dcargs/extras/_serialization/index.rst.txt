@@ -38,7 +38,19 @@ Module Contents
 
    
    Re-construct a dataclass instance from a yaml-compatible string, which should be
-   generated from ``dcargs.extra.to_yaml()``.
+   generated from ``dcargs.extras.to_yaml()``.
+
+   As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+   configuration use cases, we also introduce functions for human-readable dataclass
+   serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+   to strike a balance between flexibility and robustness — in contrast to naively
+   dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+   references enable custom tags that are robust against code reorganization and
+   refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+   .. warning::
+       Serialization functionality is stable but deprecated. It may be removed in a
+       future version of :code:`dcargs`.
 
    :param cls: Type to reconstruct.
    :param stream: YAML to read from.
@@ -50,6 +62,18 @@ Module Contents
    
    Serialize a dataclass; returns a yaml-compatible string that can be deserialized
    via ``dcargs.extras.from_yaml()``.
+
+   As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+   configuration use cases, we also introduce functions for human-readable dataclass
+   serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+   to strike a balance between flexibility and robustness — in contrast to naively
+   dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+   references enable custom tags that are robust against code reorganization and
+   refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+   .. warning::
+       Serialization functionality is stable but deprecated. It may be removed in a
+       future version of :code:`dcargs`.
 
    :param instance: Dataclass instance to serialize.
 

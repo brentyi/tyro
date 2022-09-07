@@ -170,25 +170,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_flags/">4. Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base_configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals_and_unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional_args/">8. Positional Args</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple_subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_literals_and_unions/">6. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_positional_args/">7. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_subcommands/">8. Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/09_multiple_subcommands/">9. Multiple Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_base_configs/">10. Base Configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/11_dictionaries/">11. Dictionaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/12_tuples/">12. Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/14_generics/">14. Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/16_advanced_configuration/">16. Advanced Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../serialization/">Serialization</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
 </ul>
 </li>
@@ -236,12 +239,12 @@
 <dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dcargs._resolver.unwrap_origin">
-<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_origin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tp</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#unwrap_origin"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.unwrap_origin" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns the origin of tp if it exists. Otherwise, returns tp.</p>
+<dt class="sig sig-object py" id="dcargs._resolver.unwrap_origin_strip_extras">
+<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_origin_strip_extras</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#unwrap_origin_strip_extras"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.unwrap_origin_strip_extras" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise, returns typ.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>tp</strong> (<em>TypeOrCallable</em>) – </p>
+<dd class="field-odd"><p><strong>typ</strong> (<em>TypeOrCallable</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>TypeOrCallable</p>
@@ -330,6 +333,7 @@ unsuccessful.</p>
 <span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeT</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#narrow_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.narrow_type" title="Permalink to this definition">#</a></dt>
 <dd><p>Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
 should parse as Cat.</p>
+<p>Note that Union types are intentionally excluded here.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -339,6 +343,50 @@ should parse as Cat.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>TypeT</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="dcargs._resolver.MetadataType">
+<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">MetadataType</span></span><a class="headerlink" href="#dcargs._resolver.MetadataType" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dcargs._resolver.unwrap_annotated">
+<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_annotated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">MetadataType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeOrCallable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">MetadataType</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#unwrap_annotated"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.unwrap_annotated" title="Permalink to this definition">#</a></dt>
+<dd><p>Helper for parsing typing.Annotated types.</p>
+<p>Examples:</p>
+<ul class="simple">
+<li><p>int, int =&gt; (int, ())</p></li>
+<li><p>Annotated[int, 1], int =&gt; (int, 1)</p></li>
+<li><p>Annotated[int, “1”], int =&gt; (int, None)</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typ</strong> (<em>TypeOrCallable</em>) – </p></li>
+<li><p><strong>search_type</strong> (<em>Optional</em><em>[</em><em>Type</em><em>[</em><em>MetadataType</em><em>]</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dcargs._resolver.apply_type_from_typevar">
+<span class="sig-prename descclassname"><span class="pre">dcargs._resolver.</span></span><span class="sig-name descname"><span class="pre">apply_type_from_typevar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_from_typevar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_resolver/#apply_type_from_typevar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._resolver.apply_type_from_typevar" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>typ</strong> (<em>TypeOrCallable</em>) – </p></li>
+<li><p><strong>type_from_typevar</strong> (<em>Dict</em><em>[</em><em>TypeVar</em><em>, </em><em>Type</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>TypeOrCallable</p>
 </dd>
 </dl>
 </dd></dl>
@@ -393,7 +441,7 @@ should parse as Cat.</p>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._resolver</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#dcargs._resolver.TypeOrCallable">TypeOrCallable</a></li>
-<li><a class="reference internal" href="#dcargs._resolver.unwrap_origin">unwrap_origin</a></li>
+<li><a class="reference internal" href="#dcargs._resolver.unwrap_origin_strip_extras">unwrap_origin_strip_extras</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.is_dataclass">is_dataclass</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.resolve_generic_types">resolve_generic_types</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.resolved_fields">resolved_fields</a></li>
@@ -401,6 +449,9 @@ should parse as Cat.</p>
 <li><a class="reference internal" href="#dcargs._resolver.type_from_typevar_constraints">type_from_typevar_constraints</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.TypeT">TypeT</a></li>
 <li><a class="reference internal" href="#dcargs._resolver.narrow_type">narrow_type</a></li>
+<li><a class="reference internal" href="#dcargs._resolver.MetadataType">MetadataType</a></li>
+<li><a class="reference internal" href="#dcargs._resolver.unwrap_annotated">unwrap_annotated</a></li>
+<li><a class="reference internal" href="#dcargs._resolver.apply_type_from_typevar">apply_type_from_typevar</a></li>
 </ul>
 </li>
 </ul>

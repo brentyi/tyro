@@ -169,25 +169,28 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_flags/">4. Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_base_configs/">6. Base Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_literals_and_unions/">7. Literals And Unions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_positional_args/">8. Positional Args</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/09_subparsers/">9. Subparsers</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_multiple_subparsers/">10. Multiple Subparsers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_literals_and_unions/">6. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_positional_args/">7. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_subcommands/">8. Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/09_multiple_subcommands/">9. Multiple Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_base_configs/">10. Base Configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/11_dictionaries/">11. Dictionaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/12_tuples/">12. Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/14_generics/">14. Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/16_advanced_configuration/">16. Advanced Configuration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../serialization/">Serialization</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/dcargs/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/dcargs/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/dcargs/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
 </ul>
 </li>
@@ -232,7 +235,7 @@
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span>
 
@@ -251,7 +254,6 @@
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">],</span>
     <span class="n">value_from_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">field_name_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">avoid_subparsers</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Call `f` with arguments specified by a dictionary of values from argparse.</span>
 
@@ -283,11 +285,7 @@
         <span class="n">prefixed_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field_name_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
 
         <span class="c1"># Resolve field type.</span>
-        <span class="n">field_type</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">typ</span> <span class="ow">in</span> <span class="n">type_from_typevar</span>
-            <span class="k">else</span> <span class="n">field</span><span class="o">.</span><span class="n">typ</span>
-        <span class="p">)</span>
+        <span class="n">field_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
         <span class="k">if</span> <span class="n">prefixed_field_name</span> <span class="ow">in</span> <span class="n">arg_from_prefixed_field_name</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">prefixed_field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">consumed_keywords</span>
@@ -327,8 +325,7 @@
             <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span>
         <span class="p">):</span>
             <span class="c1"># Nested callable.</span>
-            <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">field_type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">avoid_subparsers</span>
+            <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">field_type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
                 <span class="n">field_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
             <span class="n">value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">call_from_args</span><span class="p">(</span>
                 <span class="n">field_type</span><span class="p">,</span>
@@ -336,7 +333,6 @@
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
                 <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>
-                <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
         <span class="k">else</span><span class="p">:</span>
@@ -375,8 +371,8 @@
                 <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">options</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span>
-                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_from_typevar</span> <span class="k">else</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">x</span><span class="p">],</span>
-                    <span class="n">get_args</span><span class="p">(</span><span class="n">field_type</span><span class="p">),</span>
+                    <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">),</span>
+                    <span class="n">get_args</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field_type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]),</span>
                 <span class="p">)</span>
                 <span class="n">chosen_f</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
@@ -393,19 +389,18 @@
                     <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="n">chosen_f</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
                     <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>
-                    <span class="n">avoid_subparsers</span><span class="o">=</span><span class="n">avoid_subparsers</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
 
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">positional</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">kwargs</span><span class="p">[</span>
                     <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name_override</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field</span><span class="o">.</span><span class="n">name_override</span>
                 <span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
-    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">is</span> <span class="n">Sequence</span> <span class="k">else</span> <span class="n">unwrapped_f</span>  <span class="c1"># type: ignore</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
