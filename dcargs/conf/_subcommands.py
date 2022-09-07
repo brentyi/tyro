@@ -6,7 +6,7 @@ from .._fields import MISSING_NONPROP
 
 @dataclasses.dataclass(frozen=True)
 class _SubcommandConfiguration:
-    name: str
+    name: Optional[str]
     default: Any
     description: Optional[str]
     prefix_name: bool
@@ -16,7 +16,7 @@ class _SubcommandConfiguration:
 
 
 def subcommand(
-    name: str,
+    name: Optional[str] = None,
     *,
     default: Any = MISSING_NONPROP,
     description: Optional[str] = None,

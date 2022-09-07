@@ -62,13 +62,19 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     )
 
     # Subparser name from `dcargs.metadata.subcommand()`.
+    found_name = None
+    prefix_name = True
     if len(found_subcommand_configs) > 0:
-        return found_subcommand_configs[0].name, found_subcommand_configs[0].prefix_name
+        found_name = found_subcommand_configs[0].name
+        prefix_name = found_subcommand_configs[0].prefix_name
+
+    if found_name is not None:
+        return found_name, prefix_name
 
     # Subparser name from class name.
     if len(type_from_typevar) == 0:
         assert hasattr(cls, "__name__")
-        return hyphen_separated_from_camel_case(cls.__name__), True  # type: ignore
+        return hyphen_separated_from_camel_case(cls.__name__), prefix_name  # type: ignore
 
     return (
         "-".join(
@@ -77,7 +83,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
                 [cls] + list(type_from_typevar.values()),
             )
         ),
-        True,
+        prefix_name,
     )
 
 

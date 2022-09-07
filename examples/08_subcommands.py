@@ -1,5 +1,8 @@
 """Unions over nested types (classes or dataclasses) are populated using subcommands.
 
+For configuring subcommands beyond what can be expressed with type annotations, see
+:func:`dcargs.conf.subcommand()`.
+
 Usage:
 `python ./08_subcommands.py --help`
 `python ./08_subcommands.py cmd:commit --help`
