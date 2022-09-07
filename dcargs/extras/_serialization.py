@@ -184,8 +184,8 @@ def from_yaml(
     refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
 
     .. warning::
-        Serialization functionality is deprecated. It may be removed in a future version
-        of :code:`dcargs`.
+        Serialization functionality is stable but deprecated. It may be removed in a
+        future version of :code:`dcargs`.
 
     Args:
         cls: Type to reconstruct.
@@ -213,8 +213,8 @@ def to_yaml(instance: Any) -> str:
     refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
 
     .. warning::
-        Serialization functionality is deprecated. It may be removed in a future version
-        of :code:`dcargs`.
+        Serialization functionality is stable but deprecated. It may be removed in a
+        future version of :code:`dcargs`.
 
     Args:
         instance: Dataclass instance to serialize.
