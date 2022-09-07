@@ -5,6 +5,7 @@ import io
 from typing import Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
+import yaml
 from typing_extensions import Annotated
 
 import dcargs
@@ -217,7 +218,10 @@ def test_generic_nested_dataclass():
         DataclassGeneric[Child], args=["--child.a", "5", "--child.b", "7"]
     )
     assert parsed_instance == DataclassGeneric(Child(5, 7))
-    _check_serialization_identity(DataclassGeneric[Child], parsed_instance)
+
+    # Local generics will break.
+    with pytest.raises(yaml.constructor.ConstructorError):
+        _check_serialization_identity(DataclassGeneric[Child], parsed_instance)
 
 
 def test_generic_nested_dataclass_helptext():
@@ -263,14 +267,22 @@ def test_generic_subparsers():
         args="command:command-one --command.a 5".split(" "),
     )
     assert parsed_instance == Subparser(CommandOne(5))
-    _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
+    # Local generics will break.
+    with pytest.raises(yaml.constructor.ConstructorError):
+        _check_serialization_identity(
+            Subparser[CommandOne, CommandTwo], parsed_instance
+        )
 
     parsed_instance = dcargs.cli(
         Subparser[CommandOne, CommandTwo],
         args="command:command-two --command.b 7".split(" "),
     )
     assert parsed_instance == Subparser(CommandTwo(7))
-    _check_serialization_identity(Subparser[CommandOne, CommandTwo], parsed_instance)
+    # Local generics will break.
+    with pytest.raises(yaml.constructor.ConstructorError):
+        _check_serialization_identity(
+            Subparser[CommandOne, CommandTwo], parsed_instance
+        )
 
 
 def test_generic_subparsers_in_container():
@@ -294,9 +306,11 @@ def test_generic_subparsers_in_container():
     assert parsed_instance == Subparser(Command([5, 3])) and isinstance(
         parsed_instance.command.a[0], int
     )
-    _check_serialization_identity(
-        Subparser[Command[int], Command[float]], parsed_instance
-    )
+    # Local generics will break.
+    with pytest.raises(yaml.constructor.ConstructorError):
+        _check_serialization_identity(
+            Subparser[Command[int], Command[float]], parsed_instance
+        )
 
     parsed_instance = dcargs.cli(
         Subparser[Command[int], Command[float]],
@@ -305,9 +319,11 @@ def test_generic_subparsers_in_container():
     assert parsed_instance == Subparser(Command([7.0, 2.0])) and isinstance(
         parsed_instance.command.a[0], float
     )
-    _check_serialization_identity(
-        Subparser[Command[int], Command[float]], parsed_instance
-    )
+    # Local generics will break.
+    with pytest.raises(yaml.constructor.ConstructorError):
+        _check_serialization_identity(
+            Subparser[Command[int], Command[float]], parsed_instance
+        )
 
 
 def test_serialize_missing():
@@ -366,9 +382,7 @@ def test_pculbertson():
         subclass: Union[TypeA, TypeB] = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
-    dcargs.extras.from_yaml(
-        Wrapper, dcargs.extras.to_yaml(wrapper1)
-    )  # Errors, no constructor for TypeA
+    assert wrapper1 == dcargs.extras.from_yaml(Wrapper, dcargs.extras.to_yaml(wrapper1))
 
 
 def test_annotated():
@@ -383,6 +397,23 @@ def test_annotated():
         subclass: Annotated[TypeA, int] = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
-    dcargs.extras.from_yaml(
-        Wrapper, dcargs.extras.to_yaml(wrapper1)
-    )  # Errors, no constructor for TypeA
+    assert wrapper1 == dcargs.extras.from_yaml(Wrapper, dcargs.extras.to_yaml(wrapper1))
+
+
+def test_superclass():
+    # https://github.com/brentyi/dcargs/issues/7
+
+    @dataclasses.dataclass
+    class TypeA:
+        data: int
+
+    @dataclasses.dataclass
+    class TypeASubclass(TypeA):
+        pass
+
+    @dataclasses.dataclass
+    class Wrapper:
+        subclass: TypeA
+
+    wrapper1 = Wrapper(TypeASubclass(3))  # Create Wrapper object.
+    assert wrapper1 == dcargs.extras.from_yaml(Wrapper, dcargs.extras.to_yaml(wrapper1))

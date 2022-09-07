@@ -17,20 +17,6 @@ MISSING_YAML_TAG_PREFIX = "!missing"
 DataclassType = TypeVar("DataclassType")
 
 
-def _get_contained_special_types_from_instance(instance: Any) -> Set[Type]:
-    """Takes an object and recursively searches its cihldren for dataclass or enum
-    types."""
-    if issubclass(type(instance), enum.Enum):
-        return {type(instance)}
-    elif not dataclasses.is_dataclass(instance):
-        return set()
-
-    out = {type(instance)}
-    for v in vars(instance).values():
-        out |= _get_contained_special_types_from_instance(v)
-    return out
-
-
 def _get_contained_special_types_from_type(
     cls: Type,
     _parent_contained_dataclasses: Optional[Set[Type]] = None,
@@ -47,14 +33,14 @@ def _get_contained_special_types_from_type(
     cls, _ = _resolver.unwrap_annotated(cls)
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
 
-    contained_dataclasses = {cls}
+    contained_special_types = {cls}
 
-    def handle_type(typ) -> Set[Type]:
+    def handle_type(typ: Type) -> Set[Type]:
         # Handle dataclasses.
         if _resolver.is_dataclass(typ) and typ not in parent_contained_dataclasses:
             return _get_contained_special_types_from_type(
                 typ,
-                _parent_contained_dataclasses=contained_dataclasses
+                _parent_contained_dataclasses=contained_special_types
                 | parent_contained_dataclasses,
             )
 
@@ -67,16 +53,20 @@ def _get_contained_special_types_from_type(
 
     # Handle generics.
     for typ in type_from_typevar.values():
-        contained_dataclasses |= handle_type(typ)
+        contained_special_types |= handle_type(typ)
 
     if cls in parent_contained_dataclasses:
-        return contained_dataclasses
+        return contained_special_types
 
     # Handle fields.
     for field in _resolver.resolved_fields(cls):  # type: ignore
-        contained_dataclasses |= handle_type(field.type)
+        contained_special_types |= handle_type(field.type)
 
-    return contained_dataclasses
+    # Handle subclasses.
+    for subclass in cls.__subclasses__():
+        contained_special_types |= handle_type(subclass)
+
+    return contained_special_types
 
 
 def _make_loader(cls: Type) -> Type[yaml.Loader]:
@@ -134,7 +124,7 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
         def ignore_aliases(self, data):
             return super().ignore_aliases(data) or data is _fields.MISSING_PROP
 
-    contained_types = list(_get_contained_special_types_from_instance(instance))
+    contained_types = list(_get_contained_special_types_from_type(type(instance)))
     contained_type_names = list(map(lambda cls: cls.__name__, contained_types))
 
     # Note: this is currently a stricter than necessary assert.
@@ -183,7 +173,19 @@ def from_yaml(
     stream: Union[str, IO[str], bytes, IO[bytes]],
 ) -> DataclassType:
     """Re-construct a dataclass instance from a yaml-compatible string, which should be
-    generated from `dcargs.extra.to_yaml()`.
+    generated from `dcargs.extras.to_yaml()`.
+
+    As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+    configuration use cases, we also introduce functions for human-readable dataclass
+    serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+    to strike a balance between flexibility and robustness — in contrast to naively
+    dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+    references enable custom tags that are robust against code reorganization and
+    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+    .. warning::
+        Serialization functionality is deprecated. It may be removed in a future version
+        of :code:`dcargs`.
 
     Args:
         cls: Type to reconstruct.
@@ -201,6 +203,18 @@ def from_yaml(
 def to_yaml(instance: Any) -> str:
     """Serialize a dataclass; returns a yaml-compatible string that can be deserialized
     via `dcargs.extras.from_yaml()`.
+
+    As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+    configuration use cases, we also introduce functions for human-readable dataclass
+    serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+    to strike a balance between flexibility and robustness — in contrast to naively
+    dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+    references enable custom tags that are robust against code reorganization and
+    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+    .. warning::
+        Serialization functionality is deprecated. It may be removed in a future version
+        of :code:`dcargs`.
 
     Args:
         instance: Dataclass instance to serialize.
