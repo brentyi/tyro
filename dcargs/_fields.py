@@ -11,13 +11,27 @@ import inspect
 import itertools
 import typing
 import warnings
-from typing import Any, Callable, Hashable, Iterable, List, Optional, Type, Union, cast
+from typing import (
+    Any,
+    Callable,
+    FrozenSet,
+    Hashable,
+    Iterable,
+    List,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 
 import docstring_parser
 import typing_extensions
-from typing_extensions import get_args, get_type_hints, is_typeddict
+from typing_extensions import Annotated, get_args, get_type_hints, is_typeddict
 
-from . import _docstrings, _instantiators, _resolver, _strings
+from . import conf  # Avoid circular import.
+from . import _docstrings, _instantiators, _resolver, _singleton, _strings
+from .conf import _markers
 
 
 @dataclasses.dataclass(frozen=True)
@@ -26,38 +40,60 @@ class FieldDefinition:
     typ: Type
     default: Any
     helptext: Optional[str]
-    positional: bool
+    markers: FrozenSet[_markers.Marker]
 
     # Override the name in our kwargs. Currently only used for dictionary types when
     # the key values aren't strings, but in the future could be used whenever the
     # user-facing argument name doesn't match the keyword expected by our callable.
-    name_override: Optional[Any] = None
+    name_override: Optional[Any]
+
+    @staticmethod
+    def make(
+        name: str,
+        typ: Type,
+        default: Any,
+        helptext: Optional[str],
+        *,
+        markers: Tuple[_markers.Marker, ...] = (),
+        name_override: Optional[Any] = None,
+    ):
+        _, inferred_markers = _resolver.unwrap_annotated(typ, _markers.Marker)
+        return FieldDefinition(
+            name,
+            typ,
+            default,
+            helptext,
+            frozenset(inferred_markers).union(markers),
+            name_override,
+        )
+
+    def add_markers(self, markers: Tuple[_markers.Marker, ...]) -> FieldDefinition:
+        if len(markers) == 0:
+            return self
+        return dataclasses.replace(
+            self,
+            typ=Annotated.__class_getitem__((self.typ,) + markers),  # type: ignore
+            markers=self.markers.union(markers),
+        )
+
+    def is_positional(self) -> bool:
+        return (
+            # Explicit positionals.
+            _markers.POSITIONAL in self.markers
+            # Dummy dataclasses should have a single positional field.
+            or self.name == _strings.dummy_field_name
+        )
 
 
-class _Singleton:
-    # Singleton pattern.
-    # https://www.python.org/download/releases/2.2/descrintro/#__new__
-    def __new__(cls, *args, **kwds):
-        it = cls.__dict__.get("__it__")
-        if it is not None:
-            return it
-        cls.__it__ = it = object.__new__(cls)
-        it.init(*args, **kwds)
-        return it
-
-    def init(self, *args, **kwds):
-        pass
-
-
-class PropagatingMissingType(_Singleton):
+class PropagatingMissingType(_singleton.Singleton):
     pass
 
 
-class NonpropagatingMissingType(_Singleton):
+class NonpropagatingMissingType(_singleton.Singleton):
     pass
 
 
-class ExcludeFromCallType(_Singleton):
+class ExcludeFromCallType(_singleton.Singleton):
     pass
 
 
@@ -118,6 +154,10 @@ def field_list_from_callable(
 
     if isinstance(out, UnsupportedNestedTypeMessage):
         raise _instantiators.UnsupportedTypeAnnotationError(out.message)
+
+    # Recursively apply markers.
+    _, parent_markers = _resolver.unwrap_annotated(f, _markers.Marker)
+    out = list(map(lambda field: field.add_markers(parent_markers), out))
     return out
 
 
@@ -145,6 +185,12 @@ def _try_field_list_from_callable(
     f: Union[Callable, Type],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    f, found_subcommand_configs = _resolver.unwrap_annotated(
+        f, conf._subcommands._SubcommandConfiguration
+    )
+    if len(found_subcommand_configs) > 0:
+        default_instance = found_subcommand_configs[0].default
+
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.narrow_type(f, default_instance)
@@ -156,8 +202,8 @@ def _try_field_list_from_callable(
     if isinstance(f, type):
         cls = f
         f = cls.__init__  # type: ignore
-        f_origin: Callable = cls
-    f_origin = _resolver.unwrap_origin(f)
+        f_origin: Callable = cls  # type: ignore
+    f_origin = _resolver.unwrap_origin_strip_extras(f)
 
     # Try special cases.
     if cls is not None and is_typeddict(cls):
@@ -191,6 +237,7 @@ def _try_field_list_from_callable(
                     " default to infer from."
                 )
             assert isinstance(default_instance, Iterable)
+            contained_type = next(iter(default_instance))
         else:
             (contained_type,) = get_args(f)
         f_origin = list if f_origin is typing.Sequence else f_origin  # type: ignore
@@ -215,9 +262,9 @@ def _try_field_list_from_callable(
             return container_fields
 
     # General cases.
-    if (cls is not None and cls in _known_parsable_types) or _resolver.unwrap_origin(
-        f
-    ) in _known_parsable_types:
+    if (
+        cls is not None and cls in _known_parsable_types
+    ) or _resolver.unwrap_origin_strip_extras(f) in _known_parsable_types:
         return UnsupportedNestedTypeMessage(f"{f} should be parsed directly!")
     else:
         return _try_field_list_from_general_callable(f, cls, default_instance)
@@ -232,7 +279,7 @@ def _try_field_list_from_typeddict(
         and default_instance is not EXCLUDE_FROM_CALL
     )
     assert not valid_default_instance or isinstance(default_instance, dict)
-    for name, typ in get_type_hints(cls).items():
+    for name, typ in get_type_hints(cls, include_extras=True).items():
         if valid_default_instance:
             default = default_instance.get(name, MISSING_PROP)  # type: ignore
         elif getattr(cls, "__total__") is False:
@@ -245,12 +292,11 @@ def _try_field_list_from_typeddict(
             default = MISSING_PROP
 
         field_list.append(
-            FieldDefinition(
+            FieldDefinition.make(
                 name=name,
                 typ=typ,
                 default=default,
                 helptext=_docstrings.get_field_docstring(cls, name),
-                positional=False,
             )
         )
     return field_list
@@ -268,7 +314,7 @@ def _try_field_list_from_namedtuple(
     field_defaults = getattr(cls, "_field_defaults")
 
     # Note that _field_types is removed in Python 3.9.
-    for name, typ in _resolver.get_type_hints(cls).items():
+    for name, typ in get_type_hints(cls, include_extras=True).items():
         # Get default, with priority for `default_instance`.
         default = field_defaults.get(name, MISSING_NONPROP)
         if hasattr(default_instance, name):
@@ -277,12 +323,11 @@ def _try_field_list_from_namedtuple(
             default = MISSING_PROP
 
         field_list.append(
-            FieldDefinition(
+            FieldDefinition.make(
                 name=name,
                 typ=typ,
                 default=default,
                 helptext=_docstrings.get_field_docstring(cls, name),
-                positional=False,
             )
         )
     return field_list
@@ -296,14 +341,11 @@ def _try_field_list_from_dataclass(
     for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
         default = _get_dataclass_field_default(dc_field, default_instance)
         field_list.append(
-            FieldDefinition(
+            FieldDefinition.make(
                 name=dc_field.name,
                 typ=dc_field.type,
                 default=default,
                 helptext=_docstrings.get_field_docstring(cls, dc_field.name),
-                # Only mark positional if using a dummy field, for taking single types
-                # directly as input.
-                positional=dc_field.name == _strings.dummy_field_name,
             )
         )
     return field_list
@@ -342,7 +384,7 @@ def _field_list_from_tuple(
     for i, child in enumerate(children):
         default_i = default_instance[i]  # type: ignore
         field_list.append(
-            FieldDefinition(
+            FieldDefinition.make(
                 # Ideally we'd have --tuple[0] instead of --tuple.0 as the command-line
                 # argument, but in practice the brackets are annoying because they
                 # require escaping.
@@ -350,10 +392,9 @@ def _field_list_from_tuple(
                 typ=child,
                 default=default_i,
                 helptext="",
-                # This should really be positional=True, but the CLI is more
-                # intuitive for mixed nested/non-nested types in tuples when we
-                # stick with kwargs. Tuples are special-cased in _calling.py.
-                positional=False,
+                # This should really set the positional marker, but the CLI is more
+                # intuitive for mixed nested/non-nested types in tuples when we stick
+                # with kwargs. Tuples are special-cased in _calling.py.
             )
         )
 
@@ -404,12 +445,11 @@ def _try_field_list_from_sequence(
     field_list = []
     for i, default_i in enumerate(default_instance):  # type: ignore
         field_list.append(
-            FieldDefinition(
+            FieldDefinition.make(
                 name=str(i),
                 typ=contained_type,
                 default=default_i,
                 helptext="",
-                positional=False,
             )
         )
     return field_list
@@ -426,12 +466,11 @@ def _try_field_list_from_dict(
     field_list = []
     for k, v in cast(dict, default_instance).items():
         field_list.append(
-            FieldDefinition(
+            FieldDefinition.make(
                 name=str(k) if not isinstance(k, enum.Enum) else k.name,
                 typ=type(v),
                 default=v,
                 helptext=None,
-                positional=False,
                 # Dictionary specific key:
                 name_override=k,
             )
@@ -483,7 +522,7 @@ def _field_list_from_params(
 
     # This will throw a type error for torch.device, typing.Dict, etc.
     try:
-        hints = get_type_hints(f)
+        hints = get_type_hints(f, include_extras=True)
     except TypeError:
         return UnsupportedNestedTypeMessage(f"Could not get hints for {f}!")
 
@@ -510,13 +549,15 @@ def _field_list_from_params(
             return out
 
         field_list.append(
-            FieldDefinition(
+            FieldDefinition.make(
                 name=param.name,
                 # Note that param.annotation does not resolve forward references.
                 typ=hints[param.name],
                 default=default,
                 helptext=helptext,
-                positional=param.kind is inspect.Parameter.POSITIONAL_ONLY,
+                markers=(_markers.POSITIONAL,)
+                if param.kind is inspect.Parameter.POSITIONAL_ONLY
+                else (),
             )
         )
 

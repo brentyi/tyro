@@ -8,7 +8,7 @@ from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, ca
 
 import pytest
 import torch.nn as nn
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
 
 import dcargs
 import dcargs._argparse_formatter
@@ -20,15 +20,15 @@ def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         dcargs.cli(f, args=args)
 
-    # Check against dcargs.generate_parser(); this should return the same underlying
-    # parser.
+    # Check helptext with vs without termcolor. This can help catch text wrapping bugs
+    # caused by ANSI sequences.
     target2 = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
-        with dcargs._argparse_formatter.ansi_context():
-            dcargs.generate_parser(f).parse_args(args)
-    assert target.getvalue() == target2.getvalue()
+        with dcargs._argparse_formatter.dummy_termcolor_context():
+            dcargs.cli(f, args=args)
 
-    return dcargs._strings.strip_ansi_sequences(target.getvalue())
+    assert target2.getvalue() == dcargs._strings.strip_ansi_sequences(target.getvalue())
+    return target2.getvalue()
 
 
 def test_helptext():
@@ -39,13 +39,65 @@ def test_helptext():
         x: int  # Documentation 1
 
         # Documentation 2
-        y: int
+        y: Annotated[int, "ignored"]
 
         z: int = 3
         """Documentation 3"""
 
     helptext = _get_helptext(Helptext)
     assert cast(str, Helptext.__doc__) in helptext
+    assert "x INT" in helptext
+    assert "y INT" in helptext
+    assert "z INT" in helptext
+    assert "Documentation 1 (required)\n" in helptext
+    assert "Documentation 2 (required)\n" in helptext
+    assert "Documentation 3 (default: 3)\n" in helptext
+
+
+def test_helptext_from_class_docstring():
+    @dataclasses.dataclass
+    class Helptext2:
+        """This docstring should be printed as a description.
+
+        Attributes:
+            x: Documentation 1
+            y: Documentation 2
+            z: Documentation 3
+        """
+
+        x: int
+        y: Annotated[int, "ignored"]
+        z: int = 3
+
+    helptext = _get_helptext(Helptext2)
+    assert "This docstring should be printed as a description" in helptext
+    assert "Attributes" not in helptext
+    assert "x INT" in helptext
+    assert "y INT" in helptext
+    assert "z INT" in helptext
+    assert "Documentation 1 (required)\n" in helptext
+    assert "Documentation 2 (required)\n" in helptext
+    assert "Documentation 3 (default: 3)\n" in helptext
+
+
+def test_helptext_from_class_docstring_args():
+    @dataclasses.dataclass
+    class Helptext3:
+        """This docstring should be printed as a description.
+
+        Args:
+            x: Documentation 1
+            y: Documentation 2
+            z: Documentation 3
+        """
+
+        x: int
+        y: Annotated[int, "ignored"]
+        z: int = 3
+
+    helptext = _get_helptext(Helptext3)
+    assert "This docstring should be printed as a description" in helptext
+    assert "Args" not in helptext
     assert "x INT" in helptext
     assert "y INT" in helptext
     assert "z INT" in helptext
@@ -104,8 +156,6 @@ def test_helptext_inherited_default_override():
     class ChildClass(ParentClass):
         """This docstring should be printed as a description."""
 
-        pass
-
     def main(x: ParentClass = ChildClass(x=5, y=5)) -> Any:
         return x
 
@@ -127,7 +177,6 @@ def test_helptext_nested():
             Args:
                 a (int): Hello world!
             """
-            pass
 
     def main_with_docstring(a: Inner) -> None:
         """main_with_docstring.
@@ -138,7 +187,6 @@ def test_helptext_nested():
 
     def main_no_docstring(a: Inner) -> None:
         """main_no_docstring."""
-        pass
 
     helptext = _get_helptext(main_with_docstring)
     assert "Documented in function" in helptext and str(Inner.__doc__) not in helptext
@@ -525,9 +573,9 @@ def test_unparsable():
     helptext = _get_helptext(main)
     assert "--x {fixed}" in helptext
 
-    def main(x: Callable = nn.ReLU):
+    def main2(x: Callable = nn.ReLU):
         pass
 
-    helptext = _get_helptext(main)
+    helptext = _get_helptext(main2)
     assert "--x {fixed}" in helptext
     assert "(fixed to: <class 'torch.nn" in helptext

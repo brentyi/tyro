@@ -1,8 +1,10 @@
 """Positional-only arguments in functions are converted to positional CLI arguments.
 
+For more general positional arguments, see :func:`dcargs.conf.Positional`.
+
 Usage:
-`python ./08_positional_args.py --help`
-`python ./08_positional_args.py ./a ./b --optimizer.learning-rate 1e-5`
+`python ./07_positional_args.py --help`
+`python ./07_positional_args.py ./a ./b --optimizer.learning-rate 1e-5`
 """
 
 from __future__ import annotations

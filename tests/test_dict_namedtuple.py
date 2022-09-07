@@ -165,7 +165,7 @@ def test_nested_typeddict():
         dcargs.cli(NestedTypedDict, args=["--x", "1"])
 
 
-def test_helptext_and_default_instance_typeddict():
+def test_helptext_and_default_typeddict():
     class HelptextTypedDict(TypedDict):
         """This docstring should be printed as a description."""
 
@@ -180,7 +180,7 @@ def test_helptext_and_default_instance_typeddict():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.cli(HelptextTypedDict, default_instance={"z": 3}, args=["--help"])
+            dcargs.cli(HelptextTypedDict, default={"z": 3}, args=["--help"])
     helptext = dcargs._strings.strip_ansi_sequences(f.getvalue())
     assert cast(str, HelptextTypedDict.__doc__) in helptext
     assert "--x INT" in helptext
@@ -254,7 +254,7 @@ def test_helptext_and_default_namedtuple():
     assert "Documentation 3 (default: 3)\n" in helptext
 
 
-def test_helptext_and_default_instance_namedtuple():
+def test_helptext_and_default_namedtuple_alternate():
     class HelptextNamedTuple(NamedTuple):
         """This docstring should be printed as a description."""
 
@@ -269,7 +269,7 @@ def test_helptext_and_default_instance_namedtuple():
     with pytest.raises(SystemExit):
         dcargs.cli(
             HelptextNamedTuple,
-            default_instance=dcargs.MISSING,
+            default=dcargs.MISSING,
             args=[],
         )
 
@@ -278,7 +278,7 @@ def test_helptext_and_default_instance_namedtuple():
         with contextlib.redirect_stdout(f):
             dcargs.cli(
                 HelptextNamedTuple,
-                default_instance=HelptextNamedTuple(
+                default=HelptextNamedTuple(
                     x=dcargs.MISSING,
                     y=dcargs.MISSING,
                     z=3,
