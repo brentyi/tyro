@@ -162,11 +162,6 @@ def cli(
     if print_completion:
         formatting_context = _argparse_formatter.dummy_termcolor_context()
         completion_shell = args[1]
-        assert completion_shell in (
-            "bash",
-            "zsh",
-            "tcsh",
-        ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
 
     # Generate parser!
     with formatting_context:
@@ -179,6 +174,11 @@ def cli(
         parser_definition.apply(parser)
 
         if print_completion:
+            assert completion_shell in (
+                "bash",
+                "zsh",
+                "tcsh",
+            ), f"Shell should be one `bash`, `zsh`, or `tcsh`, but got {completion_shell}"
             print(
                 shtab.complete(
                     parser=parser,
@@ -189,7 +189,6 @@ def cli(
             raise SystemExit()
 
         value_from_prefixed_field_name = vars(parser.parse_args(args=args))
-        value_from_prefixed_field_name.pop("dcargs_print_completion")
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
