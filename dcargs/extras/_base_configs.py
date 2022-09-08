@@ -81,7 +81,7 @@ def subcommand_type_from_defaults(
                     subcommand(
                         k,
                         default=v,
-                        description=descriptions.get(k),
+                        description=descriptions.get(k, ""),
                         prefix_name=prefix_names,
                     ),
                 )
