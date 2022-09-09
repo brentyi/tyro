@@ -1,5 +1,3 @@
-import contextlib
-import io
 from typing import List, Optional, Tuple
 
 import pytest
@@ -47,13 +45,6 @@ def test_nested_positional():
     )
     with pytest.raises(SystemExit):
         dcargs.cli(nest1, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
-
-    f = io.StringIO()
-    with pytest.raises(SystemExit):
-        with contextlib.redirect_stdout(f):
-            dcargs.cli(nest1, args=["--help"])
-    helptext = f.getvalue()
-    assert "THING.HELLO_WORLD" in helptext
 
 
 def test_nested_positional_alt():

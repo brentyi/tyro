@@ -260,10 +260,6 @@ def _rule_generate_helptext(
         # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
         docstring_help = docstring_help.replace("%", "%%")
         help_parts.append(docstring_help)
-    elif arg.field.is_positional() and arg.field.name != _strings.dummy_field_name:
-        # Place the type in the helptext. Note that we skip this for dummy fields, which
-        # will still have the type in the metavar.
-        help_parts.append(str(lowered.metavar))
 
     default = lowered.default
     if lowered.is_fixed():
@@ -334,28 +330,19 @@ def _rule_positional_special_handling(
     if not arg.field.is_positional():
         return lowered
 
-    metavar = _strings.make_field_name([arg.prefix, arg.field.name]).upper()
-    if lowered.nargs == "+":
-        metavar = f"{metavar} [{metavar} ...]"
-    elif isinstance(lowered.nargs, int):
-        metavar = " ".join((metavar,) * lowered.nargs)
-
     if lowered.required:
         nargs = lowered.nargs
+    elif lowered.nargs == 1:
+        # Optional positional arguments. Note that this needs to be special-cased in
+        # _calling.py.
+        nargs = "?"
     else:
-        metavar = "[" + metavar + "]"
-        if lowered.nargs == 1:
-            # Optional positional arguments. Note that this needs to be special-cased in
-            # _calling.py.
-            nargs = "?"
-        else:
-            # If lowered.nargs is either + or an int.
-            nargs = "*"
+        # If lowered.nargs is either + or an int.
+        nargs = "*"
 
     return dataclasses.replace(
         lowered,
         dest=None,
         required=None,  # Can't be passed in for positionals.
-        metavar=metavar if len(metavar) > 0 else lowered.metavar,
         nargs=nargs,
     )
