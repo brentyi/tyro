@@ -1,6 +1,8 @@
 import collections
+import contextlib
 import dataclasses
 import enum
+import io
 from typing import (
     Any,
     Deque,
@@ -53,6 +55,33 @@ def test_tuples_with_default():
     assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     with pytest.raises(SystemExit):
         dcargs.cli(A, args=["--x"])
+
+
+def test_tuple_with_literal_and_default():
+    @dataclasses.dataclass
+    class A:
+        x: Tuple[Literal[1, 2, 3], ...] = (1, 2)
+
+    assert dcargs.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
+    assert dcargs.cli(A, args=[]) == A(x=(1, 2))
+    with pytest.raises(SystemExit):
+        dcargs.cli(A, args=["--x", "1", "2", "3", "4"])
+    with pytest.raises(SystemExit):
+        dcargs.cli(A, args=["--x"])
+
+
+def test_positional_tuple_with_literal_and_default():
+    @dataclasses.dataclass
+    class A:
+        x: dcargs.conf.Positional[Tuple[Literal[1, 2, 3], ...]] = (1, 2)
+
+    assert dcargs.cli(A, args=["1", "2", "3"]) == A(x=(1, 2, 3))
+    assert dcargs.cli(A, args=[]) == A(x=(1, 2))
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        dcargs.cli(A, args=["1", "2", "3", "4"])
+    assert "invalid choice" in target.getvalue()
 
 
 def test_tuples_fixed_multitype():

@@ -34,6 +34,20 @@ except ImportError:
     from backports.cached_property import cached_property  # type: ignore
 
 
+class _PatchedList(list):
+    """Custom tuple type, for avoiding "default not in choices" errors when the default
+    is set to MISSING_NONPROP.
+
+    This solves a choices error raised by argparse in a very specific edge case:
+    literals in containers as positional arguments."""
+
+    def __init__(self, li):
+        super(_PatchedList, self).__init__(li)
+
+    def __contains__(self, x: Any) -> bool:
+        return list.__contains__(self, x) or x is _fields.MISSING_NONPROP
+
+
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
     """Structure containing everything needed to define an argument."""
@@ -60,6 +74,9 @@ class ArgumentDefinition:
         # directly be used. This helps reduce the likelihood of issues with converting
         # the field default to a string format, then back to the desired type.
         kwargs["default"] = _fields.MISSING_NONPROP
+
+        if "choices" in kwargs:
+            kwargs["choices"] = _PatchedList(kwargs["choices"])
 
         # Note that the name must be passed in as a position argument.
         parser.add_argument(name_or_flag, **kwargs)
@@ -330,19 +347,24 @@ def _rule_positional_special_handling(
     if not arg.field.is_positional():
         return lowered
 
+    metavar = lowered.metavar
     if lowered.required:
         nargs = lowered.nargs
-    elif lowered.nargs == 1:
-        # Optional positional arguments. Note that this needs to be special-cased in
-        # _calling.py.
-        nargs = "?"
     else:
-        # If lowered.nargs is either + or an int.
-        nargs = "*"
+        if metavar is not None:
+            metavar = "[" + metavar + "]"
+        if lowered.nargs == 1:
+            # Optional positional arguments. Note that this needs to be special-cased in
+            # _calling.py.
+            nargs = "?"
+        else:
+            # If lowered.nargs is either + or an int.
+            nargs = "*"
 
     return dataclasses.replace(
         lowered,
         dest=None,
         required=None,  # Can't be passed in for positionals.
+        metavar=metavar,
         nargs=nargs,
     )
