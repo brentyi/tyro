@@ -264,6 +264,20 @@
     <span class="kn">from</span> <span class="nn">backports.cached_property</span> <span class="kn">import</span> <span class="n">cached_property</span>  <span class="c1"># type: ignore</span>
 
 
+<span class="k">class</span> <span class="nc">_PatchedList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Custom tuple type, for avoiding &quot;default not in choices&quot; errors when the default</span>
+<span class="sd">    is set to MISSING_NONPROP.</span>
+
+<span class="sd">    This solves a choices error raised by argparse in a very specific edge case:</span>
+<span class="sd">    literals in containers as positional arguments.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">li</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PatchedList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">li</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
+
+
 <div class="viewcode-block" id="ArgumentDefinition"><a class="viewcode-back" href="../../../api/dcargs/_arguments/#dcargs._arguments.ArgumentDefinition">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">ArgumentDefinition</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Structure containing everything needed to define an argument.&quot;&quot;&quot;</span>
@@ -290,6 +304,9 @@
         <span class="c1"># directly be used. This helps reduce the likelihood of issues with converting</span>
         <span class="c1"># the field default to a string format, then back to the desired type.</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
+
+        <span class="k">if</span> <span class="s2">&quot;choices&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_PatchedList</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">])</span>
 
         <span class="c1"># Note that the name must be passed in as a position argument.</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -560,20 +577,25 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">lowered</span>
 
+    <span class="n">metavar</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span>
     <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
         <span class="n">nargs</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span>
-    <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="c1"># Optional positional arguments. Note that this needs to be special-cased in</span>
-        <span class="c1"># _calling.py.</span>
-        <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># If lowered.nargs is either + or an int.</span>
-        <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
+        <span class="k">if</span> <span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="n">metavar</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
+        <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Optional positional arguments. Note that this needs to be special-cased in</span>
+            <span class="c1"># _calling.py.</span>
+            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;?&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If lowered.nargs is either + or an int.</span>
+            <span class="n">nargs</span> <span class="o">=</span> <span class="s2">&quot;*&quot;</span>
 
     <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="n">lowered</span><span class="p">,</span>
         <span class="n">dest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">required</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Can&#39;t be passed in for positionals.</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
         <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span>
     <span class="p">)</span>
 </pre></div>
