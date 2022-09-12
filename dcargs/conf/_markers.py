@@ -34,6 +34,11 @@ Fixed = Annotated[T, FIXED]
 default value should be set instead. Note that fields with defaults that can't be parsed
 will also be marked as fixed automatically."""
 
+SUPPRESS = _make_marker("Suppress")
+Suppress = Annotated[T, FIXED, SUPPRESS]
+"""A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and
+to prevent it from showing up in helptext."""
+
 FLAG_CONVERSION_OFF = _make_marker("FlagConversionOff")
 FlagConversionOff = Annotated[T, FLAG_CONVERSION_OFF]
 """Turn off flag conversion for booleans with default values. Instead, types annotated

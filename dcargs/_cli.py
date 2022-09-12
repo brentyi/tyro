@@ -5,9 +5,9 @@ import sys
 import warnings
 from typing import Callable, Optional, Sequence, Type, TypeVar, Union, cast, overload
 
-import shtab
-
-from . import _argparse_formatter, _calling, _fields, _parsers, _strings, conf
+from . import _argparse_formatter, _calling, _fields, _parsers
+from . import _shtab as shtab
+from . import _strings, conf
 
 OutT = TypeVar("OutT")
 

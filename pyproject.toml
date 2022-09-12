@@ -18,7 +18,7 @@ termcolor = "^1.1.0"
 "backports.cached-property" = { version = "^1.0.2", python = "~3.7" }
 colorama = {version = "^0.4.0", platform = "win32"}
 frozendict = "^2.3.4"
-shtab = "^1.5.5"
+# shtab = "^1.5.5"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
@@ -42,6 +42,11 @@ profile = "black"
 python_version = "3.8"
 ignore_missing_imports = true
 warn_unused_configs = true
+
+[tool.coverage.run]
+omit = [
+    "dcargs/_shtab/*",
+]
 
 [tool.coverage.report]
 exclude_lines = [

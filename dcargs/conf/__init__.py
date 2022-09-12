@@ -5,7 +5,7 @@ annotations.
 Features here are supported, but generally unnecessary and should be used sparingly.
 """
 
-from ._markers import AvoidSubcommands, Fixed, FlagConversionOff, Positional
+from ._markers import AvoidSubcommands, Fixed, FlagConversionOff, Positional, Suppress
 from ._subcommands import subcommand
 
 __all__ = [
@@ -13,5 +13,6 @@ __all__ = [
     "Fixed",
     "FlagConversionOff",
     "Positional",
+    "Suppress",
     "subcommand",
 ]

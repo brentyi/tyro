@@ -19,14 +19,22 @@ def _strip_dummy_field_names(parts: Iterable[str]) -> Iterable[str]:
 def make_field_name(parts: Sequence[str]) -> str:
     """Join parts of a field name together. Used for nesting.
 
-    ('parent', 'child') => 'parent.child'
-    ('parents', '1', 'child') => 'parents:1.child'
+    ('parent_1', 'child') => 'parent-1.child'
+    ('parents', '1', '_child_node') => 'parents.1._child-node'
     """
     out: List[str] = []
     for i, p in enumerate(_strip_dummy_field_names(parts)):
         if i > 0:
             out.append(".")
 
+        # Replace all underscores with hyphens, except ones at the start of a string.
+        num_underscore_prefix = 0
+        for i in range(len(p)):
+            if p[i] == "_":
+                num_underscore_prefix += 1
+            else:
+                break
+        p = "_" * num_underscore_prefix + p[num_underscore_prefix:].replace("_", "-")
         out.append(p)
 
     return "".join(out)

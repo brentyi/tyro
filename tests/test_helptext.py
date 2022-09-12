@@ -579,3 +579,17 @@ def test_unparsable():
     helptext = _get_helptext(main2)
     assert "--x {fixed}" in helptext
     assert "(fixed to: <class 'torch.nn" in helptext
+
+
+def test_suppressed():
+    @dataclasses.dataclass
+    class Struct:
+        a: int = 5
+        b: dcargs.conf.Suppress[str] = "7"
+
+    def main(x: Any = Struct()):
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x.a" in helptext
+    assert "--x.b" not in helptext
