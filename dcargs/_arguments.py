@@ -268,6 +268,11 @@ def _rule_generate_helptext(
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
     """Generate helptext from docstring, argument name, default values."""
+
+    # If the suppress marker is attached, hide the argument.
+    if _markers.SUPPRESS in arg.field.markers:
+        return dataclasses.replace(lowered, help=argparse.SUPPRESS)
+
     help_parts = []
 
     docstring_help = arg.field.helptext
@@ -327,11 +332,9 @@ def _rule_set_name_or_flag(
     elif lowered.action == "store_false":
         name_or_flag = "--" + _strings.make_field_name(
             [arg.prefix, "no-" + arg.field.name]
-        ).replace("_", "-")
+        )
     else:
-        name_or_flag = "--" + _strings.make_field_name(
-            [arg.prefix, arg.field.name]
-        ).replace("_", "-")
+        name_or_flag = "--" + _strings.make_field_name([arg.prefix, arg.field.name])
 
     return dataclasses.replace(
         lowered,

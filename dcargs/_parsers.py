@@ -147,11 +147,11 @@ class ParserSpecification:
 
                     if field.helptext is not None:
                         helptext_from_nested_class_field_name[
-                            field.name
+                            _strings.make_field_name([field.name])
                         ] = field.helptext
                     else:
                         helptext_from_nested_class_field_name[
-                            field.name
+                            _strings.make_field_name([field.name])
                         ] = _docstrings.get_callable_description(field.typ)
                     continue
 
@@ -207,20 +207,33 @@ class ParserSpecification:
         )
         parser._action_groups = parser._action_groups[::-1]
 
-        # Add each argument.
+        # Add each argument group. Note that groups with only suppressed arguments won't
+        # be added.
         for arg in self.args:
-            if arg.field.is_positional():
-                arg.add_argument(positional_group)
-                continue
-
-            if arg.prefix not in group_from_prefix:
+            if (
+                arg.lowered.help is not argparse.SUPPRESS
+                and arg.prefix not in group_from_prefix
+            ):
                 group_from_prefix[arg.prefix] = parser.add_argument_group(
                     format_group_name(arg.prefix),
                     description=self.helptext_from_nested_class_field_name.get(
                         arg.prefix
                     ),
                 )
-            arg.add_argument(group_from_prefix[arg.prefix])
+
+        # Add each argument.
+        for arg in self.args:
+            if arg.field.is_positional():
+                arg.add_argument(positional_group)
+                continue
+
+            if arg.prefix in group_from_prefix:
+                arg.add_argument(group_from_prefix[arg.prefix])
+            else:
+                # Suppressed argument: still need to add them, but they won't show up in
+                # the helptext so it doesn't matter which group.
+                assert arg.lowered.help is argparse.SUPPRESS
+                arg.add_argument(group_from_prefix[""])
 
         # Create subparser tree.
         if len(self.subparsers_from_name) > 0:
