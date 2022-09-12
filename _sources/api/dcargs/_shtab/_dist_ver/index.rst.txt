@@ -1,0 +1,16 @@
+:orphan:
+
+:py:mod:`dcargs._shtab._dist_ver`
+=================================
+
+.. py:module:: dcargs._shtab._dist_ver
+
+
+Module Contents
+---------------
+
+.. py:data:: __version__
+   :annotation: = 1.5.6.dev1+g4c0170c.d20220909
+
+   
+

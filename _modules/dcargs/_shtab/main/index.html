@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>dcargs.conf._markers - dcargs</title>
+        <title>dcargs._shtab.main - dcargs</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
@@ -227,63 +227,84 @@
           </label>
         </div>
         <article role="main">
-          <h1>Source code for dcargs.conf._markers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+          <h1>Source code for dcargs._shtab.main</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">print_function</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">importlib</span> <span class="kn">import</span> <span class="n">import_module</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_singleton</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">SUPPORTED_SHELLS</span><span class="p">,</span> <span class="n">__version__</span><span class="p">,</span> <span class="n">complete</span>
 
-
-<div class="viewcode-block" id="Marker"><a class="viewcode-back" href="../../../../api/dcargs/conf/_markers/#dcargs.conf._markers.Marker">[docs]</a><span class="k">class</span> <span class="nc">Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-
-
-<span class="k">def</span> <span class="nf">_make_marker</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Marker</span><span class="p">:</span>
-    <span class="k">class</span> <span class="nc">_InnerMarker</span><span class="p">(</span><span class="n">Marker</span><span class="p">):</span>
-        <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">description</span>
-
-    <span class="k">return</span> <span class="n">_InnerMarker</span><span class="p">()</span>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
 
-<span class="c1"># Current design issue: markers are applied recursively to nested structures, but can&#39;t</span>
-<span class="c1"># be unapplied.</span>
+<div class="viewcode-block" id="get_main_parser"><a class="viewcode-back" href="../../../../api/dcargs/_shtab/main/#dcargs._shtab.main.get_main_parser">[docs]</a><span class="k">def</span> <span class="nf">get_main_parser</span><span class="p">():</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">prog</span><span class="o">=</span><span class="s2">&quot;shtab&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;parser&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;importable parser (or fuction returning parser)&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--version&quot;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;version&quot;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%(prog)s</span><span class="s2"> &quot;</span> <span class="o">+</span> <span class="n">__version__</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-s&quot;</span><span class="p">,</span> <span class="s2">&quot;--shell&quot;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">SUPPORTED_SHELLS</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">choices</span><span class="o">=</span><span class="n">SUPPORTED_SHELLS</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--prefix&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;prepended to generated functions to avoid clashes&quot;</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--preamble&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;prepended to generated script&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--prog&quot;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot;custom program name (overrides `parser.prog`)&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;-u&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;--error-unimportable&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_true&quot;</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;raise errors if `parser` is not found in $PYTHONPATH&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+        <span class="s2">&quot;--verbose&quot;</span><span class="p">,</span>
+        <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;loglevel&quot;</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="s2">&quot;store_const&quot;</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span>
+        <span class="n">const</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Log debug information&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">parser</span></div>
 
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Type</span><span class="p">)</span>
 
-<span class="n">POSITIONAL</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;Positional&quot;</span><span class="p">)</span>
-<span class="n">Positional</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">POSITIONAL</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional</span>
-<span class="sd">argument.&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../api/dcargs/_shtab/main/#dcargs._shtab.main.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">argv</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">get_main_parser</span><span class="p">()</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">)</span>
+    <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
-
-<span class="n">FIXED</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;Fixed&quot;</span><span class="p">)</span>
-<span class="n">Fixed</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">FIXED</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a</span>
-<span class="sd">default value should be set instead. Note that fields with defaults that can&#39;t be parsed</span>
-<span class="sd">will also be marked as fixed automatically.&quot;&quot;&quot;</span>
-
-<span class="n">SUPPRESS</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;Suppress&quot;</span><span class="p">)</span>
-<span class="n">Suppress</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">FIXED</span><span class="p">,</span> <span class="n">SUPPRESS</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and</span>
-<span class="sd">to prevent it from showing up in helptext.&quot;&quot;&quot;</span>
-
-<span class="n">FLAG_CONVERSION_OFF</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;FlagConversionOff&quot;</span><span class="p">)</span>
-<span class="n">FlagConversionOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">FLAG_CONVERSION_OFF</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Turn off flag conversion for booleans with default values. Instead, types annotated</span>
-<span class="sd">with `bool` will expect an explicit True or False.</span>
-
-<span class="sd">Can be used directly on boolean annotations, `FlagConversionOff[bool]`, or recursively</span>
-<span class="sd">applied to nested types.&quot;&quot;&quot;</span>
-
-<span class="n">AVOID_SUBCOMMANDS</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;AvoidSubcommands&quot;</span><span class="p">)</span>
-<span class="n">AvoidSubcommands</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">AVOID_SUBCOMMANDS</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Avoid creating subcommands when a default is provided for unions over nested types.</span>
-<span class="sd">This simplifies CLI interfaces, but makes them less expressive.</span>
-
-<span class="sd">Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively</span>
-<span class="sd">applied to nested types.&quot;&quot;&quot;</span>
+    <span class="n">module</span><span class="p">,</span> <span class="n">other_parser</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="c1"># not blank so not searching curdir</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">curdir</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">error_unimportable</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">err</span><span class="p">))</span>
+        <span class="k">return</span>
+    <span class="n">other_parser</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">other_parser</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">callable</span><span class="p">(</span><span class="n">other_parser</span><span class="p">):</span>
+        <span class="n">other_parser</span> <span class="o">=</span> <span class="n">other_parser</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">prog</span><span class="p">:</span>
+        <span class="n">other_parser</span><span class="o">.</span><span class="n">prog</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">prog</span>
+    <span class="nb">print</span><span class="p">(</span>
+        <span class="n">complete</span><span class="p">(</span>
+            <span class="n">other_parser</span><span class="p">,</span>
+            <span class="n">shell</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">shell</span><span class="p">,</span>
+            <span class="n">root_prefix</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">prefix</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">preamble</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">preamble</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span></div>
 </pre></div>
         </article>
       </div>

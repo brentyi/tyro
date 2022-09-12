@@ -24,8 +24,8 @@ Module Contents
    
    Join parts of a field name together. Used for nesting.
 
-   ('parent', 'child') => 'parent.child'
-   ('parents', '1', 'child') => 'parents:1.child'
+   ('parent_1', 'child') => 'parent-1.child'
+   ('parents', '1', '_child_node') => 'parents.1._child-node'
 
 .. py:function:: make_subparser_dest(name: str) -> str
 

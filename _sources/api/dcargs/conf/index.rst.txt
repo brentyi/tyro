@@ -51,6 +51,13 @@ Package Contents
    A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a positional
    argument.
 
+.. py:data:: Suppress
+   
+
+   
+   A type ``T`` can be annotated as ``Suppress[T]`` to prevent ``dcargs.cli`` from parsing it, and
+   to prevent it from showing up in helptext.
+
 .. py:function:: subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True) -> Any
 
    

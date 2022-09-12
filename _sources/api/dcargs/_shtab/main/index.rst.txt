@@ -1,0 +1,20 @@
+:py:mod:`dcargs._shtab.main`
+============================
+
+.. py:module:: dcargs._shtab.main
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+   
+
+   
+
+.. py:function:: get_main_parser()
+
+
+.. py:function:: main(argv=None)
+
+

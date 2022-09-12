@@ -1,0 +1,6 @@
+:py:mod:`dcargs._shtab.__main__`
+================================
+
+.. py:module:: dcargs._shtab.__main__
+
+

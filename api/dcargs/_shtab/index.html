@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="dcargs.extras" href="../extras/" /><link rel="prev" title="dcargs" href="../" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>dcargs.conf - dcargs</title>
+        <title>dcargs._shtab - dcargs</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -189,9 +189,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul class="current">
-<li class="toctree-l1 current has-children"><a class="reference internal" href="../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input checked="" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
-<li class="toctree-l2 current current-page"><a class="current reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
 </ul>
 </li>
@@ -228,94 +228,76 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-dcargs.conf">
-<span id="dcargs-conf"></span><h1><a class="reference internal" href="#module-dcargs.conf" title="dcargs.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a><a class="headerlink" href="#module-dcargs.conf" title="Permalink to this heading">#</a></h1>
-<p>The <a class="reference internal" href="#module-dcargs.conf" title="dcargs.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a> submodule contains helpers for attaching parsing-specific
-configuration metadata to types via <a class="reference external" href="https://peps.python.org/pep-0593/">PEP 593</a> runtime
-annotations.</p>
-<p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
+          <section id="module-dcargs._shtab">
+<span id="dcargs-shtab"></span><h1><a class="reference internal" href="#module-dcargs._shtab" title="dcargs._shtab"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._shtab</span></code></a><a class="headerlink" href="#module-dcargs._shtab" title="Permalink to this heading">#</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="__main__/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._shtab.__main__</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="main/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._shtab.main</span></code></a></li>
+</ul>
+</div>
+</section>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading">#</a></h2>
 <dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf.AvoidSubcommands">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">AvoidSubcommands</span></span><a class="headerlink" href="#dcargs.conf.AvoidSubcommands" title="Permalink to this definition">#</a></dt>
-<dd><p>Avoid creating subcommands when a default is provided for unions over nested types.
-This simplifies CLI interfaces, but makes them less expressive.</p>
-<p>Can be used directly on union types, <code class="docutils literal notranslate"><span class="pre">AvoidSubcommands[Union[...]]</span></code>, or recursively
-applied to nested types.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="dcargs._shtab.SUPPORTED_SHELLS">
+<span class="sig-prename descclassname"><span class="pre">dcargs._shtab.</span></span><span class="sig-name descname"><span class="pre">SUPPORTED_SHELLS</span></span><em class="property"><span class="w"> </span><span class="pre">:List[str]</span> <span class="pre">=</span> <span class="pre">[]</span></em><a class="headerlink" href="#dcargs._shtab.SUPPORTED_SHELLS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf.Fixed">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><a class="headerlink" href="#dcargs.conf.Fixed" title="Permalink to this definition">#</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">dcargs.cli</span></code> from parsing it; a
-default value should be set instead. Note that fields with defaults that can’t be parsed
-will also be marked as fixed automatically.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf.FlagConversionOff">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">FlagConversionOff</span></span><a class="headerlink" href="#dcargs.conf.FlagConversionOff" title="Permalink to this definition">#</a></dt>
-<dd><p>Turn off flag conversion for booleans with default values. Instead, types annotated
-with <code class="docutils literal notranslate"><span class="pre">bool</span></code> will expect an explicit True or False.</p>
-<p>Can be used directly on boolean annotations, <code class="docutils literal notranslate"><span class="pre">FlagConversionOff[bool]</span></code>, or recursively
-applied to nested types.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf.Positional">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">Positional</span></span><a class="headerlink" href="#dcargs.conf.Positional" title="Permalink to this definition">#</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Positional[T]</span></code> if we want to parse it as a positional
-argument.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf.Suppress">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">Suppress</span></span><a class="headerlink" href="#dcargs.conf.Suppress" title="Permalink to this definition">#</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">dcargs.cli</span></code> from parsing it, and
-to prevent it from showing up in helptext.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="dcargs._shtab.FILE">
+<span class="sig-prename descclassname"><span class="pre">dcargs._shtab.</span></span><span class="sig-name descname"><span class="pre">FILE</span></span><a class="headerlink" href="#dcargs._shtab.FILE" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="dcargs.conf.subcommand">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">subcommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MISSING_NONPROP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/dcargs/conf/_subcommands/#subcommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.conf.subcommand" title="Permalink to this definition">#</a></dt>
-<dd><p>Returns a metadata object for configuring subcommands with <code class="docutils literal notranslate"><span class="pre">typing.Annotated</span></code>.
-This is useful but can make code harder to read, so usage is discouraged.</p>
-<p>Consider the standard approach for creating subcommands:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-    <span class="n">Union</span><span class="p">[</span><span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">NestedTypeB</span><span class="p">]</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>This will create two subcommands: <code class="docutils literal notranslate"><span class="pre">nested-type-a</span></code> and <code class="docutils literal notranslate"><span class="pre">nested-type-b</span></code>.</p>
-<p>Annotating each type with <code class="docutils literal notranslate"><span class="pre">dcargs.metadata.subcommand()</span></code> allows us to override for
-each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix
-the name or not.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-    <span class="n">Union</span><span class="p">[</span>
-        <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-        <span class="p">],</span>
-    <span class="p">]</span>
-<span class="p">)</span>
-</pre></div>
-</div>
+<dt class="sig sig-object py" id="dcargs._shtab.complete">
+<span class="sig-prename descclassname"><span class="pre">dcargs._shtab.</span></span><span class="sig-name descname"><span class="pre">complete</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">argparse.ArgumentParser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shell</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'bash'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preamble</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choice_functions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_shtab/#complete"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._shtab.complete" title="Permalink to this definition">#</a></dt>
+<dd><p>parser  : argparse.ArgumentParser
+shell  : str (bash/zsh)
+root<a href="#id1"><span class="problematic" id="id2">*</span></a>prefix  : str or <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<blockquote>
+<div><p>prefix for shell functions to avoid clashes (default: “<a href="#id3"><span class="problematic" id="id4">*</span></a>{parser.prog}”)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>preamble<span class="classifier">dict or str</span></dt><dd><p>mapping shell to text to prepend to generated script
+(e.g. <code class="docutils literal notranslate"><span class="pre">{&quot;bash&quot;:</span> <span class="pre">&quot;_myprog_custom_function(){</span> <span class="pre">echo</span> <span class="pre">hello</span> <span class="pre">}&quot;}</span></code>)</p>
+</dd>
+</dl>
+<p>choice_functions  : deprecated</p>
+<p>N.B. <code class="docutils literal notranslate"><span class="pre">parser.add_argument().complete</span> <span class="pre">=</span> <span class="pre">...</span></code> can be used to define custom
+completions (e.g. filenames). See &lt;../examples/pathcomplete.py&gt;.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
-<li><p><strong>default</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
-<li><p><strong>prefix_name</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>parser</strong> (<em>argparse.ArgumentParser</em>) – </p></li>
+<li><p><strong>shell</strong> (<em>str</em>) – </p></li>
+<li><p><strong>root_prefix</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>preamble</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Dict</em><em>]</em>) – </p></li>
+<li><p><strong>choice_functions</strong> (<em>Optional</em><em>[</em><em>Any</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Any</p>
+<dd class="field-even"><p>str</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="dcargs._shtab.add_argument_to">
+<span class="sig-prename descclassname"><span class="pre">dcargs._shtab.</span></span><span class="sig-name descname"><span class="pre">add_argument_to</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'--print-completion'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'print</span> <span class="pre">shell</span> <span class="pre">completion</span> <span class="pre">script'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">preamble</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/dcargs/_shtab/#add_argument_to"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._shtab.add_argument_to" title="Permalink to this definition">#</a></dt>
+<dd><p>parser  : argparse.ArgumentParser
+option_string  : str or list[str]</p>
+<blockquote>
+<div><p>iff positional (no <code class="docutils literal notranslate"><span class="pre">-</span></code> prefix) then <code class="docutils literal notranslate"><span class="pre">parser</span></code> is assumed to actually be
+a subparser (subcommand mode)</p>
+</div></blockquote>
+<p>help  : str
+parent  : argparse.ArgumentParser</p>
+<blockquote>
+<div><p>required in subcommand mode</p>
+</div></blockquote>
 </dd></dl>
 
 </section>
@@ -326,26 +308,8 @@ the name or not.</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../extras/">
-              <div class="page-info">
-                <div class="context">
-                  <span>Next</span>
-                </div>
-                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></div>
-              </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
-            </a>
-          <a class="prev-page" href="../">
-              <svg><use href="#svg-arrow-right"></use></svg>
-              <div class="page-info">
-                <div class="context">
-                  <span>Previous</span>
-                </div>
-                
-                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></div>
-                
-              </div>
-            </a>
+          
+          
         </div>
         <div class="bottom-of-page">
           <div class="left-details">
@@ -383,14 +347,13 @@ the name or not.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a><ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._shtab</span></code></a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
-<li><a class="reference internal" href="#dcargs.conf.AvoidSubcommands">AvoidSubcommands</a></li>
-<li><a class="reference internal" href="#dcargs.conf.Fixed">Fixed</a></li>
-<li><a class="reference internal" href="#dcargs.conf.FlagConversionOff">FlagConversionOff</a></li>
-<li><a class="reference internal" href="#dcargs.conf.Positional">Positional</a></li>
-<li><a class="reference internal" href="#dcargs.conf.Suppress">Suppress</a></li>
-<li><a class="reference internal" href="#dcargs.conf.subcommand">subcommand</a></li>
+<li><a class="reference internal" href="#dcargs._shtab.SUPPORTED_SHELLS">SUPPORTED_SHELLS</a></li>
+<li><a class="reference internal" href="#dcargs._shtab.FILE">FILE</a></li>
+<li><a class="reference internal" href="#dcargs._shtab.complete">complete</a></li>
+<li><a class="reference internal" href="#dcargs._shtab.add_argument_to">add_argument_to</a></li>
 </ul>
 </li>
 </ul>

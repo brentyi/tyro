@@ -242,8 +242,8 @@
 <dt class="sig sig-object py" id="dcargs._strings.make_field_name">
 <span class="sig-prename descclassname"><span class="pre">dcargs._strings.</span></span><span class="sig-name descname"><span class="pre">make_field_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parts</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_strings/#make_field_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs._strings.make_field_name" title="Permalink to this definition">#</a></dt>
 <dd><p>Join parts of a field name together. Used for nesting.</p>
-<p>(‘parent’, ‘child’) =&gt; ‘parent.child’
-(‘parents’, ‘1’, ‘child’) =&gt; ‘parents:1.child’</p>
+<p>(‘parent_1’, ‘child’) =&gt; ‘parent-1.child’
+(‘parents’, ‘1’, ‘_child_node’) =&gt; ‘parents.1._child-node’</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>parts</strong> (<em>Sequence</em><em>[</em><em>str</em><em>]</em>) – </p>

@@ -235,9 +235,9 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">import</span> <span class="nn">shtab</span>
-
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_calling</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_calling</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_shtab</span> <span class="k">as</span> <span class="n">shtab</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
 
 <span class="n">OutT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;OutT&quot;</span><span class="p">)</span>
 

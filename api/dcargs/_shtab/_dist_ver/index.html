@@ -2,10 +2,11 @@
 <html class="no-js" lang="en">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+<link rel="index" title="Index" href="../../../../genindex/" /><link rel="search" title="Search" href="../../../../search/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>dcargs.conf._markers - dcargs</title>
+        <title>dcargs._shtab._dist_ver - dcargs</title>
       <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
@@ -138,7 +139,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -189,9 +190,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../api/dcargs/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../../api/dcargs/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../../api/dcargs/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -221,70 +222,24 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main">
-          <h1>Source code for dcargs.conf._markers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+          <section id="module-dcargs._shtab._dist_ver">
+<span id="dcargs-shtab-dist-ver"></span><h1><a class="reference internal" href="#module-dcargs._shtab._dist_ver" title="dcargs._shtab._dist_ver"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._shtab._dist_ver</span></code></a><a class="headerlink" href="#module-dcargs._shtab._dist_ver" title="Permalink to this heading">#</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="dcargs._shtab._dist_ver.__version__">
+<span class="sig-prename descclassname"><span class="pre">dcargs._shtab._dist_ver.</span></span><span class="sig-name descname"><span class="pre">__version__</span></span><em class="property"><span class="w"> </span><span class="pre">=</span> <span class="pre">1.5.6.dev1+g4c0170c.d20220909</span></em><a class="headerlink" href="#dcargs._shtab._dist_ver.__version__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+</section>
+</section>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_singleton</span>
-
-
-<div class="viewcode-block" id="Marker"><a class="viewcode-back" href="../../../../api/dcargs/conf/_markers/#dcargs.conf._markers.Marker">[docs]</a><span class="k">class</span> <span class="nc">Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
-    <span class="k">pass</span></div>
-
-
-<span class="k">def</span> <span class="nf">_make_marker</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Marker</span><span class="p">:</span>
-    <span class="k">class</span> <span class="nc">_InnerMarker</span><span class="p">(</span><span class="n">Marker</span><span class="p">):</span>
-        <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">description</span>
-
-    <span class="k">return</span> <span class="n">_InnerMarker</span><span class="p">()</span>
-
-
-<span class="c1"># Current design issue: markers are applied recursively to nested structures, but can&#39;t</span>
-<span class="c1"># be unapplied.</span>
-
-<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Type</span><span class="p">)</span>
-
-<span class="n">POSITIONAL</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;Positional&quot;</span><span class="p">)</span>
-<span class="n">Positional</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">POSITIONAL</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional</span>
-<span class="sd">argument.&quot;&quot;&quot;</span>
-
-
-<span class="n">FIXED</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;Fixed&quot;</span><span class="p">)</span>
-<span class="n">Fixed</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">FIXED</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a</span>
-<span class="sd">default value should be set instead. Note that fields with defaults that can&#39;t be parsed</span>
-<span class="sd">will also be marked as fixed automatically.&quot;&quot;&quot;</span>
-
-<span class="n">SUPPRESS</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;Suppress&quot;</span><span class="p">)</span>
-<span class="n">Suppress</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">FIXED</span><span class="p">,</span> <span class="n">SUPPRESS</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and</span>
-<span class="sd">to prevent it from showing up in helptext.&quot;&quot;&quot;</span>
-
-<span class="n">FLAG_CONVERSION_OFF</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;FlagConversionOff&quot;</span><span class="p">)</span>
-<span class="n">FlagConversionOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">FLAG_CONVERSION_OFF</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Turn off flag conversion for booleans with default values. Instead, types annotated</span>
-<span class="sd">with `bool` will expect an explicit True or False.</span>
-
-<span class="sd">Can be used directly on boolean annotations, `FlagConversionOff[bool]`, or recursively</span>
-<span class="sd">applied to nested types.&quot;&quot;&quot;</span>
-
-<span class="n">AVOID_SUBCOMMANDS</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;AvoidSubcommands&quot;</span><span class="p">)</span>
-<span class="n">AvoidSubcommands</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">AVOID_SUBCOMMANDS</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Avoid creating subcommands when a default is provided for unions over nested types.</span>
-<span class="sd">This simplifies CLI interfaces, but makes them less expressive.</span>
-
-<span class="sd">Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively</span>
-<span class="sd">applied to nested types.&quot;&quot;&quot;</span>
-</pre></div>
         </article>
       </div>
       <footer>
@@ -317,8 +272,30 @@
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            Contents
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._shtab._dist_ver</span></code></a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#dcargs._shtab._dist_ver.__version__">__version__</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>
