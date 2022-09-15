@@ -121,9 +121,12 @@ def main(
                     "",
                     "",
                     ".. code-block:: python",
-                    "       :linenos:",
+                    "        :linenos:",
                     "",
-                    "       " + "\n       ".join(ex.source.split("\n")),
+                    "",
+                    "\n".join(
+                        f"        {line}".rstrip() for line in ex.source.split("\n")
+                    ),
                     "",
                 ]
                 + usage_lines

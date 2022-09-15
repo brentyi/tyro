@@ -45,14 +45,14 @@ def subcommand_type_from_defaults(
     The resulting type can be used directly in dcargs.cli:
 
     ```python
-    config = dcargs.cli(subcommand_union_from_mapping(default_from_name))
+    config = dcargs.cli(subcommand_type_from_defaults(default_from_name))
     reveal_type(config)  # Should be correct!
     ```
 
     Or to generate annotations for classes and functions:
 
     ```python
-    SelectableConfig = subcommand_union_from_mapping(default_from_name)
+    SelectableConfig = subcommand_type_from_defaults(default_from_name)
 
     def train(
         config: SelectableConfig,
@@ -70,7 +70,7 @@ def subcommand_type_from_defaults(
     if TYPE_CHECKING:
         SelectableConfig = ExperimentConfig
     else:
-        SelectableConfig = subcommand_union_from_mapping(base_mapping)
+        SelectableConfig = subcommand_type_from_defaults(base_mapping)
     ```
     """
     return Union.__getitem__(  # type: ignore
