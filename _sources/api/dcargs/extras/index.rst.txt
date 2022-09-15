@@ -49,14 +49,14 @@ Package Contents
 
    .. code-block:: python
 
-      config = dcargs.cli(subcommand_union_from_mapping(default_from_name))
+      config = dcargs.cli(subcommand_type_from_defaults(default_from_name))
       reveal_type(config)  # Should be correct!
 
    Or to generate annotations for classes and functions:
 
    .. code-block:: python
 
-      SelectableConfig = subcommand_union_from_mapping(default_from_name)
+      SelectableConfig = subcommand_type_from_defaults(default_from_name)
 
       def train(
           config: SelectableConfig,
@@ -74,7 +74,7 @@ Package Contents
       if TYPE_CHECKING:
           SelectableConfig = ExperimentConfig
       else:
-          SelectableConfig = subcommand_union_from_mapping(base_mapping)
+          SelectableConfig = subcommand_type_from_defaults(base_mapping)
 
 .. py:function:: from_yaml(cls: Type[DataclassType], stream: Union[str, IO[str], bytes, IO[bytes]]) -> DataclassType
 

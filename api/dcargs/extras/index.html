@@ -263,12 +263,12 @@ aren’t considered part of the core interface.</p>
 </pre></div>
 </div>
 <p>The resulting type can be used directly in dcargs.cli:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">subcommand_union_from_mapping</span><span class="p">(</span><span class="n">default_from_name</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="n">default_from_name</span><span class="p">))</span>
 <span class="n">reveal_type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>  <span class="c1"># Should be correct!</span>
 </pre></div>
 </div>
 <p>Or to generate annotations for classes and functions:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_union_from_mapping</span><span class="p">(</span><span class="n">default_from_name</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="n">default_from_name</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
     <span class="n">config</span><span class="p">:</span> <span class="n">SelectableConfig</span><span class="p">,</span>
@@ -284,7 +284,7 @@ necessary we can work around this with an <code class="docutils literal notransl
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">ExperimentConfig</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_union_from_mapping</span><span class="p">(</span><span class="n">base_mapping</span><span class="p">)</span>
+    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="n">base_mapping</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
