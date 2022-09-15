@@ -10,66 +10,66 @@ Multiple unions over nested types are populated using a series of subcommands.
 
 
 .. code-block:: python
-       :linenos:
+        :linenos:
 
-       from __future__ import annotations
-       
-       import dataclasses
-       from typing import Literal, Tuple, Union
-       
-       import dcargs
-       
-       # Possible dataset configurations.
-       
-       
-       @dataclasses.dataclass
-       class Mnist:
-           binary: bool = False
-           """Set to load binary version of MNIST dataset."""
-       
-       
-       @dataclasses.dataclass
-       class ImageNet:
-           subset: Literal[50, 100, 1000]
-           """Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""
-       
-       
-       # Possible optimizer configurations.
-       
-       
-       @dataclasses.dataclass
-       class Adam:
-           learning_rate: float = 1e-3
-           betas: Tuple[float, float] = (0.9, 0.999)
-       
-       
-       @dataclasses.dataclass
-       class Sgd:
-           learning_rate: float = 3e-4
-       
-       
-       # Train script.
-       
-       
-       def train(
-           dataset: Union[Mnist, ImageNet] = Mnist(),
-           optimizer: Union[Adam, Sgd] = Adam(),
-       ) -> None:
-           """Example training script.
-       
-           Args:
-               dataset: Dataset to train on.
-               optimizer: Optimizer to train with.
-       
-           Returns:
-               None:
-           """
-           print(dataset)
-           print(optimizer)
-       
-       
-       if __name__ == "__main__":
-           dcargs.cli(train)
+        from __future__ import annotations
+        
+        import dataclasses
+        from typing import Literal, Tuple, Union
+        
+        import dcargs
+        
+        # Possible dataset configurations.
+        
+        
+        @dataclasses.dataclass
+        class Mnist:
+            binary: bool = False
+            """Set to load binary version of MNIST dataset."""
+        
+        
+        @dataclasses.dataclass
+        class ImageNet:
+            subset: Literal[50, 100, 1000]
+            """Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""
+        
+        
+        # Possible optimizer configurations.
+        
+        
+        @dataclasses.dataclass
+        class Adam:
+            learning_rate: float = 1e-3
+            betas: Tuple[float, float] = (0.9, 0.999)
+        
+        
+        @dataclasses.dataclass
+        class Sgd:
+            learning_rate: float = 3e-4
+        
+        
+        # Train script.
+        
+        
+        def train(
+            dataset: Union[Mnist, ImageNet] = Mnist(),
+            optimizer: Union[Adam, Sgd] = Adam(),
+        ) -> None:
+            """Example training script.
+        
+            Args:
+                dataset: Dataset to train on.
+                optimizer: Optimizer to train with.
+        
+            Returns:
+                None:
+            """
+            print(dataset)
+            print(optimizer)
+        
+        
+        if __name__ == "__main__":
+            dcargs.cli(train)
 
 ------------
 
