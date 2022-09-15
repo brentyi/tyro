@@ -13,40 +13,41 @@ For configuring subcommands beyond what can be expressed with type annotations, 
 
 
 .. code-block:: python
-       :linenos:
+        :linenos:
 
-       from __future__ import annotations
-       
-       import dataclasses
-       from typing import Union
-       
-       import dcargs
-       
-       
-       @dataclasses.dataclass(frozen=True)
-       class Checkout:
-           """Checkout a branch."""
-       
-           branch: str
-       
-       
-       @dataclasses.dataclass(frozen=True)
-       class Commit:
-           """Commit changes."""
-       
-           message: str
-           all: bool = False
-       
-       
-       def main(cmd: Union[Checkout, Commit]) -> None:
-           print(cmd)
-       
-       
-       if __name__ == "__main__":
-           # Note that we can also pass `Union[Checkout, Command]` directly into
-           # `dcargs.cli()`; this is understood by dcargs and pyright, but unfortunately not by
-           # mypy.
-           dcargs.cli(main)
+
+        from __future__ import annotations
+
+        import dataclasses
+        from typing import Union
+
+        import dcargs
+
+
+        @dataclasses.dataclass(frozen=True)
+        class Checkout:
+            """Checkout a branch."""
+
+            branch: str
+
+
+        @dataclasses.dataclass(frozen=True)
+        class Commit:
+            """Commit changes."""
+
+            message: str
+            all: bool = False
+
+
+        def main(cmd: Union[Checkout, Commit]) -> None:
+            print(cmd)
+
+
+        if __name__ == "__main__":
+            # Note that we can also pass `Union[Checkout, Command]` directly into
+            # `dcargs.cli()`; this is understood by dcargs and pyright, but unfortunately not by
+            # mypy.
+            dcargs.cli(main)
 
 ------------
 
