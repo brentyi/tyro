@@ -15,35 +15,36 @@ parsing default values.
 .. code-block:: python
         :linenos:
 
+
         import dataclasses
         from typing import Dict, Tuple
-        
+
         import dcargs
-        
-        
+
+
         class Color:
             pass
-        
-        
+
+
         @dataclasses.dataclass
         class RGB(Color):
             r: int
             g: int
             b: int
-        
-        
+
+
         @dataclasses.dataclass
         class HSL(Color):
             h: int
             s: int
             l: int
-        
-        
+
+
         @dataclasses.dataclass
         class Args:
             # Example of specifying nested structures via a fixed-length tuple.
             color_tuple: Tuple[RGB, HSL]
-        
+
             # Examples of nested structures in variable-length containers. These need a default
             # provided for length inference; we don't currently support specifying dynamic
             # container lengths directly from the commandline.
@@ -59,8 +60,8 @@ parsing default values.
                     "blue": RGB(0, 0, 255),
                 }.copy
             )
-        
-        
+
+
         if __name__ == "__main__":
             args = dcargs.cli(Args)
             print(args)

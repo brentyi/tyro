@@ -13,13 +13,14 @@ or a ``TypedDict`` subclass.
 .. code-block:: python
         :linenos:
 
+
         from typing import Dict, Mapping, Tuple, TypedDict
-        
+
         from frozendict import frozendict  # type: ignore
-        
+
         import dcargs
-        
-        
+
+
         class DictionarySchema(
             TypedDict,
             # Setting `total=False` specifies that not all keys need to exist.
@@ -27,8 +28,8 @@ or a ``TypedDict`` subclass.
         ):
             learning_rate: float
             betas: Tuple[float, float]
-        
-        
+
+
         def main(
             typed_dict: DictionarySchema,
             standard_dict: Dict[str, float] = {
@@ -49,8 +50,8 @@ or a ``TypedDict`` subclass.
             print("Typed dict:", typed_dict)
             print("Standard dict:", standard_dict)
             print("Frozen dict:", frozen_dict)
-        
-        
+
+
         if __name__ == "__main__":
             dcargs.cli(main)
 

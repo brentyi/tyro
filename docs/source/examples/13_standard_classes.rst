@@ -13,9 +13,10 @@ constructors of) standard Python classes.
 .. code-block:: python
         :linenos:
 
+
         import dcargs
-        
-        
+
+
         class Args:
             def __init__(
                 self,
@@ -24,15 +25,15 @@ constructors of) standard Python classes.
                 flag: bool = False,
             ):
                 """Arguments.
-        
+
                 Args:
                     field1: A string field.
                     field2: A numeric field.
                     flag: A boolean flag.
                 """
                 self.data = [field1, field2, flag]
-        
-        
+
+
         if __name__ == "__main__":
             args = dcargs.cli(Args)
             print(args.data)

@@ -12,29 +12,30 @@ Example using ``dcargs.cli()`` to instantiate tuple types.
 .. code-block:: python
         :linenos:
 
+
         from typing import NamedTuple, Tuple
-        
+
         import dcargs
-        
-        
+
+
         # Named tuples are interpreted as nested structures.
         class Color(NamedTuple):
             r: int
             g: int
             b: int
-        
-        
+
+
         class TupleType(NamedTuple):
             """Description.
             This should show up in the helptext!"""
-        
+
             # Tuple types can contain raw values.
             color: Tuple[int, int, int] = (255, 0, 0)
-        
+
             # Tuple types can contain nested structures.
             two_colors: Tuple[Color, Color] = (Color(255, 0, 0), Color(0, 255, 0))
-        
-        
+
+
         if __name__ == "__main__":
             x = dcargs.cli(TupleType)
             assert isinstance(x, tuple)

@@ -13,46 +13,47 @@ objects. This helps with modularity and grouping in larger projects.
 .. code-block:: python
         :linenos:
 
+
         import dataclasses
         import enum
         import pathlib
-        
+
         import dcargs
-        
-        
+
+
         class OptimizerType(enum.Enum):
             ADAM = enum.auto()
             SGD = enum.auto()
-        
-        
+
+
         @dataclasses.dataclass
         class OptimizerConfig:
             # Gradient-based optimizer to use.
             algorithm: OptimizerType = OptimizerType.ADAM
-        
+
             # Learning rate to use.
             learning_rate: float = 3e-4
-        
+
             # Coefficient for L2 regularization.
             weight_decay: float = 1e-2
-        
-        
+
+
         @dataclasses.dataclass
         class ExperimentConfig:
             # Various configurable options for our optimizer.
             optimizer_config: OptimizerConfig
-        
+
             # Batch size.
             batch_size: int = 32
-        
+
             # Total number of training steps.
             train_steps: int = 100_000
-        
+
             # Random seed. This is helpful for making sure that our experiments are all
             # reproducible!
             seed: int = 0
-        
-        
+
+
         def train(
             out_dir: pathlib.Path,
             config: ExperimentConfig,
@@ -60,7 +61,7 @@ objects. This helps with modularity and grouping in larger projects.
             checkpoint_interval: int = 1000,
         ) -> None:
             """Train a model.
-        
+
             Args:
                 out_dir: Where to save logs and checkpoints.
                 config: Experiment configuration.
@@ -72,8 +73,8 @@ objects. This helps with modularity and grouping in larger projects.
             print(f"{config=}")
             print()
             print(dcargs.to_yaml(config))
-        
-        
+
+
         if __name__ == "__main__":
             dcargs.cli(train)
 
