@@ -261,29 +261,29 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 12_tuples.py --help</kbd><pre class="ansi-block literal-block">usage: 12_tuples.py [-h] [--color <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>] [--two-colors.0.r <span class="ansi-bold">INT</span>]
-                    [--two-colors.0.g <span class="ansi-bold">INT</span>] [--two-colors.0.b <span class="ansi-bold">INT</span>]
-                    [--two-colors.1.r <span class="ansi-bold">INT</span>] [--two-colors.1.g <span class="ansi-bold">INT</span>]
-                    [--two-colors.1.b <span class="ansi-bold">INT</span>]
+<kbd>python 12_tuples.py --help</kbd><pre class="ansi-block literal-block">usage: 12_tuples.py [-h] [--color INT INT INT] [--two-colors.0.r INT]
+                    [--two-colors.0.g INT] [--two-colors.0.b INT]
+                    [--two-colors.1.r INT] [--two-colors.1.g INT]
+                    [--two-colors.1.b INT]
 
 Description.
 This should show up in the helptext!
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help            show this help message and exit
-  --color <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span> <span class="ansi-bold">INT</span>   Tuple types can contain raw values. <span class="ansi-dark">(default: 255 0 0)</span>
-
-<span class="ansi-bold">two-colors.0 arguments</span>:
-
-  --two-colors.0.r <span class="ansi-bold">INT</span>  <span class="ansi-dark">(default: 255)</span>
-  --two-colors.0.g <span class="ansi-bold">INT</span>  <span class="ansi-dark">(default: 0)</span>
-  --two-colors.0.b <span class="ansi-bold">INT</span>  <span class="ansi-dark">(default: 0)</span>
-
-<span class="ansi-bold">two-colors.1 arguments</span>:
-
-  --two-colors.1.r <span class="ansi-bold">INT</span>  <span class="ansi-dark">(default: 0)</span>
-  --two-colors.1.g <span class="ansi-bold">INT</span>  <span class="ansi-dark">(default: 255)</span>
-  --two-colors.1.b <span class="ansi-bold">INT</span>  <span class="ansi-dark">(default: 0)</span></pre>
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help            show this help message and exit                      │
+│ --color INT INT INT   Tuple types can contain raw values. (default: 255 0  │
+│                       0)                                                   │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ two-colors.0 arguments ───────────────────────────────────────────────────╮
+│ --two-colors.0.r INT  (default: 255)                                       │
+│ --two-colors.0.g INT  (default: 0)                                         │
+│ --two-colors.0.b INT  (default: 0)                                         │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ two-colors.1 arguments ───────────────────────────────────────────────────╮
+│ --two-colors.1.r INT  (default: 0)                                         │
+│ --two-colors.1.g INT  (default: 255)                                       │
+│ --two-colors.1.b INT  (default: 0)                                         │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 12_tuples.py --color 127 127 127</kbd><pre class="ansi-block literal-block">TupleType(color=(127, 127, 127), two_colors=(Color(r=255, g=0, b=0), Color(r=0, g=255, b=0)))</pre>
 <hr class="docutils" />

@@ -287,36 +287,36 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 07_positional_args.py --help</kbd><pre class="ansi-block literal-block">usage: 07_positional_args.py [-h] [--optimizer.algorithm {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}]
-                             [--optimizer.learning-rate <span class="ansi-bold">FLOAT</span>]
-                             [--optimizer.weight-decay <span class="ansi-bold">FLOAT</span>] [--force]
-                             [--verbose] [--background-rgb <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>]
-                             <span class="ansi-bold">PATH</span> <span class="ansi-bold">PATH</span>
+<kbd>python 07_positional_args.py --help</kbd><pre class="ansi-block literal-block">usage: 07_positional_args.py [-h] [--optimizer.algorithm {ADAM,SGD}]
+                             [--optimizer.learning-rate FLOAT]
+                             [--optimizer.weight-decay FLOAT] [--force]
+                             [--verbose] [--background-rgb FLOAT FLOAT FLOAT]
+                             PATH PATH
 
 Command-line interface defined using a function signature. Note that this
 docstring is parsed to generate helptext.
 
-<span class="ansi-bold">positional arguments</span>:
-  <span class="ansi-bold">PATH</span>                    Source path. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  <span class="ansi-bold">PATH</span>                    Destination path. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-
-<span class="ansi-bold">arguments</span>:
-  -h, --help              show this help message and exit
-  --force                 Do not prompt before overwriting. <span class="ansi-dark">(sets: force=True)</span>
-  --verbose               Explain what is being done. <span class="ansi-dark">(sets: verbose=True)</span>
-  --background-rgb <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>
-                          Background color. Red by default. <span class="ansi-dark">(default: 1.0 0.0
-                          0.0)</span>
-
-<span class="ansi-bold">optimizer arguments</span>:
-  Configuration for our optimizer object.
-
-  --optimizer.algorithm {<span class="ansi-bold">ADAM</span>,<span class="ansi-bold">SGD</span>}
-                          Gradient-based optimizer to use. <span class="ansi-dark">(default: ADAM)</span>
-  --optimizer.learning-rate <span class="ansi-bold">FLOAT</span>
-                          Learning rate to use. <span class="ansi-dark">(default: 0.0003)</span>
-  --optimizer.weight-decay <span class="ansi-bold">FLOAT</span>
-                          Coefficient for L2 regularization. <span class="ansi-dark">(default: 0.01)</span></pre>
+╭─ positional arguments ───────────────────────────────────────────────╮
+│ PATH        Source path. (required)                                  │
+│ PATH        Destination path. (required)                             │
+╰──────────────────────────────────────────────────────────────────────╯
+╭─ arguments ──────────────────────────────────────────────────────────╮
+│ -h, --help  show this help message and exit                          │
+│ --force     Do not prompt before overwriting. (sets: force=True)     │
+│ --verbose   Explain what is being done. (sets: verbose=True)         │
+│ --background-rgb FLOAT FLOAT FLOAT                                   │
+│             Background color. Red by default. (default: 1.0 0.0 0.0) │
+╰──────────────────────────────────────────────────────────────────────╯
+╭─ optimizer arguments ────────────────────────────────────────────────╮
+│  Configuration for our optimizer object.                             │
+│ ──────────────────────────────────────────────────────────────────── │
+│ --optimizer.algorithm {ADAM,SGD}                                     │
+│             Gradient-based optimizer to use. (default: ADAM)         │
+│ --optimizer.learning-rate FLOAT                                      │
+│             Learning rate to use. (default: 0.0003)                  │
+│ --optimizer.weight-decay FLOAT                                       │
+│             Coefficient for L2 regularization. (default: 0.01)       │
+╰──────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 07_positional_args.py ./a ./b --optimizer.learning-rate 1e-5</kbd><pre class="ansi-block literal-block">source=PosixPath('a')
 dest=PosixPath('b')

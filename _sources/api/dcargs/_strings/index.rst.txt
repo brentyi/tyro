@@ -44,9 +44,6 @@ Module Contents
 .. py:function:: strip_ansi_sequences(x: str)
 
 
-.. py:function:: format_metavar(x: str) -> str
-
-
 .. py:function:: multi_metavar_from_single(single: str) -> str
 
 

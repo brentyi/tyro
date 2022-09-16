@@ -275,39 +275,37 @@ or a <code class="docutils literal notranslate"><span class="pre">TypedDict</spa
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 11_dictionaries.py --help</kbd><pre class="ansi-block literal-block">usage: 11_dictionaries.py [-h] [--typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>]
-                          [--typed-dict.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>]
-                          [--standard-dict.learning-rate <span class="ansi-bold">FLOAT</span>]
-                          [--standard-dict.beta1 <span class="ansi-bold">FLOAT</span>]
-                          [--standard-dict.beta2 <span class="ansi-bold">FLOAT</span>]
-                          [--frozen-dict.num-epochs <span class="ansi-bold">INT</span>]
-                          [--frozen-dict.batch-size <span class="ansi-bold">INT</span>]
+<kbd>python 11_dictionaries.py --help</kbd><pre class="ansi-block literal-block">usage: 11_dictionaries.py [-h] [--typed-dict.learning-rate FLOAT]
+                          [--typed-dict.betas FLOAT FLOAT]
+                          [--standard-dict.learning-rate FLOAT]
+                          [--standard-dict.beta1 FLOAT]
+                          [--standard-dict.beta2 FLOAT]
+                          [--frozen-dict.num-epochs INT]
+                          [--frozen-dict.batch-size INT]
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help              show this help message and exit
-
-<span class="ansi-bold">typed-dict arguments</span>:
-
-  --typed-dict.learning-rate <span class="ansi-bold">FLOAT</span>
-                          <span class="ansi-dark">(unset by default)</span>
-  --typed-dict.betas <span class="ansi-bold">FLOAT</span> <span class="ansi-bold">FLOAT</span>
-                          <span class="ansi-dark">(unset by default)</span>
-
-<span class="ansi-bold">standard-dict arguments</span>:
-
-  --standard-dict.learning-rate <span class="ansi-bold">FLOAT</span>
-                          <span class="ansi-dark">(default: 0.0003)</span>
-  --standard-dict.beta1 <span class="ansi-bold">FLOAT</span>
-                          <span class="ansi-dark">(default: 0.9)</span>
-  --standard-dict.beta2 <span class="ansi-bold">FLOAT</span>
-                          <span class="ansi-dark">(default: 0.999)</span>
-
-<span class="ansi-bold">frozen-dict arguments</span>:
-
-  --frozen-dict.num-epochs <span class="ansi-bold">INT</span>
-                          <span class="ansi-dark">(default: 20)</span>
-  --frozen-dict.batch-size <span class="ansi-bold">INT</span>
-                          <span class="ansi-dark">(default: 64)</span></pre>
+╭─ arguments ─────────────────────────────────╮
+│ -h, --help  show this help message and exit │
+╰─────────────────────────────────────────────╯
+╭─ typed-dict arguments ──────────────────────╮
+│ --typed-dict.learning-rate FLOAT            │
+│             (unset by default)              │
+│ --typed-dict.betas FLOAT FLOAT              │
+│             (unset by default)              │
+╰─────────────────────────────────────────────╯
+╭─ standard-dict arguments ───────────────────╮
+│ --standard-dict.learning-rate FLOAT         │
+│             (default: 0.0003)               │
+│ --standard-dict.beta1 FLOAT                 │
+│             (default: 0.9)                  │
+│ --standard-dict.beta2 FLOAT                 │
+│             (default: 0.999)                │
+╰─────────────────────────────────────────────╯
+╭─ frozen-dict arguments ─────────────────────╮
+│ --frozen-dict.num-epochs INT                │
+│             (default: 20)                   │
+│ --frozen-dict.batch-size INT                │
+│             (default: 64)                   │
+╰─────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 11_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Typed dict: {'learning_rate': 0.0003}
 Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}

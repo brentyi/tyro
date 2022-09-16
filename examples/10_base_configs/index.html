@@ -349,75 +349,80 @@ avoid fussing with <code class="docutils literal notranslate"><span class="pre">
 <hr class="docutils" />
 <kbd>python 10_base_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 10_base_configs.py [-h] {small,big}
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help   show this help message and exit
-
-<span class="ansi-bold">subcommands</span>:
-  {small,big}
-    small      Train a smaller model.
-    big        Train a bigger model.</pre>
+╭─ arguments ──────────────────────────────────╮
+│ -h, --help   show this help message and exit │
+╰──────────────────────────────────────────────╯
+╭─ subcommands ────────────────────────────────╮
+│ {small,big}                                  │
+│     small        Train a smaller model.      │
+│     big          Train a bigger model.       │
+╰──────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 10_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 10_base_configs.py small [-h] [--dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}]
-                                [--num-layers <span class="ansi-bold">INT</span>] [--units <span class="ansi-bold">INT</span>]
-                                [--batch-size <span class="ansi-bold">INT</span>] [--train-steps <span class="ansi-bold">INT</span>] --seed
-                                <span class="ansi-bold">INT</span> [--activation <span class="ansi-red">{fixed}</span>]
-                                [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]
+<kbd>python 10_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 10_base_configs.py small [-h] [--dataset {mnist,imagenet-50}]
+                                [--num-layers INT] [--units INT]
+                                [--batch-size INT] [--train-steps INT] --seed
+                                INT [--activation {fixed}]
+                                [{optimizer:adam-optimizer,optimizer:sgd-optim
+izer}]
 
 Train a smaller model.
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help              show this help message and exit
-  --dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}
-                          Dataset to run experiment on. <span class="ansi-dark">(default: mnist)</span>
-  --num-layers <span class="ansi-bold">INT</span>        Model size. <span class="ansi-dark">(default: 4)</span>
-  --units <span class="ansi-bold">INT</span>             Model size. <span class="ansi-dark">(default: 64)</span>
-  --batch-size <span class="ansi-bold">INT</span>        Batch size. <span class="ansi-dark">(default: 2048)</span>
-  --train-steps <span class="ansi-bold">INT</span>       Total number of training steps. <span class="ansi-dark">(default: 30000)</span>
-  --seed <span class="ansi-bold">INT</span>              Random seed. This is helpful for making sure that
-                          our experiments are all
-                          reproducible! <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --activation <span class="ansi-red">{fixed}</span>    Activation to use. Not specifiable via the
-                          commandline. <span class="ansi-dark">(fixed to: &lt;class
-                          'torch.nn.modules.activation.ReLU'&gt;)</span>
-
-<span class="ansi-bold">optional subcommands</span>:
-  Optimizer parameters.  (default: optimizer:sgd-optimizer)
-
-  [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]
-    optimizer:adam-optimizer
-    optimizer:sgd-optimizer</pre>
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help            show this help message and exit                      │
+│ --dataset {mnist,imagenet-50}                                              │
+│                       Dataset to run experiment on. (default: mnist)       │
+│ --num-layers INT      Model size. (default: 4)                             │
+│ --units INT           Model size. (default: 64)                            │
+│ --batch-size INT      Batch size. (default: 2048)                          │
+│ --train-steps INT     Total number of training steps. (default: 30000)     │
+│ --seed INT            Random seed. This is helpful for making sure that    │
+│                       our experiments are all                              │
+│                       reproducible! (required)                             │
+│ --activation {fixed}  Activation to use. Not specifiable via the           │
+│                       commandline. (fixed to: &lt;class                       │
+│                       'torch.nn.modules.activation.ReLU'&gt;)                 │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ optional subcommands ─────────────────────────────────────────────────────╮
+│  Optimizer parameters.  (default: optimizer:sgd-optimizer)                 │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]                       │
+│     optimizer:adam-optimizer                                               │
+│     optimizer:sgd-optimizer                                                │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 10_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=SgdOptimizer(learning_rate=0.0003), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</pre>
 <hr class="docutils" />
-<kbd>python 10_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: 10_base_configs.py big [-h] [--dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}]
-                              [--num-layers <span class="ansi-bold">INT</span>] [--units <span class="ansi-bold">INT</span>]
-                              [--batch-size <span class="ansi-bold">INT</span>] [--train-steps <span class="ansi-bold">INT</span>] --seed
-                              <span class="ansi-bold">INT</span> [--activation <span class="ansi-red">{fixed}</span>]
-                              [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]
+<kbd>python 10_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: 10_base_configs.py big [-h] [--dataset {mnist,imagenet-50}]
+                              [--num-layers INT] [--units INT]
+                              [--batch-size INT] [--train-steps INT] --seed
+                              INT [--activation {fixed}]
+                              [{optimizer:adam-optimizer,optimizer:sgd-optimiz
+er}]
 
 Train a bigger model.
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help              show this help message and exit
-  --dataset {<span class="ansi-bold">mnist</span>,<span class="ansi-bold">imagenet-50</span>}
-                          Dataset to run experiment on. <span class="ansi-dark">(default: imagenet-50)</span>
-  --num-layers <span class="ansi-bold">INT</span>        Model size. <span class="ansi-dark">(default: 8)</span>
-  --units <span class="ansi-bold">INT</span>             Model size. <span class="ansi-dark">(default: 256)</span>
-  --batch-size <span class="ansi-bold">INT</span>        Batch size. <span class="ansi-dark">(default: 32)</span>
-  --train-steps <span class="ansi-bold">INT</span>       Total number of training steps. <span class="ansi-dark">(default: 100000)</span>
-  --seed <span class="ansi-bold">INT</span>              Random seed. This is helpful for making sure that
-                          our experiments are all
-                          reproducible! <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --activation <span class="ansi-red">{fixed}</span>    Activation to use. Not specifiable via the
-                          commandline. <span class="ansi-dark">(fixed to: &lt;class
-                          'torch.nn.modules.activation.GELU'&gt;)</span>
-
-<span class="ansi-bold">optional subcommands</span>:
-  Optimizer parameters.  (default: optimizer:adam-optimizer)
-
-  [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]
-    optimizer:adam-optimizer
-    optimizer:sgd-optimizer</pre>
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help            show this help message and exit                      │
+│ --dataset {mnist,imagenet-50}                                              │
+│                       Dataset to run experiment on. (default: imagenet-50) │
+│ --num-layers INT      Model size. (default: 8)                             │
+│ --units INT           Model size. (default: 256)                           │
+│ --batch-size INT      Batch size. (default: 32)                            │
+│ --train-steps INT     Total number of training steps. (default: 100000)    │
+│ --seed INT            Random seed. This is helpful for making sure that    │
+│                       our experiments are all                              │
+│                       reproducible! (required)                             │
+│ --activation {fixed}  Activation to use. Not specifiable via the           │
+│                       commandline. (fixed to: &lt;class                       │
+│                       'torch.nn.modules.activation.GELU'&gt;)                 │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ optional subcommands ─────────────────────────────────────────────────────╮
+│  Optimizer parameters.  (default: optimizer:adam-optimizer)                │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]                       │
+│     optimizer:adam-optimizer                                               │
+│     optimizer:sgd-optimizer                                                │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 10_base_configs.py big --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)</pre>
 </section>

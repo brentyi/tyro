@@ -270,36 +270,40 @@
 <hr class="docutils" />
 <kbd>python 08_subcommands.py --help</kbd><pre class="ansi-block literal-block">usage: 08_subcommands.py [-h] {cmd:checkout,cmd:commit}
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help              show this help message and exit
-
-<span class="ansi-bold">subcommands</span>:
-  {cmd:checkout,cmd:commit}
-    cmd:checkout          Checkout a branch.
-    cmd:commit            Commit changes.</pre>
+╭─ arguments ─────────────────────────────────╮
+│ -h, --help  show this help message and exit │
+╰─────────────────────────────────────────────╯
+╭─ subcommands ───────────────────────────────╮
+│ {cmd:checkout,cmd:commit}                   │
+│     cmd:checkout                            │
+│                 Checkout a branch.          │
+│     cmd:commit  Commit changes.             │
+╰─────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 08_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">usage: 08_subcommands.py cmd:commit [-h] --cmd.message <span class="ansi-bold">STR</span> [--cmd.all]
+<kbd>python 08_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">usage: 08_subcommands.py cmd:commit [-h] --cmd.message STR [--cmd.all]
 
 Commit changes.
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help         show this help message and exit
-
-<span class="ansi-bold">cmd arguments</span>:
-  --cmd.message <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --cmd.all          <span class="ansi-dark">(sets: all=True)</span></pre>
+╭─ arguments ────────────────────────────────────────╮
+│ -h, --help         show this help message and exit │
+╰────────────────────────────────────────────────────╯
+╭─ cmd arguments ────────────────────────────────────╮
+│ --cmd.message STR  (required)                      │
+│ --cmd.all          (sets: all=True)                │
+╰────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 08_subcommands.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">Commit(message='hello', all=True)</pre>
 <hr class="docutils" />
-<kbd>python 08_subcommands.py cmd:checkout --help</kbd><pre class="ansi-block literal-block">usage: 08_subcommands.py cmd:checkout [-h] --cmd.branch <span class="ansi-bold">STR</span>
+<kbd>python 08_subcommands.py cmd:checkout --help</kbd><pre class="ansi-block literal-block">usage: 08_subcommands.py cmd:checkout [-h] --cmd.branch STR
 
 Checkout a branch.
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help        show this help message and exit
-
-<span class="ansi-bold">cmd arguments</span>:
-  --cmd.branch <span class="ansi-bold">STR</span>  <span class="ansi-bold"></span><span class="ansi-red">(required)</span></pre>
+╭─ arguments ───────────────────────────────────────╮
+│ -h, --help        show this help message and exit │
+╰───────────────────────────────────────────────────╯
+╭─ cmd arguments ───────────────────────────────────╮
+│ --cmd.branch STR  (required)                      │
+╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 08_subcommands.py cmd:checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">Checkout(branch='main')</pre>
 </section>

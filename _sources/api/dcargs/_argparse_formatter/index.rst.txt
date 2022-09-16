@@ -9,6 +9,26 @@
 Module Contents
 ---------------
 
+.. py:data:: BORDER_STYLE
+   
+
+   
+
+.. py:data:: DESCRIPTION_STYLE
+   
+
+   
+
+.. py:data:: INVOCATION_STYLE
+   
+
+   
+
+.. py:data:: METAVAR_STYLE
+   
+
+   
+
 .. py:function:: monkeypatch_len(obj: Any) -> int
 
 
@@ -26,6 +46,9 @@ Module Contents
    * Applies a temporary monkey patch for making argparse ignore ANSI codes when
      wrapping usage text.
    * Enables support for Windows via colorama.
+
+.. py:function:: str_from_rich(renderable: rich.console.RenderableType) -> str
+
 
 .. py:function:: make_formatter_class(field_count: int) -> Any
 

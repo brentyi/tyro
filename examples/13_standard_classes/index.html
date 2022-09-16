@@ -258,15 +258,16 @@ constructors of) standard Python classes.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 13_standard_classes.py --help</kbd><pre class="ansi-block literal-block">usage: 13_standard_classes.py [-h] --field1 <span class="ansi-bold">STR</span> --field2 <span class="ansi-bold">INT</span> [--flag]
+<kbd>python 13_standard_classes.py --help</kbd><pre class="ansi-block literal-block">usage: 13_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
 
 Arguments.
 
-<span class="ansi-bold">arguments</span>:
-  -h, --help    show this help message and exit
-  --field1 <span class="ansi-bold">STR</span>  A string field. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --field2 <span class="ansi-bold">INT</span>  A numeric field. <span class="ansi-bold"></span><span class="ansi-red">(required)</span>
-  --flag        A boolean flag. <span class="ansi-dark">(sets: flag=True)</span></pre>
+╭─ arguments ─────────────────────────────────────╮
+│ -h, --help    show this help message and exit   │
+│ --field1 STR  A string field. (required)        │
+│ --field2 INT  A numeric field. (required)       │
+│ --flag        A boolean flag. (sets: flag=True) │
+╰─────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 13_standard_classes.py --field1 hello --field2 7</kbd><pre class="ansi-block literal-block">['hello', 7, False]</pre>
 </section>

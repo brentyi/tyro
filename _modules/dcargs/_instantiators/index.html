@@ -356,7 +356,7 @@
 
         <span class="k">return</span> <span class="n">instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">format_metavar</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{None}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">,),</span>
         <span class="p">)</span>
 
@@ -443,9 +443,9 @@
 
     <span class="k">return</span> <span class="n">instantiator_base_case</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
         <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">metavar</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">format_metavar</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">auto_choices</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="k">else</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">format_metavar</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">auto_choices</span><span class="p">)))</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
+        <span class="k">else</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">auto_choices</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
         <span class="n">choices</span><span class="o">=</span><span class="n">auto_choices</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -804,7 +804,7 @@
         <span class="k">lambda</span> <span class="n">strings</span><span class="p">:</span> <span class="n">choices</span><span class="p">[</span><span class="n">str_choices</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
         <span class="n">InstantiatorMetadata</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">format_metavar</span><span class="p">,</span> <span class="n">str_choices</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
             <span class="n">choices</span><span class="o">=</span><span class="n">str_choices</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">)</span>
