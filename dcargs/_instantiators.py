@@ -126,7 +126,7 @@ def instantiator_from_type(
 
         return instantiator, InstantiatorMetadata(
             nargs=1,
-            metavar="{" + _strings.format_metavar("None") + "}",
+            metavar="{None}",
             choices=("None",),
         )
 
@@ -213,9 +213,9 @@ def instantiator_from_type(
 
     return instantiator_base_case, InstantiatorMetadata(
         nargs=1,
-        metavar=_strings.format_metavar(typ.__name__.upper())
+        metavar=typ.__name__.upper()
         if auto_choices is None
-        else "{" + ",".join(map(_strings.format_metavar, map(str, auto_choices))) + "}",
+        else "{" + ",".join(map(str, auto_choices)) + "}",
         choices=auto_choices,
     )
 
@@ -574,7 +574,7 @@ def _instantiator_from_literal(
         lambda strings: choices[str_choices.index(strings[0])],
         InstantiatorMetadata(
             nargs=1,
-            metavar="{" + ",".join(map(_strings.format_metavar, str_choices)) + "}",
+            metavar="{" + ",".join(str_choices) + "}",
             choices=str_choices,
         ),
     )

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcargs"
-version = "0.3.2"
+version = "0.3.3"
 description = "Strongly typed, zero-effort CLI interfaces"
 authors = ["brentyi <brentyi@berkeley.edu>"]
 include = ["./dcargs/**/*"]
@@ -19,6 +19,7 @@ termcolor = "^1.1.0"
 colorama = {version = "^0.4.0", platform = "win32"}
 frozendict = "^2.3.4"
 # shtab = "^1.5.5"
+rich = "^12.5.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"

@@ -6,7 +6,6 @@ import dataclasses
 import itertools
 from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
-import termcolor
 from typing_extensions import get_args, get_origin
 
 from . import (
@@ -200,9 +199,7 @@ class ParserSpecification:
 
         # Break some API boundaries to rename the optional group.
         parser._action_groups[1].title = format_group_name("")
-        positional_group = parser.add_argument_group(
-            "positional arguments"
-        )
+        positional_group = parser.add_argument_group("positional arguments")
         parser._action_groups = parser._action_groups[::-1]
 
         # Add each argument group. Note that groups with only suppressed arguments won't
@@ -212,11 +209,10 @@ class ParserSpecification:
                 arg.lowered.help is not argparse.SUPPRESS
                 and arg.prefix not in group_from_prefix
             ):
+                description = self.helptext_from_nested_class_field_name.get(arg.prefix)
                 group_from_prefix[arg.prefix] = parser.add_argument_group(
                     format_group_name(arg.prefix),
-                    description=self.helptext_from_nested_class_field_name.get(
-                        arg.prefix
-                    ),
+                    description=description,
                 )
 
         # Add each argument.
