@@ -49,9 +49,9 @@ def test_helptext():
     assert "x INT" in helptext
     assert "y INT" in helptext
     assert "z INT" in helptext
-    assert "Documentation 1 (required)\n" in helptext
-    assert "Documentation 2 (required)\n" in helptext
-    assert "Documentation 3 (default: 3)\n" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert "Documentation 2 (required)" in helptext
+    assert "Documentation 3 (default: 3)" in helptext
 
 
 def test_helptext_from_class_docstring():
@@ -75,9 +75,9 @@ def test_helptext_from_class_docstring():
     assert "x INT" in helptext
     assert "y INT" in helptext
     assert "z INT" in helptext
-    assert "Documentation 1 (required)\n" in helptext
-    assert "Documentation 2 (required)\n" in helptext
-    assert "Documentation 3 (default: 3)\n" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert "Documentation 2 (required)" in helptext
+    assert "Documentation 3 (default: 3)" in helptext
 
 
 def test_helptext_from_class_docstring_args():
@@ -101,9 +101,9 @@ def test_helptext_from_class_docstring_args():
     assert "x INT" in helptext
     assert "y INT" in helptext
     assert "z INT" in helptext
-    assert "Documentation 1 (required)\n" in helptext
-    assert "Documentation 2 (required)\n" in helptext
-    assert "Documentation 3 (default: 3)\n" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert "Documentation 2 (required)" in helptext
+    assert "Documentation 3 (default: 3)" in helptext
 
 
 def test_helptext_inherited():
@@ -211,8 +211,9 @@ def test_helptext_defaults():
         y: Color = Color.RED
 
     helptext = _get_helptext(HelptextWithVariousDefaults)
-    assert "show this help message and exit\n  --x PATH" in helptext
-    assert "(default: /some/path/to/a/file)\n" in helptext
+    assert "show this help message and exit" in helptext
+    assert "--x PATH" in helptext
+    assert "(default: /some/path/to/a/file)" in helptext
     assert "--y {RED,GREEN,BLUE}" in helptext
     assert "(default: RED)" in helptext
 
@@ -233,7 +234,7 @@ def test_multiline_helptext():
         Next line of documentation 3"""
 
     helptext = _get_helptext(HelptextMultiline)
-    assert "Documentation 1 (required)\n" in helptext
+    assert "Documentation 1 (required)" in helptext
     assert "Documentation 2" in helptext
     assert "documentation 2" in helptext
     assert "Documentation 3" in helptext
@@ -249,9 +250,9 @@ def test_grouped_helptext():
         z: int = 3
 
     helptext = _get_helptext(HelptextGrouped)
-    assert "Documentation 1 (required)\n" in helptext
-    assert "Description of both y and z. (required)\n" in helptext
-    assert "Description of both y and z. (default: 3)\n" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert "Description of both y and z. (required)" in helptext
+    assert "Description of both y and z. (default: 3)" in helptext
 
 
 def test_none_default_value_helptext():
@@ -261,8 +262,8 @@ def test_none_default_value_helptext():
         """An optional variable."""
 
     helptext = _get_helptext(Config)
-    assert "  --x {None}|INT" in helptext
-    assert "An optional variable. (default: None)\n" in helptext
+    assert "--x {None}|INT" in helptext
+    assert "An optional variable. (default: None)" in helptext
 
 
 def test_helptext_hard_bool():
@@ -280,7 +281,7 @@ def test_helptext_hard_bool():
 
     helptext = _get_helptext(HelptextHardString)
     assert "--x" in helptext
-    assert "Helptext. 2% milk." in helptext
+    assert "2% milk." in helptext
 
 
 def test_helptext_with_inheritance():
@@ -333,7 +334,7 @@ def test_tuple_helptext():
         x: Tuple[int, str, float]
 
     helptext = _get_helptext(TupleHelptext)
-    assert "--x INT STR FLOAT\n" in helptext
+    assert "--x INT STR FLOAT" in helptext
 
 
 def test_tuple_helptext_defaults():
@@ -343,7 +344,7 @@ def test_tuple_helptext_defaults():
 
     helptext = _get_helptext(TupleHelptextDefaults)
     assert "--x INT STR STR" in helptext
-    assert "(default: 5 'hello world' hello)\n" in helptext
+    assert "(default: 5 'hello world' hello)" in helptext
 
 
 def test_generic_helptext():
@@ -354,7 +355,7 @@ def test_generic_helptext():
         x: T
 
     helptext = _get_helptext(GenericTupleHelptext[int])
-    assert "--x INT\n" in helptext
+    assert "--x INT" in helptext
 
 
 def test_generic_tuple_helptext():
@@ -365,7 +366,7 @@ def test_generic_tuple_helptext():
         x: Tuple[T, T, T]
 
     helptext = _get_helptext(GenericTupleHelptext[int])
-    assert "--x INT INT INT\n" in helptext
+    assert "--x INT INT INT" in helptext
 
 
 def test_generic_list_helptext():
@@ -376,7 +377,7 @@ def test_generic_list_helptext():
         x: List[T]
 
     helptext = _get_helptext(GenericTupleHelptext[int])
-    assert "--x INT [INT ...]\n" in helptext
+    assert "--x INT [INT ...]" in helptext
 
 
 def test_literal_helptext():
@@ -387,7 +388,7 @@ def test_literal_helptext():
 
     helptext = _get_helptext(LiteralHelptext)
     assert "--x {1,2,3}" in helptext
-    assert "A number. (required)\n" in helptext
+    assert "A number. (required)" in helptext
 
 
 def test_optional_literal_helptext():
@@ -398,7 +399,7 @@ def test_optional_literal_helptext():
 
     helptext = _get_helptext(OptionalLiteralHelptext)
     assert "--x {None,1,2,3}" in helptext
-    assert "A number. (default: None)\n" in helptext
+    assert "A number. (default: None)" in helptext
 
 
 def test_multiple_subparsers_helptext():
@@ -457,8 +458,8 @@ def test_optional_helptext():
     helptext = _get_helptext(OptionalHelptext)
     assert cast(str, OptionalHelptext.__doc__) in helptext
     assert "--x {None}|INT" in helptext
-    assert "--y {None}|INT [{None}|INT ...]\n" in helptext
-    assert "[--z {None}|INT]\n" in helptext
+    assert "--y {None}|INT [{None}|INT ...]" in helptext
+    assert "[--z {None}|INT]" in helptext
 
 
 def test_metavar_0():

@@ -188,7 +188,7 @@ def test_helptext_and_default_typeddict():
     assert "--z INT" in helptext
     assert "Documentation 1 (required)" in helptext
     assert "Documentation 2 (required)" in helptext
-    assert "Documentation 3 (default: 3)\n" in helptext
+    assert "Documentation 3 (default: 3)" in helptext
 
 
 def test_basic_namedtuple():
@@ -249,9 +249,9 @@ def test_helptext_and_default_namedtuple():
     assert "--x INT" in helptext
     assert "--y INT" in helptext
     assert "--z INT" in helptext
-    assert "Documentation 1 (required)\n" in helptext
-    assert "Documentation 2 (required)\n" in helptext
-    assert "Documentation 3 (default: 3)\n" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert "Documentation 2 (required)" in helptext
+    assert "Documentation 3 (default: 3)" in helptext
 
 
 def test_helptext_and_default_namedtuple_alternate():
@@ -287,7 +287,7 @@ def test_helptext_and_default_namedtuple_alternate():
             )
     helptext = dcargs._strings.strip_ansi_sequences(f.getvalue())
     assert cast(str, HelptextNamedTuple.__doc__) in helptext
-    assert "Documentation 1 (required)\n" in helptext
-    assert "Documentation 2 (required)\n" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert "Documentation 2 (required)" in helptext
     assert "Documentation 3" in helptext
-    assert "(default: 3)\n" in helptext
+    assert "(default: 3)" in helptext
