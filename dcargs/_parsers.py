@@ -192,9 +192,7 @@ class ParserSpecification:
 
         # Make argument groups.
         def format_group_name(nested_field_name: str) -> str:
-            return termcolor.colored(
-                (nested_field_name + " arguments").strip(), attrs=["bold"]
-            )
+            return (nested_field_name + " arguments").strip()
 
         group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
             "": parser._action_groups[1],
@@ -203,7 +201,7 @@ class ParserSpecification:
         # Break some API boundaries to rename the optional group.
         parser._action_groups[1].title = format_group_name("")
         positional_group = parser.add_argument_group(
-            termcolor.colored("positional arguments", attrs=["bold"])
+            "positional arguments"
         )
         parser._action_groups = parser._action_groups[::-1]
 
@@ -433,7 +431,7 @@ class SubparsersSpecification:
                 dest=_strings.make_subparser_dest(self.prefix),
                 description=self.description,
                 required=self.required,
-                title=termcolor.colored(title, attrs=["bold"]),
+                title=title,
                 metavar=metavar,
             )
 
