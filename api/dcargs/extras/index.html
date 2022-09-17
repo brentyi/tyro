@@ -230,10 +230,25 @@
         <article role="main">
           <section id="module-dcargs.extras">
 <span id="dcargs-extras"></span><h1><a class="reference internal" href="#module-dcargs.extras" title="dcargs.extras"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a><a class="headerlink" href="#module-dcargs.extras" title="Permalink to this heading">#</a></h1>
-<p>The <a class="reference internal" href="#module-dcargs.extras" title="dcargs.extras"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a> submodule contains helpers that complement <a class="reference internal" href="../#dcargs.cli" title="dcargs.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">dcargs.cli()</span></code></a>, but
-aren’t considered part of the core interface.</p>
+<p>The <a class="reference internal" href="#module-dcargs.extras" title="dcargs.extras"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a> submodule contains helpers that complement <a class="reference internal" href="../#dcargs.cli" title="dcargs.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">dcargs.cli()</span></code></a>.</p>
+<p>Compared to the core interface, APIs here are more likely to be changed or deprecated.</p>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading">#</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="dcargs.extras.set_accent_color">
+<span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">set_accent_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accent_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/dcargs/_argparse_formatter/#set_accent_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.set_accent_color" title="Permalink to this definition">#</a></dt>
+<dd><p>Set an accent color to use in help messages. Takes any color supported by <code class="docutils literal notranslate"><span class="pre">rich</span></code>,
+see <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">rich.color</span></code>. Experimental.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>accent_color</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="dcargs.extras.subcommand_type_from_defaults">
 <span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">subcommand_type_from_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/extras/_base_configs/#subcommand_type_from_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.subcommand_type_from_defaults" title="Permalink to this definition">#</a></dt>
@@ -423,6 +438,7 @@ future version of <code class="code docutils literal notranslate"><span class="p
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a><ul>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#dcargs.extras.set_accent_color">set_accent_color</a></li>
 <li><a class="reference internal" href="#dcargs.extras.subcommand_type_from_defaults">subcommand_type_from_defaults</a></li>
 <li><a class="reference internal" href="#dcargs.extras.from_yaml">from_yaml</a></li>
 <li><a class="reference internal" href="#dcargs.extras.to_yaml">to_yaml</a></li>

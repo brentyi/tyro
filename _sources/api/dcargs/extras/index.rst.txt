@@ -6,12 +6,19 @@
 .. autoapi-nested-parse::
 
    
-   The :mod:`dcargs.extras` submodule contains helpers that complement :func:`dcargs.cli()`, but
-   aren't considered part of the core interface.
+   The :mod:`dcargs.extras` submodule contains helpers that complement :func:`dcargs.cli()`.
+
+   Compared to the core interface, APIs here are more likely to be changed or deprecated.
 
 
 Package Contents
 ----------------
+
+.. py:function:: set_accent_color(accent_color: str) -> None
+
+   
+   Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
+   see ``python -m rich.color``. Experimental.
 
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> Type[T]
 
