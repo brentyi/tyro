@@ -1,7 +1,6 @@
 import argparse
 import contextlib
 import functools
-import re as _re
 import shutil
 from typing import Any, ContextManager, Generator, List
 
@@ -17,10 +16,26 @@ from rich.text import Text
 
 from . import _strings
 
-BORDER_STYLE = Style(color="bright_blue", dim=True)
-DESCRIPTION_STYLE = Style(color="bright_blue", bold=True)
-INVOCATION_STYLE = Style(color="bright_white", bold=True)
-METAVAR_STYLE = Style(color="bright_blue")
+BORDER_STYLE = Style()
+DESCRIPTION_STYLE = Style()
+INVOCATION_STYLE = Style()
+METAVAR_STYLE = Style()
+
+
+def set_accent_color(accent_color: str) -> None:
+    """Set an accent color to use in help messages. Takes any color supported by `rich`,
+    see `python -m rich.color`. Experimental."""
+    global BORDER_STYLE
+    BORDER_STYLE = Style(color=accent_color, dim=True)
+    global DESCRIPTION_STYLE
+    DESCRIPTION_STYLE = Style(color=accent_color, bold=True)
+    global INVOCATION_STYLE
+    INVOCATION_STYLE = Style(bold=True)
+    global METAVAR_STYLE
+    METAVAR_STYLE = Style(color=accent_color)
+
+
+set_accent_color("color(30)")
 
 
 def monkeypatch_len(obj: Any) -> int:
@@ -165,7 +180,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # Get rich renderables from items.
                 top_parts = []
                 column_parts = []
-                panel_lines_cumsum = [0]
+                column_parts_lines_cumsum = [0]
                 for func, args in self.items:
                     item_content = func(*args)
                     if item_content is None:
@@ -180,11 +195,9 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     # Add panels. (argument groups, subcommands, etc)
                     else:
                         assert isinstance(item_content, Panel)
-                        with console.capture() as length_capture:
-                            console.print(item_content)
-                        panel_lines_cumsum.append(
-                            panel_lines_cumsum[-1]
-                            + length_capture.get().strip().count("\n")
+                        column_parts_lines_cumsum.append(
+                            column_parts_lines_cumsum[-1]
+                            + str_from_rich(item_content).strip().count("\n")
                             + 2
                         )
                         column_parts.append(item_content)
@@ -193,47 +206,38 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     """Find the index of the first panel where the line count is closest
                     to a target length."""
                     deltas = tuple(
-                        map(lambda l: abs(l - line_count), panel_lines_cumsum)
+                        map(lambda l: abs(l - line_count), column_parts_lines_cumsum)
                     )
                     return deltas.index(min(deltas))
 
-                # Single column.
-                if panel_lines_cumsum[-1] < 40 or self.formatter._width < 160:
-                    # Wrapping in columns here prevents everything from going
-                    # full-width.
-                    columns = Columns([Group(*column_parts)], column_first=True)
-
-                # Two column mode.
-                elif panel_lines_cumsum[-1] < 120 or self.formatter._width < 205:
-                    split_index = _index_closest_to(panel_lines_cumsum[-1] // 2)
-                    column_width = self.formatter._width // 2 - 1
-                    columns = Columns(
-                        [
-                            Group(*column_parts[:split_index]),
-                            Group(*column_parts[split_index:]),
-                        ],
-                        column_first=True,
-                        width=column_width,
+                # Split into columns.
+                min_column_width = 65
+                height_breakpoint = 50
+                column_count = max(
+                    1,
+                    min(
+                        column_parts_lines_cumsum[-1] // height_breakpoint + 1,
+                        self.formatter._width // min_column_width,
+                    ),
+                )
+                split_indices = [0]
+                for i in range(1, column_count):
+                    split_indices.append(
+                        _index_closest_to(
+                            column_parts_lines_cumsum[-1] // column_count * i
+                        )
                     )
-
-                # Three column mode.
-                else:
-                    split_index1 = _index_closest_to(panel_lines_cumsum[-1] // 3)
-                    split_index2 = _index_closest_to(
-                        panel_lines_cumsum[split_index1] + panel_lines_cumsum[-1] // 3
-                    )
-                    column_width = self.formatter._width // 3 - 1
-                    columns = Columns(
-                        [
-                            Group(*column_parts[:split_index1]),
-                            Group(*column_parts[split_index1:split_index2]),
-                            Group(*column_parts[split_index2:]),
-                        ],
-                        column_first=True,
-                        width=column_width,
-                    )
-
-                # Three column mode.
+                split_indices.append(len(column_parts))
+                columns = Columns(
+                    [
+                        Group(*column_parts[split_indices[i] : split_indices[i + 1]])
+                        for i in range(column_count)
+                    ],
+                    column_first=True,
+                    width=self.formatter._width // column_count - 1
+                    if column_count > 1
+                    else None,
+                )
 
                 console.print(Group(*top_parts))
                 console.print(columns)
@@ -341,108 +345,3 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 border_style=BORDER_STYLE,
                 # padding=(1, 1, 0, 1),
             )
-
-    def _format_actions_usage(self, actions, groups):
-        # find group indices and identify actions in groups
-        group_actions = set()
-        inserts = {}
-        for group in groups:
-            try:
-                start = actions.index(group._group_actions[0])  # type: ignore
-            except ValueError:
-                continue
-            else:
-                end = start + len(group._group_actions)
-                if actions[start:end] == group._group_actions:  # type: ignore
-                    for action in group._group_actions:
-                        group_actions.add(action)
-                    if not group.required:  # type: ignore
-                        if start in inserts:
-                            inserts[start] += " ["
-                        else:
-                            inserts[start] = "["
-                        if end in inserts:
-                            inserts[end] += "]"
-                        else:
-                            inserts[end] = "]"
-                    else:
-                        if start in inserts:
-                            inserts[start] += " ("
-                        else:
-                            inserts[start] = "("
-                        if end in inserts:
-                            inserts[end] += ")"
-                        else:
-                            inserts[end] = ")"
-                    for i in range(start + 1, end):
-                        inserts[i] = "|"
-
-        # collect all actions format strings
-        parts = []
-        for i, action in enumerate(actions):
-            # suppressed arguments are marked with None
-            # remove | separators for suppressed arguments
-            if action.help is argparse.SUPPRESS:
-                parts.append(None)
-                if inserts.get(i) == "|":
-                    inserts.pop(i)
-                elif inserts.get(i + 1) == "|":
-                    inserts.pop(i + 1)
-
-            # produce all arg strings
-            elif not action.option_strings:
-                default = self._get_default_metavar_for_positional(action)
-                part = self._format_args(action, default)
-
-                # if it's in a group, strip the outer []
-                if action in group_actions:
-                    if part[0] == "[" and part[-1] == "]":
-                        part = part[1:-1]
-
-                # add the action string to the list
-                parts.append(part)
-
-            # produce the first way to invoke the option in brackets
-            else:
-                option_string = action.option_strings[0]
-
-                # if the Optional doesn't take a value, format is:
-                #    -s or --long
-                if action.nargs == 0:
-                    part = "%s" % option_string
-
-                # if the Optional takes a value, format is:
-                #    -s ARGS or --long ARGS
-                else:
-                    default = self._get_default_metavar_for_optional(action)
-                    args_string = self._format_args(action, default)
-                    part = "%s %s" % (option_string, args_string)
-
-                # make it look optional if it's not required or in a group
-                if not action.required and action not in group_actions:
-                    part = "[%s]" % part
-
-                # Apply invocation style.
-                part = str_from_rich(Text(part, style=INVOCATION_STYLE))
-
-                # add the action string to the list
-                parts.append(part)
-
-        # insert things at the necessary indices
-        for i in sorted(inserts, reverse=True):
-            parts[i:i] = [inserts[i]]
-
-        # join all the action items with spaces
-        text = " ".join([item for item in parts if item is not None])
-
-        # clean up separators for mutually exclusive groups
-        open = r"[\[(]"
-        close = r"[\])]"
-        text = _re.sub(r"(%s) " % open, r"\1", text)
-        text = _re.sub(r" (%s)" % close, r"\1", text)
-        text = _re.sub(r"%s *%s" % (open, close), r"", text)
-        text = _re.sub(r"\(([^|]*)\)", r"\1", text)
-        text = text.strip()
-
-        # return the text
-        return text
