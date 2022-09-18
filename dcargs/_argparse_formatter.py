@@ -320,7 +320,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                             description_part is None
                         )  # Should only have one description part.
                         description_part = Text.from_ansi(
-                            " " + item_content.strip() + "\n",
+                            item_content.strip() + "\n",
                             style=DESCRIPTION_STYLE,
                         )
 
