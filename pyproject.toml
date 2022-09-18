@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dcargs"
-version = "0.3.4"
+version = "0.3.5"
 description = "Strongly typed, zero-effort CLI interfaces"
 authors = ["brentyi <brentyi@berkeley.edu>"]
 include = ["./dcargs/**/*"]
