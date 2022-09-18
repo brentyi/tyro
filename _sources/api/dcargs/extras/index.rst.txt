@@ -14,7 +14,7 @@
 Package Contents
 ----------------
 
-.. py:function:: set_accent_color(accent_color: str) -> None
+.. py:function:: set_accent_color(accent_color: Optional[str]) -> None
 
    
    Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
