@@ -2,7 +2,7 @@ import argparse
 import contextlib
 import functools
 import shutil
-from typing import Any, ContextManager, Generator, List
+from typing import Any, ContextManager, Generator, List, Optional
 
 import termcolor
 from rich.columns import Columns
@@ -22,7 +22,7 @@ INVOCATION_STYLE = Style()
 METAVAR_STYLE = Style()
 
 
-def set_accent_color(accent_color: str) -> None:
+def set_accent_color(accent_color: Optional[str]) -> None:
     """Set an accent color to use in help messages. Takes any color supported by `rich`,
     see `python -m rich.color`. Experimental."""
     global BORDER_STYLE
@@ -32,10 +32,10 @@ def set_accent_color(accent_color: str) -> None:
     global INVOCATION_STYLE
     INVOCATION_STYLE = Style(bold=True)
     global METAVAR_STYLE
-    METAVAR_STYLE = Style(color=accent_color)
+    METAVAR_STYLE = Style(color=accent_color, bold=True)
 
 
-set_accent_color("color(30)")
+set_accent_color(None)
 
 
 def monkeypatch_len(obj: Any) -> int:
@@ -121,10 +121,11 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         width = shutil.get_terminal_size().columns - 2
 
         # Try to make helptext more concise when we have a lot of fields!
-        if field_count > 16 and width >= 100:  # pragma: no cover
+        if field_count > 32:  # pragma: no cover
+            # When there are more fields, make helptext more compact.
             max_help_position = min(12, width // 2)  # Usual is 24.
         else:
-            max_help_position = min(24, width // 3)  # Usual is 24.
+            max_help_position = min(36, width // 3)  # Usual is 24.
 
         super().__init__(prog, indent_increment, max_help_position, width)
 
