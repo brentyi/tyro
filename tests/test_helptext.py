@@ -2,6 +2,7 @@ import contextlib
 import dataclasses
 import enum
 import io
+import os
 import pathlib
 from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
@@ -11,7 +12,7 @@ import torch.nn as nn
 from typing_extensions import Annotated, Literal
 
 import dcargs
-import dcargs._argparse_formatter
+import dcargs._arguments
 import dcargs._strings
 
 
@@ -20,14 +21,28 @@ def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         dcargs.cli(f, args=args)
 
-    # Check helptext with vs without termcolor. This can help catch text wrapping bugs
+    # Completion scripts; just smoke test for now.
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
+        dcargs.cli(f, args=["--dcargs-print-completion", "bash"])
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
+        dcargs.cli(f, args=["--dcargs-print-completion", "zsh"])
+
+    # Check helptext with vs without formatting. This can help catch text wrapping bugs
     # caused by ANSI sequences.
     target2 = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
-        with dcargs._argparse_formatter.dummy_termcolor_context():
-            dcargs.cli(f, args=args)
+        dcargs._arguments.USE_RICH = False
+        dcargs.cli(f, args=args)
+        dcargs._arguments.USE_RICH = True
 
-    assert target2.getvalue() == dcargs._strings.strip_ansi_sequences(target.getvalue())
+    if target2.getvalue() != dcargs._strings.strip_ansi_sequences(target.getvalue()):
+        raise AssertionError(
+            "Potential wrapping bug! These two strings should match:\n"
+            + target2.getvalue()
+            + "\n\n"
+            + dcargs._strings.strip_ansi_sequences(target.getvalue())
+        )
+
     return target2.getvalue()
 
 
@@ -45,7 +60,7 @@ def test_helptext():
         """Documentation 3"""
 
     helptext = _get_helptext(Helptext)
-    assert cast(str, Helptext.__doc__) in helptext
+    assert cast(str, helptext) in helptext
     assert "x INT" in helptext
     assert "y INT" in helptext
     assert "z INT" in helptext

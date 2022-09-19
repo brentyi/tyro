@@ -5,7 +5,7 @@ import sys
 import warnings
 from typing import Callable, Optional, Sequence, Type, TypeVar, Union, cast, overload
 
-from . import _argparse_formatter, _calling, _fields, _parsers
+from . import _argparse_formatter, _arguments, _calling, _fields, _parsers
 from . import _shtab as shtab
 from . import _strings, conf
 
@@ -173,21 +173,20 @@ def cli(
 
     args = list(map(fix_arg, args))
 
-    # If we pass in the --dcargs-print-completion flag: turn termcolor off, and get the
-    # shell we want to generate a completion script for (bash/zsh/tcsh).
+    # If we pass in the --dcargs-print-completion flag: turn formatting tags, and get
+    # the shell we want to generate a completion script for (bash/zsh/tcsh).
     #
     # Note that shtab also offers an add_argument_to() functions that fulfills a similar
-    # goal, but manual parsing of argv is convenient for turning off colors.
+    # goal, but manual parsing of argv is convenient for turning off formatting.
     print_completion = len(args) >= 2 and args[0] == "--dcargs-print-completion"
 
-    formatting_context = _argparse_formatter.ansi_context()
     completion_shell = None
     if print_completion:
-        formatting_context = _argparse_formatter.dummy_termcolor_context()
+        _arguments.USE_RICH = False
         completion_shell = args[1]
 
     # Generate parser!
-    with formatting_context:
+    with _argparse_formatter.ansi_context():
         parser = argparse.ArgumentParser(
             prog=prog,
             formatter_class=_argparse_formatter.make_formatter_class(
@@ -197,6 +196,7 @@ def cli(
         parser_definition.apply(parser)
 
         if print_completion:
+            _arguments.USE_RICH = True
             assert completion_shell in ("bash", "zsh", "tcsh",), (
                 "Shell should be one `bash`, `zsh`, or `tcsh`, but got"
                 f" {completion_shell}"

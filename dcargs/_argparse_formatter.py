@@ -1,10 +1,10 @@
 import argparse
 import contextlib
+import dataclasses
 import functools
 import shutil
-from typing import Any, ContextManager, Generator, List, Optional
+from typing import Any, ContextManager, Dict, Generator, List, Optional
 
-import termcolor
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
 from rich.padding import Padding
@@ -13,28 +13,45 @@ from rich.rule import Rule
 from rich.style import Style
 from rich.table import Table
 from rich.text import Text
+from rich.theme import Theme
 
 from . import _strings
 
-BORDER_STYLE = Style()
-DESCRIPTION_STYLE = Style()
-INVOCATION_STYLE = Style()
-METAVAR_STYLE = Style()
+
+@dataclasses.dataclass
+class DcargsTheme:
+    border: Style = Style()
+    description: Style = Style()
+    invocation: Style = Style()
+    metavar: Style = Style()
+    metavar_fixed: Style = Style()
+    helptext: Style = Style()
+    helptext_required: Style = Style()
+    helptext_default: Style = Style()
+
+    def as_rich_theme(self) -> Theme:
+        return Theme(vars(self))
 
 
 def set_accent_color(accent_color: Optional[str]) -> None:
     """Set an accent color to use in help messages. Takes any color supported by `rich`,
     see `python -m rich.color`. Experimental."""
-    global BORDER_STYLE
-    BORDER_STYLE = Style(color=accent_color, dim=True)
-    global DESCRIPTION_STYLE
-    DESCRIPTION_STYLE = Style(color=accent_color, bold=True)
-    global INVOCATION_STYLE
-    INVOCATION_STYLE = Style(bold=True)
-    global METAVAR_STYLE
-    METAVAR_STYLE = Style(color=accent_color, bold=True)
+    THEME.border = Style(color=accent_color, dim=True)
+    THEME.description = Style(color=accent_color, bold=True)
+    THEME.invocation = Style()
+    THEME.metavar = Style(color=accent_color, bold=True)
+    THEME.metavar_fixed = Style(color="red", bold=True)
+    THEME.helptext = Style(dim=True)
+    THEME.helptext_required = Style(color="bright_red", bold=True)
+    THEME.helptext_default = Style(
+        color=accent_color if accent_color is not None else "cyan",
+        dim=True,
+    )
 
 
+# TODO: this is a prototype; for a v1.0.0 release we should revisit whether the global
+# state here is acceptable or not.
+THEME = DcargsTheme()
 set_accent_color(None)
 
 
@@ -43,22 +60,6 @@ def monkeypatch_len(obj: Any) -> int:
         return len(_strings.strip_ansi_sequences(obj))
     else:
         return len(obj)
-
-
-def dummy_termcolor_context() -> ContextManager[None]:
-    """Context for turning termcolor off."""
-
-    def dummy_colored(*args, **kwargs) -> str:
-        return args[0]
-
-    @contextlib.contextmanager
-    def inner() -> Generator[None, None, None]:
-        orig_colored = termcolor.colored
-        termcolor.colored = dummy_colored
-        yield
-        termcolor.colored = orig_colored
-
-    return inner()
 
 
 def ansi_context() -> ContextManager[None]:
@@ -107,7 +108,7 @@ def ansi_context() -> ContextManager[None]:
 def str_from_rich(
     renderable: RenderableType, width: Optional[int] = None, soft_wrap: bool = False
 ) -> str:
-    console = Console(width=width)
+    console = Console(width=width, theme=THEME.as_rich_theme())
     with console.capture() as out:
         console.print(renderable, soft_wrap=soft_wrap)
     return out.get().rstrip("\n")
@@ -139,7 +140,13 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         out = get_metavar(1)[0]
         if isinstance(out, str):
             # Can result in an failed argparse assertion if we turn off soft wrapping.
-            return str_from_rich(Text(out, style=METAVAR_STYLE), soft_wrap=True)
+            return str_from_rich(
+                Text(
+                    out,
+                    style=THEME.metavar_fixed if out == "{fixed}" else THEME.metavar,
+                ),
+                soft_wrap=True,
+            )
         return out
 
     def add_argument(self, action):  # pragma: no cover
@@ -179,7 +186,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 return self._dcargs_format_nonroot()
 
         def _dcargs_format_root(self):
-            console = Console(width=self.formatter._width)
+            console = Console(width=self.formatter._width, theme=THEME.as_rich_theme())
             with console.capture() as capture:
                 # Get rich renderables from items.
                 top_parts = []
@@ -257,6 +264,11 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             item_parts: List[RenderableType] = []
 
             # Put invocation and help side-by-side.
+            if action.option_strings == ["-h", "--help"]:
+                # Darken helptext for --help flag. This makes it visually consistent
+                # with the helptext strings defined via docstrings and set by
+                # _arguments.py.
+                action.help = "[helptext]" + action.help + "[/helptext]"
             if (
                 action.help
                 and len(_strings.strip_ansi_sequences(invocation)) < help_position - 1
@@ -267,10 +279,10 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 table.add_row(
                     Text.from_ansi(
                         invocation,
-                        style=INVOCATION_STYLE,
+                        style=THEME.invocation,
                     ),
                     # Unescape % signs, which need special handling in argparse.
-                    Text.from_ansi(action.help.replace("%%", "%")),
+                    Text.from_markup(action.help.replace("%%", "%")),
                 )
                 item_parts.append(table)
 
@@ -279,14 +291,14 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 item_parts.append(
                     Text.from_ansi(
                         invocation + "\n",
-                        style=INVOCATION_STYLE,
+                        style=THEME.invocation,
                     )
                 )
                 if action.help:
                     item_parts.append(
                         Padding(
                             # Unescape % signs, which need special handling in argparse.
-                            Text.from_ansi(action.help.replace("%%", "%")),
+                            Text.from_markup(action.help.replace("%%", "%")),
                             pad=(0, 0, 0, help_position),
                         )
                     )
@@ -330,7 +342,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         )  # Should only have one description part.
                         description_part = Text.from_ansi(
                             item_content.strip() + "\n",
-                            style=DESCRIPTION_STYLE,
+                            style=THEME.description,
                         )
 
             if len(item_parts) == 0:
@@ -346,12 +358,12 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 heading = ""
 
             if description_part is not None:
-                item_parts = [description_part, Rule(style=BORDER_STYLE)] + item_parts
+                item_parts = [description_part, Rule(style=THEME.border)] + item_parts
 
             return Panel(
                 Group(*item_parts),
                 title=heading,
                 title_align="left",
-                border_style=BORDER_STYLE,
+                border_style=THEME.border,
                 # padding=(1, 1, 0, 1),
             )
