@@ -21,8 +21,6 @@ from typing import (
     Union,
 )
 
-import termcolor
-
 from . import _fields, _instantiators, _resolver, _strings
 from .conf import _markers
 
@@ -197,7 +195,7 @@ def _rule_recursive_instantiator_from_type(
         return dataclasses.replace(
             lowered,
             instantiator=None,
-            metavar=termcolor.colored("{fixed}", color="red"),
+            metavar="{fixed}",
             required=False,
             default=_fields.MISSING_PROP,
         )
@@ -220,7 +218,7 @@ def _rule_recursive_instantiator_from_type(
             # available.
             return dataclasses.replace(
                 lowered,
-                metavar=termcolor.colored("{fixed}", color="red"),
+                metavar="{fixed}",
                 required=False,
                 default=_fields.MISSING_PROP,
             )
@@ -263,6 +261,15 @@ def _rule_convert_defaults_to_strings(
         return dataclasses.replace(lowered, default=as_str(lowered.default))
 
 
+# This can be turned off when we don't want rich-based formatting. (notably for
+# completion scripts)
+USE_RICH = True
+
+
+def _rich_tag_if_enabled(x: str, tag: str):
+    return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
+
+
 def _rule_generate_helptext(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
@@ -281,7 +288,7 @@ def _rule_generate_helptext(
         # Note that the percent symbol needs some extra handling in argparse.
         # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
         docstring_help = docstring_help.replace("%", "%%")
-        help_parts.append(docstring_help)
+        help_parts.append(_rich_tag_if_enabled(docstring_help, "helptext"))
 
     default = lowered.default
     if lowered.is_fixed():
@@ -316,9 +323,9 @@ def _rule_generate_helptext(
             default_text = f"(default: {' '.join(default_parts)})"
         else:
             default_text = f"(default: {shlex.quote(str(default))})"
-        help_parts.append(termcolor.colored(default_text, attrs=["dark"]))
+        help_parts.append(_rich_tag_if_enabled(default_text, "helptext_default"))
     else:
-        help_parts.append(termcolor.colored("(required)", color="red", attrs=["bold"]))
+        help_parts.append(_rich_tag_if_enabled("(required)", "helptext_required"))
 
     return dataclasses.replace(lowered, help=" ".join(help_parts))
 
