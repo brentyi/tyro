@@ -498,6 +498,7 @@
                 <span class="c1"># Darken helptext for --help flag. This makes it visually consistent</span>
                 <span class="c1"># with the helptext strings defined via docstrings and set by</span>
                 <span class="c1"># _arguments.py.</span>
+                <span class="k">assert</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="s2">&quot;[helptext]&quot;</span> <span class="o">+</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="o">+</span> <span class="s2">&quot;[/helptext]&quot;</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">action</span><span class="o">.</span><span class="n">help</span>
