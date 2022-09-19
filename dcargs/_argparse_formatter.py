@@ -268,6 +268,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # Darken helptext for --help flag. This makes it visually consistent
                 # with the helptext strings defined via docstrings and set by
                 # _arguments.py.
+                assert action.help is not None
                 action.help = "[helptext]" + action.help + "[/helptext]"
             if (
                 action.help
