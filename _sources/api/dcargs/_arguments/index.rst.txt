@@ -108,3 +108,8 @@ Module Contents
       field default.
 
 
+.. py:data:: USE_RICH
+   :annotation: = True
+
+   
+

@@ -9,25 +9,51 @@
 Module Contents
 ---------------
 
-.. py:data:: BORDER_STYLE
-   
+.. py:class:: DcargsTheme
 
-   
+   .. py:attribute:: border
+      :annotation: :rich.style.Style
 
-.. py:data:: DESCRIPTION_STYLE
-   
+      
 
-   
+   .. py:attribute:: description
+      :annotation: :rich.style.Style
 
-.. py:data:: INVOCATION_STYLE
-   
+      
 
-   
+   .. py:attribute:: invocation
+      :annotation: :rich.style.Style
 
-.. py:data:: METAVAR_STYLE
-   
+      
 
-   
+   .. py:attribute:: metavar
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: metavar_fixed
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: helptext
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: helptext_required
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: helptext_default
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:method:: as_rich_theme(self) -> rich.theme.Theme
+
+
 
 .. py:function:: set_accent_color(accent_color: Optional[str]) -> None
 
@@ -35,13 +61,13 @@ Module Contents
    Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
    see ``python -m rich.color``. Experimental.
 
-.. py:function:: monkeypatch_len(obj: Any) -> int
-
-
-.. py:function:: dummy_termcolor_context() -> ContextManager[None]
+.. py:data:: THEME
+   
 
    
-   Context for turning termcolor off.
+
+.. py:function:: monkeypatch_len(obj: Any) -> int
+
 
 .. py:function:: ansi_context() -> ContextManager[None]
 

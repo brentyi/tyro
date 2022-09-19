@@ -235,7 +235,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_calling</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_calling</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_shtab</span> <span class="k">as</span> <span class="n">shtab</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
 
@@ -403,21 +403,20 @@
 
     <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">fix_arg</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
 
-    <span class="c1"># If we pass in the --dcargs-print-completion flag: turn termcolor off, and get the</span>
-    <span class="c1"># shell we want to generate a completion script for (bash/zsh/tcsh).</span>
+    <span class="c1"># If we pass in the --dcargs-print-completion flag: turn formatting tags, and get</span>
+    <span class="c1"># the shell we want to generate a completion script for (bash/zsh/tcsh).</span>
     <span class="c1">#</span>
     <span class="c1"># Note that shtab also offers an add_argument_to() functions that fulfills a similar</span>
-    <span class="c1"># goal, but manual parsing of argv is convenient for turning off colors.</span>
+    <span class="c1"># goal, but manual parsing of argv is convenient for turning off formatting.</span>
     <span class="n">print_completion</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--dcargs-print-completion&quot;</span>
 
-    <span class="n">formatting_context</span> <span class="o">=</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ansi_context</span><span class="p">()</span>
     <span class="n">completion_shell</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">print_completion</span><span class="p">:</span>
-        <span class="n">formatting_context</span> <span class="o">=</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">dummy_termcolor_context</span><span class="p">()</span>
+        <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">completion_shell</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="c1"># Generate parser!</span>
-    <span class="k">with</span> <span class="n">formatting_context</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ansi_context</span><span class="p">():</span>
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
             <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
             <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">make_formatter_class</span><span class="p">(</span>
@@ -427,6 +426,7 @@
         <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">print_completion</span><span class="p">:</span>
+            <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">assert</span> <span class="n">completion_shell</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">,),</span> <span class="p">(</span>
                 <span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>

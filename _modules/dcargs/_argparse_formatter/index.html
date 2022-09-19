@@ -230,11 +230,11 @@
           <h1>Source code for dcargs._argparse_formatter</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
-<span class="kn">import</span> <span class="nn">termcolor</span>
 <span class="kn">from</span> <span class="nn">rich.columns</span> <span class="kn">import</span> <span class="n">Columns</span>
 <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
 <span class="kn">from</span> <span class="nn">rich.padding</span> <span class="kn">import</span> <span class="n">Padding</span>
@@ -243,28 +243,45 @@
 <span class="kn">from</span> <span class="nn">rich.style</span> <span class="kn">import</span> <span class="n">Style</span>
 <span class="kn">from</span> <span class="nn">rich.table</span> <span class="kn">import</span> <span class="n">Table</span>
 <span class="kn">from</span> <span class="nn">rich.text</span> <span class="kn">import</span> <span class="n">Text</span>
+<span class="kn">from</span> <span class="nn">rich.theme</span> <span class="kn">import</span> <span class="n">Theme</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
 
-<span class="n">BORDER_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-<span class="n">DESCRIPTION_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-<span class="n">INVOCATION_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
-<span class="n">METAVAR_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DcargsTheme"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.DcargsTheme">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span> <span class="nc">DcargsTheme</span><span class="p">:</span>
+    <span class="n">border</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">invocation</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">metavar</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">metavar_fixed</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">helptext</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">helptext_required</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">helptext_default</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DcargsTheme.as_rich_theme"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.DcargsTheme.as_rich_theme">[docs]</a>    <span class="k">def</span> <span class="nf">as_rich_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Theme</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Theme</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div></div>
 
 
 <div class="viewcode-block" id="set_accent_color"><a class="viewcode-back" href="../../../api/dcargs/extras/#dcargs._argparse_formatter.set_accent_color">[docs]</a><span class="k">def</span> <span class="nf">set_accent_color</span><span class="p">(</span><span class="n">accent_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Set an accent color to use in help messages. Takes any color supported by `rich`,</span>
 <span class="sd">    see `python -m rich.color`. Experimental.&quot;&quot;&quot;</span>
-    <span class="k">global</span> <span class="n">BORDER_STYLE</span>
-    <span class="n">BORDER_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">global</span> <span class="n">DESCRIPTION_STYLE</span>
-    <span class="n">DESCRIPTION_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">global</span> <span class="n">INVOCATION_STYLE</span>
-    <span class="n">INVOCATION_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">global</span> <span class="n">METAVAR_STYLE</span>
-    <span class="n">METAVAR_STYLE</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">border</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">invocation</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">helptext</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">helptext_required</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">THEME</span><span class="o">.</span><span class="n">helptext_default</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span>
+        <span class="n">color</span><span class="o">=</span><span class="n">accent_color</span> <span class="k">if</span> <span class="n">accent_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
+        <span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
+<span class="c1"># TODO: this is a prototype; for a v1.0.0 release we should revisit whether the global</span>
+<span class="c1"># state here is acceptable or not.</span>
+<span class="n">THEME</span> <span class="o">=</span> <span class="n">DcargsTheme</span><span class="p">()</span>
 <span class="n">set_accent_color</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
 
@@ -273,22 +290,6 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="dummy_termcolor_context"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.dummy_termcolor_context">[docs]</a><span class="k">def</span> <span class="nf">dummy_termcolor_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Context for turning termcolor off.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="nf">dummy_colored</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-    <span class="k">def</span> <span class="nf">inner</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="n">orig_colored</span> <span class="o">=</span> <span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span>
-        <span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span> <span class="o">=</span> <span class="n">dummy_colored</span>
-        <span class="k">yield</span>
-        <span class="n">termcolor</span><span class="o">.</span><span class="n">colored</span> <span class="o">=</span> <span class="n">orig_colored</span>
-
-    <span class="k">return</span> <span class="n">inner</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="ansi_context"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.ansi_context">[docs]</a><span class="k">def</span> <span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
@@ -337,7 +338,7 @@
 <div class="viewcode-block" id="str_from_rich"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.str_from_rich">[docs]</a><span class="k">def</span> <span class="nf">str_from_rich</span><span class="p">(</span>
     <span class="n">renderable</span><span class="p">:</span> <span class="n">RenderableType</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
+    <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
     <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
         <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">renderable</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="n">soft_wrap</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
@@ -369,7 +370,13 @@
         <span class="n">out</span> <span class="o">=</span> <span class="n">get_metavar</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># Can result in an failed argparse assertion if we turn off soft wrapping.</span>
-            <span class="k">return</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">METAVAR_STYLE</span><span class="p">),</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">str_from_rich</span><span class="p">(</span>
+                <span class="n">Text</span><span class="p">(</span>
+                    <span class="n">out</span><span class="p">,</span>
+                    <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span> <span class="k">if</span> <span class="n">out</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span> <span class="k">else</span> <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="k">def</span> <span class="nf">add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
@@ -409,7 +416,7 @@
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dcargs_format_nonroot</span><span class="p">()</span>
 
         <span class="k">def</span> <span class="nf">_dcargs_format_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span><span class="p">)</span>
+            <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
             <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span> <span class="k">as</span> <span class="n">capture</span><span class="p">:</span>
                 <span class="c1"># Get rich renderables from items.</span>
                 <span class="n">top_parts</span> <span class="o">=</span> <span class="p">[]</span>
@@ -487,6 +494,11 @@
             <span class="n">item_parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
             <span class="c1"># Put invocation and help side-by-side.</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;-h&quot;</span><span class="p">,</span> <span class="s2">&quot;--help&quot;</span><span class="p">]:</span>
+                <span class="c1"># Darken helptext for --help flag. This makes it visually consistent</span>
+                <span class="c1"># with the helptext strings defined via docstrings and set by</span>
+                <span class="c1"># _arguments.py.</span>
+                <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="s2">&quot;[helptext]&quot;</span> <span class="o">+</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="o">+</span> <span class="s2">&quot;[/helptext]&quot;</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">action</span><span class="o">.</span><span class="n">help</span>
                 <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">invocation</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">help_position</span> <span class="o">-</span> <span class="mi">1</span>
@@ -497,10 +509,10 @@
                 <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span>
                     <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
                         <span class="n">invocation</span><span class="p">,</span>
-                        <span class="n">style</span><span class="o">=</span><span class="n">INVOCATION_STYLE</span><span class="p">,</span>
+                        <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">invocation</span><span class="p">,</span>
                     <span class="p">),</span>
                     <span class="c1"># Unescape % signs, which need special handling in argparse.</span>
-                    <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)),</span>
+                    <span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)),</span>
                 <span class="p">)</span>
                 <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
 
@@ -509,14 +521,14 @@
                 <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                     <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
                         <span class="n">invocation</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                        <span class="n">style</span><span class="o">=</span><span class="n">INVOCATION_STYLE</span><span class="p">,</span>
+                        <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">invocation</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="p">:</span>
                     <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">Padding</span><span class="p">(</span>
                             <span class="c1"># Unescape % signs, which need special handling in argparse.</span>
-                            <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)),</span>
+                            <span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">help</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;%&quot;</span><span class="p">)),</span>
                             <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">help_position</span><span class="p">),</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
@@ -560,7 +572,7 @@
                         <span class="p">)</span>  <span class="c1"># Should only have one description part.</span>
                         <span class="n">description_part</span> <span class="o">=</span> <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
                             <span class="n">item_content</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span>
-                            <span class="n">style</span><span class="o">=</span><span class="n">DESCRIPTION_STYLE</span><span class="p">,</span>
+                            <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
                         <span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -576,13 +588,13 @@
                 <span class="n">heading</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
             <span class="k">if</span> <span class="n">description_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">item_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">description_part</span><span class="p">,</span> <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">BORDER_STYLE</span><span class="p">)]</span> <span class="o">+</span> <span class="n">item_parts</span>
+                <span class="n">item_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">description_part</span><span class="p">,</span> <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">)]</span> <span class="o">+</span> <span class="n">item_parts</span>
 
             <span class="k">return</span> <span class="n">Panel</span><span class="p">(</span>
                 <span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">item_parts</span><span class="p">),</span>
                 <span class="n">title</span><span class="o">=</span><span class="n">heading</span><span class="p">,</span>
                 <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
-                <span class="n">border_style</span><span class="o">=</span><span class="n">BORDER_STYLE</span><span class="p">,</span>
+                <span class="n">border_style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">,</span>
                 <span class="c1"># padding=(1, 1, 0, 1),</span>
             <span class="p">)</span>
 </pre></div>
