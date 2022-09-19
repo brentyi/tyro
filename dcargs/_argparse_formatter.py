@@ -104,10 +104,12 @@ def ansi_context() -> ContextManager[None]:
     return inner()
 
 
-def str_from_rich(renderable: RenderableType) -> str:
-    console = Console()
+def str_from_rich(
+    renderable: RenderableType, width: Optional[int] = None, soft_wrap: bool = False
+) -> str:
+    console = Console(width=width)
     with console.capture() as out:
-        console.print(renderable, soft_wrap=True)
+        console.print(renderable, soft_wrap=soft_wrap)
     return out.get().rstrip("\n")
 
 
@@ -117,15 +119,15 @@ def make_formatter_class(field_count: int) -> Any:
 
 class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
     def __init__(self, prog, *, field_count: int):
-        indent_increment = 2
+        indent_increment = 4
         width = shutil.get_terminal_size().columns - 2
 
         # Try to make helptext more concise when we have a lot of fields!
-        if field_count > 32:  # pragma: no cover
+        if field_count > 64:  # pragma: no cover
             # When there are more fields, make helptext more compact.
-            max_help_position = min(12, width // 2)  # Usual is 24.
+            max_help_position = 8
         else:
-            max_help_position = min(36, width // 3)  # Usual is 24.
+            max_help_position = 36  # Usual is 24.
 
         super().__init__(prog, indent_increment, max_help_position, width)
 
@@ -136,7 +138,8 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         out = get_metavar(1)[0]
         if isinstance(out, str):
-            return str_from_rich(Text(out, style=METAVAR_STYLE))
+            # Can result in an failed argparse assertion if we turn off soft wrapping.
+            return str_from_rich(Text(out, style=METAVAR_STYLE), soft_wrap=True)
         return out
 
     def add_argument(self, action):  # pragma: no cover
@@ -181,7 +184,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # Get rich renderables from items.
                 top_parts = []
                 column_parts = []
-                column_parts_lines_cumsum = [0]
+                column_parts_lines = []
                 for func, args in self.items:
                     item_content = func(*args)
                     if item_content is None:
@@ -196,20 +199,13 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     # Add panels. (argument groups, subcommands, etc)
                     else:
                         assert isinstance(item_content, Panel)
-                        column_parts_lines_cumsum.append(
-                            column_parts_lines_cumsum[-1]
-                            + str_from_rich(item_content).strip().count("\n")
-                            + 2
-                        )
                         column_parts.append(item_content)
-
-                def _index_closest_to(line_count):
-                    """Find the index of the first panel where the line count is closest
-                    to a target length."""
-                    deltas = tuple(
-                        map(lambda l: abs(l - line_count), column_parts_lines_cumsum)
-                    )
-                    return deltas.index(min(deltas))
+                        # Estimate line count. This won't correctly account for
+                        # wrapping, as we don't know the column layout yet.
+                        column_parts_lines.append(
+                            str_from_rich(item_content, width=65).strip().count("\n")
+                            + 1
+                        )
 
                 # Split into columns.
                 min_column_width = 65
@@ -217,27 +213,34 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 column_count = max(
                     1,
                     min(
-                        column_parts_lines_cumsum[-1] // height_breakpoint + 1,
+                        sum(column_parts_lines) // height_breakpoint + 1,
                         self.formatter._width // min_column_width,
                     ),
                 )
-                split_indices = [0]
-                for i in range(1, column_count):
-                    split_indices.append(
-                        _index_closest_to(
-                            column_parts_lines_cumsum[-1] // column_count * i
-                        )
+                if column_count > 1:
+                    column_width = self.formatter._width // column_count - 1
+                    # Correct the line count for each panel using the known column
+                    # width. This will account for word wrap.
+                    column_parts_lines = map(
+                        lambda p: str_from_rich(p, width=column_width)
+                        .strip()
+                        .count("\n")
+                        + 1,
+                        column_parts,
                     )
-                split_indices.append(len(column_parts))
+                else:
+                    column_width = None
+
+                column_lines = [0 for i in range(column_count)]
+                column_parts_grouped = [[] for i in range(column_count)]
+                for p, l in zip(column_parts, column_parts_lines):
+                    chosen_column = column_lines.index(min(column_lines))
+                    column_parts_grouped[chosen_column].append(p)
+                    column_lines[chosen_column] += l
                 columns = Columns(
-                    [
-                        Group(*column_parts[split_indices[i] : split_indices[i + 1]])
-                        for i in range(column_count)
-                    ],
+                    [Group(*g) for g in column_parts_grouped],
                     column_first=True,
-                    width=self.formatter._width // column_count - 1
-                    if column_count > 1
-                    else None,
+                    width=column_width,
                 )
 
                 console.print(Group(*top_parts))
@@ -246,7 +249,10 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         def _format_action(self, action: argparse.Action):
             invocation = self.formatter._format_action_invocation(action)
-            help_position = self.formatter._action_max_length
+            help_position = min(
+                self.formatter._action_max_length + 4, self.formatter._max_help_position
+            )
+            indent = self.formatter._current_indent
 
             item_parts: List[RenderableType] = []
 
@@ -256,7 +262,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 and len(_strings.strip_ansi_sequences(invocation)) < help_position - 1
             ):
                 table = Table(show_header=False, box=None, padding=0)
-                table.add_column(width=help_position)
+                table.add_column(width=help_position - indent)
                 table.add_column()
                 table.add_row(
                     Text.from_ansi(
@@ -289,11 +295,14 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             try:
                 subaction: argparse.Action
                 for subaction in action._get_subactions():  # type: ignore
+                    self.formatter._indent()
                     item_parts.append(
                         Padding(
-                            Group(*self._format_action(subaction)), pad=(0, 0, 0, 4)
+                            Group(*self._format_action(subaction)),
+                            pad=(0, 0, 0, self.formatter._indent_increment),
                         )
                     )
+                    self.formatter._dedent()
             except AttributeError:
                 pass
 
