@@ -287,26 +287,26 @@
 {red,green,RED,GREEN,BLUE} [{red,green,RED,GREEN,BLUE} ...]]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help                  show this help message and exit                │
-│ --restricted-enum {RED,GREEN}                                              │
-│                             We can use Literal[] to restrict the set of    │
-│                             allowable inputs, for example, over            │
-│                             enums. (default: RED)                          │
-│ --mixed {RED,GREEN,blue}    Or mix them with other types! (default: blue)  │
-│ --integer {None,0,1,2,3}    Literals can also be marked Optional.          │
-│                             (default: None)                                │
-│ --union-over-types INT|STR  Unions can be used to specify multiple         │
-│                             allowable types. (default: 0)                  │
+│ -h, --help                          show this help message and exit        │
+│ --restricted-enum {RED,GREEN}       We can use Literal[] to restrict the   │
+│                                     set of allowable inputs, for example,  │
+│                                     over                                   │
+│                                     enums. (default: RED)                  │
+│ --mixed {RED,GREEN,blue}            Or mix them with other types!          │
+│                                     (default: blue)                        │
+│ --integer {None,0,1,2,3}            Literals can also be marked Optional.  │
+│                                     (default: None)                        │
+│ --union-over-types INT|STR          Unions can be used to specify multiple │
+│                                     allowable types. (default: 0)          │
 │ --string-or-enum {red,green,RED,GREEN,BLUE}                                │
-│                             Unions can be used to specify multiple         │
-│                             allowable types. (default: red)                │
-│ --union-over-tuples {INT INT}|STR                                          │
-│                             Unions also work over more complex nested      │
-│                             types. (default: 1)                            │
+│                                     Unions can be used to specify multiple │
+│                                     allowable types. (default: red)        │
+│ --union-over-tuples {INT INT}|STR   Unions also work over more complex     │
+│                                     nested types. (default: 1)             │
 │ --tuple-of-string-or-enum {red,green,RED,GREEN,BLUE}                       │
 │ [{red,green,RED,GREEN,BLUE} ...]                                           │
-│                             And can be nested in other types. (default:    │
-│                             red RED)                                       │
+│                                     And can be nested in other types.      │
+│                                     (default: red RED)                     │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 </section>
 

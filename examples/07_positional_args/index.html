@@ -296,27 +296,29 @@
 Command-line interface defined using a function signature. Note that this
 docstring is parsed to generate helptext.
 
-╭─ positional arguments ───────────────────────────────────────────────╮
-│ PATH        Source path. (required)                                  │
-│ PATH        Destination path. (required)                             │
-╰──────────────────────────────────────────────────────────────────────╯
-╭─ arguments ──────────────────────────────────────────────────────────╮
-│ -h, --help  show this help message and exit                          │
-│ --force     Do not prompt before overwriting. (sets: force=True)     │
-│ --verbose   Explain what is being done. (sets: verbose=True)         │
-│ --background-rgb FLOAT FLOAT FLOAT                                   │
-│             Background color. Red by default. (default: 1.0 0.0 0.0) │
-╰──────────────────────────────────────────────────────────────────────╯
-╭─ optimizer arguments ────────────────────────────────────────────────╮
-│ Configuration for our optimizer object.                              │
-│ ──────────────────────────────────────────────────────────────────── │
-│ --optimizer.algorithm {ADAM,SGD}                                     │
-│             Gradient-based optimizer to use. (default: ADAM)         │
-│ --optimizer.learning-rate FLOAT                                      │
-│             Learning rate to use. (default: 0.0003)                  │
-│ --optimizer.weight-decay FLOAT                                       │
-│             Coefficient for L2 regularization. (default: 0.01)       │
-╰──────────────────────────────────────────────────────────────────────╯</pre>
+╭─ positional arguments ─────────────────────────────────────────────────────╮
+│ PATH                                Source path. (required)                │
+│ PATH                                Destination path. (required)           │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help                          show this help message and exit        │
+│ --force                             Do not prompt before overwriting.      │
+│                                     (sets: force=True)                     │
+│ --verbose                           Explain what is being done. (sets:     │
+│                                     verbose=True)                          │
+│ --background-rgb FLOAT FLOAT FLOAT  Background color. Red by default.      │
+│                                     (default: 1.0 0.0 0.0)                 │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ optimizer arguments ──────────────────────────────────────────────────────╮
+│ Configuration for our optimizer object.                                    │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ --optimizer.algorithm {ADAM,SGD}    Gradient-based optimizer to use.       │
+│                                     (default: ADAM)                        │
+│ --optimizer.learning-rate FLOAT     Learning rate to use. (default:        │
+│                                     0.0003)                                │
+│ --optimizer.weight-decay FLOAT      Coefficient for L2 regularization.     │
+│                                     (default: 0.01)                        │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 07_positional_args.py ./a ./b --optimizer.learning-rate 1e-5</kbd><pre class="ansi-block literal-block">source=PosixPath('a')
 dest=PosixPath('b')

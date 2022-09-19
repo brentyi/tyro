@@ -334,10 +334,12 @@
     <span class="k">return</span> <span class="n">inner</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="str_from_rich"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.str_from_rich">[docs]</a><span class="k">def</span> <span class="nf">str_from_rich</span><span class="p">(</span><span class="n">renderable</span><span class="p">:</span> <span class="n">RenderableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">()</span>
+<div class="viewcode-block" id="str_from_rich"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.str_from_rich">[docs]</a><span class="k">def</span> <span class="nf">str_from_rich</span><span class="p">(</span>
+    <span class="n">renderable</span><span class="p">:</span> <span class="n">RenderableType</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
-        <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">renderable</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">renderable</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="n">soft_wrap</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
 
 
@@ -347,15 +349,15 @@
 
 <span class="k">class</span> <span class="nc">_ArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">field_count</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">indent_increment</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">indent_increment</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="n">width</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span> <span class="o">-</span> <span class="mi">2</span>
 
         <span class="c1"># Try to make helptext more concise when we have a lot of fields!</span>
-        <span class="k">if</span> <span class="n">field_count</span> <span class="o">&gt;</span> <span class="mi">32</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">if</span> <span class="n">field_count</span> <span class="o">&gt;</span> <span class="mi">64</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="c1"># When there are more fields, make helptext more compact.</span>
-            <span class="n">max_help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Usual is 24.</span>
+            <span class="n">max_help_position</span> <span class="o">=</span> <span class="mi">8</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">max_help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">36</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">3</span><span class="p">)</span>  <span class="c1"># Usual is 24.</span>
+            <span class="n">max_help_position</span> <span class="o">=</span> <span class="mi">36</span>  <span class="c1"># Usual is 24.</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
 
@@ -366,7 +368,8 @@
 
         <span class="n">out</span> <span class="o">=</span> <span class="n">get_metavar</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">METAVAR_STYLE</span><span class="p">))</span>
+            <span class="c1"># Can result in an failed argparse assertion if we turn off soft wrapping.</span>
+            <span class="k">return</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="n">Text</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">METAVAR_STYLE</span><span class="p">),</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="k">def</span> <span class="nf">add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
@@ -411,7 +414,7 @@
                 <span class="c1"># Get rich renderables from items.</span>
                 <span class="n">top_parts</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">column_parts</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">column_parts_lines_cumsum</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">column_parts_lines</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">:</span>
                     <span class="n">item_content</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">item_content</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -426,20 +429,13 @@
                     <span class="c1"># Add panels. (argument groups, subcommands, etc)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item_content</span><span class="p">,</span> <span class="n">Panel</span><span class="p">)</span>
-                        <span class="n">column_parts_lines_cumsum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                            <span class="n">column_parts_lines_cumsum</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                            <span class="o">+</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="n">item_content</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                            <span class="o">+</span> <span class="mi">2</span>
-                        <span class="p">)</span>
                         <span class="n">column_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_content</span><span class="p">)</span>
-
-                <span class="k">def</span> <span class="nf">_index_closest_to</span><span class="p">(</span><span class="n">line_count</span><span class="p">):</span>
-                    <span class="sd">&quot;&quot;&quot;Find the index of the first panel where the line count is closest</span>
-<span class="sd">                    to a target length.&quot;&quot;&quot;</span>
-                    <span class="n">deltas</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                        <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">l</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="n">line_count</span><span class="p">),</span> <span class="n">column_parts_lines_cumsum</span><span class="p">)</span>
-                    <span class="p">)</span>
-                    <span class="k">return</span> <span class="n">deltas</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">deltas</span><span class="p">))</span>
+                        <span class="c1"># Estimate line count. This won&#39;t correctly account for</span>
+                        <span class="c1"># wrapping, as we don&#39;t know the column layout yet.</span>
+                        <span class="n">column_parts_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">str_from_rich</span><span class="p">(</span><span class="n">item_content</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">65</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="mi">1</span>
+                        <span class="p">)</span>
 
                 <span class="c1"># Split into columns.</span>
                 <span class="n">min_column_width</span> <span class="o">=</span> <span class="mi">65</span>
@@ -447,27 +443,34 @@
                 <span class="n">column_count</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span>
                     <span class="mi">1</span><span class="p">,</span>
                     <span class="nb">min</span><span class="p">(</span>
-                        <span class="n">column_parts_lines_cumsum</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">height_breakpoint</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="nb">sum</span><span class="p">(</span><span class="n">column_parts_lines</span><span class="p">)</span> <span class="o">//</span> <span class="n">height_breakpoint</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span> <span class="o">//</span> <span class="n">min_column_width</span><span class="p">,</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
-                <span class="n">split_indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">column_count</span><span class="p">):</span>
-                    <span class="n">split_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">_index_closest_to</span><span class="p">(</span>
-                            <span class="n">column_parts_lines_cumsum</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">//</span> <span class="n">column_count</span> <span class="o">*</span> <span class="n">i</span>
-                        <span class="p">)</span>
+                <span class="k">if</span> <span class="n">column_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">column_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span> <span class="o">//</span> <span class="n">column_count</span> <span class="o">-</span> <span class="mi">1</span>
+                    <span class="c1"># Correct the line count for each panel using the known column</span>
+                    <span class="c1"># width. This will account for word wrap.</span>
+                    <span class="n">column_parts_lines</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">column_width</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                        <span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">column_parts</span><span class="p">,</span>
                     <span class="p">)</span>
-                <span class="n">split_indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">column_parts</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">column_width</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="n">column_lines</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
+                <span class="n">column_parts_grouped</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
+                <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">column_parts</span><span class="p">,</span> <span class="n">column_parts_lines</span><span class="p">):</span>
+                    <span class="n">chosen_column</span> <span class="o">=</span> <span class="n">column_lines</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">column_lines</span><span class="p">))</span>
+                    <span class="n">column_parts_grouped</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                    <span class="n">column_lines</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span> <span class="o">+=</span> <span class="n">l</span>
                 <span class="n">columns</span> <span class="o">=</span> <span class="n">Columns</span><span class="p">(</span>
-                    <span class="p">[</span>
-                        <span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">column_parts</span><span class="p">[</span><span class="n">split_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="p">:</span> <span class="n">split_indices</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]])</span>
-                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)</span>
-                    <span class="p">],</span>
+                    <span class="p">[</span><span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">column_parts_grouped</span><span class="p">],</span>
                     <span class="n">column_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span> <span class="o">//</span> <span class="n">column_count</span> <span class="o">-</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="n">column_count</span> <span class="o">&gt;</span> <span class="mi">1</span>
-                    <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">width</span><span class="o">=</span><span class="n">column_width</span><span class="p">,</span>
                 <span class="p">)</span>
 
                 <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">top_parts</span><span class="p">))</span>
@@ -476,7 +479,10 @@
 
         <span class="k">def</span> <span class="nf">_format_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
             <span class="n">invocation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_format_action_invocation</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
-            <span class="n">help_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_action_max_length</span>
+            <span class="n">help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_max_help_position</span>
+            <span class="p">)</span>
+            <span class="n">indent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_current_indent</span>
 
             <span class="n">item_parts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -486,7 +492,7 @@
                 <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">invocation</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">help_position</span> <span class="o">-</span> <span class="mi">1</span>
             <span class="p">):</span>
                 <span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="p">(</span><span class="n">show_header</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">help_position</span><span class="p">)</span>
+                <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">help_position</span> <span class="o">-</span> <span class="n">indent</span><span class="p">)</span>
                 <span class="n">table</span><span class="o">.</span><span class="n">add_column</span><span class="p">()</span>
                 <span class="n">table</span><span class="o">.</span><span class="n">add_row</span><span class="p">(</span>
                     <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
@@ -519,11 +525,14 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">subaction</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span>
                 <span class="k">for</span> <span class="n">subaction</span> <span class="ow">in</span> <span class="n">action</span><span class="o">.</span><span class="n">_get_subactions</span><span class="p">():</span>  <span class="c1"># type: ignore</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_indent</span><span class="p">()</span>
                     <span class="n">item_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">Padding</span><span class="p">(</span>
-                            <span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_format_action</span><span class="p">(</span><span class="n">subaction</span><span class="p">)),</span> <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+                            <span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">_format_action</span><span class="p">(</span><span class="n">subaction</span><span class="p">)),</span>
+                            <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_indent_increment</span><span class="p">),</span>
                         <span class="p">)</span>
                     <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dedent</span><span class="p">()</span>
             <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                 <span class="k">pass</span>
 

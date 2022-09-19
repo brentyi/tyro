@@ -53,7 +53,7 @@ Module Contents
      wrapping usage text.
    * Enables support for Windows via colorama.
 
-.. py:function:: str_from_rich(renderable: rich.console.RenderableType) -> str
+.. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
 
 
 .. py:function:: make_formatter_class(field_count: int) -> Any

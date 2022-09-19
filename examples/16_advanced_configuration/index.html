@@ -294,15 +294,15 @@ command-line interfaces beyond what is expressible via static type annotations.<
                                     [INT] {checkout,commit}
 
 ╭─ positional arguments ─────────────────────────────────────────────────────╮
-│ [INT]                   A numeric field parsed as a positional argument.   │
-│                         (default: 3)                                       │
+│ [INT]                         A numeric field parsed as a positional       │
+│                               argument. (default: 3)                       │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-│ --boolean {True,False}  A boolean field with flag conversion turned off.   │
-│                         (default: False)                                   │
-│ --fixed {fixed}         A numeric field that can't be changed via the CLI. │
-│                         (fixed to: 5)                                      │
+│ -h, --help                    show this help message and exit              │
+│ --boolean {True,False}        A boolean field with flag conversion turned  │
+│                               off. (default: False)                        │
+│ --fixed {fixed}               A numeric field that can't be changed via    │
+│                               the CLI. (fixed to: 5)                       │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ union-without-subcommand arguments ───────────────────────────────────────╮
 │ A union over nested structures, but without subcommand generation. When a  │
@@ -310,7 +310,7 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │ is provided, the type is simply fixed to that default.                     │
 │ ────────────────────────────────────────────────────────────────────────── │
 │ --union-without-subcommand.branch STR                                      │
-│                         (default: main)                                    │
+│                               (default: main)                              │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ subcommands ──────────────────────────────────────────────────────────────╮
 │ `dcargs.conf.subcommand()` can be used to configure subcommands in a       │
@@ -318,8 +318,8 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │ we make the subcommand names more succinct.                                │
 │ ────────────────────────────────────────────────────────────────────────── │
 │ {checkout,commit}                                                          │
-│     checkout                Checkout a branch.                             │
-│     commit                  Commit changes.                                │
+│     checkout                  Checkout a branch.                           │
+│     commit                    Commit changes.                              │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 </section>
 
