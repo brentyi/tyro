@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="14. Generics" href="../14_generics/" /><link rel="prev" title="12. Tuples" href="../12_tuples/" />
+<link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Helptext generation" href="../../helptext_generation/" /><link rel="prev" title="16. Advanced Configuration" href="../16_advanced_configuration/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>13. Standard Classes - dcargs</title>
+        <title>17. Flax Modules - dcargs</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -177,11 +177,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../10_base_configs/">10. Base Configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../11_dictionaries/">11. Dictionaries</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../12_tuples/">12. Tuples</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_standard_classes/">13. Standard Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../14_generics/">14. Generics</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../15_nesting_in_containers/">15. Nesting In Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../16_advanced_configuration/">16. Advanced Configuration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../17_flax_modules/">17. Flax Modules</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">17. Flax Modules</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -229,48 +229,86 @@
           </label>
         </div>
         <article role="main">
-          <section id="standard-classes">
-<h1>13. Standard Classes<a class="headerlink" href="#standard-classes" title="Permalink to this heading">#</a></h1>
-<p>In addition to functions and dataclasses, we can also generate CLIs from (the
-constructors of) standard Python classes.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dcargs</span>
-<span class="linenos"> 2</span>
+          <section id="flax-modules">
+<h1>17. Flax Modules<a class="headerlink" href="#flax-modules" title="Permalink to this heading">#</a></h1>
+<p>If you use <a class="reference external" href="https://github.com/google/flax">Flax</a>, modules can be instantiated
+directly from <code class="docutils literal notranslate"><span class="pre">dcargs.cli</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">flax</span> <span class="kn">import</span> <span class="n">linen</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 5</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-<span class="linenos"> 6</span>        <span class="bp">self</span><span class="p">,</span>
-<span class="linenos"> 7</span>        <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="linenos"> 8</span>        <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="linenos"> 9</span>        <span class="n">flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="linenos">10</span>    <span class="p">):</span>
-<span class="linenos">11</span>        <span class="sd">&quot;&quot;&quot;Arguments.</span>
-<span class="linenos">12</span>
-<span class="linenos">13</span><span class="sd">        Args:</span>
-<span class="linenos">14</span><span class="sd">            field1: A string field.</span>
-<span class="linenos">15</span><span class="sd">            field2: A numeric field.</span>
-<span class="linenos">16</span><span class="sd">            flag: A boolean flag.</span>
-<span class="linenos">17</span><span class="sd">        &quot;&quot;&quot;</span>
-<span class="linenos">18</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">,</span> <span class="n">flag</span><span class="p">]</span>
-<span class="linenos">19</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">22</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
-<span class="linenos">23</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">dcargs</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Classifier</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="linenos"> 8</span>    <span class="n">layers</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos"> 9</span>    <span class="sd">&quot;&quot;&quot;Layers in our network.&quot;&quot;&quot;</span>
+<span class="linenos">10</span>    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="linenos">11</span>    <span class="sd">&quot;&quot;&quot;Hidden unit count.&quot;&quot;&quot;</span>
+<span class="linenos">12</span>    <span class="n">output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="linenos">13</span>    <span class="sd">&quot;&quot;&quot;Number of classes.&quot;&quot;&quot;</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="nd">@nn</span><span class="o">.</span><span class="n">compact</span>
+<span class="linenos">16</span>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+<span class="linenos">17</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+<span class="linenos">18</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+<span class="linenos">19</span>                <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+<span class="linenos">20</span>                <span class="n">kernel_init</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">kaiming_normal</span><span class="p">(),</span>
+<span class="linenos">21</span>            <span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">22</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+<span class="linenos">25</span>            <span class="bp">self</span><span class="o">.</span><span class="n">output_dim</span><span class="p">,</span>
+<span class="linenos">26</span>            <span class="n">kernel_init</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">xavier_normal</span><span class="p">(),</span>
+<span class="linenos">27</span>        <span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">28</span>        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">29</span>        <span class="k">return</span> <span class="n">x</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span>
+<span class="linenos">32</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Classifier</span><span class="p">,</span> <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">33</span>    <span class="sd">&quot;&quot;&quot;Train a model.</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="sd">    Args:</span>
+<span class="linenos">36</span><span class="sd">        model: Model to train.</span>
+<span class="linenos">37</span><span class="sd">        num_iterations: Number of training iterations.</span>
+<span class="linenos">38</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">39</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">40</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_iterations</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span>
+<span class="linenos">43</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">44</span>    <span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 13_standard_classes.py --help</kbd><pre class="ansi-block literal-block">usage: 13_standard_classes.py [-h] --field1 STR --field2 INT [--flag]
+<kbd>python 17_flax_modules.py --help</kbd><pre class="ansi-block literal-block">usage: 17_flax_modules.py [-h] --model.layers INT [--model.units INT]
+                          [--model.output-dim INT] [--model.parent {fixed}]
+                          [--model.name STR] [--num-iterations INT]
 
-Arguments.
+Train a model.
 
-╭─ arguments ───────────────────────────────────────────╮
-│ -h, --help          show this help message and exit   │
-│ --field1 STR        A string field. (required)        │
-│ --field2 INT        A numeric field. (required)       │
-│ --flag              A boolean flag. (sets: flag=True) │
-╰───────────────────────────────────────────────────────╯</pre>
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help                    show this help message and exit              │
+│ --num-iterations INT          Number of training iterations. (default:     │
+│                               1000)                                        │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ model arguments ──────────────────────────────────────────────────────────╮
+│ Model to train.                                                            │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ --model.layers INT            Layers in our network. (required)            │
+│ --model.units INT             Hidden unit count. (default: 32)             │
+│ --model.output-dim INT        Number of classes. (default: 10)             │
+│ --model.parent {fixed}        (fixed to: &lt;flax.linen.module._Sentinel      │
+│                               object at 0x7f847a661760&gt;)                   │
+│ --model.name STR              (default: None)                              │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 13_standard_classes.py --field1 hello --field2 7</kbd><pre class="ansi-block literal-block">['hello', 7, False]</pre>
+<kbd>python 17_flax_modules.py --model.layers 4</kbd><pre class="ansi-block literal-block">model=Classifier(
+    # attributes
+    layers = 4
+    units = 32
+    output_dim = 10
+)
+num_iterations=1000</pre>
 </section>
 
         </article>
@@ -278,23 +316,23 @@ Arguments.
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../14_generics/">
+          <a class="next-page" href="../../helptext_generation/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">14. Generics</div>
+                <div class="title">Helptext generation</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../12_tuples/">
+          <a class="prev-page" href="../16_advanced_configuration/">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">12. Tuples</div>
+                <div class="title">16. Advanced Configuration</div>
                 
               </div>
             </a>
