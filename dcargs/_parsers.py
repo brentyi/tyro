@@ -434,7 +434,7 @@ class SubparsersSpecification:
             if self.can_be_none:
                 subparser = argparse_subparsers.add_parser(
                     name=_strings.subparser_name_from_type(self.prefix, None),
-                    formatter_class=_argparse_formatter.make_formatter_class(0),
+                    formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
                     help="",
                 )
                 subparser_tree_nodes.append(subparser)
@@ -442,9 +442,7 @@ class SubparsersSpecification:
             for name, subparser_def in self.parser_from_name.items():
                 subparser = argparse_subparsers.add_parser(
                     name,
-                    formatter_class=_argparse_formatter.make_formatter_class(
-                        len(subparser_def.args)
-                    ),
+                    formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
                     help=subparser_def.description,
                 )
                 subparser_def.apply(subparser)

@@ -1,9 +1,8 @@
 import argparse
 import contextlib
 import dataclasses
-import functools
 import shutil
-from typing import Any, ContextManager, Dict, Generator, List, Optional
+from typing import Any, ContextManager, Generator, List, Optional
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
@@ -114,22 +113,12 @@ def str_from_rich(
     return out.get().rstrip("\n")
 
 
-def make_formatter_class(field_count: int) -> Any:
-    return functools.partial(_ArgparseHelpFormatter, field_count=field_count)
-
-
-class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
-    def __init__(self, prog, *, field_count: int):
+class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    def __init__(self, prog: str):
         indent_increment = 4
         width = shutil.get_terminal_size().columns - 2
-
-        # Try to make helptext more concise when we have a lot of fields!
-        if field_count > 64:  # pragma: no cover
-            # When there are more fields, make helptext more compact.
-            max_help_position = 8
-        else:
-            max_help_position = 36  # Usual is 24.
-
+        max_help_position = 24
+        self._fixed_help_position = False
         super().__init__(prog, indent_increment, max_help_position, width)
 
     def _format_args(self, action, default_metavar):
@@ -171,6 +160,18 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
     def _fill_text(self, text, width, indent):
         return "".join(indent + line for line in text.splitlines(keepends=True))
+
+    def format_help(self):
+        # Try with and without a fixed help position, then return the shorter help
+        # message.
+        # For dense multi-column layouts, the fixed help position is often shorter.
+        # For wider layouts, using the default help position settings can be more
+        # efficient.
+        self._fixed_help_position = False
+        help1 = super().format_help()
+        self._fixed_help_position = True
+        help2 = super().format_help()
+        return help1 if help1.count("\n") < help2.count("\n") else help2
 
     class _Section(object):
         def __init__(self, formatter, parent, heading=None):
@@ -222,6 +223,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     min(
                         sum(column_parts_lines) // height_breakpoint + 1,
                         self.formatter._width // min_column_width,
+                        len(column_parts),
                     ),
                 )
                 if column_count > 1:
@@ -259,6 +261,8 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             help_position = min(
                 self.formatter._action_max_length + 4, self.formatter._max_help_position
             )
+            if self.formatter._fixed_help_position:
+                help_position = 4
             indent = self.formatter._current_indent
 
             item_parts: List[RenderableType] = []
@@ -273,6 +277,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             if (
                 action.help
                 and len(_strings.strip_ansi_sequences(invocation)) < help_position - 1
+                and not self.formatter._fixed_help_position
             ):
                 table = Table(show_header=False, box=None, padding=0)
                 table.add_column(width=help_position - indent)
@@ -329,7 +334,7 @@ class _ArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 item_content = func(*args)
                 if (
                     getattr(func, "__func__", None)
-                    is _ArgparseHelpFormatter._format_action
+                    is DcargsArgparseHelpFormatter._format_action
                 ):
                     (action,) = args
                     assert isinstance(action, argparse.Action)

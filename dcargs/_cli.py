@@ -189,9 +189,7 @@ def cli(
     with _argparse_formatter.ansi_context():
         parser = argparse.ArgumentParser(
             prog=prog,
-            formatter_class=_argparse_formatter.make_formatter_class(
-                len(parser_definition.args)
-            ),
+            formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
         )
         parser_definition.apply(parser)
 
