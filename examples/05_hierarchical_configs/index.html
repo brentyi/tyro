@@ -260,7 +260,7 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">25</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">26</span><span class="k">class</span> <span class="nc">ExperimentConfig</span><span class="p">:</span>
 <span class="linenos">27</span>    <span class="c1"># Various configurable options for our optimizer.</span>
-<span class="linenos">28</span>    <span class="n">optimizer_config</span><span class="p">:</span> <span class="n">OptimizerConfig</span>
+<span class="linenos">28</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">OptimizerConfig</span>
 <span class="linenos">29</span>
 <span class="linenos">30</span>    <span class="c1"># Batch size.</span>
 <span class="linenos">31</span>    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
@@ -300,12 +300,9 @@ objects. This helps with modularity and grouping in larger projects.</p>
 </div>
 <hr class="docutils" />
 <kbd>python 05_hierarchical_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 05_hierarchical_configs.py [-h] --out-dir PATH
-                                  [--config.optimizer-config.algorithm 
-{ADAM,SGD}]
-                                  [--config.optimizer-config.learning-rate 
-FLOAT]
-                                  [--config.optimizer-config.weight-decay 
-FLOAT]
+                                  [--config.optimizer.algorithm {ADAM,SGD}]
+                                  [--config.optimizer.learning-rate FLOAT]
+                                  [--config.optimizer.weight-decay FLOAT]
                                   [--config.batch-size INT]
                                   [--config.train-steps INT]
                                   [--config.seed INT] [--restore-checkpoint]
@@ -322,14 +319,14 @@ Train a model.
 │                         Training steps between each checkpoint save.       │
 │                         (default: 1000)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ config.optimizer-config arguments ────────────────────────────────────────╮
+╭─ config.optimizer arguments ───────────────────────────────────────────────╮
 │ Various configurable options for our optimizer.                            │
 │ ────────────────────────────────────────────────────────────────────────── │
-│ --config.optimizer-config.algorithm {ADAM,SGD}                             │
+│ --config.optimizer.algorithm {ADAM,SGD}                                    │
 │                         Gradient-based optimizer to use. (default: ADAM)   │
-│ --config.optimizer-config.learning-rate FLOAT                              │
+│ --config.optimizer.learning-rate FLOAT                                     │
 │                         Learning rate to use. (default: 0.0003)            │
-│ --config.optimizer-config.weight-decay FLOAT                               │
+│ --config.optimizer.weight-decay FLOAT                                      │
 │                         Coefficient for L2 regularization. (default: 0.01) │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ config arguments ─────────────────────────────────────────────────────────╮
@@ -344,29 +341,28 @@ Train a model.
 │                         reproducible! (default: 0)                         │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">usage: 05_hierarchical_configs.py [-h] --out-dir PATH
-                                  [--config.optimizer-config.algorithm 
-{ADAM,SGD}]
-                                  [--config.optimizer-config.learning-rate 
-FLOAT]
-                                  [--config.optimizer-config.weight-decay 
-FLOAT]
-                                  [--config.batch-size INT]
-                                  [--config.train-steps INT]
-                                  [--config.seed INT] [--restore-checkpoint]
-                                  [--checkpoint-interval INT]
+<kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
 
- 
-05_hierarchical_configs.py: error: unrecognized arguments: --config.optimizer.algorithm SGD</pre>
-<hr class="docutils" />
-<kbd>python 05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
-
-config=ExperimentConfig(optimizer_config=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
+config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
 
 # dcargs YAML.
 !dataclass:ExperimentConfig
 batch_size: 32
-optimizer_config: !dataclass:OptimizerConfig
+optimizer: !dataclass:OptimizerConfig
+  algorithm: !enum:OptimizerType 'SGD'
+  learning_rate: 0.0003
+  weight_decay: 0.01
+seed: 0
+train_steps: 100000</pre>
+<hr class="docutils" />
+<kbd>python 05_hierarchical_configs.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
+
+config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
+
+# dcargs YAML.
+!dataclass:ExperimentConfig
+batch_size: 32
+optimizer: !dataclass:OptimizerConfig
   algorithm: !enum:OptimizerType 'ADAM'
   learning_rate: 0.0003
   weight_decay: 0.01
