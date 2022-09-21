@@ -17,8 +17,7 @@ PyYAML = "^6.0"
 "backports.cached-property" = { version = "^1.0.2", python = "~3.7" }
 colorama = {version = "^0.4.0", platform = "win32"}
 frozendict = "^2.3.4"
-# shtab = "^1.5.5"
-rich = "^12.5.1"
+rich = ">=11.1.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
@@ -30,6 +29,9 @@ mypy = "^0.971"
 pyright = "^1.1.264"
 coverage = {extras = ["toml"], version = "^6.4.2"}
 numpy = ">=1.20.0"
+
+[tool.poetry.group.dev.dependencies]
+flax = "^0.6.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
