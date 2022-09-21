@@ -420,9 +420,7 @@
     <span class="k">with</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ansi_context</span><span class="p">():</span>
         <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
             <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
-            <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">make_formatter_class</span><span class="p">(</span>
-                <span class="nb">len</span><span class="p">(</span><span class="n">parser_definition</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
-            <span class="p">),</span>
+            <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">DcargsArgparseHelpFormatter</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 

@@ -82,6 +82,19 @@ Module Contents
 .. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
 
 
-.. py:function:: make_formatter_class(field_count: int) -> Any
+.. py:class:: DcargsArgparseHelpFormatter(prog: str)
+
+   Bases: :py:obj:`argparse.RawDescriptionHelpFormatter`
+
+   
+   Help message formatter which retains any formatting in descriptions.
+
+   Only the name of this class is considered a public API. All the methods
+   provided by the class are considered an implementation detail.
+   .. py:method:: add_argument(self, action)
+
+
+   .. py:method:: format_help(self)
+
 
 

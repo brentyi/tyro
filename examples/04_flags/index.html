@@ -265,18 +265,18 @@ value, automatically converted to flags.</p>
                    [--optional-boolean {None,True,False}] [--flag-a]
                    [--no-flag-b]
 
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help                    show this help message and exit              │
-│ --boolean {True,False}        Boolean. This expects an explicit &quot;True&quot; or  │
-│                               &quot;False&quot;. (required)                          │
-│ --optional-boolean {None,True,False}                                       │
-│                               Optional boolean. Same as above, but can be  │
-│                               omitted. (default: None)                     │
-│ --flag-a                      Pass --flag-a in to set this value to True.  │
-│                               (sets: flag_a=True)                          │
-│ --no-flag-b                   Pass --no-flag-b in to set this value to     │
-│                               False. (sets: flag_b=False)                  │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+╭─ arguments ──────────────────────────────────────────────────────────────╮
+│ -h, --help                                                               │
+│     show this help message and exit                                      │
+│ --boolean {True,False}                                                   │
+│     Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;. (required)      │
+│ --optional-boolean {None,True,False}                                     │
+│     Optional boolean. Same as above, but can be omitted. (default: None) │
+│ --flag-a                                                                 │
+│     Pass --flag-a in to set this value to True. (sets: flag_a=True)      │
+│ --no-flag-b                                                              │
+│     Pass --no-flag-b in to set this value to False. (sets: flag_b=False) │
+╰──────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_flags.py --boolean True</kbd><pre class="ansi-block literal-block">Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
 <hr class="docutils" />

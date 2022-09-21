@@ -369,21 +369,19 @@ izer}]
 Train a smaller model.
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help                          show this help message and exit        │
-│ --dataset {mnist,imagenet-50}       Dataset to run experiment on.          │
-│                                     (default: mnist)                       │
-│ --num-layers INT                    Model size. (default: 4)               │
-│ --units INT                         Model size. (default: 64)              │
-│ --batch-size INT                    Batch size. (default: 2048)            │
-│ --train-steps INT                   Total number of training steps.        │
-│                                     (default: 30000)                       │
-│ --seed INT                          Random seed. This is helpful for       │
-│                                     making sure that our experiments are   │
-│                                     all                                    │
-│                                     reproducible! (required)               │
-│ --activation {fixed}                Activation to use. Not specifiable via │
-│                                     the commandline. (fixed to: &lt;class     │
-│                                     'torch.nn.modules.activation.ReLU'&gt;)   │
+│ -h, --help              show this help message and exit                    │
+│ --dataset {mnist,imagenet-50}                                              │
+│                         Dataset to run experiment on. (default: mnist)     │
+│ --num-layers INT        Model size. (default: 4)                           │
+│ --units INT             Model size. (default: 64)                          │
+│ --batch-size INT        Batch size. (default: 2048)                        │
+│ --train-steps INT       Total number of training steps. (default: 30000)   │
+│ --seed INT              Random seed. This is helpful for making sure that  │
+│                         our experiments are all                            │
+│                         reproducible! (required)                           │
+│ --activation {fixed}    Activation to use. Not specifiable via the         │
+│                         commandline. (fixed to: &lt;class                     │
+│                         'torch.nn.modules.activation.ReLU'&gt;)               │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ optional subcommands ─────────────────────────────────────────────────────╮
 │ Optimizer parameters.  (default: optimizer:sgd-optimizer)                  │
@@ -405,21 +403,20 @@ er}]
 Train a bigger model.
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help                          show this help message and exit        │
-│ --dataset {mnist,imagenet-50}       Dataset to run experiment on.          │
-│                                     (default: imagenet-50)                 │
-│ --num-layers INT                    Model size. (default: 8)               │
-│ --units INT                         Model size. (default: 256)             │
-│ --batch-size INT                    Batch size. (default: 32)              │
-│ --train-steps INT                   Total number of training steps.        │
-│                                     (default: 100000)                      │
-│ --seed INT                          Random seed. This is helpful for       │
-│                                     making sure that our experiments are   │
-│                                     all                                    │
-│                                     reproducible! (required)               │
-│ --activation {fixed}                Activation to use. Not specifiable via │
-│                                     the commandline. (fixed to: &lt;class     │
-│                                     'torch.nn.modules.activation.GELU'&gt;)   │
+│ -h, --help              show this help message and exit                    │
+│ --dataset {mnist,imagenet-50}                                              │
+│                         Dataset to run experiment on. (default:            │
+│                         imagenet-50)                                       │
+│ --num-layers INT        Model size. (default: 8)                           │
+│ --units INT             Model size. (default: 256)                         │
+│ --batch-size INT        Batch size. (default: 32)                          │
+│ --train-steps INT       Total number of training steps. (default: 100000)  │
+│ --seed INT              Random seed. This is helpful for making sure that  │
+│                         our experiments are all                            │
+│                         reproducible! (required)                           │
+│ --activation {fixed}    Activation to use. Not specifiable via the         │
+│                         commandline. (fixed to: &lt;class                     │
+│                         'torch.nn.modules.activation.GELU'&gt;)               │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ optional subcommands ─────────────────────────────────────────────────────╮
 │ Optimizer parameters.  (default: optimizer:adam-optimizer)                 │

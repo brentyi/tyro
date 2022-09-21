@@ -314,35 +314,34 @@ FLOAT]
 Train a model.
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help                       show this help message and exit           │
-│ --out-dir PATH                   Where to save logs and checkpoints.       │
-│                                  (required)                                │
-│ --restore-checkpoint             Set to restore an existing checkpoint.    │
-│                                  (sets: restore_checkpoint=True)           │
-│ --checkpoint-interval INT        Training steps between each checkpoint    │
-│                                  save. (default: 1000)                     │
+│ -h, --help              show this help message and exit                    │
+│ --out-dir PATH          Where to save logs and checkpoints. (required)     │
+│ --restore-checkpoint    Set to restore an existing checkpoint. (sets:      │
+│                         restore_checkpoint=True)                           │
+│ --checkpoint-interval INT                                                  │
+│                         Training steps between each checkpoint save.       │
+│                         (default: 1000)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ config.optimizer-config arguments ────────────────────────────────────────╮
 │ Various configurable options for our optimizer.                            │
 │ ────────────────────────────────────────────────────────────────────────── │
 │ --config.optimizer-config.algorithm {ADAM,SGD}                             │
-│                                  Gradient-based optimizer to use.          │
-│                                  (default: ADAM)                           │
+│                         Gradient-based optimizer to use. (default: ADAM)   │
 │ --config.optimizer-config.learning-rate FLOAT                              │
-│                                  Learning rate to use. (default: 0.0003)   │
+│                         Learning rate to use. (default: 0.0003)            │
 │ --config.optimizer-config.weight-decay FLOAT                               │
-│                                  Coefficient for L2 regularization.        │
-│                                  (default: 0.01)                           │
+│                         Coefficient for L2 regularization. (default: 0.01) │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ config arguments ─────────────────────────────────────────────────────────╮
 │ Experiment configuration.                                                  │
 │ ────────────────────────────────────────────────────────────────────────── │
-│ --config.batch-size INT          Batch size. (default: 32)                 │
-│ --config.train-steps INT         Total number of training steps. (default: │
-│                                  100000)                                   │
-│ --config.seed INT                Random seed. This is helpful for making   │
-│                                  sure that our experiments are all         │
-│                                  reproducible! (default: 0)                │
+│ --config.batch-size INT                                                    │
+│                         Batch size. (default: 32)                          │
+│ --config.train-steps INT                                                   │
+│                         Total number of training steps. (default: 100000)  │
+│ --config.seed INT       Random seed. This is helpful for making sure that  │
+│                         our experiments are all                            │
+│                         reproducible! (default: 0)                         │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 05_hierarchical_configs.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">usage: 05_hierarchical_configs.py [-h] --out-dir PATH

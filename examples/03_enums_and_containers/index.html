@@ -277,17 +277,18 @@ container types.</p>
                                   [--optimizer-type {ADAM,SGD}]
                                   [--checkpoint-interval {None}|INT]
 
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help                          show this help message and exit        │
-│ --dataset-sources PATH [PATH ...]   Paths to load training data from. This │
-│                                     can be multiple! (required)            │
-│ --image-dimensions INT INT          Height and width of some image data.   │
-│                                     (default: 32 32)                       │
-│ --optimizer-type {ADAM,SGD}         Gradient-based optimizer to use.       │
-│                                     (default: ADAM)                        │
-│ --checkpoint-interval {None}|INT    Interval to save checkpoints at.       │
-│                                     (default: None)                        │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+╭─ arguments ────────────────────────────────────────────────────────────╮
+│ -h, --help                                                             │
+│     show this help message and exit                                    │
+│ --dataset-sources PATH [PATH ...]                                      │
+│     Paths to load training data from. This can be multiple! (required) │
+│ --image-dimensions INT INT                                             │
+│     Height and width of some image data. (default: 32 32)              │
+│ --optimizer-type {ADAM,SGD}                                            │
+│     Gradient-based optimizer to use. (default: ADAM)                   │
+│ --checkpoint-interval {None}|INT                                       │
+│     Interval to save checkpoints at. (default: None)                   │
+╰────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 03_enums_and_containers.py --dataset-sources ./data --image-dimensions 16 16</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(16, 16), optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, checkpoint_interval=None)</pre>
 <hr class="docutils" />

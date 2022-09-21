@@ -287,19 +287,18 @@ directly from <code class="docutils literal notranslate"><span class="pre">dcarg
 Train a model.
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help                    show this help message and exit              │
-│ --num-iterations INT          Number of training iterations. (default:     │
-│                               1000)                                        │
+│ -h, --help              show this help message and exit                    │
+│ --num-iterations INT    Number of training iterations. (default: 1000)     │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ model arguments ──────────────────────────────────────────────────────────╮
 │ Model to train.                                                            │
 │ ────────────────────────────────────────────────────────────────────────── │
-│ --model.layers INT            Layers in our network. (required)            │
-│ --model.units INT             Hidden unit count. (default: 32)             │
-│ --model.output-dim INT        Number of classes. (default: 10)             │
-│ --model.parent {fixed}        (fixed to: &lt;flax.linen.module._Sentinel      │
-│                               object at 0x7f847a661760&gt;)                   │
-│ --model.name STR              (default: None)                              │
+│ --model.layers INT      Layers in our network. (required)                  │
+│ --model.units INT       Hidden unit count. (default: 32)                   │
+│ --model.output-dim INT  Number of classes. (default: 10)                   │
+│ --model.parent {fixed}  (fixed to: &lt;flax.linen.module._Sentinel object at  │
+│                         0x7f3d04e50670&gt;)                                   │
+│ --model.name STR        (default: None)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 17_flax_modules.py --model.layers 4</kbd><pre class="ansi-block literal-block">model=Classifier(

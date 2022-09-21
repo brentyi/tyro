@@ -284,23 +284,29 @@ or a <code class="docutils literal notranslate"><span class="pre">TypedDict</spa
                           [--frozen-dict.num-epochs INT]
                           [--frozen-dict.batch-size INT]
 
-╭─ arguments ─────────────────────────────────────────────────────────╮
-│ -h, --help                          show this help message and exit │
-╰─────────────────────────────────────────────────────────────────────╯
-╭─ typed-dict arguments ──────────────────────────────────────────────╮
-│ --typed-dict.learning-rate FLOAT    (unset by default)              │
-│ --typed-dict.betas FLOAT FLOAT      (unset by default)              │
-╰─────────────────────────────────────────────────────────────────────╯
-╭─ standard-dict arguments ───────────────────────────────────────────╮
-│ --standard-dict.learning-rate FLOAT                                 │
-│                                     (default: 0.0003)               │
-│ --standard-dict.beta1 FLOAT         (default: 0.9)                  │
-│ --standard-dict.beta2 FLOAT         (default: 0.999)                │
-╰─────────────────────────────────────────────────────────────────────╯
-╭─ frozen-dict arguments ─────────────────────────────────────────────╮
-│ --frozen-dict.num-epochs INT        (default: 20)                   │
-│ --frozen-dict.batch-size INT        (default: 64)                   │
-╰─────────────────────────────────────────────────────────────────────╯</pre>
+╭─ arguments ───────────────────────────────────────╮
+│ -h, --help        show this help message and exit │
+╰───────────────────────────────────────────────────╯
+╭─ typed-dict arguments ────────────────────────────╮
+│ --typed-dict.learning-rate FLOAT                  │
+│                   (unset by default)              │
+│ --typed-dict.betas FLOAT FLOAT                    │
+│                   (unset by default)              │
+╰───────────────────────────────────────────────────╯
+╭─ standard-dict arguments ─────────────────────────╮
+│ --standard-dict.learning-rate FLOAT               │
+│                   (default: 0.0003)               │
+│ --standard-dict.beta1 FLOAT                       │
+│                   (default: 0.9)                  │
+│ --standard-dict.beta2 FLOAT                       │
+│                   (default: 0.999)                │
+╰───────────────────────────────────────────────────╯
+╭─ frozen-dict arguments ───────────────────────────╮
+│ --frozen-dict.num-epochs INT                      │
+│                   (default: 20)                   │
+│ --frozen-dict.batch-size INT                      │
+│                   (default: 64)                   │
+╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 11_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Typed dict: {'learning_rate': 0.0003}
 Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
