@@ -8,6 +8,7 @@ import enum
 import functools
 import itertools
 import shlex
+from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -21,7 +22,9 @@ from typing import (
     Union,
 )
 
-from . import _fields, _instantiators, _resolver, _strings
+from . import _fields, _instantiators, _resolver
+from . import _shtab as shtab
+from . import _strings
 from .conf import _markers
 
 try:
@@ -77,7 +80,21 @@ class ArgumentDefinition:
             kwargs["choices"] = _PatchedList(kwargs["choices"])
 
         # Note that the name must be passed in as a position argument.
-        parser.add_argument(name_or_flag, **kwargs)
+        arg = parser.add_argument(name_or_flag, **kwargs)
+
+        # Do our best to tab complete paths.
+        # There will be false positives here, but if choices is unset they should be
+        # harmless.
+        if "choices" not in kwargs:
+            if "dir" in self.field.name:
+                arg.complete = shtab.DIRECTORY  # type: ignore
+            elif (
+                # Catch types like Path, List[Path], Tuple[Path, ...] etc.
+                "Path" in str(self.field.typ)
+                or "path" in self.field.name
+                or "file" in self.field.name
+            ):
+                arg.complete = shtab.FILE  # type: ignore
 
     @cached_property
     def lowered(self) -> LoweredArgumentDefinition:
