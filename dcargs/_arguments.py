@@ -8,7 +8,6 @@ import enum
 import functools
 import itertools
 import shlex
-from pathlib import Path
 from typing import (
     Any,
     Dict,
@@ -86,15 +85,28 @@ class ArgumentDefinition:
         # There will be false positives here, but if choices is unset they should be
         # harmless.
         if "choices" not in kwargs:
-            if "dir" in self.field.name:
-                arg.complete = shtab.DIRECTORY  # type: ignore
-            elif (
+            name_suggests_dir = (
+                # The conditions are intended to be conservative; if a directory path is
+                # registered as a normal file one that's OK, the reverse on the other
+                # hand will be overly restrictive.
+                self.field.name.endswith("_dir")
+                or self.field.name.endswith("_directory")
+                or self.field.name.endswith("_folder")
+            )
+            name_suggests_path = (
+                self.field.name.endswith("_file")
+                or self.field.name.endswith("_path")
+                or self.field.name.endswith("_filename")
+                or name_suggests_dir
+            )
+            complete_as_path = (
                 # Catch types like Path, List[Path], Tuple[Path, ...] etc.
                 "Path" in str(self.field.typ)
-                or "path" in self.field.name
-                or "file" in self.field.name
-            ):
-                arg.complete = shtab.FILE  # type: ignore
+                # For string types, we require more evidence.
+                or ("str" in str(self.field.typ) and name_suggests_path)
+            )
+            if complete_as_path:
+                arg.complete = shtab.DIRECTORY if name_suggests_dir else shtab.FILE  # type: ignore
 
     @cached_property
     def lowered(self) -> LoweredArgumentDefinition:
