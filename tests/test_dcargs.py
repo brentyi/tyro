@@ -99,7 +99,7 @@ def test_init_false():
         i: int
         s: str
         f: float
-        p: pathlib.Path
+        dir: pathlib.Path
         ignored: str = dataclasses.field(default="hello", init=False)
 
     assert dcargs.cli(
@@ -111,15 +111,26 @@ def test_init_false():
             "5",
             "--f",
             "5",
-            "--p",
+            "--dir",
             "~",
         ],
-    ) == InitFalseDataclass(i=5, s="5", f=5.0, p=pathlib.Path("~"))
+    ) == InitFalseDataclass(i=5, s="5", f=5.0, dir=pathlib.Path("~"))
 
     with pytest.raises(SystemExit):
         dcargs.cli(
             InitFalseDataclass,
-            args=["--i", "5", "--s", "5", "--f", "5", "--p", "~", "--ignored", "blah"],
+            args=[
+                "--i",
+                "5",
+                "--s",
+                "5",
+                "--f",
+                "5",
+                "--dir",
+                "~",
+                "--ignored",
+                "blah",
+            ],
         )
 
 
