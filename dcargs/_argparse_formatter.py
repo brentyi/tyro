@@ -1,6 +1,19 @@
+"""Utilities and functions for helptext formatting. We replace argparse's simple help
+messages with ones that:
+    - Are more nicely formatted!
+    - Support multiple columns when many fields are defined.
+    - Use `rich` for formatting.
+    - Can be themed with an accent color.
+
+This is largely built by fussing around in argparse implementation details, and is by
+far the hackiest part of `dcargs`.
+"""
+
+
 import argparse
 import contextlib
 import dataclasses
+import itertools
 import shutil
 from typing import Any, ContextManager, Generator, List, Optional
 
@@ -8,7 +21,6 @@ from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
 from rich.padding import Padding
 from rich.panel import Panel
-from rich.rule import Rule
 from rich.style import Style
 from rich.table import Table
 from rich.text import Text
@@ -167,10 +179,14 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         # For dense multi-column layouts, the fixed help position is often shorter.
         # For wider layouts, using the default help position settings can be more
         # efficient.
+        self._dcargs_rule = None
         self._fixed_help_position = False
         help1 = super().format_help()
+
+        self._dcargs_rule = None
         self._fixed_help_position = True
         help2 = super().format_help()
+
         return help1 if help1.count("\n") < help2.count("\n") else help2
 
     class _Section(object):
@@ -179,6 +195,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             self.parent = parent
             self.heading = heading
             self.items = []
+            self.formatter._dcargs_rule = None
 
         def format_help(self):
             if self.parent is None:
@@ -363,8 +380,42 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             else:
                 heading = ""
 
+            # Determine width for divider below description text. This is shared across
+            # all sections in a particular formatter.
+            lines = list(
+                itertools.chain(
+                    *map(
+                        lambda p: _strings.strip_ansi_sequences(
+                            str_from_rich(
+                                p, width=self.formatter._width, soft_wrap=True
+                            )
+                        )
+                        .rstrip()
+                        .split("\n"),
+                        item_parts + [description_part]
+                        if description_part is not None
+                        else item_parts,
+                    )
+                )
+            )
+            max_width = max(map(len, lines))
+
+            if self.formatter._dcargs_rule is None:
+                # Note: we don't use rich.rule.Rule() because this will make all of
+                # the panels expand to fill the full width of the console. (this only
+                # impacts single-column layouts)
+                self.formatter._dcargs_rule = Text(
+                    "─" * max_width, style=THEME.border, overflow="crop"
+                )
+            elif len(self.formatter._dcargs_rule._text[0]) < max_width:
+                self.formatter._dcargs_rule._text = ["─" * max_width]
+
+            # Add description text if needed.
             if description_part is not None:
-                item_parts = [description_part, Rule(style=THEME.border)] + item_parts
+                item_parts = [
+                    description_part,
+                    self.formatter._dcargs_rule,
+                ] + item_parts
 
             return Panel(
                 Group(*item_parts),
