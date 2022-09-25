@@ -300,16 +300,16 @@ Adam(learning_rate=0.001, betas=(0.9, 0.999))</pre>
 
 Example training script.
 
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help        show this help message and exit                          │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optional subcommands ─────────────────────────────────────────────────────╮
-│ Dataset to train on.  (default: dataset:mnist)                             │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ [{dataset:mnist,dataset:image-net}]                                        │
-│     dataset:mnist                                                          │
-│     dataset:image-net                                                      │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+╭─ arguments ───────────────────────────────────────╮
+│ -h, --help        show this help message and exit │
+╰───────────────────────────────────────────────────╯
+╭─ optional subcommands ────────────────────────────╮
+│ Dataset to train on.  (default: dataset:mnist)    │
+│ ───────────────────────────────────────────────── │
+│ [{dataset:mnist,dataset:image-net}]               │
+│     dataset:mnist                                 │
+│     dataset:image-net                             │
+╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 09_multiple_subcommands.py dataset:mnist --help</kbd><pre class="ansi-block literal-block">usage: 09_multiple_subcommands.py dataset:mnist [-h] [--dataset.binary]
                                                 [{optimizer:adam,optimizer:sgd

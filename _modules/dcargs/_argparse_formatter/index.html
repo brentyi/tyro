@@ -229,9 +229,22 @@
         </div>
         <article role="main">
           <h1>Source code for dcargs._argparse_formatter</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">argparse</span>
+<span></span><span class="sd">&quot;&quot;&quot;Utilities and functions for helptext formatting. We replace argparse&#39;s simple help</span>
+<span class="sd">messages with ones that:</span>
+<span class="sd">    - Are more nicely formatted!</span>
+<span class="sd">    - Support multiple columns when many fields are defined.</span>
+<span class="sd">    - Use `rich` for formatting.</span>
+<span class="sd">    - Can be themed with an accent color.</span>
+
+<span class="sd">This is largely built by fussing around in argparse implementation details, and is by</span>
+<span class="sd">far the hackiest part of `dcargs`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
@@ -239,7 +252,6 @@
 <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
 <span class="kn">from</span> <span class="nn">rich.padding</span> <span class="kn">import</span> <span class="n">Padding</span>
 <span class="kn">from</span> <span class="nn">rich.panel</span> <span class="kn">import</span> <span class="n">Panel</span>
-<span class="kn">from</span> <span class="nn">rich.rule</span> <span class="kn">import</span> <span class="n">Rule</span>
 <span class="kn">from</span> <span class="nn">rich.style</span> <span class="kn">import</span> <span class="n">Style</span>
 <span class="kn">from</span> <span class="nn">rich.table</span> <span class="kn">import</span> <span class="n">Table</span>
 <span class="kn">from</span> <span class="nn">rich.text</span> <span class="kn">import</span> <span class="n">Text</span>
@@ -398,10 +410,14 @@
         <span class="c1"># For dense multi-column layouts, the fixed help position is often shorter.</span>
         <span class="c1"># For wider layouts, using the default help position settings can be more</span>
         <span class="c1"># efficient.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dcargs_rule</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_help_position</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">help1</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">format_help</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dcargs_rule</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_help_position</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">help2</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">format_help</span><span class="p">()</span>
+
         <span class="k">return</span> <span class="n">help1</span> <span class="k">if</span> <span class="n">help1</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">help2</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">help2</span></div>
 
     <span class="k">class</span> <span class="nc">_Section</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -410,6 +426,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">heading</span> <span class="o">=</span> <span class="n">heading</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dcargs_rule</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">def</span> <span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -594,8 +611,42 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">heading</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
+            <span class="c1"># Determine width for divider below description text. This is shared across</span>
+            <span class="c1"># all sections in a particular formatter.</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
+                    <span class="o">*</span><span class="nb">map</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span>
+                            <span class="n">str_from_rich</span><span class="p">(</span>
+                                <span class="n">p</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+                        <span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+                        <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
+                        <span class="n">item_parts</span> <span class="o">+</span> <span class="p">[</span><span class="n">description_part</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">description_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="k">else</span> <span class="n">item_parts</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">max_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">lines</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dcargs_rule</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Note: we don&#39;t use rich.rule.Rule() because this will make all of</span>
+                <span class="c1"># the panels expand to fill the full width of the console. (this only</span>
+                <span class="c1"># impacts single-column layouts)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dcargs_rule</span> <span class="o">=</span> <span class="n">Text</span><span class="p">(</span>
+                    <span class="s2">&quot;─&quot;</span> <span class="o">*</span> <span class="n">max_width</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">,</span> <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;crop&quot;</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dcargs_rule</span><span class="o">.</span><span class="n">_text</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">max_width</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dcargs_rule</span><span class="o">.</span><span class="n">_text</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;─&quot;</span> <span class="o">*</span> <span class="n">max_width</span><span class="p">]</span>
+
+            <span class="c1"># Add description text if needed.</span>
             <span class="k">if</span> <span class="n">description_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">item_parts</span> <span class="o">=</span> <span class="p">[</span><span class="n">description_part</span><span class="p">,</span> <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">)]</span> <span class="o">+</span> <span class="n">item_parts</span>
+                <span class="n">item_parts</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">description_part</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_dcargs_rule</span><span class="p">,</span>
+                <span class="p">]</span> <span class="o">+</span> <span class="n">item_parts</span>
 
             <span class="k">return</span> <span class="n">Panel</span><span class="p">(</span>
                 <span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">item_parts</span><span class="p">),</span>

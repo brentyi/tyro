@@ -5,6 +5,23 @@
 
 .. py:module:: dcargs._argparse_formatter
 
+.. autoapi-nested-parse::
+
+   
+   Utilities and functions for helptext formatting. We replace argparse's simple help
+   messages with ones that:
+
+   ::
+
+      - Are more nicely formatted!
+      - Support multiple columns when many fields are defined.
+      - Use `rich` for formatting.
+      - Can be themed with an accent color.
+
+
+   This is largely built by fussing around in argparse implementation details, and is by
+   far the hackiest part of ``dcargs``.
+
 
 Module Contents
 ---------------

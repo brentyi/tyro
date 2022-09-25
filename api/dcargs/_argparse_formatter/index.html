@@ -231,6 +231,16 @@
         <article role="main">
           <section id="module-dcargs._argparse_formatter">
 <span id="dcargs-argparse-formatter"></span><h1><a class="reference internal" href="#module-dcargs._argparse_formatter" title="dcargs._argparse_formatter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs._argparse_formatter</span></code></a><a class="headerlink" href="#module-dcargs._argparse_formatter" title="Permalink to this heading">#</a></h1>
+<p>Utilities and functions for helptext formatting. We replace argparse’s simple help
+messages with ones that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- Are more nicely formatted!
+- Support multiple columns when many fields are defined.
+- Use `rich` for formatting.
+- Can be themed with an accent color.
+</pre></div>
+</div>
+<p>This is largely built by fussing around in argparse implementation details, and is by
+far the hackiest part of <code class="docutils literal notranslate"><span class="pre">dcargs</span></code>.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
