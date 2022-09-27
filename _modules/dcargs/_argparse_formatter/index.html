@@ -286,8 +286,13 @@
     <span class="n">THEME</span><span class="o">.</span><span class="n">helptext</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">THEME</span><span class="o">.</span><span class="n">helptext_required</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;bright_red&quot;</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">THEME</span><span class="o">.</span><span class="n">helptext_default</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span>
-        <span class="n">color</span><span class="o">=</span><span class="n">accent_color</span> <span class="k">if</span> <span class="n">accent_color</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="s2">&quot;cyan&quot;</span><span class="p">,</span>
-        <span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;cyan&quot;</span>
+        <span class="k">if</span> <span class="n">accent_color</span> <span class="o">!=</span> <span class="s2">&quot;cyan&quot;</span>
+        <span class="k">else</span> <span class="s2">&quot;magenta&quot;</span>
+        <span class="c1"># Another option: make default color match accent color. This is maybe more</span>
+        <span class="c1"># visually consistent, but harder to read.</span>
+        <span class="c1"># color=accent_color if accent_color is not None else &quot;cyan&quot;,</span>
+        <span class="c1"># dim=accent_color is not None,</span>
     <span class="p">)</span></div>
 
 

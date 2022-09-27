@@ -47,3 +47,6 @@ Module Contents
 .. py:function:: multi_metavar_from_single(single: str) -> str
 
 
+.. py:function:: postprocess_helptext(helptext: str) -> str
+
+

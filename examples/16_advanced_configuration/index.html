@@ -307,16 +307,14 @@ command-line interfaces beyond what is expressible via static type annotations.<
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ union-without-subcommand arguments ───────────────────────────────────────╮
 │ A union over nested structures, but without subcommand generation. When a  │
-│ default                                                                    │
-│ is provided, the type is simply fixed to that default.                     │
+│ default is provided, the type is simply fixed to that default.             │
 │ ────────────────────────────────────────────────────────────────────────── │
 │ --union-without-subcommand.branch STR                                      │
 │                         (default: main)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ subcommands ──────────────────────────────────────────────────────────────╮
 │ `dcargs.conf.subcommand()` can be used to configure subcommands in a       │
-│ Union. Here,                                                               │
-│ we make the subcommand names more succinct.                                │
+│ Union. Here, we make the subcommand names more succinct.                   │
 │ ────────────────────────────────────────────────────────────────────────── │
 │ {checkout,commit}                                                          │
 │     checkout            Checkout a branch.                                 │

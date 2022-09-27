@@ -385,7 +385,11 @@
     <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">param_doc</span> <span class="ow">in</span> <span class="n">docstring_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">param_doc</span><span class="o">.</span><span class="n">arg_name</span> <span class="o">==</span> <span class="n">field_name</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">param_doc</span><span class="o">.</span><span class="n">description</span>
+                <span class="k">return</span> <span class="p">(</span>
+                    <span class="n">_strings</span><span class="o">.</span><span class="n">postprocess_helptext</span><span class="p">(</span><span class="n">param_doc</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">param_doc</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="kc">None</span>
+                <span class="p">)</span>
 
     <span class="n">tokenization</span> <span class="o">=</span> <span class="n">get_class_tokenization_with_field</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tokenization</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Currently only happens for dynamic dataclasses.</span>
@@ -408,7 +412,9 @@
             <span class="ow">and</span> <span class="n">first_token_content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&quot;&quot;&#39;</span><span class="p">)</span>
             <span class="ow">and</span> <span class="n">first_token_content</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&quot;&quot;&#39;</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">first_token_content</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">postprocess_helptext</span><span class="p">(</span>
+                <span class="n">_strings</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">first_token_content</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span>
+            <span class="p">)</span>
 
     <span class="c1"># Check for comment on the same line as the field.</span>
     <span class="n">final_token_on_line</span> <span class="o">=</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens_from_logical_line</span><span class="p">[</span>
@@ -417,7 +423,7 @@
     <span class="k">if</span> <span class="n">final_token_on_line</span><span class="o">.</span><span class="n">token_type</span> <span class="o">==</span> <span class="n">tokenize</span><span class="o">.</span><span class="n">COMMENT</span><span class="p">:</span>
         <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">final_token_on_line</span><span class="o">.</span><span class="n">content</span>
         <span class="k">assert</span> <span class="n">comment</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">comment</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">postprocess_helptext</span><span class="p">(</span><span class="n">comment</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
     <span class="c1"># Check for comments that come before the field. This is intentionally written to</span>
     <span class="c1"># support comments covering multiple (grouped) fields, for example:</span>
@@ -470,7 +476,7 @@
         <span class="n">current_actual_line</span> <span class="o">-=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">comments</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">postprocess_helptext</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">comments</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="kc">None</span></div>
 
