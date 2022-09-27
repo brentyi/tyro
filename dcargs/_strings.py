@@ -118,3 +118,28 @@ def multi_metavar_from_single(single: str) -> str:
         return f"{single} [...]"
     else:
         return f"{single} [{single} ...]"
+
+
+def postprocess_helptext(helptext: str) -> str:
+    lines = helptext.split("\n")
+    output_parts: List[str] = []
+    for line in lines:
+        # Remove trailing whitespace.
+        line = line.rstrip()
+
+        # Empty line.
+        if len(line) == 0:
+            prev_is_break = len(output_parts) >= 1 and output_parts[-1] == "\n"
+            if not prev_is_break:
+                output_parts.append("\n")
+            output_parts.append("\n")
+        # Empty line.
+        else:
+            if not line[0].isalpha():
+                output_parts.append("\n")
+            prev_is_break = len(output_parts) >= 1 and output_parts[-1] == "\n"
+            if len(output_parts) >= 1 and not prev_is_break:
+                output_parts.append(" ")
+            output_parts.append(line)
+
+    return "".join(output_parts).rstrip()  # type: ignore
