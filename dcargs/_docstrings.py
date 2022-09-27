@@ -154,7 +154,11 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     if docstring is not None:
         for param_doc in docstring_parser.parse(docstring).params:
             if param_doc.arg_name == field_name:
-                return param_doc.description
+                return (
+                    _strings.postprocess_helptext(param_doc.description)
+                    if param_doc.description is not None
+                    else None
+                )
 
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
@@ -177,7 +181,9 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
             and first_token_content.startswith('"""')
             and first_token_content.endswith('"""')
         ):
-            return _strings.dedent(first_token_content[3:-3])
+            return _strings.postprocess_helptext(
+                _strings.dedent(first_token_content[3:-3])
+            )
 
     # Check for comment on the same line as the field.
     final_token_on_line = tokenization.tokens_from_logical_line[
@@ -186,7 +192,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     if final_token_on_line.token_type == tokenize.COMMENT:
         comment: str = final_token_on_line.content
         assert comment.startswith("#")
-        return comment[1:].strip()
+        return _strings.postprocess_helptext(comment[1:].strip())
 
     # Check for comments that come before the field. This is intentionally written to
     # support comments covering multiple (grouped) fields, for example:
@@ -239,7 +245,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         current_actual_line -= 1
 
     if len(comments) > 0:
-        return "\n".join(reversed(comments))
+        return _strings.postprocess_helptext("\n".join(reversed(comments)))
 
     return None
 
