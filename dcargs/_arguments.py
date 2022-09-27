@@ -21,6 +21,8 @@ from typing import (
     Union,
 )
 
+import rich.markup
+
 from . import _fields, _instantiators, _resolver
 from . import _shtab as shtab
 from . import _strings
@@ -296,6 +298,7 @@ USE_RICH = True
 
 
 def _rich_tag_if_enabled(x: str, tag: str):
+    x = rich.markup.escape(x)
     return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
 
 
