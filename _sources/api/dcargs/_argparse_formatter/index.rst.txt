@@ -111,9 +111,6 @@ Module Contents
    .. py:method:: add_argument(self, action)
 
 
-   .. py:method:: format_usage(self)
-
-
    .. py:method:: format_help(self)
 
 

@@ -366,10 +366,10 @@
         <span class="n">indent_increment</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="n">width</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span> <span class="o">-</span> <span class="mi">2</span>
         <span class="n">max_help_position</span> <span class="o">=</span> <span class="mi">24</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_strip_ansi_sequences</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_help_position</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># TODO: hacky. Refactor this.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fixed_help_position</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_strip_ansi_sequences</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
 
@@ -381,12 +381,18 @@
         <span class="n">out</span> <span class="o">=</span> <span class="n">get_metavar</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="c1"># Can result in an failed argparse assertion if we turn off soft wrapping.</span>
-            <span class="k">return</span> <span class="n">str_from_rich</span><span class="p">(</span>
-                <span class="n">Text</span><span class="p">(</span>
-                    <span class="n">out</span><span class="p">,</span>
-                    <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span> <span class="k">if</span> <span class="n">out</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span> <span class="k">else</span> <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
-                <span class="p">),</span>
-                <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="n">out</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip_ansi_sequences</span>
+                <span class="k">else</span> <span class="n">str_from_rich</span><span class="p">(</span>
+                    <span class="n">Text</span><span class="p">(</span>
+                        <span class="n">out</span><span class="p">,</span>
+                        <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span>
+                        <span class="k">if</span> <span class="n">out</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span>
+                        <span class="k">else</span> <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+                    <span class="p">),</span>
+                    <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
 
@@ -412,16 +418,6 @@
 
     <span class="k">def</span> <span class="nf">_fill_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">indent</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-
-<div class="viewcode-block" id="DcargsArgparseHelpFormatter.format_usage"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.DcargsArgparseHelpFormatter.format_usage">[docs]</a>    <span class="k">def</span> <span class="nf">format_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">formatter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_formatter</span><span class="p">()</span>
-        <span class="n">formatter</span><span class="o">.</span><span class="n">add_usage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">usage</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutually_exclusive_groups</span><span class="p">)</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">formatter</span><span class="o">.</span><span class="n">format_help</span><span class="p">()</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strip_ansi_sequences</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">out</span></div>
 
 <div class="viewcode-block" id="DcargsArgparseHelpFormatter.format_help"><a class="viewcode-back" href="../../../api/dcargs/_argparse_formatter/#dcargs._argparse_formatter.DcargsArgparseHelpFormatter.format_help">[docs]</a>    <span class="k">def</span> <span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Try with and without a fixed help position, then return the shorter help</span>
