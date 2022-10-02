@@ -1,3 +1,4 @@
+import argparse
 import contextlib
 import dataclasses
 import enum
@@ -20,6 +21,9 @@ def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         dcargs.cli(f, args=args)
+
+    # Check dcargs.extras.get_parser().
+    assert isinstance(dcargs.extras.get_parser(f), argparse.ArgumentParser)
 
     # Completion scripts; just smoke test for now.
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
