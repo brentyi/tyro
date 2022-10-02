@@ -89,6 +89,6 @@ Module Contents
    Get the ``argparse.ArgumentParser`` object generated under-the-hood by
    ``dcargs.cli()``. Useful for tools like ``sphinx-argparse``\ , ``argcomplete``\ , etc.
 
-   For tab completion, we recommend using ``dcargs.cli()``\ 's\ ``built-in``\ --dcargs-print-completion`
+   For tab completion, we recommend using ``dcargs.cli()``\ 's built-in ``--dcargs-print-completion``
    flag.
 
