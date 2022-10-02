@@ -473,6 +473,8 @@
         <span class="n">completion_shell</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">return_parser</span><span class="p">:</span>
         <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># Generate parser!</span>
     <span class="k">with</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ansi_context</span><span class="p">():</span>
@@ -483,6 +485,7 @@
         <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
+            <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">parser</span>
 
         <span class="k">if</span> <span class="n">print_completion</span><span class="p">:</span>
