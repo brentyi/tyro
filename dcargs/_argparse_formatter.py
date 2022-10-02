@@ -135,10 +135,10 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         indent_increment = 4
         width = shutil.get_terminal_size().columns - 2
         max_help_position = 24
-        self._strip_ansi_sequences = not _arguments.USE_RICH
+        self._fixed_help_position = False
 
         # TODO: hacky. Refactor this.
-        self._fixed_help_position = _arguments.USE_RICH
+        self._strip_ansi_sequences = not _arguments.USE_RICH
 
         super().__init__(prog, indent_increment, max_help_position, width)
 
@@ -150,12 +150,18 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         out = get_metavar(1)[0]
         if isinstance(out, str):
             # Can result in an failed argparse assertion if we turn off soft wrapping.
-            return str_from_rich(
-                Text(
-                    out,
-                    style=THEME.metavar_fixed if out == "{fixed}" else THEME.metavar,
-                ),
-                soft_wrap=True,
+            return (
+                out
+                if self._strip_ansi_sequences
+                else str_from_rich(
+                    Text(
+                        out,
+                        style=THEME.metavar_fixed
+                        if out == "{fixed}"
+                        else THEME.metavar,
+                    ),
+                    soft_wrap=True,
+                )
             )
         return out
 
@@ -181,16 +187,6 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
     def _fill_text(self, text, width, indent):
         return "".join(indent + line for line in text.splitlines(keepends=True))
-
-    def format_usage(self):
-        formatter = self._get_formatter()
-        formatter.add_usage(self.usage, self._actions, self._mutually_exclusive_groups)
-        out = formatter.format_help()
-
-        if self._strip_ansi_sequences:
-            return _strings.strip_ansi_sequences(out)
-        else:
-            return out
 
     def format_help(self):
         # Try with and without a fixed help position, then return the shorter help
