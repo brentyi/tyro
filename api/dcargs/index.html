@@ -247,10 +247,10 @@
 <span class="sig-prename descclassname"><span class="pre">dcargs.</span></span><span class="sig-name descname"><span class="pre">cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">OutT</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">OutT</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">OutT</span></span></span><a class="reference internal" href="../../_modules/dcargs/_cli/#cli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.cli" title="Permalink to this definition">#</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-prename descclassname"><span class="pre">dcargs.</span></span><span class="sig-name descname"><span class="pre">cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">OutT</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">OutT</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">OutT</span></span></span></dt>
-<dd><p>Call <code class="docutils literal notranslate"><span class="pre">f(...)</span></code>, with arguments populated from an automatically generated CLI
-interface.</p>
-<p><code class="docutils literal notranslate"><span class="pre">f</span></code> should have type-annotated inputs, and can be a function or class. Note that if
-<code class="docutils literal notranslate"><span class="pre">f</span></code> is a class, <code class="docutils literal notranslate"><span class="pre">dcargs.cli()</span></code> returns an instance.</p>
+<dd><p>Call or instantiate <code class="docutils literal notranslate"><span class="pre">f</span></code>, with inputs populated from an automatically generated
+CLI interface.</p>
+<p><code class="docutils literal notranslate"><span class="pre">f</span></code> should have type-annotated inputs, and can be a function or type. Note that if
+<code class="docutils literal notranslate"><span class="pre">f</span></code> is a type, <code class="docutils literal notranslate"><span class="pre">dcargs.cli()</span></code> returns an instance.</p>
 <p>The parser is generated by populating helptext from docstrings and types from
 annotations; a broad range of core type annotations are supported.</p>
 <ul class="simple">
@@ -286,12 +286,13 @@ classes.</p>
 </li>
 <li><p>Generics (including nested generics).</p></li>
 </ul>
-<p>Completion scripts for interactive shells is also provided. To print a script that
-can be used for tab completion, pass in <code class="docutils literal notranslate"><span class="pre">--dcargs-print-completion</span> <span class="pre">{bash/zsh/tcsh}</span></code>.</p>
+<p>Completion script generation for interactive shells is also provided. To print a
+script that can be used for tab completion, pass in <code class="docutils literal notranslate"><span class="pre">--dcargs-print-completion</span>
+<span class="pre">{bash/zsh/tcsh}</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>f</strong> – Callable.</p></li>
+<li><p><strong>f</strong> – Function or type.</p></li>
 <li><p><strong>prog</strong> – The name of the program printed in helptext. Mirrors argument from
 <code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser()</span></code>.</p></li>
 <li><p><strong>description</strong> – Description text for the parser, displayed when the –help flag is
@@ -306,7 +307,8 @@ loaded from a yaml file)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The output of <code class="docutils literal notranslate"><span class="pre">f(...)</span></code>.</p>
+<dd class="field-even"><p>The output of <code class="docutils literal notranslate"><span class="pre">f(...)</span></code>, or an instance <code class="docutils literal notranslate"><span class="pre">f</span></code>. If <code class="docutils literal notranslate"><span class="pre">f</span></code> is a class, the two are
+typically equivalent.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -324,6 +326,11 @@ loaded from a yaml file)</p></li>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>Exception raised when an unsupported type annotation is detected.</p>
 </dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="dcargs.__version__">
+<span class="sig-prename descclassname"><span class="pre">dcargs.</span></span><span class="sig-name descname"><span class="pre">__version__</span></span><a class="headerlink" href="#dcargs.__version__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 </section>
 </section>
@@ -396,6 +403,7 @@ loaded from a yaml file)</p></li>
 <li><a class="reference internal" href="#dcargs.cli">cli</a></li>
 <li><a class="reference internal" href="#dcargs.MISSING">MISSING</a></li>
 <li><a class="reference internal" href="#dcargs.UnsupportedTypeAnnotationError">UnsupportedTypeAnnotationError</a></li>
+<li><a class="reference internal" href="#dcargs.__version__">__version__</a></li>
 </ul>
 </li>
 </ul>

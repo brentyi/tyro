@@ -20,6 +20,15 @@ Package Contents
    Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
    see ``python -m rich.color``. Experimental.
 
+.. py:function:: get_parser(f: Union[Type[OutT], Callable[Ellipsis, OutT]], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None) -> argparse.ArgumentParser
+
+   
+   Get the ``argparse.ArgumentParser`` object generated under-the-hood by
+   ``dcargs.cli()``. Useful for tools like ``sphinx-argparse``\ , ``argcomplete``\ , etc.
+
+   For tab completion, we recommend using ``dcargs.cli()``\ 's\ ``built-in``\ --dcargs-print-completion`
+   flag.
+
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> Type[T]
 
    
