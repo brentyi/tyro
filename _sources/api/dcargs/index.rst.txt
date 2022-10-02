@@ -95,8 +95,3 @@ Package Contents
    
    Exception raised when an unsupported type annotation is detected.
 
-.. py:data:: __version__
-   
-
-   
-
