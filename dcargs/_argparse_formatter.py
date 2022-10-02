@@ -26,7 +26,7 @@ from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
 
-from . import _strings
+from . import _arguments, _strings
 
 
 @dataclasses.dataclass
@@ -135,7 +135,11 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         indent_increment = 4
         width = shutil.get_terminal_size().columns - 2
         max_help_position = 24
-        self._fixed_help_position = False
+        self._strip_ansi_sequences = not _arguments.USE_RICH
+
+        # TODO: hacky. Refactor this.
+        self._fixed_help_position = _arguments.USE_RICH
+
         super().__init__(prog, indent_increment, max_help_position, width)
 
     def _format_args(self, action, default_metavar):
@@ -178,6 +182,16 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
     def _fill_text(self, text, width, indent):
         return "".join(indent + line for line in text.splitlines(keepends=True))
 
+    def format_usage(self):
+        formatter = self._get_formatter()
+        formatter.add_usage(self.usage, self._actions, self._mutually_exclusive_groups)
+        out = formatter.format_help()
+
+        if self._strip_ansi_sequences:
+            return _strings.strip_ansi_sequences(out)
+        else:
+            return out
+
     def format_help(self):
         # Try with and without a fixed help position, then return the shorter help
         # message.
@@ -192,7 +206,12 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         self._fixed_help_position = True
         help2 = super().format_help()
 
-        return help1 if help1.count("\n") < help2.count("\n") else help2
+        out = help1 if help1.count("\n") < help2.count("\n") else help2
+
+        if self._strip_ansi_sequences:
+            return _strings.strip_ansi_sequences(out)
+        else:
+            return out
 
     class _Section(object):
         def __init__(self, formatter, parent, heading=None):

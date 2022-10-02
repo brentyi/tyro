@@ -23,7 +23,18 @@ def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
         dcargs.cli(f, args=args)
 
     # Check dcargs.extras.get_parser().
-    assert isinstance(dcargs.extras.get_parser(f), argparse.ArgumentParser)
+    parser = dcargs.extras.get_parser(f)
+    assert isinstance(parser, argparse.ArgumentParser)
+
+    # Returned parser should have formatting information stripped. External tools rarely
+    # support ANSI sequences.
+    unformatted_helptext = parser.format_help()
+    assert (
+        dcargs._strings.strip_ansi_sequences(unformatted_helptext)
+        == unformatted_helptext
+    )
+    unformatted_usage = parser.format_usage()
+    assert dcargs._strings.strip_ansi_sequences(unformatted_usage) == unformatted_usage
 
     # Completion scripts; just smoke test for now.
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
