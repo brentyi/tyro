@@ -239,8 +239,9 @@ def _cli_impl(
 
     completion_shell = None
     if print_completion:
-        _arguments.USE_RICH = False
         completion_shell = args[1]
+    if print_completion or return_parser:
+        _arguments.USE_RICH = False
 
     # Generate parser!
     with _argparse_formatter.ansi_context():
