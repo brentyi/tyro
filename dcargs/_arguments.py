@@ -294,7 +294,10 @@ def _rule_generate_helptext(
     """Generate helptext from docstring, argument name, default values."""
 
     # If the suppress marker is attached, hide the argument.
-    if _markers.Suppress in arg.field.markers:
+    if _markers.Suppress in arg.field.markers or (
+        _markers.SuppressFixed in arg.field.markers
+        and _markers.Fixed in arg.field.markers
+    ):
         return dataclasses.replace(lowered, help=argparse.SUPPRESS)
 
     help_parts = []
