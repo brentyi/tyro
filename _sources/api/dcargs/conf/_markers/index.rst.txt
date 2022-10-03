@@ -22,11 +22,6 @@ Module Contents
 
    
 
-.. py:data:: MarkerAnnotation
-   
-
-   
-
 .. py:data:: Positional
    
 
