@@ -57,7 +57,6 @@ If subcommand prefixes are omitted, we would instead simply have --branch.
 # - Annotated[T, Marker]
 class Marker(_singleton.Singleton):
     def __getitem__(self, key):
-        print(key)
         return Annotated.__class_getitem__((key, self))  # type: ignore
 
 
