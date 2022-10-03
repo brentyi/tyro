@@ -235,48 +235,47 @@
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_singleton</span>
 
-<span class="c1"># Current design issue: _dynamic_marker_types are applied recursively to nested</span>
-<span class="c1"># structures, but can&#39;t be unapplied.</span>
+<span class="c1"># Current design issue: markers are applied recursively to nested structures, but can&#39;t</span>
+<span class="c1"># be unapplied.</span>
 
 <span class="c1"># Note that all Annotated[T, None] values are just for static checkers. The real marker</span>
 <span class="c1"># singletons are instantiated dynamically below.</span>
+<span class="c1">#</span>
+<span class="c1"># An alias could ideally be made, but SpecialForm aliases are not well supported by static analysis tools.</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Type</span><span class="p">)</span>
 
-<span class="c1"># This could ideally be Annotated[T, None], but SpecialForm aliases are not well supported by static analysis tools.</span>
-<span class="n">StaticPlaceholder</span> <span class="o">=</span> <span class="n">Annotated</span>
-
-<span class="n">Positional</span> <span class="o">=</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">Positional</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional</span>
 <span class="sd">argument.&quot;&quot;&quot;</span>
 
-<span class="n">Fixed</span> <span class="o">=</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">Fixed</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a</span>
 <span class="sd">default value should be set instead. Note that fields with defaults that can&#39;t be parsed</span>
 <span class="sd">will also be marked as fixed automatically.&quot;&quot;&quot;</span>
 
-<span class="n">Suppress</span> <span class="o">=</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">Suppress</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and</span>
 <span class="sd">to prevent it from showing up in helptext.&quot;&quot;&quot;</span>
 
-<span class="n">SuppressFixed</span> <span class="o">=</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">SuppressFixed</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Hide fields that are either manually or automatically marked as fixed.&quot;&quot;&quot;</span>
 
-<span class="n">FlagConversionOff</span> <span class="o">=</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">FlagConversionOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Turn off flag conversion for booleans with default values. Instead, types annotated</span>
 <span class="sd">with `bool` will expect an explicit True or False.</span>
 
 <span class="sd">Can be used directly on boolean annotations, `FlagConversionOff[bool]`, or recursively</span>
 <span class="sd">applied to nested types.&quot;&quot;&quot;</span>
 
-<span class="n">AvoidSubcommands</span> <span class="o">=</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">AvoidSubcommands</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Avoid creating subcommands when a default is provided for unions over nested types.</span>
 <span class="sd">This simplifies CLI interfaces, but makes them less expressive.</span>
 
 <span class="sd">Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively</span>
 <span class="sd">applied to nested types.&quot;&quot;&quot;</span>
 
-<span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</span>
 
 <span class="sd">If we have a structure with the field:</span>
@@ -308,7 +307,7 @@
 
     <span class="n">_dynamic_marker_types</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">globals</span><span class="p">())</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">StaticPlaceholder</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
             <span class="n">_dynamic_marker_types</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
     <span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_dynamic_marker_types</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">_dynamic_marker_types</span>

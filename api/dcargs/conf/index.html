@@ -234,6 +234,8 @@
 <p>The <a class="reference internal" href="#module-dcargs.conf" title="dcargs.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a> submodule contains helpers for attaching parsing-specific
 configuration metadata to types via <a class="reference external" href="https://peps.python.org/pep-0593/">PEP 593</a> runtime
 annotations.</p>
+<p>Configuration flags are applied recursively, and should generally be subscripted:
+<code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code>, etc.</p>
 <p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading">#</a></h2>
