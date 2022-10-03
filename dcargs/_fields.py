@@ -79,7 +79,7 @@ class FieldDefinition:
     def is_positional(self) -> bool:
         return (
             # Explicit positionals.
-            _markers.POSITIONAL in self.markers
+            _markers.Positional in self.markers
             # Dummy dataclasses should have a single positional field.
             or self.name == _strings.dummy_field_name
         )
@@ -555,7 +555,7 @@ def _field_list_from_params(
                 typ=hints[param.name],
                 default=default,
                 helptext=helptext,
-                markers=(_markers.POSITIONAL,)
+                markers=(_markers.Positional,)
                 if param.kind is inspect.Parameter.POSITIONAL_ONLY
                 else (),
             )

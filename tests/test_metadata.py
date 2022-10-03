@@ -355,9 +355,7 @@ def test_fixed_recursive():
 
     with pytest.raises(SystemExit):
         assert dcargs.cli(
-            dcargs.conf.Fixed[
-                dcargs.conf.FlagConversionOff[A],
-            ],
+            dcargs.conf.Fixed[dcargs.conf.FlagConversionOff[A]],
             args=["--x", "True"],
             default=A(False),
         ) == A(True)

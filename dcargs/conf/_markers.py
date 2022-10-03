@@ -1,62 +1,45 @@
-from typing import Type, TypeVar
+from typing import TYPE_CHECKING, Type, TypeVar
 
 from typing_extensions import Annotated
 
 from .. import _singleton
 
+# Current design issue: _dynamic_marker_types are applied recursively to nested
+# structures, but can't be unapplied.
 
-class Marker(_singleton.Singleton):
-    pass
-
-
-def _make_marker(description: str) -> Marker:
-    class _InnerMarker(Marker):
-        def __repr__(self):
-            return description
-
-    return _InnerMarker()
-
-
-# Current design issue: markers are applied recursively to nested structures, but can't
-# be unapplied.
+# Note that all Annotated[T, None] values are just for static checkers. The real marker
+# singletons are instantiated dynamically below.
 
 T = TypeVar("T", bound=Type)
 
-POSITIONAL = _make_marker("Positional")
-Positional = Annotated[T, POSITIONAL]
+Positional = Annotated[T, None]
 """A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
 argument."""
 
-
-FIXED = _make_marker("Fixed")
-Fixed = Annotated[T, FIXED]
+Fixed = Annotated[T, None]
 """A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a
 default value should be set instead. Note that fields with defaults that can't be parsed
 will also be marked as fixed automatically."""
 
-SUPPRESS = _make_marker("Suppress")
-Suppress = Annotated[T, FIXED, SUPPRESS]
+Suppress = Annotated[T, None]
 """A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and
 to prevent it from showing up in helptext."""
 
-FLAG_CONVERSION_OFF = _make_marker("FlagConversionOff")
-FlagConversionOff = Annotated[T, FLAG_CONVERSION_OFF]
+FlagConversionOff = Annotated[T, None]
 """Turn off flag conversion for booleans with default values. Instead, types annotated
 with `bool` will expect an explicit True or False.
 
 Can be used directly on boolean annotations, `FlagConversionOff[bool]`, or recursively
 applied to nested types."""
 
-AVOID_SUBCOMMANDS = _make_marker("AvoidSubcommands")
-AvoidSubcommands = Annotated[T, AVOID_SUBCOMMANDS]
+AvoidSubcommands = Annotated[T, None]
 """Avoid creating subcommands when a default is provided for unions over nested types.
 This simplifies CLI interfaces, but makes them less expressive.
 
 Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively
 applied to nested types."""
 
-OMIT_SUBCOMMAND_PREFIXES = _make_marker("OmitSubcommandPrefixes")
-OmitSubcommandPrefixes = Annotated[T, OMIT_SUBCOMMAND_PREFIXES]
+OmitSubcommandPrefixes = Annotated[T, None]
 """Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
 
 If we have a structure with the field:
@@ -66,3 +49,30 @@ If we have a structure with the field:
 By default, --cmd.branch may be generated as a flag for each dataclass in the union.
 If subcommand prefixes are omitted, we would instead simply have --branch.
 """
+
+
+# Dynamically generate marker singletons.
+# These can be used one of two ways:
+# - Marker[T]
+# - Annotated[T, Marker]
+class Marker(_singleton.Singleton):
+    def __getitem__(self, key):
+        print(key)
+        return Annotated.__class_getitem__((key, self))  # type: ignore
+
+
+if not TYPE_CHECKING:
+
+    def _make_marker(description: str) -> Marker:
+        class _InnerMarker(Marker):
+            def __repr__(self):
+                return description
+
+        return _InnerMarker()
+
+    _dynamic_marker_types = {}
+    for k, v in dict(globals()).items():
+        if v == Annotated[T, None]:
+            _dynamic_marker_types[k] = _make_marker(k)
+    globals().update(_dynamic_marker_types)
+    del _dynamic_marker_types

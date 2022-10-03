@@ -95,7 +95,7 @@ class ParserSpecification:
                     f"Field {field.name} has an unbound TypeVar: {field.typ}."
                 )
 
-            if _markers.FIXED not in field.markers:
+            if _markers.Fixed not in field.markers:
                 # (1) Handle Unions over callables; these result in subparsers.
                 subparsers_attempt = SubparsersSpecification.from_field(
                     field,
@@ -106,7 +106,7 @@ class ParserSpecification:
                 if subparsers_attempt is not None:
                     if (
                         not subparsers_attempt.required
-                        and _markers.AVOID_SUBCOMMANDS in field.markers
+                        and _markers.AvoidSubcommands in field.markers
                     ):
                         # Don't make a subparser.
                         field = dataclasses.replace(field, typ=type(field.default))
