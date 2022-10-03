@@ -4,48 +4,47 @@ from typing_extensions import Annotated
 
 from .. import _singleton
 
-# Current design issue: _dynamic_marker_types are applied recursively to nested
-# structures, but can't be unapplied.
+# Current design issue: markers are applied recursively to nested structures, but can't
+# be unapplied.
 
 # Note that all Annotated[T, None] values are just for static checkers. The real marker
 # singletons are instantiated dynamically below.
+#
+# An alias could ideally be made, but SpecialForm aliases are not well supported by static analysis tools.
 
 T = TypeVar("T", bound=Type)
 
-# This could ideally be Annotated[T, None], but SpecialForm aliases are not well supported by static analysis tools.
-StaticPlaceholder = Annotated
-
-Positional = StaticPlaceholder[T, None]
+Positional = Annotated[T, None]
 """A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
 argument."""
 
-Fixed = StaticPlaceholder[T, None]
+Fixed = Annotated[T, None]
 """A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a
 default value should be set instead. Note that fields with defaults that can't be parsed
 will also be marked as fixed automatically."""
 
-Suppress = StaticPlaceholder[T, None]
+Suppress = Annotated[T, None]
 """A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and
 to prevent it from showing up in helptext."""
 
-SuppressFixed = StaticPlaceholder[T, None]
+SuppressFixed = Annotated[T, None]
 """Hide fields that are either manually or automatically marked as fixed."""
 
-FlagConversionOff = StaticPlaceholder[T, None]
+FlagConversionOff = Annotated[T, None]
 """Turn off flag conversion for booleans with default values. Instead, types annotated
 with `bool` will expect an explicit True or False.
 
 Can be used directly on boolean annotations, `FlagConversionOff[bool]`, or recursively
 applied to nested types."""
 
-AvoidSubcommands = StaticPlaceholder[T, None]
+AvoidSubcommands = Annotated[T, None]
 """Avoid creating subcommands when a default is provided for unions over nested types.
 This simplifies CLI interfaces, but makes them less expressive.
 
 Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively
 applied to nested types."""
 
-OmitSubcommandPrefixes = StaticPlaceholder[T, None]
+OmitSubcommandPrefixes = Annotated[T, None]
 """Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
 
 If we have a structure with the field:
@@ -77,7 +76,7 @@ if not TYPE_CHECKING:
 
     _dynamic_marker_types = {}
     for k, v in dict(globals()).items():
-        if v == StaticPlaceholder[T, None]:
+        if v == Annotated[T, None]:
             _dynamic_marker_types[k] = _make_marker(k)
     globals().update(_dynamic_marker_types)
     del _dynamic_marker_types
