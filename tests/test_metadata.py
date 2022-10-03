@@ -7,6 +7,49 @@ from typing_extensions import Annotated
 import dcargs
 
 
+def test_omit_subcommand_prefix():
+    @dataclasses.dataclass
+    class DefaultInstanceHTTPServer:
+        y: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSMTPServer:
+        z: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSubparser:
+        x: int
+        # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        bc: dcargs.conf.OmitSubcommandPrefixes[
+            Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        ]
+
+    assert (
+        dcargs.cli(
+            DefaultInstanceSubparser,
+            args=["--x", "1", "bc:default-instance-http-server", "--y", "5"],
+        )
+        == dcargs.cli(
+            DefaultInstanceSubparser,
+            args=["--x", "1", "bc:default-instance-http-server", "--y", "5"],
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
+        )
+        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
+    )
+    assert (
+        dcargs.cli(
+            DefaultInstanceSubparser,
+            args=["--x", "1", "bc:default-instance-http-server", "--y", "8"],
+        )
+        == dcargs.cli(
+            DefaultInstanceSubparser,
+            args=["--x", "1", "bc:default-instance-http-server", "--y", "8"],
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
+        )
+        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
+    )
+
+
 def test_avoid_subparser_with_default():
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
