@@ -1,4 +1,5 @@
 """Interface for generating `argparse.ArgumentParser()` definitions from callables."""
+
 from __future__ import annotations
 
 import argparse
@@ -6,6 +7,7 @@ import dataclasses
 import itertools
 from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
+import rich.markup
 from typing_extensions import Annotated, get_args, get_origin
 
 from . import (
@@ -455,7 +457,7 @@ class SubparsersSpecification:
                 subparser = argparse_subparsers.add_parser(
                     name,
                     formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
-                    help=subparser_def.description,
+                    help=rich.markup.escape(subparser_def.description),
                 )
                 subparser_def.apply(subparser)
 

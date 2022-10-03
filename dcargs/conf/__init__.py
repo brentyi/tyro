@@ -2,6 +2,9 @@
 configuration metadata to types via [PEP 593](https://peps.python.org/pep-0593/) runtime
 annotations.
 
+Configuration flags are applied recursively, and should generally be subscripted:
+`Fixed[T]`, `Suppress[T]`, etc.
+
 Features here are supported, but generally unnecessary and should be used sparingly.
 """
 
