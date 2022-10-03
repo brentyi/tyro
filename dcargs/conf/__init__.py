@@ -5,13 +5,21 @@ annotations.
 Features here are supported, but generally unnecessary and should be used sparingly.
 """
 
-from ._markers import AvoidSubcommands, Fixed, FlagConversionOff, Positional, Suppress
+from ._markers import (
+    AvoidSubcommands,
+    Fixed,
+    FlagConversionOff,
+    OmitSubcommandPrefixes,
+    Positional,
+    Suppress,
+)
 from ._subcommands import subcommand
 
 __all__ = [
     "AvoidSubcommands",
     "Fixed",
     "FlagConversionOff",
+    "OmitSubcommandPrefixes",
     "Positional",
     "Suppress",
     "subcommand",

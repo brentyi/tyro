@@ -36,25 +36,12 @@ except ImportError:
     from backports.cached_property import cached_property  # type: ignore
 
 
-class _PatchedList(list):
-    """Custom tuple type, for avoiding "default not in choices" errors when the default
-    is set to MISSING_NONPROP.
-
-    This solves a choices error raised by argparse in a very specific edge case:
-    literals in containers as positional arguments."""
-
-    def __init__(self, li):
-        super(_PatchedList, self).__init__(li)
-
-    def __contains__(self, x: Any) -> bool:
-        return list.__contains__(self, x) or x is _fields.MISSING_NONPROP
-
-
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
     """Structure containing everything needed to define an argument."""
 
     prefix: str  # Prefix for nesting.
+    subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
     type_from_typevar: Dict[TypeVar, Type]
 
@@ -77,10 +64,7 @@ class ArgumentDefinition:
         # the field default to a string format, then back to the desired type.
         kwargs["default"] = _fields.MISSING_NONPROP
 
-        if "choices" in kwargs:
-            kwargs["choices"] = _PatchedList(kwargs["choices"])
-
-        # Note that the name must be passed in as a position argument.
+        # Add argument! Note that the name must be passed in as a position argument.
         arg = parser.add_argument(name_or_flag, **kwargs)
 
         # Do our best to tab complete paths.
@@ -119,8 +103,9 @@ class ArgumentDefinition:
             _rule_recursive_instantiator_from_type,
             _rule_convert_defaults_to_strings,
             _rule_generate_helptext,
-            _rule_set_name_or_flag,
+            _rule_set_name_or_flag_and_dest,
             _rule_positional_special_handling,
+            _rule_static_cast_choices_to_patched_list,
         )
         return functools.reduce(
             lambda lowered, rule: rule(self, lowered),
@@ -362,18 +347,29 @@ def _rule_generate_helptext(
     return dataclasses.replace(lowered, help=" ".join(help_parts))
 
 
-def _rule_set_name_or_flag(
+def _rule_set_name_or_flag_and_dest(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
+    # Positional arguments: no -- prefix.
     if arg.field.is_positional():
         name_or_flag = _strings.make_field_name([arg.prefix, arg.field.name])
+    # Negated booleans.
     elif lowered.action == "store_false":
         name_or_flag = "--" + _strings.make_field_name(
             [arg.prefix, "no-" + arg.field.name]
         )
+    # Prefix keyword arguments with --.
     else:
         name_or_flag = "--" + _strings.make_field_name([arg.prefix, arg.field.name])
+
+    # Strip.
+    if name_or_flag.startswith("--") and arg.subcommand_prefix != "":
+        # This will run even when unused because we want the assert.
+        strip_prefix = "--" + arg.subcommand_prefix + "."
+        assert name_or_flag.startswith(strip_prefix)
+        if _markers.OMIT_SUBCOMMAND_PREFIXES in arg.field.markers:
+            name_or_flag = "--" + name_or_flag[len(strip_prefix) :]
 
     return dataclasses.replace(
         lowered,
@@ -409,4 +405,28 @@ def _rule_positional_special_handling(
         required=None,  # Can't be passed in for positionals.
         metavar=metavar,
         nargs=nargs,
+    )
+
+
+class _PatchedList(list):
+    """Custom list type, for avoiding "default not in choices" errors when the default
+    is set to MISSING_NONPROP.
+
+    This solves a choices error raised by argparse in a very specific edge case:
+    literals in containers as positional arguments."""
+
+    def __init__(self, li):
+        super(_PatchedList, self).__init__(li)
+
+    def __contains__(self, x: Any) -> bool:
+        return list.__contains__(self, x) or x is _fields.MISSING_NONPROP
+
+
+def _rule_static_cast_choices_to_patched_list(
+    arg: ArgumentDefinition,
+    lowered: LoweredArgumentDefinition,
+) -> LoweredArgumentDefinition:
+    return dataclasses.replace(
+        lowered,
+        choices=_PatchedList(lowered.choices) if lowered.choices is not None else None,
     )

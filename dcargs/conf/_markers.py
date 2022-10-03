@@ -54,3 +54,15 @@ This simplifies CLI interfaces, but makes them less expressive.
 
 Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively
 applied to nested types."""
+
+OMIT_SUBCOMMAND_PREFIXES = _make_marker("OmitSubcommandPrefixes")
+OmitSubcommandPrefixes = Annotated[T, OMIT_SUBCOMMAND_PREFIXES]
+"""Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
+
+If we have a structure with the field:
+
+    cmd: Union[Commit, Checkout]
+
+By default, --cmd.branch may be generated as a flag for each dataclass in the union.
+If subcommand prefixes are omitted, we would instead simply have --branch.
+"""

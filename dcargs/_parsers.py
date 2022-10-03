@@ -6,7 +6,7 @@ import dataclasses
 import itertools
 from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
-from typing_extensions import get_args, get_origin
+from typing_extensions import Annotated, get_args, get_origin
 
 from . import (
     _argparse_formatter,
@@ -44,6 +44,7 @@ class ParserSpecification:
             T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
         ],
         prefix: str,
+        subcommand_prefix: str = "",
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
 
@@ -131,6 +132,7 @@ class ParserSpecification:
                         parent_type_from_typevar=type_from_typevar,
                         default_instance=field.default,
                         prefix=_strings.make_field_name([prefix, field.name]),
+                        subcommand_prefix=subcommand_prefix,
                     )
                     args.extend(nested_parser.args)
 
@@ -159,6 +161,7 @@ class ParserSpecification:
             # (3) Handle primitive or fixed types. These produce a single argument!
             arg = _arguments.ArgumentDefinition(
                 prefix=prefix,
+                subcommand_prefix=subcommand_prefix,
                 field=field,
                 type_from_typevar=type_from_typevar,
             )
@@ -305,12 +308,16 @@ class SubparsersSpecification:
                 )
 
             subparser = ParserSpecification.from_callable_or_type(
-                option,
+                # Recursively apply markers.
+                Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
+                if len(field.markers) > 0
+                else option,
                 description=found_subcommand_configs[0].description,
                 parent_classes=parent_classes,
                 parent_type_from_typevar=type_from_typevar,
                 default_instance=found_subcommand_configs[0].default,
                 prefix=prefix,
+                subcommand_prefix=prefix,
             )
 
             # Apply prefix to helptext in nested classes in subparsers.
