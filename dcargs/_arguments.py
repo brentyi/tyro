@@ -170,7 +170,7 @@ def _rule_handle_boolean_flags(
     if (
         arg.field.default in _fields.MISSING_SINGLETONS
         or arg.field.is_positional()
-        or _markers.FLAG_CONVERSION_OFF in arg.field.markers
+        or _markers.FlagConversionOff in arg.field.markers
     ):
         # Treat bools as a normal parameter.
         return lowered
@@ -207,7 +207,7 @@ def _rule_recursive_instantiator_from_type(
     Conversions from strings to our desired types happen in the instantiator; this is a
     bit more flexible, and lets us handle more complex types like enums and multi-type
     tuples."""
-    if _markers.FIXED in arg.field.markers:
+    if _markers.Fixed in arg.field.markers:
         return dataclasses.replace(
             lowered,
             instantiator=None,
@@ -294,7 +294,7 @@ def _rule_generate_helptext(
     """Generate helptext from docstring, argument name, default values."""
 
     # If the suppress marker is attached, hide the argument.
-    if _markers.SUPPRESS in arg.field.markers:
+    if _markers.Suppress in arg.field.markers:
         return dataclasses.replace(lowered, help=argparse.SUPPRESS)
 
     help_parts = []
@@ -368,7 +368,7 @@ def _rule_set_name_or_flag_and_dest(
         # This will run even when unused because we want the assert.
         strip_prefix = "--" + arg.subcommand_prefix + "."
         assert name_or_flag.startswith(strip_prefix)
-        if _markers.OMIT_SUBCOMMAND_PREFIXES in arg.field.markers:
+        if _markers.OmitSubcommandPrefixes in arg.field.markers:
             name_or_flag = "--" + name_or_flag[len(strip_prefix) :]
 
     return dataclasses.replace(
