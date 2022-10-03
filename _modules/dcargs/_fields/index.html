@@ -310,7 +310,7 @@
 <div class="viewcode-block" id="FieldDefinition.is_positional"><a class="viewcode-back" href="../../../api/dcargs/_fields/#dcargs._fields.FieldDefinition.is_positional">[docs]</a>    <span class="k">def</span> <span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># Explicit positionals.</span>
-            <span class="n">_markers</span><span class="o">.</span><span class="n">POSITIONAL</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
+            <span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
             <span class="c1"># Dummy dataclasses should have a single positional field.</span>
             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span>
         <span class="p">)</span></div></div>
@@ -786,7 +786,7 @@
                 <span class="n">typ</span><span class="o">=</span><span class="n">hints</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
-                <span class="n">markers</span><span class="o">=</span><span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">POSITIONAL</span><span class="p">,)</span>
+                <span class="n">markers</span><span class="o">=</span><span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,)</span>
                 <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span>
                 <span class="k">else</span> <span class="p">(),</span>
             <span class="p">)</span>

@@ -237,6 +237,11 @@
 <dt class="sig sig-object py" id="dcargs.conf._markers.Marker">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Marker</span></span><a class="reference internal" href="../../../../_modules/dcargs/conf/_markers/#Marker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.conf._markers.Marker" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../../_singleton/#dcargs._singleton.Singleton" title="dcargs._singleton.Singleton"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dcargs._singleton.Singleton</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="dcargs.conf._markers.Marker.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/dcargs/conf/_markers/#Marker.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.conf._markers.Marker.__getitem__" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py data">
@@ -245,8 +250,8 @@
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf._markers.POSITIONAL">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">POSITIONAL</span></span><a class="headerlink" href="#dcargs.conf._markers.POSITIONAL" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="dcargs.conf._markers.MarkerAnnotation">
+<span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">MarkerAnnotation</span></span><a class="headerlink" href="#dcargs.conf._markers.MarkerAnnotation" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py data">
@@ -257,11 +262,6 @@ argument.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf._markers.FIXED">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">FIXED</span></span><a class="headerlink" href="#dcargs.conf._markers.FIXED" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
 <dt class="sig sig-object py" id="dcargs.conf._markers.Fixed">
 <span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><a class="headerlink" href="#dcargs.conf._markers.Fixed" title="Permalink to this definition">#</a></dt>
 <dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">dcargs.cli</span></code> from parsing it; a
@@ -270,21 +270,11 @@ will also be marked as fixed automatically.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf._markers.SUPPRESS">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">SUPPRESS</span></span><a class="headerlink" href="#dcargs.conf._markers.SUPPRESS" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
 <dt class="sig sig-object py" id="dcargs.conf._markers.Suppress">
 <span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Suppress</span></span><a class="headerlink" href="#dcargs.conf._markers.Suppress" title="Permalink to this definition">#</a></dt>
 <dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">dcargs.cli</span></code> from parsing it, and
 to prevent it from showing up in helptext.</p>
 </dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf._markers.FLAG_CONVERSION_OFF">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">FLAG_CONVERSION_OFF</span></span><a class="headerlink" href="#dcargs.conf._markers.FLAG_CONVERSION_OFF" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="dcargs.conf._markers.FlagConversionOff">
@@ -296,11 +286,6 @@ applied to nested types.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf._markers.AVOID_SUBCOMMANDS">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">AVOID_SUBCOMMANDS</span></span><a class="headerlink" href="#dcargs.conf._markers.AVOID_SUBCOMMANDS" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py data">
 <dt class="sig sig-object py" id="dcargs.conf._markers.AvoidSubcommands">
 <span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">AvoidSubcommands</span></span><a class="headerlink" href="#dcargs.conf._markers.AvoidSubcommands" title="Permalink to this definition">#</a></dt>
 <dd><p>Avoid creating subcommands when a default is provided for unions over nested types.
@@ -308,11 +293,6 @@ This simplifies CLI interfaces, but makes them less expressive.</p>
 <p>Can be used directly on union types, <code class="docutils literal notranslate"><span class="pre">AvoidSubcommands[Union[...]]</span></code>, or recursively
 applied to nested types.</p>
 </dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="dcargs.conf._markers.OMIT_SUBCOMMAND_PREFIXES">
-<span class="sig-prename descclassname"><span class="pre">dcargs.conf._markers.</span></span><span class="sig-name descname"><span class="pre">OMIT_SUBCOMMAND_PREFIXES</span></span><a class="headerlink" href="#dcargs.conf._markers.OMIT_SUBCOMMAND_PREFIXES" title="Permalink to this definition">#</a></dt>
-<dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="dcargs.conf._markers.OmitSubcommandPrefixes">
@@ -375,19 +355,17 @@ If subcommand prefixes are omitted, we would instead simply have –branch.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf._markers</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#dcargs.conf._markers.Marker">Marker</a></li>
+<li><a class="reference internal" href="#dcargs.conf._markers.Marker">Marker</a><ul>
+<li><a class="reference internal" href="#dcargs.conf._markers.Marker.__getitem__">__getitem__</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#dcargs.conf._markers.T">T</a></li>
-<li><a class="reference internal" href="#dcargs.conf._markers.POSITIONAL">POSITIONAL</a></li>
+<li><a class="reference internal" href="#dcargs.conf._markers.MarkerAnnotation">MarkerAnnotation</a></li>
 <li><a class="reference internal" href="#dcargs.conf._markers.Positional">Positional</a></li>
-<li><a class="reference internal" href="#dcargs.conf._markers.FIXED">FIXED</a></li>
 <li><a class="reference internal" href="#dcargs.conf._markers.Fixed">Fixed</a></li>
-<li><a class="reference internal" href="#dcargs.conf._markers.SUPPRESS">SUPPRESS</a></li>
 <li><a class="reference internal" href="#dcargs.conf._markers.Suppress">Suppress</a></li>
-<li><a class="reference internal" href="#dcargs.conf._markers.FLAG_CONVERSION_OFF">FLAG_CONVERSION_OFF</a></li>
 <li><a class="reference internal" href="#dcargs.conf._markers.FlagConversionOff">FlagConversionOff</a></li>
-<li><a class="reference internal" href="#dcargs.conf._markers.AVOID_SUBCOMMANDS">AVOID_SUBCOMMANDS</a></li>
 <li><a class="reference internal" href="#dcargs.conf._markers.AvoidSubcommands">AvoidSubcommands</a></li>
-<li><a class="reference internal" href="#dcargs.conf._markers.OMIT_SUBCOMMAND_PREFIXES">OMIT_SUBCOMMAND_PREFIXES</a></li>
 <li><a class="reference internal" href="#dcargs.conf._markers.OmitSubcommandPrefixes">OmitSubcommandPrefixes</a></li>
 </ul>
 </li>

@@ -13,13 +13,16 @@ Module Contents
 
    Bases: :py:obj:`dcargs._singleton.Singleton`
 
+   .. py:method:: __getitem__(self, key)
+
+
 
 .. py:data:: T
    
 
    
 
-.. py:data:: POSITIONAL
+.. py:data:: MarkerAnnotation
    
 
    
@@ -31,11 +34,6 @@ Module Contents
    A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a positional
    argument.
 
-.. py:data:: FIXED
-   
-
-   
-
 .. py:data:: Fixed
    
 
@@ -44,22 +42,12 @@ Module Contents
    default value should be set instead. Note that fields with defaults that can't be parsed
    will also be marked as fixed automatically.
 
-.. py:data:: SUPPRESS
-   
-
-   
-
 .. py:data:: Suppress
    
 
    
    A type ``T`` can be annotated as ``Suppress[T]`` to prevent ``dcargs.cli`` from parsing it, and
    to prevent it from showing up in helptext.
-
-.. py:data:: FLAG_CONVERSION_OFF
-   
-
-   
 
 .. py:data:: FlagConversionOff
    
@@ -71,11 +59,6 @@ Module Contents
    Can be used directly on boolean annotations, ``FlagConversionOff[bool]``\ , or recursively
    applied to nested types.
 
-.. py:data:: AVOID_SUBCOMMANDS
-   
-
-   
-
 .. py:data:: AvoidSubcommands
    
 
@@ -85,11 +68,6 @@ Module Contents
 
    Can be used directly on union types, ``AvoidSubcommands[Union[...]]``\ , or recursively
    applied to nested types.
-
-.. py:data:: OMIT_SUBCOMMAND_PREFIXES
-   
-
-   
 
 .. py:data:: OmitSubcommandPrefixes
    

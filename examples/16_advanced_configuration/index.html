@@ -289,7 +289,11 @@ command-line interfaces beyond what is expressible via static type annotations.<
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 16_advanced_configuration.py --help</kbd><pre class="ansi-block literal-block">usage: 16_advanced_configuration.py [-h] [--boolean {True,False}]
+<kbd>python 16_advanced_configuration.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'bool'&gt;
+&lt;class 'int'&gt;
+&lt;class 'int'&gt;
+typing.Union[__main__.CheckoutArgs, __main__.CommitArgs]
+usage: 16_advanced_configuration.py [-h] [--boolean {True,False}]
                                     [--fixed {fixed}]
                                     [--union-without-subcommand.branch STR]
                                     [INT] {checkout,commit}

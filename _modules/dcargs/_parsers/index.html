@@ -326,7 +326,7 @@
                     <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FIXED</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
                 <span class="c1"># (1) Handle Unions over callables; these result in subparsers.</span>
                 <span class="n">subparsers_attempt</span> <span class="o">=</span> <span class="n">SubparsersSpecification</span><span class="o">.</span><span class="n">from_field</span><span class="p">(</span>
                     <span class="n">field</span><span class="p">,</span>
@@ -337,7 +337,7 @@
                 <span class="k">if</span> <span class="n">subparsers_attempt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="ow">not</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">required</span>
-                        <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AVOID_SUBCOMMANDS</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                        <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
                     <span class="p">):</span>
                         <span class="c1"># Don&#39;t make a subparser.</span>
                         <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>

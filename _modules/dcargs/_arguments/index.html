@@ -401,7 +401,7 @@
     <span class="k">if</span> <span class="p">(</span>
         <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
         <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FLAG_CONVERSION_OFF</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+        <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FlagConversionOff</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
     <span class="p">):</span>
         <span class="c1"># Treat bools as a normal parameter.</span>
         <span class="k">return</span> <span class="n">lowered</span>
@@ -438,7 +438,7 @@
 <span class="sd">    Conversions from strings to our desired types happen in the instantiator; this is a</span>
 <span class="sd">    bit more flexible, and lets us handle more complex types like enums and multi-type</span>
 <span class="sd">    tuples.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FIXED</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
             <span class="n">lowered</span><span class="p">,</span>
             <span class="n">instantiator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -525,7 +525,7 @@
     <span class="sd">&quot;&quot;&quot;Generate helptext from docstring, argument name, default values.&quot;&quot;&quot;</span>
 
     <span class="c1"># If the suppress marker is attached, hide the argument.</span>
-    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">SUPPRESS</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">lowered</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">)</span>
 
     <span class="n">help_parts</span> <span class="o">=</span> <span class="p">[]</span>
@@ -599,7 +599,7 @@
         <span class="c1"># This will run even when unused because we want the assert.</span>
         <span class="n">strip_prefix</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
         <span class="k">assert</span> <span class="n">name_or_flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OMIT_SUBCOMMAND_PREFIXES</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
             <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">name_or_flag</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">)</span> <span class="p">:]</span>
 
     <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
