@@ -53,11 +53,16 @@ Module Contents
 
       
 
-   .. py:method:: from_callable(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type], parent_type_from_typevar: Optional[Dict[TypeVar, Type]], default_instance: Union[T, dcargs._fields.PropagatingMissingType, dcargs._fields.NonpropagatingMissingType], prefix: str) -> ParserSpecification
+   .. py:attribute:: has_required_args
+      :annotation: :bool
+
+      
+
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type], parent_type_from_typevar: Optional[Dict[TypeVar, Type]], default_instance: Union[T, dcargs._fields.PropagatingMissingType, dcargs._fields.NonpropagatingMissingType], prefix: str, subcommand_prefix: str = '') -> ParserSpecification
       :staticmethod:
 
       
-      Create a parser definition from a callable.
+      Create a parser definition from a callable or type.
 
    .. py:method:: apply(self, parser: argparse.ArgumentParser) -> None
 

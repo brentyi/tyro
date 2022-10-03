@@ -437,7 +437,7 @@
         <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
-    <span class="n">parser_definition</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
+    <span class="n">parser_definition</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
         <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
@@ -483,6 +483,11 @@
             <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">DcargsArgparseHelpFormatter</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+
+        <span class="c1"># Print help message when no arguments are passed in. (but arguments are</span>
+        <span class="c1"># expected)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
             <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>

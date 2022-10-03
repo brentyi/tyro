@@ -44,6 +44,22 @@ Package Contents
    Can be used directly on boolean annotations, ``FlagConversionOff[bool]``\ , or recursively
    applied to nested types.
 
+.. py:data:: OmitSubcommandPrefixes
+   
+
+   
+   Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
+
+   If we have a structure with the field:
+
+   ::
+
+      cmd: Union[Commit, Checkout]
+
+
+   By default, --cmd.branch may be generated as a flag for each dataclass in the union.
+   If subcommand prefixes are omitted, we would instead simply have --branch.
+
 .. py:data:: Positional
    
 

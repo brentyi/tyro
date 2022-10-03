@@ -285,6 +285,18 @@
 
 <span class="sd">Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively</span>
 <span class="sd">applied to nested types.&quot;&quot;&quot;</span>
+
+<span class="n">OMIT_SUBCOMMAND_PREFIXES</span> <span class="o">=</span> <span class="n">_make_marker</span><span class="p">(</span><span class="s2">&quot;OmitSubcommandPrefixes&quot;</span><span class="p">)</span>
+<span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">OMIT_SUBCOMMAND_PREFIXES</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</span>
+
+<span class="sd">If we have a structure with the field:</span>
+
+<span class="sd">    cmd: Union[Commit, Checkout]</span>
+
+<span class="sd">By default, --cmd.branch may be generated as a flag for each dataclass in the union.</span>
+<span class="sd">If subcommand prefixes are omitted, we would instead simply have --branch.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 </pre></div>
         </article>
       </div>

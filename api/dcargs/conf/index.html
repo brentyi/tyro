@@ -264,6 +264,18 @@ applied to nested types.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="dcargs.conf.OmitSubcommandPrefixes">
+<span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">OmitSubcommandPrefixes</span></span><a class="headerlink" href="#dcargs.conf.OmitSubcommandPrefixes" title="Permalink to this definition">#</a></dt>
+<dd><p>Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</p>
+<p>If we have a structure with the field:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Commit</span><span class="p">,</span> <span class="n">Checkout</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>By default, –cmd.branch may be generated as a flag for each dataclass in the union.
+If subcommand prefixes are omitted, we would instead simply have –branch.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="dcargs.conf.Positional">
 <span class="sig-prename descclassname"><span class="pre">dcargs.conf.</span></span><span class="sig-name descname"><span class="pre">Positional</span></span><a class="headerlink" href="#dcargs.conf.Positional" title="Permalink to this definition">#</a></dt>
 <dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Positional[T]</span></code> if we want to parse it as a positional
@@ -389,6 +401,7 @@ the name or not.</p>
 <li><a class="reference internal" href="#dcargs.conf.AvoidSubcommands">AvoidSubcommands</a></li>
 <li><a class="reference internal" href="#dcargs.conf.Fixed">Fixed</a></li>
 <li><a class="reference internal" href="#dcargs.conf.FlagConversionOff">FlagConversionOff</a></li>
+<li><a class="reference internal" href="#dcargs.conf.OmitSubcommandPrefixes">OmitSubcommandPrefixes</a></li>
 <li><a class="reference internal" href="#dcargs.conf.Positional">Positional</a></li>
 <li><a class="reference internal" href="#dcargs.conf.Suppress">Suppress</a></li>
 <li><a class="reference internal" href="#dcargs.conf.subcommand">subcommand</a></li>

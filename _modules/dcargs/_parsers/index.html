@@ -237,7 +237,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_argparse_formatter</span><span class="p">,</span>
@@ -263,9 +263,10 @@
     <span class="n">helptext_from_nested_class_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
     <span class="n">subparsers_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">]</span>
     <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">has_required_args</span><span class="p">:</span> <span class="nb">bool</span>
 
-<div class="viewcode-block" id="ParserSpecification.from_callable"><a class="viewcode-back" href="../../../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.from_callable">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_callable</span><span class="p">(</span>
+<div class="viewcode-block" id="ParserSpecification.from_callable_or_type"><a class="viewcode-back" href="../../../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.from_callable_or_type">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
         <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span>
@@ -274,8 +275,9 @@
             <span class="n">T</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">PropagatingMissingType</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span>
         <span class="p">],</span>
         <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserSpecification</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Create a parser definition from a callable.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Create a parser definition from a callable or type.&quot;&quot;&quot;</span>
 
         <span class="c1"># Resolve generic types.</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -299,6 +301,7 @@
         <span class="c1"># cleaned up.</span>
         <span class="n">parent_classes</span> <span class="o">=</span> <span class="n">parent_classes</span> <span class="o">|</span> <span class="p">{</span><span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">)}</span>
 
+        <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">helptext_from_nested_class_field_name</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subparsers_from_name</span> <span class="o">=</span> <span class="p">{}</span>
@@ -353,13 +356,14 @@
                             <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                         <span class="p">),</span>
                     <span class="p">)</span>
-                    <span class="n">nested_parser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
+                    <span class="n">nested_parser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                         <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
                         <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                         <span class="n">parent_type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
                         <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                         <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+                        <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
                     <span class="p">)</span>
                     <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
 
@@ -386,19 +390,22 @@
                     <span class="k">continue</span>
 
             <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
-            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
-                    <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-                    <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
-                    <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
+                <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
+                <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="c1"># If a later subparser is required, all previous ones should be as well.</span>
         <span class="n">subparsers_required</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">subparsers</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">subparsers_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">())[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="k">if</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
                 <span class="n">subparsers_required</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">subparsers_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                 <span class="n">subparsers</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="n">subparsers_required</span>
             <span class="p">)</span>
@@ -412,6 +419,7 @@
             <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="n">helptext_from_nested_class_field_name</span><span class="p">,</span>
             <span class="n">subparsers_from_name</span><span class="o">=</span><span class="n">subparsers_from_name</span><span class="p">,</span>
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+            <span class="n">has_required_args</span><span class="o">=</span><span class="n">has_required_args</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="ParserSpecification.apply"><a class="viewcode-back" href="../../../api/dcargs/_parsers/#dcargs._parsers.ParserSpecification.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -530,13 +538,17 @@
                     <span class="p">),</span>
                 <span class="p">)</span>
 
-            <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable</span><span class="p">(</span>
-                <span class="n">option</span><span class="p">,</span>
+            <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+                <span class="c1"># Recursively apply markers.</span>
+                <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">option</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="k">else</span> <span class="n">option</span><span class="p">,</span>
                 <span class="n">description</span><span class="o">=</span><span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                 <span class="n">parent_type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>

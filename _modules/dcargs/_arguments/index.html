@@ -267,25 +267,12 @@
     <span class="kn">from</span> <span class="nn">backports.cached_property</span> <span class="kn">import</span> <span class="n">cached_property</span>  <span class="c1"># type: ignore</span>
 
 
-<span class="k">class</span> <span class="nc">_PatchedList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Custom tuple type, for avoiding &quot;default not in choices&quot; errors when the default</span>
-<span class="sd">    is set to MISSING_NONPROP.</span>
-
-<span class="sd">    This solves a choices error raised by argparse in a very specific edge case:</span>
-<span class="sd">    literals in containers as positional arguments.&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">li</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">_PatchedList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">li</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">list</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
-
-
 <div class="viewcode-block" id="ArgumentDefinition"><a class="viewcode-back" href="../../../api/dcargs/_arguments/#dcargs._arguments.ArgumentDefinition">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">ArgumentDefinition</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Structure containing everything needed to define an argument.&quot;&quot;&quot;</span>
 
     <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># Prefix for nesting.</span>
+    <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># Prefix for nesting.</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">]</span>
 
@@ -308,10 +295,7 @@
         <span class="c1"># the field default to a string format, then back to the desired type.</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
 
-        <span class="k">if</span> <span class="s2">&quot;choices&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_PatchedList</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;choices&quot;</span><span class="p">])</span>
-
-        <span class="c1"># Note that the name must be passed in as a position argument.</span>
+        <span class="c1"># Add argument! Note that the name must be passed in as a position argument.</span>
         <span class="n">arg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Do our best to tab complete paths.</span>
@@ -350,8 +334,9 @@
             <span class="n">_rule_recursive_instantiator_from_type</span><span class="p">,</span>
             <span class="n">_rule_convert_defaults_to_strings</span><span class="p">,</span>
             <span class="n">_rule_generate_helptext</span><span class="p">,</span>
-            <span class="n">_rule_set_name_or_flag</span><span class="p">,</span>
+            <span class="n">_rule_set_name_or_flag_and_dest</span><span class="p">,</span>
             <span class="n">_rule_positional_special_handling</span><span class="p">,</span>
+            <span class="n">_rule_static_cast_choices_to_patched_list</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">functools</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">lowered</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="n">rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lowered</span><span class="p">),</span>
@@ -593,18 +578,29 @@
     <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">lowered</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">help_parts</span><span class="p">))</span>
 
 
-<span class="k">def</span> <span class="nf">_rule_set_name_or_flag</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">_rule_set_name_or_flag_and_dest</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoweredArgumentDefinition</span><span class="p">:</span>
+    <span class="c1"># Positional arguments: no -- prefix.</span>
     <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+    <span class="c1"># Negated booleans.</span>
     <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;store_false&quot;</span><span class="p">:</span>
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
             <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="s2">&quot;no-&quot;</span> <span class="o">+</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
         <span class="p">)</span>
+    <span class="c1"># Prefix keyword arguments with --.</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
+    <span class="c1"># Strip.</span>
+    <span class="k">if</span> <span class="n">name_or_flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+        <span class="c1"># This will run even when unused because we want the assert.</span>
+        <span class="n">strip_prefix</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">arg</span><span class="o">.</span><span class="n">subcommand_prefix</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span>
+        <span class="k">assert</span> <span class="n">name_or_flag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OMIT_SUBCOMMAND_PREFIXES</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+            <span class="n">name_or_flag</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">name_or_flag</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">strip_prefix</span><span class="p">)</span> <span class="p">:]</span>
 
     <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="n">lowered</span><span class="p">,</span>
@@ -640,6 +636,30 @@
         <span class="n">required</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Can&#39;t be passed in for positionals.</span>
         <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
         <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">_PatchedList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Custom list type, for avoiding &quot;default not in choices&quot; errors when the default</span>
+<span class="sd">    is set to MISSING_NONPROP.</span>
+
+<span class="sd">    This solves a choices error raised by argparse in a very specific edge case:</span>
+<span class="sd">    literals in containers as positional arguments.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">li</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_PatchedList</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">li</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="ow">or</span> <span class="n">x</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
+
+
+<span class="k">def</span> <span class="nf">_rule_static_cast_choices_to_patched_list</span><span class="p">(</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
+    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoweredArgumentDefinition</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">lowered</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">_PatchedList</span><span class="p">(</span><span class="n">lowered</span><span class="o">.</span><span class="n">choices</span><span class="p">)</span> <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 </pre></div>
         </article>

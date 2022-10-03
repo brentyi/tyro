@@ -24,6 +24,11 @@ Module Contents
 
       
 
+   .. py:attribute:: subcommand_prefix
+      :annotation: :str
+
+      
+
    .. py:attribute:: field
       :annotation: :dcargs._fields.FieldDefinition
 
