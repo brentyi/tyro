@@ -525,7 +525,10 @@
     <span class="sd">&quot;&quot;&quot;Generate helptext from docstring, argument name, default values.&quot;&quot;&quot;</span>
 
     <span class="c1"># If the suppress marker is attached, hide the argument.</span>
-    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">_markers</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+        <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+    <span class="p">):</span>
         <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">lowered</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">)</span>
 
     <span class="n">help_parts</span> <span class="o">=</span> <span class="p">[]</span>

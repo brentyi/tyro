@@ -74,6 +74,12 @@ Package Contents
    A type ``T`` can be annotated as ``Suppress[T]`` to prevent ``dcargs.cli`` from parsing it, and
    to prevent it from showing up in helptext.
 
+.. py:data:: SuppressFixed
+   
+
+   
+   Hide fields that are either manually or automatically marked as fixed.
+
 .. py:function:: subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True) -> Any
 
    
