@@ -235,13 +235,6 @@
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_singleton</span>
 
-
-<div class="viewcode-block" id="Marker"><a class="viewcode-back" href="../../../../api/dcargs/conf/_markers/#dcargs.conf._markers.Marker">[docs]</a><span class="k">class</span> <span class="nc">Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
-<div class="viewcode-block" id="Marker.__getitem__"><a class="viewcode-back" href="../../../../api/dcargs/conf/_markers/#dcargs.conf._markers.Marker.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span></div></div>
-
-
 <span class="c1"># Current design issue: _dynamic_marker_types are applied recursively to nested</span>
 <span class="c1"># structures, but can&#39;t be unapplied.</span>
 
@@ -293,6 +286,12 @@
 <span class="c1"># These can be used one of two ways:</span>
 <span class="c1"># - Marker[T]</span>
 <span class="c1"># - Annotated[T, Marker]</span>
+<div class="viewcode-block" id="Marker"><a class="viewcode-back" href="../../../../api/dcargs/conf/_markers/#dcargs.conf._markers.Marker">[docs]</a><span class="k">class</span> <span class="nc">Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
+<div class="viewcode-block" id="Marker.__getitem__"><a class="viewcode-back" href="../../../../api/dcargs/conf/_markers/#dcargs.conf._markers.Marker.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span></div></div>
+
+
 <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
 
     <span class="k">def</span> <span class="nf">_make_marker</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Marker</span><span class="p">:</span>

@@ -9,14 +9,6 @@
 Module Contents
 ---------------
 
-.. py:class:: Marker
-
-   Bases: :py:obj:`dcargs._singleton.Singleton`
-
-   .. py:method:: __getitem__(self, key)
-
-
-
 .. py:data:: T
    
 
@@ -79,4 +71,12 @@ Module Contents
 
    By default, --cmd.branch may be generated as a flag for each dataclass in the union.
    If subcommand prefixes are omitted, we would instead simply have --branch.
+
+.. py:class:: Marker
+
+   Bases: :py:obj:`dcargs._singleton.Singleton`
+
+   .. py:method:: __getitem__(self, key)
+
+
 
