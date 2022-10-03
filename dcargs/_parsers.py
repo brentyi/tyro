@@ -32,9 +32,10 @@ class ParserSpecification:
     helptext_from_nested_class_field_name: Dict[str, Optional[str]]
     subparsers_from_name: Dict[str, SubparsersSpecification]
     prefix: str
+    has_required_args: bool
 
     @staticmethod
-    def from_callable(
+    def from_callable_or_type(
         f: Callable[..., T],
         description: Optional[str],
         parent_classes: Set[Type],
@@ -44,7 +45,7 @@ class ParserSpecification:
         ],
         prefix: str,
     ) -> ParserSpecification:
-        """Create a parser definition from a callable."""
+        """Create a parser definition from a callable or type."""
 
         # Resolve generic types.
         f, type_from_typevar = _resolver.resolve_generic_types(f)
@@ -68,6 +69,7 @@ class ParserSpecification:
         # cleaned up.
         parent_classes = parent_classes | {cast(Type, f)}
 
+        has_required_args = False
         args = []
         helptext_from_nested_class_field_name = {}
         subparsers_from_name = {}
@@ -122,7 +124,7 @@ class ParserSpecification:
                             field.default,
                         ),
                     )
-                    nested_parser = ParserSpecification.from_callable(
+                    nested_parser = ParserSpecification.from_callable_or_type(
                         field.typ,
                         description=None,
                         parent_classes=parent_classes,
@@ -155,19 +157,21 @@ class ParserSpecification:
                     continue
 
             # (3) Handle primitive or fixed types. These produce a single argument!
-            args.append(
-                _arguments.ArgumentDefinition(
-                    prefix=prefix,
-                    field=field,
-                    type_from_typevar=type_from_typevar,
-                )
+            arg = _arguments.ArgumentDefinition(
+                prefix=prefix,
+                field=field,
+                type_from_typevar=type_from_typevar,
             )
+            args.append(arg)
+            if arg.lowered.required:
+                has_required_args = True
 
         # If a later subparser is required, all previous ones should be as well.
         subparsers_required = False
         for name, subparsers in list(subparsers_from_name.items())[::-1]:
             if subparsers.required:
                 subparsers_required = True
+                has_required_args = True
             subparsers_from_name[name] = dataclasses.replace(
                 subparsers, required=subparsers_required
             )
@@ -181,6 +185,7 @@ class ParserSpecification:
             helptext_from_nested_class_field_name=helptext_from_nested_class_field_name,
             subparsers_from_name=subparsers_from_name,
             prefix=prefix,
+            has_required_args=has_required_args,
         )
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
@@ -299,7 +304,7 @@ class SubparsersSpecification:
                     ),
                 )
 
-            subparser = ParserSpecification.from_callable(
+            subparser = ParserSpecification.from_callable_or_type(
                 option,
                 description=found_subcommand_configs[0].description,
                 parent_classes=parent_classes,

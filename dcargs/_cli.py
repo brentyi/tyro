@@ -206,7 +206,7 @@ def _cli_impl(
         dummy_wrapped = False
 
     # Map a callable to the relevant CLI arguments + subparsers.
-    parser_definition = _parsers.ParserSpecification.from_callable(
+    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
         f,
         description=description,
         parent_classes=set(),  # Used for recursive calls.
@@ -252,6 +252,11 @@ def _cli_impl(
             formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
         )
         parser_definition.apply(parser)
+
+        # Print help message when no arguments are passed in. (but arguments are
+        # expected)
+        if len(args) == 0 and parser_definition.has_required_args:
+            args = ["--help"]
 
         if return_parser:
             _arguments.USE_RICH = True
