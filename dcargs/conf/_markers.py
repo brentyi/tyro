@@ -12,34 +12,40 @@ from .. import _singleton
 
 T = TypeVar("T", bound=Type)
 
-Positional = Annotated[T, None]
+# This could ideally be Annotated[T, None], but SpecialForm aliases are not well supported by static analysis tools.
+StaticPlaceholder = Annotated
+
+Positional = StaticPlaceholder[T, None]
 """A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
 argument."""
 
-Fixed = Annotated[T, None]
+Fixed = StaticPlaceholder[T, None]
 """A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a
 default value should be set instead. Note that fields with defaults that can't be parsed
 will also be marked as fixed automatically."""
 
-Suppress = Annotated[T, None]
+Suppress = StaticPlaceholder[T, None]
 """A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and
 to prevent it from showing up in helptext."""
 
-FlagConversionOff = Annotated[T, None]
+SuppressFixed = StaticPlaceholder[T, None]
+"""Hide fields that are either manually or automatically marked as fixed."""
+
+FlagConversionOff = StaticPlaceholder[T, None]
 """Turn off flag conversion for booleans with default values. Instead, types annotated
 with `bool` will expect an explicit True or False.
 
 Can be used directly on boolean annotations, `FlagConversionOff[bool]`, or recursively
 applied to nested types."""
 
-AvoidSubcommands = Annotated[T, None]
+AvoidSubcommands = StaticPlaceholder[T, None]
 """Avoid creating subcommands when a default is provided for unions over nested types.
 This simplifies CLI interfaces, but makes them less expressive.
 
 Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively
 applied to nested types."""
 
-OmitSubcommandPrefixes = Annotated[T, None]
+OmitSubcommandPrefixes = StaticPlaceholder[T, None]
 """Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
 
 If we have a structure with the field:
@@ -71,7 +77,7 @@ if not TYPE_CHECKING:
 
     _dynamic_marker_types = {}
     for k, v in dict(globals()).items():
-        if v == Annotated[T, None]:
+        if v == StaticPlaceholder[T, None]:
             _dynamic_marker_types[k] = _make_marker(k)
     globals().update(_dynamic_marker_types)
     del _dynamic_marker_types

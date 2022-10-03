@@ -12,6 +12,7 @@ from ._markers import (
     OmitSubcommandPrefixes,
     Positional,
     Suppress,
+    SuppressFixed,
 )
 from ._subcommands import subcommand
 
@@ -22,5 +23,6 @@ __all__ = [
     "OmitSubcommandPrefixes",
     "Positional",
     "Suppress",
+    "SuppressFixed",
     "subcommand",
 ]
