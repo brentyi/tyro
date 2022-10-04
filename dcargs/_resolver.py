@@ -1,14 +1,16 @@
 """Utilities for resolving types and forward references."""
-
 import collections.abc
 import copy
 import dataclasses
+import sys
 from typing import (
     Any,
     Callable,
     Dict,
+    FrozenSet,
     List,
     Optional,
+    Set,
     Tuple,
     Type,
     TypeVar,
@@ -171,6 +173,25 @@ def apply_type_from_typevar(
         if get_origin(typ) is collections.abc.Callable:
             assert isinstance(args[0], list)
             args = tuple(args[0]) + args[1:]
+
+        # Convert Python 3.10-style types to their typing library equivalents, which
+        # support `.copy_with()`.
+        if sys.version_info[:2] >= (3, 10):
+            import types
+
+            for new, old in {
+                # PEP 585
+                tuple: Tuple,
+                list: List,
+                dict: Dict,
+                set: Set,
+                frozenset: FrozenSet,
+                # PEP 604
+                types.UnionType: Union,
+            }.items():
+                if isinstance(typ, new) or get_origin(typ) is new:  # type: ignore
+                    typ = old.__getitem__(args)  # type: ignore
+
         return typ.copy_with(tuple(apply_type_from_typevar(x, type_from_typevar) for x in args))  # type: ignore
 
     return typ
