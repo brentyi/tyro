@@ -293,12 +293,13 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         def _format_action(self, action: argparse.Action):
             invocation = self.formatter._format_action_invocation(action)
+            indent = self.formatter._current_indent
             help_position = min(
-                self.formatter._action_max_length + 4, self.formatter._max_help_position
+                self.formatter._action_max_length + 4 + indent,
+                self.formatter._max_help_position,
             )
             if self.formatter._fixed_help_position:
                 help_position = 4
-            indent = self.formatter._current_indent
 
             item_parts: List[RenderableType] = []
 
