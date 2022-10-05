@@ -2,7 +2,7 @@
 
 Beyond building simple command-line interfaces, :func:`tyro.cli()` is designed
 to scale to larger configuration systems such as those typically built with
-libraries like [`hydra`](https://github.com/facebookresearch/hydra).
+libraries like [hydra](https://github.com/facebookresearch/hydra).
 
 For a live example of this, see
 [nerfstudio](https://github.com/nerfstudio-project/nerfstudio/). Notably,
