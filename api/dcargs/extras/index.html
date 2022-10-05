@@ -340,6 +340,25 @@ necessary we can work around this with an <code class="docutils literal notransl
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="dcargs.extras.literal_type_from_choices">
+<span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">literal_type_from_choices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/dcargs/extras/_choices_type/#literal_type_from_choices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.literal_type_from_choices" title="Permalink to this definition">#</a></dt>
+<dd><p>Generate a typing.Literal[] type that constrains values to a set of choices.</p>
+<p>Using Literal[…] directly should generally be preferred, but this helper can be
+used in the rare case that choices are generated dynamically. (for example, the keys
+of a dictionary)</p>
+<p>Using the returned type as an annotation currently breaks for mypy, but is
+understood by Pyright.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>choices</strong> (<em>Iterable</em><em>[</em><em>T</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Type[T]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="dcargs.extras.from_yaml">
 <span class="sig-prename descclassname"><span class="pre">dcargs.extras.</span></span><span class="sig-name descname"><span class="pre">from_yaml</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">DataclassType</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IO</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IO</span><span class="p"><span class="pre">[</span></span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataclassType</span></span></span><a class="reference internal" href="../../../_modules/dcargs/extras/_serialization/#from_yaml"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#dcargs.extras.from_yaml" title="Permalink to this definition">#</a></dt>
 <dd><p>Re-construct a dataclass instance from a yaml-compatible string, which should be
@@ -464,6 +483,7 @@ future version of <code class="code docutils literal notranslate"><span class="p
 <li><a class="reference internal" href="#dcargs.extras.set_accent_color">set_accent_color</a></li>
 <li><a class="reference internal" href="#dcargs.extras.get_parser">get_parser</a></li>
 <li><a class="reference internal" href="#dcargs.extras.subcommand_type_from_defaults">subcommand_type_from_defaults</a></li>
+<li><a class="reference internal" href="#dcargs.extras.literal_type_from_choices">literal_type_from_choices</a></li>
 <li><a class="reference internal" href="#dcargs.extras.from_yaml">from_yaml</a></li>
 <li><a class="reference internal" href="#dcargs.extras.to_yaml">to_yaml</a></li>
 </ul>
