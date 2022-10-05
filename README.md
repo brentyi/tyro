@@ -41,8 +41,8 @@ and [tyro and hydra]().
 
    Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
    arguments populated by `tyro` benefit from IDE and language server-supported
-   operations --- think tab completion, rename, jump-to-def, docstrings on hover
-   -- as well as static checking tools like `pyright` and `mypy`.
+   operations — think tab completion, rename, jump-to-def, docstrings on hover
+   — as well as static checking tools like `pyright` and `mypy`.
 
 2. **Minimal overhead.**
 
