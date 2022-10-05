@@ -4,7 +4,7 @@ from typing import Generic, TypeVar, Union
 import pytest
 from typing_extensions import Annotated
 
-import dcargs
+import tyro
 
 
 def test_omit_subcommand_prefix():
@@ -20,16 +20,16 @@ def test_omit_subcommand_prefix():
     class DefaultInstanceSubparser:
         x: int
         # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
-        bc: dcargs.conf.OmitSubcommandPrefixes[
+        bc: tyro.conf.OmitSubcommandPrefixes[
             Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
         ]
 
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--y", "5"],
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--y", "5"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
@@ -37,11 +37,11 @@ def test_omit_subcommand_prefix():
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--y", "8"],
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--y", "8"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
@@ -62,16 +62,16 @@ def test_avoid_subparser_with_default():
     @dataclasses.dataclass
     class DefaultInstanceSubparser:
         x: int
-        bc: dcargs.conf.AvoidSubcommands[
+        bc: tyro.conf.AvoidSubcommands[
             Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
         ]
 
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "5"],
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "--bc.y", "5"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
@@ -79,11 +79,11 @@ def test_avoid_subparser_with_default():
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "8"],
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultInstanceSubparser,
             args=["--bc.y", "8"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
@@ -107,29 +107,29 @@ def test_avoid_subparser_with_default_recursive():
         bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
 
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "5"],
         )
-        == dcargs.cli(
-            dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
+        == tyro.cli(
+            tyro.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "--bc.y", "5"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
-    assert dcargs.cli(
+    assert tyro.cli(
         DefaultInstanceSubparser,
         args=["bc:default-instance-smtp-server", "--bc.z", "3"],
         default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceSMTPServer(z=3))
     assert (
-        dcargs.cli(
-            dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
+        tyro.cli(
+            tyro.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "8"],
         )
-        == dcargs.cli(
-            dcargs.conf.AvoidSubcommands[DefaultInstanceSubparser],
+        == tyro.cli(
+            tyro.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--bc.y", "8"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
         )
@@ -150,8 +150,8 @@ def test_subparser_in_nested_with_metadata():
     @dataclasses.dataclass
     class Nested2:
         subcommand: Union[
-            Annotated[A, dcargs.conf.subcommand("command-a", default=A(7))],
-            Annotated[B, dcargs.conf.subcommand("command-b", default=B(9))],
+            Annotated[A, tyro.conf.subcommand("command-a", default=A(7))],
+            Annotated[B, tyro.conf.subcommand("command-b", default=B(9))],
         ]
 
     @dataclasses.dataclass
@@ -162,11 +162,11 @@ def test_subparser_in_nested_with_metadata():
     class Parent:
         nested1: Nested1
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:command-a".split(" "),
     ) == Parent(Nested1(Nested2(A(7))))
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args=(
             "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
@@ -175,11 +175,11 @@ def test_subparser_in_nested_with_metadata():
         ),
     ) == Parent(Nested1(Nested2(A(3))))
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:command-b".split(" "),
     ) == Parent(Nested1(Nested2(B(9))))
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args=(
             "nested1.nested2.subcommand:command-b --nested1.nested2.subcommand.b 7".split(
@@ -209,8 +209,8 @@ def test_subparser_in_nested_with_metadata_generic():
     class Nested1:
         nested2: Nested2[
             Union[
-                Annotated[A, dcargs.conf.subcommand("command-a", default=A(7))],
-                Annotated[B, dcargs.conf.subcommand("command-b", default=B(9))],
+                Annotated[A, tyro.conf.subcommand("command-a", default=A(7))],
+                Annotated[B, tyro.conf.subcommand("command-b", default=B(9))],
             ]
         ]
 
@@ -218,11 +218,11 @@ def test_subparser_in_nested_with_metadata_generic():
     class Parent:
         nested1: Nested1
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:command-a".split(" "),
     ) == Parent(Nested1(Nested2(A(7))))
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args=(
             "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
@@ -231,11 +231,11 @@ def test_subparser_in_nested_with_metadata_generic():
         ),
     ) == Parent(Nested1(Nested2(A(3))))
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:command-b".split(" "),
     ) == Parent(Nested1(Nested2(B(9))))
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args=(
             "nested1.nested2.subcommand:command-b --nested1.nested2.subcommand.b 7".split(
@@ -260,8 +260,8 @@ def test_subparser_in_nested_with_metadata_generic_alt():
     @dataclasses.dataclass
     class Nested2(Generic[T]):
         subcommand: Union[
-            Annotated[T, dcargs.conf.subcommand("command-a", default=A(7))],
-            Annotated[B, dcargs.conf.subcommand("command-b", default=B(9))],
+            Annotated[T, tyro.conf.subcommand("command-a", default=A(7))],
+            Annotated[B, tyro.conf.subcommand("command-b", default=B(9))],
         ]
 
     @dataclasses.dataclass
@@ -272,11 +272,11 @@ def test_subparser_in_nested_with_metadata_generic_alt():
     class Parent:
         nested1: Nested1
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:command-a".split(" "),
     ) == Parent(Nested1(Nested2(A(7))))
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args=(
             "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
@@ -285,11 +285,11 @@ def test_subparser_in_nested_with_metadata_generic_alt():
         ),
     ) == Parent(Nested1(Nested2(A(3))))
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:command-b".split(" "),
     ) == Parent(Nested1(Nested2(B(9))))
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args=(
             "nested1.nested2.subcommand:command-b --nested1.nested2.subcommand.b 7".split(
@@ -306,14 +306,14 @@ def test_flag():
     class A:
         x: bool
 
-    assert dcargs.cli(
+    assert tyro.cli(
         A,
         args=["--x"],
         default=A(False),
     ) == A(True)
 
-    assert dcargs.cli(
-        dcargs.conf.FlagConversionOff[A],
+    assert tyro.cli(
+        tyro.conf.FlagConversionOff[A],
         args=["--x", "True"],
         default=A(False),
     ) == A(True)
@@ -324,17 +324,17 @@ def test_fixed():
 
     @dataclasses.dataclass
     class A:
-        x: dcargs.conf.Fixed[bool]
+        x: tyro.conf.Fixed[bool]
 
-    assert dcargs.cli(
+    assert tyro.cli(
         A,
         args=[],
         default=A(True),
     ) == A(True)
 
     with pytest.raises(SystemExit):
-        assert dcargs.cli(
-            dcargs.conf.FlagConversionOff[A],
+        assert tyro.cli(
+            tyro.conf.FlagConversionOff[A],
             args=["--x", "True"],
             default=A(False),
         ) == A(True)
@@ -347,15 +347,15 @@ def test_fixed_recursive():
     class A:
         x: bool
 
-    assert dcargs.cli(
+    assert tyro.cli(
         A,
         args=["--x"],
         default=A(False),
     ) == A(True)
 
     with pytest.raises(SystemExit):
-        assert dcargs.cli(
-            dcargs.conf.Fixed[dcargs.conf.FlagConversionOff[A]],
+        assert tyro.cli(
+            tyro.conf.Fixed[tyro.conf.FlagConversionOff[A]],
             args=["--x", "True"],
             default=A(False),
         ) == A(True)

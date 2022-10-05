@@ -8,7 +8,7 @@
 Unions over nested types (classes or dataclasses) are populated using subcommands.
 
 For configuring subcommands beyond what can be expressed with type annotations, see
-:func:`dcargs.conf.subcommand()`.
+:func:`tyro.conf.subcommand()`.
 
 
 
@@ -21,7 +21,7 @@ For configuring subcommands beyond what can be expressed with type annotations, 
         import dataclasses
         from typing import Union
 
-        import dcargs
+        import tyro
 
 
         @dataclasses.dataclass(frozen=True)
@@ -45,9 +45,9 @@ For configuring subcommands beyond what can be expressed with type annotations, 
 
         if __name__ == "__main__":
             # Note that we can also pass `Union[Checkout, Command]` directly into
-            # `dcargs.cli()`; this is understood by dcargs and pyright, but unfortunately not by
+            # `tyro.cli()`; this is understood by tyro and pyright, but unfortunately not by
             # mypy.
-            dcargs.cli(main)
+            tyro.cli(main)
 
 ------------
 

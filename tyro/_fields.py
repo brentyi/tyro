@@ -109,7 +109,7 @@ EXCLUDE_FROM_CALL = ExcludeFromCallType()
 # Note that our "public" missing API will always be the propagating missing sentinel.
 MISSING_PUBLIC: Any = MISSING_PROP
 """Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
-`default_instance` for `dcargs.cli()` as required."""
+`default_instance` for `tyro.cli()` as required."""
 
 
 MISSING_SINGLETONS = [
@@ -593,7 +593,7 @@ def _get_dataclass_field_default(
         parent_default_instance not in MISSING_SINGLETONS
         and parent_default_instance is not None
     ):
-        # Populate default from some parent, eg `default_instance` in `dcargs.cli()`.
+        # Populate default from some parent, eg `default_instance` in `tyro.cli()`.
         if hasattr(parent_default_instance, field.name):
             return getattr(parent_default_instance, field.name)
         else:

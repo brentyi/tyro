@@ -6,7 +6,7 @@ messages with ones that:
     - Can be themed with an accent color.
 
 This is largely built by fussing around in argparse implementation details, and is by
-far the hackiest part of `dcargs`.
+far the hackiest part of `tyro`.
 """
 import argparse
 import contextlib
@@ -192,11 +192,11 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         # For dense multi-column layouts, the fixed help position is often shorter.
         # For wider layouts, using the default help position settings can be more
         # efficient.
-        self._dcargs_rule = None
+        self._tyro_rule = None
         self._fixed_help_position = False
         help1 = super().format_help()
 
-        self._dcargs_rule = None
+        self._tyro_rule = None
         self._fixed_help_position = True
         help2 = super().format_help()
 
@@ -213,15 +213,15 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             self.parent = parent
             self.heading = heading
             self.items = []
-            self.formatter._dcargs_rule = None
+            self.formatter._tyro_rule = None
 
         def format_help(self):
             if self.parent is None:
-                return self._dcargs_format_root()
+                return self._tyro_format_root()
             else:
-                return self._dcargs_format_nonroot()
+                return self._tyro_format_nonroot()
 
-        def _dcargs_format_root(self):
+        def _tyro_format_root(self):
             console = Console(width=self.formatter._width, theme=THEME.as_rich_theme())
             with console.capture() as capture:
                 # Get rich renderables from items.
@@ -361,7 +361,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
             return item_parts
 
-        def _dcargs_format_nonroot(self):
+        def _tyro_format_nonroot(self):
             # Add each child item as a rich renderable.
             description_part = None
             item_parts = []
@@ -418,21 +418,21 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             )
             max_width = max(map(len, lines))
 
-            if self.formatter._dcargs_rule is None:
+            if self.formatter._tyro_rule is None:
                 # Note: we don't use rich.rule.Rule() because this will make all of
                 # the panels expand to fill the full width of the console. (this only
                 # impacts single-column layouts)
-                self.formatter._dcargs_rule = Text(
+                self.formatter._tyro_rule = Text(
                     "─" * max_width, style=THEME.border, overflow="crop"
                 )
-            elif len(self.formatter._dcargs_rule._text[0]) < max_width:
-                self.formatter._dcargs_rule._text = ["─" * max_width]
+            elif len(self.formatter._tyro_rule._text[0]) < max_width:
+                self.formatter._tyro_rule._text = ["─" * max_width]
 
             # Add description text if needed.
             if description_part is not None:
                 item_parts = [
                     description_part,
-                    self.formatter._dcargs_rule,
+                    self.formatter._tyro_rule,
                 ] + item_parts
 
             return Panel(

@@ -19,7 +19,7 @@ container types.
         import pathlib
         from typing import Optional, Tuple
 
-        import dcargs
+        import tyro
 
 
         class OptimizerType(enum.Enum):
@@ -48,7 +48,7 @@ container types.
 
 
         if __name__ == "__main__":
-            config = dcargs.cli(TrainConfig)
+            config = tyro.cli(TrainConfig)
             print(config)
 
 ------------

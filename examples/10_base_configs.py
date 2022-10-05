@@ -1,4 +1,4 @@
-"""We can integrate `dcargs.cli()` into common configuration patterns: here, we select
+"""We can integrate `tyro.cli()` into common configuration patterns: here, we select
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.
 
@@ -21,7 +21,7 @@ from typing import Callable, Literal, Tuple, Union
 
 from torch import nn
 
-import dcargs
+import tyro
 
 
 @dataclass(frozen=True)
@@ -75,9 +75,9 @@ base_configs["small"] = ExperimentConfig(
     num_layers=4,
     units=64,
     train_steps=30_000,
-    # The dcargs.MISSING sentinel allows us to specify that the seed should have no
+    # The tyro.MISSING sentinel allows us to specify that the seed should have no
     # default, and needs to be populated from the CLI.
-    seed=dcargs.MISSING,
+    seed=tyro.MISSING,
     activation=nn.ReLU,
 )
 
@@ -90,22 +90,22 @@ base_configs["big"] = ExperimentConfig(
     num_layers=8,
     units=256,
     train_steps=100_000,
-    seed=dcargs.MISSING,
+    seed=tyro.MISSING,
     activation=nn.GELU,
 )
 
 
 if __name__ == "__main__":
-    config = dcargs.cli(
-        dcargs.extras.subcommand_type_from_defaults(base_configs, descriptions),
+    config = tyro.cli(
+        tyro.extras.subcommand_type_from_defaults(base_configs, descriptions),
     )
     # ^Note that this is equivalent to:
     #
-    # config = dcargs.cli(
+    # config = tyro.cli(
     #     Union[
     #         Annotated[
     #             ExperimentConfig,
-    #             dcargs.conf.subcommand(
+    #             tyro.conf.subcommand(
     #                 "small",
     #                 default=base_configs["small"],
     #                 description=descriptions["small"],
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #         ],
     #         Annotated[
     #             ExperimentConfig,
-    #             dcargs.conf.subcommand(
+    #             tyro.conf.subcommand(
     #                 "big",
     #                 default=base_configs["big"],
     #                 description=descriptions["big"],

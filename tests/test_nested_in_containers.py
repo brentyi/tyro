@@ -4,7 +4,7 @@ from typing import Any, Dict, Generic, List, Set, Tuple, TypeVar
 
 import pytest
 
-import dcargs
+import tyro
 
 
 @dataclasses.dataclass(frozen=True)
@@ -18,7 +18,7 @@ def test_nested_tuple_fixed_single():
     def main(x: Tuple[Color]) -> Any:
         return x
 
-    assert dcargs.cli(main, args="--x.0.r 255 --x.0.g 127 --x.0.b 5".split(" ")) == (
+    assert tyro.cli(main, args="--x.0.r 255 --x.0.g 127 --x.0.b 5".split(" ")) == (
         Color(255, 127, 5),
     )
 
@@ -27,7 +27,7 @@ def test_nested_tuple_fixed_two():
     def main(x: Tuple[Color, Color]) -> Any:
         return x
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args=(
             "--x.0.r 255 --x.0.g 127 --x.0.b 5 --x.1.r 255 --x.1.g 127 --x.1.b 0"
@@ -42,7 +42,7 @@ def test_nested_tuple_fixed_three():
     def main(x: Tuple[Color, int, Color]) -> Any:
         return x
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args=(
             "--x.0.r 255 --x.0.g 127 --x.0.b 5 --x.1 94709 --x.2.r 255 --x.2.g 127"
@@ -59,7 +59,7 @@ def test_nested_tuple_recursive():
     def main(x: Tuple[Color, Tuple[Color, Color]]) -> Any:
         return x
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args=(
             "--x.0.r 255 --x.0.g 127 --x.0.b 5 --x.1.0.r 255 --x.1.0.g 127 --x.1.0.b 0"
@@ -79,8 +79,8 @@ def test_tuple_bad():
     def main(x: Tuple[Color, ...]) -> None:
         pass
 
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=[])
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=[])
 
 
 def test_set_bad():
@@ -88,16 +88,16 @@ def test_set_bad():
     def main(x: Set[Color]) -> None:
         pass
 
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=[])
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=[])
 
 
 def test_set_ok():
     def main(x: Set[Color] = {Color(255, 0, 0)}) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[]) == {Color(255, 0, 0)}
-    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == {Color(127, 0, 0)}
+    assert tyro.cli(main, args=[]) == {Color(255, 0, 0)}
+    assert tyro.cli(main, args="--x.0.r 127".split(" ")) == {Color(127, 0, 0)}
 
 
 def test_list_bad():
@@ -105,48 +105,48 @@ def test_list_bad():
     def main(x: List[Color]) -> None:
         pass
 
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=[])
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=[])
 
 
 def test_list_ok():
     def main(x: List[Color] = [Color(255, 0, 0)]) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[]) == [Color(255, 0, 0)]
-    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
+    assert tyro.cli(main, args=[]) == [Color(255, 0, 0)]
+    assert tyro.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
 def test_list_object():
     def main(x: List[object] = [Color(255, 0, 0)]) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[]) == [Color(255, 0, 0)]
-    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
+    assert tyro.cli(main, args=[]) == [Color(255, 0, 0)]
+    assert tyro.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
 def test_list_any():
     def main(x: List[Any] = [Color(255, 0, 0)]) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[]) == [Color(255, 0, 0)]
-    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
+    assert tyro.cli(main, args=[]) == [Color(255, 0, 0)]
+    assert tyro.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
 def test_tuple_in_list():
     def main(x: List[Tuple[Color]] = [(Color(255, 0, 0),)]) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[]) == [(Color(255, 0, 0),)]
-    assert dcargs.cli(main, args="--x.0.0.r 127".split(" ")) == [(Color(127, 0, 0),)]
+    assert tyro.cli(main, args=[]) == [(Color(255, 0, 0),)]
+    assert tyro.cli(main, args="--x.0.0.r 127".split(" ")) == [(Color(127, 0, 0),)]
 
 
 def test_tuple_variable():
     def main(x: Tuple[Color, ...] = (Color(255, 0, 0), Color(255, 0, 127))) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[]) == (Color(255, 0, 0), Color(255, 0, 127))
-    assert dcargs.cli(main, args="--x.0.r 127".split(" ")) == (
+    assert tyro.cli(main, args=[]) == (Color(255, 0, 0), Color(255, 0, 127))
+    assert tyro.cli(main, args="--x.0.r 127".split(" ")) == (
         Color(127, 0, 0),
         Color(255, 0, 127),
     )
@@ -156,8 +156,8 @@ def test_dict_bad():
     def main(x: Dict[str, Color]) -> Any:
         return x
 
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main, args=[])
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=[])
 
 
 def test_dict_ok():
@@ -170,8 +170,8 @@ def test_dict_ok():
     ) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[])["green"] == Color(0, 255, 0)
-    assert dcargs.cli(main, args="--x.green.g 127".split(" "))["green"] == Color(
+    assert tyro.cli(main, args=[])["green"] == Color(0, 255, 0)
+    assert tyro.cli(main, args="--x.green.g 127".split(" "))["green"] == Color(
         0, 127, 0
     )
 
@@ -186,8 +186,8 @@ def test_dict_key_int():
     ) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[])[1] == Color(0, 255, 0)
-    assert dcargs.cli(main, args="--x.1.g 127".split(" "))[1] == Color(0, 127, 0)
+    assert tyro.cli(main, args=[])[1] == Color(0, 255, 0)
+    assert tyro.cli(main, args="--x.1.g 127".split(" "))[1] == Color(0, 127, 0)
 
 
 def test_dict_key_enum():
@@ -205,8 +205,8 @@ def test_dict_key_enum():
     ) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[])[ColorType.GREEN] == Color(0, 255, 0)
-    assert dcargs.cli(main, args="--x.GREEN.g 127".split(" "))[
+    assert tyro.cli(main, args=[])[ColorType.GREEN] == Color(0, 255, 0)
+    assert tyro.cli(main, args="--x.GREEN.g 127".split(" "))[
         ColorType.GREEN
     ] == Color(0, 127, 0)
 
@@ -222,8 +222,8 @@ def test_dict_nested():
     ) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[])["green"] == (Color(0, 255, 0), 10)
-    assert dcargs.cli(main, args="--x.green.0.g 127 --x.green.1 2".split(" "))[
+    assert tyro.cli(main, args=[])["green"] == (Color(0, 255, 0), 10)
+    assert tyro.cli(main, args="--x.green.0.g 127 --x.green.1 2".split(" "))[
         "green"
     ] == (Color(0, 127, 0), 2)
 
@@ -240,7 +240,7 @@ def test_generic_in_tuple():
     def main(x: Tuple[GenericColor[float], GenericColor[int]]) -> Any:
         return x
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args=(
             "--x.0.r 0.5 --x.0.g 0.2 --x.0.b 0.3 --x.1.r 25 --x.1.g 2 --x.1.b 3".split(
@@ -267,7 +267,7 @@ def test_generic_in_tuple_with_default():
     ) -> Any:
         return x
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args=(
             "--x.0.r 0.5 --x.0.g 0.2 --x.0.b 0.3 --x.1.r 25 --x.1.g 2 --x.1.b 3".split(
@@ -294,7 +294,7 @@ def test_generic_in_variable_tuple_with_default():
     ) -> Any:
         return x
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args=(
             "--x.0.r 0.5 --x.0.g 0.9 --x.0.b 0.3 --x.1.r 25 --x.1.g 2 --x.1.b 3".split(
@@ -321,10 +321,10 @@ def test_generic_in_dict_with_default():
     ) -> Any:
         return x
 
-    assert dcargs.cli(main, args="--x.float.g 0.1".split(" "),)[
+    assert tyro.cli(main, args="--x.float.g 0.1".split(" "),)[
         "float"
     ] == GenericColor(0.5, 0.1, 0.3)
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args="--x.int.g 0".split(" "),
     ) == {"float": GenericColor(0.5, 0.2, 0.3), "int": GenericColor(25, 0, 3)}
@@ -349,10 +349,10 @@ def test_generic_in_double_nested_dict_with_default():
     ) -> Any:
         return x
 
-    assert dcargs.cli(main, args="--x.hello.float.g 0.1".split(" "),)["hello"][
+    assert tyro.cli(main, args="--x.hello.float.g 0.1".split(" "),)["hello"][
         "float"
     ] == GenericColor(0.5, 0.1, 0.3)
-    assert dcargs.cli(main, args="--x.hello.int.g 0".split(" "),) == {
+    assert tyro.cli(main, args="--x.hello.int.g 0".split(" "),) == {
         "hello": {"float": GenericColor(0.5, 0.2, 0.3), "int": GenericColor(25, 0, 3)}
     }
 
@@ -368,6 +368,6 @@ def test_double_nested_dict_with_inferred_type():
     ) -> Any:
         return x
 
-    assert dcargs.cli(main, args="--x.hello.a.g 1".split(" "),)["hello"][
+    assert tyro.cli(main, args="--x.hello.a.g 1".split(" "),)["hello"][
         "a"
     ] == Color(5, 1, 3)

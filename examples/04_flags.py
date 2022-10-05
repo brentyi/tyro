@@ -1,7 +1,7 @@
 """Booleans can either be expected to be explicitly passed in, or, if given a default
 value, automatically converted to flags.
 
-To turn off conversion, see :class:`dcargs.conf.FlagConversionOff`.
+To turn off conversion, see :class:`tyro.conf.FlagConversionOff`.
 
 Usage:
 `python ./04_flags.py --help`
@@ -13,7 +13,7 @@ Usage:
 import dataclasses
 from typing import Optional
 
-import dcargs
+import tyro
 
 
 @dataclasses.dataclass
@@ -32,5 +32,5 @@ class Args:
 
 
 if __name__ == "__main__":
-    args = dcargs.cli(Args)
+    args = tyro.cli(Args)
     print(args)

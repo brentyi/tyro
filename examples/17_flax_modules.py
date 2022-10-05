@@ -1,5 +1,5 @@
 """If you use [Flax](https://github.com/google/flax), modules can be instantiated
-directly from `dcargs.cli`.
+directly from `tyro.cli`.
 
 Usage:
 `python ./17_flax_modules.py --help`
@@ -9,7 +9,7 @@ Usage:
 from flax import linen as nn
 from jax import numpy as jnp
 
-import dcargs
+import tyro
 
 
 class Classifier(nn.Module):
@@ -49,4 +49,4 @@ def train(model: Classifier, num_iterations: int = 1000) -> None:
 
 
 if __name__ == "__main__":
-    dcargs.cli(train)
+    tyro.cli(train)

@@ -20,16 +20,16 @@ import pytest
 import torch
 from typing_extensions import Annotated, Final, Literal, TypeAlias
 
-import dcargs
+import tyro
 
 
 def test_no_args():
     def main() -> int:
         return 5
 
-    assert dcargs.cli(main, args=[]) == 5
+    assert tyro.cli(main, args=[]) == 5
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["3"])
+        tyro.cli(main, args=["3"])
 
 
 def test_basic():
@@ -40,8 +40,8 @@ def test_basic():
         f: float
         p: pathlib.Path
 
-    # We can directly pass a dataclass to `dcargs.cli()`:
-    assert dcargs.cli(
+    # We can directly pass a dataclass to `tyro.cli()`:
+    assert tyro.cli(
         ManyTypes,
         args=[
             "--i",
@@ -55,11 +55,11 @@ def test_basic():
         ],
     ) == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
-    # We can directly pass a function to `dcargs.cli()`:
+    # We can directly pass a function to `tyro.cli()`:
     def function(i: int, s: str, f: float, p: pathlib.Path) -> ManyTypes:
         return ManyTypes(i=i, s=s, f=f, p=p)
 
-    assert dcargs.cli(
+    assert tyro.cli(
         function,
         args=[
             "--i",
@@ -73,12 +73,12 @@ def test_basic():
         ],
     ) == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
-    # We can directly pass a generic class to `dcargs.cli()`:
+    # We can directly pass a generic class to `tyro.cli()`:
     class Wrapper:
         def __init__(self, i: int, s: str, f: float, p: pathlib.Path):
             self.inner = ManyTypes(i=i, s=s, f=f, p=p)
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Wrapper,
         args=[
             "--i",
@@ -102,7 +102,7 @@ def test_init_false():
         dir: pathlib.Path
         ignored: str = dataclasses.field(default="hello", init=False)
 
-    assert dcargs.cli(
+    assert tyro.cli(
         InitFalseDataclass,
         args=[
             "--i",
@@ -117,7 +117,7 @@ def test_init_false():
     ) == InitFalseDataclass(i=5, s="5", f=5.0, dir=pathlib.Path("~"))
 
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             InitFalseDataclass,
             args=[
                 "--i",
@@ -140,7 +140,7 @@ def test_required():
         x: int
 
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=[])
+        tyro.cli(A, args=[])
 
 
 def test_flag():
@@ -151,19 +151,19 @@ def test_flag():
         x: bool
 
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=[])
+        tyro.cli(A, args=[])
 
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=["--x", "1"])
+        tyro.cli(A, args=["--x", "1"])
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=["--x", "true"])
-    assert dcargs.cli(A, args=["--x", "True"]) == A(True)
+        tyro.cli(A, args=["--x", "true"])
+    assert tyro.cli(A, args=["--x", "True"]) == A(True)
 
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=["--x", "0"])
+        tyro.cli(A, args=["--x", "0"])
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=["--x", "false"])
-    assert dcargs.cli(A, args=["--x", "False"]) == A(False)
+        tyro.cli(A, args=["--x", "false"])
+    assert tyro.cli(A, args=["--x", "False"]) == A(False)
 
 
 def test_flag_default_false():
@@ -173,8 +173,8 @@ def test_flag_default_false():
     class A:
         x: bool = False
 
-    assert dcargs.cli(A, args=[]) == A(False)
-    assert dcargs.cli(A, args=["--x"]) == A(True)
+    assert tyro.cli(A, args=[]) == A(False)
+    assert tyro.cli(A, args=["--x"]) == A(True)
 
 
 def test_flag_default_true():
@@ -184,8 +184,8 @@ def test_flag_default_true():
     class A:
         x: bool = True
 
-    assert dcargs.cli(A, args=[]) == A(True)
-    assert dcargs.cli(A, args=["--no-x"]) == A(False)
+    assert tyro.cli(A, args=[]) == A(True)
+    assert tyro.cli(A, args=["--no-x"]) == A(False)
 
 
 def test_flag_default_true_nested():
@@ -199,8 +199,8 @@ def test_flag_default_true_nested():
     class A:
         x: NestedDefaultTrue
 
-    assert dcargs.cli(A, args=[]) == A(NestedDefaultTrue(True))
-    assert dcargs.cli(A, args=["--x.no-x"]) == A(NestedDefaultTrue(False))
+    assert tyro.cli(A, args=[]) == A(NestedDefaultTrue(True))
+    assert tyro.cli(A, args=["--x.no-x"]) == A(NestedDefaultTrue(False))
 
 
 def test_default():
@@ -208,7 +208,7 @@ def test_default():
     class A:
         x: int = 5
 
-    assert dcargs.cli(A, args=[]) == A()
+    assert tyro.cli(A, args=[]) == A()
 
 
 def test_default_factory():
@@ -216,7 +216,7 @@ def test_default_factory():
     class A:
         x: int = dataclasses.field(default_factory=lambda: 5)
 
-    assert dcargs.cli(A, args=[]) == A()
+    assert tyro.cli(A, args=[]) == A()
 
 
 def test_optional():
@@ -224,36 +224,36 @@ def test_optional():
     class A:
         x: Optional[int] = None
 
-    assert dcargs.cli(A, args=[]) == A(x=None)
+    assert tyro.cli(A, args=[]) == A(x=None)
 
 
 def test_union_basic():
     def main(x: Union[int, str]) -> Union[int, str]:
         return x
 
-    assert dcargs.cli(main, args=["--x", "5"]) == 5
-    assert dcargs.cli(main, args=["--x", "6"]) == 6
-    assert dcargs.cli(main, args=["--x", "five"]) == "five"
+    assert tyro.cli(main, args=["--x", "5"]) == 5
+    assert tyro.cli(main, args=["--x", "6"]) == 6
+    assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
 def test_union_with_list():
     def main(x: Union[int, str, List[bool]]) -> Any:
         return x
 
-    assert dcargs.cli(main, args=["--x", "5"]) == 5
-    assert dcargs.cli(main, args=["--x", "6"]) == 6
-    assert dcargs.cli(main, args=["--x", "five"]) == "five"
-    assert dcargs.cli(main, args=["--x", "True"]) == "True"
-    assert dcargs.cli(main, args=["--x", "True", "False"]) == [True, False]
+    assert tyro.cli(main, args=["--x", "5"]) == 5
+    assert tyro.cli(main, args=["--x", "6"]) == 6
+    assert tyro.cli(main, args=["--x", "five"]) == "five"
+    assert tyro.cli(main, args=["--x", "True"]) == "True"
+    assert tyro.cli(main, args=["--x", "True", "False"]) == [True, False]
 
 
 def test_union_literal():
     def main(x: Union[Literal[1, 2], Literal[3, 4, 5], str]) -> Union[int, str]:
         return x
 
-    assert dcargs.cli(main, args=["--x", "5"]) == 5
-    assert dcargs.cli(main, args=["--x", "6"]) == "6"
-    assert dcargs.cli(main, args=["--x", "five"]) == "five"
+    assert tyro.cli(main, args=["--x", "5"]) == 5
+    assert tyro.cli(main, args=["--x", "6"]) == "6"
+    assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
 def test_func_typevar():
@@ -262,8 +262,8 @@ def test_func_typevar():
     def main(x: T) -> T:
         return x
 
-    assert dcargs.cli(main, args=["--x", "5"]) == 5
-    assert dcargs.cli(main, args=["--x", "five"]) == "five"
+    assert tyro.cli(main, args=["--x", "5"]) == 5
+    assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
 def test_func_typevar_bound():
@@ -272,9 +272,9 @@ def test_func_typevar_bound():
     def main(x: T) -> T:
         return x
 
-    assert dcargs.cli(main, args=["--x", "5"]) == 5
+    assert tyro.cli(main, args=["--x", "5"]) == 5
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["--x", "five"])
+        tyro.cli(main, args=["--x", "five"])
 
 
 def test_enum():
@@ -291,10 +291,10 @@ def test_enum():
     class EnumClassB:
         color: Color = Color.GREEN
 
-    assert dcargs.cli(EnumClassA, args=["--color", "RED"]) == EnumClassA(
+    assert tyro.cli(EnumClassA, args=["--color", "RED"]) == EnumClassA(
         color=Color.RED
     )
-    assert dcargs.cli(EnumClassB, args=[]) == EnumClassB()
+    assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
 
 
 def test_literal():
@@ -302,26 +302,26 @@ def test_literal():
     class A:
         x: Literal[0, 1, 2]
 
-    assert dcargs.cli(A, args=["--x", "1"]) == A(x=1)
+    assert tyro.cli(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):
-        assert dcargs.cli(A, args=["--x", "3"])
+        assert tyro.cli(A, args=["--x", "3"])
 
 
 def test_literal_bool():
     def main(x: Literal[True]) -> bool:
         return x
 
-    assert dcargs.cli(main, args=["--x", "True"]) is True
+    assert tyro.cli(main, args=["--x", "True"]) is True
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["--x", "False"])
+        tyro.cli(main, args=["--x", "False"])
 
     def main2(x: Literal[True, False]) -> bool:
         return x
 
-    assert dcargs.cli(main2, args=["--x", "True"]) is True
-    assert dcargs.cli(main2, args=["--x", "False"]) is False
+    assert tyro.cli(main2, args=["--x", "True"]) is True
+    assert tyro.cli(main2, args=["--x", "False"]) is False
     with pytest.raises(SystemExit):
-        dcargs.cli(main2, args=["--x", "Tru"])
+        tyro.cli(main2, args=["--x", "Tru"])
 
 
 def test_literal_enum():
@@ -334,10 +334,10 @@ def test_literal_enum():
     class A:
         x: Literal[Color.RED, Color.GREEN]
 
-    assert dcargs.cli(A, args=["--x", "RED"]) == A(x=Color.RED)
-    assert dcargs.cli(A, args=["--x", "GREEN"]) == A(x=Color.GREEN)
+    assert tyro.cli(A, args=["--x", "RED"]) == A(x=Color.RED)
+    assert tyro.cli(A, args=["--x", "GREEN"]) == A(x=Color.GREEN)
     with pytest.raises(SystemExit):
-        assert dcargs.cli(A, args=["--x", "BLUE"])
+        assert tyro.cli(A, args=["--x", "BLUE"])
 
 
 def test_optional_literal():
@@ -345,20 +345,20 @@ def test_optional_literal():
     class A:
         x: Optional[Literal[0, 1, 2]] = None
 
-    assert dcargs.cli(A, args=["--x", "1"]) == A(x=1)
+    assert tyro.cli(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):
-        assert dcargs.cli(A, args=["--x", "3"])
-    assert dcargs.cli(A, args=[]) == A(x=None)
+        assert tyro.cli(A, args=["--x", "3"])
+    assert tyro.cli(A, args=[]) == A(x=None)
 
 
 def test_multitype_literal():
     def main(x: Literal[0, "5"]) -> Any:
         return x
 
-    assert dcargs.cli(main, args=["--x", "0"]) == 0
-    assert dcargs.cli(main, args=["--x", "5"]) == "5"
+    assert tyro.cli(main, args=["--x", "0"]) == 0
+    assert tyro.cli(main, args=["--x", "5"]) == "5"
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["--x", "6"])
+        tyro.cli(main, args=["--x", "6"])
 
 
 def test_annotated():
@@ -368,7 +368,7 @@ def test_annotated():
     class A:
         x: Annotated[int, "some label"] = 3
 
-    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
+    assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_annotated_optional():
@@ -378,8 +378,8 @@ def test_annotated_optional():
     class A:
         x: Annotated[Optional[int], "some label"] = 3
 
-    assert dcargs.cli(A, args=[]) == A(x=3)
-    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
+    assert tyro.cli(A, args=[]) == A(x=3)
+    assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_optional_annotated():
@@ -389,8 +389,8 @@ def test_optional_annotated():
     class A:
         x: Optional[Annotated[int, "some label"]] = 3
 
-    assert dcargs.cli(A, args=[]) == A(x=3)
-    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
+    assert tyro.cli(A, args=[]) == A(x=3)
+    assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_final():
@@ -400,7 +400,7 @@ def test_final():
     class A:
         x: Final[int] = 3
 
-    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
+    assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_final_optional():
@@ -408,8 +408,8 @@ def test_final_optional():
     class A:
         x: Final[Optional[int]] = 3
 
-    assert dcargs.cli(A, args=[]) == A(x=3)
-    assert dcargs.cli(A, args=["--x", "5"]) == A(x=5)
+    assert tyro.cli(A, args=[]) == A(x=3)
+    assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
 def test_classvar():
@@ -420,8 +420,8 @@ def test_classvar():
         x: ClassVar[int] = 5
 
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=["--x", "1"])
-    assert dcargs.cli(A, args=[]) == A()
+        tyro.cli(A, args=["--x", "1"])
+    assert tyro.cli(A, args=[]) == A()
 
 
 def test_parse_empty_description():
@@ -431,7 +431,7 @@ def test_parse_empty_description():
     class A:
         x: int = 0
 
-    assert dcargs.cli(A, description=None, args=[]) == A(x=0)
+    assert tyro.cli(A, description=None, args=[]) == A(x=0)
 
 
 SomeTypeAlias: TypeAlias = int
@@ -441,7 +441,7 @@ def test_type_alias():
     def add(a: SomeTypeAlias, b: SomeTypeAlias) -> SomeTypeAlias:
         return a + b
 
-    assert dcargs.cli(add, args=["--a", "5", "--b", "7"]) == 12
+    assert tyro.cli(add, args=["--a", "5", "--b", "7"]) == 12
 
 
 @pytest.mark.filterwarnings("ignore::Warning")
@@ -449,14 +449,14 @@ def test_any():
     def main(x: Any = 5) -> Any:
         return x
 
-    assert dcargs.cli(main, args=[]) == 5
+    assert tyro.cli(main, args=[]) == 5
 
 
 def test_bytes():
     def main(x: bytes) -> bytes:
         return x
 
-    assert dcargs.cli(main, args=["--x", "hello"]) == b"hello"
+    assert tyro.cli(main, args=["--x", "hello"]) == b"hello"
 
 
 def test_any_str():
@@ -464,17 +464,17 @@ def test_any_str():
         return x
 
     # Use bytes when provided ascii-compatible inputs.
-    assert dcargs.cli(main, args=["--x", "hello"]) == b"hello"
-    assert dcargs.cli(main, args=["--x", "hello„"]) == "hello„"
+    assert tyro.cli(main, args=["--x", "hello"]) == b"hello"
+    assert tyro.cli(main, args=["--x", "hello„"]) == "hello„"
 
 
 def test_fixed():
     def main(x: Callable[[int], int] = lambda x: x * 2) -> Callable[[int], int]:
         return x
 
-    assert dcargs.cli(main, args=[])(3) == 6
+    assert tyro.cli(main, args=[])(3) == 6
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["--x", "something"])
+        tyro.cli(main, args=["--x", "something"])
 
 
 def test_fixed_dataclass_type():
@@ -485,43 +485,43 @@ def test_fixed_dataclass_type():
     def main(x: Callable = Dummy) -> Callable:
         return x
 
-    assert dcargs.cli(main, args=[]) is Dummy
+    assert tyro.cli(main, args=[]) is Dummy
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["--x", "something"])
+        tyro.cli(main, args=["--x", "something"])
 
 
 def test_missing_singleton():
-    assert dcargs.MISSING is copy.deepcopy(dcargs.MISSING)
+    assert tyro.MISSING is copy.deepcopy(tyro.MISSING)
 
 
 def test_torch_device():
     def main(device: torch.device) -> torch.device:
         return device
 
-    assert dcargs.cli(main, args=["--device", "cpu"]) == torch.device("cpu")
+    assert tyro.cli(main, args=["--device", "cpu"]) == torch.device("cpu")
 
 
 def test_torch_device_2():
-    assert dcargs.cli(torch.device, args=["cpu"]) == torch.device("cpu")
+    assert tyro.cli(torch.device, args=["cpu"]) == torch.device("cpu")
 
 
 def test_just_int():
-    assert dcargs.cli(int, args=["123"]) == 123
+    assert tyro.cli(int, args=["123"]) == 123
 
 
 def test_just_dict():
-    assert dcargs.cli(Dict[str, str], args="key value key2 value2".split(" ")) == {
+    assert tyro.cli(Dict[str, str], args="key value key2 value2".split(" ")) == {
         "key": "value",
         "key2": "value2",
     }
 
 
 def test_just_list():
-    assert dcargs.cli(List[int], args="1 2 3 4".split(" ")) == [1, 2, 3, 4]
+    assert tyro.cli(List[int], args="1 2 3 4".split(" ")) == [1, 2, 3, 4]
 
 
 def test_just_tuple():
-    assert dcargs.cli(Tuple[int, int, int, int], args="1 2 3 4".split(" ")) == (
+    assert tyro.cli(Tuple[int, int, int, int], args="1 2 3 4".split(" ")) == (
         1,
         2,
         3,
@@ -534,4 +534,4 @@ def test_return_parser():
         parser = argparse.ArgumentParser()
         return parser
 
-    assert isinstance(dcargs.cli(main, args=[]), argparse.ArgumentParser)
+    assert isinstance(tyro.cli(main, args=[]), argparse.ArgumentParser)

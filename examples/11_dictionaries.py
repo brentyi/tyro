@@ -11,7 +11,7 @@ from typing import Dict, Mapping, Tuple, TypedDict
 
 from frozendict import frozendict  # type: ignore
 
-import dcargs
+import tyro
 
 
 class DictionarySchema(
@@ -46,4 +46,4 @@ def main(
 
 
 if __name__ == "__main__":
-    dcargs.cli(main)
+    tyro.cli(main)

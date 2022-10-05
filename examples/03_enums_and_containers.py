@@ -12,7 +12,7 @@ import enum
 import pathlib
 from typing import Optional, Tuple
 
-import dcargs
+import tyro
 
 
 class OptimizerType(enum.Enum):
@@ -41,5 +41,5 @@ class TrainConfig:
 
 
 if __name__ == "__main__":
-    config = dcargs.cli(TrainConfig)
+    config = tyro.cli(TrainConfig)
     print(config)

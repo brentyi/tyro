@@ -2,7 +2,7 @@ import dataclasses
 import pathlib
 from typing import Any, Dict, List, Tuple
 
-from dcargs._fields import MISSING_NONPROP, is_nested_type
+from tyro._fields import MISSING_NONPROP, is_nested_type
 
 
 def test_is_nested_type_simple():
