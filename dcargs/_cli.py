@@ -205,16 +205,6 @@ def _cli_impl(
     else:
         dummy_wrapped = False
 
-    # Map a callable to the relevant CLI arguments + subparsers.
-    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
-        f,
-        description=description,
-        parent_classes=set(),  # Used for recursive calls.
-        parent_type_from_typevar=None,  # Used for recursive calls.
-        default_instance=default_instance_internal,  # Overrides for default values.
-        prefix="",  # Used for recursive calls.
-    )
-
     # Read and fix arguments. If the user passes in --field_name instead of
     # --field-name, correct for them.
     args = sys.argv[1:] if args is None else args
@@ -237,6 +227,9 @@ def _cli_impl(
     # goal, but manual parsing of argv is convenient for turning off formatting.
     print_completion = len(args) >= 2 and args[0] == "--dcargs-print-completion"
 
+    # Note: setting USE_RICH must happen before the parser specification is generated.
+    # TODO: revisit this. Ideally we should be able to eliminate the global state
+    # changes.
     completion_shell = None
     if print_completion:
         completion_shell = args[1]
@@ -244,6 +237,16 @@ def _cli_impl(
         _arguments.USE_RICH = False
     else:
         _arguments.USE_RICH = True
+
+    # Map a callable to the relevant CLI arguments + subparsers.
+    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
+        f,
+        description=description,
+        parent_classes=set(),  # Used for recursive calls.
+        parent_type_from_typevar=None,  # Used for recursive calls.
+        default_instance=default_instance_internal,  # Overrides for default values.
+        prefix="",  # Used for recursive calls.
+    )
 
     # Generate parser!
     with _argparse_formatter.ansi_context():
