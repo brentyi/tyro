@@ -253,8 +253,9 @@
 <span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">rich.markup</span>
+<span class="kn">from</span> <span class="nn">rich.text</span> <span class="kn">import</span> <span class="n">Text</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_instantiators</span><span class="p">,</span> <span class="n">_resolver</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse_formatter</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_instantiators</span><span class="p">,</span> <span class="n">_resolver</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_shtab</span> <span class="k">as</span> <span class="n">shtab</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span>
@@ -517,7 +518,11 @@
 
 <span class="k">def</span> <span class="nf">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">rich</span><span class="o">.</span><span class="n">markup</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">x</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">USE_RICH</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">[/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">x</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">USE_RICH</span>
+        <span class="k">else</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">str_from_rich</span><span class="p">(</span><span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">[/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
+    <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_rule_generate_helptext</span><span class="p">(</span>
