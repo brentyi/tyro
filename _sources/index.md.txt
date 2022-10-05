@@ -58,9 +58,9 @@ To get started, we recommend browsing the examples to the left.
   configuration.
 - [obj2mjcf](https://github.com/kevinzakka/obj2mjcf) uses `tyro` to build a CLI
   for processing composite Wavefront OBJ files for Mujoco.
-- [tensorf-jax](https://github.com/brentyi/tensorf-jax/) implements
-  [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/) in JAX, with
-  `tyro` for configuration.
+- [tensorf-jax](https://github.com/brentyi/tensorf-jax/) (unofficially)
+  implements [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/)
+  in JAX, with `tyro` for configuration.
 
 <!-- prettier-ignore-start -->
 
