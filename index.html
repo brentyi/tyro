@@ -166,20 +166,14 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="your_first_cli/">Your first CLI</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="building_configuration_systems/">Building configuration systems</a></li>
 <li class="toctree-l1"><a class="reference internal" href="goals_and_alternatives/">Goals and alternatives</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
-</ul>
-</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -200,6 +194,14 @@
 <li class="toctree-l1"><a class="reference internal" href="examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/16_advanced_configuration/">16. Advanced Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/17_flax_modules/">17. Flax Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
+</ul>
+</li>
 </ul>
 
 </div>
@@ -236,73 +238,62 @@
           <section id="tyro">
 <h1>tyro<a class="headerlink" href="#tyro" title="Permalink to this heading">#</a></h1>
 <p><a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Build status icon" src="https://github.com/brentyi/tyro/workflows/build/badge.svg" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Mypy status icon" src="https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=master" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Lint status icon" src="https://github.com/brentyi/tyro/workflows/lint/badge.svg" /></a> <a class="reference external" href="https://codecov.io/gh/brentyi/tyro"><img alt="Test coverage status icon" src="https://codecov.io/gh/brentyi/tyro/branch/master/graph/badge.svg" /></a> <a class="reference external" href="https://pypi.org/project/tyro/"><img alt="Version icon" src="https://img.shields.io/pypi/pyversions/tyro" /></a></p>
-<p><code class="code docutils literal notranslate"><span class="pre">tyro</span></code> is a library for typed CLI interfaces and configuration objects.</p>
-<p>Our core interface, <a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, generates argument parsers from
-type-annotated callables: functions, classes, dataclasses, and <em>nested</em>
-dataclasses and classes.</p>
-<p>This can be used as a replacement for <code class="code docutils literal notranslate"><span class="pre">argparse</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers with argparse.&quot;&quot;&quot;</span>
-
-<span class="kn">import</span> <span class="nn">argparse</span>
-
-<span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">()</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--a&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s2">&quot;--b&quot;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by calling a function with tyro.&quot;&quot;&quot;</span>
-
-<span class="kn">import</span> <span class="nn">tyro</span>
-
-<span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
-
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by instantiating a dataclass with tyro.&quot;&quot;&quot;</span>
-
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-
-<span class="kn">import</span> <span class="nn">tyro</span>
-
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-
-<span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>The broader goal is also a replacement for tools like <code class="code docutils literal notranslate"><span class="pre">hydra</span></code>,
-<code class="code docutils literal notranslate"><span class="pre">gin-config</span></code>, and <code class="code docutils literal notranslate"><span class="pre">ml_collections</span></code> that’s:</p>
+<p><code class="code docutils literal notranslate"><span class="pre">tyro</span></code> is a library for building CLI interfaces, configuration objects,
+and configuration <em>systems</em> with modern, type-annotated Python.</p>
+<p>Our core interface consists of just one function, <a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, which
+translates Python callables and types into fully-featured argument parsers and
+configuration objects.</p>
+<p>To get started, we recommend browsing the examples to the left. If you’re
+familiar with alternative libraries, we also include comparisons between
+<a class="reference external" href="./first_cli">tyro and argparse</a> and <a href="#id1"><span class="problematic" id="id2">`tyro and hydra &lt;&gt;`_</span></a>.</p>
+<section id="why-tyro">
+<h2>Why <code class="docutils literal notranslate"><span class="pre">tyro</span></code>?<a class="headerlink" href="#why-tyro" title="Permalink to this heading">#</a></h2>
+<ol class="arabic">
+<li><p><strong>Strong typing.</strong></p>
+<p>Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
+arguments populated by <code class="docutils literal notranslate"><span class="pre">tyro</span></code> benefit from IDE and language server-supported
+operations — think tab completion, rename, jump-to-def, docstrings on hover —
+as well as static checking tools like <code class="docutils literal notranslate"><span class="pre">pyright</span></code> and <code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p>
+</li>
+<li><p><strong>Minimal overhead.</strong></p>
+<p>Standard Python type annotations, docstrings, and default values are parsed
+to automatically generate command-line interfaces with informative helptext.</p>
+<p>If you’re familiar with type annotations and docstrings in Python, you
+already know how to use <code class="docutils literal notranslate"><span class="pre">tyro</span></code>! If you’re not, learning to use <code class="docutils literal notranslate"><span class="pre">tyro</span></code> reduces
+to learning to write modern Python.</p>
+<p>Hate <code class="docutils literal notranslate"><span class="pre">tyro</span></code>? Just remove one line of code, and you’re left with beautiful,
+type-annotated, and documented vanilla Python that can be used with a range
+of other configuration libraries.</p>
+</li>
+<li><p><strong>Automatic helptext generation.</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> parses docstrings, types, and defaults to generate carefully formatted
+helptext. Longer messages are organized into responsive multi-column layouts.</p>
+</li>
+<li><p><strong>Modularity.</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> supports hierarchically nested configuration structures, which make it
+easy to distribute definitions, defaults, and documentation of configurable
+fields across modules or source files.</p>
+</li>
+<li><p><strong>Tab completion.</strong></p>
+<p>By extending <a class="reference external" href="https://github.com/iterative/shtab">shtab</a>, <code class="docutils literal notranslate"><span class="pre">tyro</span></code>
+automatically generates tab completion scripts for bash, zsh, and tcsh!</p>
+</li>
+</ol>
+</section>
+<section id="in-the-wild">
+<h2>In the wild<a class="headerlink" href="#in-the-wild" title="Permalink to this heading">#</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> is still a new library, but being stress tested in several projects!</p>
 <ul class="simple">
-<li><p><strong>Low effort.</strong> Standard Python type annotations, docstrings, and default
-values are parsed to automatically generate command-line interfaces with
-informative helptext.</p></li>
-<li><p><strong>Expressive.</strong> <a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> understands functions, classes,
-dataclasses, and <em>nested</em> classes and dataclasses, as well as frequently used
-annotations like unions, literals, and collections, which can be composed into
-hierarchical configuration objects built on standard Python features.</p></li>
-<li><p><strong>Typed.</strong> Unlike dynamic configuration namespaces produced by libraries like
-<code class="code docutils literal notranslate"><span class="pre">argparse</span></code>, <code class="code docutils literal notranslate"><span class="pre">YACS</span></code>, <code class="code docutils literal notranslate"><span class="pre">abseil</span></code>, <code class="code docutils literal notranslate"><span class="pre">hydra</span></code>, or
-<code class="code docutils literal notranslate"><span class="pre">ml_collections</span></code>, typed outputs mean that IDE-assisted autocomplete,
-rename, refactor, and go-to-definition operations work out-of-the-box, as well
-as static checking tools like <code class="code docutils literal notranslate"><span class="pre">mypy</span></code> and <code class="code docutils literal notranslate"><span class="pre">pyright</span></code>.</p></li>
-<li><p><strong>Modular.</strong> Most approaches to configuration objects require a centralized
-definition of all configurable fields. Hierarchically nesting configuration
-structures, however, makes it easy to distribute definitions, defaults, and
-documentation of configurable fields across modules or source files. A model
-configuration dataclass, for example, can be co-located in its entirety with
-the model implementation and dropped into any experiment configuration with an
-import — this eliminates redundancy and makes entire modules easy to port
-across codebases.</p></li>
+<li><p><a class="reference external" href="https://github.com/nerfstudio-project/nerfstudio/">nerfstudio</a> uses <code class="docutils literal notranslate"><span class="pre">tyro</span></code>
+both to build compact command-line utilities and for YAML-free experiment
+configuration.</p></li>
+<li><p><a class="reference external" href="https://github.com/kevinzakka/obj2mjcf">obj2mjcf</a> uses <code class="docutils literal notranslate"><span class="pre">tyro</span></code> to build a CLI
+for processing composite Wavefront OBJ files for Mujoco.</p></li>
+<li><p><a class="reference external" href="https://github.com/brentyi/tensorf-jax/">tensorf-jax</a> implements
+<a class="reference external" href="https://apchenstu.github.io/TensoRF/">Tensorial Radiance Fields</a> in JAX, with
+<code class="docutils literal notranslate"><span class="pre">tyro</span></code> for configuration.</p></li>
 </ul>
-<div class="toctree-wrapper compound">
+<!-- prettier-ignore-start --><div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
 </div>
@@ -310,6 +301,7 @@ across codebases.</p></li>
 </div>
 <div class="toctree-wrapper compound">
 </div>
+<!-- prettier-ignore-end --></section>
 </section>
 
         </article>
@@ -365,6 +357,10 @@ across codebases.</p></li>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">tyro</a><ul>
+<li><a class="reference internal" href="#why-tyro">Why <code class="docutils literal notranslate"><span class="pre">tyro</span></code>?</a></li>
+<li><a class="reference internal" href="#in-the-wild">In the wild</a><ul>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
