@@ -609,7 +609,8 @@ def test_unparsable():
 
     helptext = _get_helptext(main2)
     assert "--x {fixed}" in helptext
-    assert "(fixed to: <class 'torch.nn" in helptext
+    assert "(fixed to:" in helptext
+    assert "torch" in helptext
 
 
 def test_suppressed():
