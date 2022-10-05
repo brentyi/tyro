@@ -6,7 +6,7 @@ Usage:
 `python ./13_standard_classes.py --field1 hello --field2 7`
 """
 
-import dcargs
+import tyro
 
 
 class Args:
@@ -27,5 +27,5 @@ class Args:
 
 
 if __name__ == "__main__":
-    args = dcargs.cli(Args)
+    args = tyro.cli(Args)
     print(args.data)

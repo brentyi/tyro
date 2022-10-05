@@ -16,7 +16,7 @@ def subcommand_type_from_defaults(
     """Construct a Union type for defining subcommands that choose between defaults.
 
     This can most commonly be used to create a "base configuration" pattern:
-        https://brentyi.github.io/dcargs/examples/10_base_configs/
+        https://brentyi.github.io/tyro/examples/10_base_configs/
 
     For example, when `defaults` is set to:
 
@@ -33,19 +33,19 @@ def subcommand_type_from_defaults(
     Union[
         Annotated[
             Config,
-            dcargs.conf.subcommand("small", default=Config(...))
+            tyro.conf.subcommand("small", default=Config(...))
         ],
         Annotated[
             Config,
-            dcargs.conf.subcommand("big", default=Config(...))
+            tyro.conf.subcommand("big", default=Config(...))
         ]
     ]
     ```
 
-    The resulting type can be used directly in dcargs.cli:
+    The resulting type can be used directly in tyro.cli:
 
     ```python
-    config = dcargs.cli(subcommand_type_from_defaults(default_from_name))
+    config = tyro.cli(subcommand_type_from_defaults(default_from_name))
     reveal_type(config)  # Should be correct!
     ```
 
@@ -60,7 +60,7 @@ def subcommand_type_from_defaults(
     ) -> None:
         ...
 
-    dcargs.cli(train)
+    tyro.cli(train)
     ```
 
     Note that Pyright understands the latter case, but mypy does not. If mypy support is

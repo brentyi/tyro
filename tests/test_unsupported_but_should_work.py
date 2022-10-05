@@ -12,8 +12,8 @@ import attr
 import omegaconf
 import pytest
 
-import dcargs
-import dcargs._strings
+import tyro
+import tyro._strings
 
 
 def test_omegaconf_missing():
@@ -26,19 +26,19 @@ def test_omegaconf_missing():
     ) -> Tuple[int, int, int]:
         return (required_a, optional, required_b)  # type: ignore
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main, args="--required-a 3 --optional 4 --required-b 5".split(" ")
     ) == (3, 4, 5)
-    assert dcargs.cli(main, args="--required-a 3 --required-b 5".split(" ")) == (
+    assert tyro.cli(main, args="--required-a 3 --required-b 5".split(" ")) == (
         3,
         3,
         5,
     )
 
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args="--required-a 3 --optional 4")
+        tyro.cli(main, args="--required-a 3 --optional 4")
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args="--required-a 3")
+        tyro.cli(main, args="--required-a 3")
 
     def main2(
         required_a: int,
@@ -47,19 +47,19 @@ def test_omegaconf_missing():
     ) -> Tuple[int, int, int]:
         return (required_a, optional, required_b)
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main2, args="--required-a 3 --optional 4 --required-b 5".split(" ")
     ) == (3, 4, 5)
-    assert dcargs.cli(main2, args="--required-a 3 --required-b 5".split(" ")) == (
+    assert tyro.cli(main2, args="--required-a 3 --required-b 5".split(" ")) == (
         3,
         3,
         5,
     )
 
     with pytest.raises(SystemExit):
-        dcargs.cli(main2, args="--required-a 3 --optional 4")
+        tyro.cli(main2, args="--required-a 3 --optional 4")
     with pytest.raises(SystemExit):
-        dcargs.cli(main2, args="--required-a 3")
+        tyro.cli(main2, args="--required-a 3")
 
 
 def test_attrs_basic():
@@ -70,8 +70,8 @@ def test_attrs_basic():
         f: float = attr.ib()
         p: pathlib.Path = attr.ib()
 
-    # We can directly pass a dataclass to `dcargs.cli()`:
-    assert dcargs.cli(
+    # We can directly pass a dataclass to `tyro.cli()`:
+    assert tyro.cli(
         ManyTypesA,
         args=[
             "--i",
@@ -93,8 +93,8 @@ def test_attrs_defaults():
         s: str = attr.ib()
         f: float = attr.ib(default=1.0)
 
-    # We can directly pass a dataclass to `dcargs.cli()`:
-    assert dcargs.cli(
+    # We can directly pass a dataclass to `tyro.cli()`:
+    assert tyro.cli(
         ManyTypesB,
         args=[
             "--i",
@@ -121,9 +121,9 @@ def test_attrs_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.cli(Helptext, args=["--help"])
+            tyro.cli(Helptext, args=["--help"])
     helptext = f.getvalue()
-    assert dcargs._strings.strip_ansi_sequences(cast(str, Helptext.__doc__)) in helptext
+    assert tyro._strings.strip_ansi_sequences(cast(str, Helptext.__doc__)) in helptext
 
     # Note that required detection seems to be broken here.
     assert "Documentation 1" in helptext

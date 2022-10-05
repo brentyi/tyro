@@ -11,7 +11,7 @@ import dataclasses
 import enum
 import pathlib
 
-import dcargs
+import tyro
 
 
 class OptimizerType(enum.Enum):
@@ -65,8 +65,8 @@ def train(
     print()
     print(f"{config=}")
     print()
-    print(dcargs.to_yaml(config))
+    print(tyro.to_yaml(config))
 
 
 if __name__ == "__main__":
-    dcargs.cli(train)
+    tyro.cli(train)

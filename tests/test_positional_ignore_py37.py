@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 
 import pytest
 
-import dcargs
+import tyro
 
 
 def test_positional():
@@ -26,9 +26,9 @@ def test_positional():
         """
         return (x, y, z[0])
 
-    assert dcargs.cli(main, args="1 2 --z 3".split(" ")) == (1, 2, 3)
+    assert tyro.cli(main, args="1 2 --z 3".split(" ")) == (1, 2, 3)
     with pytest.raises(SystemExit):
-        assert dcargs.cli(main, args="--x 1 --y 2 --z 3".split(" ")) == (1, 2, 3)
+        assert tyro.cli(main, args="--x 1 --y 2 --z 3".split(" ")) == (1, 2, 3)
 
 
 def test_nested_positional():
@@ -39,12 +39,10 @@ def test_nested_positional():
     def nest1(a: int, b: int, thing: A, /, c: int) -> A:
         return thing
 
-    assert isinstance(dcargs.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")), A)
-    assert (
-        dcargs.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")).hello_world == 3
-    )
+    assert isinstance(tyro.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")), A)
+    assert tyro.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")).hello_world == 3
     with pytest.raises(SystemExit):
-        dcargs.cli(nest1, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
+        tyro.cli(nest1, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
 
 
 def test_nested_positional_alt():
@@ -55,9 +53,9 @@ def test_nested_positional_alt():
     def nest2(a: int, b: int, /, thing: B, c: int):
         return thing
 
-    assert isinstance(dcargs.cli(nest2, args="0 1 2 3 --thing.c 4 --c 4".split(" ")), B)
+    assert isinstance(tyro.cli(nest2, args="0 1 2 3 --thing.c 4 --c 4".split(" ")), B)
     with pytest.raises(SystemExit):
-        dcargs.cli(nest2, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
+        tyro.cli(nest2, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
 
 
 def test_positional_with_underscores():
@@ -66,7 +64,7 @@ def test_positional_with_underscores():
     def main(a_multi_word_input: int, /) -> int:
         return a_multi_word_input
 
-    assert dcargs.cli(main, args=["5"]) == 5
+    assert tyro.cli(main, args=["5"]) == 5
 
 
 def test_positional_booleans():
@@ -80,42 +78,42 @@ def test_positional_booleans():
     ) -> Tuple[bool, bool, bool]:
         return flag1, flag2, flag3
 
-    assert dcargs.cli(main, args=["True"]) == (True, True, False)
-    assert dcargs.cli(main, args=["True", "False"]) == (True, False, False)
-    assert dcargs.cli(main, args=["False", "False", "True"]) == (False, False, True)
+    assert tyro.cli(main, args=["True"]) == (True, True, False)
+    assert tyro.cli(main, args=["True", "False"]) == (True, False, False)
+    assert tyro.cli(main, args=["False", "False", "True"]) == (False, False, True)
 
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["hmm"])
+        tyro.cli(main, args=["hmm"])
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["true"])
+        tyro.cli(main, args=["true"])
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["True", "false"])
+        tyro.cli(main, args=["True", "false"])
 
 
 def test_optional_list():
     def main(a: Optional[List[int]], /) -> Optional[List[int]]:
         return a
 
-    assert dcargs.cli(main, args=["None"]) is None
-    assert dcargs.cli(main, args=["1", "2"]) == [1, 2]
+    assert tyro.cli(main, args=["None"]) is None
+    assert tyro.cli(main, args=["1", "2"]) == [1, 2]
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=[])
+        tyro.cli(main, args=[])
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["hm"])
+        tyro.cli(main, args=["hm"])
 
 
 def test_optional_list_with_default():
     def main(a: Optional[List[int]] = None, /) -> Optional[List[int]]:
         return a
 
-    assert dcargs.cli(main, args=["None"]) is None
-    assert dcargs.cli(main, args=["5", "5"]) == [5, 5]
+    assert tyro.cli(main, args=["None"]) is None
+    assert tyro.cli(main, args=["5", "5"]) == [5, 5]
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=["None", "5"])
+        tyro.cli(main, args=["None", "5"])
 
 
 def test_positional_tuple():
     def main(x: Tuple[int, int], y: Tuple[str, str], /):
         return x, y
 
-    assert dcargs.cli(main, args="1 2 3 4".split(" ")) == ((1, 2), ("3", "4"))
+    assert tyro.cli(main, args="1 2 3 4".split(" ")) == ((1, 2), ("3", "4"))

@@ -1,4 +1,4 @@
-from dcargs import _strings
+from tyro import _strings
 
 
 def test_words_from_name():

@@ -2,7 +2,7 @@ from dataclasses import field, make_dataclass
 
 import pytest
 
-import dcargs
+import tyro
 
 
 def test_dynamic():
@@ -10,5 +10,5 @@ def test_dynamic():
     A = make_dataclass("A", [("b", B, field())])
 
     with pytest.raises(SystemExit):
-        dcargs.cli(A, args=[])
-    assert dcargs.cli(A, args=["--b.c", "5"]) == A(b=B(c=5))
+        tyro.cli(A, args=[])
+    assert tyro.cli(A, args=["--b.c", "5"]) == A(b=B(c=5))

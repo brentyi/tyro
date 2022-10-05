@@ -1,6 +1,6 @@
 import pathlib
 
-import dcargs
+import tyro
 
 
 def main(source: pathlib.Path, dest: pathlib.Path, /) -> None:
@@ -12,4 +12,4 @@ def main(source: pathlib.Path, dest: pathlib.Path, /) -> None:
 
 
 if __name__ == "__main__":
-    dcargs.cli(main)
+    tyro.cli(main)

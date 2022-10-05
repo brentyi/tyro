@@ -14,7 +14,7 @@ constructors of) standard Python classes.
         :linenos:
 
 
-        import dcargs
+        import tyro
 
 
         class Args:
@@ -35,7 +35,7 @@ constructors of) standard Python classes.
 
 
         if __name__ == "__main__":
-            args = dcargs.cli(Args)
+            args = tyro.cli(Args)
             print(args.data)
 
 ------------

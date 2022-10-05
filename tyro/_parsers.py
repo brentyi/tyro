@@ -359,7 +359,7 @@ class SubparsersSpecification:
             )
             if default_name not in parser_from_name:
                 # If we can't find the subparser by name, search by type. This is needed
-                # when the user renames their subcommands. (eg via dcargs.subcommand)
+                # when the user renames their subcommands. (eg via tyro.subcommand)
                 #
                 # TODO: this will display some weird behaviors if multiple subcommands
                 # have the same type.

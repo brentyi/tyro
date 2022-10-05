@@ -7,7 +7,7 @@ from typing import Iterable, List, Sequence, Tuple, Type, Union
 
 from . import _resolver
 
-dummy_field_name = "__dcargs_dummy_field__"
+dummy_field_name = "__tyro_dummy_field__"
 
 
 def _strip_dummy_field_names(parts: Iterable[str]) -> Iterable[str]:
@@ -67,7 +67,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         cls, _subcommands._SubcommandConfiguration
     )
 
-    # Subparser name from `dcargs.metadata.subcommand()`.
+    # Subparser name from `tyro.metadata.subcommand()`.
     found_name = None
     prefix_name = True
     if len(found_subcommand_configs) > 0:

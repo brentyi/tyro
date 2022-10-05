@@ -1,4 +1,4 @@
-"""The :mod:`dcargs.conf` submodule contains helpers for attaching parsing-specific
+"""The :mod:`tyro.conf` submodule contains helpers for attaching parsing-specific
 configuration metadata to types via [PEP 593](https://peps.python.org/pep-0593/) runtime
 annotations.
 

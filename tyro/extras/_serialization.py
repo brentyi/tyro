@@ -173,11 +173,11 @@ def from_yaml(
     stream: Union[str, IO[str], bytes, IO[bytes]],
 ) -> DataclassType:
     """Re-construct a dataclass instance from a yaml-compatible string, which should be
-    generated from `dcargs.extras.to_yaml()`.
+    generated from `tyro.extras.to_yaml()`.
 
-    As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+    As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
     configuration use cases, we also introduce functions for human-readable dataclass
-    serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+    serialization: :func:`tyro.conf.from_yaml` and :func:`tyro.conf.to_yaml` attempt
     to strike a balance between flexibility and robustness — in contrast to naively
     dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
     references enable custom tags that are robust against code reorganization and
@@ -185,7 +185,7 @@ def from_yaml(
 
     .. warning::
         Serialization functionality is stable but deprecated. It may be removed in a
-        future version of :code:`dcargs`.
+        future version of :code:`tyro`.
 
     Args:
         cls: Type to reconstruct.
@@ -202,11 +202,11 @@ def from_yaml(
 
 def to_yaml(instance: Any) -> str:
     """Serialize a dataclass; returns a yaml-compatible string that can be deserialized
-    via `dcargs.extras.from_yaml()`.
+    via `tyro.extras.from_yaml()`.
 
-    As a secondary feature aimed at enabling the use of :func:`dcargs.cli` for general
+    As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
     configuration use cases, we also introduce functions for human-readable dataclass
-    serialization: :func:`dcargs.conf.from_yaml` and :func:`dcargs.conf.to_yaml` attempt
+    serialization: :func:`tyro.conf.from_yaml` and :func:`tyro.conf.to_yaml` attempt
     to strike a balance between flexibility and robustness — in contrast to naively
     dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
     references enable custom tags that are robust against code reorganization and
@@ -214,7 +214,7 @@ def to_yaml(instance: Any) -> str:
 
     .. warning::
         Serialization functionality is stable but deprecated. It may be removed in a
-        future version of :code:`dcargs`.
+        future version of :code:`tyro`.
 
     Args:
         instance: Dataclass instance to serialize.
@@ -222,4 +222,4 @@ def to_yaml(instance: Any) -> str:
     Returns:
         YAML string.
     """
-    return "# dcargs YAML.\n" + yaml.dump(instance, Dumper=_make_dumper(instance))
+    return "# tyro YAML.\n" + yaml.dump(instance, Dumper=_make_dumper(instance))

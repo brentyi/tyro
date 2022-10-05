@@ -1,4 +1,4 @@
-"""In the simplest case, `dcargs.cli()` can be used to run a function with arguments
+"""In the simplest case, `tyro.cli()` can be used to run a function with arguments
 populated from the CLI.
 
 Usage:
@@ -7,7 +7,7 @@ Usage:
 `python ./01_functions.py --field1 hello --field2 10`
 """
 
-import dcargs
+import tyro
 
 
 def main(
@@ -24,4 +24,4 @@ def main(
 
 
 if __name__ == "__main__":
-    dcargs.cli(main)
+    tyro.cli(main)

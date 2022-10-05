@@ -9,7 +9,7 @@ import dataclasses
 import enum
 from typing import Literal, Optional, Tuple, Union
 
-import dcargs
+import tyro
 
 
 class Color(enum.Enum):
@@ -45,5 +45,5 @@ class Args:
 
 
 if __name__ == "__main__":
-    args = dcargs.cli(Args)
+    args = tyro.cli(Args)
     print(args)

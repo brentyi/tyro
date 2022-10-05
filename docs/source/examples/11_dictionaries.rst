@@ -18,7 +18,7 @@ or a ``TypedDict`` subclass.
 
         from frozendict import frozendict  # type: ignore
 
-        import dcargs
+        import tyro
 
 
         class DictionarySchema(
@@ -53,7 +53,7 @@ or a ``TypedDict`` subclass.
 
 
         if __name__ == "__main__":
-            dcargs.cli(main)
+            tyro.cli(main)
 
 ------------
 

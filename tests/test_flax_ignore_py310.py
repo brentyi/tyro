@@ -1,10 +1,10 @@
-"""Tests initializing flax modules directly via dcargs."""
+"""Tests initializing flax modules directly via tyro."""
 import jax
 import pytest
 from flax import linen as nn
 from jax import numpy as jnp
 
-import dcargs
+import tyro
 
 
 class Classifier(nn.Module):
@@ -30,7 +30,7 @@ class Classifier(nn.Module):
 
 
 def test_ok():
-    network = dcargs.cli(
+    network = tyro.cli(
         Classifier,
         args=[
             "--layers",
@@ -49,7 +49,7 @@ def test_ok():
 
 def test_missing():
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             Classifier,
             args=[
                 "--layers",
