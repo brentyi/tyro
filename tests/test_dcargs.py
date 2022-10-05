@@ -307,6 +307,21 @@ def test_literal():
         assert dcargs.cli(A, args=["--x", "3"])
 
 
+# Hack for mypy. Not needed for pyright.
+Choices = int
+Choices = dcargs.extras.literal_type_from_choices([0, 1, 2])  # type: ignore
+
+
+def test_dynamic_literal():
+    @dataclasses.dataclass
+    class A:
+        x: Choices
+
+    assert dcargs.cli(A, args=["--x", "1"]) == A(x=1)
+    with pytest.raises(SystemExit):
+        assert dcargs.cli(A, args=["--x", "3"])
+
+
 def test_literal_bool():
     def main(x: Literal[True]) -> bool:
         return x

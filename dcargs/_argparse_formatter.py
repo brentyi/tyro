@@ -122,6 +122,8 @@ def ansi_context() -> ContextManager[None]:
 def str_from_rich(
     renderable: RenderableType, width: Optional[int] = None, soft_wrap: bool = False
 ) -> str:
+    # TODO: everywhere that this function is used is a little bit sketchy. Could use
+    # re-thinking.
     console = Console(width=width, theme=THEME.as_rich_theme())
     with console.capture() as out:
         console.print(renderable, soft_wrap=soft_wrap)
@@ -152,7 +154,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 out
                 if self._strip_ansi_sequences
                 else str_from_rich(
-                    Text(
+                    Text.from_ansi(
                         out,
                         style=THEME.metavar_fixed
                         if out == "{fixed}"
@@ -309,7 +311,9 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # with the helptext strings defined via docstrings and set by
                 # _arguments.py.
                 assert action.help is not None
-                action.help = "[helptext]" + action.help + "[/helptext]"
+                action.help = str_from_rich(
+                    Text.from_markup("[helptext]" + action.help + "[/helptext]")
+                )
             if (
                 action.help
                 and len(_strings.strip_ansi_sequences(invocation)) < help_position - 1
@@ -324,7 +328,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         style=THEME.invocation,
                     ),
                     # Unescape % signs, which need special handling in argparse.
-                    Text.from_markup(action.help.replace("%%", "%")),
+                    Text.from_ansi(action.help.replace("%%", "%")),
                 )
                 item_parts.append(table)
 
@@ -340,7 +344,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     item_parts.append(
                         Padding(
                             # Unescape % signs, which need special handling in argparse.
-                            Text.from_markup(action.help.replace("%%", "%")),
+                            Text.from_ansi(action.help.replace("%%", "%")),
                             pad=(0, 0, 0, help_position),
                         )
                     )
@@ -423,7 +427,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # Note: we don't use rich.rule.Rule() because this will make all of
                 # the panels expand to fill the full width of the console. (this only
                 # impacts single-column layouts)
-                self.formatter._dcargs_rule = Text(
+                self.formatter._dcargs_rule = Text.from_ansi(
                     "─" * max_width, style=THEME.border, overflow="crop"
                 )
             elif len(self.formatter._dcargs_rule._text[0]) < max_width:
