@@ -279,6 +279,8 @@ def _rule_convert_defaults_to_strings(
 
 # This can be turned off when we don't want rich-based formatting. (notably for
 # completion scripts)
+#
+# TODO: the global state here is gross. Should be revisited.
 USE_RICH = True
 
 
