@@ -9,9 +9,7 @@ Our core interface consists of just one function, :func:`tyro.cli()`, which
 translates Python callables and types into fully-featured argument parsers and
 configuration objects.
 
-To get started, we recommend browsing the examples to the left. If you're
-familiar with alternative libraries, we also include comparisons between
-[tyro and argparse](./first_cli) and [tyro and hydra]().
+To get started, we recommend browsing the examples to the left.
 
 ### Why `tyro`?
 
