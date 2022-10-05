@@ -3,37 +3,37 @@
 </p>
 
 <p align="center">
-    <em><a href="https://brentyi.github.io/dcargs">Documentation</a></em>
+    <em><a href="https://brentyi.github.io/tyro">Documentation</a></em>
     &nbsp;&nbsp;&bull;&nbsp;&nbsp;
     <em><code>pip install tyro</code></em>
 </p>
 
 <p align="center">
-    <img alt="build" src="https://github.com/brentyi/dcargs/workflows/build/badge.svg" />
-    <img alt="mypy" src="https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master" />
-    <img alt="lint" src="https://github.com/brentyi/dcargs/workflows/lint/badge.svg" />
-    <a href="https://codecov.io/gh/brentyi/dcargs">
-        <img alt="codecov" src="https://codecov.io/gh/brentyi/dcargs/branch/master/graph/badge.svg" />
+    <img alt="build" src="https://github.com/brentyi/tyro/workflows/build/badge.svg" />
+    <img alt="mypy" src="https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=master" />
+    <img alt="lint" src="https://github.com/brentyi/tyro/workflows/lint/badge.svg" />
+    <a href="https://codecov.io/gh/brentyi/tyro">
+        <img alt="codecov" src="https://codecov.io/gh/brentyi/tyro/branch/master/graph/badge.svg" />
     </a>
-    <a href="https://pypi.org/project/dcargs/">
-        <img alt="codecov" src="https://img.shields.io/pypi/pyversions/dcargs" />
+    <a href="https://pypi.org/project/tyro/">
+        <img alt="codecov" src="https://img.shields.io/pypi/pyversions/tyro" />
     </a>
 </p>
 
 <br />
 
-<strong><code>tyro</code></strong> is a library for building CLI interfaces and
-configuration objects with modern, type-annotated Python.
+<strong><code>tyro</code></strong> is a library for building CLI interfaces,
+configuration objects, and configuration _systems_ with modern, type-annotated
+Python.
 
 Our core interface consists of just one function, `tyro.cli()`, which translates
-Python _callables_ and _types_ into fully-featured argument parsers and
+Python callables and types into fully-featured argument parsers and
 configuration objects.
 
 To get started, we recommend visiting the examples in our
-[documentation](https://brentyi.github.io/dcargs). If you're familiar with
+[documentation](https://brentyi.github.io/tyro). If you're familiar with
 alternative libraries, we also include comparisons between [tyro and argparse]()
 and [tyro and hydra]().
-
 
 ### Why `tyro`?
 
@@ -41,8 +41,8 @@ and [tyro and hydra]().
 
    Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
    arguments populated by `tyro` benefit from IDE and language server-supported
-   operations — think tab completion, rename, jump-to-def, docstrings on hover
-   — as well as static checking tools like `pyright` and `mypy`.
+   operations — think tab completion, rename, jump-to-def, docstrings on hover —
+   as well as static checking tools like `pyright` and `mypy`.
 
 2. **Minimal overhead.**
 
@@ -72,7 +72,6 @@ and [tyro and hydra]().
 
    By extending [shtab](https://github.com/iterative/shtab), `tyro`
    automatically generates tab completion scripts for bash, zsh, and tcsh!
-
 
 ### A minimal example
 
@@ -144,7 +143,7 @@ print(args.a + args.b)
 </tr>
 </table>
 
-For more examples, see our [documentation](https://brentyi.github.io/dcargs).
+For more examples, see our [documentation](https://brentyi.github.io/tyro).
 
 ### In the wild
 

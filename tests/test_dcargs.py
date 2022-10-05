@@ -291,9 +291,7 @@ def test_enum():
     class EnumClassB:
         color: Color = Color.GREEN
 
-    assert tyro.cli(EnumClassA, args=["--color", "RED"]) == EnumClassA(
-        color=Color.RED
-    )
+    assert tyro.cli(EnumClassA, args=["--color", "RED"]) == EnumClassA(color=Color.RED)
     assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
 
 
@@ -301,6 +299,21 @@ def test_literal():
     @dataclasses.dataclass
     class A:
         x: Literal[0, 1, 2]
+
+    assert tyro.cli(A, args=["--x", "1"]) == A(x=1)
+    with pytest.raises(SystemExit):
+        assert tyro.cli(A, args=["--x", "3"])
+
+
+# Hack for mypy. Not needed for pyright.
+Choices = int
+Choices = tyro.extras.literal_type_from_choices([0, 1, 2])  # type: ignore
+
+
+def test_dynamic_literal():
+    @dataclasses.dataclass
+    class A:
+        x: Choices
 
     assert tyro.cli(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):

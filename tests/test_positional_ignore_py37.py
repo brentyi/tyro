@@ -40,9 +40,7 @@ def test_nested_positional():
         return thing
 
     assert isinstance(tyro.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")), A)
-    assert (
-        tyro.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")).hello_world == 3
-    )
+    assert tyro.cli(nest1, args="0 1 2 3 --thing.c 4 --c 4".split(" ")).hello_world == 3
     with pytest.raises(SystemExit):
         tyro.cli(nest1, args="0 1 2 3 4 --thing.c 4 --c 4".split(" "))
 

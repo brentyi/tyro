@@ -206,9 +206,9 @@ def test_dict_key_enum():
         return x
 
     assert tyro.cli(main, args=[])[ColorType.GREEN] == Color(0, 255, 0)
-    assert tyro.cli(main, args="--x.GREEN.g 127".split(" "))[
-        ColorType.GREEN
-    ] == Color(0, 127, 0)
+    assert tyro.cli(main, args="--x.GREEN.g 127".split(" "))[ColorType.GREEN] == Color(
+        0, 127, 0
+    )
 
 
 def test_dict_nested():

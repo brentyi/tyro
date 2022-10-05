@@ -1,13 +1,13 @@
 [tool.poetry]
-name = "dcargs"
-version = "0.3.18"
+name = "tyro"
+version = "0.3.21"
 description = "Strongly typed, zero-effort CLI interfaces"
 authors = ["brentyi <brentyi@berkeley.edu>"]
-include = ["./dcargs/**/*"]
+include = ["./tyro/**/*"]
 readme = "README.md"
-repository = "https://github.com/brentyi/dcargs"
-homepage = "https://github.com/brentyi/dcargs"
-documentation = "https://brentyi.github.io/dcargs/"
+repository = "https://github.com/brentyi/tyro"
+homepage = "https://github.com/brentyi/tyro"
+documentation = "https://brentyi.github.io/tyro/"
 
 [tool.poetry.dependencies]
 python = "^3.7"
@@ -47,7 +47,7 @@ warn_unused_configs = true
 
 [tool.coverage.run]
 omit = [
-    "dcargs/_shtab/*",
+    "tyro/_shtab/*",
 ]
 
 [tool.coverage.report]

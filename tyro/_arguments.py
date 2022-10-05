@@ -22,8 +22,9 @@ from typing import (
 )
 
 import rich.markup
+from rich.text import Text
 
-from . import _fields, _instantiators, _resolver
+from . import _argparse_formatter, _fields, _instantiators, _resolver
 from . import _shtab as shtab
 from . import _strings
 from .conf import _markers
@@ -286,7 +287,11 @@ USE_RICH = True
 
 def _rich_tag_if_enabled(x: str, tag: str):
     x = rich.markup.escape(x)
-    return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
+    return (
+        x
+        if not USE_RICH
+        else _argparse_formatter.str_from_rich(Text.from_markup(f"[{tag}]{x}[/{tag}]"))
+    )
 
 
 def _rule_generate_helptext(
@@ -297,8 +302,7 @@ def _rule_generate_helptext(
 
     # If the suppress marker is attached, hide the argument.
     if _markers.Suppress in arg.field.markers or (
-        _markers.SuppressFixed in arg.field.markers
-        and _markers.Fixed in arg.field.markers
+        _markers.SuppressFixed in arg.field.markers and lowered.is_fixed()
     ):
         return dataclasses.replace(lowered, help=argparse.SUPPRESS)
 

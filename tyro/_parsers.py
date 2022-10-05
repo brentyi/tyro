@@ -106,6 +106,8 @@ class ParserSpecification:
                     prefix=_strings.make_field_name([prefix, field.name]),
                 )
                 if subparsers_attempt is not None:
+                    if subparsers_attempt.required:
+                        has_required_args = True
                     if (
                         not subparsers_attempt.required
                         and _markers.AvoidSubcommands in field.markers
@@ -136,6 +138,8 @@ class ParserSpecification:
                         prefix=_strings.make_field_name([prefix, field.name]),
                         subcommand_prefix=subcommand_prefix,
                     )
+                    if nested_parser.has_required_args:
+                        has_required_args = True
                     args.extend(nested_parser.args)
 
                     # Include nested subparsers.
@@ -176,7 +180,6 @@ class ParserSpecification:
         for name, subparsers in list(subparsers_from_name.items())[::-1]:
             if subparsers.required:
                 subparsers_required = True
-                has_required_args = True
             subparsers_from_name[name] = dataclasses.replace(
                 subparsers, required=subparsers_required
             )

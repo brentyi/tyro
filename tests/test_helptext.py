@@ -30,8 +30,7 @@ def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     # support ANSI sequences.
     unformatted_helptext = parser.format_help()
     assert (
-        tyro._strings.strip_ansi_sequences(unformatted_helptext)
-        == unformatted_helptext
+        tyro._strings.strip_ansi_sequences(unformatted_helptext) == unformatted_helptext
     )
     unformatted_usage = parser.format_usage()
     assert tyro._strings.strip_ansi_sequences(unformatted_usage) == unformatted_usage
@@ -609,7 +608,8 @@ def test_unparsable():
 
     helptext = _get_helptext(main2)
     assert "--x {fixed}" in helptext
-    assert "(fixed to: <class 'torch.nn" in helptext
+    assert "(fixed to:" in helptext
+    assert "torch" in helptext
 
 
 def test_suppressed():
@@ -626,13 +626,27 @@ def test_suppressed():
     assert "--x.b" not in helptext
 
 
-def test_suppress_fixed():
+def test_suppress_manual_fixed():
     @dataclasses.dataclass
     class Struct:
         a: int = 5
         b: tyro.conf.SuppressFixed[tyro.conf.Fixed[str]] = "7"
 
     def main(x: Any = Struct()):
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x.a" in helptext
+    assert "--x.b" not in helptext
+
+
+def test_suppress_auto_fixed():
+    @dataclasses.dataclass
+    class Struct:
+        a: int = 5
+        b: Callable = lambda x: 5
+
+    def main(x: tyro.conf.SuppressFixed[Any] = Struct()):
         pass
 
     helptext = _get_helptext(main)

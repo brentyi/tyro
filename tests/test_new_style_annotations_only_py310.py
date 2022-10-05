@@ -1,4 +1,3 @@
-import dataclasses
 from typing import Any, Literal
 
 import pytest

@@ -6,18 +6,18 @@ Installation is supported on Python >=3.7 via pip. This is typically all that's
 required.
 
 ```bash
-pip install dcargs
+pip install tyro
 ```
 
 ## Development
 
-If you're interested in development, the recommended way to install `dcargs` is
+If you're interested in development, the recommended way to install `tyro` is
 via [poetry](https://github.com/python-poetry/poetry).
 
 ```bash
 # Clone repository and install.
-git clone git@github.com:brentyi/dcargs.git
-cd dcargs
+git clone git@github.com:brentyi/tyro.git
+cd tyro
 poetry install
 
 # Run tests.

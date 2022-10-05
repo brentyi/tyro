@@ -50,12 +50,8 @@ def test_nested_accidental_underscores():
 
     assert (
         tyro.cli(Nested, args=["--x", "1", "--child-struct.arg-name", "three_five"])
-        == tyro.cli(
-            Nested, args=["--x", "1", "--child_struct.arg_name", "three_five"]
-        )
-        == tyro.cli(
-            Nested, args=["--x", "1", "--child_struct.arg-name", "three_five"]
-        )
+        == tyro.cli(Nested, args=["--x", "1", "--child_struct.arg_name", "three_five"])
+        == tyro.cli(Nested, args=["--x", "1", "--child_struct.arg-name", "three_five"])
         == tyro.cli(Nested, args=["--x", "1", "--child_struct.arg_name=three_five"])
         == Nested(x=1, child_struct=B(arg_name="three_five"))
     )
@@ -747,8 +743,6 @@ def test_nested_in_subparser():
 
     assert tyro.cli(Wrapper, args=[]) == Wrapper()
     assert (
-        tyro.cli(
-            Wrapper, args="supertype:type-a --supertype.subtype.data 1".split(" ")
-        )
+        tyro.cli(Wrapper, args="supertype:type-a --supertype.subtype.data 1".split(" "))
         == Wrapper()
     )
