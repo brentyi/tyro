@@ -626,13 +626,27 @@ def test_suppressed():
     assert "--x.b" not in helptext
 
 
-def test_suppress_fixed():
+def test_suppress_manual_fixed():
     @dataclasses.dataclass
     class Struct:
         a: int = 5
         b: dcargs.conf.SuppressFixed[dcargs.conf.Fixed[str]] = "7"
 
     def main(x: Any = Struct()):
+        pass
+
+    helptext = _get_helptext(main)
+    assert "--x.a" in helptext
+    assert "--x.b" not in helptext
+
+
+def test_suppress_auto_fixed():
+    @dataclasses.dataclass
+    class Struct:
+        a: int = 5
+        b: Callable = lambda x: 5
+
+    def main(x: dcargs.conf.SuppressFixed[Any] = Struct()):
         pass
 
     helptext = _get_helptext(main)
