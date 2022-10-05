@@ -1,0 +1,915 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
+
+    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
+        <title>tyro._fields - tyro</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/ansi.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-code-background: #f4f4f4;
+  --color-code-foreground: #000;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../"><div class="brand">tyro</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../../_static/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../../_static/logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">tyro</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search/" role="search">
+  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_functions/">1. Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_dataclasses/">2. Dataclasses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_enums_and_containers/">3. Enums And Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_flags/">4. Flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_hierarchical_configs/">5. Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/06_literals_and_unions/">6. Literals And Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/07_positional_args/">7. Positional Args</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/08_subcommands/">8. Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/09_multiple_subcommands/">9. Multiple Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/10_base_configs/">10. Base Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/11_dictionaries/">11. Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/12_tuples/">12. Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/13_standard_classes/">13. Standard Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/14_generics/">14. Generics</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/16_advanced_configuration/">16. Advanced Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/17_flax_modules/">17. Flax Modules</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for tyro._fields</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Abstractions for pulling out &#39;field&#39; definitions, which specify inputs, types, and</span>
+<span class="sd">defaults, from general callables.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">collections.abc</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">enum</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">FrozenSet</span><span class="p">,</span>
+    <span class="n">Hashable</span><span class="p">,</span>
+    <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Type</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">import</span> <span class="nn">docstring_parser</span>
+<span class="kn">import</span> <span class="nn">typing_extensions</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">is_typeddict</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">conf</span>  <span class="c1"># Avoid circular import.</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_instantiators</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span>
+
+
+<div class="viewcode-block" id="FieldDefinition"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">FieldDefinition</span><span class="p">:</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">Type</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span>
+
+    <span class="c1"># Override the name in our kwargs. Currently only used for dictionary types when</span>
+    <span class="c1"># the key values aren&#39;t strings, but in the future could be used whenever the</span>
+    <span class="c1"># user-facing argument name doesn&#39;t match the keyword expected by our callable.</span>
+    <span class="n">name_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+
+<div class="viewcode-block" id="FieldDefinition.make"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.make">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span>
+        <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="n">name_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">inferred_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FieldDefinition</span><span class="p">(</span>
+            <span class="n">name</span><span class="p">,</span>
+            <span class="n">typ</span><span class="p">,</span>
+            <span class="n">default</span><span class="p">,</span>
+            <span class="n">helptext</span><span class="p">,</span>
+            <span class="nb">frozenset</span><span class="p">(</span><span class="n">inferred_markers</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
+            <span class="n">name_override</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="FieldDefinition.add_markers"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.add_markers">[docs]</a>    <span class="k">def</span> <span class="nf">add_markers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">typ</span><span class="o">=</span><span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">typ</span><span class="p">,)</span> <span class="o">+</span> <span class="n">markers</span><span class="p">),</span>  <span class="c1"># type: ignore</span>
+            <span class="n">markers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">markers</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="FieldDefinition.is_positional"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional">[docs]</a>    <span class="k">def</span> <span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="c1"># Explicit positionals.</span>
+            <span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
+            <span class="c1"># Dummy dataclasses should have a single positional field.</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PropagatingMissingType"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.PropagatingMissingType">[docs]</a><span class="k">class</span> <span class="nc">PropagatingMissingType</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NonpropagatingMissingType"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.NonpropagatingMissingType">[docs]</a><span class="k">class</span> <span class="nc">NonpropagatingMissingType</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="ExcludeFromCallType"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.ExcludeFromCallType">[docs]</a><span class="k">class</span> <span class="nc">ExcludeFromCallType</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<span class="c1"># We have two types of missing sentinels: a propagating missing value, which when set as</span>
+<span class="c1"># a default will set all child values of nested structures as missing as well, and a</span>
+<span class="c1"># nonpropagating missing sentinel, which does not override child defaults.</span>
+<span class="n">MISSING_PROP</span> <span class="o">=</span> <span class="n">PropagatingMissingType</span><span class="p">()</span>
+<span class="n">MISSING_NONPROP</span> <span class="o">=</span> <span class="n">NonpropagatingMissingType</span><span class="p">()</span>
+
+<span class="c1"># When total=False in a TypedDict, we exclude fields from the constructor by default.</span>
+<span class="n">EXCLUDE_FROM_CALL</span> <span class="o">=</span> <span class="n">ExcludeFromCallType</span><span class="p">()</span>
+
+<span class="c1"># Note that our &quot;public&quot; missing API will always be the propagating missing sentinel.</span>
+<span class="n">MISSING_PUBLIC</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+<span class="sd">&quot;&quot;&quot;Sentinel value to mark fields as missing. Can be used to mark fields passed in as a</span>
+<span class="sd">`default_instance` for `tyro.cli()` as required.&quot;&quot;&quot;</span>
+
+
+<span class="n">MISSING_SINGLETONS</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
+    <span class="n">MISSING_PROP</span><span class="p">,</span>
+    <span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Undocumented feature: support omegaconf dataclasses out of the box.</span>
+    <span class="kn">import</span> <span class="nn">omegaconf</span>
+
+    <span class="n">MISSING_SINGLETONS</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">omegaconf</span><span class="o">.</span><span class="n">MISSING</span><span class="p">)</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="UnsupportedNestedTypeMessage"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.UnsupportedNestedTypeMessage">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">UnsupportedNestedTypeMessage</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Reason why a callable cannot be treated as a nested type.&quot;&quot;&quot;</span>
+
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span></div>
+
+
+<div class="viewcode-block" id="is_nested_type"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.is_nested_type">[docs]</a><span class="k">def</span> <span class="nf">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;nested type&#39;, where a single</span>
+<span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
+<span class="sd">    classes).&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">),</span>
+        <span class="n">UnsupportedNestedTypeMessage</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="field_list_from_callable"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.field_list_from_callable">[docs]</a><span class="k">def</span> <span class="nf">field_list_from_callable</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">],</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
+<span class="sd">    annotated callable.&quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="c1"># Recursively apply markers.</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">parent_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">add_markers</span><span class="p">(</span><span class="n">parent_markers</span><span class="p">),</span> <span class="n">out</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">out</span></div>
+
+
+<span class="c1"># Implementation details below.</span>
+
+
+<span class="n">_DefaultInstance</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">Any</span><span class="p">,</span> <span class="n">PropagatingMissingType</span><span class="p">,</span> <span class="n">NonpropagatingMissingType</span><span class="p">,</span> <span class="n">ExcludeFromCallType</span>
+<span class="p">]</span>
+
+<span class="n">_known_parsable_types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
+    <span class="nb">filter</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">),</span>  <span class="c1"># type: ignore</span>
+        <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span>
+            <span class="n">__builtins__</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
+            <span class="nb">vars</span><span class="p">(</span><span class="n">typing</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+            <span class="nb">vars</span><span class="p">(</span><span class="n">typing_extensions</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+            <span class="nb">vars</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>
+        <span class="p">),</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_try_field_list_from_callable</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">],</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">default_instance</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
+
+    <span class="c1"># Unwrap generics.</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="c1"># If `f` is a type:</span>
+    <span class="c1">#     1. Set cls to the type.</span>
+    <span class="c1">#     2. Consider `f` to be `cls.__init__`.</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
+        <span class="n">f_origin</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="bp">cls</span>  <span class="c1"># type: ignore</span>
+    <span class="n">f_origin</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="c1"># Try special cases.</span>
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_try_field_list_from_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_try_field_list_from_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_try_field_list_from_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="c1"># Standard container types. These are special because they can be nested structures</span>
+    <span class="c1"># if they contain other nested types (eg Tuple[Struct, Struct]), or treated as</span>
+    <span class="c1"># single arguments otherwise (eg Tuple[int, int]).</span>
+    <span class="c1">#</span>
+    <span class="c1"># Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will</span>
+    <span class="c1"># be populated if we annotated as just `tuple`.</span>
+    <span class="n">container_fields</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">f_origin</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+        <span class="n">container_fields</span> <span class="o">=</span> <span class="n">_field_list_from_tuple</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="nb">list</span><span class="p">,</span>
+        <span class="nb">set</span><span class="p">,</span>
+        <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">contained_type</span><span class="p">:</span> <span class="n">Any</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Sequence type </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> needs either an explicit type or a&quot;</span>
+                    <span class="s2">&quot; default to infer from.&quot;</span>
+                <span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span>
+            <span class="n">contained_type</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">default_instance</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">contained_type</span><span class="p">,)</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">f_origin</span> <span class="o">=</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">f_origin</span> <span class="ow">is</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span> <span class="k">else</span> <span class="n">f_origin</span>  <span class="c1"># type: ignore</span>
+
+        <span class="n">container_fields</span> <span class="o">=</span> <span class="n">_try_field_list_from_sequence</span><span class="p">(</span>
+            <span class="n">contained_type</span><span class="p">,</span> <span class="n">default_instance</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
+        <span class="nb">dict</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">container_fields</span> <span class="o">=</span> <span class="n">_try_field_list_from_dict</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="c1"># Check if one of the container types matched.</span>
+    <span class="k">if</span> <span class="n">container_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Found fields!</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">container_fields</span><span class="p">,</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">container_fields</span>
+        <span class="c1"># Got an error,</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">container_fields</span><span class="p">,</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">container_fields</span>
+
+    <span class="c1"># General cases.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">_known_parsable_types</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_known_parsable_types</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_try_field_list_from_general_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_try_field_list_from_typeddict</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">valid_default_instance</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="ow">and</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">EXCLUDE_FROM_CALL</span>
+    <span class="p">)</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">valid_default_instance</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">default_instance</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">MISSING_PROP</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__total__&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
+            <span class="k">if</span> <span class="n">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                    <span class="s2">&quot;`total=False` not supported for nested structures.&quot;</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+
+        <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">field_list</span>
+
+
+<span class="k">def</span> <span class="nf">_try_field_list_from_namedtuple</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># Handle NamedTuples.</span>
+    <span class="c1">#</span>
+    <span class="c1"># TODO: in terms of helptext, we currently do display the default NamedTuple</span>
+    <span class="c1"># helptext. But we (intentionally) don&#39;t for dataclasses; this is somewhat</span>
+    <span class="c1"># inconsistent.</span>
+    <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">field_defaults</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_field_defaults&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Note that _field_types is removed in Python 3.9.</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Get default, with priority for `default_instance`.</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="n">field_defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span><span class="p">:</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+
+        <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">field_list</span>
+
+
+<span class="k">def</span> <span class="nf">_try_field_list_from_dataclass</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># Handle dataclasses.</span>
+    <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dc_field</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">init</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)):</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="n">_get_dataclass_field_default</span><span class="p">(</span><span class="n">dc_field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">field_list</span>
+
+
+<span class="k">def</span> <span class="nf">_field_list_from_tuple</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># Fixed-length tuples.</span>
+    <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">children</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">Ellipsis</span> <span class="ow">in</span> <span class="n">children</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_try_field_list_from_sequence</span><span class="p">(</span>
+            <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="bp">Ellipsis</span><span class="p">})),</span> <span class="n">default_instance</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Infer more specific type when tuple annotation isn&#39;t subscripted. This generally</span>
+    <span class="c1"># doesn&#39;t happen</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                <span class="s2">&quot;If contained types of a tuple are not specified in the annotation, a&quot;</span>
+                <span class="s2">&quot; default instance must be specified.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+            <span class="n">children</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="c1"># EXCLUDE_FROM_CALL indicates we&#39;re inside a TypedDict, with total=False.</span>
+        <span class="ow">or</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span>
+    <span class="p">):</span>
+        <span class="n">default_instance</span> <span class="o">=</span> <span class="p">(</span><span class="n">default_instance</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">children</span><span class="p">):</span>
+        <span class="n">default_i</span> <span class="o">=</span> <span class="n">default_instance</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+        <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="c1"># Ideally we&#39;d have --tuple[0] instead of --tuple.0 as the command-line</span>
+                <span class="c1"># argument, but in practice the brackets are annoying because they</span>
+                <span class="c1"># require escaping.</span>
+                <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                <span class="c1"># This should really set the positional marker, but the CLI is more</span>
+                <span class="c1"># intuitive for mixed nested/non-nested types in tuples when we stick</span>
+                <span class="c1"># with kwargs. Tuples are special-cased in _calling.py.</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="n">contains_nested</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
+        <span class="n">contains_nested</span> <span class="o">|=</span> <span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">contains_nested</span><span class="p">:</span>
+        <span class="c1"># We could also check for variable length children, which can be populated when</span>
+        <span class="c1"># the tuple is interpreted as a nested field but not a directly parsed one.</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+            <span class="s2">&quot;Tuple does not contain any nested structures.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">field_list</span>
+
+
+<span class="k">def</span> <span class="nf">_try_field_list_from_sequence</span><span class="p">(</span>
+    <span class="n">contained_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># When no default instance is specified:</span>
+    <span class="c1">#     If we have List[int] =&gt; this can be parsed as a single field.</span>
+    <span class="c1">#     If we have List[SomeStruct] =&gt; OK.</span>
+    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_nested_type</span><span class="p">(</span>
+        <span class="n">contained_type</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Sequence containing type </span><span class="si">{</span><span class="n">contained_type</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># If we have a default instance:</span>
+    <span class="c1">#     [int, int, int] =&gt; this can be parsed as a single field.</span>
+    <span class="c1">#     [SomeStruct, int, int] =&gt; OK.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+        <span class="p">[</span><span class="ow">not</span> <span class="n">is_nested_type</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">default_instance</span><span class="p">]</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Sequence with default </span><span class="si">{</span><span class="n">default_instance</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="c1"># We use the broader error type to prevent it from being caught by</span>
+        <span class="c1"># is_possibly_nested_type(). This is for sure a bad annotation!</span>
+        <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="s2">&quot;For variable-length sequences over nested types, we need a default value&quot;</span>
+            <span class="s2">&quot; to infer length from.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">default_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">default_instance</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">contained_type</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">field_list</span>
+
+
+<span class="k">def</span> <span class="nf">_try_field_list_from_dict</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">],</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+            <span class="s2">&quot;Nested dictionary structures must have a default instance specified.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span> <span class="k">else</span> <span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">),</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="c1"># Dictionary specific key:</span>
+                <span class="n">name_override</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">field_list</span>
+
+
+<span class="k">def</span> <span class="nf">_try_field_list_from_general_callable</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">],</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># Handle general callables.</span>
+    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+            <span class="s2">&quot;`default_instance` is supported only for select types:&quot;</span>
+            <span class="s2">&quot; dataclasses, lists, NamedTuple, TypedDict, etc.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Generate field list from function signature.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Cannot extract annotations from </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">, which is not a callable type.&quot;</span>
+        <span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Ignore self parameter.</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">_field_list_from_params</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="c1"># Return error message.</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+
+<span class="k">def</span> <span class="nf">_field_list_from_params</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">],</span> <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span> <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># Get type annotations, docstrings.</span>
+    <span class="n">docstring</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">docstring_from_arg_name</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">param_doc</span> <span class="ow">in</span> <span class="n">docstring_parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span><span class="o">.</span><span class="n">params</span><span class="p">:</span>
+            <span class="n">docstring_from_arg_name</span><span class="p">[</span><span class="n">param_doc</span><span class="o">.</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_doc</span><span class="o">.</span><span class="n">description</span>
+    <span class="k">del</span> <span class="n">docstring</span>
+
+    <span class="c1"># This will throw a type error for torch.device, typing.Dict, etc.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not get hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+
+    <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+        <span class="c1"># Get default value.</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span>
+
+        <span class="c1"># Get helptext from docstring.</span>
+        <span class="n">helptext</span> <span class="o">=</span> <span class="n">docstring_from_arg_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hints</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Expected fully type-annotated callable, but </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> with arguments&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">params</span><span class="p">))</span><span class="si">}</span><span class="s2"> has no annotation for&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">param</span><span class="o">.</span><span class="n">KEYWORD_ONLY</span><span class="p">:</span>
+                <span class="c1"># If keyword only: this can&#39;t possibly be an instantiator function</span>
+                <span class="c1"># either, so we escalate to an error.</span>
+                <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">out</span>
+
+        <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="c1"># Note that param.annotation does not resolve forward references.</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">hints</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
+                <span class="n">markers</span><span class="o">=</span><span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,)</span>
+                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span>
+                <span class="k">else</span> <span class="p">(),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">field_list</span>
+
+
+<span class="k">def</span> <span class="nf">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span>
+    <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Ensure that a dataclass type used directly as a default value is marked as</span>
+<span class="sd">    frozen.&quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__dataclass_params__</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Mutable type </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> is used as a default value for `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">`. This is&quot;</span>
+            <span class="s2">&quot; dangerous! Consider using `dataclasses.field(default_factory=...)` or&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot; marking </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> as frozen.&quot;</span>
+        <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_dataclass_field_default</span><span class="p">(</span>
+    <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a field.&quot;&quot;&quot;</span>
+    <span class="c1"># If the dataclass&#39;s parent is explicitly marked MISSING, mark this field as missing</span>
+    <span class="c1"># as well.</span>
+    <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">MISSING_PROP</span>
+
+    <span class="c1"># Try grabbing default from parent instance.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="c1"># Populate default from some parent, eg `default_instance` in `tyro.cli()`.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">parent_default_instance</span><span class="si">}</span><span class="s2">, which has&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Try grabbing default from dataclass field.</span>
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
+        <span class="c1"># Note that dataclasses.is_dataclass() will also return true for dataclass</span>
+        <span class="c1"># _types_, not just instances.</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
+            <span class="n">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">default</span>
+
+    <span class="c1"># Populate default from `dataclasses.field(default_factory=...)`.</span>
+    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="c1"># Special case to ignore default_factory if we write:</span>
+        <span class="c1"># `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.</span>
+        <span class="c1">#</span>
+        <span class="c1"># In other words, treat it the same way as: `field: Dataclass`.</span>
+        <span class="c1">#</span>
+        <span class="c1"># The only time this matters is when we our dataclass has a `__post_init__`</span>
+        <span class="c1"># function that mutates the dataclass. We choose here to use the default values</span>
+        <span class="c1"># before this method is called.</span>
+        <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">()</span>
+
+    <span class="c1"># Otherwise, no default. This is different from MISSING, because MISSING propagates</span>
+    <span class="c1"># to children. We could revisit this design to make it clearer.</span>
+    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/brentyi/tyro" aria-label="GitHub">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+        </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/scripts/furo.js"></script>
+    </body>
+</html>

@@ -5,7 +5,7 @@
 ==========================================
 
 
-The :mod:`dcargs.conf` module contains utilities that can be used to configure
+The :mod:`tyro.conf` module contains utilities that can be used to configure
 command-line interfaces beyond what is expressible via static type annotations.
 
 Features here are supported, but generally unnecessary and should be used sparingly.
@@ -21,7 +21,7 @@ Features here are supported, but generally unnecessary and should be used sparin
 
         from typing_extensions import Annotated
 
-        import dcargs
+        import tyro
 
 
         @dataclasses.dataclass(frozen=True)
@@ -42,32 +42,32 @@ Features here are supported, but generally unnecessary and should be used sparin
         @dataclasses.dataclass
         class Args:
             # A boolean field with flag conversion turned off.
-            boolean: dcargs.conf.FlagConversionOff[bool] = False
+            boolean: tyro.conf.FlagConversionOff[bool] = False
 
             # A numeric field parsed as a positional argument.
-            positional: dcargs.conf.Positional[int] = 3
+            positional: tyro.conf.Positional[int] = 3
 
             # A numeric field that can't be changed via the CLI.
-            fixed: dcargs.conf.Fixed[int] = 5
+            fixed: tyro.conf.Fixed[int] = 5
 
             # A union over nested structures, but without subcommand generation. When a default
             # is provided, the type is simply fixed to that default.
-            union_without_subcommand: dcargs.conf.AvoidSubcommands[
+            union_without_subcommand: tyro.conf.AvoidSubcommands[
                 Union[CheckoutArgs, CommitArgs]
             ] = CheckoutArgs("main")
 
-            # `dcargs.conf.subcommand()` can be used to configure subcommands in a Union. Here,
+            # `tyro.conf.subcommand()` can be used to configure subcommands in a Union. Here,
             # we make the subcommand names more succinct.
             renamed_subcommand: Union[
                 Annotated[
-                    CheckoutArgs, dcargs.conf.subcommand(name="checkout", prefix_name=False)
+                    CheckoutArgs, tyro.conf.subcommand(name="checkout", prefix_name=False)
                 ],
-                Annotated[CommitArgs, dcargs.conf.subcommand(name="commit", prefix_name=False)],
+                Annotated[CommitArgs, tyro.conf.subcommand(name="commit", prefix_name=False)],
             ] = CheckoutArgs("main")
 
 
         if __name__ == "__main__":
-            print(dcargs.cli(Args))
+            print(tyro.cli(Args))
 
 ------------
 

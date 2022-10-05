@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Goals and alternatives" href="../goals_and_alternatives/" /><link rel="prev" title="Helptext generation" href="../helptext_generation/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>Tab completion - dcargs</title>
+        <title>Tab completion - tyro</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
@@ -128,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../"><div class="brand">dcargs</div></a>
+      <a href="../"><div class="brand">tyro</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -150,8 +150,12 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../">
   
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../_static/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../_static/logo-dark.svg" alt="Dark Logo"/>
+  </div>
   
-  <span class="sidebar-brand-text">dcargs</span>
+  <span class="sidebar-brand-text">tyro</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search/" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -162,6 +166,20 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../goals_and_alternatives/">Goals and alternatives</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -182,20 +200,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/15_nesting_in_containers/">15. Nesting In Containers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/16_advanced_configuration/">16. Advanced Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/17_flax_modules/">17. Flax Modules</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../helptext_generation/">Helptext generation</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../goals_and_alternatives/">Goals and alternatives</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/dcargs/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../api/dcargs/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api/dcargs/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
-</ul>
-</li>
 </ul>
 
 </div>
@@ -231,10 +235,10 @@
         <article role="main">
           <section id="tab-completion">
 <h1>Tab completion<a class="headerlink" href="#tab-completion" title="Permalink to this heading">#</a></h1>
-<p>Interfaces built with <a class="reference internal" href="../api/dcargs/#dcargs.cli" title="dcargs.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">dcargs.cli()</span></code></a> can be tab completed in interactive
+<p>Interfaces built with <a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be tab completed in interactive
 shells without any source code modification.</p>
 <p>Completion scripts can be generated by passing the
-<code class="docutils literal notranslate"><span class="pre">--dcargs-print-completion</span> <span class="pre">{bash/zsh/tcsh}</span></code> flag to a dcargs CLI. This generates
+<code class="docutils literal notranslate"><span class="pre">--tyro-print-completion</span> <span class="pre">{bash/zsh/tcsh}</span></code> flag to a tyro CLI. This generates
 a completion script via <a class="reference external" href="https://docs.iterative.ai/shtab/">shtab</a> and prints it
 to stdout. To set up tab completion, the printed script simply needs to be
 written somewhere where your shell will find it.</p>
@@ -243,14 +247,14 @@ written somewhere where your shell will find it.</p>
 <p>For zsh, one option is to emulate the pattern used for completions in
 <a class="reference external" href="https://python-poetry.org/docs">poetry</a>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up zsh autocompletion for 01_functions.py, which is located in</span>
-<span class="c1"># dcargs/examples.</span>
+<span class="c1"># tyro/examples.</span>
 
 <span class="c1"># (1) Make directory for local completions.</span>
 mkdir -p ~/.zfunc
 
 <span class="c1"># (2) Write completion script. The name here (_01_functions_py) doesn&#39;t matter,</span>
 <span class="c1"># as long as it&#39;s prefixed with an underscore.</span>
-python 01_functions.py --dcargs-print-completion zsh &gt; ~/.zfunc/_01_functions_py
+python 01_functions.py --tyro-print-completion zsh &gt; ~/.zfunc/_01_functions_py
 </pre></div>
 </div>
 <p>And if it’s not in your <code class="docutils literal notranslate"><span class="pre">.zshrc</span></code> already:</p>
@@ -275,7 +279,7 @@ loaded automatically on demand when the respective command is being completed
 </div></blockquote>
 <p>Borrowing from the <code class="docutils literal notranslate"><span class="pre">bash-completion</span></code> source<a class="footnote-reference brackets" href="#fn-bash-completion" id="id1">1</a>, we can run:</p>
 <!-- prettier-ignore-start --><!-- prettier-ignore-end --><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up bash autocompletion for 01_functions.py, which is located in</span>
-<span class="c1"># dcargs/examples.</span>
+<span class="c1"># tyro/examples.</span>
 
 <span class="c1"># (1) Find and make completion directory.</span>
 <span class="nv">completion_dir</span><span class="o">=</span><span class="si">${</span><span class="nv">BASH_COMPLETION_USER_DIR</span><span class="k">:-</span><span class="si">${</span><span class="nv">XDG_DATA_HOME</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.local/share</span><span class="si">}</span><span class="p">/bash-completion</span><span class="si">}</span>/completions/
@@ -283,7 +287,7 @@ mkdir -p <span class="nv">$completion_dir</span>
 
 <span class="c1"># (2) Write completion scripts. Note that the name of the completion script must</span>
 <span class="c1"># match the name of the file.</span>
-python 01_functions.py --dcargs-print-completion bash &gt; <span class="si">${</span><span class="nv">completion_dir</span><span class="si">}</span>/01_functions.py
+python 01_functions.py --tyro-print-completion bash &gt; <span class="si">${</span><span class="nv">completion_dir</span><span class="si">}</span>/01_functions.py
 </pre></div>
 </div>
 <p>In contrast to zsh, tab completion in bash requires that scripts are either set
@@ -340,7 +344,7 @@ with the <code class="docutils literal notranslate"><span class="pre">python</sp
           </div>
           <div class="right-details">
             <div class="icons">
-              <a class="muted-link " href="https://github.com/brentyi/dcargs" aria-label="GitHub">
+              <a class="muted-link " href="https://github.com/brentyi/tyro" aria-label="GitHub">
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
             </svg>

@@ -1,0 +1,117 @@
+:orphan:
+
+:py:mod:`tyro._argparse_formatter`
+==================================
+
+.. py:module:: tyro._argparse_formatter
+
+.. autoapi-nested-parse::
+
+   
+   Utilities and functions for helptext formatting. We replace argparse's simple help
+   messages with ones that:
+
+   ::
+
+      - Are more nicely formatted!
+      - Support multiple columns when many fields are defined.
+      - Use `rich` for formatting.
+      - Can be themed with an accent color.
+
+
+   This is largely built by fussing around in argparse implementation details, and is by
+   far the hackiest part of ``tyro``.
+
+
+Module Contents
+---------------
+
+.. py:class:: DcargsTheme
+
+   .. py:attribute:: border
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: description
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: invocation
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: metavar
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: metavar_fixed
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: helptext
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: helptext_required
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:attribute:: helptext_default
+      :annotation: :rich.style.Style
+
+      
+
+   .. py:method:: as_rich_theme(self) -> rich.theme.Theme
+
+
+
+.. py:function:: set_accent_color(accent_color: Optional[str]) -> None
+
+   
+   Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
+   see ``python -m rich.color``. Experimental.
+
+.. py:data:: THEME
+   
+
+   
+
+.. py:function:: monkeypatch_len(obj: Any) -> int
+
+
+.. py:function:: ansi_context() -> ContextManager[None]
+
+   
+   Context for working with ANSI codes + argparse:
+
+
+   * Applies a temporary monkey patch for making argparse ignore ANSI codes when
+     wrapping usage text.
+   * Enables support for Windows via colorama.
+
+.. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
+
+
+.. py:class:: DcargsArgparseHelpFormatter(prog: str)
+
+   Bases: :py:obj:`argparse.RawDescriptionHelpFormatter`
+
+   
+   Help message formatter which retains any formatting in descriptions.
+
+   Only the name of this class is considered a public API. All the methods
+   provided by the class are considered an implementation detail.
+   .. py:method:: add_argument(self, action)
+
+
+   .. py:method:: format_help(self)
+
+
+

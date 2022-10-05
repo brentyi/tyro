@@ -1,0 +1,97 @@
+:orphan:
+
+:py:mod:`tyro._instantiators`
+=============================
+
+.. py:module:: tyro._instantiators
+
+.. autoapi-nested-parse::
+
+   
+   Helper for using type annotations to recursively generate instantiator functions,
+   which map sequences of strings to the annotated type.
+
+   Some examples of type annotations and the desired instantiators:
+
+   ::
+
+          int
+
+              lambda strings: int(str[0])
+
+          List[int]
+
+              lambda strings: list(
+                  [int(x) for x in strings]
+              )
+
+          List[Color], where Color is an enum
+
+              lambda strings: list(
+                  [Color[x] for x in strings]
+              )
+
+          Tuple[int, float]
+
+              lambda strings: tuple(
+                  typ(x)
+                  for typ, x in zip(
+                      (int, float),
+                      strings,
+                  )
+              )
+
+
+Module Contents
+---------------
+
+.. py:data:: Instantiator
+   
+
+   
+
+.. py:data:: NoneType
+   
+
+   
+
+.. py:class:: InstantiatorMetadata
+
+   .. py:attribute:: nargs
+      :annotation: :Union[int, typing_extensions.Literal[+]]
+
+      
+
+   .. py:attribute:: metavar
+      :annotation: :str
+
+      
+
+   .. py:attribute:: choices
+      :annotation: :Optional[Tuple[str, Ellipsis]]
+
+      
+
+   .. py:method:: check_choices(self, strings: List[str]) -> None
+
+
+
+.. py:exception:: UnsupportedTypeAnnotationError
+
+   Bases: :py:obj:`Exception`
+
+   
+   Exception raised when an unsupported type annotation is detected.
+
+.. py:function:: instantiator_from_type(typ: Type, type_from_typevar: Dict[TypeVar, Type]) -> Tuple[Instantiator, InstantiatorMetadata]
+
+   
+   Recursive helper for parsing type annotations.
+
+   Returns two things:
+
+
+   * An instantiator function, for instantiating the type from a string or list of
+     strings. The latter applies when argparse's ``nargs`` parameter is set.
+   * A metadata structure, which specifies parameters for argparse.
+

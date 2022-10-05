@@ -1,0 +1,81 @@
+:orphan:
+
+:py:mod:`tyro.extras._serialization`
+====================================
+
+.. py:module:: tyro.extras._serialization
+
+.. autoapi-nested-parse::
+
+   
+   Type-safe, human-readable serialization helpers for dataclasses.
+
+
+Module Contents
+---------------
+
+.. py:data:: ENUM_YAML_TAG_PREFIX
+   :annotation: = !enum:
+
+   
+
+.. py:data:: DATACLASS_YAML_TAG_PREFIX
+   :annotation: = !dataclass:
+
+   
+
+.. py:data:: MISSING_YAML_TAG_PREFIX
+   :annotation: = !missing
+
+   
+
+.. py:data:: DataclassType
+   
+
+   
+
+.. py:function:: from_yaml(cls: Type[DataclassType], stream: Union[str, IO[str], bytes, IO[bytes]]) -> DataclassType
+
+   
+   Re-construct a dataclass instance from a yaml-compatible string, which should be
+   generated from ``tyro.extras.to_yaml()``.
+
+   As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
+   configuration use cases, we also introduce functions for human-readable dataclass
+   serialization: :func:`tyro.conf.from_yaml` and :func:`tyro.conf.to_yaml` attempt
+   to strike a balance between flexibility and robustness — in contrast to naively
+   dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+   references enable custom tags that are robust against code reorganization and
+   refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+   .. warning::
+       Serialization functionality is stable but deprecated. It may be removed in a
+       future version of :code:`tyro`.
+
+   :param cls: Type to reconstruct.
+   :param stream: YAML to read from.
+
+   :returns: Instantiated dataclass.
+
+.. py:function:: to_yaml(instance: Any) -> str
+
+   
+   Serialize a dataclass; returns a yaml-compatible string that can be deserialized
+   via ``tyro.extras.from_yaml()``.
+
+   As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
+   configuration use cases, we also introduce functions for human-readable dataclass
+   serialization: :func:`tyro.conf.from_yaml` and :func:`tyro.conf.to_yaml` attempt
+   to strike a balance between flexibility and robustness — in contrast to naively
+   dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
+   references enable custom tags that are robust against code reorganization and
+   refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
+
+   .. warning::
+       Serialization functionality is stable but deprecated. It may be removed in a
+       future version of :code:`tyro`.
+
+   :param instance: Dataclass instance to serialize.
+
+   :returns: YAML string.
+

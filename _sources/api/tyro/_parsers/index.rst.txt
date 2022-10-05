@@ -1,0 +1,119 @@
+:orphan:
+
+:py:mod:`tyro._parsers`
+=======================
+
+.. py:module:: tyro._parsers
+
+.. autoapi-nested-parse::
+
+   
+   Interface for generating ``argparse.ArgumentParser()`` definitions from callables.
+
+
+Module Contents
+---------------
+
+.. py:data:: T
+   
+
+   
+
+.. py:class:: ParserSpecification
+
+   
+   Each parser contains a list of arguments and optionally some subparsers.
+   .. py:attribute:: f
+      :annotation: :Callable
+
+      
+
+   .. py:attribute:: description
+      :annotation: :str
+
+      
+
+   .. py:attribute:: args
+      :annotation: :List[tyro._arguments.ArgumentDefinition]
+
+      
+
+   .. py:attribute:: helptext_from_nested_class_field_name
+      :annotation: :Dict[str, Optional[str]]
+
+      
+
+   .. py:attribute:: subparsers_from_name
+      :annotation: :Dict[str, SubparsersSpecification]
+
+      
+
+   .. py:attribute:: prefix
+      :annotation: :str
+
+      
+
+   .. py:attribute:: has_required_args
+      :annotation: :bool
+
+      
+
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type], parent_type_from_typevar: Optional[Dict[TypeVar, Type]], default_instance: Union[T, tyro._fields.PropagatingMissingType, tyro._fields.NonpropagatingMissingType], prefix: str, subcommand_prefix: str = '') -> ParserSpecification
+      :staticmethod:
+
+      
+      Create a parser definition from a callable or type.
+
+   .. py:method:: apply(self, parser: argparse.ArgumentParser) -> None
+
+      
+      Create defined arguments and subparsers.
+
+
+.. py:class:: SubparsersSpecification
+
+   
+   Structure for defining subparsers. Each subparser is a parser with a name.
+   .. py:attribute:: name
+      :annotation: :str
+
+      
+
+   .. py:attribute:: description
+      :annotation: :Optional[str]
+
+      
+
+   .. py:attribute:: parser_from_name
+      :annotation: :Dict[str, ParserSpecification]
+
+      
+
+   .. py:attribute:: prefix
+      :annotation: :str
+
+      
+
+   .. py:attribute:: required
+      :annotation: :bool
+
+      
+
+   .. py:attribute:: default_instance
+      :annotation: :Any
+
+      
+
+   .. py:attribute:: can_be_none
+      :annotation: :bool
+
+      
+
+   .. py:method:: from_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, Type], parent_classes: Set[Type], prefix: str) -> Optional[SubparsersSpecification]
+      :staticmethod:
+
+
+   .. py:method:: apply(self, parent_parser: ParserSpecification, prev_subparser_tree_nodes: List[argparse.ArgumentParser]) -> List[argparse.ArgumentParser]
+
+
+

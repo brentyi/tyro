@@ -1,11 +1,11 @@
-dcargs
+tyro
 ==========================================
 
 |build| |nbsp| |mypy| |nbsp| |lint| |nbsp| |coverage| |nbsp| |versions|
 
-:code:`dcargs` is a library for typed CLI interfaces and configuration objects.
+:code:`tyro` is a library for typed CLI interfaces and configuration objects.
 
-Our core interface, :func:`dcargs.cli()`, generates argument parsers from
+Our core interface, :func:`tyro.cli()`, generates argument parsers from
 type-annotated callables: functions, classes, dataclasses, and *nested*
 dataclasses and classes.
 
@@ -28,30 +28,30 @@ This can be used as a replacement for :code:`argparse`:
 
 .. code-block::
 
-      """Sum two numbers by calling a function with dcargs."""
+      """Sum two numbers by calling a function with tyro."""
 
-      import dcargs
+      import tyro
 
       def main(a: int, b: int = 3) -> None:
           print(a + b)
 
-      dcargs.cli(main)
+      tyro.cli(main)
 
 
 .. code-block::
 
-      """Sum two numbers by instantiating a dataclass with dcargs."""
+      """Sum two numbers by instantiating a dataclass with tyro."""
 
       from dataclasses import dataclass
 
-      import dcargs
+      import tyro
 
       @dataclass
       class Args:
           a: int
           b: int = 3
 
-      args = dcargs.cli(Args)
+      args = tyro.cli(Args)
       print(args.a + args.b)
 
 
@@ -62,7 +62,7 @@ The broader goal is also a replacement for tools like :code:`hydra`,
   values are parsed to automatically generate command-line interfaces with
   informative helptext.
 
-- **Expressive.** :func:`dcargs.cli` understands functions, classes,
+- **Expressive.** :func:`tyro.cli` understands functions, classes,
   dataclasses, and *nested* classes and dataclasses, as well as frequently used
   annotations like unions, literals, and collections, which can be composed into
   hierarchical configuration objects built on standard Python features.
@@ -91,15 +91,6 @@ The broader goal is also a replacement for tools like :code:`hydra`,
    installation
 
 .. toctree::
-   :caption: Examples
-   :maxdepth: 1
-   :hidden:
-   :titlesonly:
-   :glob:
-
-   examples/*
-
-.. toctree::
    :caption: Notes
    :maxdepth: 5
    :hidden:
@@ -109,34 +100,42 @@ The broader goal is also a replacement for tools like :code:`hydra`,
    tab_completion
    goals_and_alternatives
 
-
 .. toctree::
    :caption: API Reference
    :maxdepth: 5
    :hidden:
    :titlesonly:
 
-   api/dcargs/index
+   api/tyro/index
+
+.. toctree::
+   :caption: Examples
+   :maxdepth: 1
+   :hidden:
+   :titlesonly:
+   :glob:
+
+   examples/*
 
 
 
-.. |build| image:: https://github.com/brentyi/dcargs/workflows/build/badge.svg
+.. |build| image:: https://github.com/brentyi/tyro/workflows/build/badge.svg
    :alt: Build status icon
-   :target: https://github.com/brentyi/dcargs
-.. |mypy| image:: https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master
+   :target: https://github.com/brentyi/tyro
+.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=master
    :alt: Mypy status icon
-   :target: https://github.com/brentyi/dcargs
-.. |lint| image:: https://github.com/brentyi/dcargs/workflows/lint/badge.svg
+   :target: https://github.com/brentyi/tyro
+.. |lint| image:: https://github.com/brentyi/tyro/workflows/lint/badge.svg
    :alt: Lint status icon
-   :target: https://github.com/brentyi/dcargs
-.. |coverage| image:: https://codecov.io/gh/brentyi/dcargs/branch/master/graph/badge.svg
+   :target: https://github.com/brentyi/tyro
+.. |coverage| image:: https://codecov.io/gh/brentyi/tyro/branch/master/graph/badge.svg
    :alt: Test coverage status icon
-   :target: https://codecov.io/gh/brentyi/dcargs
-.. |downloads| image:: https://pepy.tech/badge/dcargs
+   :target: https://codecov.io/gh/brentyi/tyro
+.. |downloads| image:: https://pepy.tech/badge/tyro
    :alt: Download count icon
-   :target: https://pypi.org/project/dcargs/
-.. |versions| image:: https://img.shields.io/pypi/pyversions/dcargs
+   :target: https://pypi.org/project/tyro/
+.. |versions| image:: https://img.shields.io/pypi/pyversions/tyro
    :alt: Version icon
-   :target: https://pypi.org/project/dcargs/
+   :target: https://pypi.org/project/tyro/
 .. |nbsp| unicode:: 0xA0
    :trim:

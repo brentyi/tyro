@@ -19,7 +19,7 @@ parsing default values.
         import dataclasses
         from typing import Dict, Tuple
 
-        import dcargs
+        import tyro
 
 
         class Color:
@@ -63,7 +63,7 @@ parsing default values.
 
 
         if __name__ == "__main__":
-            args = dcargs.cli(Args)
+            args = tyro.cli(Args)
             print(args)
 
 ------------

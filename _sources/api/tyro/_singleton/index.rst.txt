@@ -1,0 +1,17 @@
+:orphan:
+
+:py:mod:`tyro._singleton`
+=========================
+
+.. py:module:: tyro._singleton
+
+
+Module Contents
+---------------
+
+.. py:class:: Singleton
+
+   .. py:method:: init(self, *args, **kwds)
+
+
+

@@ -1,0 +1,125 @@
+:orphan:
+
+:py:mod:`tyro._fields`
+======================
+
+.. py:module:: tyro._fields
+
+.. autoapi-nested-parse::
+
+   
+   Abstractions for pulling out 'field' definitions, which specify inputs, types, and
+   defaults, from general callables.
+
+
+Module Contents
+---------------
+
+.. py:class:: FieldDefinition
+
+   .. py:attribute:: name
+      :annotation: :str
+
+      
+
+   .. py:attribute:: typ
+      :annotation: :Type
+
+      
+
+   .. py:attribute:: default
+      :annotation: :Any
+
+      
+
+   .. py:attribute:: helptext
+      :annotation: :Optional[str]
+
+      
+
+   .. py:attribute:: markers
+      :annotation: :FrozenSet[tyro.conf._markers.Marker]
+
+      
+
+   .. py:attribute:: name_override
+      :annotation: :Optional[Any]
+
+      
+
+   .. py:method:: make(name: str, typ: Type, default: Any, helptext: Optional[str], *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = (), name_override: Optional[Any] = None)
+      :staticmethod:
+
+
+   .. py:method:: add_markers(self, markers: Tuple[tyro.conf._markers.Marker, Ellipsis]) -> FieldDefinition
+
+
+   .. py:method:: is_positional(self) -> bool
+
+
+
+.. py:class:: PropagatingMissingType
+
+   Bases: :py:obj:`tyro._singleton.Singleton`
+
+
+.. py:class:: NonpropagatingMissingType
+
+   Bases: :py:obj:`tyro._singleton.Singleton`
+
+
+.. py:class:: ExcludeFromCallType
+
+   Bases: :py:obj:`tyro._singleton.Singleton`
+
+
+.. py:data:: MISSING_PROP
+   
+
+   
+
+.. py:data:: MISSING_NONPROP
+   
+
+   
+
+.. py:data:: EXCLUDE_FROM_CALL
+   
+
+   
+
+.. py:data:: MISSING_PUBLIC
+   :annotation: :Any
+
+   
+   Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
+   ``default_instance`` for ``tyro.cli()`` as required.
+
+.. py:data:: MISSING_SINGLETONS
+   
+
+   
+
+.. py:class:: UnsupportedNestedTypeMessage
+
+   
+   Reason why a callable cannot be treated as a nested type.
+   .. py:attribute:: message
+      :annotation: :str
+
+      
+
+
+.. py:function:: is_nested_type(typ: Type, default_instance: _DefaultInstance) -> bool
+
+   
+   Determine whether a type should be treated as a 'nested type', where a single
+   type can be broken down into multiple fields (eg for nested dataclasses or
+   classes).
+
+.. py:function:: field_list_from_callable(f: Union[Callable, Type], default_instance: _DefaultInstance) -> List[FieldDefinition]
+
+   
+   Generate a list of generic 'field' objects corresponding to the inputs of some
+   annotated callable.
+

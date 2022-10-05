@@ -18,7 +18,7 @@ objects. This helps with modularity and grouping in larger projects.
         import enum
         import pathlib
 
-        import dcargs
+        import tyro
 
 
         class OptimizerType(enum.Enum):
@@ -72,11 +72,11 @@ objects. This helps with modularity and grouping in larger projects.
             print()
             print(f"{config=}")
             print()
-            print(dcargs.to_yaml(config))
+            print(tyro.to_yaml(config))
 
 
         if __name__ == "__main__":
-            dcargs.cli(train)
+            tyro.cli(train)
 
 ------------
 

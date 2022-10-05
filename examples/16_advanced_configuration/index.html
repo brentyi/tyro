@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="17. Flax Modules" href="../17_flax_modules/" /><link rel="prev" title="15. Nesting In Containers" href="../15_nesting_in_containers/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>16. Advanced Configuration - dcargs</title>
+        <title>16. Advanced Configuration - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -128,7 +128,7 @@
       </label>
     </div>
     <div class="header-center">
-      <a href="../../"><div class="brand">dcargs</div></a>
+      <a href="../../"><div class="brand">tyro</div></a>
     </div>
     <div class="header-right">
       <div class="theme-toggle-container theme-toggle-header">
@@ -150,8 +150,12 @@
       
       <div class="sidebar-sticky"><a class="sidebar-brand" href="../../">
   
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../_static/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../_static/logo-dark.svg" alt="Dark Logo"/>
+  </div>
   
-  <span class="sidebar-brand-text">dcargs</span>
+  <span class="sidebar-brand-text">tyro</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../search/" role="search">
   <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
@@ -162,6 +166,20 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
+</ul>
+</li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
@@ -182,20 +200,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../15_nesting_in_containers/">15. Nesting In Containers</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">16. Advanced Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../17_flax_modules/">17. Flax Modules</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
-</ul>
-<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
-<ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../api/dcargs/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../api/dcargs/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../api/dcargs/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.extras</span></code></a></li>
-</ul>
-</li>
 </ul>
 
 </div>
@@ -231,7 +235,7 @@
         <article role="main">
           <section id="advanced-configuration">
 <h1>16. Advanced Configuration<a class="headerlink" href="#advanced-configuration" title="Permalink to this heading">#</a></h1>
-<p>The <a class="reference internal" href="../../api/dcargs/conf/#module-dcargs.conf" title="dcargs.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dcargs.conf</span></code></a> module contains utilities that can be used to configure
+<p>The <a class="reference internal" href="../../api/tyro/conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> module contains utilities that can be used to configure
 command-line interfaces beyond what is expressible via static type annotations.</p>
 <p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
@@ -239,7 +243,7 @@ command-line interfaces beyond what is expressible via static type annotations.<
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">dcargs</span>
+<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span>
 <span class="linenos"> 9</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -260,32 +264,32 @@ command-line interfaces beyond what is expressible via static type annotations.<
 <span class="linenos">24</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">25</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">26</span>    <span class="c1"># A boolean field with flag conversion turned off.</span>
-<span class="linenos">27</span>    <span class="n">boolean</span><span class="p">:</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">27</span>    <span class="n">boolean</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span>    <span class="c1"># A numeric field parsed as a positional argument.</span>
-<span class="linenos">30</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">30</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span>    <span class="c1"># A numeric field that can&#39;t be changed via the CLI.</span>
-<span class="linenos">33</span>    <span class="n">fixed</span><span class="p">:</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="linenos">33</span>    <span class="n">fixed</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="linenos">34</span>
 <span class="linenos">35</span>    <span class="c1"># A union over nested structures, but without subcommand generation. When a default</span>
 <span class="linenos">36</span>    <span class="c1"># is provided, the type is simply fixed to that default.</span>
-<span class="linenos">37</span>    <span class="n">union_without_subcommand</span><span class="p">:</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">AvoidSubcommands</span><span class="p">[</span>
+<span class="linenos">37</span>    <span class="n">union_without_subcommand</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">AvoidSubcommands</span><span class="p">[</span>
 <span class="linenos">38</span>        <span class="n">Union</span><span class="p">[</span><span class="n">CheckoutArgs</span><span class="p">,</span> <span class="n">CommitArgs</span><span class="p">]</span>
 <span class="linenos">39</span>    <span class="p">]</span> <span class="o">=</span> <span class="n">CheckoutArgs</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
 <span class="linenos">40</span>
-<span class="linenos">41</span>    <span class="c1"># `dcargs.conf.subcommand()` can be used to configure subcommands in a Union. Here,</span>
+<span class="linenos">41</span>    <span class="c1"># `tyro.conf.subcommand()` can be used to configure subcommands in a Union. Here,</span>
 <span class="linenos">42</span>    <span class="c1"># we make the subcommand names more succinct.</span>
 <span class="linenos">43</span>    <span class="n">renamed_subcommand</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
 <span class="linenos">44</span>        <span class="n">Annotated</span><span class="p">[</span>
-<span class="linenos">45</span>            <span class="n">CheckoutArgs</span><span class="p">,</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;checkout&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">45</span>            <span class="n">CheckoutArgs</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;checkout&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="linenos">46</span>        <span class="p">],</span>
-<span class="linenos">47</span>        <span class="n">Annotated</span><span class="p">[</span><span class="n">CommitArgs</span><span class="p">,</span> <span class="n">dcargs</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)],</span>
+<span class="linenos">47</span>        <span class="n">Annotated</span><span class="p">[</span><span class="n">CommitArgs</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)],</span>
 <span class="linenos">48</span>    <span class="p">]</span> <span class="o">=</span> <span class="n">CheckoutArgs</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
 <span class="linenos">49</span>
 <span class="linenos">50</span>
 <span class="linenos">51</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">52</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dcargs</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">))</span>
+<span class="linenos">52</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">))</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -313,8 +317,8 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │                         (default: main)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ subcommands ──────────────────────────────────────────────────────────────╮
-│ `dcargs.conf.subcommand()` can be used to configure subcommands in a       │
-│ Union. Here, we make the subcommand names more succinct.                   │
+│ `tyro.conf.subcommand()` can be used to configure subcommands in a Union.  │
+│ Here, we make the subcommand names more succinct.                          │
 │ ────────────────────────────────────────────────────────────────────────── │
 │ {checkout,commit}                                                          │
 │     checkout            Checkout a branch.                                 │
@@ -360,7 +364,7 @@ command-line interfaces beyond what is expressible via static type annotations.<
           </div>
           <div class="right-details">
             <div class="icons">
-              <a class="muted-link " href="https://github.com/brentyi/dcargs" aria-label="GitHub">
+              <a class="muted-link " href="https://github.com/brentyi/tyro" aria-label="GitHub">
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
             </svg>

@@ -2,12 +2,12 @@
 
 ## Design goals
 
-The core functionality of `dcargs` — generating argument parsers from type
+The core functionality of `tyro` — generating argument parsers from type
 annotations — overlaps significantly with features offered by other libraries.
 Usage distinctions are the result of two API goals:
 
 - **One uninvasive function.** For all core functionality, learning to use
-  `dcargs` should reduce to learning to write (type-annotated) Python. For
+  `tyro` should reduce to learning to write (type-annotated) Python. For
   example, types are specified using standard annotations, helptext using
   docstrings, choices using the standard `typing.Literal` type, subcommands with
   `typing.Union` of nested types, and positional arguments with `/`.
@@ -37,7 +37,7 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 | [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓                 |                        |                           | ✓                    |              |          |
 | [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓                 | ✓                      | ~[^yahp_unions_nested]    | ✓                    |              |          |
 | [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓                 |                        |                           | ✓                    | ✓            |          |
-| **dcargs**                                   | ✓           | ✓         | ✓                    | ✓                      | ✓                 | ✓                      | ✓                         | ✓                    | ✓            | ✓        |
+| **tyro**                                   | ✓           | ✓         | ✓                    | ✓                      | ✓                 | ✓                      | ✓                         | ✓                    | ✓            | ✓        |
 
 <!-- prettier-ignore-start -->
 
@@ -62,7 +62,7 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [^simp_literals]: Not supported for mixed (eg `Literal[5, "five"]`) or in container (eg `List[Literal[1, 2]]`) types.
 [^datargs_literals]: Not supported for mixed types (eg `Literal[5, "five"]`).
 [^typer_containers]: `typer` uses positional arguments for all required fields, which means that only one variable-length argument (such as `List[int]`) without a default is supported per argument parser.
-[^yahp_docstrings]: Via the `hp.auto()` function, which can parse docstrings from external classes. Usage is different from the more direct parsing that `dcargs`, `tap`, and `simple-parsing`/`pyrallis` support.
+[^yahp_docstrings]: Via the `hp.auto()` function, which can parse docstrings from external classes. Usage is different from the more direct parsing that `tyro`, `tap`, and `simple-parsing`/`pyrallis` support.
 
 <!-- prettier-ignore-end -->
 
@@ -86,7 +86,7 @@ integration, which include syntax and logic for **(1)** defining configurable
 fields, **(2)** saving and choosing between a set of base configurations, and
 **(3)** overriding configurable values at the command-line.
 
-`dcargs` is meant to take advantage of modern Python features for **(1)** and
+`tyro` is meant to take advantage of modern Python features for **(1)** and
 focus completely on **(3)** in a way that's agnostic to a project's preferred
 approach for **(2)**. **(2)** is left as an exercise to the user; it tends to be
 the most open-ended and varied in terms of project and personal preferences, but

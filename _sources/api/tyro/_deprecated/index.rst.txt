@@ -1,0 +1,8 @@
+:orphan:
+
+:py:mod:`tyro._deprecated`
+==========================
+
+.. py:module:: tyro._deprecated
+
+

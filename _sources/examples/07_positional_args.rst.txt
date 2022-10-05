@@ -7,7 +7,7 @@
 
 Positional-only arguments in functions are converted to positional CLI arguments.
 
-For more general positional arguments, see :func:`dcargs.conf.Positional`.
+For more general positional arguments, see :func:`tyro.conf.Positional`.
 
 
 
@@ -22,7 +22,7 @@ For more general positional arguments, see :func:`dcargs.conf.Positional`.
         import pathlib
         from typing import Tuple
 
-        import dcargs
+        import tyro
 
 
         def main(
@@ -66,7 +66,7 @@ For more general positional arguments, see :func:`dcargs.conf.Positional`.
 
 
         if __name__ == "__main__":
-            dcargs.cli(main)
+            tyro.cli(main)
 
 ------------
 

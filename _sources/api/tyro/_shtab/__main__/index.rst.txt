@@ -1,0 +1,6 @@
+:py:mod:`tyro._shtab.__main__`
+==============================
+
+.. py:module:: tyro._shtab.__main__
+
+

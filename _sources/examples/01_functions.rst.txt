@@ -5,7 +5,7 @@
 ==========================================
 
 
-In the simplest case, ``dcargs.cli()`` can be used to run a function with arguments
+In the simplest case, ``tyro.cli()`` can be used to run a function with arguments
 populated from the CLI.
 
 
@@ -14,7 +14,7 @@ populated from the CLI.
         :linenos:
 
 
-        import dcargs
+        import tyro
 
 
         def main(
@@ -31,7 +31,7 @@ populated from the CLI.
 
 
         if __name__ == "__main__":
-            dcargs.cli(main)
+            tyro.cli(main)
 
 ------------
 
