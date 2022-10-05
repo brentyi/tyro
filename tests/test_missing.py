@@ -1,32 +1,32 @@
-"""Tests for dcargs.MISSING."""
+"""Tests for tyro.MISSING."""
 
 import dataclasses
 from typing import Tuple
 
 import pytest
 
-import dcargs
+import tyro
 
 
 def test_missing():
-    def main(a: int = 5, b: int = dcargs.MISSING, c: int = 3) -> Tuple[int, int, int]:
+    def main(a: int = 5, b: int = tyro.MISSING, c: int = 3) -> Tuple[int, int, int]:
         return a, b, c
 
     with pytest.raises(SystemExit):
-        dcargs.cli(main, args=[])
-    assert dcargs.cli(main, args=["--b", "7"]) == (5, 7, 3)
+        tyro.cli(main, args=[])
+    assert tyro.cli(main, args=["--b", "7"]) == (5, 7, 3)
 
 
 def test_missing_dataclass():
     @dataclasses.dataclass
     class Args2:
         a: int = 5
-        b: int = dcargs.MISSING
+        b: int = tyro.MISSING
         c: int = 3
 
     with pytest.raises(SystemExit):
-        dcargs.cli(Args2, args=[])
-    assert dcargs.cli(Args2, args=["--b", "7"]) == Args2(5, 7, 3)
+        tyro.cli(Args2, args=[])
+    assert tyro.cli(Args2, args=["--b", "7"]) == Args2(5, 7, 3)
 
 
 def test_missing_default():
@@ -37,15 +37,15 @@ def test_missing_default():
         c: int
 
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             Args2,
             args=[],
-            default=Args2(5, dcargs.MISSING, 3),
+            default=Args2(5, tyro.MISSING, 3),
         )
-    assert dcargs.cli(
+    assert tyro.cli(
         Args2,
         args=["--b", "7"],
-        default=Args2(5, dcargs.MISSING, 3),
+        default=Args2(5, tyro.MISSING, 3),
     ) == Args2(5, 7, 3)
 
 
@@ -61,13 +61,13 @@ def test_missing_nested_default():
         child: Child
 
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             Parent,
             args=[],
-            default=Parent(child=dcargs.MISSING),
+            default=Parent(child=tyro.MISSING),
         )
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args=["--child.a", "5", "--child.b", "7", "--child.c", "3"],
-        default=Parent(child=dcargs.MISSING),
+        default=Parent(child=tyro.MISSING),
     ) == Parent(Child(5, 7, 3))

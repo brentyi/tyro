@@ -10,7 +10,7 @@ from typing import Iterable
 
 import m2r2
 
-import dcargs
+import tyro
 
 
 @dataclasses.dataclass
@@ -137,4 +137,4 @@ def main(
 
 
 if __name__ == "__main__":
-    dcargs.cli(main, description=__doc__)
+    tyro.cli(main, description=__doc__)

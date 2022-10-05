@@ -1,4 +1,4 @@
-"""Common pattern: use `dcargs.cli()` to instantiate a dataclass. The outputted instance
+"""Common pattern: use `tyro.cli()` to instantiate a dataclass. The outputted instance
 can be used as a typed alternative for an argparse namespace.
 
 Usage:
@@ -9,7 +9,7 @@ Usage:
 
 import dataclasses
 
-import dcargs
+import tyro
 
 
 @dataclasses.dataclass
@@ -22,5 +22,5 @@ class Args:
 
 
 if __name__ == "__main__":
-    args = dcargs.cli(Args)
+    args = tyro.cli(Args)
     print(args)

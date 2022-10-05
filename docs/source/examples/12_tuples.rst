@@ -5,7 +5,7 @@
 ==========================================
 
 
-Example using ``dcargs.cli()`` to instantiate tuple types.
+Example using ``tyro.cli()`` to instantiate tuple types.
 
 
 
@@ -15,7 +15,7 @@ Example using ``dcargs.cli()`` to instantiate tuple types.
 
         from typing import NamedTuple, Tuple
 
-        import dcargs
+        import tyro
 
 
         # Named tuples are interpreted as nested structures.
@@ -37,7 +37,7 @@ Example using ``dcargs.cli()`` to instantiate tuple types.
 
 
         if __name__ == "__main__":
-            x = dcargs.cli(TupleType)
+            x = tyro.cli(TupleType)
             assert isinstance(x, tuple)
             print(x)
 

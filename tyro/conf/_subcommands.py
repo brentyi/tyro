@@ -28,19 +28,19 @@ def subcommand(
     Consider the standard approach for creating subcommands:
 
     ```python
-    dcargs.cli(
+    tyro.cli(
         Union[NestedTypeA, NestedTypeB]
     )
     ```
 
     This will create two subcommands: `nested-type-a` and `nested-type-b`.
 
-    Annotating each type with `dcargs.metadata.subcommand()` allows us to override for
+    Annotating each type with `tyro.metadata.subcommand()` allows us to override for
     each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix
     the name or not.
 
     ```python
-    dcargs.cli(
+    tyro.cli(
         Union[
             Annotated[
                 NestedTypeA, subcommand("a", ...)

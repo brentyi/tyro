@@ -5,7 +5,7 @@ import pytest
 from frozendict import frozendict  # type: ignore
 from typing_extensions import Annotated
 
-import dcargs
+import tyro
 
 
 def test_nested():
@@ -18,9 +18,9 @@ def test_nested():
         x: int
         b: B
 
-    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):
-        dcargs.cli(Nested, args=["--x", "1"])
+        tyro.cli(Nested, args=["--x", "1"])
 
 
 def test_nested_annotated():
@@ -33,9 +33,9 @@ def test_nested_annotated():
         x: int
         b: Annotated[B, "this should be ignored"]
 
-    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):
-        dcargs.cli(Nested, args=["--x", "1"])
+        tyro.cli(Nested, args=["--x", "1"])
 
 
 def test_nested_accidental_underscores():
@@ -49,18 +49,14 @@ def test_nested_accidental_underscores():
         child_struct: B
 
     assert (
-        dcargs.cli(Nested, args=["--x", "1", "--child-struct.arg-name", "three_five"])
-        == dcargs.cli(
-            Nested, args=["--x", "1", "--child_struct.arg_name", "three_five"]
-        )
-        == dcargs.cli(
-            Nested, args=["--x", "1", "--child_struct.arg-name", "three_five"]
-        )
-        == dcargs.cli(Nested, args=["--x", "1", "--child_struct.arg_name=three_five"])
+        tyro.cli(Nested, args=["--x", "1", "--child-struct.arg-name", "three_five"])
+        == tyro.cli(Nested, args=["--x", "1", "--child_struct.arg_name", "three_five"])
+        == tyro.cli(Nested, args=["--x", "1", "--child_struct.arg-name", "three_five"])
+        == tyro.cli(Nested, args=["--x", "1", "--child_struct.arg_name=three_five"])
         == Nested(x=1, child_struct=B(arg_name="three_five"))
     )
     with pytest.raises(SystemExit):
-        dcargs.cli(Nested, args=["--x", "1"])
+        tyro.cli(Nested, args=["--x", "1"])
 
 
 def test_nested_default():
@@ -73,7 +69,7 @@ def test_nested_default():
         x: int = 2
         b: B = B()
 
-    assert dcargs.cli(Nested, args=[], default=Nested(x=1, b=B(y=2))) == Nested(
+    assert tyro.cli(Nested, args=[], default=Nested(x=1, b=B(y=2))) == Nested(
         x=1, b=B(y=2)
     )
 
@@ -90,10 +86,10 @@ def test_nested_default_alternate():
 
     assert (
         Nested(x=1, b=B(y=3))
-        == dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"])
-        == dcargs.cli(Nested, args=[], default=Nested(x=1, b=B(y=3)))
+        == tyro.cli(Nested, args=["--x", "1", "--b.y", "3"])
+        == tyro.cli(Nested, args=[], default=Nested(x=1, b=B(y=3)))
     )
-    assert dcargs.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=3))
+    assert tyro.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=3))
 
 
 def test_default_nested():
@@ -106,8 +102,8 @@ def test_default_nested():
         x: int
         b: B = B(y=5)
 
-    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
-    assert dcargs.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
+    assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    assert tyro.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
 def test_double_default_nested():
@@ -124,10 +120,10 @@ def test_double_default_nested():
         x: int
         b: Parent = Parent(Child(y=5))
 
-    assert dcargs.cli(Grandparent, args=["--x", "1", "--b.c.y", "3"]) == Grandparent(
+    assert tyro.cli(Grandparent, args=["--x", "1", "--b.c.y", "3"]) == Grandparent(
         x=1, b=Parent(Child(y=3))
     )
-    assert dcargs.cli(Grandparent, args=["--x", "1"]) == Grandparent(
+    assert tyro.cli(Grandparent, args=["--x", "1"]) == Grandparent(
         x=1, b=Parent(Child(y=5))
     )
 
@@ -142,8 +138,8 @@ def test_default_factory_nested():
         x: int
         b: B = dataclasses.field(default_factory=lambda: B(y=5))
 
-    assert dcargs.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
-    assert dcargs.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
+    assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    assert tyro.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
 def test_optional_nested():
@@ -157,17 +153,17 @@ def test_optional_nested():
         x: int
         b: Optional[OptionalNestedChild] = None
 
-    assert dcargs.cli(OptionalNested, args=["--x", "1"]) == OptionalNested(x=1, b=None)
+    assert tyro.cli(OptionalNested, args=["--x", "1"]) == OptionalNested(x=1, b=None)
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             OptionalNested, args=["--x", "1", "b:optional-nested-child", "--b.y", "3"]
         )
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             OptionalNested, args=["--x", "1", "b:optional-nested-child", "--b.z", "3"]
         )
 
-    assert dcargs.cli(
+    assert tyro.cli(
         OptionalNested,
         args=["--x", "1", "b:optional-nested-child", "--b.y", "2", "--b.z", "3"],
     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
@@ -187,22 +183,22 @@ def test_subparser():
         x: int
         bc: Union[HTTPServer, SMTPServer]
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Subparser, args=["--x", "1", "bc:http-server", "--bc.y", "3"]
     ) == Subparser(x=1, bc=HTTPServer(y=3))
-    assert dcargs.cli(
+    assert tyro.cli(
         Subparser, args=["--x", "1", "bc:smtp-server", "--bc.z", "3"]
     ) == Subparser(x=1, bc=SMTPServer(z=3))
 
     with pytest.raises(SystemExit):
         # Missing subcommand.
-        dcargs.cli(Subparser, args=["--x", "1"])
+        tyro.cli(Subparser, args=["--x", "1"])
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.cli(Subparser, args=["--x", "1", "bc:http-server", "--bc.z", "3"])
+        tyro.cli(Subparser, args=["--x", "1", "bc:http-server", "--bc.z", "3"])
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.cli(Subparser, args=["--x", "1", "bc:smtp-server", "--bc.y", "3"])
+        tyro.cli(Subparser, args=["--x", "1", "bc:smtp-server", "--bc.y", "3"])
 
 
 def test_subparser_root():
@@ -219,7 +215,7 @@ def test_subparser_root():
         x: int
         bc: Union[HTTPServer, SMTPServer]
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Union[HTTPServer, SMTPServer], args=["http-server", "--y", "3"]  # type: ignore
     ) == HTTPServer(y=3)
 
@@ -241,20 +237,20 @@ def test_subparser_with_default():
         )
 
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "5"]
         )
-        == dcargs.cli(DefaultSubparser, args=["--x", "1"])
+        == tyro.cli(DefaultSubparser, args=["--x", "1"])
         == DefaultSubparser(x=1, bc=DefaultHTTPServer(y=5))
     )
-    assert dcargs.cli(
+    assert tyro.cli(
         DefaultSubparser, args=["--x", "1", "bc:default-smtp-server", "--bc.z", "3"]
     ) == DefaultSubparser(x=1, bc=DefaultSMTPServer(z=3))
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "8"]
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultSubparser,
             args=[],
             default=DefaultSubparser(x=1, bc=DefaultHTTPServer(y=8)),
@@ -263,9 +259,9 @@ def test_subparser_with_default():
     )
 
     with pytest.raises(SystemExit):
-        dcargs.cli(DefaultSubparser, args=["--x", "1", "b", "--bc.z", "3"])
+        tyro.cli(DefaultSubparser, args=["--x", "1", "b", "--bc.z", "3"])
     with pytest.raises(SystemExit):
-        dcargs.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
+        tyro.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
 def test_subparser_with_default_alternate():
@@ -283,33 +279,33 @@ def test_subparser_with_default_alternate():
         bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
 
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "5"],
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultInstanceSubparser,
             args=[],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultInstanceSubparser,
             args=["bc:default-instance-http-server"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
-    assert dcargs.cli(
+    assert tyro.cli(
         DefaultInstanceSubparser,
         args=["bc:default-instance-smtp-server", "--bc.z", "3"],
         default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5)),
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceSMTPServer(z=3))
     assert (
-        dcargs.cli(
+        tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "8"],
         )
-        == dcargs.cli(
+        == tyro.cli(
             DefaultInstanceSubparser,
             args=[],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8)),
@@ -318,9 +314,9 @@ def test_subparser_with_default_alternate():
     )
 
     with pytest.raises(SystemExit):
-        dcargs.cli(DefaultInstanceSubparser, args=["--x", "1", "b", "--bc.z", "3"])
+        tyro.cli(DefaultInstanceSubparser, args=["--x", "1", "b", "--bc.z", "3"])
     with pytest.raises(SystemExit):
-        dcargs.cli(DefaultInstanceSubparser, args=["--x", "1", "c", "--bc.y", "3"])
+        tyro.cli(DefaultInstanceSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
 def test_optional_subparser():
@@ -337,25 +333,25 @@ def test_optional_subparser():
         x: int
         bc: Optional[Union[OptionalHTTPServer, OptionalSMTPServer]]
 
-    assert dcargs.cli(
+    assert tyro.cli(
         OptionalSubparser, args=["--x", "1", "bc:optional-http-server", "--bc.y", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalHTTPServer(y=3))
-    assert dcargs.cli(
+    assert tyro.cli(
         OptionalSubparser, args=["--x", "1", "bc:optional-smtp-server", "--bc.z", "3"]
     ) == OptionalSubparser(x=1, bc=OptionalSMTPServer(z=3))
-    assert dcargs.cli(
+    assert tyro.cli(
         OptionalSubparser, args=["--x", "1", "bc:None"]
     ) == OptionalSubparser(x=1, bc=None)
 
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.cli(
+        tyro.cli(
             OptionalSubparser,
             args=["--x", "1", "bc:optional-http-server", "--bc.z", "3"],
         )
     with pytest.raises(SystemExit):
         # Wrong field.
-        dcargs.cli(
+        tyro.cli(
             OptionalSubparser,
             args=["--x", "1", "bc:optional-smtp-server", "--bc.y", "3"],
         )
@@ -383,8 +379,8 @@ def test_post_init_default():
         )
 
     assert (
-        dcargs.cli(NoDefaultPostInitArgs, args=["--inner.x", "5"]).inner
-        == dcargs.cli(DefaultFactoryPostInitArgs, args=["--inner.x", "5"]).inner
+        tyro.cli(NoDefaultPostInitArgs, args=["--inner.x", "5"]).inner
+        == tyro.cli(DefaultFactoryPostInitArgs, args=["--inner.x", "5"]).inner
         == DataclassWithDynamicDefault(x=5, y=5)
     )
 
@@ -409,27 +405,27 @@ def test_multiple_subparsers():
         c: Union[Subcommand1, Subcommand2, Subcommand3]
 
     with pytest.raises(SystemExit):
-        dcargs.cli(MultipleSubparsers, args=[])
+        tyro.cli(MultipleSubparsers, args=[])
 
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers, args="a:subcommand1 b:subcommand2 c:subcommand3".split(" ")
     ) == MultipleSubparsers(Subcommand1(), Subcommand2(), Subcommand3())
 
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args="a:subcommand1 --a.x 5 b:subcommand2 --b.y 7 c:subcommand3 --c.z 3".split(
             " "
         ),
     ) == MultipleSubparsers(Subcommand1(x=5), Subcommand2(y=7), Subcommand3(z=3))
 
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args="a:subcommand2 --a.y 5 b:subcommand1 --b.x 7 c:subcommand3 --c.z 3".split(
             " "
         ),
     ) == MultipleSubparsers(Subcommand2(y=5), Subcommand1(x=7), Subcommand3(z=3))
 
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args="a:subcommand3 --a.z 5 b:subcommand1 --b.x 7 c:subcommand3 --c.z 3".split(
             " "
@@ -452,38 +448,38 @@ def test_multiple_subparsers_with_default():
 
     @dataclasses.dataclass
     class MultipleSubparsers:
-        a: Union[Subcommand1, Subcommand2, Subcommand3] = Subcommand1(dcargs.MISSING)
+        a: Union[Subcommand1, Subcommand2, Subcommand3] = Subcommand1(tyro.MISSING)
         b: Union[Subcommand1, Subcommand2, Subcommand3] = Subcommand2(7)
         c: Union[Subcommand1, Subcommand2, Subcommand3] = Subcommand3(3)
 
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             MultipleSubparsers,
             args=[],
         )
 
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args=["a:subcommand1", "--a.x", "5"],
     ) == MultipleSubparsers(Subcommand1(x=5), Subcommand2(y=7), Subcommand3(z=3))
 
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args="a:subcommand1 --a.x 3".split(" "),
     ) == MultipleSubparsers(Subcommand1(x=3), Subcommand2(y=7), Subcommand3(z=3))
 
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             MultipleSubparsers,
             args=[],
             default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
-                Subcommand3(dcargs.MISSING),
+                Subcommand3(tyro.MISSING),
             ),
         )
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             MultipleSubparsers,
             args=[
                 "a:subcommand1",
@@ -491,45 +487,45 @@ def test_multiple_subparsers_with_default():
             default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
-                Subcommand3(dcargs.MISSING),
+                Subcommand3(tyro.MISSING),
             ),
         )
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             MultipleSubparsers,
             args=["a:subcommand1", "b:subcommand2"],
             default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
-                Subcommand3(dcargs.MISSING),
+                Subcommand3(tyro.MISSING),
             ),
         )
     with pytest.raises(SystemExit):
-        dcargs.cli(
+        tyro.cli(
             MultipleSubparsers,
             args=["a:subcommand1", "b:subcommand2", "c:subcommand3"],
             default=MultipleSubparsers(
                 Subcommand1(),
                 Subcommand2(),
-                Subcommand3(dcargs.MISSING),
+                Subcommand3(tyro.MISSING),
             ),
         )
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args=["a:subcommand1", "b:subcommand2", "c:subcommand3", "--c.z", "3"],
         default=MultipleSubparsers(
             Subcommand1(),
             Subcommand2(),
-            Subcommand3(dcargs.MISSING),
+            Subcommand3(tyro.MISSING),
         ),
     ) == MultipleSubparsers(Subcommand1(x=0), Subcommand2(y=1), Subcommand3(z=3))
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args=["a:subcommand1", "b:subcommand2", "c:subcommand2"],
         default=MultipleSubparsers(
             Subcommand1(),
             Subcommand2(),
-            Subcommand3(dcargs.MISSING),
+            Subcommand3(tyro.MISSING),
         ),
     ) == MultipleSubparsers(Subcommand1(x=0), Subcommand2(y=1), Subcommand2(y=1))
 
@@ -549,23 +545,23 @@ def test_nested_subparsers_with_default():
 
     @dataclasses.dataclass(frozen=True)
     class MultipleSubparsers:
-        a: Union[Subcommand1, Subcommand2] = Subcommand2(Subcommand1(dcargs.MISSING))
+        a: Union[Subcommand1, Subcommand2] = Subcommand2(Subcommand1(tyro.MISSING))
 
     with pytest.raises(SystemExit):
-        dcargs.cli(MultipleSubparsers, args=[])
+        tyro.cli(MultipleSubparsers, args=[])
     with pytest.raises(SystemExit):
-        dcargs.cli(MultipleSubparsers, args=["a:subcommand2"])
+        tyro.cli(MultipleSubparsers, args=["a:subcommand2"])
 
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers, args="a:subcommand1 --a.x 3".split(" ")
     ) == MultipleSubparsers(Subcommand1(3))
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers, args="a:subcommand2 a.y:subcommand3 --a.y.z 2".split(" ")
     ) == MultipleSubparsers(Subcommand2(Subcommand3()))
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers, args="a:subcommand2 a.y:subcommand3 --a.y.z 7".split(" ")
     ) == MultipleSubparsers(Subcommand2(Subcommand3(7)))
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers, args="a:subcommand2 a.y:subcommand1 --a.y.x 7".split(" ")
     ) == MultipleSubparsers(Subcommand2(Subcommand1(7)))
 
@@ -589,19 +585,19 @@ def test_nested_subparsers_multiple():
         b: Union[Subcommand1, Subcommand2]
 
     with pytest.raises(SystemExit):
-        dcargs.cli(MultipleSubparsers, args=[])
-    assert dcargs.cli(
+        tyro.cli(MultipleSubparsers, args=[])
+    assert tyro.cli(
         MultipleSubparsers, args="a:subcommand1 b:subcommand1".split(" ")
     ) == MultipleSubparsers(Subcommand1(), Subcommand1())
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args="a:subcommand1 b:subcommand2 b.y:subcommand1".split(" "),
     ) == MultipleSubparsers(Subcommand1(), Subcommand2(Subcommand1()))
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args="a:subcommand2 a.y:subcommand1 b:subcommand2 b.y:subcommand1".split(" "),
     ) == MultipleSubparsers(Subcommand2(Subcommand1()), Subcommand2(Subcommand1()))
-    assert dcargs.cli(
+    assert tyro.cli(
         MultipleSubparsers,
         args=(
             "a:subcommand2 a.y:subcommand1 --a.y.x 3 b:subcommand2 b.y:subcommand1"
@@ -626,7 +622,7 @@ def test_tuple_nesting():
     def main(x: Tuple[Tuple[Color], Location, float]):
         return x
 
-    assert dcargs.cli(
+    assert tyro.cli(
         main,
         args=(
             "--x.0.0.r 255 --x.0.0.g 0 --x.0.0.b 0 --x.1.x 5.0 --x.1.y 0.0"
@@ -645,14 +641,14 @@ def test_generic_subparsers():
     def main(x: Union[A[int], A[float]]) -> Any:
         return x
 
-    assert dcargs.cli(main, args="x:a-float --x.x 3.2".split(" ")) == A(3.2)
-    assert dcargs.cli(main, args="x:a-int --x.x 3".split(" ")) == A(3)
+    assert tyro.cli(main, args="x:a-float --x.x 3.2".split(" ")) == A(3.2)
+    assert tyro.cli(main, args="x:a-int --x.x 3".split(" ")) == A(3)
 
     def main_with_default(x: Union[A[int], A[float]] = A(5)) -> Any:
         return x
 
-    with pytest.raises(dcargs.UnsupportedTypeAnnotationError):
-        dcargs.cli(main_with_default, args=[])
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main_with_default, args=[])
 
 
 def test_generic_inherited():
@@ -675,7 +671,7 @@ def test_generic_inherited():
     class ChildClass(UnrelatedParentClass, ActualParentClass[int]):
         pass
 
-    assert dcargs.cli(
+    assert tyro.cli(
         ChildClass, args=["--x", "1", "--y", "2", "--z", "3"]
     ) == ChildClass(x=1, y=2, z=3)
 
@@ -701,11 +697,11 @@ def test_subparser_in_nested():
     class Parent:
         nested1: Nested1
 
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:a --nested1.nested2.subcommand.a 3".split(" "),
     ) == Parent(Nested1(Nested2(A(3))))
-    assert dcargs.cli(
+    assert tyro.cli(
         Parent,
         args="nested1.nested2.subcommand:b --nested1.nested2.subcommand.b 7".split(" "),
     ) == Parent(Nested1(Nested2(B(7))))
@@ -722,13 +718,13 @@ def test_frozen_dict():
     ):
         return x
 
-    assert hash(dcargs.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
+    assert hash(tyro.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
         frozendict({"num_epochs": 10, "batch_size": 64})
     )
 
 
 def test_nested_in_subparser():
-    # https://github.com/brentyi/dcargs/issues/9
+    # https://github.com/brentyi/tyro/issues/9
     @dataclasses.dataclass(frozen=True)
     class Subtype:
         data: int = 1
@@ -745,10 +741,8 @@ def test_nested_in_subparser():
     class Wrapper:
         supertype: Union[TypeA, TypeB] = TypeA()
 
-    assert dcargs.cli(Wrapper, args=[]) == Wrapper()
+    assert tyro.cli(Wrapper, args=[]) == Wrapper()
     assert (
-        dcargs.cli(
-            Wrapper, args="supertype:type-a --supertype.subtype.data 1".split(" ")
-        )
+        tyro.cli(Wrapper, args="supertype:type-a --supertype.subtype.data 1".split(" "))
         == Wrapper()
     )

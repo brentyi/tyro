@@ -8,13 +8,13 @@ import pytest
 import yaml
 from typing_extensions import Annotated
 
-import dcargs
+import tyro
 
 T = TypeVar("T")
 
 
 def _check_serialization_identity(cls: Type[T], instance: T) -> None:
-    assert dcargs.extras.from_yaml(cls, dcargs.extras.to_yaml(instance)) == instance
+    assert tyro.extras.from_yaml(cls, tyro.extras.to_yaml(instance)) == instance
 
 
 ScalarType = TypeVar("ScalarType")
@@ -25,7 +25,7 @@ def test_tuple_generic_variable():
     class TupleGenericVariable(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ...]
 
-    assert dcargs.cli(
+    assert tyro.cli(
         TupleGenericVariable[int], args=["--xyz", "1", "2", "3"]
     ) == TupleGenericVariable((1, 2, 3))
 
@@ -40,7 +40,7 @@ def test_tuple_generic_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.cli(TupleGenericVariableHelptext[int], args=["--help"])
+            tyro.cli(TupleGenericVariableHelptext[int], args=["--help"])
     helptext = f.getvalue()
     assert "Helptext!" in helptext
 
@@ -53,7 +53,7 @@ def test_tuple_generic_no_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.cli(TupleGenericVariableNoHelptext[int], args=["--help"])
+            tyro.cli(TupleGenericVariableNoHelptext[int], args=["--help"])
     helptext = f.getvalue()
     assert "Helptext!" not in helptext
 
@@ -66,7 +66,7 @@ def test_tuple_generic_fixed():
     class TupleGenericFixed(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ScalarType, ScalarType]
 
-    assert dcargs.cli(
+    assert tyro.cli(
         TupleGenericFixed[int], args=["--xyz", "1", "2", "3"]
     ) == TupleGenericFixed((1, 2, 3))
 
@@ -90,7 +90,7 @@ def test_simple_generic():
         point_continuous: Point3[float]
         point_discrete: Point3[int]
 
-    parsed_instance = dcargs.cli(
+    parsed_instance = tyro.cli(
         SimpleGeneric,
         args=[
             "--point-continuous.x",
@@ -119,7 +119,7 @@ def test_simple_generic():
 
     with pytest.raises(SystemExit):
         # Accidentally pass in floats instead of ints for discrete
-        dcargs.cli(
+        tyro.cli(
             SimpleGeneric,
             args=[
                 "--point-continuous.x",
@@ -149,7 +149,7 @@ def test_multilevel_generic():
         b: Point3[ScalarType]
         c: Point3[ScalarType]
 
-    parsed_instance = dcargs.cli(
+    parsed_instance = tyro.cli(
         Triangle[float],
         args=[
             "--a.x",
@@ -195,7 +195,7 @@ def test_multilevel_generic_no_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.cli(LineSegment[int], args=["--help"])
+            tyro.cli(LineSegment[int], args=["--help"])
     helptext = f.getvalue()
 
     # Check that we don't accidentally grab docstrings from the generic alias!
@@ -214,7 +214,7 @@ def test_generic_nested_dataclass():
     class DataclassGeneric(Generic[T]):
         child: T
 
-    parsed_instance = dcargs.cli(
+    parsed_instance = tyro.cli(
         DataclassGeneric[Child], args=["--child.a", "5", "--child.b", "7"]
     )
     assert parsed_instance == DataclassGeneric(Child(5, 7))
@@ -239,7 +239,7 @@ def test_generic_nested_dataclass_helptext():
     f = io.StringIO()
     with pytest.raises(SystemExit):
         with contextlib.redirect_stdout(f):
-            dcargs.cli(DataclassGeneric[Child], args=["--help"])
+            tyro.cli(DataclassGeneric[Child], args=["--help"])
     helptext = f.getvalue()
 
     # Check that we don't accidentally grab docstrings from the generic alias!
@@ -262,7 +262,7 @@ def test_generic_subparsers():
     class Subparser(Generic[T1, T2]):
         command: Union[T1, T2]
 
-    parsed_instance = dcargs.cli(
+    parsed_instance = tyro.cli(
         Subparser[CommandOne, CommandTwo],
         args="command:command-one --command.a 5".split(" "),
     )
@@ -273,7 +273,7 @@ def test_generic_subparsers():
             Subparser[CommandOne, CommandTwo], parsed_instance
         )
 
-    parsed_instance = dcargs.cli(
+    parsed_instance = tyro.cli(
         Subparser[CommandOne, CommandTwo],
         args="command:command-two --command.b 7".split(" "),
     )
@@ -299,7 +299,7 @@ def test_generic_subparsers_in_container():
     class Subparser(Generic[T1, T2]):
         command: Union[T1, T2]
 
-    parsed_instance = dcargs.cli(
+    parsed_instance = tyro.cli(
         Subparser[Command[int], Command[float]],
         args="command:command-int --command.a 5 3".split(" "),
     )
@@ -312,7 +312,7 @@ def test_generic_subparsers_in_container():
             Subparser[Command[int], Command[float]], parsed_instance
         )
 
-    parsed_instance = dcargs.cli(
+    parsed_instance = tyro.cli(
         Subparser[Command[int], Command[float]],
         args="command:command-float --command.a 7 2".split(" "),
     )
@@ -331,14 +331,14 @@ def test_serialize_missing():
     class TupleGenericVariableMissing(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ...]
 
-    x = TupleGenericVariableMissing[int](xyz=(dcargs.MISSING, dcargs.MISSING))
-    assert dcargs.extras.to_yaml(x).count("!missing") == 2
+    x = TupleGenericVariableMissing[int](xyz=(tyro.MISSING, tyro.MISSING))
+    assert tyro.extras.to_yaml(x).count("!missing") == 2
     _check_serialization_identity(TupleGenericVariableMissing[int], x)
     assert (
-        dcargs.extras.from_yaml(
-            TupleGenericVariableMissing[int], dcargs.extras.to_yaml(x)
+        tyro.extras.from_yaml(
+            TupleGenericVariableMissing[int], tyro.extras.to_yaml(x)
         ).xyz[0]
-        is dcargs.MISSING
+        is tyro.MISSING
     )
 
 
@@ -362,11 +362,11 @@ def test_generic_inherited_type_narrowing():
     def main(x: ActualParentClass[int] = ChildClass(5, 5)) -> ActualParentClass:
         return x
 
-    assert dcargs.cli(main, args="--x.x 3".split(" ")) == ChildClass(3, 5, 3)
+    assert tyro.cli(main, args="--x.x 3".split(" ")) == ChildClass(3, 5, 3)
 
 
 def test_pculbertson():
-    # https://github.com/brentyi/dcargs/issues/7
+    # https://github.com/brentyi/tyro/issues/7
     from typing import Union
 
     @dataclasses.dataclass
@@ -382,11 +382,11 @@ def test_pculbertson():
         subclass: Union[TypeA, TypeB] = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
-    assert wrapper1 == dcargs.extras.from_yaml(Wrapper, dcargs.extras.to_yaml(wrapper1))
+    assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
 
 
 def test_annotated():
-    # https://github.com/brentyi/dcargs/issues/7
+    # https://github.com/brentyi/tyro/issues/7
 
     @dataclasses.dataclass
     class TypeA:
@@ -397,11 +397,11 @@ def test_annotated():
         subclass: Annotated[TypeA, int] = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
-    assert wrapper1 == dcargs.extras.from_yaml(Wrapper, dcargs.extras.to_yaml(wrapper1))
+    assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
 
 
 def test_superclass():
-    # https://github.com/brentyi/dcargs/issues/7
+    # https://github.com/brentyi/tyro/issues/7
 
     @dataclasses.dataclass
     class TypeA:
@@ -416,4 +416,4 @@ def test_superclass():
         subclass: TypeA
 
     wrapper1 = Wrapper(TypeASubclass(3))  # Create Wrapper object.
-    assert wrapper1 == dcargs.extras.from_yaml(Wrapper, dcargs.extras.to_yaml(wrapper1))
+    assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))

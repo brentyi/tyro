@@ -6,7 +6,7 @@
 
 
 If you use `Flax <https://github.com/google/flax>`_\ , modules can be instantiated
-directly from ``dcargs.cli``.
+directly from ``tyro.cli``.
 
 
 
@@ -17,7 +17,7 @@ directly from ``dcargs.cli``.
         from flax import linen as nn
         from jax import numpy as jnp
 
-        import dcargs
+        import tyro
 
 
         class Classifier(nn.Module):
@@ -57,7 +57,7 @@ directly from ``dcargs.cli``.
 
 
         if __name__ == "__main__":
-            dcargs.cli(train)
+            tyro.cli(train)
 
 ------------
 

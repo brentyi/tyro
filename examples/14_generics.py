@@ -7,7 +7,7 @@ Usage:
 import dataclasses
 from typing import Generic, TypeVar
 
-import dcargs
+import tyro
 
 ScalarType = TypeVar("ScalarType", int, float)
 ShapeType = TypeVar("ShapeType")
@@ -34,5 +34,5 @@ class Args(Generic[ShapeType]):
 
 
 if __name__ == "__main__":
-    args = dcargs.cli(Args[Triangle])
+    args = tyro.cli(Args[Triangle])
     print(args)

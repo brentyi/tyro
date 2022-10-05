@@ -11,7 +11,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Literal, Tuple, Union
 
-import dcargs
+import tyro
 
 # Possible dataset configurations.
 
@@ -63,4 +63,4 @@ def train(
 
 
 if __name__ == "__main__":
-    dcargs.cli(train)
+    tyro.cli(train)

@@ -18,7 +18,7 @@ Multiple unions over nested types are populated using a series of subcommands.
         import dataclasses
         from typing import Literal, Tuple, Union
 
-        import dcargs
+        import tyro
 
         # Possible dataset configurations.
 
@@ -70,7 +70,7 @@ Multiple unions over nested types are populated using a series of subcommands.
 
 
         if __name__ == "__main__":
-            dcargs.cli(train)
+            tyro.cli(train)
 
 ------------
 

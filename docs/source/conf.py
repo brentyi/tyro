@@ -19,7 +19,7 @@ import m2r2
 
 # -- Project information -----------------------------------------------------
 
-project = "dcargs"
+project = "tyro"
 copyright = "2022"
 author = "brentyi"
 
@@ -57,6 +57,7 @@ extensions = [
 ]
 programoutput_use_ansi = True
 html_ansi_stylesheet = "black-on-white.css"
+html_static_path = ["_static"]
 html_theme_options = {
     "light_css_variables": {
         "color-code-background": "#f4f4f4",
@@ -65,7 +66,7 @@ html_theme_options = {
     "footer_icons": [
         {
             "name": "GitHub",
-            "url": "https://github.com/brentyi/dcargs",
+            "url": "https://github.com/brentyi/tyro",
             "html": """
             <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
@@ -74,6 +75,8 @@ html_theme_options = {
             "class": "",
         },
     ],
+    "light_logo": "logo-light.svg",
+    "dark_logo": "logo-dark.svg",
 }
 
 # Pull documentation types from hints
@@ -113,7 +116,7 @@ pygments_style = "monokai"
 # a list of builtin themes.
 #
 html_theme = "furo"
-html_title = "dcargs"
+html_title = "tyro"
 
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -141,7 +144,7 @@ html_static_path = ["_static"]
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = "dcargs_doc"
+htmlhelp_basename = "tyro_doc"
 
 
 # -- Options for Github output ------------------------------------------------
@@ -174,8 +177,8 @@ latex_elements: Dict[str, str] = {
 latex_documents = [
     (
         master_doc,
-        "dcargs.tex",
-        "dcargs",
+        "tyro.tex",
+        "tyro",
         "brentyi",
         "manual",
     ),
@@ -186,7 +189,7 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [(master_doc, "dcargs", "dcargs documentation", [author], 1)]
+man_pages = [(master_doc, "tyro", "tyro documentation", [author], 1)]
 
 
 # -- Options for Texinfo output ----------------------------------------------
@@ -197,11 +200,11 @@ man_pages = [(master_doc, "dcargs", "dcargs documentation", [author], 1)]
 texinfo_documents = [
     (
         master_doc,
-        "dcargs",
-        "dcargs",
+        "tyro",
+        "tyro",
         author,
-        "dcargs",
-        "dcargs",
+        "tyro",
+        "tyro",
         "Miscellaneous",
     ),
 ]
@@ -210,7 +213,7 @@ texinfo_documents = [
 # -- Extension configuration --------------------------------------------------
 
 # -- Options for autoapi extension --------------------------------------------
-autoapi_dirs = ["../../dcargs"]
+autoapi_dirs = ["../../tyro"]
 autoapi_root = "api"
 autoapi_options = [
     "members",
@@ -231,7 +234,7 @@ autoapi_add_toctree_entry = False
 #     name_alias = {}
 #
 #     def recurse(module, prefixes):
-#         if hasattr(module, "__name__") and module.__name__.startswith("dcargs"):
+#         if hasattr(module, "__name__") and module.__name__.startswith("tyro"):
 #             MAX_DEPTH = 5
 #             if len(prefixes) > MAX_DEPTH:
 #                 # Prevent infinite loops from cyclic imports
@@ -240,15 +243,15 @@ autoapi_add_toctree_entry = False
 #             return
 #
 #         for member_name in dir(module):
-#             if member_name == "dcargs":
+#             if member_name == "tyro":
 #                 continue
 #
 #             member = getattr(module, member_name)
 #             if callable(member):
-#                 full_name = ".".join(["dcargs"] + prefixes + [member_name])
+#                 full_name = ".".join(["tyro"] + prefixes + [member_name])
 #
-#                 shortened_name = "dcargs"
-#                 current = dcargs
+#                 shortened_name = "tyro"
+#                 current = tyro
 #                 success = True
 #                 for p in prefixes + [member_name]:
 #                     if p.startswith("_"):
@@ -267,9 +270,9 @@ autoapi_add_toctree_entry = False
 #             elif not member_name.startswith("__"):
 #                 recurse(member, prefixes + [member_name])
 #
-#     import dcargs
+#     import tyro
 #
-#     recurse(dcargs, prefixes=[])
+#     recurse(tyro, prefixes=[])
 #     return name_alias
 #
 #

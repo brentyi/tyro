@@ -19,12 +19,12 @@ Positional = Annotated[T, None]
 argument."""
 
 Fixed = Annotated[T, None]
-"""A type `T` can be annotated as `Fixed[T]` to prevent `dcargs.cli` from parsing it; a
+"""A type `T` can be annotated as `Fixed[T]` to prevent `tyro.cli` from parsing it; a
 default value should be set instead. Note that fields with defaults that can't be parsed
 will also be marked as fixed automatically."""
 
 Suppress = Annotated[T, None]
-"""A type `T` can be annotated as `Suppress[T]` to prevent `dcargs.cli` from parsing it, and
+"""A type `T` can be annotated as `Suppress[T]` to prevent `tyro.cli` from parsing it, and
 to prevent it from showing up in helptext."""
 
 SuppressFixed = Annotated[T, None]

@@ -12,50 +12,49 @@ import pytest
 import torch.nn as nn
 from typing_extensions import Annotated, Literal
 
-import dcargs
-import dcargs._arguments
-import dcargs._strings
+import tyro
+import tyro._arguments
+import tyro._strings
 
 
 def _get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        dcargs.cli(f, args=args)
+        tyro.cli(f, args=args)
 
-    # Check dcargs.extras.get_parser().
-    parser = dcargs.extras.get_parser(f)
+    # Check tyro.extras.get_parser().
+    parser = tyro.extras.get_parser(f)
     assert isinstance(parser, argparse.ArgumentParser)
 
     # Returned parser should have formatting information stripped. External tools rarely
     # support ANSI sequences.
     unformatted_helptext = parser.format_help()
     assert (
-        dcargs._strings.strip_ansi_sequences(unformatted_helptext)
-        == unformatted_helptext
+        tyro._strings.strip_ansi_sequences(unformatted_helptext) == unformatted_helptext
     )
     unformatted_usage = parser.format_usage()
-    assert dcargs._strings.strip_ansi_sequences(unformatted_usage) == unformatted_usage
+    assert tyro._strings.strip_ansi_sequences(unformatted_usage) == unformatted_usage
 
     # Completion scripts; just smoke test for now.
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
-        dcargs.cli(f, args=["--dcargs-print-completion", "bash"])
+        tyro.cli(f, args=["--tyro-print-completion", "bash"])
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
-        dcargs.cli(f, args=["--dcargs-print-completion", "zsh"])
+        tyro.cli(f, args=["--tyro-print-completion", "zsh"])
 
     # Check helptext with vs without formatting. This can help catch text wrapping bugs
     # caused by ANSI sequences.
     target2 = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
-        dcargs._arguments.USE_RICH = False
-        dcargs.cli(f, args=args)
-        dcargs._arguments.USE_RICH = True
+        tyro._arguments.USE_RICH = False
+        tyro.cli(f, args=args)
+        tyro._arguments.USE_RICH = True
 
-    if target2.getvalue() != dcargs._strings.strip_ansi_sequences(target.getvalue()):
+    if target2.getvalue() != tyro._strings.strip_ansi_sequences(target.getvalue()):
         raise AssertionError(
             "Potential wrapping bug! These two strings should match:\n"
             + target2.getvalue()
             + "\n\n"
-            + dcargs._strings.strip_ansi_sequences(target.getvalue())
+            + tyro._strings.strip_ansi_sequences(target.getvalue())
         )
 
     return target2.getvalue()
@@ -617,7 +616,7 @@ def test_suppressed():
     @dataclasses.dataclass
     class Struct:
         a: int = 5
-        b: dcargs.conf.Suppress[str] = "7"
+        b: tyro.conf.Suppress[str] = "7"
 
     def main(x: Any = Struct()):
         pass
@@ -631,7 +630,7 @@ def test_suppress_manual_fixed():
     @dataclasses.dataclass
     class Struct:
         a: int = 5
-        b: dcargs.conf.SuppressFixed[dcargs.conf.Fixed[str]] = "7"
+        b: tyro.conf.SuppressFixed[tyro.conf.Fixed[str]] = "7"
 
     def main(x: Any = Struct()):
         pass
@@ -647,7 +646,7 @@ def test_suppress_auto_fixed():
         a: int = 5
         b: Callable = lambda x: 5
 
-    def main(x: dcargs.conf.SuppressFixed[Any] = Struct()):
+    def main(x: tyro.conf.SuppressFixed[Any] = Struct()):
         pass
 
     helptext = _get_helptext(main)

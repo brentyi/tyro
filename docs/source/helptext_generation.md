@@ -1,6 +1,6 @@
 # Helptext generation
 
-In addition to type annotations, :func:`dcargs.cli()` will also parse docstrings
+In addition to type annotations, :func:`tyro.cli()` will also parse docstrings
 and comments. These are used to automatically generate helptext; see examples
 for how these end up being formatted.
 
@@ -30,7 +30,7 @@ def main(
 For types defined using class attributes, enumerating each argument list in the
 class docstring can be cumbersome.
 
-If they are unavailable, :func:`dcargs.cli` will generate helptext from
+If they are unavailable, :func:`tyro.cli` will generate helptext from
 docstrings and comments on attributes. These are parsed via source code
 inspection.
 
