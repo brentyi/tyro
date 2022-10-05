@@ -32,9 +32,7 @@ Python callables and types into fully-featured argument parsers and
 configuration objects.
 
 To get started, we recommend visiting the examples in our
-[documentation](https://brentyi.github.io/tyro). If you're familiar with
-alternative libraries, we also include comparisons between [tyro and argparse]()
-and [tyro and hydra]().
+[documentation](https://brentyi.github.io/tyro).
 
 ### Why `tyro`?
 
