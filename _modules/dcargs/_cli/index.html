@@ -436,16 +436,6 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
-    <span class="n">parser_definition</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-        <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
-        <span class="n">parent_type_from_typevar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
-        <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-    <span class="p">)</span>
-
     <span class="c1"># Read and fix arguments. If the user passes in --field_name instead of</span>
     <span class="c1"># --field-name, correct for them.</span>
     <span class="n">args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">args</span>
@@ -468,6 +458,9 @@
     <span class="c1"># goal, but manual parsing of argv is convenient for turning off formatting.</span>
     <span class="n">print_completion</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--dcargs-print-completion&quot;</span>
 
+    <span class="c1"># Note: setting USE_RICH must happen before the parser specification is generated.</span>
+    <span class="c1"># TODO: revisit this. Ideally we should be able to eliminate the global state</span>
+    <span class="c1"># changes.</span>
     <span class="n">completion_shell</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">print_completion</span><span class="p">:</span>
         <span class="n">completion_shell</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -475,6 +468,16 @@
         <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
+    <span class="n">parser_definition</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+        <span class="n">f</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+        <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
+        <span class="n">parent_type_from_typevar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
+        <span class="n">prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+    <span class="p">)</span>
 
     <span class="c1"># Generate parser!</span>
     <span class="k">with</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ansi_context</span><span class="p">():</span>
