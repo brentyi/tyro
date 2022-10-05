@@ -8,9 +8,7 @@
     <em><code>pip install tyro</code></em>
 </p>
 
----
-
-<p align="">
+<p align="center">
     <img alt="build" src="https://github.com/brentyi/dcargs/workflows/build/badge.svg" />
     <img alt="mypy" src="https://github.com/brentyi/dcargs/workflows/mypy/badge.svg?branch=master" />
     <img alt="lint" src="https://github.com/brentyi/dcargs/workflows/lint/badge.svg" />
@@ -21,6 +19,8 @@
         <img alt="codecov" src="https://img.shields.io/pypi/pyversions/dcargs" />
     </a>
 </p>
+
+<br />
 
 <strong><code>tyro</code></strong> is a library for building CLI interfaces and
 configuration objects with modern, type-annotated Python.
@@ -34,7 +34,6 @@ To get started, we recommend visiting the examples in our
 alternative libraries, we also include comparisons between [tyro and argparse]()
 and [tyro and hydra]().
 
----
 
 ### Why `tyro`?
 
@@ -74,7 +73,6 @@ and [tyro and hydra]().
    By extending [shtab](https://github.com/iterative/shtab), `tyro`
    automatically generates tab completion scripts for bash, zsh, and tcsh!
 
----
 
 ### A minimal example
 
