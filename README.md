@@ -1,7 +1,10 @@
 <p align="center">
     <!-- Note that image URLs should all be absolute; this README will be used for both GitHub and PyPI. -->
-    <img src="https://brentyi.github.io/tyro/_static/logo-light.svg" alt="tyro logo" width="150" />
-</p>
+    <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://brentyi.github.io/tyro/_static/logo-dark.svg">
+    <img alt="tyro logo" src="https://brentyi.github.io/tyro/_static/logo-light.svg" width="350px">
+</picture>
+
 
 <p align="center">
     <em><a href="https://brentyi.github.io/tyro">Documentation</a></em>
