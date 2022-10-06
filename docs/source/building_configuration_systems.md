@@ -16,4 +16,4 @@ a default -- this might be a YAML file or config instance -- an environment
 variable or manually parsed (via `sys.argv`) positional argument can be used.
 
 For exposing each of these base configurations as subcommands, see our
-[base config example](./examples/10_base_configs).
+[base config example](/examples/10_base_configs).
