@@ -317,9 +317,9 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             if action.help is not None:
                 assert isinstance(action.help, str)
                 helptext = (
-                    Text.from_ansi(action.help)
+                    Text.from_ansi(action.help.replace("%%", "%"))
                     if _strings.strip_ansi_sequences(action.help) != action.help
-                    else Text.from_markup(action.help)
+                    else Text.from_markup(action.help.replace("%%", "%"))
                 )
             else:
                 helptext = Text("")
