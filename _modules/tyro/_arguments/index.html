@@ -522,13 +522,10 @@
 <span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
 
 
+<span class="c1"># TODO: this function is also called outside of _arguments.py. Should be revisited.</span>
 <span class="k">def</span> <span class="nf">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="n">rich</span><span class="o">.</span><span class="n">markup</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span>
-        <span class="n">x</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">USE_RICH</span>
-        <span class="k">else</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">str_from_rich</span><span class="p">(</span><span class="n">Text</span><span class="o">.</span><span class="n">from_markup</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">[/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">))</span>
-    <span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">rich</span><span class="o">.</span><span class="n">markup</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">USE_RICH</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">[/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span>
 
 
 <span class="k">def</span> <span class="nf">_rule_generate_helptext</span><span class="p">(</span>
