@@ -244,12 +244,27 @@
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">tokenize</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Hashable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">Generic</span><span class="p">,</span>
+    <span class="n">Hashable</span><span class="p">,</span>
+    <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">Type</span><span class="p">,</span>
+    <span class="n">TypeVar</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">docstring_parser</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
+
+<span class="c1"># Cast for making types more lenient.</span>
+<span class="n">_cache</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">T</span><span class="p">]],</span> <span class="n">functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">)</span>
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -276,7 +291,7 @@
     <span class="n">field_data_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_FieldData</span><span class="p">]</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="nd">@_cache</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_ClassTokenization&quot;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Parse the source code of a class, and cache some tokenization information.&quot;&quot;&quot;</span>
         <span class="n">readline</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">readline</span>
@@ -346,7 +361,8 @@
         <span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_class_tokenization_with_field"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_class_tokenization_with_field">[docs]</a><span class="k">def</span> <span class="nf">get_class_tokenization_with_field</span><span class="p">(</span>
+<div class="viewcode-block" id="get_class_tokenization_with_field"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_class_tokenization_with_field">[docs]</a><span class="nd">@_cache</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_class_tokenization_with_field</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_ClassTokenization</span><span class="p">]:</span>
     <span class="c1"># Search for token in this class + all parents.</span>
@@ -384,7 +400,8 @@
     <span class="k">return</span> <span class="n">tokenization</span></div>
 
 
-<div class="viewcode-block" id="get_field_docstring"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_field_docstring">[docs]</a><span class="k">def</span> <span class="nf">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<div class="viewcode-block" id="get_field_docstring"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_field_docstring">[docs]</a><span class="nd">@_cache</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Get docstring for a field in a class.&quot;&quot;&quot;</span>
 
     <span class="n">docstring</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -495,7 +512,8 @@
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_callable_description"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_callable_description">[docs]</a><span class="k">def</span> <span class="nf">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="get_callable_description"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_callable_description">[docs]</a><span class="nd">@_cache</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Get description associated with a callable via docstring parsing.</span>
 
 <span class="sd">    Note that the `dataclasses.dataclass` will automatically populate __doc__ based on</span>

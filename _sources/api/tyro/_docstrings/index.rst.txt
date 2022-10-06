@@ -14,6 +14,11 @@
 Module Contents
 ---------------
 
+.. py:data:: T
+   
+
+   
+
 .. py:function:: get_class_tokenization_with_field(cls: Type, field_name: str) -> Optional[_ClassTokenization]
 
 
