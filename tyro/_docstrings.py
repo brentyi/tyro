@@ -172,7 +172,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         for param_doc in docstring_parser.parse(docstring).params:
             if param_doc.arg_name == field_name:
                 return (
-                    _strings.postprocess_helptext(param_doc.description)
+                    _strings.remove_single_line_breaks(param_doc.description)
                     if param_doc.description is not None
                     else None
                 )
@@ -198,7 +198,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
             and first_token_content.startswith('"""')
             and first_token_content.endswith('"""')
         ):
-            return _strings.postprocess_helptext(
+            return _strings.remove_single_line_breaks(
                 _strings.dedent(first_token_content[3:-3])
             )
 
@@ -209,7 +209,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     if final_token_on_line.token_type == tokenize.COMMENT:
         comment: str = final_token_on_line.content
         assert comment.startswith("#")
-        return _strings.postprocess_helptext(comment[1:].strip())
+        return _strings.remove_single_line_breaks(comment[1:].strip())
 
     # Check for comments that come before the field. This is intentionally written to
     # support comments covering multiple (grouped) fields, for example:
@@ -262,7 +262,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         current_actual_line -= 1
 
     if len(comments) > 0:
-        return _strings.postprocess_helptext("\n".join(reversed(comments)))
+        return _strings.remove_single_line_breaks("\n".join(reversed(comments)))
 
     return None
 

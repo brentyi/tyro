@@ -120,7 +120,7 @@ def multi_metavar_from_single(single: str) -> str:
         return f"{single} [{single} ...]"
 
 
-def postprocess_helptext(helptext: str) -> str:
+def remove_single_line_breaks(helptext: str) -> str:
     lines = helptext.split("\n")
     output_parts: List[str] = []
     for line in lines:
@@ -133,6 +133,7 @@ def postprocess_helptext(helptext: str) -> str:
             if not prev_is_break:
                 output_parts.append("\n")
             output_parts.append("\n")
+
         # Empty line.
         else:
             if not line[0].isalpha():

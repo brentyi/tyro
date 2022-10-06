@@ -22,18 +22,18 @@ def test_make_field_name():
 
 
 def test_postprocess_helptext():
-    assert _strings.postprocess_helptext("hello world") == "hello world"
-    assert _strings.postprocess_helptext("hello\nworld") == "hello world"
-    assert _strings.postprocess_helptext("hello   \nworld") == "hello world"
-    assert _strings.postprocess_helptext("hello\n\nworld") == "hello\n\nworld"
+    assert _strings.remove_single_line_breaks("hello world") == "hello world"
+    assert _strings.remove_single_line_breaks("hello\nworld") == "hello world"
+    assert _strings.remove_single_line_breaks("hello   \nworld") == "hello world"
+    assert _strings.remove_single_line_breaks("hello\n\nworld") == "hello\n\nworld"
     assert (
-        _strings.postprocess_helptext(
+        _strings.remove_single_line_breaks(
             "a paragraph:\nSentence one.\nSentence two.\nSentence three.\n"
         )
         == "a paragraph: Sentence one. Sentence two. Sentence three."
     )
     assert (
-        _strings.postprocess_helptext(
+        _strings.remove_single_line_breaks(
             "a bulleted list:\n"
             "- The first problem.\n"
             "- The second problem.\n"
@@ -45,7 +45,19 @@ def test_postprocess_helptext():
         "- The third problem."
     )
     assert (
-        _strings.postprocess_helptext(
+        _strings.remove_single_line_breaks(
+            "an indented list:\n"
+            " The first problem.\n"
+            " The second problem.\n"
+            " The third problem.\n"
+        )
+        == "an indented list:\n"
+        " The first problem.\n"
+        " The second problem.\n"
+        " The third problem."
+    )
+    assert (
+        _strings.remove_single_line_breaks(
             "a numbered list:\n"
             "1. The first problem.\n"
             "2. The second problem.\n"
