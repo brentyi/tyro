@@ -30,7 +30,7 @@
 configuration objects, and configuration _systems_ with modern, type-annotated
 Python.
 
-Our core interface consists of just one function, `tyro.cli()`, which translates
+Our core interface consists of just one function, `tyro.cli()`, that translates
 Python callables and types into fully-featured argument parsers and
 configuration objects.
 
@@ -59,21 +59,16 @@ To get started, we recommend visiting the examples in our
    type-annotated, and documented vanilla Python that can be used with a range
    of other configuration libraries.
 
-3. **Automatic helptext generation.**
+3. **Modularity.**
 
-   `tyro` parses docstrings, types, and defaults to generate carefully formatted
-   helptext. Longer messages are organized into responsive multi-column layouts.
+   `tyro` supports hierarchical configuration structures, which make it easy to
+   distribute definitions, defaults, and documentation of configurable fields
+   across modules or source files.
 
-4. **Modularity.**
-
-   `tyro` supports hierarchically nested configuration structures, which make it
-   easy to distribute definitions, defaults, and documentation of configurable
-   fields across modules or source files.
-
-5. **Tab completion.**
+4. **Tab completion.**
 
    By extending [shtab](https://github.com/iterative/shtab), `tyro`
-   automatically generates tab completion scripts for bash, zsh, and tcsh!
+   automatically generates tab completion scripts for bash, zsh, and tcsh.
 
 ### A minimal example
 
