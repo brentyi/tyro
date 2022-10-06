@@ -285,7 +285,7 @@ def _rule_convert_defaults_to_strings(
 USE_RICH = True
 
 
-def _rich_tag_if_enabled(x: str, tag: str):
+def _rich_tag_if_enabled(x: str, tag: str) -> str:
     x = rich.markup.escape(x)
     return (
         x
