@@ -285,13 +285,10 @@ def _rule_convert_defaults_to_strings(
 USE_RICH = True
 
 
+# TODO: this function is also called outside of _arguments.py. Should be revisited.
 def _rich_tag_if_enabled(x: str, tag: str) -> str:
-    x = rich.markup.escape(x)
-    return (
-        x
-        if not USE_RICH
-        else _argparse_formatter.str_from_rich(Text.from_markup(f"[{tag}]{x}[/{tag}]"))
-    )
+    x = rich.markup.escape(_strings.strip_ansi_sequences(x))
+    return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
 
 
 def _rule_generate_helptext(

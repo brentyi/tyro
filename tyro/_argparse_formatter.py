@@ -122,8 +122,6 @@ def ansi_context() -> ContextManager[None]:
 def str_from_rich(
     renderable: RenderableType, width: Optional[int] = None, soft_wrap: bool = False
 ) -> str:
-    # TODO: everywhere that this function is used is a little bit sketchy. Could use
-    # re-thinking.
     console = Console(width=width, theme=THEME.as_rich_theme())
     with console.capture() as out:
         console.print(renderable, soft_wrap=soft_wrap)
@@ -314,6 +312,18 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 action.help = str_from_rich(
                     Text.from_markup("[helptext]" + action.help + "[/helptext]")
                 )
+
+            # Unescape % signs, which need special handling in argparse.
+            if action.help is not None:
+                assert isinstance(action.help, str)
+                helptext = (
+                    Text.from_ansi(action.help)
+                    if _strings.strip_ansi_sequences(action.help) != action.help
+                    else Text.from_markup(action.help)
+                )
+            else:
+                helptext = Text("")
+
             if (
                 action.help
                 and len(_strings.strip_ansi_sequences(invocation)) < help_position - 1
@@ -327,8 +337,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         invocation,
                         style=THEME.invocation,
                     ),
-                    # Unescape % signs, which need special handling in argparse.
-                    Text.from_ansi(action.help.replace("%%", "%")),
+                    helptext,
                 )
                 item_parts.append(table)
 
@@ -344,7 +353,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     item_parts.append(
                         Padding(
                             # Unescape % signs, which need special handling in argparse.
-                            Text.from_ansi(action.help.replace("%%", "%")),
+                            helptext,
                             pad=(0, 0, 0, help_position),
                         )
                     )
