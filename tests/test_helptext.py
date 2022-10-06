@@ -434,6 +434,8 @@ def test_optional_literal_helptext():
 def test_multiple_subparsers_helptext():
     @dataclasses.dataclass
     class Subcommand1:
+        """2% milk."""  # % symbol is prone to bugs in argparse.
+
         x: int = 0
 
     @dataclasses.dataclass
@@ -457,6 +459,7 @@ def test_multiple_subparsers_helptext():
 
     helptext = _get_helptext(MultipleSubparsers)
 
+    assert "2% milk." in helptext
     assert "Field a description." in helptext
     assert "Field b description." not in helptext
     assert "Field c description." not in helptext
@@ -465,6 +468,7 @@ def test_multiple_subparsers_helptext():
         MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
     )
 
+    assert "2% milk." in helptext
     assert "Field a description." not in helptext
     assert "Field b description." not in helptext
     assert "Field c description." in helptext
@@ -474,7 +478,7 @@ def test_multiple_subparsers_helptext():
 def test_optional_helptext():
     @dataclasses.dataclass
     class OptionalHelptext:
-        """This docstring should be printed as a description."""
+        """This docstring should be printed as a description. 2% milk."""
 
         x: Optional[int]  # Documentation 1
 
@@ -485,7 +489,8 @@ def test_optional_helptext():
         """Documentation 3"""
 
     helptext = _get_helptext(OptionalHelptext)
-    assert cast(str, OptionalHelptext.__doc__) in helptext
+    assert cast(str, OptionalHelptext.__doc__[:20]) in helptext
+    assert "2% milk" in helptext
     assert "--x {None}|INT" in helptext
     assert "--y {None}|INT [{None}|INT ...]" in helptext
     assert "[--z {None}|INT]" in helptext

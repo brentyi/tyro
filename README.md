@@ -27,7 +27,7 @@
 <br />
 
 <strong><code>tyro</code></strong> is a library for building CLI interfaces,
-configuration objects, and configuration _systems_ with modern, type-annotated
+configuration objects, and configuration systems with modern, type-annotated
 Python.
 
 Our core interface consists of just one function, `tyro.cli()`, that translates

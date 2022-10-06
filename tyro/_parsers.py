@@ -7,7 +7,6 @@ import dataclasses
 import itertools
 from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
-import rich.markup
 from typing_extensions import Annotated, get_args, get_origin
 
 from . import (
@@ -457,7 +456,7 @@ class SubparsersSpecification:
                 subparser_tree_nodes.append(subparser)
 
             for name, subparser_def in self.parser_from_name.items():
-                helptext = subparser_def.description
+                helptext = subparser_def.description.replace("%", "%%")
                 if len(helptext) > 0:
                     # TODO: calling a private function here.
                     helptext = _arguments._rich_tag_if_enabled(

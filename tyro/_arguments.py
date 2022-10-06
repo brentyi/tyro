@@ -22,9 +22,8 @@ from typing import (
 )
 
 import rich.markup
-from rich.text import Text
 
-from . import _argparse_formatter, _fields, _instantiators, _resolver
+from . import _fields, _instantiators, _resolver
 from . import _shtab as shtab
 from . import _strings
 from .conf import _markers
