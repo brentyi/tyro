@@ -422,9 +422,11 @@
 
         <span class="k">return</span> <span class="n">ParserSpecification</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">description</span>
-            <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span>
+                <span class="n">description</span>
+                <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="p">),</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
             <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="n">helptext_from_nested_class_field_name</span><span class="p">,</span>
             <span class="n">subparsers_from_name</span><span class="o">=</span><span class="n">subparsers_from_name</span><span class="p">,</span>

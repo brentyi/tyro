@@ -47,6 +47,6 @@ Module Contents
 .. py:function:: multi_metavar_from_single(single: str) -> str
 
 
-.. py:function:: postprocess_helptext(helptext: str) -> str
+.. py:function:: remove_single_line_breaks(helptext: str) -> str
 
 
