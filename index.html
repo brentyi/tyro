@@ -240,7 +240,7 @@
 <p><a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Build status icon" src="https://github.com/brentyi/tyro/workflows/build/badge.svg" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Mypy status icon" src="https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=master" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Lint status icon" src="https://github.com/brentyi/tyro/workflows/lint/badge.svg" /></a> <a class="reference external" href="https://codecov.io/gh/brentyi/tyro"><img alt="Test coverage status icon" src="https://codecov.io/gh/brentyi/tyro/branch/master/graph/badge.svg" /></a> <a class="reference external" href="https://pypi.org/project/tyro/"><img alt="Version icon" src="https://img.shields.io/pypi/pyversions/tyro" /></a></p>
 <p><code class="code docutils literal notranslate"><span class="pre">tyro</span></code> is a library for building CLI interfaces, configuration objects,
 and configuration <em>systems</em> with modern, type-annotated Python.</p>
-<p>Our core interface consists of just one function, <a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, which
+<p>Our core interface consists of just one function, <a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, that
 translates Python callables and types into fully-featured argument parsers and
 configuration objects.</p>
 <p>To get started, we recommend browsing the examples to the left.</p>
@@ -263,18 +263,14 @@ to learning to write modern Python.</p>
 type-annotated, and documented vanilla Python that can be used with a range
 of other configuration libraries.</p>
 </li>
-<li><p><strong>Automatic helptext generation.</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> parses docstrings, types, and defaults to generate carefully formatted
-helptext. Longer messages are organized into responsive multi-column layouts.</p>
-</li>
 <li><p><strong>Modularity.</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> supports hierarchically nested configuration structures, which make it
-easy to distribute definitions, defaults, and documentation of configurable
-fields across modules or source files.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> supports hierarchical configuration structures, which make it easy to
+distribute definitions, defaults, and documentation of configurable fields
+across modules or source files.</p>
 </li>
 <li><p><strong>Tab completion.</strong></p>
 <p>By extending <a class="reference external" href="https://github.com/iterative/shtab">shtab</a>, <code class="docutils literal notranslate"><span class="pre">tyro</span></code>
-automatically generates tab completion scripts for bash, zsh, and tcsh!</p>
+automatically generates tab completion scripts for bash, zsh, and tcsh.</p>
 </li>
 </ol>
 </section>
