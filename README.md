@@ -2,7 +2,7 @@
     <!-- Note that image URLs should all be absolute; this README will be used for both GitHub and PyPI. -->
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://brentyi.github.io/tyro/_static/logo-dark.svg">
-    <img alt="tyro logo" src="https://brentyi.github.io/tyro/_static/logo-light.svg" width="350px">
+    <img alt="tyro logo" src="https://brentyi.github.io/tyro/_static/logo-light.svg" width="200px">
 </picture>
 
 
