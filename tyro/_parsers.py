@@ -185,9 +185,11 @@ class ParserSpecification:
 
         return ParserSpecification(
             f=f,
-            description=description
-            if description is not None
-            else _docstrings.get_callable_description(f),
+            description=_strings.remove_single_line_breaks(
+                description
+                if description is not None
+                else _docstrings.get_callable_description(f)
+            ),
             args=args,
             helptext_from_nested_class_field_name=helptext_from_nested_class_field_name,
             subparsers_from_name=subparsers_from_name,
