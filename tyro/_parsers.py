@@ -457,10 +457,17 @@ class SubparsersSpecification:
                 subparser_tree_nodes.append(subparser)
 
             for name, subparser_def in self.parser_from_name.items():
+                helptext = subparser_def.description
+                if len(helptext) > 0:
+                    # TODO: calling a private function here.
+                    helptext = _arguments._rich_tag_if_enabled(
+                        helptext.strip(), "helptext"
+                    )
+
                 subparser = argparse_subparsers.add_parser(
                     name,
                     formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
-                    help=rich.markup.escape(subparser_def.description),
+                    help=helptext,
                 )
                 subparser_def.apply(subparser)
 
