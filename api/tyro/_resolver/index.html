@@ -170,10 +170,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -366,8 +366,8 @@ should parse as Cat.</p>
 <p>Examples:</p>
 <ul class="simple">
 <li><p>int, int =&gt; (int, ())</p></li>
-<li><p>Annotated[int, 1], int =&gt; (int, 1)</p></li>
-<li><p>Annotated[int, “1”], int =&gt; (int, None)</p></li>
+<li><p>Annotated[int, 1], int =&gt; (int, (1,))</p></li>
+<li><p>Annotated[int, “1”], int =&gt; (int, ())</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

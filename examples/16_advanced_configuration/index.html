@@ -170,10 +170,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../building_configuration_systems/">Building configuration systems</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../goals_and_alternatives/">Goals and alternatives</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
@@ -298,7 +298,7 @@ command-line interfaces beyond what is expressible via static type annotations.<
 <kbd>python 16_advanced_configuration.py --help</kbd><pre class="ansi-block literal-block">usage: 16_advanced_configuration.py [-h] [--boolean {True,False}]
                                     [--fixed {fixed}]
                                     [--union-without-subcommand.branch STR]
-                                    [INT] {checkout,commit}
+                                    [INT] [{checkout,commit}]
 
 ╭─ positional arguments ─────────────────────────────────────────────────────╮
 │ [INT]                   A numeric field parsed as a positional argument.   │
@@ -318,11 +318,11 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │ --union-without-subcommand.branch STR                                      │
 │                         (default: main)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ subcommands ──────────────────────────────────────────────────────────────╮
+╭─ optional subcommands ─────────────────────────────────────────────────────╮
 │ `tyro.conf.subcommand()` can be used to configure subcommands in a Union.  │
-│ Here, we make the subcommand names more succinct.                          │
+│ Here, we make the subcommand names more succinct.  (default: checkout)     │
 │ ────────────────────────────────────────────────────────────────────────── │
-│ {checkout,commit}                                                          │
+│ [{checkout,commit}]                                                        │
 │     checkout            Checkout a branch.                                 │
 │     commit              Commit changes.                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>

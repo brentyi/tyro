@@ -169,10 +169,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -379,8 +379,8 @@
 
 <span class="sd">    Examples:</span>
 <span class="sd">    - int, int =&gt; (int, ())</span>
-<span class="sd">    - Annotated[int, 1], int =&gt; (int, 1)</span>
-<span class="sd">    - Annotated[int, &quot;1&quot;], int =&gt; (int, None)</span>
+<span class="sd">    - Annotated[int, 1], int =&gt; (int, (1,))</span>
+<span class="sd">    - Annotated[int, &quot;1&quot;], int =&gt; (int, ())</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__metadata__&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="p">()</span>

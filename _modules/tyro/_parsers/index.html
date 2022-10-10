@@ -169,10 +169,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -527,56 +527,39 @@
         <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="c1"># Add subparser for each option.</span>
-        <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Get subcommand configurations from `tyro.conf.subcommand()`.</span>
+        <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">subcommand_name_from_default_hash</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">subcommand_name_from_type</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Used for default matching.</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_no_none</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+            <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
             <span class="n">option</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
                 <span class="n">option</span><span class="p">,</span> <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="c1"># Make a dummy subcommand config.</span>
-                <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span><span class="p">(</span>
-                        <span class="s2">&quot;unused&quot;</span><span class="p">,</span>
-                        <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">default</span><span class="o">=</span><span class="p">(</span>
-                            <span class="n">field</span><span class="o">.</span><span class="n">default</span>
-                            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-                            <span class="ow">is</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
-                            <span class="k">else</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
-                        <span class="p">),</span>
-                        <span class="n">prefix_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="p">),</span>
+            <span class="n">default_hash</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Explicitly annotated default.</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Expected only one subcommand config, but </span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">}</span><span class="s2"> has&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
+                <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span>
+                    <span class="mi">0</span>
+                <span class="p">]</span>
 
-            <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                <span class="c1"># Recursively apply markers.</span>
-                <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">option</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                <span class="k">else</span> <span class="n">option</span><span class="p">,</span>
-                <span class="n">description</span><span class="o">=</span><span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                <span class="n">parent_type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
-                <span class="n">default_instance</span><span class="o">=</span><span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-            <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
+                    <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+                <span class="p">):</span>
+                    <span class="n">default_hash</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+                    <span class="n">subcommand_name_from_default_hash</span><span class="p">[</span><span class="n">default_hash</span><span class="p">]</span> <span class="o">=</span> <span class="n">subcommand_name</span>
 
-            <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>
-            <span class="n">subparser</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                <span class="n">subparser</span><span class="p">,</span>
-                <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="p">{</span>
-                    <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">k</span><span class="p">]):</span> <span class="n">v</span>
-                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">subparser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                <span class="p">},</span>
-            <span class="p">)</span>
-            <span class="n">parser_from_name</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser</span>
-
-        <span class="c1"># Optional if: type hint is Optional[], or a default instance is provided.</span>
-        <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
-            <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># Use subcommand types for default matching if no default is explicitly</span>
+            <span class="c1"># annotated.</span>
+            <span class="k">if</span> <span class="n">default_hash</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">subcommand_name_from_type</span><span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">=</span> <span class="n">subcommand_name</span>
 
         <span class="c1"># If there are any required arguments in the default subparser, we should mark</span>
         <span class="c1"># the subparser group as a whole as required.</span>
@@ -592,27 +575,80 @@
                     <span class="s2">&quot;Default values for generic subparsers are not supported.&quot;</span>
                 <span class="p">)</span>
 
-            <span class="n">default_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span>
-                <span class="n">prefix</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="n">default_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="p">:</span>
-                <span class="c1"># If we can&#39;t find the subparser by name, search by type. This is needed</span>
-                <span class="c1"># when the user renames their subcommands. (eg via tyro.subcommand)</span>
-                <span class="c1">#</span>
-                <span class="c1"># TODO: this will display some weird behaviors if multiple subcommands</span>
-                <span class="c1"># have the same type.</span>
-                <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># Get default subcommand name: by default hash.</span>
+            <span class="n">default_hash</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="n">default_name</span> <span class="o">=</span> <span class="n">subcommand_name_from_default_hash</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">default_hash</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
-                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">parser</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span>
-                        <span class="n">parser</span><span class="o">.</span><span class="n">f</span>
-                    <span class="p">):</span>
-                        <span class="n">default_name</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="c1"># Get default subcommand name: by default value.</span>
+            <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="p">(</span>
+                    <span class="n">subcommand_name</span><span class="p">,</span>
+                    <span class="n">subcommand_config</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">equal</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="o">==</span> <span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equal</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">equal</span><span class="p">:</span>
+                        <span class="n">default_name</span> <span class="o">=</span> <span class="n">subcommand_name</span>
                         <span class="k">break</span>
-                <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Default with type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> was passed in, but no&quot;</span>
-                    <span class="s2">&quot; matching subparser.&quot;</span>
+
+            <span class="c1"># Get default subcommand name: by default type.</span>
+            <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">default_name</span> <span class="o">=</span> <span class="n">subcommand_name_from_type</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="c1"># Add subcommands for each option.</span>
+        <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_no_none</span><span class="p">:</span>
+            <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+            <span class="n">option</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+
+            <span class="c1"># Get a subcommand config: either pulled from the type annotations or the</span>
+            <span class="c1"># field default.</span>
+            <span class="k">if</span> <span class="n">subcommand_name</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="p">:</span>
+                <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span><span class="p">(</span>
+                    <span class="s2">&quot;unused&quot;</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+                    <span class="n">prefix_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
+
+            <span class="c1"># If names match, borrow subcommand default from field default.</span>
+            <span class="k">if</span> <span class="n">default_name</span> <span class="o">==</span> <span class="n">subcommand_name</span><span class="p">:</span>
+                <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                    <span class="n">subcommand_config</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
+                <span class="p">)</span>
+
+            <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+                <span class="c1"># Recursively apply markers.</span>
+                <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">option</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="k">else</span> <span class="n">option</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+                <span class="n">parent_type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
+                <span class="n">default_instance</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>
+            <span class="n">subparser</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="n">subparser</span><span class="p">,</span>
+                <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="p">{</span>
+                    <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">k</span><span class="p">]):</span> <span class="n">v</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">subparser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="n">parser_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser</span>
+
+        <span class="c1"># Required if a default is missing.</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+
+        <span class="c1"># Required if a default is passed in, but the default value has missing</span>
+        <span class="c1"># parameters.</span>
+        <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">default_parser</span> <span class="o">=</span> <span class="n">parser_from_name</span><span class="p">[</span><span class="n">default_name</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">arg</span><span class="p">:</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">,</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)):</span>
                 <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>

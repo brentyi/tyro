@@ -76,8 +76,8 @@ Module Contents
 
 
    * int, int => (int, ())
-   * Annotated[int, 1], int => (int, 1)
-   * Annotated[int, "1"], int => (int, None)
+   * Annotated[int, 1], int => (int, (1,))
+   * Annotated[int, "1"], int => (int, ())
 
 .. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type]) -> TypeOrCallable
 

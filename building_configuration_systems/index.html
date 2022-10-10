@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Goals and alternatives" href="../goals_and_alternatives/" /><link rel="prev" title="Tab completion" href="../tab_completion/" />
+<link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="1. Functions" href="../examples/01_functions/" /><link rel="prev" title="Tab completion" href="../tab_completion/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>Building configuration systems - tyro</title>
@@ -170,10 +170,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../goals_and_alternatives/">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Building configuration systems</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../goals_and_alternatives/">Goals and alternatives</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -240,10 +240,10 @@
 <p>Beyond building simple command-line interfaces, <a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> is designed
 to scale to larger configuration systems such as those typically built with
 libraries like <a class="reference external" href="https://github.com/facebookresearch/hydra">hydra</a>.</p>
-<p>For a live example of this, see
+<p>For a live example, see
 <a class="reference external" href="https://github.com/nerfstudio-project/nerfstudio/">nerfstudio</a>. Notably,
-<code class="docutils literal notranslate"><span class="pre">nerfstudio</span></code>‘s configuration system is implemented entirely in Python, no YAML
-needed, and has full tab completion support in your terminal.</p>
+<code class="docutils literal notranslate"><span class="pre">nerfstudio</span></code>‘s configuration system is implemented entirely in Python, without
+YAML, and has full tab completion support in your terminal.</p>
 <p>For overriding a dynamically loaded configuration object (typically a
 dataclass), the <code class="docutils literal notranslate"><span class="pre">default=</span></code> parameter of <a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be used. If you
 have multiple default configuration objects and need to select one to pass in as
@@ -258,12 +258,12 @@ variable or manually parsed (via <code class="docutils literal notranslate"><spa
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../goals_and_alternatives/">
+          <a class="next-page" href="../examples/01_functions/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Goals and alternatives</div>
+                <div class="title">1. Functions</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>

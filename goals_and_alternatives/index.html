@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="1. Functions" href="../examples/01_functions/" /><link rel="prev" title="Building configuration systems" href="../building_configuration_systems/" />
+<link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Helptext generation" href="../helptext_generation/" /><link rel="prev" title="Your first CLI" href="../your_first_cli/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>Goals and alternatives - tyro</title>
@@ -170,10 +170,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul class="current">
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Goals and alternatives</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../helptext_generation/">Helptext generation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tab_completion/">Tab completion</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../building_configuration_systems/">Building configuration systems</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Goals and alternatives</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -244,9 +244,9 @@ annotations — overlaps significantly with features offered by other libraries.
 Usage distinctions are the result of two API goals:</p>
 <ul class="simple">
 <li><p><strong>One uninvasive function.</strong> For all core functionality, learning to use
-<code class="docutils literal notranslate"><span class="pre">tyro</span></code> should reduce to learning to write (type-annotated) Python. For
-example, types are specified using standard annotations, helptext using
-docstrings, choices using the standard <code class="docutils literal notranslate"><span class="pre">typing.Literal</span></code> type, subcommands with
+<code class="docutils literal notranslate"><span class="pre">tyro</span></code> should reduce to learning to write type-annotated Python. For example,
+types are specified using standard annotations, helptext using docstrings,
+choices using the standard <code class="docutils literal notranslate"><span class="pre">typing.Literal</span></code> type, subcommands with
 <code class="docutils literal notranslate"><span class="pre">typing.Union</span></code> of nested types, and positional arguments with <code class="docutils literal notranslate"><span class="pre">/</span></code>.</p>
 <ul>
 <li><p>In contrast, similar libraries have more expansive APIs , and require more
@@ -454,13 +454,13 @@ statically checked.</p></li>
 </tbody>
 </table>
 </div>
-<!-- prettier-ignore-start --><!-- prettier-ignore-end --><p>Note that most of these other libraries are generally aimed specifically at only
-one of dataclasses (<code class="docutils literal notranslate"><span class="pre">datargs</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>, <code class="docutils literal notranslate"><span class="pre">argparse-dataclass</span></code>,
+<!-- prettier-ignore-start --><!-- prettier-ignore-end --><p>Note that other libraries are generally aimed specifically at only one of
+dataclasses (<code class="docutils literal notranslate"><span class="pre">datargs</span></code>, <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>, <code class="docutils literal notranslate"><span class="pre">argparse-dataclass</span></code>,
 <code class="docutils literal notranslate"><span class="pre">argparse-dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">dataclass-cli</span></code>, <code class="docutils literal notranslate"><span class="pre">clout</span></code>, <code class="docutils literal notranslate"><span class="pre">hf_argparser</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>,
 <code class="docutils literal notranslate"><span class="pre">yahp</span></code>), custom structures (<code class="docutils literal notranslate"><span class="pre">tap</span></code>), or functions (<code class="docutils literal notranslate"><span class="pre">typer</span></code>) rather than general
-typed callables, but offer other features that you might find useful, such as
-registration for custom types (<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>), built-in approaches for
-serialization and config files (<code class="docutils literal notranslate"><span class="pre">tap</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>, <code class="docutils literal notranslate"><span class="pre">yahp</span></code>) and, opportunities
+types and callables, but offer other features that you might find critical, such
+as registration for custom types (<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>), built-in approaches for
+serialization and config files (<code class="docutils literal notranslate"><span class="pre">tap</span></code>, <code class="docutils literal notranslate"><span class="pre">pyrallis</span></code>, <code class="docutils literal notranslate"><span class="pre">yahp</span></code>), and opportunities
 for integration with fields generated using standard argparse definitions
 (<code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>).</p>
 </section>
@@ -521,23 +521,23 @@ like working with YAML formats)</p>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../examples/01_functions/">
+          <a class="next-page" href="../helptext_generation/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">1. Functions</div>
+                <div class="title">Helptext generation</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../building_configuration_systems/">
+          <a class="prev-page" href="../your_first_cli/">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Building configuration systems</div>
+                <div class="title">Your first CLI</div>
                 
               </div>
             </a>
