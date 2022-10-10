@@ -7,9 +7,9 @@ annotations — overlaps significantly with features offered by other libraries.
 Usage distinctions are the result of two API goals:
 
 - **One uninvasive function.** For all core functionality, learning to use
-  `tyro` should reduce to learning to write (type-annotated) Python. For
-  example, types are specified using standard annotations, helptext using
-  docstrings, choices using the standard `typing.Literal` type, subcommands with
+  `tyro` should reduce to learning to write type-annotated Python. For example,
+  types are specified using standard annotations, helptext using docstrings,
+  choices using the standard `typing.Literal` type, subcommands with
   `typing.Union` of nested types, and positional arguments with `/`.
   - In contrast, similar libraries have more expansive APIs , and require more
     library-specific structures, decorators, or metadata formats for configuring
@@ -37,7 +37,7 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 | [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓                 |                        |                           | ✓                    |              |          |
 | [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓                 | ✓                      | ~[^yahp_unions_nested]    | ✓                    |              |          |
 | [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓                 |                        |                           | ✓                    | ✓            |          |
-| **tyro**                                   | ✓           | ✓         | ✓                    | ✓                      | ✓                 | ✓                      | ✓                         | ✓                    | ✓            | ✓        |
+| **tyro**                                     | ✓           | ✓         | ✓                    | ✓                      | ✓                 | ✓                      | ✓                         | ✓                    | ✓            | ✓        |
 
 <!-- prettier-ignore-start -->
 
@@ -66,13 +66,13 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 
 <!-- prettier-ignore-end -->
 
-Note that most of these other libraries are generally aimed specifically at only
-one of dataclasses (`datargs`, `simple-parsing`, `argparse-dataclass`,
+Note that other libraries are generally aimed specifically at only one of
+dataclasses (`datargs`, `simple-parsing`, `argparse-dataclass`,
 `argparse-dataclasses`, `dataclass-cli`, `clout`, `hf_argparser`, `pyrallis`,
 `yahp`), custom structures (`tap`), or functions (`typer`) rather than general
-typed callables, but offer other features that you might find useful, such as
-registration for custom types (`pyrallis`), built-in approaches for
-serialization and config files (`tap`, `pyrallis`, `yahp`) and, opportunities
+types and callables, but offer other features that you might find critical, such
+as registration for custom types (`pyrallis`), built-in approaches for
+serialization and config files (`tap`, `pyrallis`, `yahp`), and opportunities
 for integration with fields generated using standard argparse definitions
 (`simple-parsing`).
 
