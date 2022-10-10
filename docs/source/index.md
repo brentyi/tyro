@@ -48,14 +48,16 @@ To get started, we recommend browsing the examples to the left.
 
 `tyro` is still a new library, but being stress tested in several projects!
 
-- [nerfstudio](https://github.com/nerfstudio-project/nerfstudio/) uses `tyro`
-  both to build compact command-line utilities and for YAML-free experiment
-  configuration.
-- [obj2mjcf](https://github.com/kevinzakka/obj2mjcf) uses `tyro` to build a CLI
+- [nerfstudio-project/nerfstudio](https://github.com/nerfstudio-project/nerfstudio/)
+  provides a set of tools for end-to-end training, testing, and rendering of
+  neural radiance fields.
+- [Sea-Snell/JAXSeq](https://github.com/Sea-Snell/JAXSeq/) is a library for
+  distributed training of large language models in JAX.
+- [kevinzakka/obj2mjcf](https://github.com/kevinzakka/obj2mjcf) is an interface
   for processing composite Wavefront OBJ files for Mujoco.
-- [tensorf-jax](https://github.com/brentyi/tensorf-jax/) (unofficially)
-  implements [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/)
-  in JAX, with `tyro` for configuration.
+- [brentyi/tensorf-jax](https://github.com/brentyi/tensorf-jax/) is an
+  unofficial implementation of
+  [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/) in JAX.
 
 <!-- prettier-ignore-start -->
 
@@ -74,10 +76,10 @@ To get started, we recommend browsing the examples to the left.
    :hidden:
    :glob:
 
+   goals_and_alternatives
    helptext_generation
    tab_completion
    building_configuration_systems
-   goals_and_alternatives
 
 .. toctree::
    :caption: Examples

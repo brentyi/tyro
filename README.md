@@ -1,10 +1,10 @@
+<br />
 <p align="center">
     <!-- Note that image URLs should all be absolute; this README will be used for both GitHub and PyPI. -->
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://brentyi.github.io/tyro/_static/logo-dark.svg">
     <img alt="tyro logo" src="https://brentyi.github.io/tyro/_static/logo-light.svg" width="200px">
 </picture>
-
 
 <p align="center">
     <em><a href="https://brentyi.github.io/tyro">Documentation</a></em>
@@ -146,11 +146,13 @@ For more examples, see our [documentation](https://brentyi.github.io/tyro).
 
 `tyro` is still a new library, but being stress tested in several projects!
 
-- [nerfstudio](https://github.com/nerfstudio-project/nerfstudio/) uses `tyro`
-  both to build compact command-line utilities and for YAML-free experiment
-  configuration.
-- [obj2mjcf](https://github.com/kevinzakka/obj2mjcf) uses `tyro` to build a CLI
+- [nerfstudio-project/nerfstudio](https://github.com/nerfstudio-project/nerfstudio/)
+  provides a set of tools for end-to-end training, testing, and rendering of
+  neural radiance fields.
+- [Sea-Snell/JAXSeq](https://github.com/Sea-Snell/JAXSeq/) is a library for
+  distributed training of large language models in JAX.
+- [kevinzakka/obj2mjcf](https://github.com/kevinzakka/obj2mjcf) is an interface
   for processing composite Wavefront OBJ files for Mujoco.
-- [tensorf-jax](https://github.com/brentyi/tensorf-jax/) (unofficially)
-  implements [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/)
-  in JAX, with `tyro` for configuration.
+- [brentyi/tensorf-jax](https://github.com/brentyi/tensorf-jax/) is an
+  unofficial implementation of
+  [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/) in JAX.

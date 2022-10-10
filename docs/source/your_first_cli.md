@@ -7,24 +7,23 @@ command-line interface:
 """Sum two numbers from argparse."""
 
 import argparse
+
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--a",
-    type=int,
-    required=True,
-)
-parser.add_argument(
-    "--b",
-    type=int,
-    default=3,
-)
+parser.add_argument("--a", type=int, required=True)
+parser.add_argument("--b", type=int, default=3)
 args = parser.parse_args()
 
 print(args.a + args.b)
 ```
 
-The basic feature of :func:`tyro.cli()` is to enable the removal of
-parsing-specific boilerplate.
+This is dramatically cleaner than manually parsing `sys.argv`, but has several
+issues: it lacks type checking and IDE support (consider: jumping to
+definitions, finding references, docstrings, refactoring and renaming tools),
+requires a significant amount of boilerplate, and generally becomes difficult to
+manage as interfaces grow.
+
+The basic feature of :func:`tyro.cli()` is to provide a wrapper for `argparse`
+that solves these issues.
 
 We can specify the same logic with a function signature:
 
