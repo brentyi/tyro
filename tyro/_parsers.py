@@ -290,56 +290,39 @@ class SubparsersSpecification:
         ):
             return None
 
-        # Add subparser for each option.
-        parser_from_name: Dict[str, ParserSpecification] = {}
+        # Get subcommand configurations from `tyro.conf.subcommand()`.
+        subcommand_config_from_name: Dict[
+            str, _subcommands._SubcommandConfiguration
+        ] = {}
+        subcommand_name_from_default_hash: Dict[int, str] = {}
+        subcommand_name_from_type: Dict[Type, str] = {}  # Used for default matching.
         for option in options_no_none:
-            name = _strings.subparser_name_from_type(prefix, option)
+            subcommand_name = _strings.subparser_name_from_type(prefix, option)
             option, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _subcommands._SubcommandConfiguration
             )
-            if len(found_subcommand_configs) == 0:
-                # Make a dummy subcommand config.
-                found_subcommand_configs = (
-                    _subcommands._SubcommandConfiguration(
-                        "unused",
-                        description=None,
-                        default=(
-                            field.default
-                            if type(field.default)
-                            is _resolver.unwrap_origin_strip_extras(option)
-                            else _fields.MISSING_NONPROP
-                        ),
-                        prefix_name=True,
-                    ),
+            default_hash = None
+            if len(found_subcommand_configs) != 0:
+                # Explicitly annotated default.
+                assert len(found_subcommand_configs) == 1, (
+                    f"Expected only one subcommand config, but {subcommand_name} has"
+                    f" {len(found_subcommand_configs)}."
                 )
+                subcommand_config_from_name[subcommand_name] = found_subcommand_configs[
+                    0
+                ]
 
-            subparser = ParserSpecification.from_callable_or_type(
-                # Recursively apply markers.
-                Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
-                if len(field.markers) > 0
-                else option,
-                description=found_subcommand_configs[0].description,
-                parent_classes=parent_classes,
-                parent_type_from_typevar=type_from_typevar,
-                default_instance=found_subcommand_configs[0].default,
-                prefix=prefix,
-                subcommand_prefix=prefix,
-            )
+                if (
+                    found_subcommand_configs[0].default
+                    not in _fields.MISSING_SINGLETONS
+                ):
+                    default_hash = object.__hash__(found_subcommand_configs[0].default)
+                    subcommand_name_from_default_hash[default_hash] = subcommand_name
 
-            # Apply prefix to helptext in nested classes in subparsers.
-            subparser = dataclasses.replace(
-                subparser,
-                helptext_from_nested_class_field_name={
-                    _strings.make_field_name([prefix, k]): v
-                    for k, v in subparser.helptext_from_nested_class_field_name.items()
-                },
-            )
-            parser_from_name[name] = subparser
-
-        # Optional if: type hint is Optional[], or a default instance is provided.
-        required = True
-        if field.default not in _fields.MISSING_SINGLETONS:
-            required = False
+            # Use subcommand types for default matching if no default is explicitly
+            # annotated.
+            if default_hash is None:
+                subcommand_name_from_type[option] = subcommand_name
 
         # If there are any required arguments in the default subparser, we should mark
         # the subparser group as a whole as required.
@@ -355,27 +338,80 @@ class SubparsersSpecification:
                     "Default values for generic subparsers are not supported."
                 )
 
-            default_name = _strings.subparser_name_from_type(
-                prefix, type(field.default)
-            )
-            if default_name not in parser_from_name:
-                # If we can't find the subparser by name, search by type. This is needed
-                # when the user renames their subcommands. (eg via tyro.subcommand)
-                #
-                # TODO: this will display some weird behaviors if multiple subcommands
-                # have the same type.
-                default_name = None
+            # Get default subcommand name: by default hash.
+            default_hash = object.__hash__(field.default)
+            default_name = subcommand_name_from_default_hash.get(default_hash, None)
 
-                for name, parser in parser_from_name.items():
-                    if type(field.default) is _resolver.unwrap_origin_strip_extras(
-                        parser.f
-                    ):
-                        default_name = name
+            # Get default subcommand name: by default value.
+            if default_name is None:
+                for (
+                    subcommand_name,
+                    subcommand_config,
+                ) in subcommand_config_from_name.items():
+                    equal = field.default == subcommand_config.default
+                    if isinstance(equal, bool) and equal:
+                        default_name = subcommand_name
                         break
-                assert default_name is not None, (
-                    f"Default with type {type(field.default)} was passed in, but no"
-                    " matching subparser."
+
+            # Get default subcommand name: by default type.
+            if default_name is None:
+                default_name = subcommand_name_from_type.get(type(field.default), None)
+
+            assert default_name is not None
+
+        # Add subcommands for each option.
+        parser_from_name: Dict[str, ParserSpecification] = {}
+        for option in options_no_none:
+            subcommand_name = _strings.subparser_name_from_type(prefix, option)
+            option, _ = _resolver.unwrap_annotated(option)
+
+            # Get a subcommand config: either pulled from the type annotations or the
+            # field default.
+            if subcommand_name in subcommand_config_from_name:
+                subcommand_config = subcommand_config_from_name[subcommand_name]
+            else:
+                subcommand_config = _subcommands._SubcommandConfiguration(
+                    "unused",
+                    description=None,
+                    default=_fields.MISSING_NONPROP,
+                    prefix_name=True,
                 )
+
+            # If names match, borrow subcommand default from field default.
+            if default_name == subcommand_name:
+                subcommand_config = dataclasses.replace(
+                    subcommand_config, default=field.default
+                )
+
+            subparser = ParserSpecification.from_callable_or_type(
+                # Recursively apply markers.
+                Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
+                if len(field.markers) > 0
+                else option,
+                description=subcommand_config.description,
+                parent_classes=parent_classes,
+                parent_type_from_typevar=type_from_typevar,
+                default_instance=subcommand_config.default,
+                prefix=prefix,
+                subcommand_prefix=prefix,
+            )
+
+            # Apply prefix to helptext in nested classes in subparsers.
+            subparser = dataclasses.replace(
+                subparser,
+                helptext_from_nested_class_field_name={
+                    _strings.make_field_name([prefix, k]): v
+                    for k, v in subparser.helptext_from_nested_class_field_name.items()
+                },
+            )
+            parser_from_name[subcommand_name] = subparser
+
+        # Required if a default is missing.
+        required = field.default in _fields.MISSING_SINGLETONS
+
+        # Required if a default is passed in, but the default value has missing
+        # parameters.
+        if default_name is not None:
             default_parser = parser_from_name[default_name]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
                 required = True
