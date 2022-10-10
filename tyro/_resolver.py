@@ -142,8 +142,8 @@ def unwrap_annotated(
 
     Examples:
     - int, int => (int, ())
-    - Annotated[int, 1], int => (int, 1)
-    - Annotated[int, "1"], int => (int, None)
+    - Annotated[int, 1], int => (int, (1,))
+    - Annotated[int, "1"], int => (int, ())
     """
     if not hasattr(typ, "__metadata__"):
         return typ, ()
