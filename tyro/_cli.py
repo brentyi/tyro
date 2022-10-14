@@ -123,6 +123,28 @@ def cli(
     )
 
 
+@overload
+def get_parser(
+    f: Type[OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    default: Optional[OutT] = None,
+) -> argparse.ArgumentParser:
+    ...
+
+
+@overload
+def get_parser(
+    f: Callable[..., OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    default: Optional[OutT] = None,
+) -> argparse.ArgumentParser:
+    ...
+
+
 def get_parser(
     f: Union[Type[OutT], Callable[..., OutT]],
     *,
