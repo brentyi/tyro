@@ -61,7 +61,7 @@ class ParserSpecification:
         #
         # Note that 'parent' here refers to in the nesting hierarchy, not the
         # superclass.
-        if f in parent_classes:
+        if f in parent_classes and f is not dict:
             raise _instantiators.UnsupportedTypeAnnotationError(
                 f"Found a cyclic dataclass dependency with type {f}."
             )

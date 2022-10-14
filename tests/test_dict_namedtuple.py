@@ -1,4 +1,5 @@
 import contextlib
+import copy
 import dataclasses
 import io
 import pathlib
@@ -291,3 +292,106 @@ def test_helptext_and_default_namedtuple_alternate():
     assert "Documentation 2 (required)" in helptext
     assert "Documentation 3" in helptext
     assert "(default: 3)" in helptext
+
+
+def test_nested_dict():
+    loaded_config = {
+        "batch_size": 32,
+        "optimizer": {
+            "learning_rate": 1e-4,
+            "epsilon": 1e-8,
+            "scheduler": {"schedule_type": "constant"},
+        },
+    }
+    backup_config = copy.deepcopy(loaded_config)
+    overrided_config = tyro.cli(
+        dict,
+        default=loaded_config,
+        args=[
+            "--batch-size",
+            "16",
+            "--optimizer.scheduler.schedule-type",
+            "exponential",
+        ],
+    )
+
+    # Overridden config should be different from loaded config.
+    assert overrided_config != loaded_config
+    assert overrided_config["batch_size"] == 16
+    assert overrided_config["optimizer"]["scheduler"]["schedule_type"] == "exponential"
+
+    # Original loaded config should not be mutated.
+    assert loaded_config == backup_config
+
+
+def test_nested_dict_hyphen():
+    # We do a lot of underscore <=> conversion in the code; this is just to make sure it
+    # doesn't break anything!
+    loaded_config = {
+        "batch-size": 32,
+        "optimizer": {
+            "learning-rate": 1e-4,
+            "epsilon": 1e-8,
+            "scheduler": {"schedule-type": "constant"},
+        },
+    }
+    backup_config = copy.deepcopy(loaded_config)
+    overrided_config = tyro.cli(
+        dict,
+        default=loaded_config,
+        args=[
+            "--batch-size",
+            "16",
+            "--optimizer.scheduler.schedule-type",
+            "exponential",
+        ],
+    )
+
+    # Overridden config should be different from loaded config.
+    assert overrided_config != loaded_config
+    assert overrided_config["batch-size"] == 16
+    assert overrided_config["optimizer"]["scheduler"]["schedule-type"] == "exponential"
+
+    # Original loaded config should not be mutated.
+    assert loaded_config == backup_config
+
+
+def test_nested_dict_annotations():
+    loaded_config = {
+        "optimizer": {
+            "scheduler": {"schedule-type": "constant"},
+        },
+    }
+
+    overrided_config = tyro.cli(
+        dict,
+        default=loaded_config,
+        args=[
+            "--optimizer.scheduler.schedule-type",
+            "exponential",
+        ],
+    )
+    assert overrided_config["optimizer"]["scheduler"]["schedule-type"] == "exponential"
+    del overrided_config
+
+    overrided_config = tyro.cli(
+        Dict[str, Dict],
+        default=loaded_config,
+        args=[
+            "--optimizer.scheduler.schedule-type",
+            "exponential",
+        ],
+    )
+    assert overrided_config["optimizer"]["scheduler"]["schedule-type"] == "exponential"
+    del overrided_config
+
+    overrided_config = tyro.cli(
+        Dict[str, Dict[str, str]],
+        default=loaded_config,
+        args=[
+            "--optimizer.scheduler.schedule-type",
+            "exponential",
+        ],
+    )
+    assert overrided_config["optimizer"]["scheduler"]["schedule-type"] == "exponential"
+    del overrided_config
