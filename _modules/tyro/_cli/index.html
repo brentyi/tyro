@@ -360,6 +360,28 @@
     <span class="p">)</span></div>
 
 
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
 <div class="viewcode-block" id="get_parser"><a class="viewcode-back" href="../../../api/tyro/extras/#tyro._cli.get_parser">[docs]</a><span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>

@@ -83,7 +83,8 @@ Module Contents
    :returns: The output of ``f(...)``\ , or an instance ``f``. If ``f`` is a class, the two are
              typically equivalent.
 
-.. py:function:: get_parser(f: Union[Type[OutT], Callable[Ellipsis, OutT]], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None) -> argparse.ArgumentParser
+.. py:function:: get_parser(f: Type[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None) -> argparse.ArgumentParser
+              get_parser(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None) -> argparse.ArgumentParser
 
    
    Get the ``argparse.ArgumentParser`` object generated under-the-hood by
