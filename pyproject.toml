@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tyro"
-version = "0.3.25"
+version = "0.3.26"
 description = "Strongly typed, zero-effort CLI interfaces"
 authors = ["brentyi <brentyi@berkeley.edu>"]
 include = ["./tyro/**/*"]

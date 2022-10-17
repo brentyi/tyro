@@ -126,9 +126,17 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
                 return Annotated.__class_getitem__(  # type: ignore
                     (potential_subclass,) + get_args(typ)[1:]
                 )
-            return cast(TypeT, potential_subclass)
+            typ = cast(TypeT, potential_subclass)
     except TypeError:
         pass
+
+    if typ is list and isinstance(default_instance, list):
+        typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
+    elif typ is set and isinstance(default_instance, set):
+        typ = Set.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
+    elif typ is tuple and isinstance(default_instance, tuple):
+        typ = Tuple.__getitem__(tuple(map(type, default_instance)))  # type: ignore
+
     return typ
 
 
