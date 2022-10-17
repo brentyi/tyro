@@ -83,11 +83,14 @@ class ParserSpecification:
             field = dataclasses.replace(
                 field,
                 # Resolve generic types.
-                typ=_resolver.type_from_typevar_constraints(
-                    _resolver.apply_type_from_typevar(
-                        field.typ,
-                        type_from_typevar,
-                    )
+                typ=_resolver.narrow_type(
+                    _resolver.type_from_typevar_constraints(  # type: ignore
+                        _resolver.apply_type_from_typevar(
+                            field.typ,
+                            type_from_typevar,
+                        )
+                    ),
+                    default_instance=field.default,
                 ),
             )
 

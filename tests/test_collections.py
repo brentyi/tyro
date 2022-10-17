@@ -450,3 +450,24 @@ def test_double_dict_no_annotation():
             "str": "7",
         }
     }
+
+
+def test_list_narrowing():
+    def main(x: list = [0, 1, 2, "hello"]) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", 5]
+
+
+def test_set_narrowing():
+    def main(x: set = {0, 1, 2, "hello"}) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
+
+
+def test_tuple_narrowing():
+    def main(x: tuple = (0, 1, 2, "hello")) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == (0, 1, 2, "3")
