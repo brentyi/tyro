@@ -251,7 +251,6 @@
 <span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
@@ -367,14 +366,10 @@
     <span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat, we</span>
 <span class="sd">    should parse as Cat.</span>
 
-<span class="sd">    Note that Union types are intentionally excluded here.&quot;&quot;&quot;</span>
-
-    <span class="c1"># Don&#39;t apply narrowing for pathlib.PosixPath, pathlib.WindowsPath, etc.</span>
-    <span class="c1"># This is mostly an aesthetic decision, and is needed because pathlib.Path() hacks</span>
-    <span class="c1"># __new__ to dynamically choose between path types.</span>
-    <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">typ</span>
-
+<span class="sd">    This should generally only be applied to fields used as nested structures, not</span>
+<span class="sd">    individual arguments/fields. (if a field is annotated as Union[int, str], and a</span>
+<span class="sd">    string default is passed in, we don&#39;t want to narrow the type to always be</span>
+<span class="sd">    strings!)&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">potential_subclass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
 
@@ -384,6 +379,11 @@
             <span class="k">return</span> <span class="n">typ</span>
 
         <span class="n">superclass</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># For Python 3.10: don&#39;t narrow union types.</span>
+        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">superclass</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">typ</span>
+
         <span class="k">if</span> <span class="n">superclass</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">potential_subclass</span><span class="p">,</span> <span class="n">superclass</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -393,13 +393,17 @@
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="k">pass</span>
 
+    <span class="k">return</span> <span class="n">typ</span></div>
+
+
+<div class="viewcode-block" id="narrow_container_types"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_container_types">[docs]</a><span class="k">def</span> <span class="nf">narrow_container_types</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeT</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeT</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Type narrowing for containers. Infers types of container contents.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">List</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))))</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">set</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">Set</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))))</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)))</span>  <span class="c1"># type: ignore</span>
-
     <span class="k">return</span> <span class="n">typ</span></div>
 
 

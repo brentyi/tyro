@@ -60,7 +60,15 @@ Module Contents
    Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
    should parse as Cat.
 
-   Note that Union types are intentionally excluded here.
+   This should generally only be applied to fields used as nested structures, not
+   individual arguments/fields. (if a field is annotated as Union[int, str], and a
+   string default is passed in, we don't want to narrow the type to always be
+   strings!)
+
+.. py:function:: narrow_container_types(typ: TypeT, default_instance: Any) -> TypeT
+
+   
+   Type narrowing for containers. Infers types of container contents.
 
 .. py:data:: MetadataType
    
