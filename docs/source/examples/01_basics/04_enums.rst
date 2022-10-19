@@ -15,8 +15,6 @@ We can generate argument parsers from more advanced type annotations, like enums
 
         import dataclasses
         import enum
-        import pathlib
-        from typing import Optional, Tuple
 
         import tyro
 

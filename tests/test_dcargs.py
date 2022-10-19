@@ -491,14 +491,12 @@ def test_fixed():
 
 
 def test_fixed_dataclass_type():
-    @dataclasses.dataclass
-    class Dummy:
-        pass
+    dummy = lambda: 5  # noqa
 
-    def main(x: Callable = Dummy) -> Callable:
+    def main(x: Callable = dummy) -> Callable:
         return x
 
-    assert tyro.cli(main, args=[]) is Dummy
+    assert tyro.cli(main, args=[]) is dummy
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--x", "something"])
 

@@ -170,9 +170,15 @@ def call_from_args(
                     field.name if field.name_override is None else field.name_override
                 ] = value
 
-    unwrapped_f = _resolver.unwrap_origin_strip_extras(f)
-    unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
+    # Note: we unwrap types both before and after narrowing. This is because narrowing
+    # sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just
+    # `tuple`.
+    unwrapped_f = f
+    unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
     unwrapped_f = _resolver.narrow_type(unwrapped_f, default_instance)
+    unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
+    unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
+
     if unwrapped_f in (tuple, list, set):
         if len(args) == 0:
             # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we

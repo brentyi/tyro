@@ -18,7 +18,7 @@ container types; such as ``typing.List[T]`` or ``typing.Tuple[T1, T2]``. In Pyth
         import dataclasses
         import enum
         import pathlib
-        from typing import Optional, Tuple
+        from typing import Tuple
 
         import tyro
 

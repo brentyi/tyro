@@ -13,7 +13,7 @@ Usage:
 import dataclasses
 import enum
 import pathlib
-from typing import Optional, Tuple
+from typing import Tuple
 
 import tyro
 
