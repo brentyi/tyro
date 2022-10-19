@@ -63,8 +63,8 @@ To get started, we recommend browsing the examples to the left.
 
 .. toctree::
    :caption: Getting started
-   :maxdepth: 1
    :hidden:
+   :maxdepth: 1
    :titlesonly:
 
    installation
@@ -72,8 +72,8 @@ To get started, we recommend browsing the examples to the left.
 
 .. toctree::
    :caption: Notes
-   :maxdepth: 5
    :hidden:
+   :maxdepth: 5
    :glob:
 
    goals_and_alternatives
@@ -82,18 +82,49 @@ To get started, we recommend browsing the examples to the left.
    building_configuration_systems
 
 .. toctree::
-   :caption: Examples
-   :maxdepth: 1
+   :caption: Basics
    :hidden:
+   :maxdepth: 1
    :titlesonly:
    :glob:
 
-   examples/*
+   examples/01_basics/*
+
+
+.. toctree::
+   :caption: Hierarchies
+   :hidden:
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   examples/02_nesting/*
+
+
+.. toctree::
+   :caption: Config Management
+   :hidden:
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   examples/03_config_systems/*
+
+
+.. toctree::
+   :caption: Additional Features
+   :hidden:
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   examples/04_additional/*
+
 
 .. toctree::
    :caption: API Reference
-   :maxdepth: 5
    :hidden:
+   :maxdepth: 5
    :titlesonly:
 
    api/tyro/index

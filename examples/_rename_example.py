@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import pathlib
 
 import tyro
@@ -12,4 +14,5 @@ def main(source: pathlib.Path, dest: pathlib.Path, /) -> None:
 
 
 if __name__ == "__main__":
+    print("starting")
     tyro.cli(main)
