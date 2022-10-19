@@ -22,6 +22,9 @@ jobs:
       run: |
         curl -sSL https://install.python-poetry.org | python3 -
         poetry install
+    - name: Strip unsupported tags in README
+      run: |
+        sed -i '/<!-- pypi-strip -->/,/<!-- \/pypi-strip -->/d' README.md
     - name: Build and publish
       env:
         PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}

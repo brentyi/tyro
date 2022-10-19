@@ -1,10 +1,20 @@
 <br />
 <p align="center">
-    <!-- Note that image URLs should all be absolute; this README will be used for both GitHub and PyPI. -->
+    <!--
+    Note that this README will be used for both GitHub and PyPI.
+    We therefore:
+    - Keep all image URLs absolute.
+    - In the GitHub action we use for publishing, strip some HTML tags that aren't supported by PyPI.
+    -->
+    <!-- pypi-strip -->
     <picture>
         <source media="(prefers-color-scheme: dark)" srcset="https://brentyi.github.io/tyro/_static/logo-dark.svg" />
+    <!-- /pypi-strip -->
         <img alt="tyro logo" src="https://brentyi.github.io/tyro/_static/logo-light.svg" width="200px" />
+    <!-- pypi-strip -->
     </picture>
+    <!-- /pypi-strip -->
+
 </p>
 
 <p align="center">
