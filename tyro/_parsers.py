@@ -83,7 +83,7 @@ class ParserSpecification:
             field = dataclasses.replace(
                 field,
                 # Resolve generic types.
-                typ=_resolver.narrow_type(
+                typ=_resolver.narrow_container_types(
                     _resolver.type_from_typevar_constraints(  # type: ignore
                         _resolver.apply_type_from_typevar(
                             field.typ,
