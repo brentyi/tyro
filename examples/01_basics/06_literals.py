@@ -8,7 +8,7 @@ Usage:
 
 import dataclasses
 import enum
-from typing import Literal, Optional, Tuple, Union
+from typing import Literal
 
 import tyro
 

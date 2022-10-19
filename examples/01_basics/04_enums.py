@@ -10,8 +10,6 @@ Usage:
 
 import dataclasses
 import enum
-import pathlib
-from typing import Optional, Tuple
 
 import tyro
 

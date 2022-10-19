@@ -2,6 +2,7 @@
 import collections.abc
 import copy
 import dataclasses
+import pathlib
 import sys
 from typing import (
     Any,
@@ -118,8 +119,21 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
     should parse as Cat.
 
     Note that Union types are intentionally excluded here."""
+
+    # Don't apply narrowing for pathlib.PosixPath, pathlib.WindowsPath, etc.
+    # This is mostly an aesthetic decision, and is needed because pathlib.Path() hacks
+    # __new__ to dynamically choose between path types.
+    if typ is pathlib.Path:
+        return typ
+
     try:
         potential_subclass = type(default_instance)
+
+        if potential_subclass is type:
+            # Don't narrow to `type`. This happens when the default instance is a class;
+            # it doesn't really make sense to parse this case.
+            return typ
+
         superclass = unwrap_annotated(typ)[0]
         if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
             if get_origin(typ) is Annotated:
