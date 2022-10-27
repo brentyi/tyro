@@ -37,13 +37,11 @@
 
 <br />
 
-<strong><code>tyro</code></strong> is a library for building CLI interfaces,
-configuration objects, and configuration systems with modern, type-annotated
-Python.
+<strong><code>tyro</code></strong> is a library for building CLI interfaces and
+configuration objects with type-annotated Python.
 
-Our core interface consists of just one function, `tyro.cli()`, that translates
-Python callables and types into fully-featured argument parsers and
-configuration objects.
+Our core interface consists of one function, `tyro.cli()`, that generates
+argument parsers from Python callables and types.
 
 To get started, we recommend visiting the examples in our
 [documentation](https://brentyi.github.io/tyro).
