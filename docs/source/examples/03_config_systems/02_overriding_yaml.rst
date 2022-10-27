@@ -18,8 +18,8 @@ override values in them.
 
         import tyro
 
-        # Our YAML configuration. Note that this could also be loaded from a file!
-        # Environment variables are an easy way to select between different YAML files.
+        # YAML configuration. Note that this could also be loaded from a file! Environment
+        # variables are an easy way to select between different YAML files.
         default_yaml = r"""
         exp_name: test
         optimizer:
@@ -35,7 +35,7 @@ override values in them.
         """.strip()
 
         if __name__ == "__main__":
-            # Convert out YAML config into a nested dictionary.
+            # Convert our YAML config into a nested dictionary.
             default_config = yaml.safe_load(default_yaml)
 
             # Override fields in the dictionary.

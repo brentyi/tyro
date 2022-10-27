@@ -100,13 +100,13 @@ def cli(
             `argparse.ArgumentParser()`.
         args: If set, parse arguments from a sequence of strings instead of the
             commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
-        default: An instance of `T` to use for default values; only supported
-            if `T` is a dataclass, TypedDict, or NamedTuple. Helpful for merging CLI
-            arguments with values loaded from elsewhere. (for example, a config object
-            loaded from a yaml file)
+        default: An instance of `T` to use for default values; supported for nested
+            structures like dataclasses and dictionaries, but not if `f` is a function
+            or standard class. Helpful for merging CLI arguments with values loaded from
+            elsewhere. (for example, a config object loaded from a yaml file)
 
     Returns:
-        The output of `f(...)`, or an instance `f`. If `f` is a class, the two are
+        The output of `f(...)` or an instance `f`. If `f` is a class, the two are
         typically equivalent.
     """
     return cast(

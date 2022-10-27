@@ -177,7 +177,7 @@ def from_yaml(
 
     As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
     configuration use cases, we also introduce functions for human-readable dataclass
-    serialization: :func:`tyro.conf.from_yaml` and :func:`tyro.conf.to_yaml` attempt
+    serialization: :func:`tyro.extras.from_yaml` and :func:`tyro.extras.to_yaml` attempt
     to strike a balance between flexibility and robustness — in contrast to naively
     dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
     references enable custom tags that are robust against code reorganization and
@@ -206,7 +206,7 @@ def to_yaml(instance: Any) -> str:
 
     As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
     configuration use cases, we also introduce functions for human-readable dataclass
-    serialization: :func:`tyro.conf.from_yaml` and :func:`tyro.conf.to_yaml` attempt
+    serialization: :func:`tyro.extras.from_yaml` and :func:`tyro.extras.to_yaml` attempt
     to strike a balance between flexibility and robustness — in contrast to naively
     dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
     references enable custom tags that are robust against code reorganization and
