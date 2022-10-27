@@ -255,8 +255,8 @@ override values in them.</p>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="c1"># Our YAML configuration. Note that this could also be loaded from a file!</span>
-<span class="linenos"> 6</span><span class="c1"># Environment variables are an easy way to select between different YAML files.</span>
+<span class="linenos"> 5</span><span class="c1"># YAML configuration. Note that this could also be loaded from a file! Environment</span>
+<span class="linenos"> 6</span><span class="c1"># variables are an easy way to select between different YAML files.</span>
 <span class="linenos"> 7</span><span class="n">default_yaml</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="linenos"> 8</span><span class="s2">exp_name: test</span>
 <span class="linenos"> 9</span><span class="s2">optimizer:</span>
@@ -272,7 +272,7 @@ override values in them.</p>
 <span class="linenos">19</span><span class="s2">&quot;&quot;&quot;</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 <span class="linenos">20</span>
 <span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">22</span>    <span class="c1"># Convert out YAML config into a nested dictionary.</span>
+<span class="linenos">22</span>    <span class="c1"># Convert our YAML config into a nested dictionary.</span>
 <span class="linenos">23</span>    <span class="n">default_config</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">default_yaml</span><span class="p">)</span>
 <span class="linenos">24</span>
 <span class="linenos">25</span>    <span class="c1"># Override fields in the dictionary.</span>

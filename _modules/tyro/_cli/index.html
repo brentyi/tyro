@@ -349,13 +349,13 @@
 <span class="sd">            `argparse.ArgumentParser()`.</span>
 <span class="sd">        args: If set, parse arguments from a sequence of strings instead of the</span>
 <span class="sd">            commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.</span>
-<span class="sd">        default: An instance of `T` to use for default values; only supported</span>
-<span class="sd">            if `T` is a dataclass, TypedDict, or NamedTuple. Helpful for merging CLI</span>
-<span class="sd">            arguments with values loaded from elsewhere. (for example, a config object</span>
-<span class="sd">            loaded from a yaml file)</span>
+<span class="sd">        default: An instance of `T` to use for default values; supported for nested</span>
+<span class="sd">            structures like dataclasses and dictionaries, but not if `f` is a function</span>
+<span class="sd">            or standard class. Helpful for merging CLI arguments with values loaded from</span>
+<span class="sd">            elsewhere. (for example, a config object loaded from a yaml file)</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The output of `f(...)`, or an instance `f`. If `f` is a class, the two are</span>
+<span class="sd">        The output of `f(...)` or an instance `f`. If `f` is a class, the two are</span>
 <span class="sd">        typically equivalent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>

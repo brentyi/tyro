@@ -318,14 +318,14 @@ passed in. If not specified, <code class="docutils literal notranslate"><span cl
 <code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser()</span></code>.</p></li>
 <li><p><strong>args</strong> – If set, parse arguments from a sequence of strings instead of the
 commandline. Mirrors argument from <code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser.parse_args()</span></code>.</p></li>
-<li><p><strong>default</strong> – An instance of <code class="docutils literal notranslate"><span class="pre">T</span></code> to use for default values; only supported
-if <code class="docutils literal notranslate"><span class="pre">T</span></code> is a dataclass, TypedDict, or NamedTuple. Helpful for merging CLI
-arguments with values loaded from elsewhere. (for example, a config object
-loaded from a yaml file)</p></li>
+<li><p><strong>default</strong> – An instance of <code class="docutils literal notranslate"><span class="pre">T</span></code> to use for default values; supported for nested
+structures like dataclasses and dictionaries, but not if <code class="docutils literal notranslate"><span class="pre">f</span></code> is a function
+or standard class. Helpful for merging CLI arguments with values loaded from
+elsewhere. (for example, a config object loaded from a yaml file)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>The output of <code class="docutils literal notranslate"><span class="pre">f(...)</span></code>, or an instance <code class="docutils literal notranslate"><span class="pre">f</span></code>. If <code class="docutils literal notranslate"><span class="pre">f</span></code> is a class, the two are
+<dd class="field-even"><p>The output of <code class="docutils literal notranslate"><span class="pre">f(...)</span></code> or an instance <code class="docutils literal notranslate"><span class="pre">f</span></code>. If <code class="docutils literal notranslate"><span class="pre">f</span></code> is a class, the two are
 typically equivalent.</p>
 </dd>
 </dl>
