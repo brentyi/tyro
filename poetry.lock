@@ -593,6 +593,14 @@ test = ["pytest (>=6.2)", "virtualenv (>20)"]
 toml = ["setuptools (>=42)"]
 
 [[package]]
+name = "shtab"
+version = "1.5.6"
+description = "Automagic shell tab completion for Python CLI applications"
+category = "main"
+optional = false
+python-versions = ">=3.2"
+
+[[package]]
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
@@ -658,7 +666,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "efb24b1ca37536bb4af0e0c2d80937cc1880a0cd1cb5af5dab562f6205db9696"
+content-hash = "f273885b6e4daaa758c2bd6e777e974aab9c320d63417dd5476c0e4c46211277"
 
 [metadata.files]
 absl-py = [
@@ -1237,6 +1245,10 @@ setuptools = [
 setuptools-scm = [
     {file = "setuptools_scm-6.4.2-py3-none-any.whl", hash = "sha256:acea13255093849de7ccb11af9e1fb8bde7067783450cee9ef7a93139bddf6d4"},
     {file = "setuptools_scm-6.4.2.tar.gz", hash = "sha256:6833ac65c6ed9711a4d5d2266f8024cfa07c533a0e55f4c12f6eff280a5a9e30"},
+]
+shtab = [
+    {file = "shtab-1.5.6-py2.py3-none-any.whl", hash = "sha256:59cc8b291ce43cea24f9c66a633d054967893bd6a55dc8bfcc65849073ee01d0"},
+    {file = "shtab-1.5.6.tar.gz", hash = "sha256:0b394e4625cb0632ad3b26a51c16ee35628b707b137108502a71473abb2be4c3"},
 ]
 six = [
     {file = "six-1.16.0-py2.py3-none-any.whl", hash = "sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254"},
