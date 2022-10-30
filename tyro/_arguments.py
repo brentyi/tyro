@@ -22,10 +22,9 @@ from typing import (
 )
 
 import rich.markup
+import shtab
 
-from . import _fields, _instantiators, _resolver
-from . import _shtab as shtab
-from . import _strings
+from . import _fields, _instantiators, _resolver, _strings
 from .conf import _markers
 
 try:
