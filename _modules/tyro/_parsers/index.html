@@ -483,7 +483,13 @@
                 <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">positional_group</span><span class="p">)</span>
                 <span class="k">continue</span>
 
-            <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">prefix</span> <span class="ow">in</span> <span class="n">group_from_prefix</span><span class="p">:</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Suppressed argument: still need to add them, but they won&#39;t show up in</span>
+                <span class="c1"># the helptext so it doesn&#39;t matter which group.</span>
+                <span class="k">assert</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
 
         <span class="c1"># Create subparser tree.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subparsers_from_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

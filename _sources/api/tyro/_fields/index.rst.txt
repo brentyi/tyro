@@ -57,6 +57,9 @@ Module Contents
 
       
 
+   .. py:method:: __post_init__(self)
+
+
    .. py:method:: make(name: str, typ: Type, default: Any, helptext: Optional[str], *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = (), name_override: Optional[Any] = None)
       :staticmethod:
 

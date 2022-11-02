@@ -269,6 +269,9 @@
 <span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional</span>
 <span class="sd">argument.&quot;&quot;&quot;</span>
 
+<span class="c1"># TODO: the verb tenses here are inconsistent, naming could be revisited.</span>
+<span class="c1"># Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.</span>
+
 <span class="n">Fixed</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Fixed[T]` to prevent `tyro.cli` from parsing it; a</span>
 <span class="sd">default value should be set instead. Note that fields with defaults that can&#39;t be parsed</span>
