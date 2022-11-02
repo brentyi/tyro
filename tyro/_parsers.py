@@ -40,7 +40,6 @@ class ParserSpecification:
         f: Callable[..., T],
         description: Optional[str],
         parent_classes: Set[Type],
-        parent_type_from_typevar: Optional[Dict[TypeVar, Type]],
         default_instance: Union[
             T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
         ],
@@ -52,10 +51,6 @@ class ParserSpecification:
         # Resolve generic types.
         f, type_from_typevar = _resolver.resolve_generic_types(f)
         f = _resolver.narrow_type(f, default_instance)
-        if parent_type_from_typevar is not None:
-            for typevar, typ in type_from_typevar.items():
-                if typ in parent_type_from_typevar:
-                    type_from_typevar[typevar] = parent_type_from_typevar[typ]  # type: ignore
 
         # Cycle detection.
         #
@@ -135,7 +130,6 @@ class ParserSpecification:
                         field.typ,
                         description=None,
                         parent_classes=parent_classes,
-                        parent_type_from_typevar=type_from_typevar,
                         default_instance=field.default,
                         prefix=_strings.make_field_name([prefix, field.name]),
                         subcommand_prefix=subcommand_prefix,
@@ -238,13 +232,7 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            if arg.prefix in group_from_prefix:
-                arg.add_argument(group_from_prefix[arg.prefix])
-            else:
-                # Suppressed argument: still need to add them, but they won't show up in
-                # the helptext so it doesn't matter which group.
-                assert arg.lowered.help is argparse.SUPPRESS
-                arg.add_argument(group_from_prefix[""])
+            arg.add_argument(group_from_prefix[arg.prefix])
 
         # Create subparser tree.
         if len(self.subparsers_from_name) > 0:
@@ -393,7 +381,6 @@ class SubparsersSpecification:
                 else option,
                 description=subcommand_config.description,
                 parent_classes=parent_classes,
-                parent_type_from_typevar=type_from_typevar,
                 default_instance=subcommand_config.default,
                 prefix=prefix,
                 subcommand_prefix=prefix,
