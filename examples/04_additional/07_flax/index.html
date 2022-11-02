@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Pydantic" href="../08_pydantic/" /><link rel="prev" title="Configuration via typing.Annotated[]" href="../06_conf/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Pydantic Integration" href="../08_pydantic/" /><link rel="prev" title="Configuration via typing.Annotated[]" href="../06_conf/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>Directly Instantiating Flax Modules - tyro</title>
+        <title>JAX/Flax Integration - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -198,9 +198,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Directly Instantiating Flax Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Pydantic</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Attrs Integration</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -249,8 +249,8 @@
           </label>
         </div>
         <article role="main">
-          <section id="directly-instantiating-flax-modules">
-<h1>Directly Instantiating Flax Modules<a class="headerlink" href="#directly-instantiating-flax-modules" title="Permalink to this heading">#</a></h1>
+          <section id="jax-flax-integration">
+<h1>JAX/Flax Integration<a class="headerlink" href="#jax-flax-integration" title="Permalink to this heading">#</a></h1>
 <p>If you use <a class="reference external" href="https://github.com/google/flax">flax.linen</a>, modules can be instantiated
 directly from <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">flax</span> <span class="kn">import</span> <span class="n">linen</span> <span class="k">as</span> <span class="n">nn</span>
@@ -317,7 +317,7 @@ Train a model.
 │ --model.units INT       Hidden unit count. (default: 32)                   │
 │ --model.output-dim INT  Number of classes. (default: 10)                   │
 │ --model.parent {fixed}  (fixed to: &lt;flax.linen.module._Sentinel object at  │
-│                         0x7fc3b914d550&gt;)                                   │
+│                         0x7f42f03456d0&gt;)                                   │
 │ --model.name STR        (default: None)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
@@ -340,7 +340,7 @@ num_iterations=1000</pre>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Pydantic</div>
+                <div class="title">Pydantic Integration</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
