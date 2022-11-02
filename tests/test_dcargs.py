@@ -491,7 +491,8 @@ def test_fixed():
 
 
 def test_fixed_dataclass_type():
-    dummy = lambda: 5  # noqa
+    def dummy():
+        return 5  # noqa
 
     def main(x: Callable = dummy) -> Callable:
         return x

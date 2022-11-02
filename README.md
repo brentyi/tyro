@@ -43,42 +43,6 @@ configuration objects with type-annotated Python.
 Our core interface consists of one function, `tyro.cli()`, that generates
 argument parsers from Python callables and types.
 
-To get started, we recommend visiting the examples in our
-[documentation](https://brentyi.github.io/tyro).
-
-### Why `tyro`?
-
-1. **Strong typing.**
-
-   Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
-   arguments populated by `tyro` benefit from IDE and language server-supported
-   operations — think tab completion, rename, jump-to-def, docstrings on hover —
-   as well as static checking tools like `pyright` and `mypy`.
-
-2. **Minimal overhead.**
-
-   Standard Python type annotations, docstrings, and default values are parsed
-   to automatically generate command-line interfaces with informative helptext.
-
-   If you're familiar with type annotations and docstrings in Python, you
-   already know how to use `tyro`! If you're not, learning to use `tyro` reduces
-   to learning to write modern Python.
-
-   Hate `tyro`? Just remove one line of code, and you're left with beautiful,
-   type-annotated, and documented vanilla Python that can be used with a range
-   of other configuration libraries.
-
-3. **Modularity.**
-
-   `tyro` supports hierarchical configuration structures, which make it easy to
-   distribute definitions, defaults, and documentation of configurable fields
-   across modules or source files.
-
-4. **Tab completion.**
-
-   By extending [shtab](https://github.com/iterative/shtab), `tyro`
-   automatically generates tab completion scripts for bash, zsh, and tcsh.
-
 ### A minimal example
 
 As a replacement for `argparse`:
@@ -150,6 +114,39 @@ print(args.a + args.b)
 </table>
 
 For more examples, see our [documentation](https://brentyi.github.io/tyro).
+
+### Why `tyro`?
+
+1. **Strong typing.**
+
+   Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
+   arguments populated by `tyro` benefit from IDE and language server-supported
+   operations — think tab completion, rename, jump-to-def, docstrings on hover —
+   as well as static checking tools like `pyright` and `mypy`.
+
+2. **Minimal overhead.**
+
+   Standard Python type annotations, docstrings, and default values are parsed
+   to automatically generate command-line interfaces with informative helptext.
+
+   If you're familiar with type annotations and docstrings in Python, you
+   already know how to use `tyro`! If you're not, learning to use `tyro` reduces
+   to learning to write modern Python.
+
+   Hate `tyro`? Just remove one line of code, and you're left with beautiful,
+   type-annotated, and documented vanilla Python that can be used with a range
+   of other configuration libraries.
+
+3. **Modularity.**
+
+   `tyro` supports hierarchical configuration structures, which make it easy to
+   distribute definitions, defaults, and documentation of configurable fields
+   across modules or source files.
+
+4. **Tab completion.**
+
+   By extending [shtab](https://github.com/iterative/shtab), `tyro`
+   automatically generates tab completion scripts for bash, zsh, and tcsh.
 
 ### In the wild
 

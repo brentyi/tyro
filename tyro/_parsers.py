@@ -284,7 +284,7 @@ class SubparsersSpecification:
             _resolver.apply_type_from_typevar(typ, type_from_typevar)
             for typ in get_args(typ)
         ]
-        options_no_none = [o for o in options if o != type(None)]  # noqa
+        options_no_none = [o for o in options if o is not type(None)]  # noqa
         if not all(
             [
                 _fields.is_nested_type(o, _fields.MISSING_NONPROP)

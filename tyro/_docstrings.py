@@ -140,9 +140,13 @@ def get_class_tokenization_with_field(
         try:
             tokenization = _ClassTokenization.make(search_cls)  # type: ignore
         except OSError as e:
-            # Dynamic dataclasses will result in an OSError -- this is fine, we just assume
-            # there's no docstring.
-            assert "could not find class definition" in e.args[0]
+            assert (
+                # Dynamic dataclasses will result in an OSError -- this is fine, we just assume
+                # there's no docstring.
+                "could not find class definition" in e.args[0]
+                # Pydantic.
+                or "source code not available" in e.args[0]
+            )
             return None
         except TypeError as e:  # pragma: no cover
             # Notebooks cause “___ is a built-in class” TypeError.

@@ -68,7 +68,7 @@ def subcommand_type_from_defaults(
 
     ```python
     if TYPE_CHECKING:
-        SelectableConfig = ExperimentConfig
+        SelectableConfig = Config
     else:
         SelectableConfig = subcommand_type_from_defaults(base_mapping)
     ```
