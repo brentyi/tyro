@@ -72,4 +72,7 @@ exclude_lines = [
 
     # or fallback imports
     "except ImportError:",
+
+    # or anything that's deprecated
+    "deprecated",
 ]

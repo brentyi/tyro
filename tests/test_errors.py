@@ -1,5 +1,5 @@
 import dataclasses
-from typing import List, Tuple, Union
+from typing import List, Tuple, TypeVar, Union
 
 import pytest
 
@@ -93,6 +93,24 @@ def test_missing_annotation_1():
 
 def test_missing_annotation_2():
     def main(*, a) -> None:
+        pass
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=["--help"])
+
+
+def test_tuple_needs_default():
+    def main(arg: tuple) -> None:  # type: ignore
+        pass
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=["--help"])
+
+
+def test_unbound_typevar():
+    T = TypeVar("T")
+
+    def main(arg: T) -> None:  # type: ignore
         pass
 
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):

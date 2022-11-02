@@ -276,7 +276,6 @@ def _cli_impl(
         f,
         description=description,
         parent_classes=set(),  # Used for recursive calls.
-        parent_type_from_typevar=None,  # Used for recursive calls.
         default_instance=default_instance_internal,  # Overrides for default values.
         prefix="",  # Used for recursive calls.
     )

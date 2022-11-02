@@ -104,13 +104,6 @@ def instantiator_from_type(
     - A metadata structure, which specifies parameters for argparse.
     """
 
-    # Resolve typevars.
-    if typ in type_from_typevar:
-        return instantiator_from_type(
-            type_from_typevar[typ],  # type: ignore
-            type_from_typevar,
-        )
-
     # Handle Any.
     if typ is Any:
         raise UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
