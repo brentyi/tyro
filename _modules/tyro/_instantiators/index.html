@@ -355,13 +355,6 @@
 <span class="sd">    - A metadata structure, which specifies parameters for argparse.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c1"># Resolve typevars.</span>
-    <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">instantiator_from_type</span><span class="p">(</span>
-            <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">],</span>  <span class="c1"># type: ignore</span>
-            <span class="n">type_from_typevar</span><span class="p">,</span>
-        <span class="p">)</span>
-
     <span class="c1"># Handle Any.</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="s2">&quot;`Any` is not a parsable type.&quot;</span><span class="p">)</span>
