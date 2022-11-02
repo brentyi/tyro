@@ -1,7 +1,7 @@
 """Pydantic
 
 In addition to standard dataclasses, `tyro` also supports
-[Pydantic](https://github.com/pydantic/pydantic) models.
+[attrs](https://www.attrs.org/) classes.
 
 Usage:
 `python ./09_attrs.py --help`
