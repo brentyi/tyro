@@ -6,6 +6,7 @@ import sys
 from typing import (
     Any,
     Callable,
+    ClassVar,
     Dict,
     FrozenSet,
     List,
@@ -18,6 +19,7 @@ from typing import (
     cast,
 )
 
+from attr import dataclass
 from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
 TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
@@ -69,17 +71,26 @@ def resolve_generic_types(
 
 
 def resolved_fields(cls: Type) -> List[dataclasses.Field]:
-    """Similar to dataclasses.fields, but resolves forward references."""
+    """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
+    resolves forward references."""
 
     assert dataclasses.is_dataclass(cls)
     fields = []
     annotations = get_type_hints(cls, include_extras=True)
-    for field in dataclasses.fields(cls):
+    for field in getattr(cls, "__dataclass_fields__").values():
         # Avoid mutating original field.
         field = copy.copy(field)
 
         # Resolve forward references.
         field.type = annotations[field.name]
+
+        # Skip ClassVars.
+        if get_origin(field.type) is ClassVar:
+            continue
+
+        # Unwrap InitVar types.
+        if isinstance(field.type, dataclasses.InitVar):
+            field.type = field.type.type
 
         fields.append(field)
 
