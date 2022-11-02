@@ -28,10 +28,10 @@ attrs = "^21.4.0"
 torch = "^1.10.0"
 mypy = "^0.971"
 pyright = "^1.1.264"
-coverage = {extras = ["toml"], version = "^6.4.2"}
 numpy = ">=1.20.0"
 flax = "^0.6.0"
 pydantic = "^1.10.2"
+coverage = {extras = ["toml"], version = "^6.5.0"}
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
