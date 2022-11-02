@@ -38,7 +38,8 @@ Module Contents
 .. py:function:: resolved_fields(cls: Type) -> List[dataclasses.Field]
 
    
-   Similar to dataclasses.fields, but resolves forward references.
+   Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
+   resolves forward references.
 
 .. py:function:: is_namedtuple(cls: Type) -> bool
 
