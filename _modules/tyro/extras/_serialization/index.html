@@ -167,13 +167,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../building_configuration_systems/">Building configuration systems</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/01_functions/">Functions</a></li>
@@ -205,6 +198,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/05_generics/">Generic Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/07_flax/">Directly Instantiating Flax Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../building_configuration_systems/">Building configuration systems</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -294,7 +294,7 @@
             <span class="p">)</span>
 
         <span class="c1"># Handle enums.</span>
-        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">enum</span><span class="o">.</span><span class="n">EnumMeta</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">EnumMeta</span><span class="p">):</span>
             <span class="k">return</span> <span class="p">{</span><span class="n">typ</span><span class="p">}</span>
 
         <span class="c1"># Handle Union, Annotated, List, etc. No-op when there are no args.</span>

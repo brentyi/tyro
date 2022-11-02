@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="tyro" href="../../../api/tyro/" /><link rel="prev" title="Configuration via typing.Annotated[]" href="../06_conf/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Goals and alternatives" href="../../../goals_and_alternatives/" /><link rel="prev" title="Configuration via typing.Annotated[]" href="../06_conf/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>Directly Instantiating Flax Modules - tyro</title>
@@ -168,13 +168,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/01_functions/">Functions</a></li>
@@ -206,6 +199,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../06_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Directly Instantiating Flax Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -315,7 +315,7 @@ Train a model.
 │ --model.units INT       Hidden unit count. (default: 32)                   │
 │ --model.output-dim INT  Number of classes. (default: 10)                   │
 │ --model.parent {fixed}  (fixed to: &lt;flax.linen.module._Sentinel object at  │
-│                         0x7f27a79a45e0&gt;)                                   │
+│                         0x7fc4bfce9700&gt;)                                   │
 │ --model.name STR        (default: None)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
@@ -333,12 +333,12 @@ num_iterations=1000</pre>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../../../api/tyro/">
+          <a class="next-page" href="../../../goals_and_alternatives/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></div>
+                <div class="title">Goals and alternatives</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>

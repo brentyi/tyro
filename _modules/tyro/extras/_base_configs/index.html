@@ -167,13 +167,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../building_configuration_systems/">Building configuration systems</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/01_functions/">Functions</a></li>
@@ -205,6 +198,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/05_generics/">Generic Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/07_flax/">Directly Instantiating Flax Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../goals_and_alternatives/">Goals and alternatives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../building_configuration_systems/">Building configuration systems</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -317,7 +317,7 @@
 
 <span class="sd">    ```python</span>
 <span class="sd">    if TYPE_CHECKING:</span>
-<span class="sd">        SelectableConfig = ExperimentConfig</span>
+<span class="sd">        SelectableConfig = Config</span>
 <span class="sd">    else:</span>
 <span class="sd">        SelectableConfig = subcommand_type_from_defaults(base_mapping)</span>
 <span class="sd">    ```</span>

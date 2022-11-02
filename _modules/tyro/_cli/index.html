@@ -167,13 +167,6 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
-</ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/01_functions/">Functions</a></li>
@@ -205,6 +198,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_flax/">Directly Instantiating Flax Modules</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
@@ -296,7 +296,10 @@
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="c1"># Note that passing a default makes sense for things like dataclasses, but are not</span>
+    <span class="c1"># supported for general callables. These can, however, be specified in the signature</span>
+    <span class="c1"># of the callable itself.</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span>
     <span class="o">...</span>
 
@@ -357,14 +360,14 @@
 <span class="sd">            `argparse.ArgumentParser()`.</span>
 <span class="sd">        args: If set, parse arguments from a sequence of strings instead of the</span>
 <span class="sd">            commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.</span>
-<span class="sd">        default: An instance of `T` to use for default values; supported for nested</span>
-<span class="sd">            structures like dataclasses and dictionaries, but not if `f` is a function</span>
-<span class="sd">            or standard class. Helpful for merging CLI arguments with values loaded from</span>
-<span class="sd">            elsewhere. (for example, a config object loaded from a yaml file)</span>
+<span class="sd">        default: An instance of `OutT` to use for default values; supported if `f` is a</span>
+<span class="sd">            type like a dataclass or dictionary, but not if `f` is a general callable like</span>
+<span class="sd">            a function or standard class. Helpful for merging CLI arguments with values</span>
+<span class="sd">            loaded from elsewhere. (for example, a config object loaded from a yaml file)</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The output of `f(...)` or an instance `f`. If `f` is a class, the two are</span>
-<span class="sd">        typically equivalent.</span>
+<span class="sd">        equivalent.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>
         <span class="n">OutT</span><span class="p">,</span>

@@ -15,6 +15,16 @@
 Module Contents
 ---------------
 
+.. py:data:: attr
+   
+
+   
+
+.. py:data:: pydantic
+   
+
+   
+
 .. py:class:: FieldDefinition
 
    .. py:attribute:: name

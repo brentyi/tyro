@@ -73,7 +73,7 @@ Module Contents
    .. code-block:: python
 
       if TYPE_CHECKING:
-          SelectableConfig = ExperimentConfig
+          SelectableConfig = Config
       else:
           SelectableConfig = subcommand_type_from_defaults(base_mapping)
 
