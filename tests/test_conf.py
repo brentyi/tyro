@@ -401,3 +401,54 @@ def test_fixed_recursive():
             args=["--x", "True"],
             default=A(False),
         ) == A(True)
+
+
+def test_suppressed_group():
+    """Reproduction of https://github.com/nerfstudio-project/nerfstudio/issues/882."""
+
+    @dataclasses.dataclass
+    class Inner:
+        a: int
+        b: int
+
+    def main(
+        value: int,
+        inner: tyro.conf.Suppress[Inner] = Inner(1, 2),
+    ) -> int:
+        return value + inner.a + inner.b
+
+    assert tyro.cli(main, args=["--value", "5"]) == 8
+
+
+def test_fixed_group():
+    """Reproduction of https://github.com/nerfstudio-project/nerfstudio/issues/882."""
+
+    @dataclasses.dataclass
+    class Inner:
+        a: int
+        b: int
+
+    def main(
+        value: int,
+        inner: tyro.conf.Fixed[Inner] = Inner(1, 2),
+    ) -> int:
+        return value + inner.a + inner.b
+
+    assert tyro.cli(main, args=["--value", "5"]) == 8
+
+
+def test_fixed_suppressed_group():
+    """Reproduction of https://github.com/nerfstudio-project/nerfstudio/issues/882."""
+
+    @dataclasses.dataclass
+    class Inner:
+        a: int
+        b: int
+
+    def main(
+        value: int,
+        inner: tyro.conf.Fixed[Inner] = Inner(1, 2),
+    ) -> int:
+        return value + inner.a + inner.b
+
+    assert tyro.cli(main, args=["--value", "5"]) == 8
