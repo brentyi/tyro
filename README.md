@@ -25,10 +25,10 @@
 
 <p align="center">
     <img alt="build" src="https://github.com/brentyi/tyro/workflows/build/badge.svg" />
-    <img alt="mypy" src="https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=master" />
+    <img alt="mypy" src="https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=main" />
     <img alt="lint" src="https://github.com/brentyi/tyro/workflows/lint/badge.svg" />
     <a href="https://codecov.io/gh/brentyi/tyro">
-        <img alt="codecov" src="https://codecov.io/gh/brentyi/tyro/branch/master/graph/badge.svg" />
+        <img alt="codecov" src="https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg" />
     </a>
     <a href="https://pypi.org/project/tyro/">
         <img alt="codecov" src="https://img.shields.io/pypi/pyversions/tyro" />
