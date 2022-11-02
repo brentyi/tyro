@@ -134,13 +134,13 @@ To get started, we recommend browsing the examples to the left.
 .. |build| image:: https://github.com/brentyi/tyro/workflows/build/badge.svg
    :alt: Build status icon
    :target: https://github.com/brentyi/tyro
-.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=master
+.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=main
    :alt: Mypy status icon
    :target: https://github.com/brentyi/tyro
 .. |lint| image:: https://github.com/brentyi/tyro/workflows/lint/badge.svg
    :alt: Lint status icon
    :target: https://github.com/brentyi/tyro
-.. |coverage| image:: https://codecov.io/gh/brentyi/tyro/branch/master/graph/badge.svg
+.. |coverage| image:: https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg
    :alt: Test coverage status icon
    :target: https://codecov.io/gh/brentyi/tyro
 .. |downloads| image:: https://pepy.tech/badge/tyro
