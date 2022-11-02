@@ -115,3 +115,19 @@ def test_unbound_typevar():
 
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
+
+
+def test_missing_default_fixed():
+    def main(value: tyro.conf.SuppressFixed[tyro.conf.Fixed[int]]) -> int:
+        return value
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=["--help"])
+
+
+def test_missing_default_suppressed():
+    def main(value: tyro.conf.Suppress[int]) -> int:
+        return value
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=["--help"])

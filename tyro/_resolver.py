@@ -19,7 +19,6 @@ from typing import (
     cast,
 )
 
-from attr import dataclass
 from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
 TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)

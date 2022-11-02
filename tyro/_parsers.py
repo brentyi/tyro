@@ -232,7 +232,13 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            arg.add_argument(group_from_prefix[arg.prefix])
+            if arg.prefix in group_from_prefix:
+                arg.add_argument(group_from_prefix[arg.prefix])
+            else:
+                # Suppressed argument: still need to add them, but they won't show up in
+                # the helptext so it doesn't matter which group.
+                assert arg.lowered.help is argparse.SUPPRESS
+                arg.add_argument(group_from_prefix[""])
 
         # Create subparser tree.
         if len(self.subparsers_from_name) > 0:

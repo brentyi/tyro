@@ -18,6 +18,9 @@ Positional = Annotated[T, None]
 """A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
 argument."""
 
+# TODO: the verb tenses here are inconsistent, naming could be revisited.
+# Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.
+
 Fixed = Annotated[T, None]
 """A type `T` can be annotated as `Fixed[T]` to prevent `tyro.cli` from parsing it; a
 default value should be set instead. Note that fields with defaults that can't be parsed

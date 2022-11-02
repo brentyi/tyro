@@ -57,6 +57,14 @@ class FieldDefinition:
     # user-facing argument name doesn't match the keyword expected by our callable.
     name_override: Optional[Any]
 
+    def __post_init__(self):
+        if (
+            _markers.Fixed in self.markers or _markers.Suppress in self.markers
+        ) and self.default in MISSING_SINGLETONS:
+            raise _instantiators.UnsupportedTypeAnnotationError(
+                f"Field {self.name} is missing a default value!"
+            )
+
     @staticmethod
     def make(
         name: str,
