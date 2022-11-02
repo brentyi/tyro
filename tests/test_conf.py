@@ -421,7 +421,7 @@ def test_suppressed_group():
 
 
 def test_fixed_group():
-    """Reproduction of https://github.com/nerfstudio-project/nerfstudio/issues/882."""
+    """Inspired by https://github.com/nerfstudio-project/nerfstudio/issues/882."""
 
     @dataclasses.dataclass
     class Inner:
