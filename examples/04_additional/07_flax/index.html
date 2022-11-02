@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Goals and alternatives" href="../../../goals_and_alternatives/" /><link rel="prev" title="Configuration via typing.Annotated[]" href="../06_conf/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Pydantic" href="../08_pydantic/" /><link rel="prev" title="Configuration via typing.Annotated[]" href="../06_conf/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
         <title>Directly Instantiating Flax Modules - tyro</title>
@@ -199,6 +199,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../06_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Directly Instantiating Flax Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Pydantic</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -315,7 +317,7 @@ Train a model.
 │ --model.units INT       Hidden unit count. (default: 32)                   │
 │ --model.output-dim INT  Number of classes. (default: 10)                   │
 │ --model.parent {fixed}  (fixed to: &lt;flax.linen.module._Sentinel object at  │
-│                         0x7fc4bfce9700&gt;)                                   │
+│                         0x7f4ecf88b670&gt;)                                   │
 │ --model.name STR        (default: None)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
@@ -333,12 +335,12 @@ num_iterations=1000</pre>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../../../goals_and_alternatives/">
+          <a class="next-page" href="../08_pydantic/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Goals and alternatives</div>
+                <div class="title">Pydantic</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>

@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Nesting in Containers" href="../04_nesting_in_containers/" /><link rel="prev" title="Subcommands" href="../02_subcommands/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Goals and alternatives" href="../../../goals_and_alternatives/" /><link rel="prev" title="Pydantic" href="../08_pydantic/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>Sequenced Subcommands - tyro</title>
+        <title>Pydantic - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -179,11 +179,11 @@
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/07_unions/">Unions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../01_nesting/">Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../02_subcommands/">Subcommands</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Sequenced Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../04_nesting_in_containers/">Nesting in Containers</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/01_nesting/">Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/02_subcommands/">Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
 <ul>
@@ -191,16 +191,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../../03_config_systems/02_overriding_yaml/">Overriding YAML Configs</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Additional Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/01_positional_args/">Positional Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/02_dictionaries/">Overriding Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/03_tuples/">Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/04_classes/">Instantiating Classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/07_flax/">Directly Instantiating Flax Modules</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/08_pydantic/">Pydantic</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/09_attrs/">Pydantic</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../01_positional_args/">Positional Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_dictionaries/">Overriding Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_tuples/">Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_conf/">Configuration via typing.Annotated[]</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_flax/">Directly Instantiating Flax Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Pydantic</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -249,109 +249,46 @@
           </label>
         </div>
         <article role="main">
-          <section id="sequenced-subcommands">
-<h1>Sequenced Subcommands<a class="headerlink" href="#sequenced-subcommands" title="Permalink to this heading">#</a></h1>
-<p>Multiple unions over nested types are populated using a series of subcommands.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+          <section id="pydantic">
+<h1>Pydantic<a class="headerlink" href="#pydantic" title="Permalink to this heading">#</a></h1>
+<p>In addition to standard dataclasses, <code class="docutils literal notranslate"><span class="pre">tyro</span></code> also supports
+<a class="reference external" href="https://www.attrs.org/">attrs</a> classes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">attr</span>
 <span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="c1"># Possible dataset configurations.</span>
-<span class="linenos"> 9</span>
+<span class="linenos"> 6</span><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
+<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 8</span>    <span class="sd">&quot;&quot;&quot;Description.</span>
+<span class="linenos"> 9</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">10</span>
-<span class="linenos">11</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">12</span><span class="k">class</span> <span class="nc">Mnist</span><span class="p">:</span>
-<span class="linenos">13</span>    <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="linenos">14</span>    <span class="sd">&quot;&quot;&quot;Set to load binary version of MNIST dataset.&quot;&quot;&quot;</span>
-<span class="linenos">15</span>
+<span class="linenos">11</span>    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">()</span>
+<span class="linenos">12</span>    <span class="sd">&quot;&quot;&quot;A string field.&quot;&quot;&quot;</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">ib</span><span class="p">(</span><span class="n">factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="mi">5</span><span class="p">)</span>
+<span class="linenos">15</span>    <span class="sd">&quot;&quot;&quot;A required integer field.&quot;&quot;&quot;</span>
 <span class="linenos">16</span>
-<span class="linenos">17</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">18</span><span class="k">class</span> <span class="nc">ImageNet</span><span class="p">:</span>
-<span class="linenos">19</span>    <span class="n">subset</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
-<span class="linenos">20</span>    <span class="sd">&quot;&quot;&quot;Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc.&quot;&quot;&quot;</span>
-<span class="linenos">21</span>
-<span class="linenos">22</span>
-<span class="linenos">23</span><span class="c1"># Possible optimizer configurations.</span>
-<span class="linenos">24</span>
-<span class="linenos">25</span>
-<span class="linenos">26</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">27</span><span class="k">class</span> <span class="nc">Adam</span><span class="p">:</span>
-<span class="linenos">28</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
-<span class="linenos">29</span>    <span class="n">betas</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)</span>
-<span class="linenos">30</span>
-<span class="linenos">31</span>
-<span class="linenos">32</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">33</span><span class="k">class</span> <span class="nc">Sgd</span><span class="p">:</span>
-<span class="linenos">34</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3e-4</span>
-<span class="linenos">35</span>
-<span class="linenos">36</span>
-<span class="linenos">37</span><span class="c1"># Train script.</span>
-<span class="linenos">38</span>
-<span class="linenos">39</span>
-<span class="linenos">40</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
-<span class="linenos">41</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mnist</span><span class="p">,</span> <span class="n">ImageNet</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mnist</span><span class="p">(),</span>
-<span class="linenos">42</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Adam</span><span class="p">,</span> <span class="n">Sgd</span><span class="p">]</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(),</span>
-<span class="linenos">43</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">44</span>    <span class="sd">&quot;&quot;&quot;Example training script.</span>
-<span class="linenos">45</span>
-<span class="linenos">46</span><span class="sd">    Args:</span>
-<span class="linenos">47</span><span class="sd">        dataset: Dataset to train on.</span>
-<span class="linenos">48</span><span class="sd">        optimizer: Optimizer to train with.</span>
-<span class="linenos">49</span>
-<span class="linenos">50</span><span class="sd">    Returns:</span>
-<span class="linenos">51</span><span class="sd">        None:</span>
-<span class="linenos">52</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">53</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-<span class="linenos">54</span>    <span class="nb">print</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
-<span class="linenos">55</span>
-<span class="linenos">56</span>
-<span class="linenos">57</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">58</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="linenos">17</span>
+<span class="linenos">18</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">19</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
+<span class="linenos">20</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py</kbd><pre class="ansi-block literal-block">Mnist(binary=False)
-Adam(learning_rate=0.001, betas=(0.9, 0.999))</pre>
-<hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py [-h] [{dataset:mnist,dataset:image-net}]
+<kbd>python 04_additional/09_attrs.py --help</kbd><pre class="ansi-block literal-block">usage: 09_attrs.py [-h] --field1 STR [--field2 INT]
 
-Example training script.
+Description. This should show up in the helptext!
 
-╭─ arguments ───────────────────────────────────────╮
-│ -h, --help        show this help message and exit │
-╰───────────────────────────────────────────────────╯
-╭─ optional subcommands ────────────────────────────╮
-│ Dataset to train on.  (default: dataset:mnist)    │
-│ ──────────────────────────────────────────────    │
-│ [{dataset:mnist,dataset:image-net}]               │
-│     dataset:mnist                                 │
-│     dataset:image-net                             │
-╰───────────────────────────────────────────────────╯</pre>
+╭─ arguments ────────────────────────────────────────────────╮
+│ -h, --help          show this help message and exit        │
+│ --field1 STR        A string field. (required)             │
+│ --field2 INT        A required integer field. (default: 5) │
+╰────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py dataset:mnist [-h] [--dataset.binary]
-                                                [{optimizer:adam,optimizer:sgd
-}]
-
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ dataset arguments ────────────────────────────────────────────────────────╮
-│ --dataset.binary        Set to load binary version of MNIST dataset.       │
-│                         (sets: binary=True)                                │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optional subcommands ─────────────────────────────────────────────────────╮
-│ Optimizer to train with.  (default: optimizer:adam)                        │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ [{optimizer:adam,optimizer:sgd}]                                           │
-│     optimizer:adam                                                         │
-│     optimizer:sgd                                                          │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/09_attrs.py --field1 hello</kbd><pre class="ansi-block literal-block">Args(field1='hello', field2=5)</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Mnist(binary=False)
-Adam(learning_rate=0.0003, betas=(0.9, 0.999))</pre>
+<kbd>python 04_additional/09_attrs.py --field1 hello --field2 5</kbd><pre class="ansi-block literal-block">Args(field1='hello', field2=5)</pre>
 </section>
 
         </article>
@@ -359,23 +296,23 @@ Adam(learning_rate=0.0003, betas=(0.9, 0.999))</pre>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../04_nesting_in_containers/">
+          <a class="next-page" href="../../../goals_and_alternatives/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Nesting in Containers</div>
+                <div class="title">Goals and alternatives</div>
               </div>
               <svg><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../02_subcommands/">
+          <a class="prev-page" href="../08_pydantic/">
               <svg><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Subcommands</div>
+                <div class="title">Pydantic</div>
                 
               </div>
             </a>
