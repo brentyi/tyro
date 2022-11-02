@@ -70,17 +70,6 @@ To get started, we recommend browsing the examples to the left.
    your_first_cli
 
 .. toctree::
-   :caption: Notes
-   :hidden:
-   :maxdepth: 5
-   :glob:
-
-   goals_and_alternatives
-   helptext_generation
-   tab_completion
-   building_configuration_systems
-
-.. toctree::
    :caption: Basics
    :hidden:
    :maxdepth: 1
@@ -118,6 +107,18 @@ To get started, we recommend browsing the examples to the left.
    :glob:
 
    examples/04_additional/*
+
+
+.. toctree::
+   :caption: Notes
+   :hidden:
+   :maxdepth: 5
+   :glob:
+
+   goals_and_alternatives
+   helptext_generation
+   tab_completion
+   building_configuration_systems
 
 
 .. toctree::

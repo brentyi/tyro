@@ -45,7 +45,7 @@ def _get_contained_special_types_from_type(
             )
 
         # Handle enums.
-        elif type(typ) is enum.EnumMeta:
+        elif isinstance(typ, enum.EnumMeta):
             return {typ}
 
         # Handle Union, Annotated, List, etc. No-op when there are no args.

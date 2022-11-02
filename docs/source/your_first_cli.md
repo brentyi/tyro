@@ -57,7 +57,7 @@ args = tyro.cli(Args)
 print(args.a + args.b)
 ```
 
-And that's it for the core API! By incorporating more advanced type annotations
-from the standard library, we can specify a broad range of more advanced
-behaviors: variable-length inputs, unions over types, subcommands, and more. Our
-examples walk through a selection of these features.
+And that's it! By incorporating more advanced type annotations from the standard
+library, we can specify a broad range of more advanced behaviors:
+variable-length inputs, unions over types, subcommands, and more. Our examples
+walk through a selection of these features.

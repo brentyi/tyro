@@ -33,6 +33,16 @@ from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
 from .conf import _markers
 
+# Support attrs and pydantic if they're installed.
+try:
+    import attr
+except ImportError:
+    attr = None  # type: ignore
+try:
+    import pydantic
+except ImportError:
+    pydantic = None  # type: ignore
+
 
 @dataclasses.dataclass(frozen=True)
 class FieldDefinition:
@@ -206,14 +216,21 @@ def _try_field_list_from_callable(
     f_origin = _resolver.unwrap_origin_strip_extras(f)
 
     # Try special cases.
-    if cls is not None and is_typeddict(cls):
-        return _try_field_list_from_typeddict(cls, default_instance)
+    if cls is not None:
+        if is_typeddict(cls):
+            return _try_field_list_from_typeddict(cls, default_instance)
 
-    elif cls is not None and _resolver.is_namedtuple(cls):
-        return _try_field_list_from_namedtuple(cls, default_instance)
+        if _resolver.is_namedtuple(cls):
+            return _try_field_list_from_namedtuple(cls, default_instance)
 
-    elif cls is not None and _resolver.is_dataclass(cls):
-        return _try_field_list_from_dataclass(cls, default_instance)
+        if _resolver.is_dataclass(cls):
+            return _try_field_list_from_dataclass(cls, default_instance)
+
+        if pydantic is not None and issubclass(cls, pydantic.BaseModel):
+            return _try_field_list_from_pydantic(cls, default_instance)
+
+        if attr is not None and attr.has(cls):
+            return _try_field_list_from_attrs(cls, default_instance)
 
     # Standard container types. These are special because they can be nested structures
     # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
@@ -346,6 +363,54 @@ def _try_field_list_from_dataclass(
                 typ=dc_field.type,
                 default=default,
                 helptext=_docstrings.get_field_docstring(cls, dc_field.name),
+            )
+        )
+    return field_list
+
+
+def _try_field_list_from_pydantic(
+    cls: Type, default_instance: _DefaultInstance
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    assert pydantic is not None
+
+    # Handle pydantic models.
+    field_list = []
+    for pd_field in cls.__fields__.values():
+        field_list.append(
+            FieldDefinition.make(
+                name=pd_field.name,
+                typ=pd_field.outer_type_,
+                default=MISSING_NONPROP
+                if pd_field.required
+                else pd_field.get_default(),
+                helptext=pd_field.field_info.description,
+            )
+        )
+    return field_list
+
+
+def _try_field_list_from_attrs(
+    cls: Type, default_instance: _DefaultInstance
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    assert attr is not None
+
+    # Handle attr classes.
+    field_list = []
+    for attr_field in attr.fields(cls):
+        # Default handling.
+        default = attr_field.default
+        if default is attr.NOTHING:
+            default = MISSING_NONPROP
+        elif isinstance(default, attr.Factory):  # type: ignore
+            default = default.factory()  # type: ignore
+
+        assert attr_field.type is not None
+        field_list.append(
+            FieldDefinition.make(
+                name=attr_field.name,
+                typ=attr_field.type,
+                default=default,
+                helptext=_docstrings.get_field_docstring(cls, attr_field.name),
             )
         )
     return field_list

@@ -20,7 +20,7 @@ frozendict = "^2.3.4"
 rich = ">=11.1.0"
 shtab = "^1.5.6"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 omegaconf = "^2.2.2"
@@ -30,9 +30,8 @@ mypy = "^0.971"
 pyright = "^1.1.264"
 coverage = {extras = ["toml"], version = "^6.4.2"}
 numpy = ">=1.20.0"
-
-[tool.poetry.group.dev.dependencies]
 flax = "^0.6.0"
+pydantic = "^1.10.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

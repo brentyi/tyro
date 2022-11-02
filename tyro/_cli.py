@@ -47,7 +47,10 @@ def cli(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
+    # Note that passing a default makes sense for things like dataclasses, but are not
+    # supported for general callables. These can, however, be specified in the signature
+    # of the callable itself.
+    default: None = None,
 ) -> OutT:
     ...
 
@@ -108,14 +111,14 @@ def cli(
             `argparse.ArgumentParser()`.
         args: If set, parse arguments from a sequence of strings instead of the
             commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
-        default: An instance of `T` to use for default values; supported for nested
-            structures like dataclasses and dictionaries, but not if `f` is a function
-            or standard class. Helpful for merging CLI arguments with values loaded from
-            elsewhere. (for example, a config object loaded from a yaml file)
+        default: An instance of `OutT` to use for default values; supported if `f` is a
+            type like a dataclass or dictionary, but not if `f` is a general callable like
+            a function or standard class. Helpful for merging CLI arguments with values
+            loaded from elsewhere. (for example, a config object loaded from a yaml file)
 
     Returns:
         The output of `f(...)` or an instance `f`. If `f` is a class, the two are
-        typically equivalent.
+        equivalent.
     """
     return cast(
         OutT,
