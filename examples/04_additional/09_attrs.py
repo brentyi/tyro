@@ -1,4 +1,4 @@
-"""Pydantic
+"""Attrs Integration
 
 In addition to standard dataclasses, `tyro` also supports
 [attrs](https://www.attrs.org/) classes.

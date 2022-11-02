@@ -1,4 +1,4 @@
-"""Directly Instantiating Flax Modules
+"""JAX/Flax Integration
 
 If you use [flax.linen](https://github.com/google/flax), modules can be instantiated
 directly from `tyro.cli`.

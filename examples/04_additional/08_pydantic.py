@@ -1,4 +1,4 @@
-"""Pydantic
+"""Pydantic Integration
 
 In addition to standard dataclasses, `tyro` also supports
 [Pydantic](https://github.com/pydantic/pydantic) models.
