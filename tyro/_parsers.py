@@ -354,7 +354,13 @@ class SubparsersSpecification:
             if default_name is None:
                 default_name = subcommand_name_from_type.get(type(field.default), None)
 
-            assert default_name is not None
+            if default_name is None:
+                raise AssertionError(
+                    f"`{prefix}` was provided a default value of type"
+                    f" {type(field.default)} but no matching subcommand was found. A"
+                    " type may be missing in the Union type declaration for"
+                    f" `{prefix}`, which is currently set to {field.typ}."
+                )
 
         # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}

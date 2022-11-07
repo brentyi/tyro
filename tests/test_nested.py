@@ -319,6 +319,28 @@ def test_subparser_with_default_alternate():
         tyro.cli(DefaultInstanceSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
+def test_subparser_with_default_bad():
+    @dataclasses.dataclass
+    class DefaultHTTPServer:
+        y: int
+
+    @dataclasses.dataclass
+    class DefaultSMTPServer:
+        z: int
+
+    @dataclasses.dataclass
+    class DefaultSubparser:
+        x: int
+        bc: Union[DefaultHTTPServer, DefaultSMTPServer] = dataclasses.field(
+            default_factory=lambda: 5  # type: ignore
+        )
+
+    with pytest.raises(AssertionError):
+        tyro.cli(
+            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "5"]
+        )
+
+
 def test_optional_subparser():
     @dataclasses.dataclass
     class OptionalHTTPServer:
