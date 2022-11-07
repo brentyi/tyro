@@ -3,6 +3,7 @@ import collections.abc
 import copy
 import dataclasses
 import sys
+import types
 from typing import (
     Any,
     Callable,
@@ -210,21 +211,22 @@ def apply_type_from_typevar(
             assert isinstance(args[0], list)
             args = tuple(args[0]) + args[1:]
 
-        # Convert Python 3.10-style types to their typing library equivalents, which
+        # Convert Python 3.9 and 3.10 types to their typing library equivalents, which
         # support `.copy_with()`.
-        if sys.version_info[:2] >= (3, 10):
-            import types
-
-            for new, old in {
-                # PEP 585
+        if sys.version_info[:2] >= (3, 9):
+            shim_table = {
+                # PEP 585. Requires Python 3.9.
                 tuple: Tuple,
                 list: List,
                 dict: Dict,
                 set: Set,
                 frozenset: FrozenSet,
-                # PEP 604
-                types.UnionType: Union,
-            }.items():
+            }
+            if hasattr(types, "UnionType"):  # type: ignore
+                # PEP 604. Requires Python 3.10.
+                shim_table[types.UnionType] = Union  # type: ignore
+
+            for new, old in shim_table.items():
                 if isinstance(typ, new) or get_origin(typ) is new:  # type: ignore
                     typ = old.__getitem__(args)  # type: ignore
 
