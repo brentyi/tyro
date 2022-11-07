@@ -605,7 +605,13 @@
             <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">default_name</span> <span class="o">=</span> <span class="n">subcommand_name_from_type</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
 
-            <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> but no matching subcommand was found. A&quot;</span>
+                    <span class="s2">&quot; type may be missing in the Union type declaration for&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">`, which is currently set to </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
 
         <span class="c1"># Add subcommands for each option.</span>
         <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
