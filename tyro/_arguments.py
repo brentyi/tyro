@@ -170,6 +170,7 @@ def _rule_handle_boolean_flags(
         arg.field.default in _fields.MISSING_SINGLETONS
         or arg.field.is_positional()
         or _markers.FlagConversionOff in arg.field.markers
+        or _markers.Fixed in arg.field.markers
     ):
         # Treat bools as a normal parameter.
         return lowered

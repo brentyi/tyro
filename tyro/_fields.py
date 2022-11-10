@@ -27,7 +27,7 @@ from typing import (
 
 import docstring_parser
 import typing_extensions
-from typing_extensions import Annotated, get_args, get_type_hints, is_typeddict
+from typing_extensions import get_args, get_type_hints, is_typeddict
 
 from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
@@ -75,7 +75,7 @@ class FieldDefinition:
         markers: Tuple[_markers.Marker, ...] = (),
         name_override: Optional[Any] = None,
     ):
-        _, inferred_markers = _resolver.unwrap_annotated(typ, _markers.Marker)
+        typ, inferred_markers = _resolver.unwrap_annotated(typ, _markers.Marker)
         return FieldDefinition(
             name,
             typ,
@@ -86,11 +86,8 @@ class FieldDefinition:
         )
 
     def add_markers(self, markers: Tuple[_markers.Marker, ...]) -> FieldDefinition:
-        if len(markers) == 0:
-            return self
         return dataclasses.replace(
             self,
-            typ=Annotated.__class_getitem__((self.typ,) + markers),  # type: ignore
             markers=self.markers.union(markers),
         )
 
