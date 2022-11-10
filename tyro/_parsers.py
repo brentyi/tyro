@@ -127,7 +127,12 @@ class ParserSpecification:
                         ),
                     )
                     nested_parser = ParserSpecification.from_callable_or_type(
-                        field.typ,
+                        # Recursively apply marker types.
+                        field.typ
+                        if len(field.markers) == 0
+                        else Annotated.__class_getitem__(  # type: ignore
+                            (field.typ,) + tuple(field.markers)
+                        ),
                         description=None,
                         parent_classes=parent_classes,
                         default_instance=field.default,

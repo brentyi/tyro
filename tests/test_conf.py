@@ -12,6 +12,7 @@ def test_omit_subcommand_prefix():
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
+        flag: bool = True
 
     @dataclasses.dataclass
     class DefaultInstanceSMTPServer:
@@ -28,14 +29,23 @@ def test_omit_subcommand_prefix():
     assert (
         tyro.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "bc:default-instance-http-server", "--y", "5"],
+            args=[
+                "--x",
+                "1",
+                "bc:default-instance-http-server",
+                "--y",
+                "5",
+                "--no-flag",
+            ],
         )
         == tyro.cli(
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--y", "5"],
-            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
+            default=DefaultInstanceSubparser(
+                x=1, bc=DefaultInstanceHTTPServer(y=3, flag=False)
+            ),
         )
-        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
+        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5, flag=False))
     )
     assert (
         tyro.cli(

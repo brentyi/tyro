@@ -129,9 +129,12 @@ For more examples, see our [documentation](https://brentyi.github.io/tyro).
    Standard Python type annotations, docstrings, and default values are parsed
    to automatically generate command-line interfaces with informative helptext.
 
-   If you're familiar with type annotations and docstrings in Python, you
-   already know how to use `tyro`! If you're not, learning to use `tyro` reduces
-   to learning to write modern Python.
+   `tyro` works seamlessly with tools you already use: examples are included for
+   [`dataclasses`](https://docs.python.org/3/library/dataclasses.html),
+   [`attrs`](https://www.attrs.org/),
+   [`pydantic`](https://pydantic-docs.helpmanual.io/),
+   [`flax.linen`](https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html),
+   and more.
 
    Hate `tyro`? Just remove one line of code, and you're left with beautiful,
    type-annotated, and documented vanilla Python that can be used with a range
