@@ -269,9 +269,12 @@ as well as static checking tools like <code class="docutils literal notranslate"
 <li><p><strong>Minimal overhead.</strong></p>
 <p>Standard Python type annotations, docstrings, and default values are parsed
 to automatically generate command-line interfaces with informative helptext.</p>
-<p>If you’re familiar with type annotations and docstrings in Python, you
-already know how to use <code class="docutils literal notranslate"><span class="pre">tyro</span></code>! If you’re not, learning to use <code class="docutils literal notranslate"><span class="pre">tyro</span></code> reduces
-to learning to write modern Python.</p>
+<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> works seamlessly with tools you already use: examples are included for
+<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>,
+<a class="reference external" href="https://www.attrs.org/">attrs</a>,
+<a class="reference external" href="https://pydantic-docs.helpmanual.io/">pydantic</a>,
+<a class="reference external" href="https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html">flax.linen</a>,
+and more.</p>
 <p>Hate <code class="docutils literal notranslate"><span class="pre">tyro</span></code>? Just remove one line of code, and you’re left with beautiful,
 type-annotated, and documented vanilla Python that can be used with a range
 of other configuration libraries.</p>
