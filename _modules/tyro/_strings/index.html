@@ -311,11 +311,11 @@
 
 
 <span class="k">def</span> <span class="nf">_subparser_name_from_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-    <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_subcommands</span>  <span class="c1"># Prevent circular imports</span>
+    <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span>  <span class="c1"># Prevent circular imports</span>
 
     <span class="bp">cls</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
     <span class="p">)</span>
 
     <span class="c1"># Subparser name from `tyro.metadata.subcommand()`.</span>

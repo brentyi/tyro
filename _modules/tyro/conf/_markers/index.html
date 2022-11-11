@@ -303,10 +303,10 @@
 
 <span class="sd">If we have a structure with the field:</span>
 
-<span class="sd">    cmd: Union[Commit, Checkout]</span>
+<span class="sd">    cmd: Union[NestedTypeA, NestedTypeB]</span>
 
-<span class="sd">By default, --cmd.branch may be generated as a flag for each dataclass in the union.</span>
-<span class="sd">If subcommand prefixes are omitted, we would instead simply have --branch.</span>
+<span class="sd">By default, `--cmd.arg` may be generated as a flag for each dataclass in the union.</span>
+<span class="sd">If subcommand prefixes are omitted, we would instead simply have `--arg`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 

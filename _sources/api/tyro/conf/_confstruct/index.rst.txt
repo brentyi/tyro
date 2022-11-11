@@ -1,9 +1,9 @@
 :orphan:
 
-:py:mod:`tyro.conf._subcommands`
-================================
+:py:mod:`tyro.conf._confstruct`
+===============================
 
-.. py:module:: tyro.conf._subcommands
+.. py:module:: tyro.conf._confstruct
 
 
 Module Contents
@@ -13,7 +13,7 @@ Module Contents
 
    
    Returns a metadata object for configuring subcommands with ``typing.Annotated``.
-   This is useful but can make code harder to read, so usage is discouraged.
+   Useful for aesthetics.
 
    Consider the standard approach for creating subcommands:
 
@@ -41,4 +41,16 @@ Module Contents
               ],
           ]
       )
+
+.. py:function:: arg(name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None) -> Any
+
+   
+   Returns a metadata object for configuring arguments with ``typing.Annotated``.
+   Useful for aesthetics.
+
+   Usage:
+
+   .. code-block:: python
+
+      x: Annotated[int, tyro.conf.arg(...)]
 

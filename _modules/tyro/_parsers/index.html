@@ -269,7 +269,7 @@
     <span class="n">_resolver</span><span class="p">,</span>
     <span class="n">_strings</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span><span class="p">,</span> <span class="n">_subcommands</span>
+<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
@@ -545,14 +545,14 @@
 
         <span class="c1"># Get subcommand configurations from `tyro.conf.subcommand()`.</span>
         <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
+            <span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
         <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_name_from_default_hash</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_name_from_type</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Used for default matching.</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_no_none</span><span class="p">:</span>
             <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
             <span class="n">option</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
-                <span class="n">option</span><span class="p">,</span> <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
+                <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
             <span class="p">)</span>
             <span class="n">default_hash</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -629,7 +629,7 @@
             <span class="k">if</span> <span class="n">subcommand_name</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="p">:</span>
                 <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">_subcommands</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span><span class="p">(</span>
+                <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span><span class="p">(</span>
                     <span class="s2">&quot;unused&quot;</span><span class="p">,</span>
                     <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>

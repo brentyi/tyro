@@ -259,69 +259,34 @@ annotations.</p>
 <p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Permalink to this heading">#</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf.AvoidSubcommands">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">AvoidSubcommands</span></span><a class="headerlink" href="#tyro.conf.AvoidSubcommands" title="Permalink to this definition">#</a></dt>
-<dd><p>Avoid creating subcommands when a default is provided for unions over nested types.
-This simplifies CLI interfaces, but makes them less expressive.</p>
-<p>Can be used directly on union types, <code class="docutils literal notranslate"><span class="pre">AvoidSubcommands[Union[...]]</span></code>, or recursively
-applied to nested types.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf.Fixed">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><a class="headerlink" href="#tyro.conf.Fixed" title="Permalink to this definition">#</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code> from parsing it; a
-default value should be set instead. Note that fields with defaults that can’t be parsed
-will also be marked as fixed automatically.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf.FlagConversionOff">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">FlagConversionOff</span></span><a class="headerlink" href="#tyro.conf.FlagConversionOff" title="Permalink to this definition">#</a></dt>
-<dd><p>Turn off flag conversion for booleans with default values. Instead, types annotated
-with <code class="docutils literal notranslate"><span class="pre">bool</span></code> will expect an explicit True or False.</p>
-<p>Can be used directly on boolean annotations, <code class="docutils literal notranslate"><span class="pre">FlagConversionOff[bool]</span></code>, or recursively
-applied to nested types.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf.OmitSubcommandPrefixes">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitSubcommandPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitSubcommandPrefixes" title="Permalink to this definition">#</a></dt>
-<dd><p>Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</p>
-<p>If we have a structure with the field:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Commit</span><span class="p">,</span> <span class="n">Checkout</span><span class="p">]</span>
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro.conf.arg">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">arg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metavar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_confstruct/#arg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.arg" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns a metadata object for configuring arguments with <code class="docutils literal notranslate"><span class="pre">typing.Annotated</span></code>.
+Useful for aesthetics.</p>
+<p>Usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="o">...</span><span class="p">)]</span>
 </pre></div>
 </div>
-<p>By default, –cmd.branch may be generated as a flag for each dataclass in the union.
-If subcommand prefixes are omitted, we would instead simply have –branch.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf.Positional">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Positional</span></span><a class="headerlink" href="#tyro.conf.Positional" title="Permalink to this definition">#</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Positional[T]</span></code> if we want to parse it as a positional
-argument.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf.Suppress">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Suppress</span></span><a class="headerlink" href="#tyro.conf.Suppress" title="Permalink to this definition">#</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code> from parsing it, and
-to prevent it from showing up in helptext.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.conf.SuppressFixed">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">SuppressFixed</span></span><a class="headerlink" href="#tyro.conf.SuppressFixed" title="Permalink to this definition">#</a></dt>
-<dd><p>Hide fields that are either manually or automatically marked as fixed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>metavar</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+<li><p><strong>help</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.conf.subcommand">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">subcommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MISSING_NONPROP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_subcommands/#subcommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.subcommand" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">subcommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MISSING_NONPROP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_confstruct/#subcommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.subcommand" title="Permalink to this definition">#</a></dt>
 <dd><p>Returns a metadata object for configuring subcommands with <code class="docutils literal notranslate"><span class="pre">typing.Annotated</span></code>.
-This is useful but can make code harder to read, so usage is discouraged.</p>
+Useful for aesthetics.</p>
 <p>Consider the standard approach for creating subcommands:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
     <span class="n">Union</span><span class="p">[</span><span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">NestedTypeB</span><span class="p">]</span>
@@ -357,6 +322,64 @@ the name or not.</p>
 <dd class="field-even"><p>Any</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.AvoidSubcommands">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">AvoidSubcommands</span></span><a class="headerlink" href="#tyro.conf.AvoidSubcommands" title="Permalink to this definition">#</a></dt>
+<dd><p>Avoid creating subcommands when a default is provided for unions over nested types.
+This simplifies CLI interfaces, but makes them less expressive.</p>
+<p>Can be used directly on union types, <code class="docutils literal notranslate"><span class="pre">AvoidSubcommands[Union[...]]</span></code>, or recursively
+applied to nested types.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.Fixed">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><a class="headerlink" href="#tyro.conf.Fixed" title="Permalink to this definition">#</a></dt>
+<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code> from parsing it; a
+default value should be set instead. Note that fields with defaults that can’t be parsed
+will also be marked as fixed automatically.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.FlagConversionOff">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">FlagConversionOff</span></span><a class="headerlink" href="#tyro.conf.FlagConversionOff" title="Permalink to this definition">#</a></dt>
+<dd><p>Turn off flag conversion for booleans with default values. Instead, types annotated
+with <code class="docutils literal notranslate"><span class="pre">bool</span></code> will expect an explicit True or False.</p>
+<p>Can be used directly on boolean annotations, <code class="docutils literal notranslate"><span class="pre">FlagConversionOff[bool]</span></code>, or recursively
+applied to nested types.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.OmitSubcommandPrefixes">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitSubcommandPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitSubcommandPrefixes" title="Permalink to this definition">#</a></dt>
+<dd><p>Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</p>
+<p>If we have a structure with the field:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">NestedTypeB</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">--cmd.arg</span></code> may be generated as a flag for each dataclass in the union.
+If subcommand prefixes are omitted, we would instead simply have <code class="docutils literal notranslate"><span class="pre">--arg</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.Positional">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Positional</span></span><a class="headerlink" href="#tyro.conf.Positional" title="Permalink to this definition">#</a></dt>
+<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Positional[T]</span></code> if we want to parse it as a positional
+argument.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.Suppress">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Suppress</span></span><a class="headerlink" href="#tyro.conf.Suppress" title="Permalink to this definition">#</a></dt>
+<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code> from parsing it, and
+to prevent it from showing up in helptext.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.SuppressFixed">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">SuppressFixed</span></span><a class="headerlink" href="#tyro.conf.SuppressFixed" title="Permalink to this definition">#</a></dt>
+<dd><p>Hide fields that are either manually or automatically marked as fixed.</p>
 </dd></dl>
 
 </section>
@@ -426,6 +449,8 @@ the name or not.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a><ul>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#tyro.conf.arg">arg</a></li>
+<li><a class="reference internal" href="#tyro.conf.subcommand">subcommand</a></li>
 <li><a class="reference internal" href="#tyro.conf.AvoidSubcommands">AvoidSubcommands</a></li>
 <li><a class="reference internal" href="#tyro.conf.Fixed">Fixed</a></li>
 <li><a class="reference internal" href="#tyro.conf.FlagConversionOff">FlagConversionOff</a></li>
@@ -433,7 +458,6 @@ the name or not.</p>
 <li><a class="reference internal" href="#tyro.conf.Positional">Positional</a></li>
 <li><a class="reference internal" href="#tyro.conf.Suppress">Suppress</a></li>
 <li><a class="reference internal" href="#tyro.conf.SuppressFixed">SuppressFixed</a></li>
-<li><a class="reference internal" href="#tyro.conf.subcommand">subcommand</a></li>
 </ul>
 </li>
 </ul>
