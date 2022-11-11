@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Generic, TypeVar, Union
+from typing import Any, Callable, Generic, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext
@@ -462,3 +462,68 @@ def test_fixed_suppressed_group():
         return value + inner.a + inner.b
 
     assert tyro.cli(main, args=["--value", "5"]) == 8
+
+
+def test_suppressed():
+    @dataclasses.dataclass
+    class Struct:
+        a: int = 5
+        b: tyro.conf.Suppress[str] = "7"
+
+    def main(x: Any = Struct()):
+        pass
+
+    helptext = get_helptext(main)
+    assert "--x.a" in helptext
+    assert "--x.b" not in helptext
+
+
+def test_suppress_manual_fixed():
+    @dataclasses.dataclass
+    class Struct:
+        a: int = 5
+        b: tyro.conf.SuppressFixed[tyro.conf.Fixed[str]] = "7"
+
+    def main(x: Any = Struct()):
+        pass
+
+    helptext = get_helptext(main)
+    assert "--x.a" in helptext
+    assert "--x.b" not in helptext
+
+
+def test_suppress_auto_fixed():
+    @dataclasses.dataclass
+    class Struct:
+        a: int = 5
+        b: Callable = lambda x: 5
+
+    def main(x: tyro.conf.SuppressFixed[Any] = Struct()):
+        pass
+
+    helptext = get_helptext(main)
+    assert "--x.a" in helptext
+    assert "--x.b" not in helptext
+
+
+def test_argconf_help():
+    @dataclasses.dataclass
+    class Struct:
+        a: Annotated[
+            int, tyro.conf.arg(name="nice", help="Hello world", metavar="NUMBER")
+        ] = 5
+        b: tyro.conf.Suppress[str] = "7"
+
+    def main(x: Any = Struct()) -> int:
+        return x.a
+
+    helptext = get_helptext(main)
+    assert "Hello world" in helptext
+    assert "INT" not in helptext
+    assert "NUMBER" in helptext
+    assert "--x.a" not in helptext
+    assert "--x.nice" in helptext
+    assert "--x.b" not in helptext
+
+    assert tyro.cli(main, args=[]) == 5
+    assert tyro.cli(main, args=["--x.nice", "3"]) == 3

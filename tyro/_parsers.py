@@ -18,7 +18,7 @@ from . import (
     _resolver,
     _strings,
 )
-from .conf import _markers, _subcommands
+from .conf import _confstruct, _markers
 
 T = TypeVar("T")
 
@@ -294,14 +294,14 @@ class SubparsersSpecification:
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.
         subcommand_config_from_name: Dict[
-            str, _subcommands._SubcommandConfiguration
+            str, _confstruct._SubcommandConfiguration
         ] = {}
         subcommand_name_from_default_hash: Dict[int, str] = {}
         subcommand_name_from_type: Dict[Type, str] = {}  # Used for default matching.
         for option in options_no_none:
             subcommand_name = _strings.subparser_name_from_type(prefix, option)
             option, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _subcommands._SubcommandConfiguration
+                option, _confstruct._SubcommandConfiguration
             )
             default_hash = None
             if len(found_subcommand_configs) != 0:
@@ -378,7 +378,7 @@ class SubparsersSpecification:
             if subcommand_name in subcommand_config_from_name:
                 subcommand_config = subcommand_config_from_name[subcommand_name]
             else:
-                subcommand_config = _subcommands._SubcommandConfiguration(
+                subcommand_config = _confstruct._SubcommandConfiguration(
                     "unused",
                     description=None,
                     default=_fields.MISSING_NONPROP,

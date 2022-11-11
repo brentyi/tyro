@@ -63,6 +63,16 @@ class ArgumentDefinition:
         # the field default to a string format, then back to the desired type.
         kwargs["default"] = _fields.MISSING_NONPROP
 
+        # Apply overrides in our arg configuration object.
+        # Note that the `name` field is applied when the field object is instantiated!
+        kwargs.update(
+            {
+                k: v
+                for k, v in vars(self.field.argconf).items()
+                if v is not None and k != "name"
+            }
+        )
+
         # Add argument! Note that the name must be passed in as a position argument.
         arg = parser.add_argument(name_or_flag, **kwargs)
 
