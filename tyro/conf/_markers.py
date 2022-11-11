@@ -52,10 +52,10 @@ OmitSubcommandPrefixes = Annotated[T, None]
 
 If we have a structure with the field:
 
-    cmd: Union[Commit, Checkout]
+    cmd: Union[NestedTypeA, NestedTypeB]
 
-By default, --cmd.branch may be generated as a flag for each dataclass in the union.
-If subcommand prefixes are omitted, we would instead simply have --branch.
+By default, `--cmd.arg` may be generated as a flag for each dataclass in the union.
+If subcommand prefixes are omitted, we would instead simply have `--arg`.
 """
 
 

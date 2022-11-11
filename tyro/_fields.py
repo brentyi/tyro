@@ -31,7 +31,7 @@ from typing_extensions import get_args, get_type_hints, is_typeddict
 
 from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
-from .conf import _markers
+from .conf import _confstruct, _markers
 
 # Support attrs and pydantic if they're installed.
 try:
@@ -52,10 +52,12 @@ class FieldDefinition:
     helptext: Optional[str]
     markers: FrozenSet[_markers.Marker]
 
+    argconf: _confstruct._ArgConfiguration
+
     # Override the name in our kwargs. Currently only used for dictionary types when
     # the key values aren't strings, but in the future could be used whenever the
     # user-facing argument name doesn't match the keyword expected by our callable.
-    name_override: Optional[Any]
+    call_argname: Any
 
     def __post_init__(self):
         if (
@@ -71,18 +73,27 @@ class FieldDefinition:
         typ: Type,
         default: Any,
         helptext: Optional[str],
+        call_argname_override: Optional[Any] = None,
         *,
         markers: Tuple[_markers.Marker, ...] = (),
-        name_override: Optional[Any] = None,
     ):
+        # Try to extract argconf overrides from type.
+        _, argconfs = _resolver.unwrap_annotated(typ, _confstruct._ArgConfiguration)
+        if len(argconfs) == 0:
+            argconf = _confstruct._ArgConfiguration(None, None, None)
+        else:
+            assert len(argconfs) == 1
+            (argconf,) = argconfs
+
         typ, inferred_markers = _resolver.unwrap_annotated(typ, _markers.Marker)
         return FieldDefinition(
-            name,
+            name if argconf.name is None else argconf.name,
             typ,
             default,
             helptext,
             frozenset(inferred_markers).union(markers),
-            name_override,
+            argconf,
+            call_argname_override if call_argname_override is not None else name,
         )
 
     def add_markers(self, markers: Tuple[_markers.Marker, ...]) -> FieldDefinition:
@@ -201,7 +212,7 @@ def _try_field_list_from_callable(
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     f, found_subcommand_configs = _resolver.unwrap_annotated(
-        f, conf._subcommands._SubcommandConfiguration
+        f, conf._confstruct._SubcommandConfiguration
     )
     if len(found_subcommand_configs) > 0:
         default_instance = found_subcommand_configs[0].default
@@ -362,12 +373,23 @@ def _try_field_list_from_dataclass(
     field_list = []
     for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
         default = _get_dataclass_field_default(dc_field, default_instance)
+
+        # Try to get helptext from field metadata. This is also intended to be
+        # compatible with HuggingFace-style config objects.
+        helptext = dc_field.metadata.get("help", None)
+        assert isinstance(helptext, (str, type(None)))
+
+        # Try to get helptext from docstrings. Note that this can't be generated
+        # dynamically.
+        if helptext is None:
+            helptext = _docstrings.get_field_docstring(cls, dc_field.name)
+
         field_list.append(
             FieldDefinition.make(
                 name=dc_field.name,
                 typ=dc_field.type,
                 default=default,
-                helptext=_docstrings.get_field_docstring(cls, dc_field.name),
+                helptext=helptext,
             )
         )
     return field_list
@@ -542,7 +564,7 @@ def _try_field_list_from_dict(
                 default=v,
                 helptext=None,
                 # Dictionary specific key:
-                name_override=k,
+                call_argname_override=k,
             )
         )
     return field_list

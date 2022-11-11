@@ -23,7 +23,7 @@ def subcommand(
     prefix_name: bool = True,
 ) -> Any:
     """Returns a metadata object for configuring subcommands with `typing.Annotated`.
-    This is useful but can make code harder to read, so usage is discouraged.
+    Useful for aesthetics.
 
     Consider the standard approach for creating subcommands:
 
@@ -53,3 +53,27 @@ def subcommand(
     ```
     """
     return _SubcommandConfiguration(name, default, description, prefix_name)
+
+
+@dataclasses.dataclass(frozen=True)
+class _ArgConfiguration:
+    name: Optional[str]
+    metavar: Optional[str]
+    help: Optional[str]
+
+
+def arg(
+    *,
+    name: Optional[str] = None,
+    metavar: Optional[str] = None,
+    help: Optional[str] = None,
+) -> Any:
+    """Returns a metadata object for configuring arguments with `typing.Annotated`.
+    Useful for aesthetics.
+
+    Usage:
+    ```python
+    x: Annotated[int, tyro.conf.arg(...)]
+    ```
+    """
+    return _ArgConfiguration(name=name, metavar=metavar, help=help)

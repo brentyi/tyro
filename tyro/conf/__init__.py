@@ -8,6 +8,7 @@ Configuration flags are applied recursively, and should generally be subscripted
 Features here are supported, but generally unnecessary and should be used sparingly.
 """
 
+from ._confstruct import arg, subcommand
 from ._markers import (
     AvoidSubcommands,
     Fixed,
@@ -17,9 +18,10 @@ from ._markers import (
     Suppress,
     SuppressFixed,
 )
-from ._subcommands import subcommand
 
 __all__ = [
+    "arg",
+    "subcommand",
     "AvoidSubcommands",
     "Fixed",
     "FlagConversionOff",
@@ -27,5 +29,4 @@ __all__ = [
     "Positional",
     "Suppress",
     "SuppressFixed",
-    "subcommand",
 ]

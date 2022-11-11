@@ -8,8 +8,6 @@ import torch.nn as nn
 from helptext_utils import get_helptext
 from typing_extensions import Annotated, Literal
 
-import tyro
-
 
 def test_helptext():
     @dataclasses.dataclass
@@ -566,45 +564,3 @@ def test_unparsable():
     assert "--x {fixed}" in helptext
     assert "(fixed to:" in helptext
     assert "torch" in helptext
-
-
-def test_suppressed():
-    @dataclasses.dataclass
-    class Struct:
-        a: int = 5
-        b: tyro.conf.Suppress[str] = "7"
-
-    def main(x: Any = Struct()):
-        pass
-
-    helptext = get_helptext(main)
-    assert "--x.a" in helptext
-    assert "--x.b" not in helptext
-
-
-def test_suppress_manual_fixed():
-    @dataclasses.dataclass
-    class Struct:
-        a: int = 5
-        b: tyro.conf.SuppressFixed[tyro.conf.Fixed[str]] = "7"
-
-    def main(x: Any = Struct()):
-        pass
-
-    helptext = get_helptext(main)
-    assert "--x.a" in helptext
-    assert "--x.b" not in helptext
-
-
-def test_suppress_auto_fixed():
-    @dataclasses.dataclass
-    class Struct:
-        a: int = 5
-        b: Callable = lambda x: 5
-
-    def main(x: tyro.conf.SuppressFixed[Any] = Struct()):
-        pass
-
-    helptext = get_helptext(main)
-    assert "--x.a" in helptext
-    assert "--x.b" not in helptext
