@@ -54,9 +54,8 @@ class FieldDefinition:
 
     argconf: _confstruct._ArgConfiguration
 
-    # Override the name in our kwargs. Currently only used for dictionary types when
-    # the key values aren't strings, but in the future could be used whenever the
-    # user-facing argument name doesn't match the keyword expected by our callable.
+    # Override the name in our kwargs. Useful whenever the user-facing argument name
+    # doesn't match the keyword expected by our callable.
     call_argname: Any
 
     def __post_init__(self):
