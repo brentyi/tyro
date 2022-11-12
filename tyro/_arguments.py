@@ -65,13 +65,8 @@ class ArgumentDefinition:
 
         # Apply overrides in our arg configuration object.
         # Note that the `name` field is applied when the field object is instantiated!
-        kwargs.update(
-            {
-                k: v
-                for k, v in vars(self.field.argconf).items()
-                if v is not None and k != "name"
-            }
-        )
+        if self.field.argconf.metavar is not None:
+            kwargs["metavar"] = self.field.argconf.metavar
 
         # Add argument! Note that the name must be passed in as a position argument.
         arg = parser.add_argument(name_or_flag, **kwargs)
@@ -314,13 +309,13 @@ def _rule_generate_helptext(
 
     help_parts = []
 
-    docstring_help = arg.field.helptext
+    primary_help = arg.field.helptext
 
-    if docstring_help is not None and docstring_help != "":
+    if primary_help is not None and primary_help != "":
         # Note that the percent symbol needs some extra handling in argparse.
         # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-        docstring_help = docstring_help.replace("%", "%%")
-        help_parts.append(_rich_tag_if_enabled(docstring_help, "helptext"))
+        primary_help = primary_help.replace("%", "%%")
+        help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
 
     default = lowered.default
     if lowered.is_fixed():

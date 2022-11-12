@@ -83,6 +83,7 @@ class FieldDefinition:
         else:
             assert len(argconfs) == 1
             (argconf,) = argconfs
+            helptext = argconf.help
 
         typ, inferred_markers = _resolver.unwrap_annotated(typ, _markers.Marker)
         return FieldDefinition(
@@ -102,9 +103,19 @@ class FieldDefinition:
         )
 
     def is_positional(self) -> bool:
+        """Returns True if the argument should be positional in the commandline."""
         return (
             # Explicit positionals.
             _markers.Positional in self.markers
+            # Dummy dataclasses should have a single positional field.
+            or self.name == _strings.dummy_field_name
+        )
+
+    def is_positional_call(self) -> bool:
+        """Returns True if the argument should be positional in underlying Python call."""
+        return (
+            # Explicit positionals.
+            _markers._PositionalCall in self.markers
             # Dummy dataclasses should have a single positional field.
             or self.name == _strings.dummy_field_name
         )
@@ -646,7 +657,7 @@ def _field_list_from_params(
                 typ=hints[param.name],
                 default=default,
                 helptext=helptext,
-                markers=(_markers.Positional,)
+                markers=(_markers.Positional, _markers._PositionalCall)
                 if param.kind is inspect.Parameter.POSITIONAL_ONLY
                 else (),
             )
