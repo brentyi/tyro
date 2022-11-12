@@ -36,7 +36,7 @@ class CommitArgs:
 @dataclasses.dataclass
 class Args:
     # A numeric field parsed as a positional argument.
-    positional: tyro.conf.Positional[int] = 3
+    positional: tyro.conf.Positional[int]
 
     # A boolean field with flag conversion turned off.
     boolean: tyro.conf.FlagConversionOff[bool] = False
