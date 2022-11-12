@@ -279,33 +279,43 @@ command-line interfaces beyond what is expressible via static type annotations.<
 <span class="linenos">23</span>
 <span class="linenos">24</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">25</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos">26</span>    <span class="c1"># A boolean field with flag conversion turned off.</span>
-<span class="linenos">27</span>    <span class="n">boolean</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">26</span>    <span class="c1"># A numeric field parsed as a positional argument.</span>
+<span class="linenos">27</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="linenos">28</span>
-<span class="linenos">29</span>    <span class="c1"># A numeric field parsed as a positional argument.</span>
-<span class="linenos">30</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">29</span>    <span class="c1"># A boolean field with flag conversion turned off.</span>
+<span class="linenos">30</span>    <span class="n">boolean</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span>    <span class="c1"># A numeric field that can&#39;t be changed via the CLI.</span>
 <span class="linenos">33</span>    <span class="n">fixed</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
 <span class="linenos">34</span>
-<span class="linenos">35</span>    <span class="c1"># A union over nested structures, but without subcommand generation. When a default</span>
-<span class="linenos">36</span>    <span class="c1"># is provided, the type is simply fixed to that default.</span>
-<span class="linenos">37</span>    <span class="n">union_without_subcommand</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">AvoidSubcommands</span><span class="p">[</span>
-<span class="linenos">38</span>        <span class="n">Union</span><span class="p">[</span><span class="n">CheckoutArgs</span><span class="p">,</span> <span class="n">CommitArgs</span><span class="p">]</span>
-<span class="linenos">39</span>    <span class="p">]</span> <span class="o">=</span> <span class="n">CheckoutArgs</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
-<span class="linenos">40</span>
-<span class="linenos">41</span>    <span class="c1"># `tyro.conf.subcommand()` can be used to configure subcommands in a Union. Here,</span>
-<span class="linenos">42</span>    <span class="c1"># we make the subcommand names more succinct.</span>
-<span class="linenos">43</span>    <span class="n">renamed_subcommand</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-<span class="linenos">44</span>        <span class="n">Annotated</span><span class="p">[</span>
-<span class="linenos">45</span>            <span class="n">CheckoutArgs</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;checkout&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="linenos">46</span>        <span class="p">],</span>
-<span class="linenos">47</span>        <span class="n">Annotated</span><span class="p">[</span><span class="n">CommitArgs</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)],</span>
-<span class="linenos">48</span>    <span class="p">]</span> <span class="o">=</span> <span class="n">CheckoutArgs</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
-<span class="linenos">49</span>
+<span class="linenos">35</span>    <span class="c1"># A field with manually overridden properties.</span>
+<span class="linenos">36</span>    <span class="n">manual</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="linenos">37</span>        <span class="nb">str</span><span class="p">,</span>
+<span class="linenos">38</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
+<span class="linenos">39</span>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;renamed&quot;</span><span class="p">,</span>
+<span class="linenos">40</span>            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<span class="linenos">41</span>            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A field with manually overridden properties!&quot;</span><span class="p">,</span>
+<span class="linenos">42</span>        <span class="p">),</span>
+<span class="linenos">43</span>    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hello&quot;</span>
+<span class="linenos">44</span>
+<span class="linenos">45</span>    <span class="c1"># A union over nested structures, but without subcommand generation. When a default</span>
+<span class="linenos">46</span>    <span class="c1"># is provided, the type is simply fixed to that default.</span>
+<span class="linenos">47</span>    <span class="n">union_without_subcommand</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">AvoidSubcommands</span><span class="p">[</span>
+<span class="linenos">48</span>        <span class="n">Union</span><span class="p">[</span><span class="n">CheckoutArgs</span><span class="p">,</span> <span class="n">CommitArgs</span><span class="p">]</span>
+<span class="linenos">49</span>    <span class="p">]</span> <span class="o">=</span> <span class="n">CheckoutArgs</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
 <span class="linenos">50</span>
-<span class="linenos">51</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">52</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">))</span>
+<span class="linenos">51</span>    <span class="c1"># `tyro.conf.subcommand()` can be used to configure subcommands in a Union. Here,</span>
+<span class="linenos">52</span>    <span class="c1"># we make the subcommand names more succinct.</span>
+<span class="linenos">53</span>    <span class="n">renamed_subcommand</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+<span class="linenos">54</span>        <span class="n">Annotated</span><span class="p">[</span>
+<span class="linenos">55</span>            <span class="n">CheckoutArgs</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;checkout&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="linenos">56</span>        <span class="p">],</span>
+<span class="linenos">57</span>        <span class="n">Annotated</span><span class="p">[</span><span class="n">CommitArgs</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span> <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">)],</span>
+<span class="linenos">58</span>    <span class="p">]</span> <span class="o">=</span> <span class="n">CheckoutArgs</span><span class="p">(</span><span class="s2">&quot;main&quot;</span><span class="p">)</span>
+<span class="linenos">59</span>
+<span class="linenos">60</span>
+<span class="linenos">61</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">62</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">))</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -341,6 +351,13 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │     checkout            Checkout a branch.                                 │
 │     commit              Commit changes.                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
+<hr class="docutils" />
+<kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
+                  [--renamed STRING] [--union-without-subcommand.branch STR]
+                  [INT] [{checkout,commit}]
+
+ 
+06_conf.py: error: argument [{checkout,commit}]: invalid choice: '5' (choose from 'checkout', 'commit')</pre>
 </section>
 
         </article>
