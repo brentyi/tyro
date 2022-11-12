@@ -310,7 +310,7 @@ command-line interfaces beyond what is expressible via static type annotations.<
 </div>
 <hr class="docutils" />
 <kbd>python 04_additional/06_conf.py --help</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
-                  [--union-without-subcommand.branch STR]
+                  [--renamed STRING] [--union-without-subcommand.branch STR]
                   [INT] [{checkout,commit}]
 
 ╭─ positional arguments ─────────────────────────────────────────────────────╮
@@ -323,6 +323,8 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │                         (default: False)                                   │
 │ --fixed {fixed}         A numeric field that can't be changed via the CLI. │
 │                         (fixed to: 5)                                      │
+│ --renamed STRING        A field with manually overridden properties!       │
+│                         (default: Hello)                                   │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ union-without-subcommand arguments ───────────────────────────────────────╮
 │ A union over nested structures, but without subcommand generation. When a  │

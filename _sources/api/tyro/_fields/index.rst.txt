@@ -74,6 +74,13 @@ Module Contents
 
    .. py:method:: is_positional(self) -> bool
 
+      
+      Returns True if the argument should be positional in the commandline.
+
+   .. py:method:: is_positional_call(self) -> bool
+
+      
+      Returns True if the argument should be positional in underlying Python call.
 
 
 .. py:class:: PropagatingMissingType

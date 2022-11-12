@@ -341,7 +341,19 @@ defaults, from general callables.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.is_positional">
 <span class="sig-name descname"><span class="pre">is_positional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.is_positional"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.is_positional" title="Permalink to this definition">#</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Returns True if the argument should be positional in the commandline.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._fields.FieldDefinition.is_positional_call">
+<span class="sig-name descname"><span class="pre">is_positional_call</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.is_positional_call"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.is_positional_call" title="Permalink to this definition">#</a></dt>
+<dd><p>Returns True if the argument should be positional in underlying Python call.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>bool</p>
 </dd>
@@ -509,6 +521,7 @@ annotated callable.</p>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.make">make</a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.add_markers">add_markers</a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.is_positional">is_positional</a></li>
+<li><a class="reference internal" href="#tyro._fields.FieldDefinition.is_positional_call">is_positional_call</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._fields.PropagatingMissingType">PropagatingMissingType</a></li>
