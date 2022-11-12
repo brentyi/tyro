@@ -280,7 +280,7 @@ command-line interfaces beyond what is expressible via static type annotations.<
 <span class="linenos">24</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">25</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">26</span>    <span class="c1"># A numeric field parsed as a positional argument.</span>
-<span class="linenos">27</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">27</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="linenos">28</span>
 <span class="linenos">29</span>    <span class="c1"># A boolean field with flag conversion turned off.</span>
 <span class="linenos">30</span>    <span class="n">boolean</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
@@ -321,11 +321,11 @@ command-line interfaces beyond what is expressible via static type annotations.<
 <hr class="docutils" />
 <kbd>python 04_additional/06_conf.py --help</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
                   [--renamed STRING] [--union-without-subcommand.branch STR]
-                  [INT] [{checkout,commit}]
+                  INT [{checkout,commit}]
 
 ╭─ positional arguments ─────────────────────────────────────────────────────╮
-│ [INT]                   A numeric field parsed as a positional argument.   │
-│                         (default: 3)                                       │
+│ INT                     A numeric field parsed as a positional argument.   │
+│                         (required)                                         │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
@@ -352,12 +352,7 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │     commit              Commit changes.                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
-                  [--renamed STRING] [--union-without-subcommand.branch STR]
-                  [INT] [{checkout,commit}]
-
- 
-06_conf.py: error: argument [{checkout,commit}]: invalid choice: '5' (choose from 'checkout', 'commit')</pre>
+<kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">Args(positional=5, boolean=True, fixed=5, manual='Hello', union_without_subcommand=CheckoutArgs(branch='main'), renamed_subcommand=CheckoutArgs(branch='main'))</pre>
 </section>
 
         </article>
