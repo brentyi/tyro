@@ -527,3 +527,19 @@ def test_argconf_help():
 
     assert tyro.cli(main, args=[]) == 5
     assert tyro.cli(main, args=["--x.nice", "3"]) == 3
+
+
+def test_positional():
+    def main(x: tyro.conf.Positional[int], y: int) -> int:
+        return x + y
+
+    assert tyro.cli(main, args="5 --y 3".split(" ")) == 8
+    assert tyro.cli(main, args="--y 3 5".split(" ")) == 8
+
+
+def test_positional_order_swap():
+    def main(x: int, y: tyro.conf.Positional[int]) -> int:
+        return x + y
+
+    assert tyro.cli(main, args="5 --x 3".split(" ")) == 8
+    assert tyro.cli(main, args="--x 3 5".split(" ")) == 8

@@ -7,6 +7,7 @@ Features here are supported, but generally unnecessary and should be used sparin
 
 Usage:
 `python ./06_conf.py --help`
+`python ./06_conf.py 5 --boolean True`
 """
 
 import dataclasses
@@ -34,14 +35,24 @@ class CommitArgs:
 
 @dataclasses.dataclass
 class Args:
-    # A boolean field with flag conversion turned off.
-    boolean: tyro.conf.FlagConversionOff[bool] = False
-
     # A numeric field parsed as a positional argument.
     positional: tyro.conf.Positional[int] = 3
 
+    # A boolean field with flag conversion turned off.
+    boolean: tyro.conf.FlagConversionOff[bool] = False
+
     # A numeric field that can't be changed via the CLI.
     fixed: tyro.conf.Fixed[int] = 5
+
+    # A field with manually overridden properties.
+    manual: Annotated[
+        str,
+        tyro.conf.arg(
+            name="renamed",
+            metavar="STRING",
+            help="A field with manually overridden properties!",
+        ),
+    ] = "Hello"
 
     # A union over nested structures, but without subcommand generation. When a default
     # is provided, the type is simply fixed to that default.

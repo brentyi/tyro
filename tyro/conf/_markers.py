@@ -18,6 +18,10 @@ Positional = Annotated[T, None]
 """A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
 argument."""
 
+# Private marker. For when an argument is not only positional in the CLI, but also in
+# the callable.
+_PositionalCall = Annotated[T, None]
+
 # TODO: the verb tenses here are inconsistent, naming could be revisited.
 # Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.
 

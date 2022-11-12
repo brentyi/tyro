@@ -163,7 +163,7 @@ def call_from_args(
                 consumed_keywords |= consumed_keywords_child
 
         if value is not _fields.EXCLUDE_FROM_CALL:
-            if field.is_positional():
+            if field.is_positional_call():
                 args.append(value)
             else:
                 kwargs[field.call_argname] = value
