@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
-import itertools
 from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
 
 from typing_extensions import Annotated, get_args, get_origin
@@ -31,7 +30,7 @@ class ParserSpecification:
     description: str
     args: List[_arguments.ArgumentDefinition]
     helptext_from_nested_class_field_name: Dict[str, Optional[str]]
-    subparsers_from_name: Dict[str, SubparsersSpecification]
+    subparsers: Optional[SubparsersSpecification]
     prefix: str
     has_required_args: bool
 
@@ -69,7 +68,7 @@ class ParserSpecification:
         has_required_args = False
         args = []
         helptext_from_nested_class_field_name = {}
-        subparsers_from_name = {}
+        subparsers = None
 
         field_list = _fields.field_list_from_callable(
             f=f, default_instance=default_instance
@@ -111,10 +110,13 @@ class ParserSpecification:
                     ):
                         # Don't make a subparser.
                         field = dataclasses.replace(field, typ=type(field.default))
+                    elif subparsers is None:
+                        subparsers = subparsers_attempt
+                        continue
                     else:
-                        subparsers_from_name[
-                            _strings.make_field_name([prefix, subparsers_attempt.name])
-                        ] = subparsers_attempt
+                        subparsers = subparsers.add_subparsers_to_leaves(
+                            subparsers_attempt
+                        )
                         continue
 
                 # (2) Handle nested callables.
@@ -144,7 +146,14 @@ class ParserSpecification:
                     args.extend(nested_parser.args)
 
                     # Include nested subparsers.
-                    subparsers_from_name.update(nested_parser.subparsers_from_name)
+                    if nested_parser.subparsers is not None:
+                        subparsers = (
+                            nested_parser.subparsers
+                            if subparsers is None
+                            else subparsers.add_subparsers_to_leaves(
+                                nested_parser.subparsers
+                            )
+                        )
 
                     # Include nested strings.
                     for (
@@ -176,15 +185,6 @@ class ParserSpecification:
             if arg.lowered.required:
                 has_required_args = True
 
-        # If a later subparser is required, all previous ones should be as well.
-        subparsers_required = False
-        for name, subparsers in list(subparsers_from_name.items())[::-1]:
-            if subparsers.required:
-                subparsers_required = True
-            subparsers_from_name[name] = dataclasses.replace(
-                subparsers, required=subparsers_required
-            )
-
         return ParserSpecification(
             f=f,
             description=_strings.remove_single_line_breaks(
@@ -194,12 +194,23 @@ class ParserSpecification:
             ),
             args=args,
             helptext_from_nested_class_field_name=helptext_from_nested_class_field_name,
-            subparsers_from_name=subparsers_from_name,
+            subparsers=subparsers,
             prefix=prefix,
             has_required_args=has_required_args,
         )
 
     def apply(self, parser: argparse.ArgumentParser) -> None:
+        """Create defined arguments and subparsers."""
+
+        # Generate helptext.
+        parser.description = self.description
+        self.apply_args(parser)
+
+        # Create subparser tree.
+        if self.subparsers is not None:
+            self.subparsers.apply(parser)
+
+    def apply_args(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
 
         # Generate helptext.
@@ -244,14 +255,6 @@ class ParserSpecification:
                 # the helptext so it doesn't matter which group.
                 assert arg.lowered.help is argparse.SUPPRESS
                 arg.add_argument(group_from_prefix[""])
-
-        # Create subparser tree.
-        if len(self.subparsers_from_name) > 0:
-            prev_subparser_tree_nodes = [parser]  # Root node.
-            for subparsers in self.subparsers_from_name.values():
-                prev_subparser_tree_nodes = subparsers.apply(
-                    self, prev_subparser_tree_nodes
-                )
 
 
 @dataclasses.dataclass(frozen=True)
@@ -422,11 +425,9 @@ class SubparsersSpecification:
             default_parser = parser_from_name[default_name]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
                 required = True
-            if any(
-                map(
-                    lambda subparsers: subparsers.required,
-                    default_parser.subparsers_from_name.values(),
-                )
+            if (
+                default_parser.subparsers is not None
+                and default_parser.subparsers.required
             ):
                 required = True
 
@@ -459,11 +460,7 @@ class SubparsersSpecification:
             can_be_none=options != options_no_none,
         )
 
-    def apply(
-        self,
-        parent_parser: ParserSpecification,
-        prev_subparser_tree_nodes: List[argparse.ArgumentParser],
-    ) -> List[argparse.ArgumentParser]:
+    def apply(self, parent_parser: argparse.ArgumentParser) -> None:
         title = "subcommands"
         metavar = (
             "{"
@@ -481,58 +478,48 @@ class SubparsersSpecification:
             title = "optional " + title
             metavar = f"[{metavar}]"
 
-        subparser_tree_nodes: List[argparse.ArgumentParser] = []
-        for p in prev_subparser_tree_nodes:
-            # Add subparsers to every node in previous level of the tree.
-            argparse_subparsers = p.add_subparsers(
-                dest=_strings.make_subparser_dest(self.prefix),
-                description=self.description,
-                required=self.required,
-                title=title,
-                metavar=metavar,
+        # Add subparsers to every node in previous level of the tree.
+        argparse_subparsers = parent_parser.add_subparsers(
+            dest=_strings.make_subparser_dest(self.prefix),
+            description=self.description,
+            required=self.required,
+            title=title,
+            metavar=metavar,
+        )
+
+        if self.can_be_none:
+            subparser = argparse_subparsers.add_parser(
+                name=_strings.subparser_name_from_type(self.prefix, None),
+                formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
+                help="",
             )
 
-            if self.can_be_none:
-                subparser = argparse_subparsers.add_parser(
-                    name=_strings.subparser_name_from_type(self.prefix, None),
-                    formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
-                    help="",
-                )
-                subparser_tree_nodes.append(subparser)
+        for name, subparser_def in self.parser_from_name.items():
+            helptext = subparser_def.description.replace("%", "%%")
+            if len(helptext) > 0:
+                # TODO: calling a private function here.
+                helptext = _arguments._rich_tag_if_enabled(helptext.strip(), "helptext")
 
-            for name, subparser_def in self.parser_from_name.items():
-                helptext = subparser_def.description.replace("%", "%%")
-                if len(helptext) > 0:
-                    # TODO: calling a private function here.
-                    helptext = _arguments._rich_tag_if_enabled(
-                        helptext.strip(), "helptext"
-                    )
+            subparser = argparse_subparsers.add_parser(
+                name,
+                formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
+                help=helptext,
+            )
+            subparser_def.apply(subparser)
 
-                subparser = argparse_subparsers.add_parser(
-                    name,
-                    formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
-                    help=helptext,
-                )
-                subparser_def.apply(subparser)
-
-                def _get_leaf_subparsers(
-                    node: argparse.ArgumentParser,
-                ) -> List[argparse.ArgumentParser]:
-                    if node._subparsers is None:
-                        return [node]
-                    else:
-                        # Magic!
-                        return list(
-                            itertools.chain(
-                                *map(
-                                    _get_leaf_subparsers,
-                                    node._subparsers._actions[
-                                        -1
-                                    ]._name_parser_map.values(),  # type: ignore
-                                )
-                            )
-                        )
-
-                subparser_tree_nodes.extend(_get_leaf_subparsers(subparser))
-
-        return subparser_tree_nodes
+    def add_subparsers_to_leaves(
+        self, subparsers: SubparsersSpecification
+    ) -> SubparsersSpecification:
+        new_parsers_from_name = {}
+        for name, parser in self.parser_from_name.items():
+            new_parsers_from_name[name] = dataclasses.replace(
+                parser,
+                subparsers=subparsers
+                if parser.subparsers is None
+                else parser.subparsers.add_subparsers_to_leaves(subparsers),
+            )
+        return dataclasses.replace(
+            self,
+            parser_from_name=new_parsers_from_name,
+            required=self.required or subparsers.required,
+        )

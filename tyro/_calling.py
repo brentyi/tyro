@@ -24,6 +24,7 @@ def call_from_args(
     default_instance: Union[T, _fields.NonpropagatingMissingType],
     value_from_prefixed_field_name: Dict[str, Any],
     field_name_prefix: str,
+    subparser_def_from_prefixed_field_name: Dict[str, _parsers.SubparsersSpecification],
 ) -> Tuple[T, Set[str]]:
     """Call `f` with arguments specified by a dictionary of values from argparse.
 
@@ -103,14 +104,13 @@ def call_from_args(
                 field.default,
                 value_from_prefixed_field_name,
                 field_name_prefix=prefixed_field_name,
+                subparser_def_from_prefixed_field_name=subparser_def_from_prefixed_field_name,
             )
             consumed_keywords |= consumed_keywords_child
         else:
             # Unions over dataclasses (subparsers). This is the only other option.
-            assert len(parser_definition.subparsers_from_name) > 0
-            assert prefixed_field_name in parser_definition.subparsers_from_name
-
-            subparser_def = parser_definition.subparsers_from_name[prefixed_field_name]
+            assert parser_definition.subparsers is not None
+            subparser_def = subparser_def_from_prefixed_field_name[prefixed_field_name]
 
             subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)
             consumed_keywords.add(subparser_dest)
@@ -159,6 +159,7 @@ def call_from_args(
                     field.default if type(field.default) is chosen_f else None,
                     value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name,
+                    subparser_def_from_prefixed_field_name=subparser_def_from_prefixed_field_name,
                 )
                 consumed_keywords |= consumed_keywords_child
 
