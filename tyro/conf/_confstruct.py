@@ -60,6 +60,7 @@ class _ArgConfiguration:
     name: Optional[str]
     metavar: Optional[str]
     help: Optional[str]
+    # TODO - add prefix_name: bool
 
 
 def arg(
