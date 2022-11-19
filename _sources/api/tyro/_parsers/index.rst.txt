@@ -43,8 +43,8 @@ Module Contents
 
       
 
-   .. py:attribute:: subparsers_from_name
-      :annotation: :Dict[str, SubparsersSpecification]
+   .. py:attribute:: subparsers
+      :annotation: :Optional[SubparsersSpecification]
 
       
 
@@ -65,6 +65,11 @@ Module Contents
       Create a parser definition from a callable or type.
 
    .. py:method:: apply(self, parser: argparse.ArgumentParser) -> None
+
+      
+      Create defined arguments and subparsers.
+
+   .. py:method:: apply_args(self, parser: argparse.ArgumentParser) -> None
 
       
       Create defined arguments and subparsers.
@@ -113,7 +118,10 @@ Module Contents
       :staticmethod:
 
 
-   .. py:method:: apply(self, parent_parser: ParserSpecification, prev_subparser_tree_nodes: List[argparse.ArgumentParser]) -> List[argparse.ArgumentParser]
+   .. py:method:: apply(self, parent_parser: argparse.ArgumentParser) -> None
+
+
+   .. py:method:: add_subparsers_to_leaves(self, subparsers: SubparsersSpecification) -> SubparsersSpecification
 
 
 
