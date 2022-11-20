@@ -242,6 +242,7 @@ class ParserSpecification:
             self.apply_args(parser)
 
         # Break some API boundaries to rename the "optional arguments" => "arguments".
+        assert parser._action_groups[1].title == "optional arguments"
         parser._action_groups[1].title = "arguments"
 
         return leaves
