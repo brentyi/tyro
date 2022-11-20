@@ -52,6 +52,7 @@ Multiple unions over nested types are populated using a series of subcommands.
         # Train script.
 
 
+        @tyro.conf.configure(tyro.conf.ConsolidateSubcommandArgs)
         def train(
             dataset: Union[Mnist, ImageNet] = Mnist(),
             optimizer: Union[Adam, Sgd] = Adam(),
@@ -100,6 +101,6 @@ Multiple unions over nested types are populated using a series of subcommands.
 
 .. raw:: html
 
-        <kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4</kbd>
+        <kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary</kbd>
 
-.. program-output:: python ../../examples/02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4
+.. program-output:: python ../../examples/02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary

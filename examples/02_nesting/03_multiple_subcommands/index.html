@@ -291,25 +291,26 @@
 <span class="linenos">37</span><span class="c1"># Train script.</span>
 <span class="linenos">38</span>
 <span class="linenos">39</span>
-<span class="linenos">40</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
-<span class="linenos">41</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mnist</span><span class="p">,</span> <span class="n">ImageNet</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mnist</span><span class="p">(),</span>
-<span class="linenos">42</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Adam</span><span class="p">,</span> <span class="n">Sgd</span><span class="p">]</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(),</span>
-<span class="linenos">43</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">44</span>    <span class="sd">&quot;&quot;&quot;Example training script.</span>
-<span class="linenos">45</span>
-<span class="linenos">46</span><span class="sd">    Args:</span>
-<span class="linenos">47</span><span class="sd">        dataset: Dataset to train on.</span>
-<span class="linenos">48</span><span class="sd">        optimizer: Optimizer to train with.</span>
-<span class="linenos">49</span>
-<span class="linenos">50</span><span class="sd">    Returns:</span>
-<span class="linenos">51</span><span class="sd">        None:</span>
-<span class="linenos">52</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">53</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
-<span class="linenos">54</span>    <span class="nb">print</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
-<span class="linenos">55</span>
+<span class="linenos">40</span><span class="nd">@tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span><span class="p">)</span>
+<span class="linenos">41</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+<span class="linenos">42</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Mnist</span><span class="p">,</span> <span class="n">ImageNet</span><span class="p">]</span> <span class="o">=</span> <span class="n">Mnist</span><span class="p">(),</span>
+<span class="linenos">43</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Adam</span><span class="p">,</span> <span class="n">Sgd</span><span class="p">]</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(),</span>
+<span class="linenos">44</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">45</span>    <span class="sd">&quot;&quot;&quot;Example training script.</span>
+<span class="linenos">46</span>
+<span class="linenos">47</span><span class="sd">    Args:</span>
+<span class="linenos">48</span><span class="sd">        dataset: Dataset to train on.</span>
+<span class="linenos">49</span><span class="sd">        optimizer: Optimizer to train with.</span>
+<span class="linenos">50</span>
+<span class="linenos">51</span><span class="sd">    Returns:</span>
+<span class="linenos">52</span><span class="sd">        None:</span>
+<span class="linenos">53</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">54</span>    <span class="nb">print</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+<span class="linenos">55</span>    <span class="nb">print</span><span class="p">(</span><span class="n">optimizer</span><span class="p">)</span>
 <span class="linenos">56</span>
-<span class="linenos">57</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">58</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="linenos">57</span>
+<span class="linenos">58</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">59</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -346,7 +347,7 @@ Example training script.
 │     optimizer:sgd                                   │
 ╰─────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Mnist(binary=False)
+<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary</kbd><pre class="ansi-block literal-block">Mnist(binary=True)
 Adam(learning_rate=0.0003, betas=(0.9, 0.999))</pre>
 </section>
 
