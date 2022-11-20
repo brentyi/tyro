@@ -369,13 +369,13 @@ Python is convenient for autocompletion and type checking).</p>
 <hr class="docutils" />
 <kbd>python 03_config_systems/01_base_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] {small,big}
 
-╭─ arguments ────────────────────────────────────────╮
-│ -h, --help         show this help message and exit │
-╰────────────────────────────────────────────────────╯
 ╭─ subcommands ──────────────────────────────────────╮
 │ {small,big}                                        │
 │     small              Train a smaller model.      │
 │     big                Train a bigger model.       │
+╰────────────────────────────────────────────────────╯
+╭─ arguments ────────────────────────────────────────╮
+│ -h, --help         show this help message and exit │
 ╰────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 03_config_systems/01_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py small [-h] [--dataset {mnist,imagenet-50}]
@@ -387,6 +387,13 @@ izer}]
 
 Train a smaller model.
 
+╭─ optional subcommands ─────────────────────────────────────────────────────╮
+│ Optimizer parameters.  (default: optimizer:sgd-optimizer)                  │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]                       │
+│     optimizer:adam-optimizer                                               │
+│     optimizer:sgd-optimizer                                                │
+╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
 │ --dataset {mnist,imagenet-50}                                              │
@@ -400,13 +407,6 @@ Train a smaller model.
 │ --activation {fixed}    Activation to use. Not specifiable via the         │
 │                         commandline. (fixed to: &lt;class                     │
 │                         'torch.nn.modules.activation.ReLU'&gt;)               │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optional subcommands ─────────────────────────────────────────────────────╮
-│ Optimizer parameters.  (default: optimizer:sgd-optimizer)                  │
-│ ─────────────────────────────────────────────────────────                  │
-│ [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]                       │
-│     optimizer:adam-optimizer                                               │
-│     optimizer:sgd-optimizer                                                │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 03_config_systems/01_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</pre>
@@ -420,6 +420,13 @@ er}]
 
 Train a bigger model.
 
+╭─ optional subcommands ─────────────────────────────────────────────────────╮
+│ Optimizer parameters.  (default: optimizer:adam-optimizer)                 │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]                       │
+│     optimizer:adam-optimizer                                               │
+│     optimizer:sgd-optimizer                                                │
+╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
 │ --dataset {mnist,imagenet-50}                                              │
@@ -434,13 +441,6 @@ Train a bigger model.
 │ --activation {fixed}    Activation to use. Not specifiable via the         │
 │                         commandline. (fixed to: &lt;class                     │
 │                         'torch.nn.modules.activation.GELU'&gt;)               │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optional subcommands ─────────────────────────────────────────────────────╮
-│ Optimizer parameters.  (default: optimizer:adam-optimizer)                 │
-│ ──────────────────────────────────────────────────────────                 │
-│ [{optimizer:adam-optimizer,optimizer:sgd-optimizer}]                       │
-│     optimizer:adam-optimizer                                               │
-│     optimizer:sgd-optimizer                                                │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 03_config_systems/01_base_configs.py big --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)</pre>

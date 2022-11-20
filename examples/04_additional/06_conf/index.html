@@ -321,11 +321,19 @@ command-line interfaces beyond what is expressible via static type annotations.<
 <hr class="docutils" />
 <kbd>python 04_additional/06_conf.py --help</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
                   [--renamed STRING] [--union-without-subcommand.branch STR]
-                  INT [{checkout,commit}]
+                  [{checkout,commit}] INT
 
 ╭─ positional arguments ─────────────────────────────────────────────────────╮
 │ INT                     A numeric field parsed as a positional argument.   │
 │                         (required)                                         │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ optional subcommands ─────────────────────────────────────────────────────╮
+│ `tyro.conf.subcommand()` can be used to configure subcommands in a Union.  │
+│ Here, we make the subcommand names more succinct.  (default: checkout)     │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ [{checkout,commit}]                                                        │
+│     checkout            Checkout a branch.                                 │
+│     commit              Commit changes.                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
@@ -342,17 +350,14 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │ ────────────────────────────────────────────────────────────────────────── │
 │ --union-without-subcommand.branch STR                                      │
 │                         (default: main)                                    │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optional subcommands ─────────────────────────────────────────────────────╮
-│ `tyro.conf.subcommand()` can be used to configure subcommands in a Union.  │
-│ Here, we make the subcommand names more succinct.  (default: checkout)     │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ [{checkout,commit}]                                                        │
-│     checkout            Checkout a branch.                                 │
-│     commit              Commit changes.                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">Args(positional=5, boolean=True, fixed=5, manual='Hello', union_without_subcommand=CheckoutArgs(branch='main'), renamed_subcommand=CheckoutArgs(branch='main'))</pre>
+<kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
+                  [--renamed STRING] [--union-without-subcommand.branch STR]
+                  [{checkout,commit}] INT
+
+ 
+06_conf.py: error: argument [{checkout,commit}]: invalid choice: '5' (choose from 'checkout', 'commit')</pre>
 </section>
 
         </article>

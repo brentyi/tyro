@@ -301,6 +301,11 @@
 <span class="sig-name descname"><span class="pre">has_required_args</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#tyro._parsers.ParserSpecification.has_required_args" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.consolidate_subcommand_args">
+<span class="sig-name descname"><span class="pre">consolidate_subcommand_args</span></span><em class="property"><span class="w"> </span><span class="pre">:bool</span></em><a class="headerlink" href="#tyro._parsers.ParserSpecification.consolidate_subcommand_args" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.from_callable_or_type">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_callable_or_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../_fields/#tyro._fields.PropagatingMissingType" title="tyro._fields.PropagatingMissingType"><span class="pre">tyro._fields.PropagatingMissingType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../_fields/#tyro._fields.NonpropagatingMissingType" title="tyro._fields.NonpropagatingMissingType"><span class="pre">tyro._fields.NonpropagatingMissingType</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcommand_prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.from_callable_or_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.from_callable_or_type" title="Permalink to this definition">#</a></dt>
@@ -324,14 +329,14 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._parsers.ParserSpecification.apply">
-<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">argparse.ArgumentParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.apply" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">argparse.ArgumentParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">argparse.ArgumentParser</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#ParserSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.ParserSpecification.apply" title="Permalink to this definition">#</a></dt>
 <dd><p>Create defined arguments and subparsers.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>parser</strong> (<em>argparse.ArgumentParser</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p>Tuple[argparse.ArgumentParser, Ellipsis]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -414,13 +419,13 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.apply">
-<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">argparse.ArgumentParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#SubparsersSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.apply" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">apply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">argparse.ArgumentParser</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">argparse.ArgumentParser</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#SubparsersSpecification.apply"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.apply" title="Permalink to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>parent_parser</strong> (<em>argparse.ArgumentParser</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>None</p>
+<dd class="field-even"><p>Tuple[argparse.ArgumentParser, Ellipsis]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -500,6 +505,7 @@
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.subparsers">subparsers</a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.prefix">prefix</a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.has_required_args">has_required_args</a></li>
+<li><a class="reference internal" href="#tyro._parsers.ParserSpecification.consolidate_subcommand_args">consolidate_subcommand_args</a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.from_callable_or_type">from_callable_or_type</a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.apply">apply</a></li>
 <li><a class="reference internal" href="#tyro._parsers.ParserSpecification.apply_args">apply_args</a></li>

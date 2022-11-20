@@ -249,7 +249,7 @@
         </div>
         <article role="main">
           <h1>Source code for tyro.conf._markers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
 
@@ -302,6 +302,28 @@
 <span class="sd">Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively</span>
 <span class="sd">applied to nested types.&quot;&quot;&quot;</span>
 
+<span class="n">ConsolidateSubcommandArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument</span>
+<span class="sd">ordering, at the cost of support for optional subcommands.</span>
+
+<span class="sd">By default, `tyro` will generate a traditional CLI interface where args are applied to</span>
+<span class="sd">the directly preceding subcommand. When we have two subcommands `s1` and `s2`:</span>
+<span class="sd">```</span>
+<span class="sd">python x.py {--root options} s1 {--s1 options} s2 {--s2 options}</span>
+<span class="sd">```</span>
+
+<span class="sd">This can be frustrating because the resulting CLI is sensitive the exact positioning and</span>
+<span class="sd">ordering of options.</span>
+
+<span class="sd">To consolidate subcommands, we push arguments to the end, after all subcommands:</span>
+<span class="sd">```</span>
+<span class="sd">python x.py s1 s2 {--root, s1, and s2 options}</span>
+<span class="sd">```</span>
+
+<span class="sd">This is more robust to reordering of options, ensuring that any new options can simply</span>
+<span class="sd">be placed at the end of the command&gt;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</span>
 
@@ -313,14 +335,43 @@
 <span class="sd">If subcommand prefixes are omitted, we would instead simply have `--arg`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 
 <span class="c1"># Dynamically generate marker singletons.</span>
 <span class="c1"># These can be used one of two ways:</span>
 <span class="c1"># - Marker[T]</span>
 <span class="c1"># - Annotated[T, Marker]</span>
+
+
 <div class="viewcode-block" id="Marker"><a class="viewcode-back" href="../../../../api/tyro/conf/_markers/#tyro.conf._markers.Marker">[docs]</a><span class="k">class</span> <span class="nc">Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
 <div class="viewcode-block" id="Marker.__getitem__"><a class="viewcode-back" href="../../../../api/tyro/conf/_markers/#tyro.conf._markers.Marker.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span></div></div>
+
+
+<div class="viewcode-block" id="configure"><a class="viewcode-back" href="../../../../api/tyro/conf/#tyro.conf._markers.configure">[docs]</a><span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="o">*</span><span class="n">markers</span><span class="p">:</span> <span class="n">Marker</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">CallableType</span><span class="p">],</span> <span class="n">CallableType</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Decorator for configuring functions.</span>
+
+<span class="sd">    Configuration markers are implemented via `typing.Annotated` and straightforward to</span>
+<span class="sd">    apply to types, for example:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    field: tyro.conf.FlagConversionOff[bool]</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    This decorator makes markers applicable to general functions as well:</span>
+
+<span class="sd">    ```python</span>
+<span class="sd">    # Recursively apply FlagConversionOff to all field in `main()`.</span>
+<span class="sd">    @tyro.conf.configure_function(tyro.conf.FlagConversionOff)</span>
+<span class="sd">    def main(field: bool) -&gt; None:</span>
+<span class="sd">        ...</span>
+<span class="sd">    ```</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_inner</span><span class="p">(</span><span class="n">callable</span><span class="p">:</span> <span class="n">CallableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableType</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">callable</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">return</span> <span class="n">_inner</span></div>
 
 
 <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

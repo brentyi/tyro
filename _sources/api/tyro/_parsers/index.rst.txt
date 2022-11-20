@@ -58,13 +58,18 @@ Module Contents
 
       
 
+   .. py:attribute:: consolidate_subcommand_args
+      :annotation: :bool
+
+      
+
    .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type], default_instance: Union[T, tyro._fields.PropagatingMissingType, tyro._fields.NonpropagatingMissingType], prefix: str, subcommand_prefix: str = '') -> ParserSpecification
       :staticmethod:
 
       
       Create a parser definition from a callable or type.
 
-   .. py:method:: apply(self, parser: argparse.ArgumentParser) -> None
+   .. py:method:: apply(self, parser: argparse.ArgumentParser) -> Tuple[argparse.ArgumentParser, Ellipsis]
 
       
       Create defined arguments and subparsers.
@@ -118,7 +123,7 @@ Module Contents
       :staticmethod:
 
 
-   .. py:method:: apply(self, parent_parser: argparse.ArgumentParser) -> None
+   .. py:method:: apply(self, parent_parser: argparse.ArgumentParser) -> Tuple[argparse.ArgumentParser, Ellipsis]
 
 
 

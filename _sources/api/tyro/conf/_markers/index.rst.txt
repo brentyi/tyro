@@ -62,6 +62,32 @@ Module Contents
    Can be used directly on union types, ``AvoidSubcommands[Union[...]]``\ , or recursively
    applied to nested types.
 
+.. py:data:: ConsolidateSubcommandArgs
+   
+
+   
+   Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
+   ordering, at the cost of support for optional subcommands.
+
+   By default, ``tyro`` will generate a traditional CLI interface where args are applied to
+   the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``\ :
+
+   ::
+
+      python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
+
+   This can be frustrating because the resulting CLI is sensitive the exact positioning and
+   ordering of options.
+
+   To consolidate subcommands, we push arguments to the end, after all subcommands:
+
+   ::
+
+      python x.py s1 s2 {--root, s1, and s2 options}
+
+   This is more robust to reordering of options, ensuring that any new options can simply
+   be placed at the end of the command>
+
 .. py:data:: OmitSubcommandPrefixes
    
 
@@ -78,6 +104,11 @@ Module Contents
    By default, ``--cmd.arg`` may be generated as a flag for each dataclass in the union.
    If subcommand prefixes are omitted, we would instead simply have ``--arg``.
 
+.. py:data:: CallableType
+   
+
+   
+
 .. py:class:: Marker
 
    Bases: :py:obj:`tyro._singleton.Singleton`
@@ -85,4 +116,25 @@ Module Contents
    .. py:method:: __getitem__(self, key)
 
 
+
+.. py:function:: configure(*markers: Marker) -> Callable[[CallableType], CallableType]
+
+   
+   Decorator for configuring functions.
+
+   Configuration markers are implemented via ``typing.Annotated`` and straightforward to
+   apply to types, for example:
+
+   .. code-block:: python
+
+      field: tyro.conf.FlagConversionOff[bool]
+
+   This decorator makes markers applicable to general functions as well:
+
+   .. code-block:: python
+
+      # Recursively apply FlagConversionOff to all field in `main()`.
+      @tyro.conf.configure_function(tyro.conf.FlagConversionOff)
+      def main(field: bool) -> None:
+          ...
 
