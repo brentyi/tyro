@@ -501,17 +501,21 @@
         <span class="n">parser</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
 
         <span class="c1"># Make argument groups.</span>
-        <span class="k">def</span> <span class="nf">format_group_name</span><span class="p">(</span><span class="n">nested_field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">nested_field_name</span> <span class="o">+</span> <span class="s2">&quot; arguments&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">def</span> <span class="nf">format_group_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot; arguments&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="n">group_from_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_ArgumentGroup</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;&quot;</span><span class="p">:</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="o">**</span><span class="p">{</span>
+                <span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">group</span><span class="o">.</span><span class="n">title</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">group</span>
+                <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+            <span class="p">},</span>
         <span class="p">}</span>
+        <span class="n">positional_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="n">positional_group</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;positional arguments&quot;</span>
 
         <span class="c1"># Break some API boundaries to rename the optional group.</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="n">format_group_name</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
-        <span class="n">positional_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="s2">&quot;positional arguments&quot;</span><span class="p">)</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="c1"># Add each argument group. Note that groups with only suppressed arguments won&#39;t</span>
         <span class="c1"># be added.</span>

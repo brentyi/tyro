@@ -291,13 +291,13 @@
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py [-h] {cmd:checkout,cmd:commit}
 
+╭─ arguments ───────────────────────────────────────╮
+│ -h, --help        show this help message and exit │
+╰───────────────────────────────────────────────────╯
 ╭─ subcommands ─────────────────────────────────────╮
 │ {cmd:checkout,cmd:commit}                         │
 │     cmd:checkout      Checkout a branch.          │
 │     cmd:commit        Commit changes.             │
-╰───────────────────────────────────────────────────╯
-╭─ arguments ───────────────────────────────────────╮
-│ -h, --help        show this help message and exit │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py cmd:commit [-h] --cmd.message STR [--cmd.all]

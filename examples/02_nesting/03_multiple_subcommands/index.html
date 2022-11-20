@@ -320,35 +320,31 @@ Adam(learning_rate=0.001, betas=(0.9, 0.999))</pre>
 
 Example training script.
 
+╭─ optional arguments ──────────────────────────────╮
+│ -h, --help        show this help message and exit │
+╰───────────────────────────────────────────────────╯
 ╭─ optional subcommands ────────────────────────────╮
 │ Dataset to train on.  (default: dataset:mnist)    │
-│ ───────────────────────────────────────────────── │
+│ ──────────────────────────────────────────────    │
 │ [{dataset:mnist,dataset:image-net}]               │
 │     dataset:mnist                                 │
 │     dataset:image-net                             │
-╰───────────────────────────────────────────────────╯
-╭─ arguments ───────────────────────────────────────╮
-│ -h, --help        show this help message and exit │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py dataset:mnist [-h] [--dataset.binary]
+<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py dataset:mnist [-h]
                                                 [{optimizer:adam,optimizer:sgd
 }]
 
-╭─ optional subcommands ─────────────────────────────────────────────────────╮
-│ Optimizer to train with.  (default: optimizer:adam)                        │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ [{optimizer:adam,optimizer:sgd}]                                           │
-│     optimizer:adam                                                         │
-│     optimizer:sgd                                                          │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ dataset arguments ────────────────────────────────────────────────────────╮
-│ --dataset.binary        Set to load binary version of MNIST dataset.       │
-│                         (sets: binary=True)                                │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+╭─ optional arguments ────────────────────────────────╮
+│ -h, --help        show this help message and exit   │
+╰─────────────────────────────────────────────────────╯
+╭─ optional subcommands ──────────────────────────────╮
+│ Optimizer to train with.  (default: optimizer:adam) │
+│ ─────────────────────────────────────────────────── │
+│ [{optimizer:adam,optimizer:sgd}]                    │
+│     optimizer:adam                                  │
+│     optimizer:sgd                                   │
+╰─────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Mnist(binary=False)
 Adam(learning_rate=0.0003, betas=(0.9, 0.999))</pre>

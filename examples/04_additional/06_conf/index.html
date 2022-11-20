@@ -327,14 +327,6 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │ INT                     A numeric field parsed as a positional argument.   │
 │                         (required)                                         │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optional subcommands ─────────────────────────────────────────────────────╮
-│ `tyro.conf.subcommand()` can be used to configure subcommands in a Union.  │
-│ Here, we make the subcommand names more succinct.  (default: checkout)     │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ [{checkout,commit}]                                                        │
-│     checkout            Checkout a branch.                                 │
-│     commit              Commit changes.                                    │
-╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
 │ --boolean {True,False}  A boolean field with flag conversion turned off.   │
@@ -343,6 +335,14 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │                         (fixed to: 5)                                      │
 │ --renamed STRING        A field with manually overridden properties!       │
 │                         (default: Hello)                                   │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ optional subcommands ─────────────────────────────────────────────────────╮
+│ `tyro.conf.subcommand()` can be used to configure subcommands in a Union.  │
+│ Here, we make the subcommand names more succinct.  (default: checkout)     │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ [{checkout,commit}]                                                        │
+│     checkout            Checkout a branch.                                 │
+│     commit              Commit changes.                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ union-without-subcommand arguments ───────────────────────────────────────╮
 │ A union over nested structures, but without subcommand generation. When a  │
