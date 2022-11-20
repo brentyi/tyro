@@ -347,6 +347,26 @@ Example training script.
 │     optimizer:sgd                                   │
 ╰─────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
+<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py dataset:mnist optimizer:adam
+       [-h] [--optimizer.learning-rate FLOAT] [--optimizer.betas FLOAT FLOAT]
+       [--dataset.binary]
+
+Example training script.
+
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit                    │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ optimizer arguments ──────────────────────────────────────────────────────╮
+│ --optimizer.learning-rate FLOAT                                            │
+│                         (default: 0.001)                                   │
+│ --optimizer.betas FLOAT FLOAT                                              │
+│                         (default: 0.9 0.999)                               │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ dataset arguments ────────────────────────────────────────────────────────╮
+│ --dataset.binary        Set to load binary version of MNIST dataset.       │
+│                         (sets: binary=True)                                │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
+<hr class="docutils" />
 <kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary</kbd><pre class="ansi-block literal-block">Mnist(binary=True)
 Adam(learning_rate=0.0003, betas=(0.9, 0.999))</pre>
 </section>
