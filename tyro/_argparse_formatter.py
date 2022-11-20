@@ -28,7 +28,7 @@ from . import _arguments, _strings
 
 
 @dataclasses.dataclass
-class DcargsTheme:
+class TyroTheme:
     border: Style = Style()
     description: Style = Style()
     invocation: Style = Style()
@@ -65,7 +65,7 @@ def set_accent_color(accent_color: Optional[str]) -> None:
 
 # TODO: this is a prototype; for a v1.0.0 release we should revisit whether the global
 # state here is acceptable or not.
-THEME = DcargsTheme()
+THEME = TyroTheme()
 set_accent_color(None)
 
 
@@ -128,7 +128,7 @@ def str_from_rich(
     return out.get().rstrip("\n")
 
 
-class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
+class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
     def __init__(self, prog: str):
         indent_increment = 4
         width = shutil.get_terminal_size().columns - 2
@@ -383,7 +383,7 @@ class DcargsArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 item_content = func(*args)
                 if (
                     getattr(func, "__func__", None)
-                    is DcargsArgparseHelpFormatter._format_action
+                    is TyroArgparseHelpFormatter._format_action
                 ):
                     (action,) = args
                     assert isinstance(action, argparse.Action)

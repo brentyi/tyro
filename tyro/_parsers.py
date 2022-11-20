@@ -114,8 +114,8 @@ class ParserSpecification:
                         subparsers = subparsers_attempt
                         continue
                     else:
-                        subparsers = subparsers.add_subparsers_to_leaves(
-                            subparsers_attempt
+                        subparsers = add_subparsers_to_leaves(
+                            subparsers, subparsers_attempt
                         )
                         continue
 
@@ -150,8 +150,8 @@ class ParserSpecification:
                         subparsers = (
                             nested_parser.subparsers
                             if subparsers is None
-                            else subparsers.add_subparsers_to_leaves(
-                                nested_parser.subparsers
+                            else add_subparsers_to_leaves(
+                                subparsers, nested_parser.subparsers
                             )
                         )
 
@@ -490,7 +490,7 @@ class SubparsersSpecification:
         if self.can_be_none:
             subparser = argparse_subparsers.add_parser(
                 name=_strings.subparser_name_from_type(self.prefix, None),
-                formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
+                formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help="",
             )
 
@@ -502,24 +502,26 @@ class SubparsersSpecification:
 
             subparser = argparse_subparsers.add_parser(
                 name,
-                formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
+                formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
             )
             subparser_def.apply(subparser)
 
-    def add_subparsers_to_leaves(
-        self, subparsers: SubparsersSpecification
-    ) -> SubparsersSpecification:
-        new_parsers_from_name = {}
-        for name, parser in self.parser_from_name.items():
-            new_parsers_from_name[name] = dataclasses.replace(
-                parser,
-                subparsers=subparsers
-                if parser.subparsers is None
-                else parser.subparsers.add_subparsers_to_leaves(subparsers),
-            )
-        return dataclasses.replace(
-            self,
-            parser_from_name=new_parsers_from_name,
-            required=self.required or subparsers.required,
+
+def add_subparsers_to_leaves(
+    root: Optional[SubparsersSpecification], leaf: SubparsersSpecification
+) -> SubparsersSpecification:
+    if root is None:
+        return leaf
+
+    new_parsers_from_name = {}
+    for name, parser in root.parser_from_name.items():
+        new_parsers_from_name[name] = dataclasses.replace(
+            parser,
+            subparsers=add_subparsers_to_leaves(parser.subparsers, leaf),
         )
+    return dataclasses.replace(
+        root,
+        parser_from_name=new_parsers_from_name,
+        required=root.required or leaf.required,
+    )
