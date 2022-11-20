@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Type, TypeVar
+from typing import TYPE_CHECKING, Callable, Type, TypeVar
 
 from typing_extensions import Annotated
 
@@ -51,6 +51,28 @@ This simplifies CLI interfaces, but makes them less expressive.
 Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively
 applied to nested types."""
 
+ConsolidateSubcommandArgs = Annotated[T, None]
+"""Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
+ordering, at the cost of support for optional subcommands.
+
+By default, `tyro` will generate a traditional CLI interface where args are applied to
+the directly preceding subcommand. When we have two subcommands `s1` and `s2`:
+```
+python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
+```
+
+This can be frustrating because the resulting CLI is sensitive the exact positioning and
+ordering of options.
+
+To consolidate subcommands, we push arguments to the end, after all subcommands:
+```
+python x.py s1 s2 {--root, s1, and s2 options}
+```
+
+This is more robust to reordering of options, ensuring that any new options can simply
+be placed at the end of the command>
+"""
+
 OmitSubcommandPrefixes = Annotated[T, None]
 """Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
 
@@ -62,14 +84,43 @@ By default, `--cmd.arg` may be generated as a flag for each dataclass in the uni
 If subcommand prefixes are omitted, we would instead simply have `--arg`.
 """
 
+CallableType = TypeVar("CallableType", bound=Callable)
 
 # Dynamically generate marker singletons.
 # These can be used one of two ways:
 # - Marker[T]
 # - Annotated[T, Marker]
+
+
 class Marker(_singleton.Singleton):
     def __getitem__(self, key):
         return Annotated.__class_getitem__((key, self))  # type: ignore
+
+
+def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
+    """Decorator for configuring functions.
+
+    Configuration markers are implemented via `typing.Annotated` and straightforward to
+    apply to types, for example:
+
+    ```python
+    field: tyro.conf.FlagConversionOff[bool]
+    ```
+
+    This decorator makes markers applicable to general functions as well:
+
+    ```python
+    # Recursively apply FlagConversionOff to all field in `main()`.
+    @tyro.conf.configure_function(tyro.conf.FlagConversionOff)
+    def main(field: bool) -> None:
+        ...
+    ```
+    """
+
+    def _inner(callable: CallableType) -> CallableType:
+        return Annotated.__class_getitem__((callable,) + tuple(markers))  # type: ignore
+
+    return _inner
 
 
 if not TYPE_CHECKING:

@@ -4,7 +4,19 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
-from typing import Any, Callable, Dict, List, Optional, Set, Type, TypeVar, Union, cast
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+    Union,
+    cast,
+)
 
 from typing_extensions import Annotated, get_args, get_origin
 
@@ -33,6 +45,7 @@ class ParserSpecification:
     subparsers: Optional[SubparsersSpecification]
     prefix: str
     has_required_args: bool
+    consolidate_subcommand_args: bool
 
     @staticmethod
     def from_callable_or_type(
@@ -46,6 +59,12 @@ class ParserSpecification:
         subcommand_prefix: str = "",
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
+
+        # Consolidate subcommand types.
+        consolidate_subcommand_args = (
+            _markers.ConsolidateSubcommandArgs
+            in _resolver.unwrap_annotated(f, _markers.Marker)[1]
+        )
 
         # Resolve generic types.
         f, type_from_typevar = _resolver.resolve_generic_types(f)
@@ -197,18 +216,32 @@ class ParserSpecification:
             subparsers=subparsers,
             prefix=prefix,
             has_required_args=has_required_args,
+            consolidate_subcommand_args=consolidate_subcommand_args,
         )
 
-    def apply(self, parser: argparse.ArgumentParser) -> None:
+    def apply(
+        self, parser: argparse.ArgumentParser
+    ) -> Tuple[argparse.ArgumentParser, ...]:
         """Create defined arguments and subparsers."""
 
         # Generate helptext.
         parser.description = self.description
-        self.apply_args(parser)
 
         # Create subparser tree.
         if self.subparsers is not None:
-            self.subparsers.apply(parser)
+            leaves = self.subparsers.apply(parser)
+        else:
+            leaves = (parser,)
+
+        # Depending on whether we want to consolidate subcommand args, we can either
+        # apply arguments to the intermediate parser or only on the leaves.
+        if self.consolidate_subcommand_args:
+            for leaf in leaves:
+                self.apply_args(leaf)
+        else:
+            self.apply_args(parser)
+
+        return leaves
 
     def apply_args(self, parser: argparse.ArgumentParser) -> None:
         """Create defined arguments and subparsers."""
@@ -460,7 +493,9 @@ class SubparsersSpecification:
             can_be_none=options != options_no_none,
         )
 
-    def apply(self, parent_parser: argparse.ArgumentParser) -> None:
+    def apply(
+        self, parent_parser: argparse.ArgumentParser
+    ) -> Tuple[argparse.ArgumentParser, ...]:
         title = "subcommands"
         metavar = (
             "{"
@@ -494,6 +529,7 @@ class SubparsersSpecification:
                 help="",
             )
 
+        subparser_tree_leaves: List[argparse.ArgumentParser] = []
         for name, subparser_def in self.parser_from_name.items():
             helptext = subparser_def.description.replace("%", "%%")
             if len(helptext) > 0:
@@ -505,7 +541,9 @@ class SubparsersSpecification:
                 formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
             )
-            subparser_def.apply(subparser)
+            subparser_tree_leaves.extend(subparser_def.apply(subparser))
+
+        return tuple(subparser_tree_leaves)
 
 
 def add_subparsers_to_leaves(

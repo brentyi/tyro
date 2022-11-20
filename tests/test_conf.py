@@ -543,3 +543,122 @@ def test_positional_order_swap():
 
     assert tyro.cli(main, args="5 --x 3".split(" ")) == 8
     assert tyro.cli(main, args="--x 3 5".split(" ")) == 8
+
+
+def test_omit_subcommand_prefix_and_consolidate_subcommand_args():
+    @dataclasses.dataclass
+    class DefaultInstanceHTTPServer:
+        y: int = 0
+        flag: bool = True
+
+    @dataclasses.dataclass
+    class DefaultInstanceSMTPServer:
+        z: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSubparser:
+        x: int
+        # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        bc: tyro.conf.OmitSubcommandPrefixes[
+            Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        ]
+
+    assert (
+        tyro.cli(
+            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            args=[
+                "bc:default-instance-http-server",
+                "--x",
+                "1",
+                "--y",
+                "5",
+                "--no-flag",
+            ],
+        )
+        == tyro.cli(
+            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            args=[
+                "bc:default-instance-http-server",
+                "--x",
+                "1",
+                "--y",
+                "5",
+            ],
+            default=DefaultInstanceSubparser(
+                x=1, bc=DefaultInstanceHTTPServer(y=3, flag=False)
+            ),
+        )
+        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5, flag=False))
+    )
+    assert (
+        tyro.cli(
+            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            args=[
+                "bc:default-instance-http-server",
+                "--x",
+                "1",
+                "--y",
+                "8",
+            ],
+        )
+        == tyro.cli(
+            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
+            args=[
+                "bc:default-instance-http-server",
+                "--x",
+                "1",
+                "--y",
+                "8",
+            ],
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
+        )
+        == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
+    )
+
+
+def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function():
+    @dataclasses.dataclass
+    class DefaultInstanceHTTPServer:
+        y: int = 0
+        flag: bool = True
+
+    @dataclasses.dataclass
+    class DefaultInstanceSMTPServer:
+        z: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSubparser:
+        x: int
+        # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+
+    @tyro.conf.configure(
+        tyro.conf.OmitSubcommandPrefixes,
+        tyro.conf.ConsolidateSubcommandArgs,
+    )
+    def func(parent: DefaultInstanceSubparser) -> DefaultInstanceSubparser:
+        return parent
+
+    assert tyro.cli(
+        func,
+        args=[
+            "parent.bc:default-instance-http-server",
+            "--parent.x",
+            "1",
+            # --y and --no-flag are in a subcommand with prefix omission.
+            "--y",
+            "5",
+            "--no-flag",
+        ],
+    ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5, flag=False))
+    assert tyro.cli(
+        func,
+        args=[
+            "parent.bc:default-instance-http-server",
+            "--parent.x",
+            "1",
+            # --y is in a subcommand with prefix omission.
+            "--y",
+            "8",
+        ],
+    ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
