@@ -11,22 +11,26 @@ Features here are supported, but generally unnecessary and should be used sparin
 from ._confstruct import arg, subcommand
 from ._markers import (
     AvoidSubcommands,
+    ConsolidateSubcommandArgs,
     Fixed,
     FlagConversionOff,
     OmitSubcommandPrefixes,
     Positional,
     Suppress,
     SuppressFixed,
+    configure,
 )
 
 __all__ = [
     "arg",
     "subcommand",
     "AvoidSubcommands",
+    "ConsolidateSubcommandArgs",
     "Fixed",
     "FlagConversionOff",
     "OmitSubcommandPrefixes",
     "Positional",
     "Suppress",
     "SuppressFixed",
+    "configure",
 ]

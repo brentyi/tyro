@@ -278,6 +278,7 @@ def _cli_impl(
         parent_classes=set(),  # Used for recursive calls.
         default_instance=default_instance_internal,  # Overrides for default values.
         prefix="",  # Used for recursive calls.
+        subcommand_prefix="",  # Used for recursive calls.
     )
 
     # Generate parser!
