@@ -26,7 +26,7 @@
 Module Contents
 ---------------
 
-.. py:class:: DcargsTheme
+.. py:class:: TyroTheme
 
    .. py:attribute:: border
       :annotation: :rich.style.Style
@@ -99,7 +99,7 @@ Module Contents
 .. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
 
 
-.. py:class:: DcargsArgparseHelpFormatter(prog: str)
+.. py:class:: TyroArgparseHelpFormatter(prog: str)
 
    Bases: :py:obj:`argparse.RawDescriptionHelpFormatter`
 
