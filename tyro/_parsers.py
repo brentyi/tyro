@@ -241,6 +241,9 @@ class ParserSpecification:
         else:
             self.apply_args(parser)
 
+        # Break some API boundaries to rename the "optional arguments" => "arguments".
+        parser._action_groups[1].title = "arguments"
+
         return leaves
 
     def apply_args(self, parser: argparse.ArgumentParser) -> None:
@@ -250,17 +253,18 @@ class ParserSpecification:
         parser.description = self.description
 
         # Make argument groups.
-        def format_group_name(nested_field_name: str) -> str:
-            return (nested_field_name + " arguments").strip()
+        def format_group_name(prefix: str) -> str:
+            return (prefix + " arguments").strip()
 
         group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
             "": parser._action_groups[1],
+            **{
+                cast(str, group.title).partition(" ")[0]: group
+                for group in parser._action_groups[2:]
+            },
         }
-
-        # Break some API boundaries to rename the optional group.
-        parser._action_groups[1].title = format_group_name("")
-        positional_group = parser.add_argument_group("positional arguments")
-        parser._action_groups = parser._action_groups[::-1]
+        positional_group = parser._action_groups[0]
+        assert positional_group.title == "positional arguments"
 
         # Add each argument group. Note that groups with only suppressed arguments won't
         # be added.

@@ -6,7 +6,8 @@ Usage:
 `python ./03_multiple_subcommands.py`
 `python ./03_multiple_subcommands.py --help`
 `python ./03_multiple_subcommands.py dataset:mnist --help`
-`python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4`
+`python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --help`
+`python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary`
 """
 from __future__ import annotations
 
@@ -47,6 +48,7 @@ class Sgd:
 # Train script.
 
 
+@tyro.conf.configure(tyro.conf.ConsolidateSubcommandArgs)
 def train(
     dataset: Union[Mnist, ImageNet] = Mnist(),
     optimizer: Union[Adam, Sgd] = Adam(),
