@@ -284,7 +284,7 @@ def _cli_impl(
     with _argparse_formatter.ansi_context():
         parser = argparse.ArgumentParser(
             prog=prog,
-            formatter_class=_argparse_formatter.DcargsArgparseHelpFormatter,
+            formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
         )
         parser_definition.apply(parser)
 
@@ -327,9 +327,7 @@ def _cli_impl(
         subparsers = parser_definition.subparsers
         if subparsers is None:
             return
-        subparser_def_from_prefixed_field_name[
-            subparsers.prefix if subparsers.prefix != _strings.dummy_field_name else ""
-        ] = subparsers
+        subparser_def_from_prefixed_field_name[subparsers.prefix] = subparsers
         for p in subparsers.parser_from_name.values():
             _cache_subparsers(p)
 
