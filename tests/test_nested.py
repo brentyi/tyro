@@ -3,7 +3,7 @@ from typing import Any, Generic, Mapping, Optional, Tuple, TypeVar, Union
 
 import pytest
 from frozendict import frozendict  # type: ignore
-from typing_extensions import Annotated
+from typing_extensions import Annotated, Literal
 
 import tyro
 
@@ -768,3 +768,58 @@ def test_nested_in_subparser():
         tyro.cli(Wrapper, args="supertype:type-a --supertype.subtype.data 1".split(" "))
         == Wrapper()
     )
+
+
+def test_nested_in_subparser_override_with_default():
+    @dataclasses.dataclass
+    class Mnist:
+        binary: bool = False
+        """Set to load binary version of MNIST dataset."""
+
+    @dataclasses.dataclass
+    class ImageNet:
+        subset: Literal[50, 100, 1000]
+        """Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc."""
+
+    # Possible optimizer configurations.
+
+    Selector = tyro.extras.subcommand_type_from_defaults(
+        {
+            "m": Mnist(),
+            "i": ImageNet(50),
+        }
+    )
+
+    @dataclasses.dataclass
+    class DatasetContainer:
+        dataset: Selector = Mnist()  # type: ignore
+
+    @dataclasses.dataclass
+    class Adam:
+        learning_rate: float = 1e-3
+        betas: Tuple[float, float] = (0.9, 0.999)
+        container: DatasetContainer = DatasetContainer()
+
+    @dataclasses.dataclass
+    class Sgd:
+        learning_rate: float = 3e-4
+        container: DatasetContainer = DatasetContainer()
+
+    # Train script.
+
+    Optimizers = tyro.extras.subcommand_type_from_defaults(
+        {"adam": Adam(container=DatasetContainer(ImageNet(50))), "sgd": Sgd()},
+        prefix_names=False,
+    )
+
+    @tyro.conf.configure(tyro.conf.OmitSubcommandPrefixes)
+    def train(
+        optimizer: Optimizers = Adam(container=DatasetContainer(ImageNet(50))),  # type: ignore
+    ) -> Union[Adam, Sgd]:
+        return optimizer
+
+    assert tyro.cli(train, args=[]) == Adam(container=DatasetContainer(ImageNet(50)))
+    assert tyro.cli(train, args=["adam"]) == Adam(
+        container=DatasetContainer(ImageNet(50))
+    )
+    assert tyro.cli(train, args=["sgd"]) == Sgd(container=DatasetContainer(Mnist()))

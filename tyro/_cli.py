@@ -321,19 +321,6 @@ def _cli_impl(
             for k, v in value_from_prefixed_field_name.items()
         }
 
-    # Build a map from subparser names to definitions.
-    subparser_def_from_prefixed_field_name = {}
-
-    def _cache_subparsers(parser_definition: _parsers.ParserSpecification) -> None:
-        subparsers = parser_definition.subparsers
-        if subparsers is None:
-            return
-        subparser_def_from_prefixed_field_name[subparsers.prefix] = subparsers
-        for p in subparsers.parser_from_name.values():
-            _cache_subparsers(p)
-
-    _cache_subparsers(parser_definition)
-
     try:
         # Attempt to call `f` using whatever was passed in.
         out, consumed_keywords = _calling.call_from_args(
@@ -342,7 +329,6 @@ def _cli_impl(
             default_instance_internal,
             value_from_prefixed_field_name,
             field_name_prefix="",
-            subparser_def_from_prefixed_field_name=subparser_def_from_prefixed_field_name,
         )
     except _calling.InstantiationError as e:
         # Emulate argparse's error behavior when invalid arguments are passed in.

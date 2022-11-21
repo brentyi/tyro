@@ -42,7 +42,14 @@ class ParserSpecification:
     description: str
     args: List[_arguments.ArgumentDefinition]
     helptext_from_nested_class_field_name: Dict[str, Optional[str]]
+
+    # We have two mechanics for tracking subparser groups:
+    # - A single subparser group, which is what gets added in the tree structure built
+    # by the argparse parser.
     subparsers: Optional[SubparsersSpecification]
+    # - A set of subparser groups, which reflect the tree structure built by the
+    # hierarchy of a nested config structure.
+    subparsers_from_prefix: Dict[str, SubparsersSpecification]
     prefix: str
     has_required_args: bool
     consolidate_subcommand_args: bool
@@ -87,7 +94,9 @@ class ParserSpecification:
         has_required_args = False
         args = []
         helptext_from_nested_class_field_name = {}
+
         subparsers = None
+        subparsers_from_prefix = {}
 
         field_list = _fields.field_list_from_callable(
             f=f, default_instance=default_instance
@@ -129,10 +138,10 @@ class ParserSpecification:
                     ):
                         # Don't make a subparser.
                         field = dataclasses.replace(field, typ=type(field.default))
-                    elif subparsers is None:
-                        subparsers = subparsers_attempt
-                        continue
                     else:
+                        subparsers_from_prefix[
+                            subparsers_attempt.prefix
+                        ] = subparsers_attempt
                         subparsers = add_subparsers_to_leaves(
                             subparsers, subparsers_attempt
                         )
@@ -166,12 +175,11 @@ class ParserSpecification:
 
                     # Include nested subparsers.
                     if nested_parser.subparsers is not None:
-                        subparsers = (
-                            nested_parser.subparsers
-                            if subparsers is None
-                            else add_subparsers_to_leaves(
-                                subparsers, nested_parser.subparsers
-                            )
+                        subparsers_from_prefix[
+                            nested_parser.subparsers.prefix
+                        ] = nested_parser.subparsers
+                        subparsers = add_subparsers_to_leaves(
+                            subparsers, nested_parser.subparsers
                         )
 
                     # Include nested strings.
@@ -214,6 +222,7 @@ class ParserSpecification:
             args=args,
             helptext_from_nested_class_field_name=helptext_from_nested_class_field_name,
             subparsers=subparsers,
+            subparsers_from_prefix=subparsers_from_prefix,
             prefix=prefix,
             has_required_args=has_required_args,
             consolidate_subcommand_args=consolidate_subcommand_args,
@@ -228,8 +237,10 @@ class ParserSpecification:
         parser.description = self.description
 
         # Create subparser tree.
+        subparser_group = None
         if self.subparsers is not None:
             leaves = self.subparsers.apply(parser)
+            subparser_group = parser._action_groups.pop()
         else:
             leaves = (parser,)
 
@@ -241,8 +252,16 @@ class ParserSpecification:
         else:
             self.apply_args(parser)
 
+        if subparser_group is not None:
+            parser._action_groups.append(subparser_group)
+
         # Break some API boundaries to rename the "optional arguments" => "arguments".
-        assert parser._action_groups[1].title == "optional arguments"
+        assert parser._action_groups[1].title in (
+            # python <= 3.9
+            "optional arguments",
+            # python >= 3.10
+            "options",
+        )
         parser._action_groups[1].title = "arguments"
 
         return leaves
@@ -431,7 +450,6 @@ class SubparsersSpecification:
                 subcommand_config = dataclasses.replace(
                     subcommand_config, default=field.default
                 )
-
             subparser = ParserSpecification.from_callable_or_type(
                 # Recursively apply markers.
                 Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
@@ -493,8 +511,6 @@ class SubparsersSpecification:
             prefix=prefix,
             required=required,
             default_instance=field.default,
-            # if field.default not in _fields.MISSING_SINGLETONS
-            # else None,
             can_be_none=options != options_no_none,
         )
 
