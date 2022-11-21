@@ -572,19 +572,6 @@
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
 
-    <span class="c1"># Build a map from subparser names to definitions.</span>
-    <span class="n">subparser_def_from_prefixed_field_name</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="k">def</span> <span class="nf">_cache_subparsers</span><span class="p">(</span><span class="n">parser_definition</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers</span>
-        <span class="k">if</span> <span class="n">subparsers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span>
-        <span class="n">subparser_def_from_prefixed_field_name</span><span class="p">[</span><span class="n">subparsers</span><span class="o">.</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparsers</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-            <span class="n">_cache_subparsers</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-
-    <span class="n">_cache_subparsers</span><span class="p">(</span><span class="n">parser_definition</span><span class="p">)</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
         <span class="n">out</span><span class="p">,</span> <span class="n">consumed_keywords</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">call_from_args</span><span class="p">(</span>
@@ -593,7 +580,6 @@
             <span class="n">default_instance_internal</span><span class="p">,</span>
             <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
             <span class="n">field_name_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">subparser_def_from_prefixed_field_name</span><span class="o">=</span><span class="n">subparser_def_from_prefixed_field_name</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>

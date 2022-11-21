@@ -48,6 +48,11 @@ Module Contents
 
       
 
+   .. py:attribute:: subparsers_from_prefix
+      :annotation: :Dict[str, SubparsersSpecification]
+
+      
+
    .. py:attribute:: prefix
       :annotation: :str
 

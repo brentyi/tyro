@@ -336,6 +336,13 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │ --renamed STRING        A field with manually overridden properties!       │
 │                         (default: Hello)                                   │
 ╰────────────────────────────────────────────────────────────────────────────╯
+╭─ union-without-subcommand arguments ───────────────────────────────────────╮
+│ A union over nested structures, but without subcommand generation. When a  │
+│ default is provided, the type is simply fixed to that default.             │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ --union-without-subcommand.branch STR                                      │
+│                         (default: main)                                    │
+╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ optional subcommands ─────────────────────────────────────────────────────╮
 │ `tyro.conf.subcommand()` can be used to configure subcommands in a Union.  │
 │ Here, we make the subcommand names more succinct.  (default: checkout)     │
@@ -343,13 +350,6 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │ [{checkout,commit}]                                                        │
 │     checkout            Checkout a branch.                                 │
 │     commit              Commit changes.                                    │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ union-without-subcommand arguments ───────────────────────────────────────╮
-│ A union over nested structures, but without subcommand generation. When a  │
-│ default is provided, the type is simply fixed to that default.             │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ --union-without-subcommand.branch STR                                      │
-│                         (default: main)                                    │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
