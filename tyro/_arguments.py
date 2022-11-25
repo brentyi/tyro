@@ -39,7 +39,8 @@ except ImportError:
 class ArgumentDefinition:
     """Structure containing everything needed to define an argument."""
 
-    prefix: str  # Prefix for nesting.
+    dest_prefix: str  # True prefix. (eg for the argument's dest field)
+    name_prefix: str  # User-facing prefix.
     subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
     type_from_typevar: Dict[TypeVar, Type]
@@ -231,7 +232,7 @@ def _rule_recursive_instantiator_from_type(
         if arg.field.default in _fields.MISSING_SINGLETONS:
             raise _instantiators.UnsupportedTypeAnnotationError(
                 "Unsupported type annotation for the field"
-                f" {_strings.make_field_name([arg.prefix, arg.field.name])}. To"
+                f" {_strings.make_field_name([arg.name_prefix, arg.field.name])}. To"
                 " suppress this error, assign the field a default value."
             ) from e
         else:
@@ -363,15 +364,17 @@ def _rule_set_name_or_flag_and_dest(
 ) -> LoweredArgumentDefinition:
     # Positional arguments: no -- prefix.
     if arg.field.is_positional():
-        name_or_flag = _strings.make_field_name([arg.prefix, arg.field.name])
+        name_or_flag = _strings.make_field_name([arg.name_prefix, arg.field.name])
     # Negated booleans.
     elif lowered.action == "store_false":
         name_or_flag = "--" + _strings.make_field_name(
-            [arg.prefix, "no-" + arg.field.name]
+            [arg.name_prefix, "no-" + arg.field.name]
         )
     # Prefix keyword arguments with --.
     else:
-        name_or_flag = "--" + _strings.make_field_name([arg.prefix, arg.field.name])
+        name_or_flag = "--" + _strings.make_field_name(
+            [arg.name_prefix, arg.field.name]
+        )
 
     # Strip.
     if name_or_flag.startswith("--") and arg.subcommand_prefix != "":
@@ -384,7 +387,7 @@ def _rule_set_name_or_flag_and_dest(
     return dataclasses.replace(
         lowered,
         name_or_flag=name_or_flag,
-        dest=_strings.make_field_name([arg.prefix, arg.field.name]),
+        dest=_strings.make_field_name([arg.dest_prefix, arg.field.name]),
     )
 
 
