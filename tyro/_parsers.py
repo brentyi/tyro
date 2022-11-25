@@ -203,7 +203,8 @@ class ParserSpecification:
 
             # (3) Handle primitive or fixed types. These produce a single argument!
             arg = _arguments.ArgumentDefinition(
-                prefix=prefix,
+                dest_prefix=prefix,
+                name_prefix=prefix,
                 subcommand_prefix=subcommand_prefix,
                 field=field,
                 type_from_typevar=type_from_typevar,
@@ -291,11 +292,11 @@ class ParserSpecification:
         for arg in self.args:
             if (
                 arg.lowered.help is not argparse.SUPPRESS
-                and arg.prefix not in group_from_prefix
+                and arg.dest_prefix not in group_from_prefix
             ):
-                description = self.helptext_from_nested_class_field_name.get(arg.prefix)
-                group_from_prefix[arg.prefix] = parser.add_argument_group(
-                    format_group_name(arg.prefix),
+                description = self.helptext_from_nested_class_field_name.get(arg.dest_prefix)
+                group_from_prefix[arg.dest_prefix] = parser.add_argument_group(
+                    format_group_name(arg.dest_prefix),
                     description=description,
                 )
 
@@ -305,8 +306,8 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            if arg.prefix in group_from_prefix:
-                arg.add_argument(group_from_prefix[arg.prefix])
+            if arg.dest_prefix in group_from_prefix:
+                arg.add_argument(group_from_prefix[arg.dest_prefix])
             else:
                 # Suppressed argument: still need to add them, but they won't show up in
                 # the helptext so it doesn't matter which group.

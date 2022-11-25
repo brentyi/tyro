@@ -45,7 +45,7 @@ def call_from_args(
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[
-            _strings.make_field_name([arg.prefix, arg.field.name])
+            _strings.make_field_name([arg.dest_prefix, arg.field.name])
         ] = arg
 
     for field in _fields.field_list_from_callable(
