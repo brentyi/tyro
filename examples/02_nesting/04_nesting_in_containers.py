@@ -2,7 +2,7 @@
 
 Structures can be nested inside of standard containers.
 
-Note that lengths must be inferrable, either via a fixed-length tuple annotation or by
+Note that lengths must be inferable, either via a fixed-length tuple annotation or by
 parsing default values.
 
 
