@@ -311,7 +311,7 @@ def test_optional_lists():
 
 def test_nested_optional_types():
     """We support "None" as a special-case keyword. (note: this is a bit weird because
-    Optional[str] might interprete "None" as either a string or an actual `None`
+    Optional[str] might interpret "None" as either a string or an actual `None`
     value)"""
 
     @dataclasses.dataclass
