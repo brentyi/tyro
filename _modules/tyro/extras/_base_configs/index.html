@@ -267,23 +267,26 @@
     <span class="sd">&quot;&quot;&quot;Construct a Union type for defining subcommands that choose between defaults.</span>
 
 <span class="sd">    .. warning::</span>
-<span class="sd">        Use of this helper is discouraged because it is compatible with `pyright` and</span>
-<span class="sd">        `pylance`, but not with `mypy`. For `pyright` support, you may need to enable</span>
-<span class="sd">        postponed evaluation of annotations (`from __future__ import annotations`).</span>
+
+<span class="sd">        Use of this helper is discouraged because it is compatible with ``pyright`` and</span>
+<span class="sd">        `pylance`, but not with ``mypy``. For ``pyright`` support, you may need to enable</span>
+<span class="sd">        postponed evaluation of annotations (``from __future__ import annotations``).</span>
 
 <span class="sd">        At the cost of verbosity, using :func:`tyro.conf.subcommand()` directly is</span>
 <span class="sd">        better supported by external tools.</span>
 
-<span class="sd">        Alternatively, we can work around this limitation with an `if TYPE_CHECKING`</span>
+<span class="sd">        Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``</span>
 <span class="sd">        guard:</span>
-<span class="sd">        ```python</span>
-<span class="sd">        from typing import TYPE_CHECKING</span>
 
-<span class="sd">        if TYPE_CHECKING:</span>
-<span class="sd">            SelectableConfig = Config  # For mypy.</span>
-<span class="sd">        else:</span>
-<span class="sd">            SelectableConfig = subcommand_type_from_defaults(...)</span>
-<span class="sd">        ```</span>
+<span class="sd">        .. code-block:: python</span>
+
+<span class="sd">            from typing import TYPE_CHECKING</span>
+
+<span class="sd">            if TYPE_CHECKING:</span>
+<span class="sd">                SelectableConfig = Config  # For mypy.</span>
+<span class="sd">            else:</span>
+<span class="sd">                SelectableConfig = subcommand_type_from_defaults(...)</span>
+
 
 <span class="sd">    This can most commonly be used to create a &quot;base configuration&quot; pattern:</span>
 <span class="sd">        https://brentyi.github.io/tyro/examples/10_base_configs/</span>

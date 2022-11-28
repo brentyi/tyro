@@ -258,112 +258,96 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
 base configurations. A Hydra-style YAML approach could just as easily
 be used for the config library (although we generally prefer to avoid YAMLs; staying in
 Python is convenient for autocompletion and type checking).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">  1</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="linenos">  2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-<span class="linenos">  3</span>
-<span class="linenos">  4</span><span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
-<span class="linenos">  5</span>
-<span class="linenos">  6</span><span class="kn">import</span> <span class="nn">tyro</span>
-<span class="linenos">  7</span>
-<span class="linenos">  8</span>
-<span class="linenos">  9</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos"> 10</span><span class="k">class</span> <span class="nc">AdamOptimizer</span><span class="p">:</span>
-<span class="linenos"> 11</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
-<span class="linenos"> 12</span>    <span class="n">betas</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)</span>
-<span class="linenos"> 13</span>
-<span class="linenos"> 14</span>
-<span class="linenos"> 15</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos"> 16</span><span class="k">class</span> <span class="nc">SgdOptimizer</span><span class="p">:</span>
-<span class="linenos"> 17</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3e-4</span>
-<span class="linenos"> 18</span>
-<span class="linenos"> 19</span>
-<span class="linenos"> 20</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos"> 21</span><span class="k">class</span> <span class="nc">ExperimentConfig</span><span class="p">:</span>
-<span class="linenos"> 22</span>    <span class="c1"># Dataset to run experiment on.</span>
-<span class="linenos"> 23</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span> <span class="s2">&quot;imagenet-50&quot;</span><span class="p">]</span>
-<span class="linenos"> 24</span>
-<span class="linenos"> 25</span>    <span class="c1"># Optimizer parameters.</span>
-<span class="linenos"> 26</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">AdamOptimizer</span><span class="p">,</span> <span class="n">SgdOptimizer</span><span class="p">]</span>
-<span class="linenos"> 27</span>
-<span class="linenos"> 28</span>    <span class="c1"># Model size.</span>
-<span class="linenos"> 29</span>    <span class="n">num_layers</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos"> 30</span>    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos"> 31</span>
-<span class="linenos"> 32</span>    <span class="c1"># Batch size.</span>
-<span class="linenos"> 33</span>    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos"> 34</span>
-<span class="linenos"> 35</span>    <span class="c1"># Total number of training steps.</span>
-<span class="linenos"> 36</span>    <span class="n">train_steps</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos"> 37</span>
-<span class="linenos"> 38</span>    <span class="c1"># Random seed. This is helpful for making sure that our experiments are all</span>
-<span class="linenos"> 39</span>    <span class="c1"># reproducible!</span>
-<span class="linenos"> 40</span>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos"> 41</span>
-<span class="linenos"> 42</span>    <span class="c1"># Activation to use. Not specifiable via the commandline.</span>
-<span class="linenos"> 43</span>    <span class="n">activation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span>
-<span class="linenos"> 44</span>
-<span class="linenos"> 45</span>
-<span class="linenos"> 46</span><span class="c1"># Note that we could also define this library using separate YAML files (similar to</span>
-<span class="linenos"> 47</span><span class="c1"># `config_path`/`config_name` in Hydra), but staying in Python enables seamless type</span>
-<span class="linenos"> 48</span><span class="c1"># checking + IDE support.</span>
-<span class="linenos"> 49</span><span class="n">descriptions</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="linenos"> 50</span><span class="n">base_configs</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="linenos"> 51</span>
-<span class="linenos"> 52</span><span class="n">descriptions</span><span class="p">[</span><span class="s2">&quot;small&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Train a smaller model.&quot;</span>
-<span class="linenos"> 53</span><span class="n">base_configs</span><span class="p">[</span><span class="s2">&quot;small&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ExperimentConfig</span><span class="p">(</span>
-<span class="linenos"> 54</span>    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span>
-<span class="linenos"> 55</span>    <span class="n">optimizer</span><span class="o">=</span><span class="n">SgdOptimizer</span><span class="p">(),</span>
-<span class="linenos"> 56</span>    <span class="n">batch_size</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
-<span class="linenos"> 57</span>    <span class="n">num_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-<span class="linenos"> 58</span>    <span class="n">units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-<span class="linenos"> 59</span>    <span class="n">train_steps</span><span class="o">=</span><span class="mi">30_000</span><span class="p">,</span>
-<span class="linenos"> 60</span>    <span class="c1"># The tyro.MISSING sentinel allows us to specify that the seed should have no</span>
-<span class="linenos"> 61</span>    <span class="c1"># default, and needs to be populated from the CLI.</span>
-<span class="linenos"> 62</span>    <span class="n">seed</span><span class="o">=</span><span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
-<span class="linenos"> 63</span>    <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
-<span class="linenos"> 64</span><span class="p">)</span>
-<span class="linenos"> 65</span>
-<span class="linenos"> 66</span>
-<span class="linenos"> 67</span><span class="n">descriptions</span><span class="p">[</span><span class="s2">&quot;big&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Train a bigger model.&quot;</span>
-<span class="linenos"> 68</span><span class="n">base_configs</span><span class="p">[</span><span class="s2">&quot;big&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ExperimentConfig</span><span class="p">(</span>
-<span class="linenos"> 69</span>    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;imagenet-50&quot;</span><span class="p">,</span>
-<span class="linenos"> 70</span>    <span class="n">optimizer</span><span class="o">=</span><span class="n">AdamOptimizer</span><span class="p">(),</span>
-<span class="linenos"> 71</span>    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-<span class="linenos"> 72</span>    <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-<span class="linenos"> 73</span>    <span class="n">units</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
-<span class="linenos"> 74</span>    <span class="n">train_steps</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
-<span class="linenos"> 75</span>    <span class="n">seed</span><span class="o">=</span><span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
-<span class="linenos"> 76</span>    <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
-<span class="linenos"> 77</span><span class="p">)</span>
-<span class="linenos"> 78</span>
-<span class="linenos"> 79</span>
-<span class="linenos"> 80</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos"> 81</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-<span class="linenos"> 82</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="n">base_configs</span><span class="p">,</span> <span class="n">descriptions</span><span class="p">),</span>
-<span class="linenos"> 83</span>    <span class="p">)</span>
-<span class="linenos"> 84</span>    <span class="c1"># ^Note that this is equivalent to:</span>
-<span class="linenos"> 85</span>    <span class="c1">#</span>
-<span class="linenos"> 86</span>    <span class="c1"># config = tyro.cli(</span>
-<span class="linenos"> 87</span>    <span class="c1">#     Union[</span>
-<span class="linenos"> 88</span>    <span class="c1">#         Annotated[</span>
-<span class="linenos"> 89</span>    <span class="c1">#             ExperimentConfig,</span>
-<span class="linenos"> 90</span>    <span class="c1">#             tyro.conf.subcommand(</span>
-<span class="linenos"> 91</span>    <span class="c1">#                 &quot;small&quot;,</span>
-<span class="linenos"> 92</span>    <span class="c1">#                 default=base_configs[&quot;small&quot;],</span>
-<span class="linenos"> 93</span>    <span class="c1">#                 description=descriptions[&quot;small&quot;],</span>
-<span class="linenos"> 94</span>    <span class="c1">#             ),</span>
-<span class="linenos"> 95</span>    <span class="c1">#         ],</span>
-<span class="linenos"> 96</span>    <span class="c1">#         Annotated[</span>
-<span class="linenos"> 97</span>    <span class="c1">#             ExperimentConfig,</span>
-<span class="linenos"> 98</span>    <span class="c1">#             tyro.conf.subcommand(</span>
-<span class="linenos"> 99</span>    <span class="c1">#                 &quot;big&quot;,</span>
-<span class="linenos">100</span>    <span class="c1">#                 default=base_configs[&quot;big&quot;],</span>
-<span class="linenos">101</span>    <span class="c1">#                 description=descriptions[&quot;big&quot;],</span>
-<span class="linenos">102</span>    <span class="c1">#             ),</span>
-<span class="linenos">103</span>    <span class="c1">#         ],</span>
-<span class="linenos">104</span>    <span class="c1">#     ]</span>
-<span class="linenos">105</span>    <span class="c1"># )</span>
-<span class="linenos">106</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">nn</span>
+<span class="linenos"> 5</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span>
+<span class="linenos">10</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">11</span><span class="k">class</span> <span class="nc">AdamOptimizer</span><span class="p">:</span>
+<span class="linenos">12</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
+<span class="linenos">13</span>    <span class="n">betas</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">17</span><span class="k">class</span> <span class="nc">ExperimentConfig</span><span class="p">:</span>
+<span class="linenos">18</span>    <span class="c1"># Dataset to run experiment on.</span>
+<span class="linenos">19</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span> <span class="s2">&quot;imagenet-50&quot;</span><span class="p">]</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>    <span class="c1"># Optimizer parameters.</span>
+<span class="linenos">22</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">AdamOptimizer</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>    <span class="c1"># Model size.</span>
+<span class="linenos">25</span>    <span class="n">num_layers</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">26</span>    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span>    <span class="c1"># Batch size.</span>
+<span class="linenos">29</span>    <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span>    <span class="c1"># Total number of training steps.</span>
+<span class="linenos">32</span>    <span class="n">train_steps</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">33</span>
+<span class="linenos">34</span>    <span class="c1"># Random seed. This is helpful for making sure that our experiments are all</span>
+<span class="linenos">35</span>    <span class="c1"># reproducible!</span>
+<span class="linenos">36</span>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span>    <span class="c1"># Activation to use. Not specifiable via the commandline.</span>
+<span class="linenos">39</span>    <span class="n">activation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span>
+<span class="linenos">40</span>
+<span class="linenos">41</span>
+<span class="linenos">42</span><span class="c1"># Note that we could also define this library using separate YAML files (similar to</span>
+<span class="linenos">43</span><span class="c1"># `config_path`/`config_name` in Hydra), but staying in Python enables seamless type</span>
+<span class="linenos">44</span><span class="c1"># checking + IDE support.</span>
+<span class="linenos">45</span><span class="n">SmallConfig</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="linenos">46</span>    <span class="n">ExperimentConfig</span><span class="p">,</span>
+<span class="linenos">47</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span>
+<span class="linenos">48</span>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;small&quot;</span><span class="p">,</span>
+<span class="linenos">49</span>        <span class="n">default</span><span class="o">=</span><span class="n">ExperimentConfig</span><span class="p">(</span>
+<span class="linenos">50</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span>
+<span class="linenos">51</span>            <span class="n">optimizer</span><span class="o">=</span><span class="n">AdamOptimizer</span><span class="p">(),</span>
+<span class="linenos">52</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
+<span class="linenos">53</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="linenos">54</span>            <span class="n">units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+<span class="linenos">55</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">30_000</span><span class="p">,</span>
+<span class="linenos">56</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">57</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
+<span class="linenos">58</span>        <span class="p">),</span>
+<span class="linenos">59</span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Train a smaller model.&quot;</span><span class="p">,</span>
+<span class="linenos">60</span>    <span class="p">),</span>
+<span class="linenos">61</span><span class="p">]</span>
+<span class="linenos">62</span><span class="n">BigConfig</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="linenos">63</span>    <span class="n">ExperimentConfig</span><span class="p">,</span>
+<span class="linenos">64</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span>
+<span class="linenos">65</span>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;big&quot;</span><span class="p">,</span>
+<span class="linenos">66</span>        <span class="n">default</span><span class="o">=</span><span class="n">ExperimentConfig</span><span class="p">(</span>
+<span class="linenos">67</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;imagenet-50&quot;</span><span class="p">,</span>
+<span class="linenos">68</span>            <span class="n">optimizer</span><span class="o">=</span><span class="n">AdamOptimizer</span><span class="p">(),</span>
+<span class="linenos">69</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+<span class="linenos">70</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="linenos">71</span>            <span class="n">units</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+<span class="linenos">72</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
+<span class="linenos">73</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">74</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
+<span class="linenos">75</span>        <span class="p">),</span>
+<span class="linenos">76</span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Train a bigger model.&quot;</span><span class="p">,</span>
+<span class="linenos">77</span>    <span class="p">),</span>
+<span class="linenos">78</span><span class="p">]</span>
+<span class="linenos">79</span>
+<span class="linenos">80</span>
+<span class="linenos">81</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos">82</span>    <span class="n">config</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SmallConfig</span><span class="p">,</span> <span class="n">BigConfig</span><span class="p">],</span>
+<span class="linenos">83</span>    <span class="n">restore_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="linenos">84</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">85</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">86</span>
+<span class="linenos">87</span>
+<span class="linenos">88</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">89</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+<span class="linenos">90</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -380,29 +364,97 @@ Python is convenient for autocompletion and type checking).</p>
 │     config:big          Train a bigger model.           │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] [--restore-checkpoint]
-                          {config:small,config:big}
+<kbd>python 03_config_systems/01_base_configs.py config:small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py config:small [-h]
+                                       [--config.dataset {mnist,imagenet-50}]
+                                       [--config.optimizer.learning-rate 
+FLOAT]
+                                       [--config.optimizer.betas FLOAT FLOAT]
+                                       [--config.num-layers INT]
+                                       [--config.units INT]
+                                       [--config.batch-size INT]
+                                       [--config.train-steps INT]
+                                       [--config.seed INT]
+                                       [--config.activation {fixed}]
 
- 
-01_base_configs.py: error: argument {config:small,config:big}: invalid choice: 'small' (choose from 'config:small', 'config:big')</pre>
+Train a smaller model.
+
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit                    │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ config arguments ─────────────────────────────────────────────────────────╮
+│ --config.dataset {mnist,imagenet-50}                                       │
+│                         Dataset to run experiment on. (default: mnist)     │
+│ --config.num-layers INT                                                    │
+│                         Model size. (default: 4)                           │
+│ --config.units INT      Model size. (default: 64)                          │
+│ --config.batch-size INT                                                    │
+│                         Batch size. (default: 2048)                        │
+│ --config.train-steps INT                                                   │
+│                         Total number of training steps. (default: 30000)   │
+│ --config.seed INT       Random seed. This is helpful for making sure that  │
+│                         our experiments are all reproducible! (default: 0) │
+│ --config.activation {fixed}                                                │
+│                         Activation to use. Not specifiable via the         │
+│                         commandline. (fixed to: &lt;class                     │
+│                         'torch.nn.modules.activation.ReLU'&gt;)               │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ config.optimizer arguments ───────────────────────────────────────────────╮
+│ Optimizer parameters.                                                      │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ --config.optimizer.learning-rate FLOAT                                     │
+│                         (default: 0.001)                                   │
+│ --config.optimizer.betas FLOAT FLOAT                                       │
+│                         (default: 0.9 0.999)                               │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] [--restore-checkpoint]
-                          {config:small,config:big}
-
- 
-01_base_configs.py: error: argument {config:small,config:big}: invalid choice: 'small' (choose from 'config:small', 'config:big')</pre>
+<kbd>python 03_config_systems/01_base_configs.py config:small --config.seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)
+None</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] [--restore-checkpoint]
-                          {config:small,config:big}
+<kbd>python 03_config_systems/01_base_configs.py config:big --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py config:big [-h]
+                                     [--config.dataset {mnist,imagenet-50}]
+                                     [--config.optimizer.learning-rate FLOAT]
+                                     [--config.optimizer.betas FLOAT FLOAT]
+                                     [--config.num-layers INT]
+                                     [--config.units INT]
+                                     [--config.batch-size INT]
+                                     [--config.train-steps INT]
+                                     [--config.seed INT]
+                                     [--config.activation {fixed}]
 
- 
-01_base_configs.py: error: argument {config:small,config:big}: invalid choice: 'big' (choose from 'config:small', 'config:big')</pre>
+Train a bigger model.
+
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit                    │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ config arguments ─────────────────────────────────────────────────────────╮
+│ --config.dataset {mnist,imagenet-50}                                       │
+│                         Dataset to run experiment on. (default:            │
+│                         imagenet-50)                                       │
+│ --config.num-layers INT                                                    │
+│                         Model size. (default: 8)                           │
+│ --config.units INT      Model size. (default: 256)                         │
+│ --config.batch-size INT                                                    │
+│                         Batch size. (default: 32)                          │
+│ --config.train-steps INT                                                   │
+│                         Total number of training steps. (default: 100000)  │
+│ --config.seed INT       Random seed. This is helpful for making sure that  │
+│                         our experiments are all reproducible! (default: 0) │
+│ --config.activation {fixed}                                                │
+│                         Activation to use. Not specifiable via the         │
+│                         commandline. (fixed to: &lt;class                     │
+│                         'torch.nn.modules.activation.GELU'&gt;)               │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ config.optimizer arguments ───────────────────────────────────────────────╮
+│ Optimizer parameters.                                                      │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ --config.optimizer.learning-rate FLOAT                                     │
+│                         (default: 0.001)                                   │
+│ --config.optimizer.betas FLOAT FLOAT                                       │
+│                         (default: 0.9 0.999)                               │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py big --seed 94720</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] [--restore-checkpoint]
-                          {config:small,config:big}
-
- 
-01_base_configs.py: error: argument {config:small,config:big}: invalid choice: 'big' (choose from 'config:small', 'config:big')</pre>
+<kbd>python 03_config_systems/01_base_configs.py config:big --config.seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)
+None</pre>
 </section>
 
         </article>
