@@ -285,6 +285,25 @@ flag.</p>
 <dt class="sig sig-object py" id="tyro.extras.subcommand_type_from_defaults">
 <span class="sig-prename descclassname"><span class="pre">tyro.extras.</span></span><span class="sig-name descname"><span class="pre">subcommand_type_from_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/extras/_base_configs/#subcommand_type_from_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.subcommand_type_from_defaults" title="Permalink to this definition">#</a></dt>
 <dd><p>Construct a Union type for defining subcommands that choose between defaults.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Use of this helper is discouraged because it is compatible with <cite>pyright</cite> and
+<cite>pylance</cite>, but not with <cite>mypy</cite>. For <cite>pyright</cite> support, you may need to enable
+postponed evaluation of annotations (<cite>from __future__ import annotations</cite>).</p>
+<p>At the cost of verbosity, using <a class="reference internal" href="../conf/#tyro.conf.subcommand" title="tyro.conf.subcommand"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.subcommand()</span></code></a> directly is
+better supported by external tools.</p>
+<p>Alternatively, we can work around this limitation with an <cite>if TYPE_CHECKING</cite>
+guard:
+<a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+from typing import TYPE_CHECKING</p>
+<dl class="simple">
+<dt>if TYPE_CHECKING:</dt><dd><p>SelectableConfig = Config  # For mypy.</p>
+</dd>
+<dt>else:</dt><dd><p>SelectableConfig = subcommand_type_from_defaults(…)</p>
+</dd>
+</dl>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
+</div>
 <dl class="simple">
 <dt>This can most commonly be used to create a “base configuration” pattern:</dt><dd><p><a class="reference external" href="https://brentyi.github.io/tyro/examples/10_base_configs/">https://brentyi.github.io/tyro/examples/10_base_configs/</a></p>
 </dd>
@@ -326,14 +345,6 @@ flag.</p>
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Note that Pyright understands the latter case, but mypy does not. If mypy support is
-necessary we can work around this with an <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING</span></code> guard:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">Config</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="n">base_mapping</span><span class="p">)</span>
-</pre></div>
-</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -355,8 +366,25 @@ necessary we can work around this with an <code class="docutils literal notransl
 <p>Using Literal[…] directly should generally be preferred, but this helper can be
 used in the rare case that choices are generated dynamically. (for example, the keys
 of a dictionary)</p>
-<p>Using the returned type as an annotation currently breaks for mypy, but is
-understood by Pyright.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Use of this helper is discouraged because it is compatible with `pyright` and
+`pylance`, but not with `mypy`. For `pyright` support, you may need to enable
+postponed evaluation of annotations (`from __future__ import annotations`).
+
+At the cost of verbosity, using `typing.Literal[]` directly is better supported
+by external tools.
+
+Alternatively, we can work around this limitation with an `if TYPE_CHECKING`
+guard:
+```python
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    SelectableConfig = str  # For mypy.
+else:
+    SelectableConfig = literal_type_from_choices(...)
+```
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>choices</strong> (<em>Iterable</em><em>[</em><em>T</em><em>]</em>) – </p>

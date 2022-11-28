@@ -272,11 +272,13 @@
 
 
 <span class="c1"># Overload notes:</span>
-<span class="c1"># 1. Type[T] is almost a subtype of Callable[..., T]; the difference is types like</span>
-<span class="c1">#    Union[T1, T2] which fall under the former but not the latter.</span>
+<span class="c1"># 1. Type[T] is almost a subtype of Callable[..., T]; the difference is (in pyright)</span>
+<span class="c1">#    types like Union[T1, T2] which fall under the former but not the latter.</span>
 <span class="c1"># 2. We really shouldn&#39;t need an overload here. But as of 1.1.268, it seems like it&#39;s</span>
 <span class="c1">#    needed for pyright to understand that Union types are OK to pass in directly.</span>
 <span class="c1">#    Hopefully we can just switch to a Union[Type[...], Callable[...]] in the future.</span>
+<span class="c1"># 3. For equivalent functionality in mypy, we need to wait for typing.TypeForm:</span>
+<span class="c1">#    https://github.com/python/mypy/issues/9773</span>
 
 
 <span class="nd">@overload</span>

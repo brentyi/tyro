@@ -265,8 +265,25 @@
 <p>Using Literal[…] directly should generally be preferred, but this helper can be
 used in the rare case that choices are generated dynamically. (for example, the keys
 of a dictionary)</p>
-<p>Using the returned type as an annotation currently breaks for mypy, but is
-understood by Pyright.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Use of this helper is discouraged because it is compatible with `pyright` and
+`pylance`, but not with `mypy`. For `pyright` support, you may need to enable
+postponed evaluation of annotations (`from __future__ import annotations`).
+
+At the cost of verbosity, using `typing.Literal[]` directly is better supported
+by external tools.
+
+Alternatively, we can work around this limitation with an `if TYPE_CHECKING`
+guard:
+```python
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    SelectableConfig = str  # For mypy.
+else:
+    SelectableConfig = literal_type_from_choices(...)
+```
+</pre></div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>choices</strong> (<em>Iterable</em><em>[</em><em>T</em><em>]</em>) – </p>

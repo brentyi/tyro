@@ -741,6 +741,10 @@
             <span class="p">):</span>
                 <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
 
+        <span class="c1"># Required if all args are pushed to the final subcommand.</span>
+        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+            <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="c1"># Make description.</span>
         <span class="n">description_parts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
