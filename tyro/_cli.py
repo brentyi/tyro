@@ -21,11 +21,13 @@ OutT = TypeVar("OutT")
 
 
 # Overload notes:
-# 1. Type[T] is almost a subtype of Callable[..., T]; the difference is types like
-#    Union[T1, T2] which fall under the former but not the latter.
+# 1. Type[T] is almost a subtype of Callable[..., T]; the difference is (in pyright)
+#    types like Union[T1, T2] which fall under the former but not the latter.
 # 2. We really shouldn't need an overload here. But as of 1.1.268, it seems like it's
 #    needed for pyright to understand that Union types are OK to pass in directly.
 #    Hopefully we can just switch to a Union[Type[...], Callable[...]] in the future.
+# 3. For equivalent functionality in mypy, we need to wait for typing.TypeForm:
+#    https://github.com/python/mypy/issues/9773
 
 
 @overload

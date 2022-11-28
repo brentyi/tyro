@@ -114,7 +114,7 @@ def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
 
     ```python
     # Recursively apply FlagConversionOff to all field in `main()`.
-    @tyro.conf.configure_function(tyro.conf.FlagConversionOff)
+    @tyro.conf.configure(tyro.conf.FlagConversionOff)
     def main(field: bool) -> None:
         ...
     ```

@@ -490,6 +490,10 @@ class SubparsersSpecification:
             ):
                 required = True
 
+        # Required if all args are pushed to the final subcommand.
+        if _markers.ConsolidateSubcommandArgs in field.markers:
+            required = True
+
         # Make description.
         description_parts = []
         if field.helptext is not None:
