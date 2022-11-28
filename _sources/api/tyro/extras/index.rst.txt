@@ -116,7 +116,7 @@ Package Contents
        ``pylance``, but not with ``mypy``. For ``pyright`` support, you may need to enable
        postponed evaluation of annotations (``from __future__ import annotations``).
 
-       At the cost of verbosity, using `typing.Literal[]` directly is better supported
+       At the cost of verbosity, using ``typing.Literal[]`` directly is better supported
        by external tools.
 
        Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``
