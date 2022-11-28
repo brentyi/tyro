@@ -38,7 +38,7 @@ Package Contents
    .. warning::
 
        Use of this helper is discouraged because it is compatible with ``pyright`` and
-       `pylance`, but not with ``mypy``. For ``pyright`` support, you may need to enable
+       ``pylance``, but not with ``mypy``. For ``pyright`` support, you may need to enable
        postponed evaluation of annotations (``from __future__ import annotations``).
 
        At the cost of verbosity, using :func:`tyro.conf.subcommand()` directly is
@@ -113,7 +113,7 @@ Package Contents
    .. warning::
 
        Use of this helper is discouraged because it is compatible with ``pyright`` and
-       `pylance`, but not with ``mypy``. For ``pyright`` support, you may need to enable
+       ``pylance``, but not with ``mypy``. For ``pyright`` support, you may need to enable
        postponed evaluation of annotations (``from __future__ import annotations``).
 
        At the cost of verbosity, using `typing.Literal[]` directly is better supported
