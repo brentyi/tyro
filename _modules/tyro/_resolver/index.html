@@ -294,7 +294,7 @@
 
 <div class="viewcode-block" id="resolve_generic_types"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolve_generic_types">[docs]</a><span class="k">def</span> <span class="nf">resolve_generic_types</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]:</span>
     <span class="sd">&quot;&quot;&quot;If the input is a class: no-op. If it&#39;s a generic alias: returns the origin</span>
 <span class="sd">    class, and a mapping from typevars to concrete types.&quot;&quot;&quot;</span>
 
@@ -449,7 +449,7 @@
 
 
 <div class="viewcode-block" id="apply_type_from_typevar"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.apply_type_from_typevar">[docs]</a><span class="k">def</span> <span class="nf">apply_type_from_typevar</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
@@ -475,7 +475,7 @@
             <span class="p">}</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
                 <span class="c1"># PEP 604. Requires Python 3.10.</span>
-                <span class="n">shim_table</span><span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">UnionType</span><span class="p">]</span> <span class="o">=</span> <span class="n">Union</span>  <span class="c1"># type: ignore</span>
+                <span class="n">shim_table</span><span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">UnionType</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="n">Union</span>  <span class="c1"># type: ignore</span>
 
             <span class="k">for</span> <span class="n">new</span><span class="p">,</span> <span class="n">old</span> <span class="ow">in</span> <span class="n">shim_table</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span> <span class="ow">or</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">new</span><span class="p">:</span>  <span class="c1"># type: ignore</span>

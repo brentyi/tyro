@@ -83,7 +83,7 @@ Module Contents
    
    Exception raised when an unsupported type annotation is detected.
 
-.. py:function:: instantiator_from_type(typ: Type, type_from_typevar: Dict[TypeVar, Type]) -> Tuple[Instantiator, InstantiatorMetadata]
+.. py:function:: instantiator_from_type(typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]) -> Tuple[Instantiator, InstantiatorMetadata]
 
    
    Recursive helper for parsing type annotations.

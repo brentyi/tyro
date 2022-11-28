@@ -341,20 +341,14 @@ If subcommand prefixes are omitted, we would instead simply have <code class="do
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">CallableType</span></span><a class="headerlink" href="#tyro.conf._markers.CallableType" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
-<dl class="py class">
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.Marker">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Marker</span></span><a class="reference internal" href="../../../../_modules/tyro/conf/_markers/#Marker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf._markers.Marker" title="Permalink to this definition">#</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../../_singleton/#tyro._singleton.Singleton" title="tyro._singleton.Singleton"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._singleton.Singleton</span></code></a></p>
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro.conf._markers.Marker.__getitem__">
-<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/tyro/conf/_markers/#Marker.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf._markers.Marker.__getitem__" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Marker</span></span><a class="headerlink" href="#tyro.conf._markers.Marker" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
-
-</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.conf._markers.configure">
-<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tyro.conf._markers.Marker" title="tyro.conf._markers.Marker"><span class="pre">Marker</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/tyro/conf/_markers/#configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf._markers.configure" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Marker</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/tyro/conf/_markers/#configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf._markers.configure" title="Permalink to this definition">#</a></dt>
 <dd><p>Decorator for configuring functions.</p>
 <p>Configuration markers are implemented via <code class="docutils literal notranslate"><span class="pre">typing.Annotated</span></code> and straightforward to
 apply to types, for example:</p>
@@ -370,7 +364,7 @@ apply to types, for example:</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>markers</strong> (<a class="reference internal" href="#tyro.conf._markers.Marker" title="tyro.conf._markers.Marker"><em>Marker</em></a>) – </p>
+<dd class="field-odd"><p><strong>markers</strong> (<em>Marker</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>Callable[[CallableType], CallableType]</p>
@@ -437,10 +431,7 @@ apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf._markers.ConsolidateSubcommandArgs">ConsolidateSubcommandArgs</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.OmitSubcommandPrefixes">OmitSubcommandPrefixes</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.CallableType">CallableType</a></li>
-<li><a class="reference internal" href="#tyro.conf._markers.Marker">Marker</a><ul>
-<li><a class="reference internal" href="#tyro.conf._markers.Marker.__getitem__">__getitem__</a></li>
-</ul>
-</li>
+<li><a class="reference internal" href="#tyro.conf._markers.Marker">Marker</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.configure">configure</a></li>
 </ul>
 </li>

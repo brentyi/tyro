@@ -15,16 +15,6 @@
 Module Contents
 ---------------
 
-.. py:data:: attr
-   
-
-   
-
-.. py:data:: pydantic
-   
-
-   
-
 .. py:class:: FieldDefinition
 
    .. py:attribute:: name
@@ -33,7 +23,7 @@ Module Contents
       
 
    .. py:attribute:: typ
-      :annotation: :Type
+      :annotation: :Type[Any]
 
       
 
@@ -48,7 +38,7 @@ Module Contents
       
 
    .. py:attribute:: markers
-      :annotation: :FrozenSet[tyro.conf._markers.Marker]
+      :annotation: :FrozenSet[tyro.conf._markers._Marker]
 
       
 
@@ -65,11 +55,11 @@ Module Contents
    .. py:method:: __post_init__(self)
 
 
-   .. py:method:: make(name: str, typ: Type, default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = ())
+   .. py:method:: make(name: str, typ: Type[Any], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers._Marker, Ellipsis] = ())
       :staticmethod:
 
 
-   .. py:method:: add_markers(self, markers: Tuple[tyro.conf._markers.Marker, Ellipsis]) -> FieldDefinition
+   .. py:method:: add_markers(self, markers: Tuple[tyro.conf._markers._Marker, Ellipsis]) -> FieldDefinition
 
 
    .. py:method:: is_positional(self) -> bool
@@ -135,16 +125,21 @@ Module Contents
       
 
 
-.. py:function:: is_nested_type(typ: Type, default_instance: _DefaultInstance) -> bool
+.. py:function:: is_nested_type(typ: Type[Any], default_instance: _DefaultInstance) -> bool
 
    
    Determine whether a type should be treated as a 'nested type', where a single
    type can be broken down into multiple fields (eg for nested dataclasses or
    classes).
 
-.. py:function:: field_list_from_callable(f: Union[Callable, Type], default_instance: _DefaultInstance) -> List[FieldDefinition]
+.. py:function:: field_list_from_callable(f: Union[Callable, Type[Any]], default_instance: _DefaultInstance) -> List[FieldDefinition]
 
    
    Generate a list of generic 'field' objects corresponding to the inputs of some
    annotated callable.
+
+.. py:data:: attr
+   
+
+   
 

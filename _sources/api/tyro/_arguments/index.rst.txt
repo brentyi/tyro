@@ -19,7 +19,12 @@ Module Contents
 
    
    Structure containing everything needed to define an argument.
-   .. py:attribute:: prefix
+   .. py:attribute:: dest_prefix
+      :annotation: :str
+
+      
+
+   .. py:attribute:: name_prefix
       :annotation: :str
 
       
@@ -35,7 +40,7 @@ Module Contents
       
 
    .. py:attribute:: type_from_typevar
-      :annotation: :Dict[TypeVar, Type]
+      :annotation: :Dict[TypeVar, Type[Any]]
 
       
 

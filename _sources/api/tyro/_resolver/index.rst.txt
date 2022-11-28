@@ -29,7 +29,7 @@ Module Contents
    
    Same as ``dataclasses.is_dataclass``\ , but also handles generic aliases.
 
-.. py:function:: resolve_generic_types(cls: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, Type]]
+.. py:function:: resolve_generic_types(cls: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, Type[Any]]]
 
    
    If the input is a class: no-op. If it's a generic alias: returns the origin
@@ -88,6 +88,6 @@ Module Contents
    * Annotated[int, 1], int => (int, (1,))
    * Annotated[int, "1"], int => (int, ())
 
-.. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type]) -> TypeOrCallable
+.. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type[Any]]) -> TypeOrCallable
 
 

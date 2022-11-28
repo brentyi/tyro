@@ -309,7 +309,7 @@
     <span class="k">def</span> <span class="nf">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
         <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span>
+        <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
             <span class="n">T</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">PropagatingMissingType</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span>
         <span class="p">],</span>
@@ -321,7 +321,7 @@
         <span class="c1"># Consolidate subcommand types.</span>
         <span class="n">consolidate_subcommand_args</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span>
-            <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
         <span class="p">)</span>
 
         <span class="c1"># Resolve generic types.</span>
@@ -454,7 +454,8 @@
 
             <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
             <span class="n">arg</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">dest_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">name_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
                 <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
                 <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
@@ -542,11 +543,13 @@
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
-                <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">prefix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_prefix</span>
+                <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_prefix</span>
             <span class="p">):</span>
-                <span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">)</span>
-                <span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
-                    <span class="n">format_group_name</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">),</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span>
+                <span class="p">)</span>
+                <span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
+                    <span class="n">format_group_name</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span><span class="p">),</span>
                     <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -556,8 +559,8 @@
                 <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">positional_group</span><span class="p">)</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">prefix</span> <span class="ow">in</span> <span class="n">group_from_prefix</span><span class="p">:</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">prefix</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span> <span class="ow">in</span> <span class="n">group_from_prefix</span><span class="p">:</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Suppressed argument: still need to add them, but they won&#39;t show up in</span>
                 <span class="c1"># the helptext so it doesn&#39;t matter which group.</span>
@@ -580,8 +583,8 @@
 <div class="viewcode-block" id="SubparsersSpecification.from_field"><a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.from_field">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_field</span><span class="p">(</span>
         <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
-        <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">],</span>
-        <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">],</span>
+        <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+        <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SubparsersSpecification</span><span class="p">]:</span>
         <span class="c1"># Union of classes should create subparsers.</span>

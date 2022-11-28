@@ -109,13 +109,10 @@ Module Contents
 
    
 
-.. py:class:: Marker
+.. py:data:: Marker
+   
 
-   Bases: :py:obj:`tyro._singleton.Singleton`
-
-   .. py:method:: __getitem__(self, key)
-
-
+   
 
 .. py:function:: configure(*markers: Marker) -> Callable[[CallableType], CallableType]
 
