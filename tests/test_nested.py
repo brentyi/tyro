@@ -8,7 +8,7 @@ from typing_extensions import Annotated, Literal
 import tyro
 
 
-def test_nested():
+def test_nested() -> None:
     @dataclasses.dataclass
     class B:
         y: int
@@ -23,7 +23,7 @@ def test_nested():
         tyro.cli(Nested, args=["--x", "1"])
 
 
-def test_nested_annotated():
+def test_nested_annotated() -> None:
     @dataclasses.dataclass
     class B:
         y: int
@@ -38,7 +38,7 @@ def test_nested_annotated():
         tyro.cli(Nested, args=["--x", "1"])
 
 
-def test_nested_accidental_underscores():
+def test_nested_accidental_underscores() -> None:
     @dataclasses.dataclass
     class B:
         arg_name: str
@@ -59,7 +59,7 @@ def test_nested_accidental_underscores():
         tyro.cli(Nested, args=["--x", "1"])
 
 
-def test_nested_default():
+def test_nested_default() -> None:
     @dataclasses.dataclass
     class B:
         y: int = 1
@@ -74,7 +74,7 @@ def test_nested_default():
     )
 
 
-def test_nested_default_alternate():
+def test_nested_default_alternate() -> None:
     @dataclasses.dataclass
     class B:
         y: int = 3
@@ -92,7 +92,7 @@ def test_nested_default_alternate():
     assert tyro.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=3))
 
 
-def test_default_nested():
+def test_default_nested() -> None:
     @dataclasses.dataclass(frozen=True)
     class B:
         y: int = 3
@@ -106,7 +106,7 @@ def test_default_nested():
     assert tyro.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
-def test_double_default_nested():
+def test_double_default_nested() -> None:
     @dataclasses.dataclass(frozen=True)
     class Child:
         y: int
@@ -128,7 +128,7 @@ def test_double_default_nested():
     )
 
 
-def test_default_factory_nested():
+def test_default_factory_nested() -> None:
     @dataclasses.dataclass
     class B:
         y: int = 3
@@ -142,7 +142,7 @@ def test_default_factory_nested():
     assert tyro.cli(Nested, args=["--x", "1"]) == Nested(x=1, b=B(y=5))
 
 
-def test_optional_nested():
+def test_optional_nested() -> None:
     @dataclasses.dataclass
     class OptionalNestedChild:
         y: int
@@ -169,7 +169,7 @@ def test_optional_nested():
     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
 
 
-def test_subparser():
+def test_subparser() -> None:
     @dataclasses.dataclass
     class HTTPServer:
         y: int
@@ -201,7 +201,7 @@ def test_subparser():
         tyro.cli(Subparser, args=["--x", "1", "bc:smtp-server", "--bc.y", "3"])
 
 
-def test_subparser_root():
+def test_subparser_root() -> None:
     @dataclasses.dataclass
     class HTTPServer:
         y: int
@@ -220,7 +220,7 @@ def test_subparser_root():
     ) == HTTPServer(y=3)
 
 
-def test_subparser_with_default():
+def test_subparser_with_default() -> None:
     @dataclasses.dataclass
     class DefaultHTTPServer:
         y: int
@@ -264,7 +264,7 @@ def test_subparser_with_default():
         tyro.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
-def test_subparser_with_default_alternate():
+def test_subparser_with_default_alternate() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -319,7 +319,7 @@ def test_subparser_with_default_alternate():
         tyro.cli(DefaultInstanceSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
-def test_subparser_with_default_bad():
+def test_subparser_with_default_bad() -> None:
     @dataclasses.dataclass
     class DefaultHTTPServer:
         y: int
@@ -341,7 +341,7 @@ def test_subparser_with_default_bad():
         )
 
 
-def test_optional_subparser():
+def test_optional_subparser() -> None:
     @dataclasses.dataclass
     class OptionalHTTPServer:
         y: int
@@ -379,7 +379,7 @@ def test_optional_subparser():
         )
 
 
-def test_post_init_default():
+def test_post_init_default() -> None:
     @dataclasses.dataclass
     class DataclassWithDynamicDefault:
         x: int = 3
@@ -407,7 +407,7 @@ def test_post_init_default():
     )
 
 
-def test_multiple_subparsers():
+def test_multiple_subparsers() -> None:
     @dataclasses.dataclass
     class Subcommand1:
         x: int = 0
@@ -455,7 +455,7 @@ def test_multiple_subparsers():
     ) == MultipleSubparsers(Subcommand3(z=5), Subcommand1(x=7), Subcommand3(z=3))
 
 
-def test_multiple_subparsers_with_default():
+def test_multiple_subparsers_with_default() -> None:
     @dataclasses.dataclass(frozen=True)
     class Subcommand1:
         x: int = 0
@@ -552,7 +552,7 @@ def test_multiple_subparsers_with_default():
     ) == MultipleSubparsers(Subcommand1(x=0), Subcommand2(y=1), Subcommand2(y=1))
 
 
-def test_nested_subparsers_with_default():
+def test_nested_subparsers_with_default() -> None:
     @dataclasses.dataclass(frozen=True)
     class Subcommand1:
         x: int = 0
@@ -588,7 +588,7 @@ def test_nested_subparsers_with_default():
     ) == MultipleSubparsers(Subcommand2(Subcommand1(7)))
 
 
-def test_nested_subparsers_multiple():
+def test_nested_subparsers_multiple() -> None:
     @dataclasses.dataclass(frozen=True)
     class Subcommand1:
         x: int = 0
@@ -628,7 +628,7 @@ def test_nested_subparsers_multiple():
     ) == MultipleSubparsers(Subcommand2(Subcommand1(3)), Subcommand2(Subcommand1(7)))
 
 
-def test_tuple_nesting():
+def test_tuple_nesting() -> None:
     @dataclasses.dataclass(frozen=True)
     class Color:
         r: int
@@ -653,7 +653,7 @@ def test_tuple_nesting():
     ) == ((Color(255, 0, 0),), Location(5.0, 0.0, 2.0), 4.0)
 
 
-def test_generic_subparsers():
+def test_generic_subparsers() -> None:
     T = TypeVar("T")
 
     @dataclasses.dataclass
@@ -673,7 +673,7 @@ def test_generic_subparsers():
         tyro.cli(main_with_default, args=[])
 
 
-def test_generic_inherited():
+def test_generic_inherited() -> None:
     class UnrelatedParentClass:
         pass
 
@@ -698,7 +698,7 @@ def test_generic_inherited():
     ) == ChildClass(x=1, y=2, z=3)
 
 
-def test_subparser_in_nested():
+def test_subparser_in_nested() -> None:
     @dataclasses.dataclass
     class A:
         a: int
@@ -729,7 +729,7 @@ def test_subparser_in_nested():
     ) == Parent(Nested1(Nested2(B(7))))
 
 
-def test_frozen_dict():
+def test_frozen_dict() -> None:
     def main(
         x: Mapping[str, float] = frozendict(
             {
@@ -745,7 +745,7 @@ def test_frozen_dict():
     )
 
 
-def test_nested_in_subparser():
+def test_nested_in_subparser() -> None:
     # https://github.com/brentyi/tyro/issues/9
     @dataclasses.dataclass(frozen=True)
     class Subtype:
@@ -770,7 +770,7 @@ def test_nested_in_subparser():
     )
 
 
-def test_nested_in_subparser_override_with_default():
+def test_nested_in_subparser_override_with_default() -> None:
     @dataclasses.dataclass
     class Mnist:
         binary: bool = False

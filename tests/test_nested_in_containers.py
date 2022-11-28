@@ -14,7 +14,7 @@ class Color:
     b: int
 
 
-def test_nested_tuple_fixed_single():
+def test_nested_tuple_fixed_single() -> None:
     def main(x: Tuple[Color]) -> Any:
         return x
 
@@ -23,7 +23,7 @@ def test_nested_tuple_fixed_single():
     )
 
 
-def test_nested_tuple_fixed_two():
+def test_nested_tuple_fixed_two() -> None:
     def main(x: Tuple[Color, Color]) -> Any:
         return x
 
@@ -38,7 +38,7 @@ def test_nested_tuple_fixed_two():
     )
 
 
-def test_nested_tuple_fixed_three():
+def test_nested_tuple_fixed_three() -> None:
     def main(x: Tuple[Color, int, Color]) -> Any:
         return x
 
@@ -55,7 +55,7 @@ def test_nested_tuple_fixed_three():
     )
 
 
-def test_nested_tuple_recursive():
+def test_nested_tuple_recursive() -> None:
     def main(x: Tuple[Color, Tuple[Color, Color]]) -> Any:
         return x
 
@@ -74,7 +74,7 @@ def test_nested_tuple_recursive():
     )
 
 
-def test_tuple_bad():
+def test_tuple_bad() -> None:
     # Unable to infer input length.
     def main(x: Tuple[Color, ...]) -> None:
         pass
@@ -83,7 +83,7 @@ def test_tuple_bad():
         tyro.cli(main, args=[])
 
 
-def test_set_bad():
+def test_set_bad() -> None:
     # Unable to infer input length.
     def main(x: Set[Color]) -> None:
         pass
@@ -92,7 +92,7 @@ def test_set_bad():
         tyro.cli(main, args=[])
 
 
-def test_set_ok():
+def test_set_ok() -> None:
     def main(x: Set[Color] = {Color(255, 0, 0)}) -> Any:
         return x
 
@@ -100,7 +100,7 @@ def test_set_ok():
     assert tyro.cli(main, args="--x.0.r 127".split(" ")) == {Color(127, 0, 0)}
 
 
-def test_list_bad():
+def test_list_bad() -> None:
     # Unable to infer input length.
     def main(x: List[Color]) -> None:
         pass
@@ -109,7 +109,7 @@ def test_list_bad():
         tyro.cli(main, args=[])
 
 
-def test_list_ok():
+def test_list_ok() -> None:
     def main(x: List[Color] = [Color(255, 0, 0)]) -> Any:
         return x
 
@@ -117,7 +117,7 @@ def test_list_ok():
     assert tyro.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
-def test_list_object():
+def test_list_object() -> None:
     def main(x: List[object] = [Color(255, 0, 0)]) -> Any:
         return x
 
@@ -125,7 +125,7 @@ def test_list_object():
     assert tyro.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
-def test_list_any():
+def test_list_any() -> None:
     def main(x: List[Any] = [Color(255, 0, 0)]) -> Any:
         return x
 
@@ -133,7 +133,7 @@ def test_list_any():
     assert tyro.cli(main, args="--x.0.r 127".split(" ")) == [Color(127, 0, 0)]
 
 
-def test_tuple_in_list():
+def test_tuple_in_list() -> None:
     def main(x: List[Tuple[Color]] = [(Color(255, 0, 0),)]) -> Any:
         return x
 
@@ -141,7 +141,7 @@ def test_tuple_in_list():
     assert tyro.cli(main, args="--x.0.0.r 127".split(" ")) == [(Color(127, 0, 0),)]
 
 
-def test_tuple_variable():
+def test_tuple_variable() -> None:
     def main(x: Tuple[Color, ...] = (Color(255, 0, 0), Color(255, 0, 127))) -> Any:
         return x
 
@@ -152,7 +152,7 @@ def test_tuple_variable():
     )
 
 
-def test_dict_bad():
+def test_dict_bad() -> None:
     def main(x: Dict[str, Color]) -> Any:
         return x
 
@@ -160,7 +160,7 @@ def test_dict_bad():
         tyro.cli(main, args=[])
 
 
-def test_dict_ok():
+def test_dict_ok() -> None:
     def main(
         x: Dict[str, Color] = {
             "red": Color(255, 0, 0),
@@ -176,7 +176,7 @@ def test_dict_ok():
     )
 
 
-def test_dict_key_int():
+def test_dict_key_int() -> None:
     def main(
         x: Dict[int, Color] = {
             0: Color(255, 0, 0),
@@ -190,7 +190,7 @@ def test_dict_key_int():
     assert tyro.cli(main, args="--x.1.g 127".split(" "))[1] == Color(0, 127, 0)
 
 
-def test_dict_key_enum():
+def test_dict_key_enum() -> None:
     class ColorType(enum.Enum):
         RED = enum.auto()
         GREEN = enum.auto()
@@ -211,7 +211,7 @@ def test_dict_key_enum():
     )
 
 
-def test_dict_nested():
+def test_dict_nested() -> None:
     def main(
         x: Dict[str, Tuple[Color, int]] = {
             # For each color: RGB and xterm color code.
@@ -228,7 +228,7 @@ def test_dict_nested():
     ] == (Color(0, 127, 0), 2)
 
 
-def test_generic_in_tuple():
+def test_generic_in_tuple() -> None:
     ScalarType = TypeVar("ScalarType", int, float)
 
     @dataclasses.dataclass
@@ -250,7 +250,7 @@ def test_generic_in_tuple():
     ) == (GenericColor(0.5, 0.2, 0.3), GenericColor(25, 2, 3))
 
 
-def test_generic_in_tuple_with_default():
+def test_generic_in_tuple_with_default() -> None:
     ScalarType = TypeVar("ScalarType", int, float)
 
     @dataclasses.dataclass
@@ -277,7 +277,7 @@ def test_generic_in_tuple_with_default():
     ) == (GenericColor(0.5, 0.2, 0.3), GenericColor(25, 2, 3))
 
 
-def test_generic_in_variable_tuple_with_default():
+def test_generic_in_variable_tuple_with_default() -> None:
     ScalarType = TypeVar("ScalarType", int, float)
 
     @dataclasses.dataclass
@@ -304,7 +304,7 @@ def test_generic_in_variable_tuple_with_default():
     ) == (GenericColor(0.5, 0.9, 0.3), GenericColor(25, 2, 3))
 
 
-def test_generic_in_dict_with_default():
+def test_generic_in_dict_with_default() -> None:
     ScalarType = TypeVar("ScalarType", int, float)
 
     @dataclasses.dataclass
@@ -330,7 +330,7 @@ def test_generic_in_dict_with_default():
     ) == {"float": GenericColor(0.5, 0.2, 0.3), "int": GenericColor(25, 0, 3)}
 
 
-def test_generic_in_double_nested_dict_with_default():
+def test_generic_in_double_nested_dict_with_default() -> None:
     ScalarType = TypeVar("ScalarType", int, float)
 
     @dataclasses.dataclass
@@ -357,7 +357,7 @@ def test_generic_in_double_nested_dict_with_default():
     }
 
 
-def test_double_nested_dict_with_inferred_type():
+def test_double_nested_dict_with_inferred_type() -> None:
     def main(
         x: Dict[str, Any] = {
             "hello": {

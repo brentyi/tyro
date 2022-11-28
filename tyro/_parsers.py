@@ -58,7 +58,7 @@ class ParserSpecification:
     def from_callable_or_type(
         f: Callable[..., T],
         description: Optional[str],
-        parent_classes: Set[Type],
+        parent_classes: Set[Type[Any]],
         default_instance: Union[
             T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
         ],
@@ -70,7 +70,7 @@ class ParserSpecification:
         # Consolidate subcommand types.
         consolidate_subcommand_args = (
             _markers.ConsolidateSubcommandArgs
-            in _resolver.unwrap_annotated(f, _markers.Marker)[1]
+            in _resolver.unwrap_annotated(f, _markers._Marker)[1]
         )
 
         # Resolve generic types.
@@ -294,7 +294,9 @@ class ParserSpecification:
                 arg.lowered.help is not argparse.SUPPRESS
                 and arg.dest_prefix not in group_from_prefix
             ):
-                description = self.helptext_from_nested_class_field_name.get(arg.dest_prefix)
+                description = self.helptext_from_nested_class_field_name.get(
+                    arg.dest_prefix
+                )
                 group_from_prefix[arg.dest_prefix] = parser.add_argument_group(
                     format_group_name(arg.dest_prefix),
                     description=description,
@@ -330,8 +332,8 @@ class SubparsersSpecification:
     @staticmethod
     def from_field(
         field: _fields.FieldDefinition,
-        type_from_typevar: Dict[TypeVar, Type],
-        parent_classes: Set[Type],
+        type_from_typevar: Dict[TypeVar, Type[Any]],
+        parent_classes: Set[Type[Any]],
         prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.

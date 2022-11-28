@@ -22,7 +22,7 @@ from typing_extensions import Literal
 import tyro
 
 
-def test_tuples_fixed():
+def test_tuples_fixed() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[int, int, int]
@@ -34,7 +34,7 @@ def test_tuples_fixed():
         tyro.cli(A, args=[])
 
 
-def test_tuples_fixed_mixed():
+def test_tuples_fixed_mixed() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[int, str, int]
@@ -46,7 +46,7 @@ def test_tuples_fixed_mixed():
         tyro.cli(A, args=[])
 
 
-def test_tuples_with_default():
+def test_tuples_with_default() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[int, int, int] = (0, 1, 2)
@@ -57,7 +57,7 @@ def test_tuples_with_default():
         tyro.cli(A, args=["--x"])
 
 
-def test_tuple_with_literal_and_default():
+def test_tuple_with_literal_and_default() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[Literal[1, 2, 3], ...] = (1, 2)
@@ -70,7 +70,7 @@ def test_tuple_with_literal_and_default():
         tyro.cli(A, args=["--x"])
 
 
-def test_positional_tuple_with_literal_and_default():
+def test_positional_tuple_with_literal_and_default() -> None:
     @dataclasses.dataclass
     class A:
         x: tyro.conf.Positional[Tuple[Literal[1, 2, 3], ...]] = (1, 2)
@@ -84,7 +84,7 @@ def test_positional_tuple_with_literal_and_default():
     assert "invalid choice" in target.getvalue()
 
 
-def test_tuples_fixed_multitype():
+def test_tuples_fixed_multitype() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[int, str, float]
@@ -96,7 +96,7 @@ def test_tuples_fixed_multitype():
         tyro.cli(A, args=[])
 
 
-def test_tuples_fixed_bool():
+def test_tuples_fixed_bool() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[bool, bool, bool]
@@ -110,7 +110,7 @@ def test_tuples_fixed_bool():
         tyro.cli(A, args=[])
 
 
-def test_tuples_variable():
+def test_tuples_variable() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[int, ...]
@@ -122,7 +122,7 @@ def test_tuples_variable():
         tyro.cli(A, args=[])
 
 
-def test_tuples_variable_bool():
+def test_tuples_variable_bool() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[bool, ...]
@@ -136,7 +136,7 @@ def test_tuples_variable_bool():
         tyro.cli(A, args=[])
 
 
-def test_tuples_variable_optional():
+def test_tuples_variable_optional() -> None:
     @dataclasses.dataclass
     class A:
         x: Optional[Tuple[int, ...]] = None
@@ -147,7 +147,7 @@ def test_tuples_variable_optional():
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
-def test_sequences():
+def test_sequences() -> None:
     @dataclasses.dataclass
     class A:
         x: Sequence[int]
@@ -159,7 +159,7 @@ def test_sequences():
         tyro.cli(A, args=[])
 
 
-def test_lists():
+def test_lists() -> None:
     @dataclasses.dataclass
     class A:
         x: List[int]
@@ -171,7 +171,7 @@ def test_lists():
         tyro.cli(A, args=[])
 
 
-def test_list_with_literal():
+def test_list_with_literal() -> None:
     @dataclasses.dataclass
     class A:
         x: List[Literal[1, 2, 3]]
@@ -185,7 +185,7 @@ def test_list_with_literal():
         tyro.cli(A, args=[])
 
 
-def test_list_with_enums():
+def test_list_with_enums() -> None:
     class Color(enum.Enum):
         RED = enum.auto()
         GREEN = enum.auto()
@@ -206,7 +206,7 @@ def test_list_with_enums():
         tyro.cli(A, args=[])
 
 
-def test_lists_with_default():
+def test_lists_with_default() -> None:
     class Color(enum.Enum):
         RED = enum.auto()
         GREEN = enum.auto()
@@ -224,7 +224,7 @@ def test_lists_with_default():
     )
 
 
-def test_lists_bool():
+def test_lists_bool() -> None:
     @dataclasses.dataclass
     class A:
         x: List[bool]
@@ -238,7 +238,7 @@ def test_lists_bool():
         tyro.cli(A, args=[])
 
 
-def test_sets():
+def test_sets() -> None:
     @dataclasses.dataclass
     class A:
         x: Set[int]
@@ -250,7 +250,7 @@ def test_sets():
         tyro.cli(A, args=[])
 
 
-def test_frozen_sets():
+def test_frozen_sets() -> None:
     @dataclasses.dataclass
     class A:
         x: FrozenSet[int]
@@ -262,7 +262,7 @@ def test_frozen_sets():
         tyro.cli(A, args=[])
 
 
-def test_deque():
+def test_deque() -> None:
     @dataclasses.dataclass
     class A:
         x: Deque[int]
@@ -276,7 +276,7 @@ def test_deque():
         tyro.cli(A, args=[])
 
 
-def test_sets_with_default():
+def test_sets_with_default() -> None:
     @dataclasses.dataclass
     class A:
         x: Set[int] = dataclasses.field(default_factory={0, 1, 2}.copy)
@@ -287,7 +287,7 @@ def test_sets_with_default():
         tyro.cli(A, args=["--x"])
 
 
-def test_optional_sequences():
+def test_optional_sequences() -> None:
     @dataclasses.dataclass
     class A:
         x: Optional[Sequence[int]] = None
@@ -298,7 +298,7 @@ def test_optional_sequences():
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
-def test_optional_lists():
+def test_optional_lists() -> None:
     @dataclasses.dataclass
     class A:
         x: Optional[List[int]] = None
@@ -309,7 +309,7 @@ def test_optional_lists():
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
-def test_nested_optional_types():
+def test_nested_optional_types() -> None:
     """We support "None" as a special-case keyword. (note: this is a bit weird because
     Optional[str] might interpret "None" as either a string or an actual `None`
     value)"""
@@ -322,7 +322,7 @@ def test_nested_optional_types():
     assert tyro.cli(A, args=["--x", "0", "None", "1"]) == A((0, None, 1))
 
 
-def test_union_over_collections():
+def test_union_over_collections() -> None:
     def main(a: Union[Tuple[float, ...], Tuple[int, ...]]) -> Any:
         return a
 
@@ -330,7 +330,7 @@ def test_union_over_collections():
     assert tyro.cli(main, args="--a 3 3 7".split(" ")) == (3, 3, 7)
 
 
-def test_union_over_collections_2():
+def test_union_over_collections_2() -> None:
     def main(a: Union[Tuple[str, float, str], Tuple[str, str, float]]) -> Any:
         return a
 
@@ -338,7 +338,7 @@ def test_union_over_collections_2():
     assert tyro.cli(main, args="--a 3 3 hey".split(" ")) == ("3", 3.0, "hey")
 
 
-def test_union_over_collections_3():
+def test_union_over_collections_3() -> None:
     def main(a: Union[Tuple[int, int], Tuple[int, int, int]]) -> Tuple[int, ...]:
         return a
 
@@ -354,7 +354,7 @@ def test_union_over_collections_3():
         tyro.cli(main, args=[])
 
 
-def test_choices_in_tuples_0():
+def test_choices_in_tuples_0() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[bool, bool]
@@ -362,7 +362,7 @@ def test_choices_in_tuples_0():
     assert tyro.cli(A, args=["--x", "True", "False"]) == A((True, False))
 
 
-def test_choices_in_tuples_1():
+def test_choices_in_tuples_1() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[bool, Literal["True", "False"]]
@@ -370,7 +370,7 @@ def test_choices_in_tuples_1():
     assert tyro.cli(A, args=["--x", "True", "False"]) == A((True, "False"))
 
 
-def test_choices_in_tuples_2():
+def test_choices_in_tuples_2() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[bool, Literal["True", "False", "None"]]
@@ -381,7 +381,7 @@ def test_choices_in_tuples_2():
         tyro.cli(A, args=["--x", "None", "False"])
 
 
-def test_nested_tuple_types():
+def test_nested_tuple_types() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[Tuple[int, int], Tuple[str, str]]
@@ -389,7 +389,7 @@ def test_nested_tuple_types():
     assert tyro.cli(A, args="--x 5 5 5 5".split(" ")).x == ((5, 5), ("5", "5"))
 
 
-def test_variable_nested_tuple():
+def test_variable_nested_tuple() -> None:
     def main(x: Tuple[Tuple[int, str], ...]) -> tuple:
         return x
 
@@ -398,7 +398,7 @@ def test_variable_nested_tuple():
         tyro.cli(main, args="--x 1 1 2".split(" "))
 
 
-def test_super_nested():
+def test_super_nested() -> None:
     def main(
         x: Optional[
             List[
@@ -424,7 +424,7 @@ def test_super_nested():
         tyro.cli(main, args=["--help"])
 
 
-def test_dict_no_annotation():
+def test_dict_no_annotation() -> None:
     def main(x: Dict[str, Any] = {"int": 5, "str": "5"}):
         return x
 
@@ -435,7 +435,7 @@ def test_dict_no_annotation():
     }
 
 
-def test_double_dict_no_annotation():
+def test_double_dict_no_annotation() -> None:
     def main(
         x: Dict[str, Any] = {
             "wow": {"int": 5, "str": "5"},
@@ -452,21 +452,21 @@ def test_double_dict_no_annotation():
     }
 
 
-def test_list_narrowing():
+def test_list_narrowing() -> None:
     def main(x: list = [0, 1, 2, "hello"]) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", 5]
 
 
-def test_set_narrowing():
+def test_set_narrowing() -> None:
     def main(x: set = {0, 1, 2, "hello"}) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
 
 
-def test_tuple_narrowing():
+def test_tuple_narrowing() -> None:
     def main(x: tuple = (0, 1, 2, "hello")) -> Any:
         return x
 

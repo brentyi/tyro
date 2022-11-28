@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 import tyro
 
 
-def test_pydantic():
+def test_pydantic() -> None:
     class ManyTypesA(BaseModel):
         i: int
         s: str = "hello"
@@ -28,7 +28,7 @@ def test_pydantic():
     ) == ManyTypesA(i=5, s="hello", f=3.0, p=pathlib.Path("~"))
 
 
-def test_pydantic_helptext():
+def test_pydantic_helptext() -> None:
     class Helptext(BaseModel):
         """This docstring should be printed as a description."""
 

@@ -8,7 +8,7 @@ import pytest
 import tyro
 
 
-def test_missing():
+def test_missing() -> None:
     def main(a: int = 5, b: int = tyro.MISSING, c: int = 3) -> Tuple[int, int, int]:
         return a, b, c
 
@@ -17,7 +17,7 @@ def test_missing():
     assert tyro.cli(main, args=["--b", "7"]) == (5, 7, 3)
 
 
-def test_missing_dataclass():
+def test_missing_dataclass() -> None:
     @dataclasses.dataclass
     class Args2:
         a: int = 5
@@ -29,7 +29,7 @@ def test_missing_dataclass():
     assert tyro.cli(Args2, args=["--b", "7"]) == Args2(5, 7, 3)
 
 
-def test_missing_default():
+def test_missing_default() -> None:
     @dataclasses.dataclass
     class Args2:
         a: int
@@ -49,7 +49,7 @@ def test_missing_default():
     ) == Args2(5, 7, 3)
 
 
-def test_missing_nested_default():
+def test_missing_nested_default() -> None:
     @dataclasses.dataclass
     class Child:
         a: int = 5

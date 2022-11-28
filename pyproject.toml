@@ -19,6 +19,7 @@ colorama = {version = "^0.4.0", platform = "win32"}
 frozendict = "^2.3.4"
 rich = ">=11.1.0"
 shtab = "^1.5.6"
+mypy = "^0.991"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.1.2"
@@ -26,7 +27,6 @@ pytest-cov = "^3.0.0"
 omegaconf = "^2.2.2"
 attrs = "^21.4.0"
 torch = "^1.10.0"
-mypy = "^0.971"
 pyright = "^1.1.264"
 numpy = ">=1.20.0"
 flax = "^0.6.0"

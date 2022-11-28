@@ -94,7 +94,7 @@ _builtin_set = set(
 
 
 def instantiator_from_type(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+    typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Recursive helper for parsing type annotations.
 
@@ -216,7 +216,7 @@ def instantiator_from_type(
 @overload
 def _instantiator_from_type_inner(
     typ: Type,
-    type_from_typevar: Dict[TypeVar, Type],
+    type_from_typevar: Dict[TypeVar, Type[Any]],
     allow_sequences: Literal["fixed_length"],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     ...
@@ -225,7 +225,7 @@ def _instantiator_from_type_inner(
 @overload
 def _instantiator_from_type_inner(
     typ: Type,
-    type_from_typevar: Dict[TypeVar, Type],
+    type_from_typevar: Dict[TypeVar, Type[Any]],
     allow_sequences: Literal[False],
 ) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
     ...
@@ -234,7 +234,7 @@ def _instantiator_from_type_inner(
 @overload
 def _instantiator_from_type_inner(
     typ: Type,
-    type_from_typevar: Dict[TypeVar, Type],
+    type_from_typevar: Dict[TypeVar, Type[Any]],
     allow_sequences: Literal[True],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     ...
@@ -242,7 +242,7 @@ def _instantiator_from_type_inner(
 
 def _instantiator_from_type_inner(
     typ: Type,
-    type_from_typevar: Dict[TypeVar, Type],
+    type_from_typevar: Dict[TypeVar, Type[Any]],
     allow_sequences: Literal["fixed_length", True, False],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
@@ -261,7 +261,7 @@ def _instantiator_from_type_inner(
 
 
 def _instantiator_from_container_type(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+    typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
     """Attempt to create an instantiator from a container type. Returns `None` is no
     container type is found."""
@@ -297,7 +297,7 @@ def _instantiator_from_container_type(
 
 
 def _instantiator_from_tuple(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+    typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     types = get_args(typ)
     typeset = set(types)  # Note that sets are unordered.
@@ -381,7 +381,7 @@ def _join_union_metavars(metavars: Iterable[str]) -> str:
 
 
 def _instantiator_from_union(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+    typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     options = list(get_args(typ))
     if NoneType in options:
@@ -457,7 +457,7 @@ def _instantiator_from_union(
 
 
 def _instantiator_from_dict(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+    typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     key_type, val_type = get_args(typ)
     key_instantiator, key_meta = _instantiator_from_type_inner(
@@ -513,7 +513,7 @@ def _instantiator_from_dict(
 
 
 def _instantiator_from_sequence(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+    typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc."""
     container_type = get_origin(typ)
@@ -557,7 +557,7 @@ def _instantiator_from_sequence(
 
 
 def _instantiator_from_literal(
-    typ: Type, type_from_typevar: Dict[TypeVar, Type]
+    typ: Type, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     choices = get_args(typ)
     str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)

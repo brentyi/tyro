@@ -8,7 +8,7 @@ from typing_extensions import Annotated
 import tyro
 
 
-def test_omit_subcommand_prefix():
+def test_omit_subcommand_prefix() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -61,7 +61,7 @@ def test_omit_subcommand_prefix():
     )
 
 
-def test_avoid_subparser_with_default():
+def test_avoid_subparser_with_default() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -103,7 +103,7 @@ def test_avoid_subparser_with_default():
     )
 
 
-def test_avoid_subparser_with_default_recursive():
+def test_avoid_subparser_with_default_recursive() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -148,7 +148,7 @@ def test_avoid_subparser_with_default_recursive():
     )
 
 
-def test_subparser_in_nested_with_metadata():
+def test_subparser_in_nested_with_metadata() -> None:
     @dataclasses.dataclass
     class A:
         a: int
@@ -200,7 +200,7 @@ def test_subparser_in_nested_with_metadata():
     ) == Parent(Nested1(Nested2(B(7))))
 
 
-def test_subparser_in_nested_with_metadata_generic():
+def test_subparser_in_nested_with_metadata_generic() -> None:
     @dataclasses.dataclass
     class A:
         a: int
@@ -256,7 +256,7 @@ def test_subparser_in_nested_with_metadata_generic():
     ) == Parent(Nested1(Nested2(B(7))))
 
 
-def test_subparser_in_nested_with_metadata_generic_alt():
+def test_subparser_in_nested_with_metadata_generic_alt() -> None:
     @dataclasses.dataclass
     class A:
         a: int
@@ -310,7 +310,7 @@ def test_subparser_in_nested_with_metadata_generic_alt():
     ) == Parent(Nested1(Nested2(B(7))))
 
 
-def test_subparser_in_nested_with_metadata_default_matching():
+def test_subparser_in_nested_with_metadata_default_matching() -> None:
     @dataclasses.dataclass(frozen=True)
     class A:
         a: int
@@ -351,7 +351,7 @@ def test_subparser_in_nested_with_metadata_default_matching():
     assert "default: x.subcommand:three" in get_helptext(main_three)
 
 
-def test_flag():
+def test_flag() -> None:
     """When boolean flags have no default value, they must be explicitly specified."""
 
     @dataclasses.dataclass
@@ -371,7 +371,7 @@ def test_flag():
     ) == A(True)
 
 
-def test_fixed():
+def test_fixed() -> None:
     """When boolean flags have no default value, they must be explicitly specified."""
 
     @dataclasses.dataclass
@@ -392,7 +392,7 @@ def test_fixed():
         ) == A(True)
 
 
-def test_fixed_recursive():
+def test_fixed_recursive() -> None:
     """When boolean flags have no default value, they must be explicitly specified."""
 
     @dataclasses.dataclass
@@ -413,7 +413,7 @@ def test_fixed_recursive():
         ) == A(True)
 
 
-def test_suppressed_group():
+def test_suppressed_group() -> None:
     """Reproduction of https://github.com/nerfstudio-project/nerfstudio/issues/882."""
 
     @dataclasses.dataclass
@@ -430,7 +430,7 @@ def test_suppressed_group():
     assert tyro.cli(main, args=["--value", "5"]) == 8
 
 
-def test_fixed_group():
+def test_fixed_group() -> None:
     """Inspired by https://github.com/nerfstudio-project/nerfstudio/issues/882."""
 
     @dataclasses.dataclass
@@ -447,7 +447,7 @@ def test_fixed_group():
     assert tyro.cli(main, args=["--value", "5"]) == 8
 
 
-def test_fixed_suppressed_group():
+def test_fixed_suppressed_group() -> None:
     """Reproduction of https://github.com/nerfstudio-project/nerfstudio/issues/882."""
 
     @dataclasses.dataclass
@@ -464,7 +464,7 @@ def test_fixed_suppressed_group():
     assert tyro.cli(main, args=["--value", "5"]) == 8
 
 
-def test_suppressed():
+def test_suppressed() -> None:
     @dataclasses.dataclass
     class Struct:
         a: int = 5
@@ -478,7 +478,7 @@ def test_suppressed():
     assert "--x.b" not in helptext
 
 
-def test_suppress_manual_fixed():
+def test_suppress_manual_fixed() -> None:
     @dataclasses.dataclass
     class Struct:
         a: int = 5
@@ -492,7 +492,7 @@ def test_suppress_manual_fixed():
     assert "--x.b" not in helptext
 
 
-def test_suppress_auto_fixed():
+def test_suppress_auto_fixed() -> None:
     @dataclasses.dataclass
     class Struct:
         a: int = 5
@@ -506,7 +506,7 @@ def test_suppress_auto_fixed():
     assert "--x.b" not in helptext
 
 
-def test_argconf_help():
+def test_argconf_help() -> None:
     @dataclasses.dataclass
     class Struct:
         a: Annotated[
@@ -529,7 +529,7 @@ def test_argconf_help():
     assert tyro.cli(main, args=["--x.nice", "3"]) == 3
 
 
-def test_positional():
+def test_positional() -> None:
     def main(x: tyro.conf.Positional[int], y: int) -> int:
         return x + y
 
@@ -537,7 +537,7 @@ def test_positional():
     assert tyro.cli(main, args="--y 3 5".split(" ")) == 8
 
 
-def test_positional_order_swap():
+def test_positional_order_swap() -> None:
     def main(x: int, y: tyro.conf.Positional[int]) -> int:
         return x + y
 
@@ -545,7 +545,7 @@ def test_positional_order_swap():
     assert tyro.cli(main, args="--x 3 5".split(" ")) == 8
 
 
-def test_omit_subcommand_prefix_and_consolidate_subcommand_args():
+def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -616,7 +616,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args():
     )
 
 
-def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function():
+def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0

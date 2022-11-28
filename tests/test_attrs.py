@@ -10,7 +10,7 @@ from attrs import define, field
 import tyro
 
 
-def test_attrs_basic():
+def test_attrs_basic() -> None:
     @attr.s
     class ManyTypesA:
         i: int = attr.ib()
@@ -34,7 +34,7 @@ def test_attrs_basic():
     ) == ManyTypesA(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
 
-def test_attrs_defaults():
+def test_attrs_defaults() -> None:
     @attr.s
     class ManyTypesB:
         i: int = attr.ib()
@@ -53,7 +53,7 @@ def test_attrs_defaults():
     ) == ManyTypesB(i=5, s="5", f=1.0)
 
 
-def test_attrs_helptext():
+def test_attrs_helptext() -> None:
     @attr.s
     class Helptext:
         """This docstring should be printed as a description."""
@@ -78,7 +78,7 @@ def test_attrs_helptext():
     assert "Documentation 3" in helptext
 
 
-def test_attrs_next_gen_and_factory():
+def test_attrs_next_gen_and_factory() -> None:
     @define
     class Helptext:
         """This docstring should be printed as a description."""

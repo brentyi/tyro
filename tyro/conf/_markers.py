@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Callable, Type, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 from typing_extensions import Annotated
 
@@ -12,7 +12,7 @@ from .. import _singleton
 #
 # An alias could ideally be made, but SpecialForm aliases are not well supported by static analysis tools.
 
-T = TypeVar("T", bound=Type)
+T = TypeVar("T")
 
 Positional = Annotated[T, None]
 """A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
@@ -92,9 +92,12 @@ CallableType = TypeVar("CallableType", bound=Callable)
 # - Annotated[T, Marker]
 
 
-class Marker(_singleton.Singleton):
+class _Marker(_singleton.Singleton):
     def __getitem__(self, key):
         return Annotated.__class_getitem__((key, self))  # type: ignore
+
+
+Marker = Any
 
 
 def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
@@ -125,8 +128,8 @@ def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
 
 if not TYPE_CHECKING:
 
-    def _make_marker(description: str) -> Marker:
-        class _InnerMarker(Marker):
+    def _make_marker(description: str) -> _Marker:
+        class _InnerMarker(_Marker):
             def __repr__(self):
                 return description
 
