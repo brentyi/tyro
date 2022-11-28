@@ -18,9 +18,9 @@ DataclassType = TypeVar("DataclassType")
 
 
 def _get_contained_special_types_from_type(
-    cls: Type,
-    _parent_contained_dataclasses: Optional[Set[Type]] = None,
-) -> Set[Type]:
+    cls: Type[Any],
+    _parent_contained_dataclasses: Optional[Set[Type[Any]]] = None,
+) -> Set[Type[Any]]:
     """Takes a dataclass type, and recursively searches its fields for dataclass or enum
     types."""
     assert _resolver.is_dataclass(cls)
@@ -35,7 +35,7 @@ def _get_contained_special_types_from_type(
 
     contained_special_types = {cls}
 
-    def handle_type(typ: Type) -> Set[Type]:
+    def handle_type(typ: Type[Any]) -> Set[Type[Any]]:
         # Handle dataclasses.
         if _resolver.is_dataclass(typ) and typ not in parent_contained_dataclasses:
             return _get_contained_special_types_from_type(
@@ -69,7 +69,7 @@ def _get_contained_special_types_from_type(
     return contained_special_types
 
 
-def _make_loader(cls: Type) -> Type[yaml.Loader]:
+def _make_loader(cls: Type[Any]) -> Type[yaml.Loader]:
     class DataclassLoader(yaml.Loader):
         pass
 
@@ -91,10 +91,10 @@ def _make_loader(cls: Type) -> Type[yaml.Loader]:
     loader: yaml.Loader
     node: yaml.Node
 
-    def make_dataclass_constructor(typ: Type):
+    def make_dataclass_constructor(typ: Type[Any]):
         return lambda loader, node: typ(**loader.construct_mapping(node))
 
-    def make_enum_constructor(typ: Type):
+    def make_enum_constructor(typ: Type[Any]):
         return lambda loader, node: typ[loader.construct_python_str(node)]
 
     for typ, name in zip(contained_types, contained_type_names):

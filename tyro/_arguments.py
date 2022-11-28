@@ -43,7 +43,7 @@ class ArgumentDefinition:
     name_prefix: str  # User-facing prefix.
     subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
-    type_from_typevar: Dict[TypeVar, Type]
+    type_from_typevar: Dict[TypeVar, Type[Any]]
 
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]

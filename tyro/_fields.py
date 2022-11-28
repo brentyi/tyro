@@ -33,24 +33,14 @@ from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
 from .conf import _confstruct, _markers
 
-# Support attrs and pydantic if they're installed.
-try:
-    import attr
-except ImportError:
-    attr = None  # type: ignore
-try:
-    import pydantic
-except ImportError:
-    pydantic = None  # type: ignore
-
 
 @dataclasses.dataclass(frozen=True)
 class FieldDefinition:
     name: str
-    typ: Type
+    typ: Type[Any]
     default: Any
     helptext: Optional[str]
-    markers: FrozenSet[_markers.Marker]
+    markers: FrozenSet[_markers._Marker]
 
     argconf: _confstruct._ArgConfiguration
 
@@ -69,12 +59,12 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        typ: Type,
+        typ: Type[Any],
         default: Any,
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
         *,
-        markers: Tuple[_markers.Marker, ...] = (),
+        markers: Tuple[_markers._Marker, ...] = (),
     ):
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated(typ, _confstruct._ArgConfiguration)
@@ -85,7 +75,7 @@ class FieldDefinition:
             (argconf,) = argconfs
             helptext = argconf.help
 
-        typ, inferred_markers = _resolver.unwrap_annotated(typ, _markers.Marker)
+        typ, inferred_markers = _resolver.unwrap_annotated(typ, _markers._Marker)
         return FieldDefinition(
             name if argconf.name is None else argconf.name,
             typ,
@@ -96,7 +86,7 @@ class FieldDefinition:
             call_argname_override if call_argname_override is not None else name,
         )
 
-    def add_markers(self, markers: Tuple[_markers.Marker, ...]) -> FieldDefinition:
+    def add_markers(self, markers: Tuple[_markers._Marker, ...]) -> FieldDefinition:
         return dataclasses.replace(
             self,
             markers=self.markers.union(markers),
@@ -170,7 +160,7 @@ class UnsupportedNestedTypeMessage:
     message: str
 
 
-def is_nested_type(typ: Type, default_instance: _DefaultInstance) -> bool:
+def is_nested_type(typ: Type[Any], default_instance: _DefaultInstance) -> bool:
     """Determine whether a type should be treated as a 'nested type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
     classes)."""
@@ -181,7 +171,7 @@ def is_nested_type(typ: Type, default_instance: _DefaultInstance) -> bool:
 
 
 def field_list_from_callable(
-    f: Union[Callable, Type],
+    f: Union[Callable, Type[Any]],
     default_instance: _DefaultInstance,
 ) -> List[FieldDefinition]:
     """Generate a list of generic 'field' objects corresponding to the inputs of some
@@ -192,7 +182,7 @@ def field_list_from_callable(
         raise _instantiators.UnsupportedTypeAnnotationError(out.message)
 
     # Recursively apply markers.
-    _, parent_markers = _resolver.unwrap_annotated(f, _markers.Marker)
+    _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
     out = list(map(lambda field: field.add_markers(parent_markers), out))
     return out
 
@@ -218,7 +208,7 @@ _known_parsable_types = set(
 
 
 def _try_field_list_from_callable(
-    f: Union[Callable, Type],
+    f: Union[Callable, Type[Any]],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     f, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -230,79 +220,48 @@ def _try_field_list_from_callable(
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.narrow_type(f, default_instance)
+    f_origin = _resolver.unwrap_origin_strip_extras(cast(Type, f))
 
     # If `f` is a type:
     #     1. Set cls to the type.
     #     2. Consider `f` to be `cls.__init__`.
-    cls: Optional[Type] = None
+    cls: Optional[Type[Any]] = None
     if isinstance(f, type):
         cls = f
         f = cls.__init__  # type: ignore
-        f_origin: Callable = cls  # type: ignore
-    f_origin = _resolver.unwrap_origin_strip_extras(f)
+        f_origin = cls  # type: ignore
 
-    # Try special cases.
+    # Try field generation from class inputs.
     if cls is not None:
-        if is_typeddict(cls):
-            return _try_field_list_from_typeddict(cls, default_instance)
+        for match, field_list_from_class in (
+            (is_typeddict, _field_list_from_typeddict),
+            (_resolver.is_namedtuple, _field_list_from_namedtuple),
+            (_resolver.is_dataclass, _field_list_from_dataclass),
+            (_is_attrs, _field_list_from_attrs),
+            (_is_pydantic, _field_list_from_pydantic),
+        ):
+            if match(cls):
+                return field_list_from_class(cls, default_instance)
 
-        if _resolver.is_namedtuple(cls):
-            return _try_field_list_from_namedtuple(cls, default_instance)
-
-        if _resolver.is_dataclass(cls):
-            return _try_field_list_from_dataclass(cls, default_instance)
-
-        if pydantic is not None and issubclass(cls, pydantic.BaseModel):
-            return _try_field_list_from_pydantic(cls, default_instance)
-
-        if attr is not None and attr.has(cls):
-            return _try_field_list_from_attrs(cls, default_instance)
-
-    # Standard container types. These are special because they can be nested structures
+    # Standard container types. These are different because they can be nested structures
     # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
     # single arguments otherwise (eg Tuple[int, int]).
     #
     # Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will
-    # be populated if we annotated as just `tuple`.
-    container_fields = None
+    # be populated if we annotate as just `tuple`.
     if f_origin is tuple or cls is tuple:
-        container_fields = _field_list_from_tuple(f, default_instance)
+        return _field_list_from_tuple(f, default_instance)
+    elif f_origin in (collections.abc.Mapping, dict) or cls in (
+        collections.abc.Mapping,
+        dict,
+    ):
+        return _field_list_from_dict(f, default_instance)
     elif f_origin in (list, set, typing.Sequence) or cls in (
         list,
         set,
         typing.Sequence,
     ):
-        contained_type: Any
-        if len(get_args(f)) == 0:
-            if default_instance in MISSING_SINGLETONS:
-                raise _instantiators.UnsupportedTypeAnnotationError(
-                    f"Sequence type {cls} needs either an explicit type or a"
-                    " default to infer from."
-                )
-            assert isinstance(default_instance, Iterable)
-            contained_type = next(iter(default_instance))
-        else:
-            (contained_type,) = get_args(f)
-        f_origin = list if f_origin is typing.Sequence else f_origin  # type: ignore
-
-        container_fields = _try_field_list_from_sequence(
-            contained_type, default_instance
-        )
-    elif f_origin in (collections.abc.Mapping, dict) or cls in (
-        collections.abc.Mapping,
-        dict,
-    ):
-        container_fields = _try_field_list_from_dict(f, default_instance)
-
-    # Check if one of the container types matched.
-    if container_fields is not None:
-        # Found fields!
-        if not isinstance(container_fields, UnsupportedNestedTypeMessage):
-            return container_fields
-        # Got an error,
-        else:
-            assert isinstance(container_fields, UnsupportedNestedTypeMessage)
-            return container_fields
+        return _field_list_from_sequence_checked(f, default_instance)
 
     # General cases.
     if (
@@ -313,8 +272,8 @@ def _try_field_list_from_callable(
         return _try_field_list_from_general_callable(f, cls, default_instance)
 
 
-def _try_field_list_from_typeddict(
-    cls: Type, default_instance: _DefaultInstance
+def _field_list_from_typeddict(
+    cls: Type[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     field_list = []
     valid_default_instance = (
@@ -345,8 +304,8 @@ def _try_field_list_from_typeddict(
     return field_list
 
 
-def _try_field_list_from_namedtuple(
-    cls: Type, default_instance: _DefaultInstance
+def _field_list_from_namedtuple(
+    cls: Type[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle NamedTuples.
     #
@@ -376,8 +335,8 @@ def _try_field_list_from_namedtuple(
     return field_list
 
 
-def _try_field_list_from_dataclass(
-    cls: Type, default_instance: _DefaultInstance
+def _field_list_from_dataclass(
+    cls: Type[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle dataclasses.
     field_list = []
@@ -405,8 +364,19 @@ def _try_field_list_from_dataclass(
     return field_list
 
 
-def _try_field_list_from_pydantic(
-    cls: Type, default_instance: _DefaultInstance
+# Support attrs and pydantic if they're installed.
+try:
+    import pydantic
+except ImportError:
+    pass
+
+
+def _is_pydantic(cls: Type[Any]) -> bool:
+    return pydantic is not None and issubclass(cls, pydantic.BaseModel)
+
+
+def _field_list_from_pydantic(
+    cls: Type[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert pydantic is not None
 
@@ -426,8 +396,18 @@ def _try_field_list_from_pydantic(
     return field_list
 
 
-def _try_field_list_from_attrs(
-    cls: Type, default_instance: _DefaultInstance
+try:
+    import attr
+except ImportError:
+    attr = None  # type: ignore
+
+
+def _is_attrs(cls: Type[Any]) -> bool:
+    return attr is not None and attr.has(cls)
+
+
+def _field_list_from_attrs(
+    cls: Type[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert attr is not None
 
@@ -454,13 +434,13 @@ def _try_field_list_from_attrs(
 
 
 def _field_list_from_tuple(
-    f: Union[Callable, Type], default_instance: _DefaultInstance
+    f: Union[Callable, Type[Any]], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Fixed-length tuples.
     field_list = []
     children = get_args(f)
     if Ellipsis in children:
-        return _try_field_list_from_sequence(
+        return _try_field_list_from_sequence_inner(
             next(iter(set(children) - {Ellipsis})), default_instance
         )
 
@@ -513,8 +493,25 @@ def _field_list_from_tuple(
     return field_list
 
 
-def _try_field_list_from_sequence(
-    contained_type: Type,
+def _field_list_from_sequence_checked(
+    f: Union[Callable, Type[Any]], default_instance: _DefaultInstance
+) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    contained_type: Any
+    if len(get_args(f)) == 0:
+        if default_instance in MISSING_SINGLETONS:
+            raise _instantiators.UnsupportedTypeAnnotationError(
+                f"Sequence type {f} needs either an explicit type or a"
+                " default to infer from."
+            )
+        assert isinstance(default_instance, Iterable)
+        contained_type = next(iter(default_instance))
+    else:
+        (contained_type,) = get_args(f)
+    return _try_field_list_from_sequence_inner(contained_type, default_instance)
+
+
+def _try_field_list_from_sequence_inner(
+    contained_type: Type[Any],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # When no default instance is specified:
@@ -557,8 +554,8 @@ def _try_field_list_from_sequence(
     return field_list
 
 
-def _try_field_list_from_dict(
-    f: Union[Callable, Type],
+def _field_list_from_dict(
+    f: Union[Callable, Type[Any]],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     if default_instance in MISSING_SINGLETONS:
@@ -581,8 +578,8 @@ def _try_field_list_from_dict(
 
 
 def _try_field_list_from_general_callable(
-    f: Union[Callable, Type],
-    cls: Optional[Type],
+    f: Union[Callable, Type[Any]],
+    cls: Optional[Type[Any]],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle general callables.
@@ -612,7 +609,9 @@ def _try_field_list_from_general_callable(
 
 
 def _field_list_from_params(
-    f: Union[Callable, Type], cls: Optional[Type], params: List[inspect.Parameter]
+    f: Union[Callable, Type[Any]],
+    cls: Optional[Type[Any]],
+    params: List[inspect.Parameter],
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)

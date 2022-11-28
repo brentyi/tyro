@@ -43,7 +43,7 @@ def is_dataclass(cls: Union[Type, Callable]) -> bool:
 
 def resolve_generic_types(
     cls: TypeOrCallable,
-) -> Tuple[TypeOrCallable, Dict[TypeVar, Type]]:
+) -> Tuple[TypeOrCallable, Dict[TypeVar, Type[Any]]]:
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
 
@@ -198,7 +198,7 @@ def unwrap_annotated(
 
 
 def apply_type_from_typevar(
-    typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type]
+    typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type[Any]]
 ) -> TypeOrCallable:
     if typ in type_from_typevar:
         return type_from_typevar[typ]  # type: ignore
@@ -224,7 +224,7 @@ def apply_type_from_typevar(
             }
             if hasattr(types, "UnionType"):  # type: ignore
                 # PEP 604. Requires Python 3.10.
-                shim_table[types.UnionType] = Union  # type: ignore
+                shim_table[types.UnionType[Any]] = Union  # type: ignore
 
             for new, old in shim_table.items():
                 if isinstance(typ, new) or get_origin(typ) is new:  # type: ignore

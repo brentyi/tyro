@@ -23,7 +23,7 @@ from typing_extensions import Annotated, Final, Literal, TypeAlias
 import tyro
 
 
-def test_no_args():
+def test_no_args() -> None:
     def main() -> int:
         return 5
 
@@ -32,7 +32,7 @@ def test_no_args():
         tyro.cli(main, args=["3"])
 
 
-def test_basic():
+def test_basic() -> None:
     @dataclasses.dataclass
     class ManyTypes:
         i: int
@@ -93,7 +93,7 @@ def test_basic():
     ).inner == ManyTypes(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
 
-def test_init_false():
+def test_init_false() -> None:
     @dataclasses.dataclass
     class InitFalseDataclass:
         i: int
@@ -134,7 +134,7 @@ def test_init_false():
         )
 
 
-def test_required():
+def test_required() -> None:
     @dataclasses.dataclass
     class A:
         x: int
@@ -143,7 +143,7 @@ def test_required():
         tyro.cli(A, args=[])
 
 
-def test_flag():
+def test_flag() -> None:
     """When boolean flags have no default value, they must be explicitly specified."""
 
     @dataclasses.dataclass
@@ -166,7 +166,7 @@ def test_flag():
     assert tyro.cli(A, args=["--x", "False"]) == A(False)
 
 
-def test_flag_default_false():
+def test_flag_default_false() -> None:
     """When boolean flags default to False, a --flag-name flag must be passed in to flip it to True."""
 
     @dataclasses.dataclass
@@ -177,7 +177,7 @@ def test_flag_default_false():
     assert tyro.cli(A, args=["--x"]) == A(True)
 
 
-def test_flag_default_true():
+def test_flag_default_true() -> None:
     """When boolean flags default to True, a --no-flag-name flag must be passed in to flip it to False."""
 
     @dataclasses.dataclass
@@ -188,7 +188,7 @@ def test_flag_default_true():
     assert tyro.cli(A, args=["--no-x"]) == A(False)
 
 
-def test_flag_default_true_nested():
+def test_flag_default_true_nested() -> None:
     """When boolean flags default to True, a --no-flag-name flag must be passed in to flip it to False."""
 
     @dataclasses.dataclass
@@ -203,7 +203,7 @@ def test_flag_default_true_nested():
     assert tyro.cli(A, args=["--x.no-x"]) == A(NestedDefaultTrue(False))
 
 
-def test_default():
+def test_default() -> None:
     @dataclasses.dataclass
     class A:
         x: int = 5
@@ -211,7 +211,7 @@ def test_default():
     assert tyro.cli(A, args=[]) == A()
 
 
-def test_default_factory():
+def test_default_factory() -> None:
     @dataclasses.dataclass
     class A:
         x: int = dataclasses.field(default_factory=lambda: 5)
@@ -219,7 +219,7 @@ def test_default_factory():
     assert tyro.cli(A, args=[]) == A()
 
 
-def test_optional():
+def test_optional() -> None:
     @dataclasses.dataclass
     class A:
         x: Optional[int] = None
@@ -227,7 +227,7 @@ def test_optional():
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
-def test_union_basic():
+def test_union_basic() -> None:
     def main(x: Union[int, str]) -> Union[int, str]:
         return x
 
@@ -236,7 +236,7 @@ def test_union_basic():
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
-def test_union_with_list():
+def test_union_with_list() -> None:
     def main(x: Union[int, str, List[bool]]) -> Any:
         return x
 
@@ -247,7 +247,7 @@ def test_union_with_list():
     assert tyro.cli(main, args=["--x", "True", "False"]) == [True, False]
 
 
-def test_union_literal():
+def test_union_literal() -> None:
     def main(x: Union[Literal[1, 2], Literal[3, 4, 5], str]) -> Union[int, str]:
         return x
 
@@ -256,7 +256,7 @@ def test_union_literal():
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
-def test_func_typevar():
+def test_func_typevar() -> None:
     T = TypeVar("T", int, str)
 
     def main(x: T) -> T:
@@ -266,7 +266,7 @@ def test_func_typevar():
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
-def test_func_typevar_bound():
+def test_func_typevar_bound() -> None:
     T = TypeVar("T", bound=int)
 
     def main(x: T) -> T:
@@ -277,7 +277,7 @@ def test_func_typevar_bound():
         tyro.cli(main, args=["--x", "five"])
 
 
-def test_enum():
+def test_enum() -> None:
     class Color(enum.Enum):
         RED = enum.auto()
         GREEN = enum.auto()
@@ -295,7 +295,7 @@ def test_enum():
     assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
 
 
-def test_literal():
+def test_literal() -> None:
     @dataclasses.dataclass
     class A:
         x: Literal[0, 1, 2]
@@ -310,7 +310,7 @@ Choices = int
 Choices = tyro.extras.literal_type_from_choices([0, 1, 2])  # type: ignore
 
 
-def test_dynamic_literal():
+def test_dynamic_literal() -> None:
     @dataclasses.dataclass
     class A:
         x: Choices
@@ -320,7 +320,7 @@ def test_dynamic_literal():
         assert tyro.cli(A, args=["--x", "3"])
 
 
-def test_literal_bool():
+def test_literal_bool() -> None:
     def main(x: Literal[True]) -> bool:
         return x
 
@@ -337,7 +337,7 @@ def test_literal_bool():
         tyro.cli(main2, args=["--x", "Tru"])
 
 
-def test_literal_enum():
+def test_literal_enum() -> None:
     class Color(enum.Enum):
         RED = enum.auto()
         GREEN = enum.auto()
@@ -353,7 +353,7 @@ def test_literal_enum():
         assert tyro.cli(A, args=["--x", "BLUE"])
 
 
-def test_optional_literal():
+def test_optional_literal() -> None:
     @dataclasses.dataclass
     class A:
         x: Optional[Literal[0, 1, 2]] = None
@@ -364,7 +364,7 @@ def test_optional_literal():
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
-def test_multitype_literal():
+def test_multitype_literal() -> None:
     def main(x: Literal[0, "5"]) -> Any:
         return x
 
@@ -374,7 +374,7 @@ def test_multitype_literal():
         tyro.cli(main, args=["--x", "6"])
 
 
-def test_annotated():
+def test_annotated() -> None:
     """Annotated[] is a no-op."""
 
     @dataclasses.dataclass
@@ -384,7 +384,7 @@ def test_annotated():
     assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
-def test_annotated_optional():
+def test_annotated_optional() -> None:
     """Annotated[] is a no-op."""
 
     @dataclasses.dataclass
@@ -395,7 +395,7 @@ def test_annotated_optional():
     assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
-def test_optional_annotated():
+def test_optional_annotated() -> None:
     """Annotated[] is a no-op."""
 
     @dataclasses.dataclass
@@ -406,7 +406,7 @@ def test_optional_annotated():
     assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
-def test_final():
+def test_final() -> None:
     """Final[] is a no-op."""
 
     @dataclasses.dataclass
@@ -416,7 +416,7 @@ def test_final():
     assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
-def test_final_optional():
+def test_final_optional() -> None:
     @dataclasses.dataclass
     class A:
         x: Final[Optional[int]] = 3
@@ -425,7 +425,7 @@ def test_final_optional():
     assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
 
 
-def test_classvar():
+def test_classvar() -> None:
     """ClassVar[] types should be skipped."""
 
     @dataclasses.dataclass
@@ -437,7 +437,7 @@ def test_classvar():
     assert tyro.cli(A, args=[]) == A()
 
 
-def test_parse_empty_description():
+def test_parse_empty_description() -> None:
     """If the file has no dosctring, it should be treated as an empty string."""
 
     @dataclasses.dataclass
@@ -450,7 +450,7 @@ def test_parse_empty_description():
 SomeTypeAlias: TypeAlias = int
 
 
-def test_type_alias():
+def test_type_alias() -> None:
     def add(a: SomeTypeAlias, b: SomeTypeAlias) -> SomeTypeAlias:
         return a + b
 
@@ -458,21 +458,21 @@ def test_type_alias():
 
 
 @pytest.mark.filterwarnings("ignore::Warning")
-def test_any():
+def test_any() -> None:
     def main(x: Any = 5) -> Any:
         return x
 
     assert tyro.cli(main, args=[]) == 5
 
 
-def test_bytes():
+def test_bytes() -> None:
     def main(x: bytes) -> bytes:
         return x
 
     assert tyro.cli(main, args=["--x", "hello"]) == b"hello"
 
 
-def test_any_str():
+def test_any_str() -> None:
     def main(x: AnyStr) -> AnyStr:
         return x
 
@@ -481,7 +481,7 @@ def test_any_str():
     assert tyro.cli(main, args=["--x", "hello„"]) == "hello„"
 
 
-def test_fixed():
+def test_fixed() -> None:
     def main(x: Callable[[int], int] = lambda x: x * 2) -> Callable[[int], int]:
         return x
 
@@ -490,7 +490,7 @@ def test_fixed():
         tyro.cli(main, args=["--x", "something"])
 
 
-def test_fixed_dataclass_type():
+def test_fixed_dataclass_type() -> None:
     def dummy():
         return 5  # noqa
 
@@ -502,38 +502,39 @@ def test_fixed_dataclass_type():
         tyro.cli(main, args=["--x", "something"])
 
 
-def test_missing_singleton():
+def test_missing_singleton() -> None:
     assert tyro.MISSING is copy.deepcopy(tyro.MISSING)
 
 
-def test_torch_device():
+def test_torch_device() -> None:
     def main(device: torch.device) -> torch.device:
         return device
 
     assert tyro.cli(main, args=["--device", "cpu"]) == torch.device("cpu")
 
 
-def test_torch_device_2():
+def test_torch_device_2() -> None:
     assert tyro.cli(torch.device, args=["cpu"]) == torch.device("cpu")
 
 
-def test_just_int():
+def test_just_int() -> None:
     assert tyro.cli(int, args=["123"]) == 123
 
 
-def test_just_dict():
+def test_just_dict() -> None:
     assert tyro.cli(Dict[str, str], args="key value key2 value2".split(" ")) == {
         "key": "value",
         "key2": "value2",
     }
 
 
-def test_just_list():
+def test_just_list() -> None:
     assert tyro.cli(List[int], args="1 2 3 4".split(" ")) == [1, 2, 3, 4]
 
 
-def test_just_tuple():
-    assert tyro.cli(Tuple[int, int, int, int], args="1 2 3 4".split(" ")) == (
+def test_just_tuple() -> None:
+    # Need a type: ignore for mypy. Seems like a mypy bug.
+    assert tyro.cli(Tuple[int, int, int, int], args="1 2 3 4".split(" ")) == (  # type: ignore
         1,
         2,
         3,
@@ -541,7 +542,7 @@ def test_just_tuple():
     )
 
 
-def test_return_parser():
+def test_return_parser() -> None:
     def main() -> argparse.ArgumentParser:
         parser = argparse.ArgumentParser()
         return parser

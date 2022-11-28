@@ -12,7 +12,7 @@ import tyro
 import tyro._strings
 
 
-def test_basic_dict():
+def test_basic_dict() -> None:
     def main(params: Dict[str, int]) -> Dict[str, int]:
         return params
 
@@ -32,7 +32,7 @@ def test_basic_dict():
         tyro.cli(main, args="--params".split(" "))
 
 
-def test_dict_with_default():
+def test_dict_with_default() -> None:
     def main(params: Mapping[Literal[1, 3, 5, 7], bool] = {5: False, 1: True}) -> Any:
         return params
 
@@ -45,7 +45,7 @@ def test_dict_with_default():
         tyro.cli(main, args="--params".split(" "))
 
 
-def test_tuple_in_dict():
+def test_tuple_in_dict() -> None:
     def main(x: Dict[Union[Tuple[int, int], Tuple[str, str]], Tuple[int, int]]) -> dict:
         return x
 
@@ -55,7 +55,7 @@ def test_tuple_in_dict():
     }
 
 
-def test_basic_typeddict():
+def test_basic_typeddict() -> None:
     class ManyTypesTypedDict(TypedDict):
         i: int
         s: str
@@ -72,7 +72,7 @@ def test_basic_typeddict():
         tyro.cli(ManyTypesTypedDict, args="--s 5".split(" "))
 
 
-def test_total_false_typeddict():
+def test_total_false_typeddict() -> None:
     class ManyTypesTypedDict(TypedDict, total=False):
         i: int
         s: str
@@ -86,7 +86,7 @@ def test_total_false_typeddict():
     assert tyro.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
 
 
-def test_total_false_nested_typeddict():
+def test_total_false_nested_typeddict() -> None:
     class ChildTypedDict(TypedDict, total=False):
         i: int
         s: str
@@ -110,7 +110,7 @@ def test_total_false_nested_typeddict():
         )
 
 
-def test_total_false_typeddict_with_nested():
+def test_total_false_typeddict_with_nested() -> None:
     @dataclasses.dataclass
     class Inner:
         j: float
@@ -132,7 +132,7 @@ def test_total_false_typeddict_with_nested():
         )
 
 
-def test_total_false_typeddict_with_tuple():
+def test_total_false_typeddict_with_tuple() -> None:
     class ManyTypesTypedDict(TypedDict, total=False):
         i: int
         s: Tuple[str, str]
@@ -151,7 +151,7 @@ def test_total_false_typeddict_with_tuple():
     ) == dict(i=5, s=("5", "5"))
 
 
-def test_nested_typeddict():
+def test_nested_typeddict() -> None:
     class ChildTypedDict(TypedDict):
         y: int
 
@@ -166,7 +166,7 @@ def test_nested_typeddict():
         tyro.cli(NestedTypedDict, args=["--x", "1"])
 
 
-def test_helptext_and_default_typeddict():
+def test_helptext_and_default_typeddict() -> None:
     class HelptextTypedDict(TypedDict):
         """This docstring should be printed as a description."""
 
@@ -192,7 +192,7 @@ def test_helptext_and_default_typeddict():
     assert "Documentation 3 (default: 3)" in helptext
 
 
-def test_basic_namedtuple():
+def test_basic_namedtuple() -> None:
     class ManyTypesNamedTuple(NamedTuple):
         i: int
         s: str
@@ -214,7 +214,7 @@ def test_basic_namedtuple():
     ) == ManyTypesNamedTuple(i=5, s="5", f=5.0, p=pathlib.Path("~"))
 
 
-def test_nested_namedtuple():
+def test_nested_namedtuple() -> None:
     class ChildNamedTuple(NamedTuple):
         y: int
 
@@ -229,7 +229,7 @@ def test_nested_namedtuple():
         tyro.cli(NestedNamedTuple, args=["--x", "1"])
 
 
-def test_helptext_and_default_namedtuple():
+def test_helptext_and_default_namedtuple() -> None:
     class HelptextNamedTupleDefault(NamedTuple):
         """This docstring should be printed as a description."""
 
@@ -255,7 +255,7 @@ def test_helptext_and_default_namedtuple():
     assert "Documentation 3 (default: 3)" in helptext
 
 
-def test_helptext_and_default_namedtuple_alternate():
+def test_helptext_and_default_namedtuple_alternate() -> None:
     class HelptextNamedTuple(NamedTuple):
         """This docstring should be printed as a description."""
 
@@ -294,7 +294,7 @@ def test_helptext_and_default_namedtuple_alternate():
     assert "(default: 3)" in helptext
 
 
-def test_nested_dict():
+def test_nested_dict() -> None:
     loaded_config = {
         "batch_size": 32,
         "optimizer": {
@@ -324,7 +324,7 @@ def test_nested_dict():
     assert loaded_config == backup_config
 
 
-def test_nested_dict_hyphen():
+def test_nested_dict_hyphen() -> None:
     # We do a lot of underscore <=> conversion in the code; this is just to make sure it
     # doesn't break anything!
     loaded_config = {
@@ -356,7 +356,7 @@ def test_nested_dict_hyphen():
     assert loaded_config == backup_config
 
 
-def test_nested_dict_annotations():
+def test_nested_dict_annotations() -> None:
     loaded_config = {
         "optimizer": {
             "scheduler": {"schedule-type": "constant"},

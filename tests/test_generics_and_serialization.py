@@ -20,7 +20,7 @@ def _check_serialization_identity(cls: Type[T], instance: T) -> None:
 ScalarType = TypeVar("ScalarType")
 
 
-def test_tuple_generic_variable():
+def test_tuple_generic_variable() -> None:
     @dataclasses.dataclass
     class TupleGenericVariable(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ...]
@@ -30,7 +30,7 @@ def test_tuple_generic_variable():
     ) == TupleGenericVariable((1, 2, 3))
 
 
-def test_tuple_generic_helptext():
+def test_tuple_generic_helptext() -> None:
     @dataclasses.dataclass
     class TupleGenericVariableHelptext(Generic[ScalarType]):
         """Helptext!"""
@@ -45,7 +45,7 @@ def test_tuple_generic_helptext():
     assert "Helptext!" in helptext
 
 
-def test_tuple_generic_no_helptext():
+def test_tuple_generic_no_helptext() -> None:
     @dataclasses.dataclass
     class TupleGenericVariableNoHelptext(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ...]
@@ -61,7 +61,7 @@ def test_tuple_generic_no_helptext():
     assert "The central part of internal API" not in helptext
 
 
-def test_tuple_generic_fixed():
+def test_tuple_generic_fixed() -> None:
     @dataclasses.dataclass
     class TupleGenericFixed(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ScalarType, ScalarType]
@@ -84,7 +84,7 @@ class Point3(Generic[ScalarType]):
     frame: CoordinateFrame
 
 
-def test_simple_generic():
+def test_simple_generic() -> None:
     @dataclasses.dataclass
     class SimpleGeneric:
         point_continuous: Point3[float]
@@ -142,7 +142,7 @@ def test_simple_generic():
         )
 
 
-def test_multilevel_generic():
+def test_multilevel_generic() -> None:
     @dataclasses.dataclass
     class Triangle(Generic[ScalarType]):
         a: Point3[ScalarType]
@@ -186,7 +186,7 @@ def test_multilevel_generic():
     _check_serialization_identity(Triangle[float], parsed_instance)
 
 
-def test_multilevel_generic_no_helptext():
+def test_multilevel_generic_no_helptext() -> None:
     @dataclasses.dataclass
     class LineSegment(Generic[ScalarType]):
         a: Point3[ScalarType]
@@ -202,7 +202,7 @@ def test_multilevel_generic_no_helptext():
     assert "The central part of internal API" not in helptext
 
 
-def test_generic_nested_dataclass():
+def test_generic_nested_dataclass() -> None:
     @dataclasses.dataclass
     class Child:
         a: int
@@ -224,7 +224,7 @@ def test_generic_nested_dataclass():
         _check_serialization_identity(DataclassGeneric[Child], parsed_instance)
 
 
-def test_generic_nested_dataclass_helptext():
+def test_generic_nested_dataclass_helptext() -> None:
     @dataclasses.dataclass
     class Child:
         a: int
@@ -246,7 +246,7 @@ def test_generic_nested_dataclass_helptext():
     assert "The central part of internal API" not in helptext
 
 
-def test_generic_subparsers():
+def test_generic_subparsers() -> None:
     @dataclasses.dataclass
     class CommandOne:
         a: int
@@ -266,7 +266,8 @@ def test_generic_subparsers():
         Subparser[CommandOne, CommandTwo],
         args="command:command-one --command.a 5".split(" "),
     )
-    assert parsed_instance == Subparser(CommandOne(5))
+    # Not supported in mypy.
+    assert parsed_instance == Subparser(CommandOne(5))  # type: ignore
     # Local generics will break.
     with pytest.raises(yaml.constructor.ConstructorError):
         _check_serialization_identity(
@@ -277,7 +278,8 @@ def test_generic_subparsers():
         Subparser[CommandOne, CommandTwo],
         args="command:command-two --command.b 7".split(" "),
     )
-    assert parsed_instance == Subparser(CommandTwo(7))
+    # Not supported in mypy.
+    assert parsed_instance == Subparser(CommandTwo(7))  # type: ignore
     # Local generics will break.
     with pytest.raises(yaml.constructor.ConstructorError):
         _check_serialization_identity(
@@ -285,7 +287,7 @@ def test_generic_subparsers():
         )
 
 
-def test_generic_subparsers_in_container():
+def test_generic_subparsers_in_container() -> None:
     T = TypeVar("T")
 
     @dataclasses.dataclass
@@ -303,7 +305,8 @@ def test_generic_subparsers_in_container():
         Subparser[Command[int], Command[float]],
         args="command:command-int --command.a 5 3".split(" "),
     )
-    assert parsed_instance == Subparser(Command([5, 3])) and isinstance(
+    # Not supported in mypy.
+    assert parsed_instance == Subparser(Command([5, 3])) and isinstance(  # type: ignore
         parsed_instance.command.a[0], int
     )
     # Local generics will break.
@@ -316,7 +319,8 @@ def test_generic_subparsers_in_container():
         Subparser[Command[int], Command[float]],
         args="command:command-float --command.a 7 2".split(" "),
     )
-    assert parsed_instance == Subparser(Command([7.0, 2.0])) and isinstance(
+    # Not supported in mypy.
+    assert parsed_instance == Subparser(Command([7.0, 2.0])) and isinstance(  # type: ignore
         parsed_instance.command.a[0], float
     )
     # Local generics will break.
@@ -326,7 +330,7 @@ def test_generic_subparsers_in_container():
         )
 
 
-def test_serialize_missing():
+def test_serialize_missing() -> None:
     @dataclasses.dataclass
     class TupleGenericVariableMissing(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ...]
@@ -342,7 +346,7 @@ def test_serialize_missing():
     )
 
 
-def test_generic_inherited_type_narrowing():
+def test_generic_inherited_type_narrowing() -> None:
     T = TypeVar("T")
 
     @dataclasses.dataclass
@@ -365,7 +369,7 @@ def test_generic_inherited_type_narrowing():
     assert tyro.cli(main, args="--x.x 3".split(" ")) == ChildClass(3, 5, 3)
 
 
-def test_pculbertson():
+def test_pculbertson() -> None:
     # https://github.com/brentyi/tyro/issues/7
     from typing import Union
 
@@ -385,7 +389,7 @@ def test_pculbertson():
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
 
 
-def test_annotated():
+def test_annotated() -> None:
     # https://github.com/brentyi/tyro/issues/7
 
     @dataclasses.dataclass
@@ -400,7 +404,7 @@ def test_annotated():
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
 
 
-def test_superclass():
+def test_superclass() -> None:
     # https://github.com/brentyi/tyro/issues/7
 
     @dataclasses.dataclass

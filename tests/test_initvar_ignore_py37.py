@@ -3,7 +3,7 @@ import dataclasses
 import tyro
 
 
-def test_dataclass_init_var():
+def test_dataclass_init_var() -> None:
     @dataclasses.dataclass
     class DataclassWithInitVar:
         i: dataclasses.InitVar[int]

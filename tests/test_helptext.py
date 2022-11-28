@@ -9,7 +9,7 @@ from helptext_utils import get_helptext
 from typing_extensions import Annotated, Literal
 
 
-def test_helptext():
+def test_helptext() -> None:
     @dataclasses.dataclass
     class Helptext:
         """This docstring should be printed as a description."""
@@ -32,7 +32,7 @@ def test_helptext():
     assert "Documentation 3 (default: 3)" in helptext
 
 
-def test_helptext_from_class_docstring():
+def test_helptext_from_class_docstring() -> None:
     @dataclasses.dataclass
     class Helptext2:
         """This docstring should be printed as a description.
@@ -58,7 +58,7 @@ def test_helptext_from_class_docstring():
     assert "Documentation 3 (default: 3)" in helptext
 
 
-def test_helptext_from_class_docstring_args():
+def test_helptext_from_class_docstring_args() -> None:
     @dataclasses.dataclass
     class Helptext3:
         """This docstring should be printed as a description.
@@ -84,7 +84,7 @@ def test_helptext_from_class_docstring_args():
     assert "Documentation 3 (default: 3)" in helptext
 
 
-def test_helptext_inherited():
+def test_helptext_inherited() -> None:
     class UnrelatedParentClass:
         pass
 
@@ -113,7 +113,7 @@ def test_helptext_inherited():
     assert "Documentation 2" in helptext
 
 
-def test_helptext_inherited_default_override():
+def test_helptext_inherited_default_override() -> None:
     @dataclasses.dataclass
     class ParentClass:
         """This docstring should __not__ be printed as a description."""
@@ -144,7 +144,7 @@ def test_helptext_inherited_default_override():
     assert "should be printed" in helptext
 
 
-def test_helptext_nested():
+def test_helptext_nested() -> None:
     """For nested classes, we should pull helptext from the outermost docstring if
     possible. The class docstring can be used as a fallback."""
 
@@ -177,7 +177,7 @@ def test_helptext_nested():
     assert "Hello world!" in helptext
 
 
-def test_helptext_defaults():
+def test_helptext_defaults() -> None:
     class Color(enum.Enum):
         RED = enum.auto()
         GREEN = enum.auto()
@@ -196,7 +196,7 @@ def test_helptext_defaults():
     assert "(default: RED)" in helptext
 
 
-def test_multiline_helptext():
+def test_multiline_helptext() -> None:
     @dataclasses.dataclass
     class HelptextMultiline:
         x: int  # Documentation 1
@@ -219,7 +219,7 @@ def test_multiline_helptext():
     assert "documentation 3" in helptext
 
 
-def test_grouped_helptext():
+def test_grouped_helptext() -> None:
     @dataclasses.dataclass
     class HelptextGrouped:
         x: int  # Documentation 1
@@ -233,7 +233,7 @@ def test_grouped_helptext():
     assert "Description of both y and z. (default: 3)" in helptext
 
 
-def test_none_default_value_helptext():
+def test_none_default_value_helptext() -> None:
     @dataclasses.dataclass
     class Config:
         x: Optional[int] = None
@@ -244,7 +244,7 @@ def test_none_default_value_helptext():
     assert "An optional variable. (default: None)" in helptext
 
 
-def test_helptext_hard_bool():
+def test_helptext_hard_bool() -> None:
     @dataclasses.dataclass
     class HelptextHardString:
         # fmt: off
@@ -262,7 +262,7 @@ def test_helptext_hard_bool():
     assert "2% milk." in helptext
 
 
-def test_helptext_with_inheritance():
+def test_helptext_with_inheritance() -> None:
     @dataclasses.dataclass
     class Parent:
         # fmt: off
@@ -282,7 +282,7 @@ def test_helptext_with_inheritance():
     assert "(default: 'This docstring" in helptext
 
 
-def test_helptext_with_inheritance_overriden():
+def test_helptext_with_inheritance_overriden() -> None:
     @dataclasses.dataclass
     class Parent2:
         # fmt: off
@@ -306,7 +306,7 @@ def test_helptext_with_inheritance_overriden():
     assert "Helptext! (default: 'This" in helptext
 
 
-def test_tuple_helptext():
+def test_tuple_helptext() -> None:
     @dataclasses.dataclass
     class TupleHelptext:
         x: Tuple[int, str, float]
@@ -315,7 +315,7 @@ def test_tuple_helptext():
     assert "--x INT STR FLOAT" in helptext
 
 
-def test_tuple_helptext_defaults():
+def test_tuple_helptext_defaults() -> None:
     @dataclasses.dataclass
     class TupleHelptextDefaults:
         x: Tuple[int, str, str] = (5, "hello world", "hello")
@@ -325,7 +325,7 @@ def test_tuple_helptext_defaults():
     assert "(default: 5 'hello world' hello)" in helptext
 
 
-def test_generic_helptext():
+def test_generic_helptext() -> None:
     T = TypeVar("T")
 
     @dataclasses.dataclass
@@ -336,7 +336,7 @@ def test_generic_helptext():
     assert "--x INT" in helptext
 
 
-def test_generic_tuple_helptext():
+def test_generic_tuple_helptext() -> None:
     T = TypeVar("T")
 
     @dataclasses.dataclass
@@ -347,7 +347,7 @@ def test_generic_tuple_helptext():
     assert "--x INT INT INT" in helptext
 
 
-def test_generic_list_helptext():
+def test_generic_list_helptext() -> None:
     T = TypeVar("T")
 
     @dataclasses.dataclass
@@ -358,7 +358,7 @@ def test_generic_list_helptext():
     assert "--x INT [INT ...]" in helptext
 
 
-def test_literal_helptext():
+def test_literal_helptext() -> None:
     @dataclasses.dataclass
     class LiteralHelptext:
         x: Literal[1, 2, 3]
@@ -369,7 +369,7 @@ def test_literal_helptext():
     assert "A number. (required)" in helptext
 
 
-def test_optional_literal_helptext():
+def test_optional_literal_helptext() -> None:
     @dataclasses.dataclass
     class OptionalLiteralHelptext:
         x: Optional[Literal[1, 2, 3]] = None
@@ -380,7 +380,7 @@ def test_optional_literal_helptext():
     assert "A number. (default: None)" in helptext
 
 
-def test_multiple_subparsers_helptext():
+def test_multiple_subparsers_helptext() -> None:
     @dataclasses.dataclass
     class Subcommand1:
         """2% milk."""  # % symbol is prone to bugs in argparse.
@@ -424,7 +424,7 @@ def test_multiple_subparsers_helptext():
     assert "(default: c:subcommand3)" in helptext
 
 
-def test_optional_helptext():
+def test_optional_helptext() -> None:
     @dataclasses.dataclass
     class OptionalHelptext:
         """This docstring should be printed as a description. 2% milk."""
@@ -438,14 +438,14 @@ def test_optional_helptext():
         """Documentation 3"""
 
     helptext = get_helptext(OptionalHelptext)
-    assert cast(str, OptionalHelptext.__doc__[:20]) in helptext
+    assert cast(str, cast(str, OptionalHelptext.__doc__)[:20]) in helptext
     assert "2% milk" in helptext
     assert "--x {None}|INT" in helptext
     assert "--y {None}|INT [{None}|INT ...]" in helptext
     assert "[--z {None}|INT]" in helptext
 
 
-def test_metavar_0():
+def test_metavar_0() -> None:
     def main(x: Union[Literal[0, 1, 2, 3], Tuple[int, int]]) -> None:
         pass
 
@@ -453,7 +453,7 @@ def test_metavar_0():
     assert "--x {0,1,2,3}|{INT INT}" in helptext
 
 
-def test_metavar_1():
+def test_metavar_1() -> None:
     def main(
         x: Union[
             Literal[0, 1, 2, 3],
@@ -468,7 +468,7 @@ def test_metavar_1():
     assert "--x {0,1,2,3,hey,there,hello}|{INT [INT ...]}" in helptext
 
 
-def test_metavar_2():
+def test_metavar_2() -> None:
     def main(
         x: Tuple[
             Literal[0, 1, 2, 3],
@@ -481,7 +481,7 @@ def test_metavar_2():
     assert "--x {0,1,2,3} INT|STR" in helptext
 
 
-def test_metavar_3():
+def test_metavar_3() -> None:
     def main(
         x: Union[
             Literal[0, 1, 2, 3],
@@ -494,7 +494,7 @@ def test_metavar_3():
     assert "--x {0,1,2,3}|{INT INT}|STR" in helptext
 
 
-def test_metavar_4():
+def test_metavar_4() -> None:
     def main(
         x: Union[
             Literal[0, 1, 2, 3],
@@ -508,7 +508,7 @@ def test_metavar_4():
     assert "--x {0,1,2,3}|{INT INT}|{STR STR STR}|{True}" in helptext
 
 
-def test_metavar_5():
+def test_metavar_5() -> None:
     def main(
         x: List[
             Union[Tuple[int, int], Tuple[str, str]],
@@ -520,7 +520,7 @@ def test_metavar_5():
     assert "[--x {INT INT}|{STR STR} [{INT INT}|{STR STR} ...]]" in helptext
 
 
-def test_metavar_6():
+def test_metavar_6() -> None:
     def main(x: Dict[Union[Tuple[int, int], Tuple[str, str]], Tuple[int, int]]) -> dict:
         return x
 
@@ -530,7 +530,7 @@ def test_metavar_6():
     )
 
 
-def test_comment_in_subclass_list():
+def test_comment_in_subclass_list() -> None:
     @dataclasses.dataclass
     class Something(
         # This text should not show up in the helptext anywhere.
@@ -546,7 +546,7 @@ def test_comment_in_subclass_list():
     assert "But this text should!" in helptext
 
 
-def test_unparsable():
+def test_unparsable() -> None:
     class Struct:
         a: int = 5
         b: str = "7"

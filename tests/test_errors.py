@@ -6,7 +6,7 @@ import pytest
 import tyro
 
 
-def test_ambiguous_collection_0():
+def test_ambiguous_collection_0() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[Tuple[int, ...], ...]
@@ -15,7 +15,7 @@ def test_ambiguous_collection_0():
         tyro.cli(A, args=["--x", "0", "1"])
 
 
-def test_ambiguous_collection_1():
+def test_ambiguous_collection_1() -> None:
     def main(x: Tuple[List[str], List[str]]) -> None:
         pass
 
@@ -23,7 +23,7 @@ def test_ambiguous_collection_1():
         tyro.cli(main, args=["--help"])
 
 
-def test_ambiguous_collection_2():
+def test_ambiguous_collection_2() -> None:
     def main(x: List[Union[Tuple[int, int], Tuple[int, int, int]]]) -> None:
         pass
 
@@ -37,12 +37,12 @@ class _CycleDataclass:
     x: "_CycleDataclass"
 
 
-def test_cycle():
+def test_cycle() -> None:
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):
         tyro.cli(_CycleDataclass, args=[])
 
 
-def test_uncallable_annotation():
+def test_uncallable_annotation() -> None:
     def main(arg: 5) -> None:  # type: ignore
         pass
 
@@ -50,7 +50,7 @@ def test_uncallable_annotation():
         tyro.cli(main, args=[])
 
 
-def test_nested_annotation():
+def test_nested_annotation() -> None:
     @dataclasses.dataclass
     class OneIntArg:
         x: int
@@ -76,14 +76,14 @@ def test_nested_annotation():
         x: str
         y: str
 
-    def main(arg: List[TwoStringArg]) -> None:
+    def main2(arg: List[TwoStringArg]) -> None:
         pass
 
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):
-        tyro.cli(main, args=[])
+        tyro.cli(main2, args=[])
 
 
-def test_missing_annotation_1():
+def test_missing_annotation_1() -> None:
     def main(a, b) -> None:
         pass
 
@@ -91,7 +91,7 @@ def test_missing_annotation_1():
         tyro.cli(main, args=["--help"])
 
 
-def test_missing_annotation_2():
+def test_missing_annotation_2() -> None:
     def main(*, a) -> None:
         pass
 
@@ -99,7 +99,7 @@ def test_missing_annotation_2():
         tyro.cli(main, args=["--help"])
 
 
-def test_tuple_needs_default():
+def test_tuple_needs_default() -> None:
     def main(arg: tuple) -> None:  # type: ignore
         pass
 
@@ -107,7 +107,7 @@ def test_tuple_needs_default():
         tyro.cli(main, args=["--help"])
 
 
-def test_unbound_typevar():
+def test_unbound_typevar() -> None:
     T = TypeVar("T")
 
     def main(arg: T) -> None:  # type: ignore
@@ -117,7 +117,7 @@ def test_unbound_typevar():
         tyro.cli(main, args=["--help"])
 
 
-def test_missing_default_fixed():
+def test_missing_default_fixed() -> None:
     def main(value: tyro.conf.SuppressFixed[tyro.conf.Fixed[int]]) -> int:
         return value
 
@@ -125,7 +125,7 @@ def test_missing_default_fixed():
         tyro.cli(main, args=["--help"])
 
 
-def test_missing_default_suppressed():
+def test_missing_default_suppressed() -> None:
     def main(value: tyro.conf.Suppress[int]) -> int:
         return value
 
