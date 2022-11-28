@@ -18,21 +18,6 @@ from typing_extensions import Annotated
 import tyro
 
 
-@dataclasses.dataclass(frozen=True)
-class CheckoutArgs:
-    """Checkout a branch."""
-
-    branch: str
-
-
-@dataclasses.dataclass(frozen=True)
-class CommitArgs:
-    """Commit changes."""
-
-    message: str
-    all: bool = False
-
-
 @dataclasses.dataclass
 class Args:
     # A numeric field parsed as a positional argument.
@@ -53,21 +38,6 @@ class Args:
             help="A field with manually overridden properties!",
         ),
     ] = "Hello"
-
-    # A union over nested structures, but without subcommand generation. When a default
-    # is provided, the type is simply fixed to that default.
-    union_without_subcommand: tyro.conf.AvoidSubcommands[
-        Union[CheckoutArgs, CommitArgs]
-    ] = CheckoutArgs("main")
-
-    # `tyro.conf.subcommand()` can be used to configure subcommands in a Union. Here,
-    # we make the subcommand names more succinct.
-    renamed_subcommand: Union[
-        Annotated[
-            CheckoutArgs, tyro.conf.subcommand(name="checkout", prefix_name=False)
-        ],
-        Annotated[CommitArgs, tyro.conf.subcommand(name="commit", prefix_name=False)],
-    ] = CheckoutArgs("main")
 
 
 if __name__ == "__main__":
