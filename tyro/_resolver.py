@@ -224,7 +224,7 @@ def apply_type_from_typevar(
             }
             if hasattr(types, "UnionType"):  # type: ignore
                 # PEP 604. Requires Python 3.10.
-                shim_table[types.UnionType[Any]] = Union  # type: ignore
+                shim_table[types.UnionType] = Union  # type: ignore
 
             for new, old in shim_table.items():
                 if isinstance(typ, new) or get_origin(typ) is new:  # type: ignore

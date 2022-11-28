@@ -561,7 +561,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
         bc: tyro.conf.OmitSubcommandPrefixes[
             Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
-        ]
+        ] = DefaultInstanceHTTPServer()
 
     assert (
         tyro.cli(
@@ -614,6 +614,10 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )
+
+    # Despite all defaults being set, a subcommand should be required.
+    with pytest.raises(SystemExit):
+        tyro.cli(tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser], args=[])
 
 
 def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() -> None:
