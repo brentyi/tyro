@@ -138,6 +138,11 @@ Module Contents
    Generate a list of generic 'field' objects corresponding to the inputs of some
    annotated callable.
 
+.. py:data:: pydantic
+   
+
+   
+
 .. py:data:: attr
    
 
