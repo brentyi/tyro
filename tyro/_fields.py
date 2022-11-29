@@ -365,10 +365,11 @@ def _field_list_from_dataclass(
 
 
 # Support attrs and pydantic if they're installed.
+
 try:
     import pydantic
 except ImportError:
-    pass
+    pydantic = None  # type: ignore
 
 
 def _is_pydantic(cls: Type[Any]) -> bool:
@@ -382,7 +383,7 @@ def _field_list_from_pydantic(
 
     # Handle pydantic models.
     field_list = []
-    for pd_field in cls.__fields__.values():
+    for pd_field in cls.__fields__.values():  # type: ignore
         field_list.append(
             FieldDefinition.make(
                 name=pd_field.name,
