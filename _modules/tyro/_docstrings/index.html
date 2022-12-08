@@ -543,6 +543,11 @@
     <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">_callable_description_blocklist</span><span class="p">:</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span>
 
+    <span class="c1"># Return original docstring when used with functools.partial, not</span>
+    <span class="c1"># functools.partial&#39;s docstinrg.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">func</span>
+
     <span class="c1"># Note inspect.getdoc() causes some corner cases with TypedDicts.</span>
     <span class="n">docstring</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="vm">__doc__</span>
     <span class="k">if</span> <span class="p">(</span>
