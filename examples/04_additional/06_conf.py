@@ -11,7 +11,6 @@ Usage:
 """
 
 import dataclasses
-from typing import Union
 
 from typing_extensions import Annotated
 

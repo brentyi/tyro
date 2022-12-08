@@ -1,12 +1,12 @@
 """Abstractions for pulling out 'field' definitions, which specify inputs, types, and
 defaults, from general callables."""
-
 from __future__ import annotations
 
 import collections
 import collections.abc
 import dataclasses
 import enum
+import functools
 import inspect
 import itertools
 import typing
@@ -624,6 +624,12 @@ def _field_list_from_params(
 
     # This will throw a type error for torch.device, typing.Dict, etc.
     try:
+        # Special-case for functools.partial().
+        if isinstance(f, functools.partial):
+            f = f.func
+            if isinstance(f, type):
+                f = f.__init__  # type: ignore
+
         hints = get_type_hints(f, include_extras=True)
     except TypeError:
         return UnsupportedNestedTypeMessage(f"Could not get hints for {f}!")
@@ -653,7 +659,7 @@ def _field_list_from_params(
         field_list.append(
             FieldDefinition.make(
                 name=param.name,
-                # Note that param.annotation does not resolve forward references.
+                # Note that param.annotation doesn't resolve forward references.
                 typ=hints[param.name],
                 default=default,
                 helptext=helptext,
