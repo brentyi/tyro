@@ -312,6 +312,9 @@ def _rule_generate_helptext(
 
     primary_help = arg.field.helptext
 
+    if primary_help is None and _markers.Positional in arg.field.markers:
+        primary_help = _strings.make_field_name([arg.name_prefix, arg.field.name])
+
     if primary_help is not None and primary_help != "":
         # Note that the percent symbol needs some extra handling in argparse.
         # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
