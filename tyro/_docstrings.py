@@ -292,6 +292,11 @@ def get_callable_description(f: Callable) -> str:
     if f in _callable_description_blocklist:
         return ""
 
+    # Return original docstring when used with functools.partial, not
+    # functools.partial's docstinrg.
+    if isinstance(f, functools.partial):
+        f = f.func
+
     # Note inspect.getdoc() causes some corner cases with TypedDicts.
     docstring = f.__doc__
     if (
