@@ -614,6 +614,13 @@ def _field_list_from_params(
     cls: Optional[Type[Any]],
     params: List[inspect.Parameter],
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    # Special-case for functools.partial().
+    if isinstance(f, functools.partial):
+        f = f.func
+        if isinstance(f, type):
+            cls = f
+            f = f.__init__  # type: ignore
+
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)
     docstring_from_arg_name = {}
@@ -624,12 +631,6 @@ def _field_list_from_params(
 
     # This will throw a type error for torch.device, typing.Dict, etc.
     try:
-        # Special-case for functools.partial().
-        if isinstance(f, functools.partial):
-            f = f.func
-            if isinstance(f, type):
-                f = f.__init__  # type: ignore
-
         hints = get_type_hints(f, include_extras=True)
     except TypeError:
         return UnsupportedNestedTypeMessage(f"Could not get hints for {f}!")
