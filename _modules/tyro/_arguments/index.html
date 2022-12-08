@@ -563,6 +563,9 @@
 
     <span class="n">primary_help</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
 
+    <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+        <span class="n">primary_help</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">name_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+
     <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">primary_help</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
         <span class="c1"># Note that the percent symbol needs some extra handling in argparse.</span>
         <span class="c1"># https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string</span>
