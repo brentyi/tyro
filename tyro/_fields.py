@@ -614,12 +614,21 @@ def _field_list_from_params(
     cls: Optional[Type[Any]],
     params: List[inspect.Parameter],
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    # Special-case for functools.partial().
-    if isinstance(f, functools.partial):
-        f = f.func
-        if isinstance(f, type):
-            cls = f
-            f = f.__init__  # type: ignore
+    # Unwrap functools.wraps and functools.partial.
+    done = False
+    while not done:
+        done = True
+        if hasattr(f, "__wrapped__"):
+            f = f.__wrapped__
+            done = False
+        if isinstance(f, functools.partial):
+            f = f.func
+            done = False
+
+    # Sometime functools.* is applied to a class.
+    if isinstance(f, type):
+        cls = f
+        f = f.__init__  # type: ignore
 
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)
