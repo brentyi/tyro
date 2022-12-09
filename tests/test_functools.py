@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import functools
 
 import pytest
@@ -79,3 +80,54 @@ def test_wraps_partial_func_helptext() -> None:
     assert "wraps" not in helptext
     assert "Hello!" in helptext
     assert "Argument." in helptext
+
+
+def test_wraps_partial_class_helptext() -> None:
+    class Main:
+        """Hello!"""
+
+        def __init__(self, a: int, b: str) -> None:
+            self.inner = b * a
+
+    @functools.wraps(Main)
+    def wrapper(*args, **kwargs) -> int:
+        return kwargs["a"]
+
+    assert tyro.cli(functools.partial(wrapper, a=3), args=["--b", "hi"]) == 3
+
+    helptext = get_helptext(functools.partial(wrapper, b=3))
+    assert "wraps" not in helptext
+    assert "Hello!" in helptext
+
+
+@dataclasses.dataclass
+class WrappedDataclass:
+    """Hello!"""
+
+    a: int
+    b: str
+    """Second field."""
+
+
+def test_wraps_partial_dataclass() -> None:
+    @functools.wraps(WrappedDataclass)
+    def wrapper(*args, **kwargs) -> str:
+        return kwargs["a"] * kwargs["b"]
+
+    assert tyro.cli(functools.partial(wrapper, a=3), args=["--b", "hi"]) == "hihihi"
+    assert (
+        tyro.cli(
+            functools.partial(functools.partial(wrapper, a=3), b="hello"),
+            args=["--b", "hi"],
+        )
+        == "hihihi"
+    )
+    assert (
+        tyro.cli(functools.partial(functools.partial(wrapper, a=3), b="hello"), args=[])
+        == "hellohellohello"
+    )
+
+    helptext = get_helptext(functools.partial(wrapper, b=3))
+    assert "wraps" not in helptext
+    assert "Hello!" in helptext
+    assert "Second field." in helptext
