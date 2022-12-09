@@ -865,12 +865,21 @@
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">params</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
-    <span class="c1"># Special-case for functools.partial().</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">func</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
-            <span class="bp">cls</span> <span class="o">=</span> <span class="n">f</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
+    <span class="c1"># Unwrap functools.wraps and functools.partial.</span>
+    <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+        <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__wrapped__&quot;</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">__wrapped__</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">func</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># Sometime functools.* is applied to a class.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
 
     <span class="c1"># Get type annotations, docstrings.</span>
     <span class="n">docstring</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
