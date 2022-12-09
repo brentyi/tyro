@@ -50,9 +50,15 @@ def resolve_generic_types(
     origin_cls = get_origin(cls)
 
     type_from_typevar = {}
-    if origin_cls is not None and hasattr(origin_cls, "__parameters__"):
+    if (
+        # Apply some heuristics for generic types. Should revisit this.
+        origin_cls is not None
+        and hasattr(origin_cls, "__parameters__")
+        and hasattr(origin_cls.__parameters__, "__len__")
+    ):
         typevars = origin_cls.__parameters__
         typevar_values = get_args(cls)
+        print(typevars, typevar_values, origin_cls)
         assert len(typevars) == len(typevar_values)
         cls = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))

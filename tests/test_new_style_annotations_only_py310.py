@@ -5,6 +5,11 @@ import pytest
 import tyro
 
 
+def test_union_direct():
+    assert tyro.cli(int | str, args=["5"]) == 5
+    assert tyro.cli(int | str, args=["five"]) == "five"
+
+
 def test_union_basic():
     def main(x: int | str) -> int | str:
         return x
