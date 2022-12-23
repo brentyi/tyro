@@ -22,8 +22,11 @@ class Color(enum.Enum):
 @dataclasses.dataclass(frozen=True)
 class Args:
     # We can use Literal[] to restrict the set of allowable inputs, for example, over
-    # enums.
-    restricted_enum: Literal[Color.RED, Color.GREEN] = Color.RED
+    # a set of strings.
+    strings: Literal["red", "green"] = "red"
+
+    # Enums also work.
+    enums: Literal[Color.RED, Color.GREEN] = Color.RED
 
     # Or mix them with other types!
     mixed: Literal[Color.RED, Color.GREEN, "blue"] = "blue"

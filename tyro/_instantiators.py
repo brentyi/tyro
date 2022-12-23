@@ -152,8 +152,7 @@ def instantiator_from_type(
                 if i == 0 and param.annotation not in (str, inspect.Parameter.empty):
                     raise UnsupportedTypeAnnotationError(
                         f"Expected {typ} to be an `(arg: str) -> T` type converter, but"
-                        f" got {signature}. You may have a nested type in a container,"
-                        " which is unsupported."
+                        f" got {signature}."
                     )
                 if param.kind is inspect.Parameter.VAR_POSITIONAL:
                     has_var_positional = True
