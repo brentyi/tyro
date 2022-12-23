@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import dataclasses
 import functools
 
 from helptext_utils import get_helptext
@@ -40,5 +41,21 @@ def test_partial_helptext_class() -> None:
             self.inner = b * a
 
     helptext = get_helptext(functools.partial(Main, b=3))
+    assert "partial" not in helptext
+    assert "Hello!" in helptext
+
+
+def test_partial_helptext_dataclass() -> None:
+    @dataclasses.dataclass
+    class Config:
+        a: int
+        b: int
+        """Hello!"""
+        c: int
+
+    ConfigWithDefaults = functools.partial(functools.partial(Config, a=3), c=5)
+    assert tyro.cli(ConfigWithDefaults, args=["--b", "4"]) == Config(3, 4, 5)
+
+    helptext = get_helptext(ConfigWithDefaults)
     assert "partial" not in helptext
     assert "Hello!" in helptext
