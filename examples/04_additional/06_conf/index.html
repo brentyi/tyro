@@ -255,37 +255,36 @@
 command-line interfaces beyond what is expressible via static type annotations.</p>
 <p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
-<span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="linenos"> 4</span>
+<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">10</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos">11</span>    <span class="c1"># A numeric field parsed as a positional argument.</span>
-<span class="linenos">12</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span>    <span class="c1"># A boolean field with flag conversion turned off.</span>
-<span class="linenos">15</span>    <span class="n">boolean</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="linenos">16</span>
-<span class="linenos">17</span>    <span class="c1"># A numeric field that can&#39;t be changed via the CLI.</span>
-<span class="linenos">18</span>    <span class="n">fixed</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="linenos">19</span>
-<span class="linenos">20</span>    <span class="c1"># A field with manually overridden properties.</span>
-<span class="linenos">21</span>    <span class="n">manual</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-<span class="linenos">22</span>        <span class="nb">str</span><span class="p">,</span>
-<span class="linenos">23</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
-<span class="linenos">24</span>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;renamed&quot;</span><span class="p">,</span>
-<span class="linenos">25</span>            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
-<span class="linenos">26</span>            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A field with manually overridden properties!&quot;</span><span class="p">,</span>
-<span class="linenos">27</span>        <span class="p">),</span>
-<span class="linenos">28</span>    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hello&quot;</span>
+<span class="linenos"> 8</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos">10</span>    <span class="c1"># A numeric field parsed as a positional argument.</span>
+<span class="linenos">11</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>    <span class="c1"># A boolean field with flag conversion turned off.</span>
+<span class="linenos">14</span>    <span class="n">boolean</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="c1"># A numeric field that can&#39;t be changed via the CLI.</span>
+<span class="linenos">17</span>    <span class="n">fixed</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="linenos">18</span>
+<span class="linenos">19</span>    <span class="c1"># A field with manually overridden properties.</span>
+<span class="linenos">20</span>    <span class="n">manual</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="linenos">21</span>        <span class="nb">str</span><span class="p">,</span>
+<span class="linenos">22</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
+<span class="linenos">23</span>            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;renamed&quot;</span><span class="p">,</span>
+<span class="linenos">24</span>            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;STRING&quot;</span><span class="p">,</span>
+<span class="linenos">25</span>            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;A field with manually overridden properties!&quot;</span><span class="p">,</span>
+<span class="linenos">26</span>        <span class="p">),</span>
+<span class="linenos">27</span>    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Hello&quot;</span>
+<span class="linenos">28</span>
 <span class="linenos">29</span>
-<span class="linenos">30</span>
-<span class="linenos">31</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">32</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">))</span>
+<span class="linenos">30</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">31</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">))</span>
 </pre></div>
 </div>
 <hr class="docutils" />

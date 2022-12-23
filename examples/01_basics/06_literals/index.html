@@ -268,29 +268,33 @@
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="linenos">15</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">16</span>    <span class="c1"># We can use Literal[] to restrict the set of allowable inputs, for example, over</span>
-<span class="linenos">17</span>    <span class="c1"># enums.</span>
-<span class="linenos">18</span>    <span class="n">restricted_enum</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span> <span class="n">Color</span><span class="o">.</span><span class="n">GREEN</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
+<span class="linenos">17</span>    <span class="c1"># a set of strings.</span>
+<span class="linenos">18</span>    <span class="n">strings</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span>    <span class="c1"># Or mix them with other types!</span>
-<span class="linenos">21</span>    <span class="n">mixed</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span> <span class="n">Color</span><span class="o">.</span><span class="n">GREEN</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span>
+<span class="linenos">20</span>    <span class="c1"># Enums also work.</span>
+<span class="linenos">21</span>    <span class="n">enums</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span> <span class="n">Color</span><span class="o">.</span><span class="n">GREEN</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
 <span class="linenos">22</span>
-<span class="linenos">23</span>
-<span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">25</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
-<span class="linenos">26</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">23</span>    <span class="c1"># Or mix them with other types!</span>
+<span class="linenos">24</span>    <span class="n">mixed</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span> <span class="n">Color</span><span class="o">.</span><span class="n">GREEN</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">28</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
+<span class="linenos">29</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/06_literals.py --help</kbd><pre class="ansi-block literal-block">usage: 06_literals.py [-h] [--restricted-enum {RED,GREEN}]
+<kbd>python 01_basics/06_literals.py --help</kbd><pre class="ansi-block literal-block">usage: 06_literals.py [-h] [--strings {red,green}] [--enums {RED,GREEN}]
                       [--mixed {RED,GREEN,blue}]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help        show this help message and exit                          │
-│ --restricted-enum {RED,GREEN}                                              │
-│                   We can use Literal[] to restrict the set of allowable    │
-│                   inputs, for example, over enums. (default: RED)          │
+│ -h, --help              show this help message and exit                    │
+│ --strings {red,green}   We can use Literal[] to restrict the set of        │
+│                         allowable inputs, for example, over a set of       │
+│                         strings. (default: red)                            │
+│ --enums {RED,GREEN}     Enums also work. (default: RED)                    │
 │ --mixed {RED,GREEN,blue}                                                   │
-│                   Or mix them with other types! (default: blue)            │
+│                         Or mix them with other types! (default: blue)      │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 </section>
 

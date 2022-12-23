@@ -252,8 +252,8 @@
           <section id="containers">
 <h1>Containers<a class="headerlink" href="#containers" title="Permalink to this heading">#</a></h1>
 <p>Arguments of both fixed and variable lengths can be annotated with standard Python
-container types; such as <code class="docutils literal notranslate"><span class="pre">typing.List[T]</span></code> or <code class="docutils literal notranslate"><span class="pre">typing.Tuple[T1,</span> <span class="pre">T2]</span></code>. In Python 3.9,
-<code class="docutils literal notranslate"><span class="pre">list[T]</span></code> and <code class="docutils literal notranslate"><span class="pre">tuple[T]</span></code> are also directly supported.</p>
+container types: <code class="docutils literal notranslate"><span class="pre">typing.List[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">typing.Tuple[T1,</span> <span class="pre">T2]</span></code>, etc. In Python &gt;=3.9,
+<code class="docutils literal notranslate"><span class="pre">list[T]</span></code> and <code class="docutils literal notranslate"><span class="pre">tuple[T]</span></code> are also supported.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">enum</span>
 <span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pathlib</span>
@@ -262,26 +262,21 @@ container types; such as <code class="docutils literal notranslate"><span class=
 <span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">OptimizerType</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
-<span class="linenos">10</span>    <span class="n">ADAM</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-<span class="linenos">11</span>    <span class="n">SGD</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-<span class="linenos">12</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos">15</span><span class="k">class</span> <span class="nc">TrainConfig</span><span class="p">:</span>
-<span class="linenos">16</span>    <span class="c1"># Example of a variable-length tuple. `typing.List`, `typing.Sequence`,</span>
-<span class="linenos">17</span>    <span class="c1"># `typing.Set`, `typing.Dict`, etc are all supported as well.</span>
-<span class="linenos">18</span>    <span class="n">dataset_sources</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-<span class="linenos">19</span>    <span class="sd">&quot;&quot;&quot;Paths to load training data from. This can be multiple!&quot;&quot;&quot;</span>
+<span class="linenos"> 9</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">10</span><span class="k">class</span> <span class="nc">TrainConfig</span><span class="p">:</span>
+<span class="linenos">11</span>    <span class="c1"># Example of a variable-length tuple. `typing.List`, `typing.Sequence`,</span>
+<span class="linenos">12</span>    <span class="c1"># `typing.Set`, `typing.Dict`, etc are all supported as well.</span>
+<span class="linenos">13</span>    <span class="n">dataset_sources</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="linenos">14</span>    <span class="sd">&quot;&quot;&quot;Paths to load training data from. This can be multiple!&quot;&quot;&quot;</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="c1"># Fixed-length tuples are also okay.</span>
+<span class="linenos">17</span>    <span class="n">image_dimensions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
+<span class="linenos">18</span>    <span class="sd">&quot;&quot;&quot;Height and width of some image data.&quot;&quot;&quot;</span>
+<span class="linenos">19</span>
 <span class="linenos">20</span>
-<span class="linenos">21</span>    <span class="c1"># Fixed-length tuples are also okay.</span>
-<span class="linenos">22</span>    <span class="n">image_dimensions</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
-<span class="linenos">23</span>    <span class="sd">&quot;&quot;&quot;Height and width of some image data.&quot;&quot;&quot;</span>
-<span class="linenos">24</span>
-<span class="linenos">25</span>
-<span class="linenos">26</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">27</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">TrainConfig</span><span class="p">)</span>
-<span class="linenos">28</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">22</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">TrainConfig</span><span class="p">)</span>
+<span class="linenos">23</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
