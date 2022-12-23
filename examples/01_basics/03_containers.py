@@ -11,7 +11,6 @@ Usage:
 """
 
 import dataclasses
-import enum
 import pathlib
 from typing import Tuple
 
