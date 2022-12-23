@@ -5,7 +5,6 @@ command-line interface:
 
 ```python
 """Sum two numbers from argparse."""
-
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -13,37 +12,56 @@ parser.add_argument("--a", type=int, required=True)
 parser.add_argument("--b", type=int, default=3)
 args = parser.parse_args()
 
-print(args.a + args.b)
+total = args.a + args.b
+
+print(total)
 ```
 
-This is dramatically cleaner than manually parsing `sys.argv`, but has several
-issues: it lacks type checking and IDE support (consider: jumping to
+This pattern is dramatically cleaner than manually parsing `sys.argv`, but has
+several issues: it lacks type checking and IDE support (consider: jumping to
 definitions, finding references, docstrings, refactoring and renaming tools),
-requires a significant amount of boilerplate, and generally becomes difficult to
-manage as interfaces grow.
+requires a significant amount of parsing-specific boilerplate, and becomes
+difficult to manage for larger projects.
 
-The basic feature of :func:`tyro.cli()` is to provide a wrapper for `argparse`
-that solves these issues.
+The basic goal of :func:`tyro.cli()` is to provide a wrapper for `argparse` that
+solves these issues.
 
-We can specify the same logic with a function signature:
+**(1) Command-line interfaces from functions.**
+
+We can write the same script as above using `tyro.cli()`:
 
 ```python
 """Sum two numbers by calling a function with tyro."""
-
 import tyro
 
-def main(a: int, b: int = 3) -> None:
-    print(a + b)
+def add(a: int, b: int = 3) -> int:
+    return a + b
 
-tyro.cli(main)
+# Populate the inputs of add(), call it, then return the output.
+total = tyro.cli(add)
+
+print(total)
 ```
 
-Particularly when interfaces grow in complexity or require hierarchical
-structures, dataclasses can also be helpful:
+Or, more succinctly:
+
+```python
+"""Sum two numbers by calling a function with tyro."""
+import tyro
+
+def add(a: int, b: int = 3) -> None:
+    print(a + b)
+
+tyro.cli(add)  # Returns `None`.
+```
+
+**(2) Command-line interfaces from config objects.**
+
+A class in Python can be treated as a function that returns an instance. This
+makes it easy to populate explicit configuration structures:
 
 ```python
 """Sum two numbers by instantiating a dataclass with tyro."""
-
 from dataclasses import dataclass
 
 import tyro
@@ -57,7 +75,11 @@ args = tyro.cli(Args)
 print(args.a + args.b)
 ```
 
-And that's it! By incorporating more advanced type annotations from the standard
-library, we can specify a broad range of more advanced behaviors:
-variable-length inputs, unions over types, subcommands, and more. Our examples
-walk through a selection of these features.
+Unlike directly using `argparse`, both the function-based and dataclass-based
+approaches are compatible with static analysis; tab completion and type checking
+will work out-of-the-box.
+
+And that's it! By incorporating more standard type annotations, we can specify a
+broad range of more advanced behaviors: nested structures, variable-length
+inputs, unions over types, subcommands, and more. Our examples walk through a
+selection of these features.

@@ -17,7 +17,6 @@ Features here are supported, but generally unnecessary and should be used sparin
 
 
         import dataclasses
-        from typing import Union
 
         from typing_extensions import Annotated
 

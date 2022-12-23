@@ -6,8 +6,8 @@ Containers
 
 
 Arguments of both fixed and variable lengths can be annotated with standard Python
-container types; such as ``typing.List[T]`` or ``typing.Tuple[T1, T2]``. In Python 3.9,
-``list[T]`` and ``tuple[T]`` are also directly supported.
+container types: ``typing.List[T]``\ , ``typing.Tuple[T1, T2]``\ , etc. In Python >=3.9,
+``list[T]`` and ``tuple[T]`` are also supported.
 
 
 
@@ -21,11 +21,6 @@ container types; such as ``typing.List[T]`` or ``typing.Tuple[T1, T2]``. In Pyth
         from typing import Tuple
 
         import tyro
-
-
-        class OptimizerType(enum.Enum):
-            ADAM = enum.auto()
-            SGD = enum.auto()
 
 
         @dataclasses.dataclass(frozen=True)

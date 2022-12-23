@@ -37,65 +37,78 @@
 
 <br />
 
-<strong><code>tyro</code></strong> is a library for building CLI interfaces and
-configuration objects with type-annotated Python.
+<strong><code>tyro</code></strong> is a tool for building command-line
+interfaces and configuration objects in Python.
 
-Our core interface consists of one function, `tyro.cli()`, that generates
-argument parsers from Python callables and types.
-
-### A minimal example
-
-As a replacement for `argparse`:
-
-<table align="">
-<tr>
-    <td><strong>with argparse</strong></td>
-    <td><strong>with tyro</strong></td>
-</tr>
-<tr>
-<td>
-
-```python
-"""Sum two numbers from argparse."""
-
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument(
-    "--a",
-    type=int,
-    required=True,
-)
-parser.add_argument(
-    "--b",
-    type=int,
-    default=3,
-)
-args = parser.parse_args()
-
-print(args.a + args.b)
-```
-
-</td>
-<td>
-
-```python
-"""Sum two numbers by calling a
-function with tyro."""
-
-import tyro
-
-def main(a: int, b: int = 3) -> None:
-    print(a + b)
-
-tyro.cli(main)
-```
+Our core interface, `tyro.cli()`, generates command-line interfaces from
+type-annotated callables.
 
 ---
 
-```python
-"""Sum two numbers by instantiating
-a dataclass with tyro."""
+### Brief walkthrough
 
+To summarize how `tyro.cli()` can be used, let's consider a script based on
+`argparse`. We define two inputs and print the sum:
+
+```python
+"""Sum two numbers from argparse."""
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--a", type=int, required=True)
+parser.add_argument("--b", type=int, default=3)
+args = parser.parse_args()
+
+total = args.a + args.b
+
+print(total)
+```
+
+This pattern is dramatically cleaner than manually parsing `sys.argv`, but has
+several issues: it lacks type checking and IDE support (consider: jumping to
+definitions, finding references, docstrings, refactoring and renaming tools),
+requires a significant amount of parsing-specific boilerplate, and becomes
+difficult to manage for larger projects.
+
+The basic goal of `tyro.cli()` is to provide a wrapper for `argparse` that
+solves these issues.
+
+**(1) Command-line interfaces from functions.**
+
+We can write the same script as above using `tyro.cli()`:
+
+```python
+"""Sum two numbers by calling a function with tyro."""
+import tyro
+
+def add(a: int, b: int = 3) -> int:
+    return a + b
+
+# Populate the inputs of add(), call it, then return the output.
+total = tyro.cli(add)
+
+print(total)
+```
+
+Or, more succinctly:
+
+```python
+"""Sum two numbers by calling a function with tyro."""
+import tyro
+
+def add(a: int, b: int = 3) -> None:
+    print(a + b)
+
+tyro.cli(add)  # Returns `None`.
+```
+
+**(2) Command-line interfaces from config objects.**
+
+A class in Python can be treated as a function that returns an instance. This
+makes it easy to populate explicit configuration structures:
+
+```python
+"""Sum two numbers by instantiating a dataclass with tyro."""
 from dataclasses import dataclass
 
 import tyro
@@ -109,47 +122,16 @@ args = tyro.cli(Args)
 print(args.a + args.b)
 ```
 
-</td>
-</tr>
-</table>
+Unlike directly using `argparse`, both the function-based and dataclass-based
+approaches are compatible with static analysis; tab completion and type checking
+will work out-of-the-box.
 
-For more examples, see our [documentation](https://brentyi.github.io/tyro).
+**(3) Additional features.**
 
-### Why `tyro`?
-
-1. **Strong typing.**
-
-   Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
-   arguments populated by `tyro` benefit from IDE and language server-supported
-   operations — think tab completion, rename, jump-to-def, docstrings on hover —
-   as well as static checking tools like `pyright` and `mypy`.
-
-2. **Minimal overhead.**
-
-   Standard Python type annotations, docstrings, and default values are parsed
-   to automatically generate command-line interfaces with informative helptext.
-
-   `tyro` works seamlessly with tools you already use: examples are included for
-   [`dataclasses`](https://docs.python.org/3/library/dataclasses.html),
-   [`attrs`](https://www.attrs.org/),
-   [`pydantic`](https://pydantic-docs.helpmanual.io/),
-   [`flax.linen`](https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html),
-   and more.
-
-   Hate `tyro`? Just remove one line of code, and you're left with beautiful,
-   type-annotated, and documented vanilla Python that can be used with a range
-   of other configuration libraries.
-
-3. **Modularity.**
-
-   `tyro` supports hierarchical configuration structures, which make it easy to
-   distribute definitions, defaults, and documentation of configurable fields
-   across modules or source files.
-
-4. **Tab completion.**
-
-   By extending [shtab](https://github.com/iterative/shtab), `tyro`
-   automatically generates tab completion scripts for bash, zsh, and tcsh.
+These examples only scratch the surface of what's possible. `tyro` aims to
+support all reasonable type annotations, which can help us define things like
+hierachical structures, enums, unions, variable-length inputs, and subcommands.
+See [documentation](https://brentyi.github.io/tyro) for examples.
 
 ### In the wild
 

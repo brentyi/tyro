@@ -2,11 +2,11 @@
 
 |build| |nbsp| |mypy| |nbsp| |lint| |nbsp| |coverage| |nbsp| |versions|
 
-:code:`tyro` is a library for building CLI interfaces and configuration objects
-with type-annotated Python.
+:code:`tyro` is a tool for building scalable command-line interfaces and
+configuration objects in Python.
 
-Our core interface consists of one function, :func:`tyro.cli()`, that generates
-argument parsers from Python callables and types.
+Our core interface, :func:`tyro.cli()`, generates command-line interfaces from
+type-annotated callables.
 
 To get started, we recommend browsing the examples to the left.
 
