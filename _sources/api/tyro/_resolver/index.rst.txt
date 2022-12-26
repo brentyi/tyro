@@ -24,27 +24,27 @@ Module Contents
    
    Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise, returns typ.
 
-.. py:function:: is_dataclass(cls: Union[Type, Callable]) -> bool
+.. py:function:: is_dataclass(cls: Union[tyro._typing.TypeForm, Callable]) -> bool
 
    
    Same as ``dataclasses.is_dataclass``\ , but also handles generic aliases.
 
-.. py:function:: resolve_generic_types(cls: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, Type[Any]]]
+.. py:function:: resolve_generic_types(cls: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, tyro._typing.TypeForm[Any]]]
 
    
    If the input is a class: no-op. If it's a generic alias: returns the origin
    class, and a mapping from typevars to concrete types.
 
-.. py:function:: resolved_fields(cls: Type) -> List[dataclasses.Field]
+.. py:function:: resolved_fields(cls: tyro._typing.TypeForm) -> List[dataclasses.Field]
 
    
    Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
    resolves forward references.
 
-.. py:function:: is_namedtuple(cls: Type) -> bool
+.. py:function:: is_namedtuple(cls: tyro._typing.TypeForm) -> bool
 
 
-.. py:function:: type_from_typevar_constraints(typ: Union[Type, TypeVar]) -> Union[Type, TypeVar]
+.. py:function:: type_from_typevar_constraints(typ: Union[tyro._typing.TypeForm, TypeVar]) -> Union[tyro._typing.TypeForm, TypeVar]
 
    
    Try to concretize a type from a TypeVar's bounds or constraints. Identity if
@@ -58,7 +58,7 @@ Module Contents
 .. py:function:: narrow_type(typ: TypeT, default_instance: Any) -> TypeT
 
    
-   Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
+   TypeForm narrowing: if we annotate as Animal but specify a default instance of Cat, we
    should parse as Cat.
 
    This should generally only be applied to fields used as nested structures, not
@@ -69,14 +69,14 @@ Module Contents
 .. py:function:: narrow_container_types(typ: TypeT, default_instance: Any) -> TypeT
 
    
-   Type narrowing for containers. Infers types of container contents.
+   TypeForm narrowing for containers. Infers types of container contents.
 
 .. py:data:: MetadataType
    
 
    
 
-.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: Optional[Type[MetadataType]] = None) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: Optional[tyro._typing.TypeForm[MetadataType]] = None) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
 
    
    Helper for parsing typing.Annotated types.
@@ -88,6 +88,6 @@ Module Contents
    * Annotated[int, 1], int => (int, (1,))
    * Annotated[int, "1"], int => (int, ())
 
-.. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type[Any]]) -> TypeOrCallable
+.. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]]) -> TypeOrCallable
 
 

@@ -14,19 +14,21 @@ Module Contents
 
    
 
-.. py:function:: literal_type_from_choices(choices: Iterable[T]) -> Type[T]
+.. py:function:: literal_type_from_choices(choices: Iterable[T]) -> tyro._typing.TypeForm[T]
 
    
    Generate a ``typing.Literal[]`` type that constrains values to a set of choices.
 
    .. warning::
 
-       Use of this helper is discouraged because it is compatible with ``pyright`` and
-       ``pylance``, but not with ``mypy``. For ``pyright`` support, you may need to enable
-       postponed evaluation of annotations (``from __future__ import annotations``).
+       Use of this helper is discouraged. It will likely be deprecated.
+
+       The the returned type is understood as an annotation by ``pyright`` and
+       ``pylance`` (with ``from __future__ import annotations``), but it relies on
+       behavior that isn't defined by the Python language specifications.
 
        At the cost of verbosity, using ``typing.Literal[]`` directly is better supported
-       by external tools.
+       by tools like ``mypy``.
 
        Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``
        guard:
@@ -36,8 +38,10 @@ Module Contents
            from typing import TYPE_CHECKING
 
            if TYPE_CHECKING:
-               Color = str  # For mypy.
+               # Static type seen by mypy, language servers, etc.
+               Color = str
            else:
+               # Runtime type used by tyro.
                Color = literal_type_from_choices(["red", "green", "blue"])
 
    Using ``Literal[...]`` directly should generally be preferred, but this helper can be

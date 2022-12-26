@@ -16,7 +16,6 @@ container types: ``typing.List[T]``\ , ``typing.Tuple[T1, T2]``\ , etc. In Pytho
 
 
         import dataclasses
-        import enum
         import pathlib
         from typing import Tuple
 

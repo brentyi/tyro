@@ -17,7 +17,7 @@ Subpackages
 Package Contents
 ----------------
 
-.. py:function:: cli(f: Type[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default: Optional[OutT] = None) -> OutT
+.. py:function:: cli(f: tyro._typing.TypeForm[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default: Optional[OutT] = None) -> OutT
               cli(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default: None = None) -> OutT
 
    

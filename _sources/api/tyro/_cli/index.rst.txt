@@ -19,7 +19,7 @@ Module Contents
 
    
 
-.. py:function:: cli(f: Type[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default: Optional[OutT] = None) -> OutT
+.. py:function:: cli(f: tyro._typing.TypeForm[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default: Optional[OutT] = None) -> OutT
               cli(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, default: None = None) -> OutT
 
    
@@ -83,7 +83,7 @@ Module Contents
    :returns: The output of ``f(...)`` or an instance ``f``. If ``f`` is a class, the two are
              equivalent.
 
-.. py:function:: get_parser(f: Type[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None) -> argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None) -> argparse.ArgumentParser
               get_parser(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None) -> argparse.ArgumentParser
 
    

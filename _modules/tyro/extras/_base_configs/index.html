@@ -249,10 +249,11 @@
         </div>
         <article role="main">
           <h1>Source code for tyro.extras._base_configs</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
 
+<span class="kn">from</span> <span class="nn">.._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">..conf</span> <span class="kn">import</span> <span class="n">subcommand</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
@@ -263,17 +264,19 @@
     <span class="n">descriptions</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prefix_names</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Construct a Union type for defining subcommands that choose between defaults.</span>
 
 <span class="sd">    .. warning::</span>
 
-<span class="sd">        Use of this helper is discouraged because it is compatible with ``pyright`` and</span>
-<span class="sd">        ``pylance``, but not with ``mypy``. For ``pyright`` support, you may need to enable</span>
-<span class="sd">        postponed evaluation of annotations (``from __future__ import annotations``).</span>
+<span class="sd">        Use of this helper is discouraged. It will likely be deprecated.</span>
+
+<span class="sd">        Using the the returned type is understood as an annotation by ``pyright`` and</span>
+<span class="sd">        ``pylance`` (with ``from __future__ import annotations``), but it relies on</span>
+<span class="sd">        behavior that isn&#39;t defined by the Python language specifications.</span>
 
 <span class="sd">        At the cost of verbosity, using :func:`tyro.conf.subcommand()` directly is</span>
-<span class="sd">        better supported by external tools.</span>
+<span class="sd">        better supported by tools like ``mypy``.</span>
 
 <span class="sd">        Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``</span>
 <span class="sd">        guard:</span>
@@ -283,8 +286,10 @@
 <span class="sd">            from typing import TYPE_CHECKING</span>
 
 <span class="sd">            if TYPE_CHECKING:</span>
-<span class="sd">                SelectableConfig = Config  # For mypy.</span>
+<span class="sd">                # Static type seen by mypy, language servers, etc.</span>
+<span class="sd">                SelectableConfig = Config</span>
 <span class="sd">            else:</span>
+<span class="sd">                # Runtime type used by tyro.</span>
 <span class="sd">                SelectableConfig = subcommand_type_from_defaults(...)</span>
 
 

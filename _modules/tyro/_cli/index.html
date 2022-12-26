@@ -254,7 +254,7 @@
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">import</span> <span class="nn">shtab</span>
 
@@ -267,23 +267,20 @@
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">conf</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 
 <span class="n">OutT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;OutT&quot;</span><span class="p">)</span>
 
 
-<span class="c1"># Overload notes:</span>
-<span class="c1"># 1. Type[T] is almost a subtype of Callable[..., T]; the difference is (in pyright)</span>
-<span class="c1">#    types like Union[T1, T2] which fall under the former but not the latter.</span>
-<span class="c1"># 2. We really shouldn&#39;t need an overload here. But as of 1.1.268, it seems like it&#39;s</span>
-<span class="c1">#    needed for pyright to understand that Union types are OK to pass in directly.</span>
-<span class="c1">#    Hopefully we can just switch to a Union[Type[...], Callable[...]] in the future.</span>
-<span class="c1"># 3. For equivalent functionality in mypy, we need to wait for typing.TypeForm:</span>
-<span class="c1">#    https://github.com/python/mypy/issues/9773</span>
+<span class="c1"># Note that the overload here is necessary for pyright and pylance due to special-casing</span>
+<span class="c1"># related to using typing.Type[] as a temporary replacement for typing.TypeForm[].</span>
+<span class="c1">#</span>
+<span class="c1"># https://github.com/microsoft/pyright/issues/4298</span>
 
 
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -309,7 +306,7 @@
 
 
 <div class="viewcode-block" id="cli"><a class="viewcode-back" href="../../../api/tyro/#tyro._cli.cli">[docs]</a><span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -389,7 +386,7 @@
 
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -410,7 +407,7 @@
 
 
 <div class="viewcode-block" id="get_parser"><a class="viewcode-back" href="../../../api/tyro/extras/#tyro._cli.get_parser">[docs]</a><span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="c1"># Note that we have no `args` argument, since this is only used when</span>
     <span class="c1"># parser.parse_args() is called.</span>
@@ -437,7 +434,7 @@
 
 
 <span class="k">def</span> <span class="nf">_cli_impl</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
@@ -476,7 +473,7 @@
     <span class="c1"># We wrap our type with a dummy dataclass if it can&#39;t be treated as a nested type.</span>
     <span class="c1"># For example: passing in f=int will result in a dataclass with a single field</span>
     <span class="c1"># typed as int.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
         <span class="n">dummy_field</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
             <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span>
             <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
@@ -485,7 +482,7 @@
         <span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">make_dataclass</span><span class="p">(</span>
             <span class="n">cls_name</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="p">[(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">dummy_field</span><span class="p">)],</span>
+            <span class="n">fields</span><span class="o">=</span><span class="p">[(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">dummy_field</span><span class="p">)],</span>
         <span class="p">)</span>
         <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>

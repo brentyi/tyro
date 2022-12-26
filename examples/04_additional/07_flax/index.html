@@ -254,82 +254,123 @@
 <p>If you use <a class="reference external" href="https://github.com/google/flax">flax.linen</a>, modules can be instantiated
 directly from <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">flax</span> <span class="kn">import</span> <span class="n">linen</span> <span class="k">as</span> <span class="n">nn</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">flax.linen</span> <span class="kn">import</span> <span class="n">Module</span>  <span class="c1"># https://github.com/google/flax/issues/2636</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
-<span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 5</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">Classifier</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
-<span class="linenos"> 9</span>    <span class="n">layers</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos">10</span>    <span class="sd">&quot;&quot;&quot;Layers in our network.&quot;&quot;&quot;</span>
-<span class="linenos">11</span>    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
-<span class="linenos">12</span>    <span class="sd">&quot;&quot;&quot;Hidden unit count.&quot;&quot;&quot;</span>
-<span class="linenos">13</span>    <span class="n">output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="linenos">14</span>    <span class="sd">&quot;&quot;&quot;Number of classes.&quot;&quot;&quot;</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span>    <span class="nd">@nn</span><span class="o">.</span><span class="n">compact</span>
-<span class="linenos">17</span>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
-<span class="linenos">18</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-<span class="linenos">19</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
-<span class="linenos">20</span>                <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
-<span class="linenos">21</span>                <span class="n">kernel_init</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">kaiming_normal</span><span class="p">(),</span>
-<span class="linenos">22</span>            <span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-<span class="linenos">23</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="linenos">24</span>
-<span class="linenos">25</span>        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
-<span class="linenos">26</span>            <span class="bp">self</span><span class="o">.</span><span class="n">output_dim</span><span class="p">,</span>
-<span class="linenos">27</span>            <span class="n">kernel_init</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">xavier_normal</span><span class="p">(),</span>
-<span class="linenos">28</span>        <span class="p">)(</span><span class="n">x</span><span class="p">)</span>
-<span class="linenos">29</span>        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
-<span class="linenos">30</span>        <span class="k">return</span> <span class="n">x</span>
+<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Classifier</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="linenos"> 8</span>    <span class="n">layers</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos"> 9</span>    <span class="sd">&quot;&quot;&quot;Layers in our network.&quot;&quot;&quot;</span>
+<span class="linenos">10</span>    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="linenos">11</span>    <span class="sd">&quot;&quot;&quot;Hidden unit count.&quot;&quot;&quot;</span>
+<span class="linenos">12</span>    <span class="n">output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="linenos">13</span>    <span class="sd">&quot;&quot;&quot;Number of classes.&quot;&quot;&quot;</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="nd">@nn</span><span class="o">.</span><span class="n">compact</span>
+<span class="linenos">16</span>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+<span class="linenos">17</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+<span class="linenos">18</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+<span class="linenos">19</span>                <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
+<span class="linenos">20</span>                <span class="n">kernel_init</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">kaiming_normal</span><span class="p">(),</span>
+<span class="linenos">21</span>            <span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">22</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
+<span class="linenos">25</span>            <span class="bp">self</span><span class="o">.</span><span class="n">output_dim</span><span class="p">,</span>
+<span class="linenos">26</span>            <span class="n">kernel_init</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">initializers</span><span class="o">.</span><span class="n">xavier_normal</span><span class="p">(),</span>
+<span class="linenos">27</span>        <span class="p">)(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">28</span>        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="linenos">29</span>        <span class="k">return</span> <span class="n">x</span>
+<span class="linenos">30</span>
 <span class="linenos">31</span>
-<span class="linenos">32</span>
-<span class="linenos">33</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Classifier</span><span class="p">,</span> <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">34</span>    <span class="sd">&quot;&quot;&quot;Train a model.</span>
-<span class="linenos">35</span>
-<span class="linenos">36</span><span class="sd">    Args:</span>
-<span class="linenos">37</span><span class="sd">        model: Model to train.</span>
-<span class="linenos">38</span><span class="sd">        num_iterations: Number of training iterations.</span>
-<span class="linenos">39</span><span class="sd">    &quot;&quot;&quot;</span>
-<span class="linenos">40</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">41</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_iterations</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">32</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Classifier</span><span class="p">,</span> <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">33</span>    <span class="sd">&quot;&quot;&quot;Train a model.</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="sd">    Args:</span>
+<span class="linenos">36</span><span class="sd">        model: Model to train.</span>
+<span class="linenos">37</span><span class="sd">        num_iterations: Number of training iterations.</span>
+<span class="linenos">38</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">39</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">40</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">num_iterations</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">41</span>
 <span class="linenos">42</span>
-<span class="linenos">43</span>
-<span class="linenos">44</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">45</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="linenos">43</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">44</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">usage: 07_flax.py [-h] --model.layers INT [--model.units INT]
-                  [--model.output-dim INT] [--model.parent {fixed}]
-                  [--model.name {None}|STR] [--num-iterations INT]
-
-Train a model.
-
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-│ --num-iterations INT    Number of training iterations. (default: 1000)     │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ model arguments ──────────────────────────────────────────────────────────╮
-│ Model to train.                                                            │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ --model.layers INT      Layers in our network. (required)                  │
-│ --model.units INT       Hidden unit count. (default: 32)                   │
-│ --model.output-dim INT  Number of classes. (default: 10)                   │
-│ --model.parent {fixed}  (fixed to: &lt;flax.linen.module._Sentinel object at  │
-│                         0x7f57caee7100&gt;)                                   │
-│ --model.name {None}|STR                                                    │
-│                         (default: None)                                    │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 54, in &lt;module&gt;
+    tyro.cli(train)
+  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 124, in cli
+    _cli_impl(
+  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 274, in _cli_impl
+    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
+  File &quot;/home/runner/work/tyro/tyro/tyro/_parsers.py&quot;, line 152, in from_callable_or_type
+    if _fields.is_nested_type(field.typ, field.default):
+  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 168, in is_nested_type
+    _try_field_list_from_callable(typ, default_instance),
+  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 244, in _try_field_list_from_callable
+    return field_list_from_class(cls, default_instance)
+  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 343, in _field_list_from_dataclass
+    for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
+  File &quot;/home/runner/work/tyro/tyro/tyro/_resolver.py&quot;, line 86, in resolved_fields
+    annotations = get_type_hints(cls, include_extras=True)
+  File &quot;/home/runner/.cache/pypoetry/virtualenvs/tyro-aA_vqJwo-py3.10/lib/python3.10/site-packages/typing_extensions.py&quot;, line 929, in get_type_hints
+    hint = typing.get_type_hints(
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 1833, in get_type_hints
+    value = _eval_type(value, base_globals, base_locals)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 327, in _eval_type
+    return t._evaluate(globalns, localns, recursive_guard)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 694, in _evaluate
+    eval(self.__forward_code__, globalns, localns),
+  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+NameError: name 'Module' is not defined</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">model=Classifier(
-    # attributes
-    layers = 4
-    units = 32
-    output_dim = 10
-)
-num_iterations=1000</pre>
+<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 54, in &lt;module&gt;
+    tyro.cli(train)
+  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 124, in cli
+    _cli_impl(
+  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 274, in _cli_impl
+    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
+  File &quot;/home/runner/work/tyro/tyro/tyro/_parsers.py&quot;, line 152, in from_callable_or_type
+    if _fields.is_nested_type(field.typ, field.default):
+  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 168, in is_nested_type
+    _try_field_list_from_callable(typ, default_instance),
+  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 244, in _try_field_list_from_callable
+    return field_list_from_class(cls, default_instance)
+  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 343, in _field_list_from_dataclass
+    for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
+  File &quot;/home/runner/work/tyro/tyro/tyro/_resolver.py&quot;, line 86, in resolved_fields
+    annotations = get_type_hints(cls, include_extras=True)
+  File &quot;/home/runner/.cache/pypoetry/virtualenvs/tyro-aA_vqJwo-py3.10/lib/python3.10/site-packages/typing_extensions.py&quot;, line 929, in get_type_hints
+    hint = typing.get_type_hints(
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 1833, in get_type_hints
+    value = _eval_type(value, base_globals, base_locals)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
+    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 327, in _eval_type
+    return t._evaluate(globalns, localns, recursive_guard)
+  File &quot;/usr/lib/python3.10/typing.py&quot;, line 694, in _evaluate
+    eval(self.__forward_code__, globalns, localns),
+  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+NameError: name 'Module' is not defined</pre>
 </section>
 
         </article>

@@ -250,24 +250,28 @@
         <article role="main">
           <h1>Source code for tyro.extras._choices_type</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">enum</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="kn">from</span> <span class="nn">.._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">])</span>
 
 
-<div class="viewcode-block" id="literal_type_from_choices"><a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._choices_type.literal_type_from_choices">[docs]</a><span class="k">def</span> <span class="nf">literal_type_from_choices</span><span class="p">(</span><span class="n">choices</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
+<div class="viewcode-block" id="literal_type_from_choices"><a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._choices_type.literal_type_from_choices">[docs]</a><span class="k">def</span> <span class="nf">literal_type_from_choices</span><span class="p">(</span><span class="n">choices</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Generate a `typing.Literal[]` type that constrains values to a set of choices.</span>
 
 <span class="sd">    .. warning::</span>
 
-<span class="sd">        Use of this helper is discouraged because it is compatible with ``pyright`` and</span>
-<span class="sd">        ``pylance``, but not with ``mypy``. For ``pyright`` support, you may need to enable</span>
-<span class="sd">        postponed evaluation of annotations (``from __future__ import annotations``).</span>
+<span class="sd">        Use of this helper is discouraged. It will likely be deprecated.</span>
+
+<span class="sd">        The the returned type is understood as an annotation by ``pyright`` and</span>
+<span class="sd">        ``pylance`` (with ``from __future__ import annotations``), but it relies on</span>
+<span class="sd">        behavior that isn&#39;t defined by the Python language specifications.</span>
 
 <span class="sd">        At the cost of verbosity, using ``typing.Literal[]`` directly is better supported</span>
-<span class="sd">        by external tools.</span>
+<span class="sd">        by tools like ``mypy``.</span>
 
 <span class="sd">        Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``</span>
 <span class="sd">        guard:</span>
@@ -277,8 +281,10 @@
 <span class="sd">            from typing import TYPE_CHECKING</span>
 
 <span class="sd">            if TYPE_CHECKING:</span>
-<span class="sd">                Color = str  # For mypy.</span>
+<span class="sd">                # Static type seen by mypy, language servers, etc.</span>
+<span class="sd">                Color = str</span>
 <span class="sd">            else:</span>
+<span class="sd">                # Runtime type used by tyro.</span>
 <span class="sd">                Color = literal_type_from_choices([&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;])</span>
 
 <span class="sd">    Using `Literal[...]` directly should generally be preferred, but this helper can be</span>

@@ -23,7 +23,7 @@ Module Contents
       
 
    .. py:attribute:: typ
-      :annotation: :Type[Any]
+      :annotation: :tyro._typing.TypeForm[Any]
 
       
 
@@ -55,7 +55,7 @@ Module Contents
    .. py:method:: __post_init__(self)
 
 
-   .. py:method:: make(name: str, typ: Type[Any], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers._Marker, Ellipsis] = ())
+   .. py:method:: make(name: str, typ: tyro._typing.TypeForm[Any], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers._Marker, Ellipsis] = ())
       :staticmethod:
 
 
@@ -125,14 +125,14 @@ Module Contents
       
 
 
-.. py:function:: is_nested_type(typ: Type[Any], default_instance: _DefaultInstance) -> bool
+.. py:function:: is_nested_type(typ: tyro._typing.TypeForm[Any], default_instance: _DefaultInstance) -> bool
 
    
    Determine whether a type should be treated as a 'nested type', where a single
    type can be broken down into multiple fields (eg for nested dataclasses or
    classes).
 
-.. py:function:: field_list_from_callable(f: Union[Callable, Type[Any]], default_instance: _DefaultInstance) -> List[FieldDefinition]
+.. py:function:: field_list_from_callable(f: Union[Callable, tyro._typing.TypeForm[Any]], default_instance: _DefaultInstance) -> List[FieldDefinition]
 
    
    Generate a list of generic 'field' objects corresponding to the inputs of some

@@ -40,7 +40,7 @@ Module Contents
       
 
    .. py:attribute:: type_from_typevar
-      :annotation: :Dict[TypeVar, Type[Any]]
+      :annotation: :Dict[TypeVar, tyro._typing.TypeForm[Any]]
 
       
 
