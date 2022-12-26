@@ -29,6 +29,7 @@ from . import (
     _resolver,
     _strings,
 )
+from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
 T = TypeVar("T")
@@ -332,7 +333,7 @@ class SubparsersSpecification:
     @staticmethod
     def from_field(
         field: _fields.FieldDefinition,
-        type_from_typevar: Dict[TypeVar, Type[Any]],
+        type_from_typevar: Dict[TypeVar, TypeForm[Any]],
         parent_classes: Set[Type[Any]],
         prefix: str,
     ) -> Optional[SubparsersSpecification]:

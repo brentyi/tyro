@@ -8,23 +8,13 @@ import enum
 import functools
 import itertools
 import shlex
-from typing import (
-    Any,
-    Dict,
-    Mapping,
-    Optional,
-    Sequence,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import Any, Dict, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 import rich.markup
 import shtab
 
 from . import _fields, _instantiators, _resolver, _strings
+from ._typing import TypeForm
 from .conf import _markers
 
 try:
@@ -43,7 +33,7 @@ class ArgumentDefinition:
     name_prefix: str  # User-facing prefix.
     subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
-    type_from_typevar: Dict[TypeVar, Type[Any]]
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]]
 
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]

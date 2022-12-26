@@ -20,7 +20,6 @@ from typing import (
     List,
     Optional,
     Tuple,
-    Type,
     Union,
     cast,
 )
@@ -31,13 +30,14 @@ from typing_extensions import get_args, get_type_hints, is_typeddict
 
 from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
+from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
 
 @dataclasses.dataclass(frozen=True)
 class FieldDefinition:
     name: str
-    typ: Type[Any]
+    typ: TypeForm[Any]
     default: Any
     helptext: Optional[str]
     markers: FrozenSet[_markers._Marker]
@@ -59,7 +59,7 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        typ: Type[Any],
+        typ: TypeForm[Any],
         default: Any,
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
@@ -160,7 +160,7 @@ class UnsupportedNestedTypeMessage:
     message: str
 
 
-def is_nested_type(typ: Type[Any], default_instance: _DefaultInstance) -> bool:
+def is_nested_type(typ: TypeForm[Any], default_instance: _DefaultInstance) -> bool:
     """Determine whether a type should be treated as a 'nested type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
     classes)."""
@@ -171,7 +171,7 @@ def is_nested_type(typ: Type[Any], default_instance: _DefaultInstance) -> bool:
 
 
 def field_list_from_callable(
-    f: Union[Callable, Type[Any]],
+    f: Union[Callable, TypeForm[Any]],
     default_instance: _DefaultInstance,
 ) -> List[FieldDefinition]:
     """Generate a list of generic 'field' objects corresponding to the inputs of some
@@ -208,7 +208,7 @@ _known_parsable_types = set(
 
 
 def _try_field_list_from_callable(
-    f: Union[Callable, Type[Any]],
+    f: Union[Callable, TypeForm[Any]],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     f, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -220,12 +220,12 @@ def _try_field_list_from_callable(
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.narrow_type(f, default_instance)
-    f_origin = _resolver.unwrap_origin_strip_extras(cast(Type, f))
+    f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
 
     # If `f` is a type:
     #     1. Set cls to the type.
     #     2. Consider `f` to be `cls.__init__`.
-    cls: Optional[Type[Any]] = None
+    cls: Optional[TypeForm[Any]] = None
     if isinstance(f, type):
         cls = f
         f = cls.__init__  # type: ignore
@@ -273,7 +273,7 @@ def _try_field_list_from_callable(
 
 
 def _field_list_from_typeddict(
-    cls: Type[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     field_list = []
     valid_default_instance = (
@@ -305,7 +305,7 @@ def _field_list_from_typeddict(
 
 
 def _field_list_from_namedtuple(
-    cls: Type[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle NamedTuples.
     #
@@ -336,7 +336,7 @@ def _field_list_from_namedtuple(
 
 
 def _field_list_from_dataclass(
-    cls: Type[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle dataclasses.
     field_list = []
@@ -372,12 +372,12 @@ except ImportError:
     pydantic = None  # type: ignore
 
 
-def _is_pydantic(cls: Type[Any]) -> bool:
+def _is_pydantic(cls: TypeForm[Any]) -> bool:
     return pydantic is not None and issubclass(cls, pydantic.BaseModel)
 
 
 def _field_list_from_pydantic(
-    cls: Type[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert pydantic is not None
 
@@ -403,12 +403,12 @@ except ImportError:
     attr = None  # type: ignore
 
 
-def _is_attrs(cls: Type[Any]) -> bool:
+def _is_attrs(cls: TypeForm[Any]) -> bool:
     return attr is not None and attr.has(cls)
 
 
 def _field_list_from_attrs(
-    cls: Type[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert attr is not None
 
@@ -435,7 +435,7 @@ def _field_list_from_attrs(
 
 
 def _field_list_from_tuple(
-    f: Union[Callable, Type[Any]], default_instance: _DefaultInstance
+    f: Union[Callable, TypeForm[Any]], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Fixed-length tuples.
     field_list = []
@@ -495,7 +495,7 @@ def _field_list_from_tuple(
 
 
 def _field_list_from_sequence_checked(
-    f: Union[Callable, Type[Any]], default_instance: _DefaultInstance
+    f: Union[Callable, TypeForm[Any]], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     contained_type: Any
     if len(get_args(f)) == 0:
@@ -512,7 +512,7 @@ def _field_list_from_sequence_checked(
 
 
 def _try_field_list_from_sequence_inner(
-    contained_type: Type[Any],
+    contained_type: TypeForm[Any],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # When no default instance is specified:
@@ -556,7 +556,7 @@ def _try_field_list_from_sequence_inner(
 
 
 def _field_list_from_dict(
-    f: Union[Callable, Type[Any]],
+    f: Union[Callable, TypeForm[Any]],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     if default_instance in MISSING_SINGLETONS:
@@ -579,8 +579,8 @@ def _field_list_from_dict(
 
 
 def _try_field_list_from_general_callable(
-    f: Union[Callable, Type[Any]],
-    cls: Optional[Type[Any]],
+    f: Union[Callable, TypeForm[Any]],
+    cls: Optional[TypeForm[Any]],
     default_instance: _DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle general callables.
@@ -610,8 +610,8 @@ def _try_field_list_from_general_callable(
 
 
 def _field_list_from_params(
-    f: Union[Callable, Type[Any]],
-    cls: Optional[Type[Any]],
+    f: Union[Callable, TypeForm[Any]],
+    cls: Optional[TypeForm[Any]],
     params: List[inspect.Parameter],
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Unwrap functools.wraps and functools.partial.

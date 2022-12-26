@@ -14,7 +14,6 @@ from typing import (
     Optional,
     Set,
     Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -22,7 +21,9 @@ from typing import (
 
 from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
-TypeOrCallable = TypeVar("TypeOrCallable", Type, Callable)
+from ._typing import TypeForm
+
+TypeOrCallable = TypeVar("TypeOrCallable", TypeForm, Callable)
 
 
 def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
@@ -36,14 +37,14 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
         return origin
 
 
-def is_dataclass(cls: Union[Type, Callable]) -> bool:
+def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
     return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))
 
 
 def resolve_generic_types(
     cls: TypeOrCallable,
-) -> Tuple[TypeOrCallable, Dict[TypeVar, Type[Any]]]:
+) -> Tuple[TypeOrCallable, Dict[TypeVar, TypeForm[Any]]]:
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
 
@@ -76,7 +77,7 @@ def resolve_generic_types(
     return cls, type_from_typevar
 
 
-def resolved_fields(cls: Type) -> List[dataclasses.Field]:
+def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
     """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
     resolves forward references."""
 
@@ -103,7 +104,7 @@ def resolved_fields(cls: Type) -> List[dataclasses.Field]:
     return fields
 
 
-def is_namedtuple(cls: Type) -> bool:
+def is_namedtuple(cls: TypeForm) -> bool:
     return (
         hasattr(cls, "_fields")
         # `_field_types` was removed in Python >=3.9.
@@ -112,7 +113,9 @@ def is_namedtuple(cls: Type) -> bool:
     )
 
 
-def type_from_typevar_constraints(typ: Union[Type, TypeVar]) -> Union[Type, TypeVar]:
+def type_from_typevar_constraints(
+    typ: Union[TypeForm, TypeVar]
+) -> Union[TypeForm, TypeVar]:
     """Try to concretize a type from a TypeVar's bounds or constraints. Identity if
     unsuccessful."""
     if isinstance(typ, TypeVar):
@@ -126,12 +129,12 @@ def type_from_typevar_constraints(typ: Union[Type, TypeVar]) -> Union[Type, Type
 
 
 # Be a little bit permissive with types here, since we often blur the lines between
-# Callable[..., T] and Type[T]... this could be cleaned up!
-TypeT = TypeVar("TypeT", bound=Callable)
+# Callable[..., T] and TypeForm[T]... this could be cleaned up!
+TypeT = TypeVar("TypeT", bound=Union[TypeForm, Callable])
 
 
 def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
-    """Type narrowing: if we annotate as Animal but specify a default instance of Cat, we
+    """TypeForm narrowing: if we annotate as Animal but specify a default instance of Cat, we
     should parse as Cat.
 
     This should generally only be applied to fields used as nested structures, not
@@ -165,7 +168,7 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
 
 
 def narrow_container_types(typ: TypeT, default_instance: Any) -> TypeT:
-    """Type narrowing for containers. Infers types of container contents."""
+    """TypeForm narrowing for containers. Infers types of container contents."""
     if typ is list and isinstance(default_instance, list):
         typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
     elif typ is set and isinstance(default_instance, set):
@@ -179,7 +182,7 @@ MetadataType = TypeVar("MetadataType")
 
 
 def unwrap_annotated(
-    typ: TypeOrCallable, search_type: Optional[Type[MetadataType]] = None
+    typ: TypeOrCallable, search_type: Optional[TypeForm[MetadataType]] = None
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]:
     """Helper for parsing typing.Annotated types.
 
@@ -204,7 +207,7 @@ def unwrap_annotated(
 
 
 def apply_type_from_typevar(
-    typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, Type[Any]]
+    typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
 ) -> TypeOrCallable:
     if typ in type_from_typevar:
         return type_from_typevar[typ]  # type: ignore

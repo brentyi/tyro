@@ -1,7 +1,8 @@
-from typing import Mapping, Type, TypeVar, Union
+from typing import Mapping, TypeVar, Union
 
 from typing_extensions import Annotated
 
+from .._typing import TypeForm
 from ..conf import subcommand
 
 T = TypeVar("T")
@@ -12,17 +13,19 @@ def subcommand_type_from_defaults(
     descriptions: Mapping[str, str] = {},
     *,
     prefix_names: bool = True,
-) -> Type[T]:
+) -> TypeForm[T]:
     """Construct a Union type for defining subcommands that choose between defaults.
 
     .. warning::
 
-        Use of this helper is discouraged because it is compatible with ``pyright`` and
-        ``pylance``, but not with ``mypy``. For ``pyright`` support, you may need to enable
-        postponed evaluation of annotations (``from __future__ import annotations``).
+        Use of this helper is discouraged. It will likely be deprecated.
+
+        Using the the returned type is understood as an annotation by ``pyright`` and
+        ``pylance`` (with ``from __future__ import annotations``), but it relies on
+        behavior that isn't defined by the Python language specifications.
 
         At the cost of verbosity, using :func:`tyro.conf.subcommand()` directly is
-        better supported by external tools.
+        better supported by tools like ``mypy``.
 
         Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``
         guard:
@@ -32,8 +35,10 @@ def subcommand_type_from_defaults(
             from typing import TYPE_CHECKING
 
             if TYPE_CHECKING:
-                SelectableConfig = Config  # For mypy.
+                # Static type seen by mypy, language servers, etc.
+                SelectableConfig = Config
             else:
+                # Runtime type used by tyro.
                 SelectableConfig = subcommand_type_from_defaults(...)
 
 
