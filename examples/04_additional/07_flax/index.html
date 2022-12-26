@@ -300,77 +300,35 @@ directly from <code class="docutils literal notranslate"><span class="pre">tyro.
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
-  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 54, in &lt;module&gt;
-    tyro.cli(train)
-  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 124, in cli
-    _cli_impl(
-  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 274, in _cli_impl
-    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
-  File &quot;/home/runner/work/tyro/tyro/tyro/_parsers.py&quot;, line 152, in from_callable_or_type
-    if _fields.is_nested_type(field.typ, field.default):
-  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 168, in is_nested_type
-    _try_field_list_from_callable(typ, default_instance),
-  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 244, in _try_field_list_from_callable
-    return field_list_from_class(cls, default_instance)
-  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 343, in _field_list_from_dataclass
-    for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
-  File &quot;/home/runner/work/tyro/tyro/tyro/_resolver.py&quot;, line 86, in resolved_fields
-    annotations = get_type_hints(cls, include_extras=True)
-  File &quot;/home/runner/.cache/pypoetry/virtualenvs/tyro-aA_vqJwo-py3.10/lib/python3.10/site-packages/typing_extensions.py&quot;, line 929, in get_type_hints
-    hint = typing.get_type_hints(
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 1833, in get_type_hints
-    value = _eval_type(value, base_globals, base_locals)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 327, in _eval_type
-    return t._evaluate(globalns, localns, recursive_guard)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 694, in _evaluate
-    eval(self.__forward_code__, globalns, localns),
-  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
-NameError: name 'Module' is not defined</pre>
+<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">usage: 07_flax.py [-h] --model.layers INT [--model.units INT]
+                  [--model.output-dim INT] [--model.parent {fixed}]
+                  [--model.name {None}|STR] [--num-iterations INT]
+
+Train a model.
+
+╭─ arguments ────────────────────────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit                    │
+│ --num-iterations INT    Number of training iterations. (default: 1000)     │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ model arguments ──────────────────────────────────────────────────────────╮
+│ Model to train.                                                            │
+│ ────────────────────────────────────────────────────────────────────────── │
+│ --model.layers INT      Layers in our network. (required)                  │
+│ --model.units INT       Hidden unit count. (default: 32)                   │
+│ --model.output-dim INT  Number of classes. (default: 10)                   │
+│ --model.parent {fixed}  (fixed to: &lt;flax.linen.module._Sentinel object at  │
+│                         0x7f1cf6ecb7c0&gt;)                                   │
+│ --model.name {None}|STR                                                    │
+│                         (default: None)                                    │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
-  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 54, in &lt;module&gt;
-    tyro.cli(train)
-  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 124, in cli
-    _cli_impl(
-  File &quot;/home/runner/work/tyro/tyro/tyro/_cli.py&quot;, line 274, in _cli_impl
-    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
-  File &quot;/home/runner/work/tyro/tyro/tyro/_parsers.py&quot;, line 152, in from_callable_or_type
-    if _fields.is_nested_type(field.typ, field.default):
-  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 168, in is_nested_type
-    _try_field_list_from_callable(typ, default_instance),
-  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 244, in _try_field_list_from_callable
-    return field_list_from_class(cls, default_instance)
-  File &quot;/home/runner/work/tyro/tyro/tyro/_fields.py&quot;, line 343, in _field_list_from_dataclass
-    for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
-  File &quot;/home/runner/work/tyro/tyro/tyro/_resolver.py&quot;, line 86, in resolved_fields
-    annotations = get_type_hints(cls, include_extras=True)
-  File &quot;/home/runner/.cache/pypoetry/virtualenvs/tyro-aA_vqJwo-py3.10/lib/python3.10/site-packages/typing_extensions.py&quot;, line 929, in get_type_hints
-    hint = typing.get_type_hints(
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 1833, in get_type_hints
-    value = _eval_type(value, base_globals, base_locals)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in _eval_type
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 329, in &lt;genexpr&gt;
-    ev_args = tuple(_eval_type(a, globalns, localns, recursive_guard) for a in t.__args__)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 327, in _eval_type
-    return t._evaluate(globalns, localns, recursive_guard)
-  File &quot;/usr/lib/python3.10/typing.py&quot;, line 694, in _evaluate
-    eval(self.__forward_code__, globalns, localns),
-  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
-NameError: name 'Module' is not defined</pre>
+<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">model=Classifier(
+    # attributes
+    layers = 4
+    units = 32
+    output_dim = 10
+)
+num_iterations=1000</pre>
 </section>
 
         </article>
