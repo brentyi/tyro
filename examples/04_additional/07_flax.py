@@ -9,13 +9,12 @@ Usage:
 """
 
 from flax import linen as nn
-from flax.linen import Module  # https://github.com/google/flax/issues/2636
 from jax import numpy as jnp
 
 import tyro
 
 
-class Classifier(Module):
+class Classifier(nn.Module):
     layers: int
     """Layers in our network."""
     units: int = 32

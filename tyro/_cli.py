@@ -3,7 +3,7 @@ import argparse
 import dataclasses
 import sys
 import warnings
-from typing import Callable, Optional, Sequence, Type, TypeVar, Union, cast, overload
+from typing import Callable, Optional, Sequence, TypeVar, Union, cast, overload
 
 import shtab
 
@@ -16,23 +16,20 @@ from . import (
     _strings,
     conf,
 )
+from ._typing import TypeForm
 
 OutT = TypeVar("OutT")
 
 
-# Overload notes:
-# 1. Type[T] is almost a subtype of Callable[..., T]; the difference is (in pyright)
-#    types like Union[T1, T2] which fall under the former but not the latter.
-# 2. We really shouldn't need an overload here. But as of 1.1.268, it seems like it's
-#    needed for pyright to understand that Union types are OK to pass in directly.
-#    Hopefully we can just switch to a Union[Type[...], Callable[...]] in the future.
-# 3. For equivalent functionality in mypy, we need to wait for typing.TypeForm:
-#    https://github.com/python/mypy/issues/9773
+# Note that the overload here is necessary for pyright and pylance due to special-casing
+# related to using typing.Type[] as a temporary replacement for typing.TypeForm[].
+#
+# https://github.com/microsoft/pyright/issues/4298
 
 
 @overload
 def cli(
-    f: Type[OutT],
+    f: TypeForm[OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
@@ -58,7 +55,7 @@ def cli(
 
 
 def cli(
-    f: Union[Type[OutT], Callable[..., OutT]],
+    f: Union[TypeForm[OutT], Callable[..., OutT]],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
@@ -138,7 +135,7 @@ def cli(
 
 @overload
 def get_parser(
-    f: Type[OutT],
+    f: TypeForm[OutT],
     *,
     prog: Optional[str] = None,
     description: Optional[str] = None,
@@ -159,7 +156,7 @@ def get_parser(
 
 
 def get_parser(
-    f: Union[Type[OutT], Callable[..., OutT]],
+    f: Union[TypeForm[OutT], Callable[..., OutT]],
     *,
     # Note that we have no `args` argument, since this is only used when
     # parser.parse_args() is called.
@@ -186,7 +183,7 @@ def get_parser(
 
 
 def _cli_impl(
-    f: Union[Type[OutT], Callable[..., OutT]],
+    f: Union[TypeForm[OutT], Callable[..., OutT]],
     *,
     prog: Optional[str] = None,
     description: Optional[str],
@@ -225,7 +222,7 @@ def _cli_impl(
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
     # For example: passing in f=int will result in a dataclass with a single field
     # typed as int.
-    if not _fields.is_nested_type(cast(Type, f), default_instance_internal):
+    if not _fields.is_nested_type(cast(type, f), default_instance_internal):
         dummy_field = cast(
             dataclasses.Field,
             dataclasses.field(
@@ -234,7 +231,7 @@ def _cli_impl(
         )
         f = dataclasses.make_dataclass(
             cls_name="",
-            fields=[(_strings.dummy_field_name, cast(Type, f), dummy_field)],
+            fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
         )
         dummy_wrapped = True
     else:
