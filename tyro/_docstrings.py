@@ -183,6 +183,13 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
 
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
+
+        # Fallback on metadata for dynamic dataclasses.
+        if dataclasses.is_dataclass(cls): 
+            dataclass_field = cls.__dataclass_fields__[field_name]
+            if 'docs' in dataclass_field.metadata:
+                assert(isinstance(dataclass_field.metadata['docs'], str))
+                return dataclass_field.metadata['docs']
         return None
 
     field_data = tokenization.field_data_from_name[field_name]
