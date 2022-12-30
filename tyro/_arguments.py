@@ -186,8 +186,8 @@ def _rule_handle_boolean_flags(
         )
 
     assert False, (
-        "Expected a boolean as a default for {arg.field.name}, but got"
-        " {lowered.default}."
+        f"Expected a boolean as a default for {arg.field.name}, but got"
+        f" {lowered.default}."
     )
 
 
