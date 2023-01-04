@@ -29,8 +29,10 @@ def call_from_args(
 
     Returns the output of `f` and a set of used arguments."""
 
-    f, type_from_typevar = _resolver.resolve_generic_types(f)
-    f = _resolver.narrow_type(f, default_instance)
+    # Resolve the type of `f`, generate a field list.
+    f, type_from_typevar, field_list = _fields.field_list_from_callable(
+        f=f, default_instance=default_instance
+    )
 
     args: List[Any] = []
     kwargs: Dict[str, Any] = {}
@@ -48,14 +50,12 @@ def call_from_args(
             _strings.make_field_name([arg.dest_prefix, arg.field.name])
         ] = arg
 
-    for field in _fields.field_list_from_callable(
-        f, default_instance=default_instance
-    ):  # type: ignore
+    for field in field_list:
         value: Any
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
 
         # Resolve field type.
-        field_type = _resolver.apply_type_from_typevar(field.typ, type_from_typevar)  # type: ignore
+        field_type = field.typ
 
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords

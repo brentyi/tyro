@@ -74,9 +74,10 @@ class ParserSpecification:
             in _resolver.unwrap_annotated(f, _markers._Marker)[1]
         )
 
-        # Resolve generic types.
-        f, type_from_typevar = _resolver.resolve_generic_types(f)
-        f = _resolver.narrow_type(f, default_instance)
+        # Resolve the type of `f`, generate a field list.
+        f, type_from_typevar, field_list = _fields.field_list_from_callable(
+            f=f, default_instance=default_instance
+        )
 
         # Cycle detection.
         #
@@ -99,24 +100,7 @@ class ParserSpecification:
         subparsers = None
         subparsers_from_prefix = {}
 
-        field_list = _fields.field_list_from_callable(
-            f=f, default_instance=default_instance
-        )
         for field in field_list:
-            field = dataclasses.replace(
-                field,
-                # Resolve generic types.
-                typ=_resolver.narrow_container_types(
-                    _resolver.type_from_typevar_constraints(  # type: ignore
-                        _resolver.apply_type_from_typevar(
-                            field.typ,
-                            type_from_typevar,
-                        )
-                    ),
-                    default_instance=field.default,
-                ),
-            )
-
             if isinstance(field.typ, TypeVar):
                 raise _instantiators.UnsupportedTypeAnnotationError(
                     f"Field {field.name} has an unbound TypeVar: {field.typ}."
