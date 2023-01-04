@@ -35,6 +35,7 @@ from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
+from .registry import _registry
 
 
 @dataclasses.dataclass(frozen=True)
@@ -136,7 +137,7 @@ MISSING_NONPROP = NonpropagatingMissingType()
 EXCLUDE_FROM_CALL = ExcludeFromCallType()
 
 # Note that our "public" missing API will always be the propagating missing sentinel.
-MISSING_PUBLIC: Any = MISSING_PROP
+MISSING: Any = MISSING_PROP
 """Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
 `default_instance` for `tyro.cli()` as required."""
 
@@ -211,6 +212,7 @@ def field_list_from_callable(
         typ = _resolver.type_from_typevar_constraints(typ)
         typ = _resolver.narrow_container_types(typ, field.default)
         typ = _resolver.narrow_union_type(typ, field.default)
+        typ = _registry.get_constructor_for_type(typ)
         field = dataclasses.replace(field, typ=typ)
         return field
 

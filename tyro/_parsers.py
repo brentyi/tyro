@@ -31,6 +31,7 @@ from . import (
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
+from .registry import _registry
 
 T = TypeVar("T")
 

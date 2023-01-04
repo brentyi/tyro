@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Uni
 from typing_extensions import get_args
 
 from . import _arguments, _fields, _parsers, _resolver, _strings
+from .registry import _registry
 
 
 class InstantiationError(Exception):
