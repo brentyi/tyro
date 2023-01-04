@@ -14,19 +14,22 @@ import warnings
 from typing import (
     Any,
     Callable,
+    Dict,
     FrozenSet,
     Hashable,
     Iterable,
     List,
     Optional,
     Tuple,
+    TypeVar,
     Union,
     cast,
 )
 
 import docstring_parser
 import typing_extensions
-from typing_extensions import get_args, get_type_hints, is_typeddict
+from attr import dataclass
+from typing_extensions import Annotated, get_args, get_type_hints, is_typeddict
 
 from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings
@@ -163,7 +166,10 @@ class UnsupportedNestedTypeMessage:
 def is_nested_type(typ: TypeForm[Any], default_instance: _DefaultInstance) -> bool:
     """Determine whether a type should be treated as a 'nested type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
-    classes)."""
+    classes).
+
+    TODO: we should come up with a better name than 'nested type', which is a little bit
+    misleading."""
     return not isinstance(
         _try_field_list_from_callable(typ, default_instance),
         UnsupportedNestedTypeMessage,
@@ -173,18 +179,44 @@ def is_nested_type(typ: TypeForm[Any], default_instance: _DefaultInstance) -> bo
 def field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: _DefaultInstance,
-) -> List[FieldDefinition]:
+) -> Tuple[
+    Union[Callable, TypeForm[Any]], Dict[TypeVar, TypeForm], List[FieldDefinition]
+]:
     """Generate a list of generic 'field' objects corresponding to the inputs of some
-    annotated callable."""
-    out = _try_field_list_from_callable(f, default_instance)
+    annotated callable.
 
-    if isinstance(out, UnsupportedNestedTypeMessage):
-        raise _instantiators.UnsupportedTypeAnnotationError(out.message)
+    Returns:
+        The type that `f` is resolved as.
+        A type_from_typevar dict.
+        A list of field definitions.
+    """
+    # Resolve generic types.
+    f, type_from_typevar = _resolver.resolve_generic_types(f)
+    f = _resolver.narrow_type(f, default_instance)
+
+    # Try to generate field list.
+    field_list = _try_field_list_from_callable(f, default_instance)
+
+    if isinstance(field_list, UnsupportedNestedTypeMessage):
+        raise _instantiators.UnsupportedTypeAnnotationError(field_list.message)
 
     # Recursively apply markers.
     _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
-    out = list(map(lambda field: field.add_markers(parent_markers), out))
-    return out
+    field_list = list(map(lambda field: field.add_markers(parent_markers), field_list))
+
+    # Try to resolve types in our list of fields.
+    def resolve(field: FieldDefinition) -> FieldDefinition:
+        typ = field.typ
+        typ = _resolver.apply_type_from_typevar(typ, type_from_typevar)
+        typ = _resolver.type_from_typevar_constraints(typ)
+        typ = _resolver.narrow_container_types(typ, field.default)
+        typ = _resolver.narrow_union_type(typ, field.default)
+        field = dataclasses.replace(field, typ=typ)
+        return field
+
+    field_list = list(map(resolve, field_list))
+
+    return f, type_from_typevar, field_list
 
 
 # Implementation details below.

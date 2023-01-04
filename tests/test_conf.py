@@ -372,7 +372,7 @@ def test_flag() -> None:
 
 
 def test_fixed() -> None:
-    """When boolean flags have no default value, they must be explicitly specified."""
+    """When an argument is fixed, we shouldn't be able to override it from the CLI."""
 
     @dataclasses.dataclass
     class A:
@@ -393,7 +393,7 @@ def test_fixed() -> None:
 
 
 def test_fixed_recursive() -> None:
-    """When boolean flags have no default value, they must be explicitly specified."""
+    """When an argument is fixed, we shouldn't be able to override it from the CLI."""
 
     @dataclasses.dataclass
     class A:
@@ -561,7 +561,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
         bc: tyro.conf.OmitSubcommandPrefixes[
             Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
-        ] = DefaultInstanceHTTPServer()
+        ] = dataclasses.field(default_factory=DefaultInstanceHTTPServer)
 
     assert (
         tyro.cli(

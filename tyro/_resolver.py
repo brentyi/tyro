@@ -21,6 +21,7 @@ from typing import (
 
 from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
+from . import _fields
 from ._typing import TypeForm
 
 TypeOrCallable = TypeVar("TypeOrCallable", TypeForm, Callable)
@@ -59,7 +60,6 @@ def resolve_generic_types(
     ):
         typevars = origin_cls.__parameters__
         typevar_values = get_args(cls)
-        print(typevars, typevar_values, origin_cls)
         assert len(typevars) == len(typevar_values)
         cls = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
@@ -113,9 +113,7 @@ def is_namedtuple(cls: TypeForm) -> bool:
     )
 
 
-def type_from_typevar_constraints(
-    typ: Union[TypeForm, TypeVar]
-) -> Union[TypeForm, TypeVar]:
+def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
     """Try to concretize a type from a TypeVar's bounds or constraints. Identity if
     unsuccessful."""
     if isinstance(typ, TypeVar):
@@ -128,14 +126,9 @@ def type_from_typevar_constraints(
     return typ
 
 
-# Be a little bit permissive with types here, since we often blur the lines between
-# Callable[..., T] and TypeForm[T]... this could be cleaned up!
-TypeT = TypeVar("TypeT", bound=Union[TypeForm, Callable])
-
-
-def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
-    """TypeForm narrowing: if we annotate as Animal but specify a default instance of Cat, we
-    should parse as Cat.
+def narrow_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
+    """Type narrowing: if we annotate as Animal but specify a default instance of Cat,
+    we should parse as Cat.
 
     This should generally only be applied to fields used as nested structures, not
     individual arguments/fields. (if a field is annotated as Union[int, str], and a
@@ -151,7 +144,7 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
 
         superclass = unwrap_annotated(typ)[0]
 
-        # For Python 3.10: don't narrow union types.
+        # For Python 3.10.
         if get_origin(superclass) is Union:
             return typ
 
@@ -160,14 +153,18 @@ def narrow_type(typ: TypeT, default_instance: Any) -> TypeT:
                 return Annotated.__class_getitem__(  # type: ignore
                     (potential_subclass,) + get_args(typ)[1:]
                 )
-            typ = cast(TypeT, potential_subclass)
+            typ = cast(TypeOrCallable, potential_subclass)
     except TypeError:
+        # TODO: document where this TypeError can be raised, and reduce the amount of
+        # code in it.
         pass
 
     return typ
 
 
-def narrow_container_types(typ: TypeT, default_instance: Any) -> TypeT:
+def narrow_container_types(
+    typ: TypeOrCallable, default_instance: Any
+) -> TypeOrCallable:
     """TypeForm narrowing for containers. Infers types of container contents."""
     if typ is list and isinstance(default_instance, list):
         typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
@@ -242,3 +239,67 @@ def apply_type_from_typevar(
         return typ.copy_with(tuple(apply_type_from_typevar(x, type_from_typevar) for x in args))  # type: ignore
 
     return typ
+
+
+def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
+    """Narrow union types. This is a shim for failing more gracefully when we we're
+    given an unsupported union.
+
+    When do we want to narrow Union types?
+
+      Unions over nested types: no.
+         typ = NestedA | NestedB
+         => NestedA | NestedB can be converted to two subcommands.
+
+      Unions over nested and not nested types: no.
+         typ = int | str
+         => int | str can be instantiated as a union.
+
+      Unions over mixed nested / not nested types: if the default is a nested
+      type, strip out the non-nested ones. If the default is a non-nested
+      type, strip out the nested ones.
+
+         typ = NestedA | int, default_instance = NestedA()
+         => NestedA
+
+         typ = NestedA | int, default_instance = 5
+         => int
+
+         typ = NestedA | NestedB | int, default_instance = NestedA()
+         => NestedA
+
+    This is a hack to get around the fact that we don't currently support
+    mixing nested types (eg `SomeDataclass`) and non-nested ones (eg `int` or
+    `int | str`) in unions. This should be supported in the future, but will
+    likely require a big code refactor."""
+    if get_origin(typ) is not Union:
+        return typ
+    options = get_args(typ)
+    is_nested = tuple(
+        map(
+            lambda option: _fields.is_nested_type(
+                option,
+                _fields.MISSING_NONPROP,
+            ),
+            options,
+        )
+    )
+    if type(None) in options:
+        none_index = options.index(type(None))
+        is_nested_no_none = is_nested[:none_index] + is_nested[none_index + 1 :]
+    else:
+        is_nested_no_none = is_nested
+
+    if all(is_nested_no_none) or not any(is_nested_no_none):
+        # Either all types are nested or none of them are.
+        return typ
+    else:
+        is_default_nested = _fields.is_nested_type(type(default_instance), default_instance)  # type: ignore
+        out = Union.__getitem__(  # type: ignore
+            tuple(
+                option
+                for option, nested in zip(get_args(typ), is_nested)
+                if nested is is_default_nested
+            )
+        )
+        return out  # type: ignore
