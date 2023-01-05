@@ -417,6 +417,8 @@ defaults, from general callables.</p>
 <dd><p>Determine whether a type should be treated as a ‘nested type’, where a single
 type can be broken down into multiple fields (eg for nested dataclasses or
 classes).</p>
+<p>TODO: we should come up with a better name than ‘nested type’, which is a little bit
+misleading.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -432,18 +434,23 @@ classes).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._fields.field_list_from_callable">
-<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">field_list_from_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition"><span class="pre">FieldDefinition</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#field_list_from_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.field_list_from_callable" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">field_list_from_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition"><span class="pre">FieldDefinition</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#field_list_from_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.field_list_from_callable" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a list of generic ‘field’ objects corresponding to the inputs of some
 annotated callable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The type that <code class="docutils literal notranslate"><span class="pre">f</span></code> is resolved as.
+A type_from_typevar dict.
+A list of field definitions.</p>
+</dd>
+<dt class="field-even">Parameters</dt>
+<dd class="field-even"><ul class="simple">
 <li><p><strong>f</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>]</em>) – </p></li>
 <li><p><strong>default_instance</strong> (<em>_DefaultInstance</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>List[<a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition">FieldDefinition</a>]</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[Union[Callable, tyro._typing.TypeForm[Any]], Dict[TypeVar, tyro._typing.TypeForm], List[<a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition">FieldDefinition</a>]]</p>
 </dd>
 </dl>
 </dd></dl>

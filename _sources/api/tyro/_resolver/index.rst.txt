@@ -44,29 +44,24 @@ Module Contents
 .. py:function:: is_namedtuple(cls: tyro._typing.TypeForm) -> bool
 
 
-.. py:function:: type_from_typevar_constraints(typ: Union[tyro._typing.TypeForm, TypeVar]) -> Union[tyro._typing.TypeForm, TypeVar]
+.. py:function:: type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable
 
    
    Try to concretize a type from a TypeVar's bounds or constraints. Identity if
    unsuccessful.
 
-.. py:data:: TypeT
-   
+.. py:function:: narrow_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
    
-
-.. py:function:: narrow_type(typ: TypeT, default_instance: Any) -> TypeT
-
-   
-   TypeForm narrowing: if we annotate as Animal but specify a default instance of Cat, we
-   should parse as Cat.
+   Type narrowing: if we annotate as Animal but specify a default instance of Cat,
+   we should parse as Cat.
 
    This should generally only be applied to fields used as nested structures, not
    individual arguments/fields. (if a field is annotated as Union[int, str], and a
    string default is passed in, we don't want to narrow the type to always be
    strings!)
 
-.. py:function:: narrow_container_types(typ: TypeT, default_instance: Any) -> TypeT
+.. py:function:: narrow_container_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
    
    TypeForm narrowing for containers. Infers types of container contents.
@@ -90,4 +85,41 @@ Module Contents
 
 .. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]]) -> TypeOrCallable
 
+
+.. py:function:: narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
+
+   
+   Narrow union types. This is a shim for failing more gracefully when we we're
+   given an unsupported union.
+
+   When do we want to narrow Union types?
+
+     Unions over nested types: no.
+        typ = NestedA | NestedB
+        => NestedA | NestedB can be converted to two subcommands.
+
+     Unions over nested and not nested types: no.
+        typ = int | str
+        => int | str can be instantiated as a union.
+
+     Unions over mixed nested / not nested types: if the default is a nested
+     type, strip out the non-nested ones. If the default is a non-nested
+     type, strip out the nested ones.
+
+   ::
+
+       typ = NestedA | int, default_instance = NestedA()
+       => NestedA
+
+       typ = NestedA | int, default_instance = 5
+       => int
+
+       typ = NestedA | NestedB | int, default_instance = NestedA()
+       => NestedA
+
+
+   This is a hack to get around the fact that we don't currently support
+   mixing nested types (eg ``SomeDataclass``\ ) and non-nested ones (eg ``int`` or
+   ``int | str``\ ) in unions. This should be supported in the future, but will
+   likely require a big code refactor.
 

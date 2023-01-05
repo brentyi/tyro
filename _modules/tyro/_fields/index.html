@@ -265,19 +265,22 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">Dict</span><span class="p">,</span>
     <span class="n">FrozenSet</span><span class="p">,</span>
     <span class="n">Hashable</span><span class="p">,</span>
     <span class="n">Iterable</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
     <span class="n">Optional</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">TypeVar</span><span class="p">,</span>
     <span class="n">Union</span><span class="p">,</span>
     <span class="n">cast</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">docstring_parser</span>
 <span class="kn">import</span> <span class="nn">typing_extensions</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">is_typeddict</span>
+<span class="kn">from</span> <span class="nn">attr</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">is_typeddict</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">conf</span>  <span class="c1"># Avoid circular import.</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_instantiators</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
@@ -414,7 +417,10 @@
 <div class="viewcode-block" id="is_nested_type"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.is_nested_type">[docs]</a><span class="k">def</span> <span class="nf">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;nested type&#39;, where a single</span>
 <span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
-<span class="sd">    classes).&quot;&quot;&quot;</span>
+<span class="sd">    classes).</span>
+
+<span class="sd">    TODO: we should come up with a better name than &#39;nested type&#39;, which is a little bit</span>
+<span class="sd">    misleading.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">),</span>
         <span class="n">UnsupportedNestedTypeMessage</span><span class="p">,</span>
@@ -424,18 +430,44 @@
 <div class="viewcode-block" id="field_list_from_callable"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.field_list_from_callable">[docs]</a><span class="k">def</span> <span class="nf">field_list_from_callable</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
+    <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]</span>
+<span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
-<span class="sd">    annotated callable.&quot;&quot;&quot;</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+<span class="sd">    annotated callable.</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        The type that `f` is resolved as.</span>
+<span class="sd">        A type_from_typevar dict.</span>
+<span class="sd">        A list of field definitions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Resolve generic types.</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="c1"># Try to generate field list.</span>
+    <span class="n">field_list</span> <span class="o">=</span> <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_list</span><span class="p">,</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="n">field_list</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
 
     <span class="c1"># Recursively apply markers.</span>
     <span class="n">_</span><span class="p">,</span> <span class="n">parent_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">add_markers</span><span class="p">(</span><span class="n">parent_markers</span><span class="p">),</span> <span class="n">out</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">out</span></div>
+    <span class="n">field_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">add_markers</span><span class="p">(</span><span class="n">parent_markers</span><span class="p">),</span> <span class="n">field_list</span><span class="p">))</span>
+
+    <span class="c1"># Try to resolve types in our list of fields.</span>
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">FieldDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">typ</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_container_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="n">typ</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">field</span>
+
+    <span class="n">field_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">resolve</span><span class="p">,</span> <span class="n">field_list</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">field_list</span></div>
 
 
 <span class="c1"># Implementation details below.</span>
