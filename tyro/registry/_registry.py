@@ -2,6 +2,9 @@ import dataclasses
 import functools
 from typing import Any, Callable, List, Optional, Protocol, Tuple, Type, TypeVar, Union
 
+from typing_extensions import Annotated
+
+from .. import _resolver
 from .._typing import TypeForm
 
 T = TypeVar("T")
@@ -44,4 +47,5 @@ def get_constructor_for_type(typ: TypeT, default: Any) -> TypeT:
     for matcher, constructor_factory in registered_constructors:
         if matcher(typ):
             return constructor_factory(typ, default)  # type: ignore
+
     return typ

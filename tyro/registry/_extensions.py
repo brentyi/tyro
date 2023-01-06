@@ -4,9 +4,8 @@ import inspect
 import warnings
 from typing import Any, Callable, Type, TypeVar
 
-from .. import _docstrings
-from .._fields import MISSING_PROP, MISSING_SINGLETONS
-from .._resolver import is_dataclass
+from .. import _docstrings, _resolver
+from .._fields import MISSING_NONPROP, MISSING_PROP, MISSING_SINGLETONS
 from ._registry import register_constructor
 
 T = TypeVar("T")
@@ -77,18 +76,23 @@ def _get_dataclass_field_default(
         return field.default_factory()
 
     # Otherwise, no default.
-    return inspect.Parameter.empty
+    return MISSING_NONPROP
 
 
 def dataclass_constructor_factory(typ: Type[T], default: T) -> Callable[..., Type[T]]:
-    # TODO: docstrings, etc.
-    kwdefaults = {
-        f.name: _get_dataclass_field_default(f, default)
-        for f in dataclasses.fields(typ)
-    }
-    return functools.partial(typ, **kwdefaults)
+    # Add defaults.
+    kwdefaults = {}
+    typ = _resolver.unwrap_origin_strip_extras(typ)
+    for f in dataclasses.fields(typ):
+        if not f.init:
+            continue
+        field_default = _get_dataclass_field_default(f, default)
+        if field_default is not MISSING_NONPROP:
+            kwdefaults[f.name] = field_default
+
+    typ = functools.partial(typ, **kwdefaults)  # type: ignore
+    return typ
 
 
 def register_builtins() -> None:
-    # TODO: add back support for all other nested types.
-    register_constructor(is_dataclass, dataclass_constructor_factory)
+    register_constructor(_resolver.is_dataclass, dataclass_constructor_factory)

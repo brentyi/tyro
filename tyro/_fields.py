@@ -202,6 +202,7 @@ def field_list_from_callable(
     f = _resolver.narrow_type(f, default_instance)
 
     # Try to generate field list.
+    f, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
     f = _registry.get_constructor_for_type(f, default_instance)
     # field_list = _try_field_list_from_callable(f, default_instance)
     field_list = _field_list_from_callable_signature(f)
@@ -210,7 +211,6 @@ def field_list_from_callable(
         raise _instantiators.UnsupportedTypeAnnotationError(field_list.message)
 
     # Recursively apply markers.
-    _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
     field_list = list(map(lambda field: field.add_markers(parent_markers), field_list))
 
     # Try to resolve types in our list of fields.
@@ -259,8 +259,8 @@ def _field_list_from_callable_signature(
         )
     try:
         params = list(inspect.signature(f).parameters.values())
-    except ValueError:
-        return UnsupportedNestedTypeMessage(f"Could not inspect signature of {f}!")
+    except ValueError as e:
+        return UnsupportedNestedTypeMessage(f"Could not inspect signature of {f}! {e}")
 
     out = _field_list_from_params(f, params)
     if not isinstance(out, UnsupportedNestedTypeMessage):
@@ -274,7 +274,8 @@ def _field_list_from_callable_signature(
 def _field_list_from_params(
     f: Union[Callable, TypeForm[Any]], params: List[inspect.Parameter]
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    # Unwrap functools.wraps and functools.partial.
+    # For getting type annotations and docstrings, we can unwrap functools.wraps and
+    # functools.partial.
     done = False
     while not done:
         done = True
@@ -317,6 +318,11 @@ def _field_list_from_params(
 
         # Get helptext from docstring.
         helptext = docstring_from_arg_name.get(param.name)
+
+        # If helptext wasn't in normal docstring, we can search for dataclass-style
+        # docstrings.
+        if helptext is None and isinstance(f, type):
+            helptext = _docstrings.get_field_docstring(f, param.name)
 
         if param.name not in hints:
             out = UnsupportedNestedTypeMessage(

@@ -439,6 +439,7 @@ class SubparsersSpecification:
                 subcommand_config = dataclasses.replace(
                     subcommand_config, default=field.default
                 )
+
             subparser = ParserSpecification.from_callable_or_type(
                 # Recursively apply markers.
                 Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore

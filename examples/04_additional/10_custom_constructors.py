@@ -6,6 +6,7 @@ Usage:
 `python ./10_custom_constructors.py --food vegetable`
 """
 
+import functools
 from typing import Literal, Protocol
 
 from typing_extensions import assert_never
@@ -53,9 +54,19 @@ def make_food(food: Literal["fruit", "vegetable"]) -> Food:
 
 
 if __name__ == "__main__":
+    # TODO: this example is temporary. We should make it more readable.
     tyro.registry.register_constructor(
         matcher=lambda typ: typ is Food,
-        constructor_factory=lambda typ: make_food,
+        constructor_factory=lambda typ, default: make_food
+        # If a default is provided (consider: def main(food: Food = Vegetable())), how
+        # should we handle it?
+        #
+        # TODO: do we need to expose both propagating and non-propagating missing types?
+        # This is surprisingly annoying : - )
+        if default in tyro._fields.MISSING_SINGLETONS
+        else functools.partial(
+            make_food, food="fruit" if isinstance(default, Fruit) else "vegetable"
+        ),
     )
 
     # Note that `Food` is a protocol and cannot be directly instantiated; we
