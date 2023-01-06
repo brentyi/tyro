@@ -28,8 +28,7 @@ from typing import (
 
 import docstring_parser
 import typing_extensions
-from attr import dataclass
-from typing_extensions import Annotated, get_args, get_type_hints, is_typeddict
+from typing_extensions import get_args, get_type_hints, is_typeddict
 
 from . import conf  # Avoid circular import.
 from . import _docstrings, _instantiators, _resolver, _singleton, _strings

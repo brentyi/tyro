@@ -160,9 +160,9 @@ class ParserSpecification:
 
                     # Include nested subparsers.
                     if nested_parser.subparsers is not None:
-                        subparsers_from_prefix[
-                            nested_parser.subparsers.prefix
-                        ] = nested_parser.subparsers
+                        subparsers_from_prefix.update(
+                            nested_parser.subparsers_from_prefix
+                        )
                         subparsers = add_subparsers_to_leaves(
                             subparsers, nested_parser.subparsers
                         )

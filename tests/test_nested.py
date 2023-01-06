@@ -628,6 +628,57 @@ def test_nested_subparsers_multiple() -> None:
     ) == MultipleSubparsers(Subcommand2(Subcommand1(3)), Subcommand2(Subcommand1(7)))
 
 
+def test_nested_subparsers_multiple_in_container() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Subcommand1:
+        x: int = 0
+
+    @dataclasses.dataclass(frozen=True)
+    class Subcommand3:
+        z: int = 2
+
+    @dataclasses.dataclass(frozen=True)
+    class Subcommand2:
+        y: Union[Subcommand1, Subcommand3]
+
+    @dataclasses.dataclass(frozen=True)
+    class MultipleSubparsers:
+        a: Union[Subcommand1, Subcommand2]
+        b: Union[Subcommand1, Subcommand2]
+
+    @dataclasses.dataclass(frozen=True)
+    class Root:
+        inner: MultipleSubparsers
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Root, args=[])
+    assert tyro.cli(
+        Root, args="inner.a:subcommand1 inner.b:subcommand1".split(" ")
+    ) == Root(MultipleSubparsers(Subcommand1(), Subcommand1()))
+    assert tyro.cli(
+        Root,
+        args="inner.a:subcommand1 inner.b:subcommand2 inner.b.y:subcommand1".split(" "),
+    ) == Root(MultipleSubparsers(Subcommand1(), Subcommand2(Subcommand1())))
+    assert tyro.cli(
+        Root,
+        args=(
+            "inner.a:subcommand2 inner.a.y:subcommand1 inner.b:subcommand2"
+            " inner.b.y:subcommand1".split(" ")
+        ),
+    ) == Root(
+        MultipleSubparsers(Subcommand2(Subcommand1()), Subcommand2(Subcommand1()))
+    )
+    assert tyro.cli(
+        Root,
+        args=(
+            "inner.a:subcommand2 inner.a.y:subcommand1 --inner.a.y.x 3"
+            " inner.b:subcommand2 inner.b.y:subcommand1 --inner.b.y.x 7".split(" ")
+        ),
+    ) == Root(
+        MultipleSubparsers(Subcommand2(Subcommand1(3)), Subcommand2(Subcommand1(7)))
+    )
+
+
 def test_tuple_nesting() -> None:
     @dataclasses.dataclass(frozen=True)
     class Color:
