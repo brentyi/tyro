@@ -1,1 +1,1 @@
-from ._registry import register_constructor as register_constructor
+from ._registry import register_constructor

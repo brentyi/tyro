@@ -7,7 +7,7 @@ from .._typing import TypeForm
 T = TypeVar("T")
 
 MatchingFunction = Callable[[Type], bool]
-ConstructorFactoryFunction = Callable[[Type[T]], Callable[..., T]]
+ConstructorFactoryFunction = Callable[[Type[T], T], Callable[..., T]]
 
 
 registered_constructors: List[Tuple[MatchingFunction, ConstructorFactoryFunction]] = []
@@ -30,8 +30,18 @@ def register_constructor(
 TypeT = TypeVar("TypeT", bound=Union[TypeForm, Callable])
 
 
-def get_constructor_for_type(typ: TypeT) -> TypeT:
+builtsin_registered = False
+
+
+def get_constructor_for_type(typ: TypeT, default: Any) -> TypeT:
+    global builtins_registered
+    if not builtsin_registered:
+        from . import _extensions
+
+        _extensions.register_builtins()
+        builtins_registered = True
+
     for matcher, constructor_factory in registered_constructors:
         if matcher(typ):
-            return constructor_factory(typ)  # type: ignore
+            return constructor_factory(typ, default)  # type: ignore
     return typ
