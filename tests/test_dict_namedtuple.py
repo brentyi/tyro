@@ -72,6 +72,23 @@ def test_basic_typeddict() -> None:
         tyro.cli(ManyTypesTypedDict, args="--s 5".split(" "))
 
 
+def test_positional_in_typeddict() -> None:
+    class ManyTypesTypedDict(TypedDict):
+        i: tyro.conf.Positional[int]
+        s: str
+
+    assert tyro.cli(
+        ManyTypesTypedDict,
+        args="5 --s 5".split(" "),
+    ) == dict(i=5, s="5")
+
+    with pytest.raises(SystemExit):
+        tyro.cli(ManyTypesTypedDict, args="5".split(" "))
+
+    with pytest.raises(SystemExit):
+        tyro.cli(ManyTypesTypedDict, args="--s 5".split(" "))
+
+
 def test_total_false_typeddict() -> None:
     class ManyTypesTypedDict(TypedDict, total=False):
         i: int
