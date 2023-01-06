@@ -34,7 +34,7 @@ def call_from_args(
         f=f, default_instance=default_instance
     )
 
-    args: List[Any] = []
+    positional_args: List[Any] = []
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
 
@@ -162,7 +162,7 @@ def call_from_args(
 
         if value is not _fields.EXCLUDE_FROM_CALL:
             if field.is_positional_call():
-                args.append(value)
+                positional_args.append(value)
             else:
                 kwargs[field.call_argname] = value
 
@@ -176,19 +176,13 @@ def call_from_args(
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
 
     if unwrapped_f in (tuple, list, set):
-        if len(args) == 0:
-            # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
-            # use keyword arguments.
-            return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
-        else:
-            # When tuples are directly parsed (eg Tuple[int, int]), we end up with a
-            # single set of positional arguments.
-            assert len(args) == 1
-            return unwrapped_f(args[0]), consumed_keywords  # type: ignore
+        assert len(positional_args) == 0
+        # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
+        # use keyword arguments.
+        assert len(positional_args) == 0
+        return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
     elif unwrapped_f is dict:
-        for arg in args:
-            assert isinstance(arg, dict)
-            kwargs.update(arg)
+        assert len(positional_args) == 0
         return kwargs, consumed_keywords  # type: ignore
     else:
-        return unwrapped_f(*args, **kwargs), consumed_keywords  # type: ignore
+        return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
