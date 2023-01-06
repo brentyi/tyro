@@ -411,9 +411,9 @@
 
                     <span class="c1"># Include nested subparsers.</span>
                     <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">subparsers_from_prefix</span><span class="p">[</span>
-                            <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">prefix</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span>
+                        <span class="n">subparsers_from_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                            <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_prefix</span>
+                        <span class="p">)</span>
                         <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span>
                             <span class="n">subparsers</span><span class="p">,</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span>
                         <span class="p">)</span>
