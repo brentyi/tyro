@@ -415,6 +415,10 @@ def _field_list_from_pydantic(
     # Handle pydantic models.
     field_list = []
     for pd_field in cls.__fields__.values():  # type: ignore
+        helptext = pd_field.field_info.description
+        if helptext is None:
+            helptext = _docstrings.get_field_docstring(cls, pd_field.name)
+
         field_list.append(
             FieldDefinition.make(
                 name=pd_field.name,
@@ -422,7 +426,7 @@ def _field_list_from_pydantic(
                 default=MISSING_NONPROP
                 if pd_field.required
                 else pd_field.get_default(),
-                helptext=pd_field.field_info.description,
+                helptext=helptext,
             )
         )
     return field_list
@@ -747,9 +751,11 @@ def _get_dataclass_field_default(
             return getattr(parent_default_instance, field.name)
         else:
             warnings.warn(
-                f"Could not find field {field.name} in default instance"
-                f" {parent_default_instance}, which has"
-                f" type {type(parent_default_instance)},",
+                (
+                    f"Could not find field {field.name} in default instance"
+                    f" {parent_default_instance}, which has"
+                    f" type {type(parent_default_instance)},"
+                ),
                 stacklevel=2,
             )
 

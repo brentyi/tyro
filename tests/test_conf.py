@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Callable, Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext
@@ -496,7 +496,9 @@ def test_suppress_auto_fixed() -> None:
     @dataclasses.dataclass
     class Struct:
         a: int = 5
-        b: Callable = lambda x: 5
+
+        def b(x):
+            return 5
 
     def main(x: tyro.conf.SuppressFixed[Any] = Struct()):
         pass

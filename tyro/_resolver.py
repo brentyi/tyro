@@ -28,7 +28,8 @@ TypeOrCallable = TypeVar("TypeOrCallable", TypeForm, Callable)
 
 
 def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
-    """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise, returns typ."""
+    """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,
+    returns typ."""
     # TODO: Annotated[] handling should be revisited...
     typ, _ = unwrap_annotated(typ)
     origin = get_origin(typ)
