@@ -279,7 +279,8 @@
 
 
 <div class="viewcode-block" id="unwrap_origin_strip_extras"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_origin_strip_extras">[docs]</a><span class="k">def</span> <span class="nf">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise, returns typ.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
+<span class="sd">    returns typ.&quot;&quot;&quot;</span>
     <span class="c1"># TODO: Annotated[] handling should be revisited...</span>
     <span class="n">typ</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>

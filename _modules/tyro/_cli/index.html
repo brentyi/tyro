@@ -455,8 +455,10 @@
     <span class="k">if</span> <span class="n">deprecated_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;avoid_subparsers&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">AvoidSubcommands</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="s2">&quot;`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`&quot;</span>
-            <span class="s2">&quot; instead.&quot;</span><span class="p">,</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`&quot;</span>
+                <span class="s2">&quot; instead.&quot;</span>
+            <span class="p">),</span>
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
 
