@@ -48,3 +48,52 @@ def test_pydantic_helptext() -> None:
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
     assert "Documentation 3" in helptext
+
+
+def test_pydantic_suppress_base_model_helptext() -> None:
+    class Helptext(BaseModel):
+        x: int = Field(description="Documentation 1")
+
+        y: int = Field(description="Documentation 2")
+
+        z: int = Field(description="Documentation 3")
+
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            tyro.cli(Helptext, args=["--help"])
+    helptext = f.getvalue()
+
+    assert "Create a new model by parsing and validating" not in helptext
+    assert "Documentation 1" in helptext
+    assert "Documentation 2" in helptext
+    assert "Documentation 3" in helptext
+
+
+class HelptextWithFieldDocstring(BaseModel):
+    """This docstring should be printed as a description."""
+
+    x: int
+    """Documentation 1"""
+
+    y: int = Field(description="Documentation 2")
+
+    z: int = Field(description="Documentation 3")
+
+
+def test_pydantic_field_helptext_from_docstring() -> None:
+    f = io.StringIO()
+    with pytest.raises(SystemExit):
+        with contextlib.redirect_stdout(f):
+            tyro.cli(HelptextWithFieldDocstring, args=["--help"])
+    helptext = f.getvalue()
+    assert (
+        tyro._strings.strip_ansi_sequences(
+            cast(str, HelptextWithFieldDocstring.__doc__)
+        )
+        in helptext
+    )
+
+    assert "Documentation 1" in helptext
+    assert "Documentation 2" in helptext
+    assert "Documentation 3" in helptext

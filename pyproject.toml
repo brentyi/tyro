@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tyro"
-version = "0.3.37"
+version = "0.3.38"
 description = "Strongly typed, zero-effort CLI interfaces"
 authors = ["brentyi <brentyi@berkeley.edu>"]
 include = ["./tyro/**/*"]
@@ -75,4 +75,9 @@ exclude_lines = [
 
     # or anything that's deprecated
     "deprecated",
+]
+
+[tool.ruff]
+ignore = [
+    "E501",  # Ignore line length errors.
 ]

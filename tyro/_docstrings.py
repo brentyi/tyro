@@ -297,6 +297,11 @@ def get_callable_description(f: Callable) -> str:
     if isinstance(f, functools.partial):
         f = f.func
 
+    try:
+        import pydantic
+    except ImportError:
+        pydantic = None  # type: ignore
+
     # Note inspect.getdoc() causes some corner cases with TypedDicts.
     docstring = f.__doc__
     if (
@@ -304,7 +309,10 @@ def get_callable_description(f: Callable) -> str:
         and isinstance(f, type)
         # Ignore TypedDict's __init__ docstring, because it will just be `dict`
         and not is_typeddict(f)
+        # Ignore NamedTuple __init__ docstring.
         and not _resolver.is_namedtuple(f)
+        # Ignore pydantic base model constructor docstring.
+        and not (pydantic is not None and f.__init__ is pydantic.BaseModel.__init__)  # type: ignore
     ):
         docstring = f.__init__.__doc__  # type: ignore
     if docstring is None:

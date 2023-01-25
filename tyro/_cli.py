@@ -204,8 +204,10 @@ def _cli_impl(
     if deprecated_kwargs.get("avoid_subparsers", False):
         f = conf.AvoidSubcommands[f]  # type: ignore
         warnings.warn(
-            "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`"
-            " instead.",
+            (
+                "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`"
+                " instead."
+            ),
             stacklevel=2,
         )
 
