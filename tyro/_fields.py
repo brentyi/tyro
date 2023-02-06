@@ -162,7 +162,7 @@ class UnsupportedNestedTypeMessage:
     message: str
 
 
-def is_nested_type(typ: TypeForm[Any], default_instance: _DefaultInstance) -> bool:
+def is_nested_type(typ: TypeForm[Any], default_instance: DefaultInstance) -> bool:
     """Determine whether a type should be treated as a 'nested type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
     classes).
@@ -177,7 +177,7 @@ def is_nested_type(typ: TypeForm[Any], default_instance: _DefaultInstance) -> bo
 
 def field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
-    default_instance: _DefaultInstance,
+    default_instance: DefaultInstance,
 ) -> Tuple[
     Union[Callable, TypeForm[Any]], Dict[TypeVar, TypeForm], List[FieldDefinition]
 ]:
@@ -221,7 +221,7 @@ def field_list_from_callable(
 # Implementation details below.
 
 
-_DefaultInstance = Union[
+DefaultInstance = Union[
     Any, PropagatingMissingType, NonpropagatingMissingType, ExcludeFromCallType
 ]
 
@@ -240,7 +240,7 @@ _known_parsable_types = set(
 
 def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
-    default_instance: _DefaultInstance,
+    default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     f, found_subcommand_configs = _resolver.unwrap_annotated(
         f, conf._confstruct._SubcommandConfiguration
@@ -304,7 +304,7 @@ def _try_field_list_from_callable(
 
 
 def _field_list_from_typeddict(
-    cls: TypeForm[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     field_list = []
     valid_default_instance = (
@@ -336,7 +336,7 @@ def _field_list_from_typeddict(
 
 
 def _field_list_from_namedtuple(
-    cls: TypeForm[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle NamedTuples.
     #
@@ -367,7 +367,7 @@ def _field_list_from_namedtuple(
 
 
 def _field_list_from_dataclass(
-    cls: TypeForm[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle dataclasses.
     field_list = []
@@ -408,7 +408,7 @@ def _is_pydantic(cls: TypeForm[Any]) -> bool:
 
 
 def _field_list_from_pydantic(
-    cls: TypeForm[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert pydantic is not None
 
@@ -443,7 +443,7 @@ def _is_attrs(cls: TypeForm[Any]) -> bool:
 
 
 def _field_list_from_attrs(
-    cls: TypeForm[Any], default_instance: _DefaultInstance
+    cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert attr is not None
 
@@ -470,7 +470,7 @@ def _field_list_from_attrs(
 
 
 def _field_list_from_tuple(
-    f: Union[Callable, TypeForm[Any]], default_instance: _DefaultInstance
+    f: Union[Callable, TypeForm[Any]], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Fixed-length tuples.
     field_list = []
@@ -530,7 +530,7 @@ def _field_list_from_tuple(
 
 
 def _field_list_from_sequence_checked(
-    f: Union[Callable, TypeForm[Any]], default_instance: _DefaultInstance
+    f: Union[Callable, TypeForm[Any]], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     contained_type: Any
     if len(get_args(f)) == 0:
@@ -548,7 +548,7 @@ def _field_list_from_sequence_checked(
 
 def _try_field_list_from_sequence_inner(
     contained_type: TypeForm[Any],
-    default_instance: _DefaultInstance,
+    default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # When no default instance is specified:
     #     If we have List[int] => this can be parsed as a single field.
@@ -592,7 +592,7 @@ def _try_field_list_from_sequence_inner(
 
 def _field_list_from_dict(
     f: Union[Callable, TypeForm[Any]],
-    default_instance: _DefaultInstance,
+    default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     if default_instance in MISSING_SINGLETONS:
         return UnsupportedNestedTypeMessage(
@@ -616,7 +616,7 @@ def _field_list_from_dict(
 def _try_field_list_from_general_callable(
     f: Union[Callable, TypeForm[Any]],
     cls: Optional[TypeForm[Any]],
-    default_instance: _DefaultInstance,
+    default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Handle general callables.
     if default_instance not in MISSING_SINGLETONS:
