@@ -1,6 +1,7 @@
 """Core public API."""
 import argparse
 import dataclasses
+import pathlib
 import sys
 import warnings
 from typing import Callable, Optional, Sequence, TypeVar, Union, cast, overload
@@ -97,9 +98,9 @@ def cli(
       - Optional unions over nested structures (optional subparsers).
     - Generics (including nested generics).
 
-    Completion script generation for interactive shells is also provided. To print a
-    script that can be used for tab completion, pass in `--tyro-print-completion
-    {bash/zsh/tcsh}`.
+    Completion script generation for interactive shells is also provided. To write a
+    script that can be used for tab completion, pass in:
+        `--tyro-write-completion {bash/zsh/tcsh} {path to script to write}`.
 
     Args:
         f: Function or type.
@@ -167,7 +168,7 @@ def get_parser(
     """Get the `argparse.ArgumentParser` object generated under-the-hood by
     `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.
 
-    For tab completion, we recommend using `tyro.cli()`'s built-in `--tyro-print-completion`
+    For tab completion, we recommend using `tyro.cli()`'s built-in `--tyro-write-completion`
     flag."""
     return cast(
         argparse.ArgumentParser,
@@ -254,20 +255,28 @@ def _cli_impl(
 
     args = list(map(fix_arg, args))
 
-    # If we pass in the --tyro-print-completion flag: turn formatting tags, and get
-    # the shell we want to generate a completion script for (bash/zsh/tcsh).
+    # If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn
+    # formatting tags, and get the shell we want to generate a completion script for
+    # (bash/zsh/tcsh).
     #
-    # Note that shtab also offers an add_argument_to() functions that fulfills a similar
-    # goal, but manual parsing of argv is convenient for turning off formatting.
+    # shtab also offers an add_argument_to() functions that fulfills a similar goal, but
+    # manual parsing of argv is convenient for turning off formatting.
+    #
+    # Note: --tyro-print-completion is deprecated! --tyro-write-completion is less prone
+    # to errors from accidental logging, print statements, etc.
     print_completion = len(args) >= 2 and args[0] == "--tyro-print-completion"
+    write_completion = len(args) >= 3 and args[0] == "--tyro-write-completion"
 
     # Note: setting USE_RICH must happen before the parser specification is generated.
     # TODO: revisit this. Ideally we should be able to eliminate the global state
     # changes.
     completion_shell = None
-    if print_completion:
+    completion_target_path = None
+    if print_completion or write_completion:
         completion_shell = args[1]
-    if print_completion or return_parser:
+    if write_completion:
+        completion_target_path = pathlib.Path(args[2])
+    if print_completion or write_completion or return_parser:
         _arguments.USE_RICH = False
     else:
         _arguments.USE_RICH = True
@@ -299,7 +308,7 @@ def _cli_impl(
             _arguments.USE_RICH = True
             return parser
 
-        if print_completion:
+        if print_completion or write_completion:
             _arguments.USE_RICH = True
             assert completion_shell in (
                 "bash",
@@ -309,13 +318,24 @@ def _cli_impl(
                 "Shell should be one `bash`, `zsh`, or `tcsh`, but got"
                 f" {completion_shell}"
             )
-            print(
-                shtab.complete(
-                    parser=parser,
-                    shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
+
+            if write_completion:
+                assert completion_target_path is not None
+                completion_target_path.write_text(
+                    shtab.complete(
+                        parser=parser,
+                        shell=completion_shell,
+                        root_prefix=f"tyro_{parser.prog}",
+                    )
                 )
-            )
+            else:
+                print(
+                    shtab.complete(
+                        parser=parser,
+                        shell=completion_shell,
+                        root_prefix=f"tyro_{parser.prog}",
+                    )
+                )
             raise SystemExit()
 
         value_from_prefixed_field_name = vars(parser.parse_args(args=args))
