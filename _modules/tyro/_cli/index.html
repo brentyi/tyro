@@ -552,7 +552,11 @@
 
         <span class="k">if</span> <span class="n">print_completion</span><span class="p">:</span>
             <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">assert</span> <span class="n">completion_shell</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;bash&quot;</span><span class="p">,</span> <span class="s2">&quot;zsh&quot;</span><span class="p">,</span> <span class="s2">&quot;tcsh&quot;</span><span class="p">,),</span> <span class="p">(</span>
+            <span class="k">assert</span> <span class="n">completion_shell</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="s2">&quot;bash&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;zsh&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;tcsh&quot;</span><span class="p">,</span>
+            <span class="p">),</span> <span class="p">(</span>
                 <span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>

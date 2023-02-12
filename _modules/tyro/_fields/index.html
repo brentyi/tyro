@@ -620,9 +620,23 @@
 <span class="k">def</span> <span class="nf">_field_list_from_dataclass</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">_DefaultInstance</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># Check if dataclass is a flax module.</span>
+    <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">flax</span>
+
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">flax</span><span class="o">.</span><span class="n">linen</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+            <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
     <span class="c1"># Handle dataclasses.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">dc_field</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">init</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">)):</span>
+        <span class="c1"># For flax modules, we ignore the built-in &quot;name&quot; and &quot;parent&quot; fields.</span>
+        <span class="k">if</span> <span class="n">is_flax_module</span> <span class="ow">and</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">):</span>
+            <span class="k">continue</span>
+
         <span class="n">default</span> <span class="o">=</span> <span class="n">_get_dataclass_field_default</span><span class="p">(</span><span class="n">dc_field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
         <span class="c1"># Try to get helptext from field metadata. This is also intended to be</span>
@@ -674,9 +688,9 @@
             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">pd_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">typ</span><span class="o">=</span><span class="n">pd_field</span><span class="o">.</span><span class="n">outer_type_</span><span class="p">,</span>
-                <span class="n">default</span><span class="o">=</span><span class="n">MISSING_NONPROP</span>
-                <span class="k">if</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">required</span>
-                <span class="k">else</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(),</span>
+                <span class="n">default</span><span class="o">=</span><span class="p">(</span>
+                    <span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">required</span> <span class="k">else</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+                <span class="p">),</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -959,9 +973,11 @@
                 <span class="n">typ</span><span class="o">=</span><span class="n">hints</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
-                <span class="n">markers</span><span class="o">=</span><span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span>
-                <span class="k">else</span> <span class="p">(),</span>
+                <span class="n">markers</span><span class="o">=</span><span class="p">(</span>
+                    <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span>
+                    <span class="k">else</span> <span class="p">()</span>
+                <span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
 

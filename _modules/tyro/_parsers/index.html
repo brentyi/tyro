@@ -393,11 +393,13 @@
                         <span class="p">),</span>
                     <span class="p">)</span>
                     <span class="n">nested_parser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                        <span class="c1"># Recursively apply marker types.</span>
-                        <span class="n">field</span><span class="o">.</span><span class="n">typ</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-                        <span class="k">else</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-                            <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
+                        <span class="p">(</span>
+                            <span class="c1"># Recursively apply marker types.</span>
+                            <span class="n">field</span><span class="o">.</span><span class="n">typ</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+                            <span class="k">else</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                                <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
+                            <span class="p">)</span>
                         <span class="p">),</span>
                         <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                         <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
@@ -690,10 +692,12 @@
                     <span class="n">subcommand_config</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
                 <span class="p">)</span>
             <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                <span class="c1"># Recursively apply markers.</span>
-                <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">option</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                <span class="k">else</span> <span class="n">option</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="c1"># Recursively apply markers.</span>
+                    <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">option</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="k">else</span> <span class="n">option</span>
+                <span class="p">),</span>
                 <span class="n">description</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>

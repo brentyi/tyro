@@ -405,9 +405,9 @@
                 <span class="k">else</span> <span class="n">str_from_rich</span><span class="p">(</span>
                     <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
                         <span class="n">out</span><span class="p">,</span>
-                        <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span>
-                        <span class="k">if</span> <span class="n">out</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span>
-                        <span class="k">else</span> <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+                        <span class="n">style</span><span class="o">=</span><span class="p">(</span>
+                            <span class="n">THEME</span><span class="o">.</span><span class="n">metavar_fixed</span> <span class="k">if</span> <span class="n">out</span> <span class="o">==</span> <span class="s2">&quot;</span><span class="si">{fixed}</span><span class="s2">&quot;</span> <span class="k">else</span> <span class="n">THEME</span><span class="o">.</span><span class="n">metavar</span>
+                        <span class="p">),</span>
                     <span class="p">),</span>
                     <span class="n">soft_wrap</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -675,9 +675,11 @@
                         <span class="p">)</span>
                         <span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
                         <span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">),</span>
-                        <span class="n">item_parts</span> <span class="o">+</span> <span class="p">[</span><span class="n">description_part</span><span class="p">]</span>
-                        <span class="k">if</span> <span class="n">description_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="k">else</span> <span class="n">item_parts</span><span class="p">,</span>
+                        <span class="p">(</span>
+                            <span class="n">item_parts</span> <span class="o">+</span> <span class="p">[</span><span class="n">description_part</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="n">description_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                            <span class="k">else</span> <span class="n">item_parts</span>
+                        <span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
             <span class="p">)</span>
