@@ -369,9 +369,23 @@ def _field_list_from_namedtuple(
 def _field_list_from_dataclass(
     cls: TypeForm[Any], default_instance: _DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    # Check if dataclass is a flax module.
+    is_flax_module = False
+    try:
+        import flax
+
+        if issubclass(cls, flax.linen.Module):
+            is_flax_module = True
+    except ImportError:
+        pass
+
     # Handle dataclasses.
     field_list = []
     for dc_field in filter(lambda field: field.init, _resolver.resolved_fields(cls)):
+        # For flax modules, we ignore the built-in "name" and "parent" fields.
+        if is_flax_module and dc_field.name in ("name", "parent"):
+            continue
+
         default = _get_dataclass_field_default(dc_field, default_instance)
 
         # Try to get helptext from field metadata. This is also intended to be
@@ -423,9 +437,9 @@ def _field_list_from_pydantic(
             FieldDefinition.make(
                 name=pd_field.name,
                 typ=pd_field.outer_type_,
-                default=MISSING_NONPROP
-                if pd_field.required
-                else pd_field.get_default(),
+                default=(
+                    MISSING_NONPROP if pd_field.required else pd_field.get_default()
+                ),
                 helptext=helptext,
             )
         )
@@ -708,9 +722,11 @@ def _field_list_from_params(
                 typ=hints[param.name],
                 default=default,
                 helptext=helptext,
-                markers=(_markers.Positional, _markers._PositionalCall)
-                if param.kind is inspect.Parameter.POSITIONAL_ONLY
-                else (),
+                markers=(
+                    (_markers.Positional, _markers._PositionalCall)
+                    if param.kind is inspect.Parameter.POSITIONAL_ONLY
+                    else ()
+                ),
             )
         )
 

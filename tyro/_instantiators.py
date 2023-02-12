@@ -205,9 +205,11 @@ def instantiator_from_type(
 
     return instantiator_base_case, InstantiatorMetadata(
         nargs=1,
-        metavar=typ.__name__.upper()
-        if auto_choices is None
-        else "{" + ",".join(map(str, auto_choices)) + "}",
+        metavar=(
+            typ.__name__.upper()
+            if auto_choices is None
+            else "{" + ",".join(map(str, auto_choices)) + "}"
+        ),
         choices=auto_choices,
     )
 

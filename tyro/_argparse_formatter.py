@@ -154,9 +154,9 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 else str_from_rich(
                     Text.from_ansi(
                         out,
-                        style=THEME.metavar_fixed
-                        if out == "{fixed}"
-                        else THEME.metavar,
+                        style=(
+                            THEME.metavar_fixed if out == "{fixed}" else THEME.metavar
+                        ),
                     ),
                     soft_wrap=True,
                 )
@@ -424,9 +424,11 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         )
                         .rstrip()
                         .split("\n"),
-                        item_parts + [description_part]
-                        if description_part is not None
-                        else item_parts,
+                        (
+                            item_parts + [description_part]
+                            if description_part is not None
+                            else item_parts
+                        ),
                     )
                 )
             )
