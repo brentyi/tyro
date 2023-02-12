@@ -61,9 +61,9 @@ Package Contents
 
    * Generics (including nested generics).
 
-   Completion script generation for interactive shells is also provided. To print a
-   script that can be used for tab completion, pass in ``--tyro-print-completion
-   {bash/zsh/tcsh}``.
+   Completion script generation for interactive shells is also provided. To write a
+   script that can be used for tab completion, pass in:
+       ``--tyro-write-completion {bash/zsh/tcsh} {path to script to write}``.
 
    :param f: Function or type.
    :param prog: The name of the program printed in helptext. Mirrors argument from

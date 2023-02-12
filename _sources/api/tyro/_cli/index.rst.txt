@@ -63,9 +63,9 @@ Module Contents
 
    * Generics (including nested generics).
 
-   Completion script generation for interactive shells is also provided. To print a
-   script that can be used for tab completion, pass in ``--tyro-print-completion
-   {bash/zsh/tcsh}``.
+   Completion script generation for interactive shells is also provided. To write a
+   script that can be used for tab completion, pass in:
+       ``--tyro-write-completion {bash/zsh/tcsh} {path to script to write}``.
 
    :param f: Function or type.
    :param prog: The name of the program printed in helptext. Mirrors argument from
@@ -90,6 +90,6 @@ Module Contents
    Get the ``argparse.ArgumentParser`` object generated under-the-hood by
    ``tyro.cli()``. Useful for tools like ``sphinx-argparse``\ , ``argcomplete``\ , etc.
 
-   For tab completion, we recommend using ``tyro.cli()``\ 's built-in ``--tyro-print-completion``
+   For tab completion, we recommend using ``tyro.cli()``\ 's built-in ``--tyro-write-completion``
    flag.
 

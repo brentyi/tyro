@@ -252,6 +252,7 @@
 <span></span><span class="sd">&quot;&quot;&quot;Core public API.&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
@@ -348,9 +349,9 @@
 <span class="sd">      - Optional unions over nested structures (optional subparsers).</span>
 <span class="sd">    - Generics (including nested generics).</span>
 
-<span class="sd">    Completion script generation for interactive shells is also provided. To print a</span>
-<span class="sd">    script that can be used for tab completion, pass in `--tyro-print-completion</span>
-<span class="sd">    {bash/zsh/tcsh}`.</span>
+<span class="sd">    Completion script generation for interactive shells is also provided. To write a</span>
+<span class="sd">    script that can be used for tab completion, pass in:</span>
+<span class="sd">        `--tyro-write-completion {bash/zsh/tcsh} {path to script to write}`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        f: Function or type.</span>
@@ -418,7 +419,7 @@
     <span class="sd">&quot;&quot;&quot;Get the `argparse.ArgumentParser` object generated under-the-hood by</span>
 <span class="sd">    `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.</span>
 
-<span class="sd">    For tab completion, we recommend using `tyro.cli()`&#39;s built-in `--tyro-print-completion`</span>
+<span class="sd">    For tab completion, we recommend using `tyro.cli()`&#39;s built-in `--tyro-write-completion`</span>
 <span class="sd">    flag.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>
         <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
@@ -505,20 +506,28 @@
 
     <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">fix_arg</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span>
 
-    <span class="c1"># If we pass in the --tyro-print-completion flag: turn formatting tags, and get</span>
-    <span class="c1"># the shell we want to generate a completion script for (bash/zsh/tcsh).</span>
+    <span class="c1"># If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn</span>
+    <span class="c1"># formatting tags, and get the shell we want to generate a completion script for</span>
+    <span class="c1"># (bash/zsh/tcsh).</span>
     <span class="c1">#</span>
-    <span class="c1"># Note that shtab also offers an add_argument_to() functions that fulfills a similar</span>
-    <span class="c1"># goal, but manual parsing of argv is convenient for turning off formatting.</span>
+    <span class="c1"># shtab also offers an add_argument_to() functions that fulfills a similar goal, but</span>
+    <span class="c1"># manual parsing of argv is convenient for turning off formatting.</span>
+    <span class="c1">#</span>
+    <span class="c1"># Note: --tyro-print-completion is deprecated! --tyro-write-completion is less prone</span>
+    <span class="c1"># to errors from accidental logging, print statements, etc.</span>
     <span class="n">print_completion</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--tyro-print-completion&quot;</span>
+    <span class="n">write_completion</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--tyro-write-completion&quot;</span>
 
     <span class="c1"># Note: setting USE_RICH must happen before the parser specification is generated.</span>
     <span class="c1"># TODO: revisit this. Ideally we should be able to eliminate the global state</span>
     <span class="c1"># changes.</span>
     <span class="n">completion_shell</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">print_completion</span><span class="p">:</span>
+    <span class="n">completion_target_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span><span class="p">:</span>
         <span class="n">completion_shell</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">return_parser</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">write_completion</span><span class="p">:</span>
+        <span class="n">completion_target_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span> <span class="ow">or</span> <span class="n">return_parser</span><span class="p">:</span>
         <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
@@ -550,7 +559,7 @@
             <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">return</span> <span class="n">parser</span>
 
-        <span class="k">if</span> <span class="n">print_completion</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span><span class="p">:</span>
             <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">assert</span> <span class="n">completion_shell</span> <span class="ow">in</span> <span class="p">(</span>
                 <span class="s2">&quot;bash&quot;</span><span class="p">,</span>
@@ -560,13 +569,24 @@
                 <span class="s2">&quot;Shell should be one `bash`, `zsh`, or `tcsh`, but got&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span>
-                <span class="n">shtab</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
-                    <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span>
-                    <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>
-                    <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+
+            <span class="k">if</span> <span class="n">write_completion</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">completion_target_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="n">completion_target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
+                    <span class="n">shtab</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
+                        <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span>
+                        <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>
+                        <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="n">shtab</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
+                        <span class="n">parser</span><span class="o">=</span><span class="n">parser</span><span class="p">,</span>
+                        <span class="n">shell</span><span class="o">=</span><span class="n">completion_shell</span><span class="p">,</span>
+                        <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
             <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">()</span>
 
         <span class="n">value_from_prefixed_field_name</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">))</span>

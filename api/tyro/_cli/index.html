@@ -303,9 +303,11 @@ classes.</p>
 </li>
 <li><p>Generics (including nested generics).</p></li>
 </ul>
-<p>Completion script generation for interactive shells is also provided. To print a
-script that can be used for tab completion, pass in <code class="docutils literal notranslate"><span class="pre">--tyro-print-completion</span>
-<span class="pre">{bash/zsh/tcsh}</span></code>.</p>
+<p>Completion script generation for interactive shells is also provided. To write a
+script that can be used for tab completion, pass in:</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">--tyro-write-completion</span> <span class="pre">{bash/zsh/tcsh}</span> <span class="pre">{path</span> <span class="pre">to</span> <span class="pre">script</span> <span class="pre">to</span> <span class="pre">write}</span></code>.</p>
+</div></blockquote>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -337,7 +339,7 @@ equivalent.</p>
 <span class="sig-prename descclassname"><span class="pre">tyro._cli.</span></span><span class="sig-name descname"><span class="pre">get_parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">OutT</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">OutT</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">argparse.ArgumentParser</span></span></span></dt>
 <dd><p>Get the <code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code> object generated under-the-hood by
 <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code>. Useful for tools like <code class="docutils literal notranslate"><span class="pre">sphinx-argparse</span></code>, <code class="docutils literal notranslate"><span class="pre">argcomplete</span></code>, etc.</p>
-<p>For tab completion, we recommend using <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code>‘s built-in <code class="docutils literal notranslate"><span class="pre">--tyro-print-completion</span></code>
+<p>For tab completion, we recommend using <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code>‘s built-in <code class="docutils literal notranslate"><span class="pre">--tyro-write-completion</span></code>
 flag.</p>
 </dd></dl>
 

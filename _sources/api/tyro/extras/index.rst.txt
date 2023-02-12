@@ -27,7 +27,7 @@ Package Contents
    Get the ``argparse.ArgumentParser`` object generated under-the-hood by
    ``tyro.cli()``. Useful for tools like ``sphinx-argparse``\ , ``argcomplete``\ , etc.
 
-   For tab completion, we recommend using ``tyro.cli()``\ 's built-in ``--tyro-print-completion``
+   For tab completion, we recommend using ``tyro.cli()``\ 's built-in ``--tyro-write-completion``
    flag.
 
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> tyro._typing.TypeForm[T]
