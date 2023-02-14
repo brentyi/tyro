@@ -548,3 +548,10 @@ def test_return_parser() -> None:
         return parser
 
     assert isinstance(tyro.cli(main, args=[]), argparse.ArgumentParser)
+
+
+def test_pathlike():
+    def main(x: os.PathLike, /) -> os.PathLike:
+        return x
+
+    assert tyro.cli(main, args=["/dev/null"]) == pathlib.Path("/dev/null")

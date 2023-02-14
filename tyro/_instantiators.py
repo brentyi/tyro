@@ -34,6 +34,8 @@ import collections.abc
 import dataclasses
 import enum
 import inspect
+import os
+import pathlib
 from collections import deque
 from typing import (
     Any,
@@ -122,6 +124,12 @@ def instantiator_from_type(
             metavar="{None}",
             choices=("None",),
         )
+
+    # Instantiate os.PathLike annotations using pathlib.Path.
+    # Ideally this should be implemented in a more general way, eg using
+    # https://github.com/brentyi/tyro/pull/30
+    if typ is os.PathLike:
+        typ = pathlib.Path
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
