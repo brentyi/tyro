@@ -2,6 +2,7 @@ import argparse
 import copy
 import dataclasses
 import enum
+import os
 import pathlib
 from typing import (
     Any,
@@ -551,7 +552,7 @@ def test_return_parser() -> None:
 
 
 def test_pathlike():
-    def main(x: os.PathLike, /) -> os.PathLike:
+    def main(x: os.PathLike) -> os.PathLike:
         return x
 
-    assert tyro.cli(main, args=["/dev/null"]) == pathlib.Path("/dev/null")
+    assert tyro.cli(main, args=["--x", "/dev/null"]) == pathlib.Path("/dev/null")
