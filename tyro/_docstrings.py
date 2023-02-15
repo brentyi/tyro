@@ -306,7 +306,7 @@ def get_callable_description(f: Callable) -> str:
     docstring = f.__doc__
     if (
         docstring is None
-        and isinstance(f, type)
+        and inspect.isclass(f)
         # Ignore TypedDict's __init__ docstring, because it will just be `dict`
         and not is_typeddict(f)
         # Ignore NamedTuple __init__ docstring.

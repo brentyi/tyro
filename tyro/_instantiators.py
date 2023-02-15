@@ -52,7 +52,14 @@ from typing import (
     overload,
 )
 
-from typing_extensions import Annotated, Final, Literal, get_args, get_origin
+from typing_extensions import (
+    Annotated,
+    Final,
+    Literal,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 from . import _strings
 from ._typing import TypeForm
@@ -93,6 +100,47 @@ _builtin_set = set(
         __builtins__.values(),  # type: ignore
     )
 )
+
+
+def _has_parsable_signature(typ: Union[Callable, TypeForm[Any]]) -> bool:
+    try:
+        inspect.signature(typ)
+    except ValueError:
+        return False
+    else:
+        return True
+
+
+def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
+    """Check if type is a string converter, i.e., (arg: Union[str, Any]) -> T."""
+    param_count = 0
+    has_var_positional = False
+    try:
+        signature = inspect.signature(typ)
+    except ValueError:
+        # No signature, this is often the case with pybind, etc.
+        return False
+
+    type_annotations = get_type_hints(typ)
+    # Some checks we can do if the signature is available!
+    for i, param in enumerate(signature.parameters.values()):
+        annotation = type_annotations.get(param.name, param.annotation)
+        if i == 0 and not (
+            (get_origin(annotation) is Union and str in get_args(annotation))
+            or annotation in (str, inspect.Parameter.empty)
+        ):
+            return False
+        if param.kind is inspect.Parameter.VAR_POSITIONAL:
+            has_var_positional = True
+        elif param.default is inspect.Parameter.empty and param.kind is not (
+            inspect.Parameter.VAR_KEYWORD
+        ):
+            param_count += 1
+
+    # Raise an error if parameters look wrong.
+    if not (param_count == 1 or (param_count == 0 and has_var_positional)):
+        return False
+    return True
 
 
 def instantiator_from_type(
@@ -145,43 +193,21 @@ def instantiator_from_type(
             f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
             " callable."
         )
-    else:
-        param_count = 0
-        has_var_positional = False
-        try:
-            signature = inspect.signature(typ)
-        except ValueError:
-            # No signature, this is often the case with pybind, etc.
-            signature = None
-
-        if signature is not None:
-            # Some checks we can do if the signature is available!
-            for i, param in enumerate(signature.parameters.values()):
-                if i == 0 and param.annotation not in (str, inspect.Parameter.empty):
-                    raise UnsupportedTypeAnnotationError(
-                        f"Expected {typ} to be an `(arg: str) -> T` type converter, but"
-                        f" got {signature}."
-                    )
-                if param.kind is inspect.Parameter.VAR_POSITIONAL:
-                    has_var_positional = True
-                elif param.default is inspect.Parameter.empty and param.kind is not (
-                    inspect.Parameter.VAR_KEYWORD
-                ):
-                    param_count += 1
-
-            # Raise an error if parameters look wrong.
-            if not (param_count == 1 or (param_count == 0 and has_var_positional)):
-                raise UnsupportedTypeAnnotationError(
-                    f"Expected {typ} to be an `(arg: str) -> T` type converter, but got"
-                    f" {signature}. You may have a nested type in a container, which is"
-                    " unsupported."
-                )
+    # pybind objects might not have a parsable signature
+    # One day this should be fixed with `__text_signature__`
+    elif not _has_parsable_signature(typ):
+        pass
+    elif not is_type_string_converter(typ):
+        raise UnsupportedTypeAnnotationError(
+            f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
+            " a valid type converter."
+        )
 
     # Special case `choices` for some types, as implemented in `instance_from_string()`.
     auto_choices: Optional[Tuple[str, ...]] = None
     if typ is bool:
         auto_choices = ("True", "False")
-    elif isinstance(typ, type) and issubclass(typ, enum.Enum):
+    elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
         auto_choices = tuple(x.name for x in typ)
 
     def instantiator_base_case(strings: List[str]) -> Any:

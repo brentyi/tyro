@@ -551,6 +551,34 @@ def test_return_parser() -> None:
     assert isinstance(tyro.cli(main, args=[]), argparse.ArgumentParser)
 
 
+def test_pathlike_custom_class() -> None:
+    class CustomPath(pathlib.PurePosixPath):
+        def __new__(cls, *args: Union[str, os.PathLike]):
+            return super().__new__(cls, *args)
+
+    def main(a: CustomPath) -> CustomPath:
+        return a
+
+    assert tyro.cli(main, args=["--a", "/dev/null"]) == CustomPath("/dev/null")
+
+
+def test_class_with_new_and_no_init() -> None:
+    class A(object):
+        def __new__(cls, x: int = 5):
+            return cls._custom_initializer(x)
+
+        @classmethod
+        def _custom_initializer(cls, x: int = 5):
+            self = object.__new__(cls)
+            self.x = x  # type: ignore
+            return self
+
+        def __eq__(self, other) -> bool:
+            return self.x == other.x  # type: ignore
+
+    assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
+
+
 def test_pathlike():
     def main(x: os.PathLike) -> os.PathLike:
         return x
