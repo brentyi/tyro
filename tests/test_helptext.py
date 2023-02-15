@@ -1,5 +1,6 @@
 import dataclasses
 import enum
+import os
 import pathlib
 from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
@@ -562,3 +563,11 @@ def test_unparsable() -> None:
     assert "--x {fixed}" in helptext
     assert "(fixed to:" in helptext
     assert "torch" in helptext
+
+
+def test_pathlike() -> None:
+    def main(x: os.PathLike) -> None:
+        pass
+
+    helptext = get_helptext(main)
+    assert "--x PATH " in helptext
