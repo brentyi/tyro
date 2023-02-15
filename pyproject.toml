@@ -81,3 +81,8 @@ exclude_lines = [
 ignore = [
     "E501",  # Ignore line length errors.
 ]
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
