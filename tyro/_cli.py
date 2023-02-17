@@ -4,9 +4,21 @@ import dataclasses
 import pathlib
 import sys
 import warnings
-from typing import Callable, Optional, Sequence, TypeVar, Union, cast, overload
+from typing import (
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 import shtab
+from typing_extensions import Literal
 
 from . import (
     _argparse_formatter,
@@ -36,6 +48,36 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
+    return_unknown_args: Literal[False] = False,
+) -> OutT:
+    ...
+
+
+@overload
+def cli(
+    f: TypeForm[OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default: Optional[OutT] = None,
+    return_unknown_args: Literal[True],
+) -> Tuple[OutT, List[str]]:
+    ...
+
+
+@overload
+def cli(
+    f: Callable[..., OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    # Note that passing a default makes sense for things like dataclasses, but are not
+    # supported for general callables. These can, however, be specified in the signature
+    # of the callable itself.
+    default: None = None,
+    return_unknown_args: Literal[False] = False,
 ) -> OutT:
     ...
 
@@ -51,7 +93,8 @@ def cli(
     # supported for general callables. These can, however, be specified in the signature
     # of the callable itself.
     default: None = None,
-) -> OutT:
+    return_unknown_args: Literal[True],
+) -> Tuple[OutT, List[str]]:
     ...
 
 
@@ -62,8 +105,9 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
+    return_unknown_args: bool = False,
     **deprecated_kwargs,
-) -> OutT:
+) -> Union[OutT, Tuple[OutT, List[str]]]:
     """Call or instantiate `f`, with inputs populated from an automatically generated
     CLI interface.
 
@@ -115,23 +159,29 @@ def cli(
             type like a dataclass or dictionary, but not if `f` is a general callable like
             a function or standard class. Helpful for merging CLI arguments with values
             loaded from elsewhere. (for example, a config object loaded from a yaml file)
+        return_unknown_args: If True, return a tuple of the output of `f` and a list of
+            unknown arguments. Mirrors the unknown arguments returned from
+            `argparse.ArgumentParser.parse_known_args()`.
 
     Returns:
         The output of `f(...)` or an instance `f`. If `f` is a class, the two are
-        equivalent.
+        equivalent. If `return_unknown_args` is True, returns a tuple of the output of
+        `f(...)` and a list of unknown arguments.
     """
-    return cast(
-        OutT,
-        _cli_impl(
-            f,
-            prog=prog,
-            description=description,
-            args=args,
-            default=default,
-            return_parser=False,
-            **deprecated_kwargs,
-        ),
+    output = _cli_impl(
+        f,
+        prog=prog,
+        description=description,
+        args=args,
+        default=default,
+        return_parser=False,
+        return_unknown_args=return_unknown_args,
+        **deprecated_kwargs,
     )
+    if return_unknown_args:
+        return cast(Tuple[OutT, List[str]], output)
+    else:
+        return cast(OutT, output)
 
 
 @overload
@@ -179,6 +229,7 @@ def get_parser(
             args=None,
             default=default,
             return_parser=True,
+            return_unknown_args=False,
         ),
     )
 
@@ -191,8 +242,9 @@ def _cli_impl(
     args: Optional[Sequence[str]],
     default: Optional[OutT],
     return_parser: bool,
+    return_unknown_args: bool,
     **deprecated_kwargs,
-) -> Union[OutT, argparse.ArgumentParser]:
+) -> Union[OutT, argparse.ArgumentParser, Tuple[OutT, List[str]],]:
     """Helper for stitching the `tyro` pipeline together.
 
     Converts `f` into a
@@ -242,18 +294,32 @@ def _cli_impl(
 
     # Read and fix arguments. If the user passes in --field_name instead of
     # --field-name, correct for them.
-    args = sys.argv[1:] if args is None else args
+    args = list(sys.argv[1:]) if args is None else list(args)
 
-    def fix_arg(arg: str) -> str:
+    # Fix arguments. This will modify all option-style arguments replacing
+    # underscores with dashes. This is to support the common convention of using
+    # underscores in variable names, but dashes in command line arguments.
+    # If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.
+    modified_args: Dict[str, str] = {}
+    for index, arg in enumerate(args):
         if not arg.startswith("--"):
-            return arg
+            continue
+
         if "=" in arg:
             arg, _, val = arg.partition("=")
-            return arg.replace("_", "-") + "=" + val
+            fixed = arg.replace("_", "-") + "=" + val
         else:
-            return arg.replace("_", "-")
-
-    args = list(map(fix_arg, args))
+            fixed = arg.replace("_", "-")
+        if (
+            return_unknown_args
+            and fixed in modified_args
+            and modified_args[fixed] != arg
+        ):
+            raise RuntimeError(
+                f"Ambiguous arguments: " + modified_args[fixed] + " and " + arg
+            )
+        modified_args[fixed] = arg
+        args[index] = fixed
 
     # If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn
     # formatting tags, and get the shell we want to generate a completion script for
@@ -338,7 +404,12 @@ def _cli_impl(
                 )
             raise SystemExit()
 
-        value_from_prefixed_field_name = vars(parser.parse_args(args=args))
+        if return_unknown_args:
+            namespace, unknown_args = parser.parse_known_args(args=args)
+        else:
+            unknown_args = None
+            namespace = parser.parse_args(args=args)
+        value_from_prefixed_field_name = vars(namespace)
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
@@ -369,4 +440,13 @@ def _cli_impl(
 
     if dummy_wrapped:
         out = getattr(out, _strings.dummy_field_name)
-    return out
+
+    if return_unknown_args:
+        assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
+        # If we're parsed unknown args, we should return the original args, not
+        # the fixed ones.
+        unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
+        return out, unknown_args
+    else:
+        assert unknown_args is None, "Should have parsed with `parse_args()`"
+        return out
