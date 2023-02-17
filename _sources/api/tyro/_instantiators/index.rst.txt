@@ -83,6 +83,11 @@ Module Contents
    
    Exception raised when an unsupported type annotation is detected.
 
+.. py:function:: is_type_string_converter(typ: Union[Callable, tyro._typing.TypeForm[Any]]) -> bool
+
+   
+   Check if type is a string converter, i.e., (arg: Union[str, Any]) -> T.
+
 .. py:function:: instantiator_from_type(typ: tyro._typing.TypeForm, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]]) -> Tuple[Instantiator, InstantiatorMetadata]
 
    

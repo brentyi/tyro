@@ -303,7 +303,14 @@
     <span class="n">overload</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Final</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Annotated</span><span class="p">,</span>
+    <span class="n">Final</span><span class="p">,</span>
+    <span class="n">Literal</span><span class="p">,</span>
+    <span class="n">get_args</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_type_hints</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
@@ -344,6 +351,39 @@
         <span class="n">__builtins__</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span>  <span class="c1"># type: ignore</span>
     <span class="p">)</span>
 <span class="p">)</span>
+
+
+<div class="viewcode-block" id="is_type_string_converter"><a class="viewcode-back" href="../../../api/tyro/_instantiators/#tyro._instantiators.is_type_string_converter">[docs]</a><span class="k">def</span> <span class="nf">is_type_string_converter</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Check if type is a string converter, i.e., (arg: Union[str, Any]) -&gt; T.&quot;&quot;&quot;</span>
+    <span class="n">param_count</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">has_var_positional</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># pybind objects might not have a parsable signature. We try to be tolerant in this case.</span>
+        <span class="c1"># One day this should be fixed with `__text_signature__`.</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">type_annotations</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="c1"># Some checks we can do if the signature is available!</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+        <span class="n">annotation</span> <span class="o">=</span> <span class="n">type_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span> <span class="ow">and</span> <span class="nb">str</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">))</span>
+            <span class="ow">or</span> <span class="n">annotation</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
+            <span class="n">has_var_positional</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">(</span>
+            <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span>
+        <span class="p">):</span>
+            <span class="n">param_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># Raise an error if parameters look wrong.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">param_count</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="p">(</span><span class="n">param_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">has_var_positional</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="instantiator_from_type"><a class="viewcode-back" href="../../../api/tyro/_instantiators/#tyro._instantiators.instantiator_from_type">[docs]</a><span class="k">def</span> <span class="nf">instantiator_from_type</span><span class="p">(</span>
@@ -396,43 +436,17 @@
             <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2"> to be an `(arg: str) -&gt; T` type converter, but is not&quot;</span>
             <span class="s2">&quot; callable.&quot;</span>
         <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">param_count</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">has_var_positional</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">signature</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-            <span class="c1"># No signature, this is often the case with pybind, etc.</span>
-            <span class="n">signature</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="n">signature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Some checks we can do if the signature is available!</span>
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
-                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2"> to be an `(arg: str) -&gt; T` type converter, but&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; got </span><span class="si">{</span><span class="n">signature</span><span class="si">}</span><span class="s2">.&quot;</span>
-                    <span class="p">)</span>
-                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
-                    <span class="n">has_var_positional</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="p">(</span>
-                    <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span>
-                <span class="p">):</span>
-                    <span class="n">param_count</span> <span class="o">+=</span> <span class="mi">1</span>
-
-            <span class="c1"># Raise an error if parameters look wrong.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">param_count</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="p">(</span><span class="n">param_count</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">has_var_positional</span><span class="p">)):</span>
-                <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2"> to be an `(arg: str) -&gt; T` type converter, but got&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">signature</span><span class="si">}</span><span class="s2">. You may have a nested type in a container, which is&quot;</span>
-                    <span class="s2">&quot; unsupported.&quot;</span>
-                <span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">is_type_string_converter</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2"> to be an `(arg: str) -&gt; T` type converter, but is not&quot;</span>
+            <span class="s2">&quot; a valid type converter.&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Special case `choices` for some types, as implemented in `instance_from_string()`.</span>
     <span class="n">auto_choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="n">auto_choices</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
         <span class="n">auto_choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">typ</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">instantiator_base_case</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>

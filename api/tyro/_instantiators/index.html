@@ -334,6 +334,20 @@ which map sequences of strings to the annotated type.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="tyro._instantiators.is_type_string_converter">
+<span class="sig-prename descclassname"><span class="pre">tyro._instantiators.</span></span><span class="sig-name descname"><span class="pre">is_type_string_converter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_instantiators/#is_type_string_converter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._instantiators.is_type_string_converter" title="Permalink to this definition">#</a></dt>
+<dd><p>Check if type is a string converter, i.e., (arg: Union[str, Any]) -&gt; T.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>typ</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="tyro._instantiators.instantiator_from_type">
 <span class="sig-prename descclassname"><span class="pre">tyro._instantiators.</span></span><span class="sig-name descname"><span class="pre">instantiator_from_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_from_typevar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Instantiator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata" title="tyro._instantiators.InstantiatorMetadata"><span class="pre">InstantiatorMetadata</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_instantiators/#instantiator_from_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._instantiators.instantiator_from_type" title="Permalink to this definition">#</a></dt>
 <dd><p>Recursive helper for parsing type annotations.</p>
@@ -415,6 +429,7 @@ strings. The latter applies when argparse’s <code class="docutils literal notr
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._instantiators.UnsupportedTypeAnnotationError">UnsupportedTypeAnnotationError</a></li>
+<li><a class="reference internal" href="#tyro._instantiators.is_type_string_converter">is_type_string_converter</a></li>
 <li><a class="reference internal" href="#tyro._instantiators.instantiator_from_type">instantiator_from_type</a></li>
 </ul>
 </li>
