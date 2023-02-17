@@ -266,7 +266,8 @@ def _try_field_list_from_callable(
             f = cls.__new__
         else:
             return UnsupportedNestedTypeMessage(
-                f"Cannot instantiate class {cls} with no unique __init__ or __new__ method."
+                f"Cannot instantiate class {cls} with no unique __init__ or __new__"
+                " method."
             )
         f_origin = cls  # type: ignore
 

@@ -511,9 +511,7 @@ def test_metavar_4() -> None:
 
 def test_metavar_5() -> None:
     def main(
-        x: List[
-            Union[Tuple[int, int], Tuple[str, str]],
-        ] = [(1, 1), (2, 2)]
+        x: List[Union[Tuple[int, int], Tuple[str, str]]] = [(1, 1), (2, 2)]
     ) -> None:
         pass
 
