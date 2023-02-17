@@ -102,15 +102,6 @@ _builtin_set = set(
 )
 
 
-def _has_parsable_signature(typ: Union[Callable, TypeForm[Any]]) -> bool:
-    try:
-        inspect.signature(typ)
-    except ValueError:
-        return False
-    else:
-        return True
-
-
 def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
     """Check if type is a string converter, i.e., (arg: Union[str, Any]) -> T."""
     param_count = 0
@@ -118,8 +109,9 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
     try:
         signature = inspect.signature(typ)
     except ValueError:
-        # No signature, this is often the case with pybind, etc.
-        return False
+        # pybind objects might not have a parsable signature. We try to be tolerant in this case.
+        # One day this should be fixed with `__text_signature__`.
+        return True
 
     type_annotations = get_type_hints(typ)
     # Some checks we can do if the signature is available!
@@ -193,10 +185,6 @@ def instantiator_from_type(
             f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
             " callable."
         )
-    # pybind objects might not have a parsable signature
-    # One day this should be fixed with `__text_signature__`
-    elif not _has_parsable_signature(typ):
-        pass
     elif not is_type_string_converter(typ):
         raise UnsupportedTypeAnnotationError(
             f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
