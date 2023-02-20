@@ -301,7 +301,11 @@ def _cli_impl(
 
         if print_completion:
             _arguments.USE_RICH = True
-            assert completion_shell in ("bash", "zsh", "tcsh",), (
+            assert completion_shell in (
+                "bash",
+                "zsh",
+                "tcsh",
+            ), (
                 "Shell should be one `bash`, `zsh`, or `tcsh`, but got"
                 f" {completion_shell}"
             )

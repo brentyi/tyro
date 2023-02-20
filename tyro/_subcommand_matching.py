@@ -82,15 +82,11 @@ class _TypeTree:
 
     def is_subtype_of(self, supertype: _TypeTree) -> bool:
         # Generalize to unions.
-        if get_origin(self.typ) is Union:
-            self_types = get_args(self.typ)
-        else:
-            self_types = (self.typ,)
+        def _get_type_options(typ: _typing.TypeForm) -> Tuple[_typing.TypeForm, ...]:
+            return get_args(typ) if get_origin(typ) is Union else (typ,)
 
-        if get_origin(supertype.typ) is Union:
-            super_types = get_args(supertype.typ)
-        else:
-            super_types = (supertype.typ,)
+        self_types = _get_type_options(self.typ)
+        super_types = _get_type_options(supertype.typ)
 
         # Check against supertypes.
         for self_type in self_types:
