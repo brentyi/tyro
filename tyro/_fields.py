@@ -732,18 +732,37 @@ def _field_list_from_params(
                 raise _instantiators.UnsupportedTypeAnnotationError(out.message)
             return out
 
+        # Set markers for positional + variadic arguments.
+        markers = ()
+        typ = hints[param.name]
+        if param.kind is inspect.Parameter.POSITIONAL_ONLY:
+            markers = (_markers.Positional, _markers._PositionalCall)
+        elif param.kind is inspect.Parameter.VAR_POSITIONAL:
+            # Handle *args signatures.
+            #
+            # This will create a `--args T [T ...]` CLI argument.
+            markers = (_markers._UnpackArgsCall,)
+            typ = Tuple[typ, ...]
+        elif param.kind is inspect.Parameter.VAR_KEYWORD:
+            # Handle *kwargs signatures.
+            #
+            # This will create a `--kwargs STR T [STR T ...]` CLI argument.
+            #
+            # Note that it would be straightforward to make both this and *args truly
+            # positional, omitting the --args/--kwargs prefix, but we are choosing not
+            # to because it would make *args and **kwargs difficult to use in
+            # conjunction.
+            markers = (_markers._UnpackKwargsCall,)
+            typ = Dict[str, typ]
+
         field_list.append(
             FieldDefinition.make(
                 name=param.name,
                 # Note that param.annotation doesn't resolve forward references.
-                typ=hints[param.name],
+                typ=typ,
                 default=default,
                 helptext=helptext,
-                markers=(
-                    (_markers.Positional, _markers._PositionalCall)
-                    if param.kind is inspect.Parameter.POSITIONAL_ONLY
-                    else ()
-                ),
+                markers=markers,
             )
         )
 

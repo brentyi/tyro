@@ -668,3 +668,12 @@ def test_pathlike():
         return x
 
     assert tyro.cli(main, args=["--x", "/dev/null"]) == pathlib.Path("/dev/null")
+
+
+def test_variadics() -> None:
+    def main(*args: int, **kwargs: float) -> Tuple[Tuple[int, ...], Dict[str, float]]:
+        return args, kwargs
+
+    assert tyro.cli(
+        main, args="--args 1 2 3 --kwargs learning_rate 1e-4 beta1 0.99".split(" ")
+    ) == ((1, 2, 3), {"learning_rate": 1e-4, "beta1": 0.99})

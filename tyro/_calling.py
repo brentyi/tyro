@@ -8,6 +8,7 @@ from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Uni
 from typing_extensions import get_args
 
 from . import _arguments, _fields, _parsers, _resolver, _strings
+from .conf import _markers
 
 
 class InstantiationError(Exception):
@@ -160,11 +161,19 @@ def call_from_args(
                 )
                 consumed_keywords |= consumed_keywords_child
 
-        if value is not _fields.EXCLUDE_FROM_CALL:
-            if field.is_positional_call():
-                positional_args.append(value)
-            else:
-                kwargs[field.call_argname] = value
+        if value is _fields.EXCLUDE_FROM_CALL:
+            continue
+
+        if _markers._UnpackArgsCall in field.markers:
+            assert isinstance(value, tuple)
+            positional_args.extend(value)
+        elif _markers._UnpackKwargsCall in field.markers:
+            assert isinstance(value, dict)
+            kwargs.update(value)
+        elif field.is_positional_call():
+            positional_args.append(value)
+        else:
+            kwargs[field.call_argname] = value
 
     # Note: we unwrap types both before and after narrowing. This is because narrowing
     # sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just
