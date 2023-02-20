@@ -321,15 +321,14 @@ def test_subparser_in_nested_with_metadata_default_matching() -> None:
         a: A = A(5)
 
     default_one = B(3)
-    default_two = B(9)
+    default_three = B(9)
 
     @dataclasses.dataclass
     class Nested:
         subcommand: Union[
-            # Annotated[A, tyro.conf.subcommand("zero")],
             Annotated[B, tyro.conf.subcommand("one", default=default_one)],
-            Annotated[B, tyro.conf.subcommand("two", default=default_two)],
-            Annotated[B, tyro.conf.subcommand("three")],
+            Annotated[B, tyro.conf.subcommand("two")],
+            Annotated[B, tyro.conf.subcommand("three", default=default_three)],
         ]
 
     # Match by hash.
@@ -342,13 +341,13 @@ def test_subparser_in_nested_with_metadata_default_matching() -> None:
     def main_two(x: Nested = Nested(B(9))) -> None:
         pass
 
-    assert "default: x.subcommand:two" in get_helptext(main_two)
+    assert "default: x.subcommand:three" in get_helptext(main_two)
 
     # Match by type.
     def main_three(x: Nested = Nested(B(15))) -> None:
         pass
 
-    assert "default: x.subcommand:three" in get_helptext(main_three)
+    assert "default: x.subcommand:one" in get_helptext(main_three)
 
 
 def test_flag() -> None:

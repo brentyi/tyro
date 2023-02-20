@@ -28,6 +28,7 @@ from . import (
     _instantiators,
     _resolver,
     _strings,
+    _subcommand_matching,
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -346,8 +347,7 @@ class SubparsersSpecification:
         subcommand_config_from_name: Dict[
             str, _confstruct._SubcommandConfiguration
         ] = {}
-        subcommand_name_from_default_hash: Dict[int, str] = {}
-        subcommand_name_from_type: Dict[Type, str] = {}  # Used for default matching.
+        subcommand_type_from_name: Dict[str, type] = {}
         for option in options_no_none:
             subcommand_name = _strings.subparser_name_from_type(prefix, option)
             option, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -363,52 +363,15 @@ class SubparsersSpecification:
                 subcommand_config_from_name[subcommand_name] = found_subcommand_configs[
                     0
                 ]
+            subcommand_type_from_name[subcommand_name] = option
 
-                if (
-                    found_subcommand_configs[0].default
-                    not in _fields.MISSING_SINGLETONS
-                ):
-                    default_hash = object.__hash__(found_subcommand_configs[0].default)
-                    subcommand_name_from_default_hash[default_hash] = subcommand_name
-
-            # Use subcommand types for default matching if no default is explicitly
-            # annotated.
-            if default_hash is None:
-                subcommand_name_from_type[option] = subcommand_name
-
-        # If there are any required arguments in the default subparser, we should mark
-        # the subparser group as a whole as required.
-        default_name = None
-        if (
-            field.default is not None
-            and field.default not in _fields.MISSING_SINGLETONS
-        ):
-            # It's really hard to concretize a generic type at runtime, so we just...
-            # don't. :-)
-            if hasattr(type(field.default), "__parameters__"):
-                raise _instantiators.UnsupportedTypeAnnotationError(
-                    "Default values for generic subparsers are not supported."
-                )
-
-            # Get default subcommand name: by default hash.
-            default_hash = object.__hash__(field.default)
-            default_name = subcommand_name_from_default_hash.get(default_hash, None)
-
-            # Get default subcommand name: by default value.
-            if default_name is None:
-                for (
-                    subcommand_name,
-                    subcommand_config,
-                ) in subcommand_config_from_name.items():
-                    equal = field.default == subcommand_config.default
-                    if isinstance(equal, bool) and equal:
-                        default_name = subcommand_name
-                        break
-
-            # Get default subcommand name: by default type.
-            if default_name is None:
-                default_name = subcommand_name_from_type.get(type(field.default), None)
-
+        # If a field default is provided, try to find a matching subcommand name.
+        if field.default is None or field.default in _fields.MISSING_SINGLETONS:
+            default_name = None
+        else:
+            default_name = _subcommand_matching.match_subcommand(
+                field.default, subcommand_config_from_name, subcommand_type_from_name
+            )
             if default_name is None:
                 raise AssertionError(
                     f"`{prefix}` was provided a default value of type"
