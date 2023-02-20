@@ -733,8 +733,8 @@ def _field_list_from_params(
             return out
 
         # Set markers for positional + variadic arguments.
-        markers = ()
-        typ = hints[param.name]
+        markers: Tuple[Any, ...] = ()
+        typ: Any = hints[param.name]
         if param.kind is inspect.Parameter.POSITIONAL_ONLY:
             markers = (_markers.Positional, _markers._PositionalCall)
         elif param.kind is inspect.Parameter.VAR_POSITIONAL:
@@ -742,7 +742,7 @@ def _field_list_from_params(
             #
             # This will create a `--args T [T ...]` CLI argument.
             markers = (_markers._UnpackArgsCall,)
-            typ = Tuple[typ, ...]
+            typ = Tuple.__getitem__((typ, ...))  # type: ignore
         elif param.kind is inspect.Parameter.VAR_KEYWORD:
             # Handle *kwargs signatures.
             #
@@ -753,7 +753,7 @@ def _field_list_from_params(
             # to because it would make *args and **kwargs difficult to use in
             # conjunction.
             markers = (_markers._UnpackKwargsCall,)
-            typ = Dict[str, typ]
+            typ = Dict.__getitem__((str, typ))  # type: ignore
 
         field_list.append(
             FieldDefinition.make(
