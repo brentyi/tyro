@@ -143,11 +143,13 @@ class ParserSpecification:
                         ),
                     )
                     nested_parser = ParserSpecification.from_callable_or_type(
-                        # Recursively apply marker types.
-                        field.typ
-                        if len(field.markers) == 0
-                        else Annotated.__class_getitem__(  # type: ignore
-                            (field.typ,) + tuple(field.markers)
+                        (
+                            # Recursively apply marker types.
+                            field.typ
+                            if len(field.markers) == 0
+                            else Annotated.__class_getitem__(  # type: ignore
+                                (field.typ,) + tuple(field.markers)
+                            )
                         ),
                         description=None,
                         parent_classes=parent_classes,
@@ -402,10 +404,12 @@ class SubparsersSpecification:
                     subcommand_config, default=field.default
                 )
             subparser = ParserSpecification.from_callable_or_type(
-                # Recursively apply markers.
-                Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
-                if len(field.markers) > 0
-                else option,
+                (
+                    # Recursively apply markers.
+                    Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
+                    if len(field.markers) > 0
+                    else option
+                ),
                 description=subcommand_config.description,
                 parent_classes=parent_classes,
                 default_instance=subcommand_config.default,

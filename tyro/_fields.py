@@ -423,9 +423,9 @@ def _field_list_from_pydantic(
             FieldDefinition.make(
                 name=pd_field.name,
                 typ=pd_field.outer_type_,
-                default=MISSING_NONPROP
-                if pd_field.required
-                else pd_field.get_default(),
+                default=(
+                    MISSING_NONPROP if pd_field.required else pd_field.get_default()
+                ),
                 helptext=helptext,
             )
         )
@@ -708,9 +708,11 @@ def _field_list_from_params(
                 typ=hints[param.name],
                 default=default,
                 helptext=helptext,
-                markers=(_markers.Positional, _markers._PositionalCall)
-                if param.kind is inspect.Parameter.POSITIONAL_ONLY
-                else (),
+                markers=(
+                    (_markers.Positional, _markers._PositionalCall)
+                    if param.kind is inspect.Parameter.POSITIONAL_ONLY
+                    else ()
+                ),
             )
         )
 
