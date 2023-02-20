@@ -22,6 +22,10 @@ argument."""
 # the callable.
 _PositionalCall = Annotated[T, None]
 
+# Private markers for when arguments should be passed in via *args or **kwargs.
+_UnpackArgsCall = Annotated[T, None]
+_UnpackKwargsCall = Annotated[T, None]
+
 # TODO: the verb tenses here are inconsistent, naming could be revisited.
 # Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.
 
