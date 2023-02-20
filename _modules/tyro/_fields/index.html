@@ -984,8 +984,8 @@
             <span class="k">return</span> <span class="n">out</span>
 
         <span class="c1"># Set markers for positional + variadic arguments.</span>
-        <span class="n">markers</span> <span class="o">=</span> <span class="p">()</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">hints</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="n">typ</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">hints</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">POSITIONAL_ONLY</span><span class="p">:</span>
             <span class="n">markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span><span class="p">:</span>
@@ -993,7 +993,7 @@
             <span class="c1">#</span>
             <span class="c1"># This will create a `--args T [T ...]` CLI argument.</span>
             <span class="n">markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackArgsCall</span><span class="p">,)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">typ</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">((</span><span class="n">typ</span><span class="p">,</span> <span class="o">...</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
         <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
             <span class="c1"># Handle *kwargs signatures.</span>
             <span class="c1">#</span>
@@ -1004,7 +1004,7 @@
             <span class="c1"># to because it would make *args and **kwargs difficult to use in</span>
             <span class="c1"># conjunction.</span>
             <span class="n">markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackKwargsCall</span><span class="p">,)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">]</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">((</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
