@@ -273,6 +273,10 @@
 <span class="c1"># the callable.</span>
 <span class="n">_PositionalCall</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 
+<span class="c1"># Private markers for when arguments should be passed in via *args or **kwargs.</span>
+<span class="n">_UnpackArgsCall</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="n">_UnpackKwargsCall</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+
 <span class="c1"># TODO: the verb tenses here are inconsistent, naming could be revisited.</span>
 <span class="c1"># Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.</span>
 

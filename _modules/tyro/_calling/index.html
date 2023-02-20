@@ -259,6 +259,7 @@
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span>
 
 
 <div class="viewcode-block" id="InstantiationError"><a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.InstantiationError">[docs]</a><span class="k">class</span> <span class="nc">InstantiationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -411,11 +412,19 @@
                 <span class="p">)</span>
                 <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
 
-        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">is_positional_call</span><span class="p">():</span>
-                <span class="n">positional_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">kwargs</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">call_argname</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackArgsCall</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+            <span class="n">positional_args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackKwargsCall</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">field</span><span class="o">.</span><span class="n">is_positional_call</span><span class="p">():</span>
+            <span class="n">positional_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">call_argname</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="c1"># Note: we unwrap types both before and after narrowing. This is because narrowing</span>
     <span class="c1"># sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just</span>
