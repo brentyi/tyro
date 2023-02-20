@@ -1,0 +1,14 @@
+:orphan:
+
+:py:mod:`tyro._subcommand_matching`
+===================================
+
+.. py:module:: tyro._subcommand_matching
+
+
+Module Contents
+---------------
+
+.. py:function:: match_subcommand(default: Any, subcommand_config_from_name: Dict[str, tyro.conf._confstruct._SubcommandConfiguration], subcommand_type_from_name: Dict[str, type]) -> Optional[str]
+
+

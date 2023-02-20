@@ -413,7 +413,7 @@ defaults, from general callables.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._fields.is_nested_type">
-<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">is_nested_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#is_nested_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.is_nested_type" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">is_nested_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#is_nested_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.is_nested_type" title="Permalink to this definition">#</a></dt>
 <dd><p>Determine whether a type should be treated as a ‘nested type’, where a single
 type can be broken down into multiple fields (eg for nested dataclasses or
 classes).</p>
@@ -423,7 +423,7 @@ misleading.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>typ</strong> (<em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em>) – </p></li>
-<li><p><strong>default_instance</strong> (<em>_DefaultInstance</em>) – </p></li>
+<li><p><strong>default_instance</strong> (<em>DefaultInstance</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -434,7 +434,7 @@ misleading.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._fields.field_list_from_callable">
-<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">field_list_from_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition"><span class="pre">FieldDefinition</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#field_list_from_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.field_list_from_callable" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">field_list_from_callable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition"><span class="pre">FieldDefinition</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#field_list_from_callable"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.field_list_from_callable" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a list of generic ‘field’ objects corresponding to the inputs of some
 annotated callable.</p>
 <dl class="field-list simple">
@@ -446,7 +446,7 @@ A list of field definitions.</p>
 <dt class="field-even">Parameters</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>f</strong> (<em>Union</em><em>[</em><em>Callable</em><em>, </em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>]</em>) – </p></li>
-<li><p><strong>default_instance</strong> (<em>_DefaultInstance</em>) – </p></li>
+<li><p><strong>default_instance</strong> (<em>DefaultInstance</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-odd">Return type</dt>
@@ -454,6 +454,11 @@ A list of field definitions.</p>
 </dd>
 </dl>
 </dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._fields.DefaultInstance">
+<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">DefaultInstance</span></span><a class="headerlink" href="#tyro._fields.DefaultInstance" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._fields.pydantic">
@@ -540,6 +545,7 @@ A list of field definitions.</p>
 <li><a class="reference internal" href="#tyro._fields.UnsupportedNestedTypeMessage">UnsupportedNestedTypeMessage</a></li>
 <li><a class="reference internal" href="#tyro._fields.is_nested_type">is_nested_type</a></li>
 <li><a class="reference internal" href="#tyro._fields.field_list_from_callable">field_list_from_callable</a></li>
+<li><a class="reference internal" href="#tyro._fields.DefaultInstance">DefaultInstance</a></li>
 <li><a class="reference internal" href="#tyro._fields.pydantic">pydantic</a></li>
 <li><a class="reference internal" href="#tyro._fields.attr">attr</a></li>
 </ul>
