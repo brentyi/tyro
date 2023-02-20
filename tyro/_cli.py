@@ -1,11 +1,24 @@
 """Core public API."""
 import argparse
 import dataclasses
+import pathlib
 import sys
 import warnings
-from typing import Callable, Optional, Sequence, TypeVar, Union, cast, overload
+from typing import (
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 import shtab
+from typing_extensions import Literal
 
 from . import (
     _argparse_formatter,
@@ -35,6 +48,36 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
+    return_unknown_args: Literal[False] = False,
+) -> OutT:
+    ...
+
+
+@overload
+def cli(
+    f: TypeForm[OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    default: Optional[OutT] = None,
+    return_unknown_args: Literal[True],
+) -> Tuple[OutT, List[str]]:
+    ...
+
+
+@overload
+def cli(
+    f: Callable[..., OutT],
+    *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
+    args: Optional[Sequence[str]] = None,
+    # Note that passing a default makes sense for things like dataclasses, but are not
+    # supported for general callables. These can, however, be specified in the signature
+    # of the callable itself.
+    default: None = None,
+    return_unknown_args: Literal[False] = False,
 ) -> OutT:
     ...
 
@@ -50,7 +93,8 @@ def cli(
     # supported for general callables. These can, however, be specified in the signature
     # of the callable itself.
     default: None = None,
-) -> OutT:
+    return_unknown_args: Literal[True],
+) -> Tuple[OutT, List[str]]:
     ...
 
 
@@ -61,8 +105,9 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
+    return_unknown_args: bool = False,
     **deprecated_kwargs,
-) -> OutT:
+) -> Union[OutT, Tuple[OutT, List[str]]]:
     """Call or instantiate `f`, with inputs populated from an automatically generated
     CLI interface.
 
@@ -97,9 +142,9 @@ def cli(
       - Optional unions over nested structures (optional subparsers).
     - Generics (including nested generics).
 
-    Completion script generation for interactive shells is also provided. To print a
-    script that can be used for tab completion, pass in `--tyro-print-completion
-    {bash/zsh/tcsh}`.
+    Completion script generation for interactive shells is also provided. To write a
+    script that can be used for tab completion, pass in:
+        `--tyro-write-completion {bash/zsh/tcsh} {path to script to write}`.
 
     Args:
         f: Function or type.
@@ -114,23 +159,29 @@ def cli(
             type like a dataclass or dictionary, but not if `f` is a general callable like
             a function or standard class. Helpful for merging CLI arguments with values
             loaded from elsewhere. (for example, a config object loaded from a yaml file)
+        return_unknown_args: If True, return a tuple of the output of `f` and a list of
+            unknown arguments. Mirrors the unknown arguments returned from
+            `argparse.ArgumentParser.parse_known_args()`.
 
     Returns:
         The output of `f(...)` or an instance `f`. If `f` is a class, the two are
-        equivalent.
+        equivalent. If `return_unknown_args` is True, returns a tuple of the output of
+        `f(...)` and a list of unknown arguments.
     """
-    return cast(
-        OutT,
-        _cli_impl(
-            f,
-            prog=prog,
-            description=description,
-            args=args,
-            default=default,
-            return_parser=False,
-            **deprecated_kwargs,
-        ),
+    output = _cli_impl(
+        f,
+        prog=prog,
+        description=description,
+        args=args,
+        default=default,
+        return_parser=False,
+        return_unknown_args=return_unknown_args,
+        **deprecated_kwargs,
     )
+    if return_unknown_args:
+        return cast(Tuple[OutT, List[str]], output)
+    else:
+        return cast(OutT, output)
 
 
 @overload
@@ -167,7 +218,7 @@ def get_parser(
     """Get the `argparse.ArgumentParser` object generated under-the-hood by
     `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.
 
-    For tab completion, we recommend using `tyro.cli()`'s built-in `--tyro-print-completion`
+    For tab completion, we recommend using `tyro.cli()`'s built-in `--tyro-write-completion`
     flag."""
     return cast(
         argparse.ArgumentParser,
@@ -178,6 +229,7 @@ def get_parser(
             args=None,
             default=default,
             return_parser=True,
+            return_unknown_args=False,
         ),
     )
 
@@ -190,8 +242,9 @@ def _cli_impl(
     args: Optional[Sequence[str]],
     default: Optional[OutT],
     return_parser: bool,
+    return_unknown_args: bool,
     **deprecated_kwargs,
-) -> Union[OutT, argparse.ArgumentParser]:
+) -> Union[OutT, argparse.ArgumentParser, Tuple[OutT, List[str]],]:
     """Helper for stitching the `tyro` pipeline together.
 
     Converts `f` into a
@@ -241,33 +294,55 @@ def _cli_impl(
 
     # Read and fix arguments. If the user passes in --field_name instead of
     # --field-name, correct for them.
-    args = sys.argv[1:] if args is None else args
+    args = list(sys.argv[1:]) if args is None else list(args)
 
-    def fix_arg(arg: str) -> str:
+    # Fix arguments. This will modify all option-style arguments replacing
+    # underscores with dashes. This is to support the common convention of using
+    # underscores in variable names, but dashes in command line arguments.
+    # If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.
+    modified_args: Dict[str, str] = {}
+    for index, arg in enumerate(args):
         if not arg.startswith("--"):
-            return arg
+            continue
+
         if "=" in arg:
             arg, _, val = arg.partition("=")
-            return arg.replace("_", "-") + "=" + val
+            fixed = arg.replace("_", "-") + "=" + val
         else:
-            return arg.replace("_", "-")
+            fixed = arg.replace("_", "-")
+        if (
+            return_unknown_args
+            and fixed in modified_args
+            and modified_args[fixed] != arg
+        ):
+            raise RuntimeError(
+                f"Ambiguous arguments: " + modified_args[fixed] + " and " + arg
+            )
+        modified_args[fixed] = arg
+        args[index] = fixed
 
-    args = list(map(fix_arg, args))
-
-    # If we pass in the --tyro-print-completion flag: turn formatting tags, and get
-    # the shell we want to generate a completion script for (bash/zsh/tcsh).
+    # If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn
+    # formatting tags, and get the shell we want to generate a completion script for
+    # (bash/zsh/tcsh).
     #
-    # Note that shtab also offers an add_argument_to() functions that fulfills a similar
-    # goal, but manual parsing of argv is convenient for turning off formatting.
+    # shtab also offers an add_argument_to() functions that fulfills a similar goal, but
+    # manual parsing of argv is convenient for turning off formatting.
+    #
+    # Note: --tyro-print-completion is deprecated! --tyro-write-completion is less prone
+    # to errors from accidental logging, print statements, etc.
     print_completion = len(args) >= 2 and args[0] == "--tyro-print-completion"
+    write_completion = len(args) >= 3 and args[0] == "--tyro-write-completion"
 
     # Note: setting USE_RICH must happen before the parser specification is generated.
     # TODO: revisit this. Ideally we should be able to eliminate the global state
     # changes.
     completion_shell = None
-    if print_completion:
+    completion_target_path = None
+    if print_completion or write_completion:
         completion_shell = args[1]
-    if print_completion or return_parser:
+    if write_completion:
+        completion_target_path = pathlib.Path(args[2])
+    if print_completion or write_completion or return_parser:
         _arguments.USE_RICH = False
     else:
         _arguments.USE_RICH = True
@@ -299,7 +374,7 @@ def _cli_impl(
             _arguments.USE_RICH = True
             return parser
 
-        if print_completion:
+        if print_completion or write_completion:
             _arguments.USE_RICH = True
             assert completion_shell in (
                 "bash",
@@ -309,16 +384,32 @@ def _cli_impl(
                 "Shell should be one `bash`, `zsh`, or `tcsh`, but got"
                 f" {completion_shell}"
             )
-            print(
-                shtab.complete(
-                    parser=parser,
-                    shell=completion_shell,
-                    root_prefix=f"tyro_{parser.prog}",
+
+            if write_completion:
+                assert completion_target_path is not None
+                completion_target_path.write_text(
+                    shtab.complete(
+                        parser=parser,
+                        shell=completion_shell,
+                        root_prefix=f"tyro_{parser.prog}",
+                    )
                 )
-            )
+            else:
+                print(
+                    shtab.complete(
+                        parser=parser,
+                        shell=completion_shell,
+                        root_prefix=f"tyro_{parser.prog}",
+                    )
+                )
             raise SystemExit()
 
-        value_from_prefixed_field_name = vars(parser.parse_args(args=args))
+        if return_unknown_args:
+            namespace, unknown_args = parser.parse_known_args(args=args)
+        else:
+            unknown_args = None
+            namespace = parser.parse_args(args=args)
+        value_from_prefixed_field_name = vars(namespace)
 
     if dummy_wrapped:
         value_from_prefixed_field_name = {
@@ -349,4 +440,13 @@ def _cli_impl(
 
     if dummy_wrapped:
         out = getattr(out, _strings.dummy_field_name)
-    return out
+
+    if return_unknown_args:
+        assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
+        # If we're parsed unknown args, we should return the original args, not
+        # the fixed ones.
+        unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
+        return out, unknown_args
+    else:
+        assert unknown_args is None, "Should have parsed with `parse_args()`"
+        return out

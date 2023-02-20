@@ -2,6 +2,7 @@ import argparse
 import copy
 import dataclasses
 import enum
+import os
 import pathlib
 from typing import (
     Any,
@@ -548,3 +549,122 @@ def test_return_parser() -> None:
         return parser
 
     assert isinstance(tyro.cli(main, args=[]), argparse.ArgumentParser)
+
+
+def test_pathlike_custom_class() -> None:
+    class CustomPath(pathlib.PurePosixPath):
+        def __new__(cls, *args: Union[str, os.PathLike]):
+            return super().__new__(cls, *args)
+
+    def main(a: CustomPath) -> CustomPath:
+        return a
+
+    assert tyro.cli(main, args=["--a", "/dev/null"]) == CustomPath("/dev/null")
+
+
+def test_class_with_new_and_no_init() -> None:
+    class A(object):
+        def __new__(cls, x: int = 5):
+            return cls._custom_initializer(x)
+
+        @classmethod
+        def _custom_initializer(cls, x: int = 5):
+            self = object.__new__(cls)
+            self.x = x  # type: ignore
+            return self
+
+        def __eq__(self, other) -> bool:
+            return self.x == other.x  # type: ignore
+
+    assert tyro.cli(A, args=["--x", "5"]) == A(x=5)
+
+
+def test_return_unknown_args() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: int = 0
+
+    a, unknown_args = tyro.cli(
+        A, args=["positional", "--x", "5", "--y", "7"], return_unknown_args=True
+    )
+    assert a == A(x=5)
+    assert unknown_args == ["positional", "--y", "7"]
+
+
+def test_unknown_args_with_arg_fixing() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: int = 0
+
+    a, unknown_args = tyro.cli(
+        A,
+        args=["--x", "5", "--a_b", "--a-c"],
+        return_unknown_args=True,
+    )
+    assert a == A(x=5)
+    # Should return the unfixed arguments
+    assert unknown_args == ["--a_b", "--a-c"]
+
+
+def test_allow_ambiguous_args_when_not_returning_unknown_args() -> None:
+    @dataclasses.dataclass
+    class A:
+        a_b: List[int] = dataclasses.field(default_factory=list)
+
+    a = tyro.cli(
+        A,
+        args=["--a_b", "5", "--a-b", "7"],
+    )
+    assert a == A(a_b=[7])
+
+
+def test_disallow_ambiguous_args_when_returning_unknown_args() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: int = 0
+
+    # If there's an argument that's ambiguous then we should raise an error when we're
+    # returning unknown args.
+    with pytest.raises(RuntimeError, match="Ambiguous .* --a_b and --a-b"):
+        tyro.cli(
+            A,
+            args=["--x", "5", "--a_b", "--a-b"],
+            return_unknown_args=True,
+        )
+
+
+def test_unknown_args_with_consistent_duplicates() -> None:
+    @dataclasses.dataclass
+    class A:
+        a_b: List[int] = dataclasses.field(default_factory=list)
+        c_d: List[int] = dataclasses.field(default_factory=list)
+
+    # Tests logic for consistent duplicate arguments when performing argument fixing.
+    # i.e., we can fix arguments if the separator is consistent (all _'s or all -'s).
+    a, unknown_args = tyro.cli(
+        A,
+        args=[
+            "--a-b",
+            "5",
+            "--a-b",
+            "7",
+            "--c_d",
+            "5",
+            "--c_d",
+            "7",
+            "--e-f",
+            "--e-f",
+            "--g_h",
+            "--g_h",
+        ],
+        return_unknown_args=True,
+    )
+    assert a == A(a_b=[7], c_d=[7])
+    assert unknown_args == ["--e-f", "--e-f", "--g_h", "--g_h"]
+
+
+def test_pathlike():
+    def main(x: os.PathLike) -> os.PathLike:
+        return x
+
+    assert tyro.cli(main, args=["--x", "/dev/null"]) == pathlib.Path("/dev/null")

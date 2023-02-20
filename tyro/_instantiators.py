@@ -34,6 +34,8 @@ import collections.abc
 import dataclasses
 import enum
 import inspect
+import os
+import pathlib
 from collections import deque
 from typing import (
     Any,
@@ -50,7 +52,14 @@ from typing import (
     overload,
 )
 
-from typing_extensions import Annotated, Final, Literal, get_args, get_origin
+from typing_extensions import (
+    Annotated,
+    Final,
+    Literal,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 from . import _strings
 from ._typing import TypeForm
@@ -93,6 +102,39 @@ _builtin_set = set(
 )
 
 
+def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
+    """Check if type is a string converter, i.e., (arg: Union[str, Any]) -> T."""
+    param_count = 0
+    has_var_positional = False
+    try:
+        signature = inspect.signature(typ)
+    except ValueError:
+        # pybind objects might not have a parsable signature. We try to be tolerant in this case.
+        # One day this should be fixed with `__text_signature__`.
+        return True
+
+    type_annotations = get_type_hints(typ)
+    # Some checks we can do if the signature is available!
+    for i, param in enumerate(signature.parameters.values()):
+        annotation = type_annotations.get(param.name, param.annotation)
+        if i == 0 and not (
+            (get_origin(annotation) is Union and str in get_args(annotation))
+            or annotation in (str, inspect.Parameter.empty)
+        ):
+            return False
+        if param.kind is inspect.Parameter.VAR_POSITIONAL:
+            has_var_positional = True
+        elif param.default is inspect.Parameter.empty and param.kind is not (
+            inspect.Parameter.VAR_KEYWORD
+        ):
+            param_count += 1
+
+    # Raise an error if parameters look wrong.
+    if not (param_count == 1 or (param_count == 0 and has_var_positional)):
+        return False
+    return True
+
+
 def instantiator_from_type(
     typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
@@ -123,6 +165,12 @@ def instantiator_from_type(
             choices=("None",),
         )
 
+    # Instantiate os.PathLike annotations using pathlib.Path.
+    # Ideally this should be implemented in a more general way, eg using
+    # https://github.com/brentyi/tyro/pull/30
+    if typ is os.PathLike:
+        typ = pathlib.Path
+
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
     container_out = _instantiator_from_container_type(typ, type_from_typevar)
@@ -137,43 +185,17 @@ def instantiator_from_type(
             f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
             " callable."
         )
-    else:
-        param_count = 0
-        has_var_positional = False
-        try:
-            signature = inspect.signature(typ)
-        except ValueError:
-            # No signature, this is often the case with pybind, etc.
-            signature = None
-
-        if signature is not None:
-            # Some checks we can do if the signature is available!
-            for i, param in enumerate(signature.parameters.values()):
-                if i == 0 and param.annotation not in (str, inspect.Parameter.empty):
-                    raise UnsupportedTypeAnnotationError(
-                        f"Expected {typ} to be an `(arg: str) -> T` type converter, but"
-                        f" got {signature}."
-                    )
-                if param.kind is inspect.Parameter.VAR_POSITIONAL:
-                    has_var_positional = True
-                elif param.default is inspect.Parameter.empty and param.kind is not (
-                    inspect.Parameter.VAR_KEYWORD
-                ):
-                    param_count += 1
-
-            # Raise an error if parameters look wrong.
-            if not (param_count == 1 or (param_count == 0 and has_var_positional)):
-                raise UnsupportedTypeAnnotationError(
-                    f"Expected {typ} to be an `(arg: str) -> T` type converter, but got"
-                    f" {signature}. You may have a nested type in a container, which is"
-                    " unsupported."
-                )
+    elif not is_type_string_converter(typ):
+        raise UnsupportedTypeAnnotationError(
+            f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
+            " a valid type converter."
+        )
 
     # Special case `choices` for some types, as implemented in `instance_from_string()`.
     auto_choices: Optional[Tuple[str, ...]] = None
     if typ is bool:
         auto_choices = ("True", "False")
-    elif isinstance(typ, type) and issubclass(typ, enum.Enum):
+    elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
         auto_choices = tuple(x.name for x in typ)
 
     def instantiator_base_case(strings: List[str]) -> Any:

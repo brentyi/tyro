@@ -34,6 +34,10 @@ def get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
         tyro.cli(f, args=["--tyro-print-completion", "bash"])
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
         tyro.cli(f, args=["--tyro-print-completion", "zsh"])
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
+        tyro.cli(f, args=["--tyro-write-completion", "bash", os.devnull])
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
+        tyro.cli(f, args=["--tyro-write-completion", "zsh", os.devnull])
 
     # Check helptext with vs without formatting. This can help catch text wrapping bugs
     # caused by ANSI sequences.

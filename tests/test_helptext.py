@@ -1,5 +1,6 @@
 import dataclasses
 import enum
+import os
 import pathlib
 from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
@@ -510,7 +511,7 @@ def test_metavar_4() -> None:
 
 def test_metavar_5() -> None:
     def main(
-        x: List[Union[Tuple[int, int], Tuple[str, str]],] = [(1, 1), (2, 2)]
+        x: List[Union[Tuple[int, int], Tuple[str, str]]] = [(1, 1), (2, 2)]
     ) -> None:
         pass
 
@@ -562,3 +563,11 @@ def test_unparsable() -> None:
     assert "--x {fixed}" in helptext
     assert "(fixed to:" in helptext
     assert "torch" in helptext
+
+
+def test_pathlike() -> None:
+    def main(x: os.PathLike) -> None:
+        pass
+
+    helptext = get_helptext(main)
+    assert "--x PATH " in helptext
