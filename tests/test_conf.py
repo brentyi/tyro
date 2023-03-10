@@ -622,6 +622,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
 
 
 def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() -> None:
+    @tyro.conf.configure(tyro.conf.subcommand(name="http-server"))
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
         y: int = 0
@@ -647,7 +648,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
     assert tyro.cli(
         func,
         args=[
-            "parent.bc:default-instance-http-server",
+            "parent.bc:http-server",
             "--parent.x",
             "1",
             # --y and --no-flag are in a subcommand with prefix omission.
@@ -659,7 +660,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
     assert tyro.cli(
         func,
         args=[
-            "parent.bc:default-instance-http-server",
+            "parent.bc:http-server",
             "--parent.x",
             "1",
             # --y is in a subcommand with prefix omission.
