@@ -250,11 +250,13 @@
         <article role="main">
           <h1>Source code for tyro._resolver</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utilities for resolving types and forward references.&quot;&quot;&quot;</span>
+
 <span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
@@ -494,8 +496,21 @@
 
 
 <div class="viewcode-block" id="narrow_union_type"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_union_type">[docs]</a><span class="k">def</span> <span class="nf">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Narrow union types. This is a shim for failing more gracefully when we we&#39;re</span>
-<span class="sd">    given an unsupported union.</span>
+    <span class="sd">&quot;&quot;&quot;Narrow union types.</span>
+
+<span class="sd">    This is a shim for failing more gracefully when we we&#39;re given one of two errors:</span>
+<span class="sd">    (A) A Union type that doesn&#39;t match the default value.</span>
+<span class="sd">    (B) An unsupported Union type, which mixes &quot;nested&quot; types (like dataclasses) with</span>
+<span class="sd">      non-&quot;nested&quot; types (like strings).</span>
+
+<span class="sd">    --</span>
+<span class="sd">    For (A):</span>
+
+<span class="sd">    We raise a warning, then take the type of the default value.</span>
+<span class="sd">    Loosely motivated by: https://github.com/brentyi/tyro/issues/20</span>
+
+<span class="sd">    --</span>
+<span class="sd">    For (B):</span>
 
 <span class="sd">    When do we want to narrow Union types?</span>
 
@@ -526,7 +541,24 @@
 <span class="sd">    likely require a big code refactor.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Union</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">typ</span>
+
     <span class="n">options</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="n">options_unwrapped</span> <span class="o">=</span> <span class="p">[</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span><span class="p">]</span>
+
+    <span class="c1"># (A)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options_unwrapped</span>
+        <span class="p">):</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2"> does not match any type in Union:&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">options_unwrapped</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># (B)</span>
     <span class="n">is_nested</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
         <span class="nb">map</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">option</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span>

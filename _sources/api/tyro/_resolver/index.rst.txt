@@ -90,8 +90,21 @@ Module Contents
 .. py:function:: narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
    
-   Narrow union types. This is a shim for failing more gracefully when we we're
-   given an unsupported union.
+   Narrow union types.
+
+   This is a shim for failing more gracefully when we we're given one of two errors:
+   (A) A Union type that doesn't match the default value.
+   (B) An unsupported Union type, which mixes "nested" types (like dataclasses) with
+     non-"nested" types (like strings).
+
+   --
+   For (A):
+
+   We raise a warning, then take the type of the default value.
+   Loosely motivated by: https://github.com/brentyi/tyro/issues/20
+
+   --
+   For (B):
 
    When do we want to narrow Union types?
 
