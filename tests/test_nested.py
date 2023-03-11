@@ -345,6 +345,24 @@ def test_subparser_with_default_bad() -> None:
         )
 
 
+def test_subparser_with_default_bad_alt() -> None:
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @tyro.conf.configure(tyro.conf.subcommand(name="bbbb"))
+    @dataclasses.dataclass
+    class B:
+        b: int
+
+    @dataclasses.dataclass
+    class C:
+        c: int
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Union[A, B], default=C(3), args=["--c", "2"]) == C(2)
+
+
 def test_optional_subparser() -> None:
     @dataclasses.dataclass
     class OptionalHTTPServer:
