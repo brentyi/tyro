@@ -188,6 +188,7 @@ def test_helptext_defaults() -> None:
     class HelptextWithVariousDefaults:
         x: pathlib.Path = pathlib.Path("/some/path/to/a/file")
         y: Color = Color.RED
+        z: str = "%"
 
     helptext = get_helptext(HelptextWithVariousDefaults)
     assert "show this help message and exit" in helptext
@@ -195,6 +196,8 @@ def test_helptext_defaults() -> None:
     assert "(default: /some/path/to/a/file)" in helptext
     assert "--y {RED,GREEN,BLUE}" in helptext
     assert "(default: RED)" in helptext
+    assert "--z STR" in helptext
+    assert "(default: %)" in helptext
 
 
 def test_multiline_helptext() -> None:
