@@ -380,7 +380,6 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             description_part = None
             item_parts = []
             for func, args in self.items:
-                item_content = func(*args)
                 if (
                     getattr(func, "__func__", None)
                     is TyroArgparseHelpFormatter._format_action
@@ -390,6 +389,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     item_parts.extend(self._format_action(action))
 
                 else:
+                    item_content = func(*args)
                     assert isinstance(item_content, str)
                     if item_content.strip() != "":
                         assert (
