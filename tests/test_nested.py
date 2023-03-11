@@ -335,9 +335,13 @@ def test_subparser_with_default_bad() -> None:
             default_factory=lambda: 5  # type: ignore
         )
 
-    with pytest.raises(AssertionError):
-        tyro.cli(
-            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "5"]
+    # Tolerate bad static types: https://github.com/brentyi/tyro/issues/20
+    # Should give us a bunch of warnings!
+    with pytest.warns(UserWarning):
+        assert tyro.cli(
+            DefaultSubparser, args=["--x", "1", "--bc", "3"]
+        ) == DefaultSubparser(
+            1, 3  # type: ignore
         )
 
 

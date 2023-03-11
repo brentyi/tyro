@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import warnings
 from typing import (
     Any,
     Callable,
@@ -373,12 +374,16 @@ class SubparsersSpecification:
                 field.default, subcommand_config_from_name, subcommand_type_from_name
             )
             if default_name is None:
-                raise AssertionError(
+                # This should really be an error, but we can raise a warning to make
+                # hacking at subcommands easier:
+                # https://github.com/brentyi/tyro/issues/20
+                warnings.warn(
                     f"`{prefix}` was provided a default value of type"
                     f" {type(field.default)} but no matching subcommand was found. A"
                     " type may be missing in the Union type declaration for"
-                    f" `{prefix}`, which is currently set to {field.typ}."
+                    f" `{prefix}`, which currently expects {options_no_none}."
                 )
+                return None
 
         # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}

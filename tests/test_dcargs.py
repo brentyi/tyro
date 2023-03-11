@@ -458,7 +458,6 @@ def test_type_alias() -> None:
     assert tyro.cli(add, args=["--a", "5", "--b", "7"]) == 12
 
 
-@pytest.mark.filterwarnings("ignore::Warning")
 def test_any() -> None:
     def main(x: Any = 5) -> Any:
         return x

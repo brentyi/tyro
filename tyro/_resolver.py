@@ -1,9 +1,11 @@
 """Utilities for resolving types and forward references."""
+
 import collections.abc
 import copy
 import dataclasses
 import sys
 import types
+import warnings
 from typing import (
     Any,
     Callable,
@@ -243,8 +245,21 @@ def apply_type_from_typevar(
 
 
 def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
-    """Narrow union types. This is a shim for failing more gracefully when we we're
-    given an unsupported union.
+    """Narrow union types.
+
+    This is a shim for failing more gracefully when we we're given one of two errors:
+    (A) A Union type that doesn't match the default value.
+    (B) An unsupported Union type, which mixes "nested" types (like dataclasses) with
+      non-"nested" types (like strings).
+
+    --
+    For (A):
+
+    We raise a warning, then take the type of the default value.
+    Loosely motivated by: https://github.com/brentyi/tyro/issues/20
+
+    --
+    For (B):
 
     When do we want to narrow Union types?
 
@@ -275,7 +290,24 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     likely require a big code refactor."""
     if get_origin(typ) is not Union:
         return typ
+
     options = get_args(typ)
+    options_unwrapped = [unwrap_origin_strip_extras(o) for o in options]
+
+    # (A)
+    try:
+        if default_instance not in _fields.MISSING_SINGLETONS and not any(
+            isinstance(default_instance, o) for o in options_unwrapped
+        ):
+            warnings.warn(
+                f"{type(default_instance)} does not match any type in Union:"
+                f" {options_unwrapped}"
+            )
+            return type(default_instance)
+    except TypeError:
+        pass
+
+    # (B)
     is_nested = tuple(
         map(
             lambda option: _fields.is_nested_type(
