@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "tyro"
-version = "0.4.1"
+version = "0.4.2"
 description = "Strongly typed, zero-effort CLI interfaces"
 authors = ["brentyi <brentyi@berkeley.edu>"]
 include = ["./tyro/**/*"]
@@ -66,6 +66,7 @@ exclude_lines = [
 
     # or assert statements & errors
     "assert",
+    "raise AssertionError",
 
     # or anything that's not implemented
     "NotImplementedError()",
