@@ -326,7 +326,7 @@ def _cli_impl(
             and modified_args[fixed] != arg
         ):
             raise RuntimeError(
-                f"Ambiguous arguments: " + modified_args[fixed] + " and " + arg
+                "Ambiguous arguments: " + modified_args[fixed] + " and " + arg
             )
         modified_args[fixed] = arg
         args[index] = fixed

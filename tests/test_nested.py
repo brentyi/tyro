@@ -726,6 +726,31 @@ def test_tuple_nesting() -> None:
     ) == ((Color(255, 0, 0),), Location(5.0, 0.0, 2.0), 4.0)
 
 
+def test_tuple_nesting_union() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Color:
+        r: int
+        g: int
+        b: int
+
+    @dataclasses.dataclass(frozen=True)
+    class Location:
+        x: float
+        y: float
+        z: float
+
+    def main(x: Union[Tuple[Tuple[Color], Location, float], Tuple[Color, Color]]):
+        return x
+
+    assert tyro.cli(
+        main,
+        args=(
+            "x:tuple-tuple-color-location-float --x.0.0.r 255 --x.0.0.g 0 --x.0.0.b 0"
+            " --x.1.x 5.0 --x.1.y 0.0 --x.1.z 2.0 --x.2 4.0".split(" ")
+        ),
+    ) == ((Color(255, 0, 0),), Location(5.0, 0.0, 2.0), 4.0)
+
+
 def test_generic_subparsers() -> None:
     T = TypeVar("T")
 
