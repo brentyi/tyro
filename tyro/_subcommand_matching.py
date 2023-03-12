@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from typing_extensions import get_args, get_origin
 
-from . import _fields, _instantiators, _resolver, _typing
+from . import _fields, _instantiators, _resolver, _typing, _unsafe_cache
 from .conf import _confstruct
 
 
@@ -14,6 +14,9 @@ def match_subcommand(
     subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfiguration],
     subcommand_type_from_name: Dict[str, type],
 ) -> Optional[str]:
+    """Given a subcommand mapping and a default, return which subcommand the default
+    corresponds to."""
+
     # It's really hard to concretize a generic type at runtime, so we just...
     # don't. :-)
     if hasattr(type(default), "__parameters__"):

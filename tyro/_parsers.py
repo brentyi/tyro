@@ -30,6 +30,7 @@ from . import (
     _resolver,
     _strings,
     _subcommand_matching,
+    _unsafe_cache,
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
