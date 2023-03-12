@@ -1,13 +1,23 @@
 import functools
-from typing import Any, Callable, Dict, TypeVar
+from typing import Any, Callable, Dict, List, TypeVar
 
 CallableType = TypeVar("CallableType", bound=Callable)
+
+
+_cache_list: List[Dict[Any, Any]] = []
+
+
+def clear_cache() -> None:
+    for c in _cache_list:
+        c.clear()
 
 
 def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
     """Cache decorator that relies object IDs when arguments are unhashable. Assumes
     immutability."""
-    cache: Dict[Any, Any] = {}
+
+    _cache_list.append({})
+    local_cache = _cache_list[-1]
 
     def inner(f: CallableType) -> CallableType:
         @functools.wraps(f)
@@ -16,13 +26,13 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
                 ("__kwarg__", k, unsafe_hash(v)) for k, v in kwargs.items()
             )
 
-            if key in cache:
-                return cache[key]
+            if key in local_cache:
+                return local_cache[key]
 
             out = f(*args, **kwargs)
-            cache[key] = out
-            if len(cache) > maxsize:
-                cache.pop(next(iter(cache)))
+            local_cache[key] = out
+            if len(local_cache) > maxsize:
+                local_cache.pop(next(iter(local_cache)))
             return out
 
         return wrapped_f  # type: ignore
