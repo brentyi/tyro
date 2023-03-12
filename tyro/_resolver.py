@@ -23,7 +23,7 @@ from typing import (
 
 from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 
-from . import _fields
+from . import _fields, _unsafe_cache
 from ._typing import TypeForm
 
 TypeOrCallable = TypeVar("TypeOrCallable", TypeForm, Callable)
@@ -80,6 +80,7 @@ def resolve_generic_types(
     return cls, type_from_typevar
 
 
+@_unsafe_cache.unsafe_cache(maxsize=1024)
 def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
     """Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
     resolves forward references."""
@@ -129,6 +130,7 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
     return typ
 
 
+@_unsafe_cache.unsafe_cache(maxsize=1024)
 def narrow_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
     """Type narrowing: if we annotate as Animal but specify a default instance of Cat,
     we should parse as Cat.
@@ -244,6 +246,7 @@ def apply_type_from_typevar(
     return typ
 
 
+@_unsafe_cache.unsafe_cache(maxsize=1024)
 def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
     """Narrow union types.
 

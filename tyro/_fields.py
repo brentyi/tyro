@@ -32,7 +32,14 @@ import typing_extensions
 from typing_extensions import get_args, get_type_hints, is_typeddict
 
 from . import conf  # Avoid circular import.
-from . import _docstrings, _instantiators, _resolver, _singleton, _strings
+from . import (
+    _docstrings,
+    _instantiators,
+    _resolver,
+    _singleton,
+    _strings,
+    _unsafe_cache,
+)
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
@@ -163,6 +170,7 @@ class UnsupportedNestedTypeMessage:
     message: str
 
 
+@_unsafe_cache.unsafe_cache(maxsize=1024)
 def is_nested_type(typ: TypeForm[Any], default_instance: DefaultInstance) -> bool:
     """Determine whether a type should be treated as a 'nested type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or

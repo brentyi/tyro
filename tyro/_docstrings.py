@@ -22,12 +22,9 @@ from typing import (
 import docstring_parser
 from typing_extensions import get_origin, is_typeddict
 
-from . import _resolver, _strings
+from . import _resolver, _strings, _unsafe_cache
 
 T = TypeVar("T", bound=Callable)
-
-# Cast for making types more lenient.
-_cache = cast(Callable[[int], Callable[[T], T]], functools.lru_cache)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -54,7 +51,7 @@ class _ClassTokenization:
     field_data_from_name: Dict[str, _FieldData]
 
     @staticmethod
-    @_cache(64)
+    @_unsafe_cache.unsafe_cache(64)
     def make(clz) -> "_ClassTokenization":
         """Parse the source code of a class, and cache some tokenization information."""
         readline = io.BytesIO(inspect.getsource(clz).encode("utf-8")).readline
@@ -124,7 +121,7 @@ class _ClassTokenization:
         )
 
 
-@_cache(256)
+@_unsafe_cache.unsafe_cache(1024)
 def get_class_tokenization_with_field(
     cls: Type, field_name: str
 ) -> Optional[_ClassTokenization]:
@@ -167,7 +164,7 @@ def get_class_tokenization_with_field(
     return tokenization
 
 
-@_cache(256)
+@_unsafe_cache.unsafe_cache(1024)
 def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
 
@@ -279,7 +276,7 @@ _callable_description_blocklist = set(
 )
 
 
-@_cache(256)
+@_unsafe_cache.unsafe_cache(1024)
 def get_callable_description(f: Callable) -> str:
     """Get description associated with a callable via docstring parsing.
 
