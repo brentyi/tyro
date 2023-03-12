@@ -131,3 +131,11 @@ def test_missing_default_suppressed() -> None:
 
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
+
+
+def test_ambiguous_sequence() -> None:
+    def main(value: list) -> None:
+        return None
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(main, args=["--help"])
