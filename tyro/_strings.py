@@ -81,12 +81,13 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
 
     # Subparser name from class name.
     def get_name(cls: Type) -> str:
-        if hasattr(cls, "__name__"):
-            return hyphen_separated_from_camel_case(cls.__name__)
-        elif hasattr(get_origin(cls), "__name__"):
-            parts = [get_origin(cls).__name__]  # type: ignore
+        orig = get_origin(cls)
+        if orig is not None and hasattr(orig, "__name__"):
+            parts = [orig.__name__]  # type: ignore
             parts.extend(map(get_name, get_args(cls)))
             return "-".join(parts)
+        elif hasattr(cls, "__name__"):
+            return hyphen_separated_from_camel_case(cls.__name__)
         else:
             raise AssertionError(
                 f"Tried to interpret {cls} as a subcommand, but could not infer name"
