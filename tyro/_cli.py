@@ -27,6 +27,7 @@ from . import (
     _fields,
     _parsers,
     _strings,
+    _unsafe_cache,
     conf,
 )
 from ._typing import TypeForm
@@ -168,6 +169,11 @@ def cli(
         equivalent. If `return_unknown_args` is True, returns a tuple of the output of
         `f(...)` and a list of unknown arguments.
     """
+
+    # Make sure we start on a clean slate. Some tests may fail without this due to
+    # memory address conflicts.
+    _unsafe_cache.clear_cache()
+
     output = _cli_impl(
         f,
         prog=prog,
@@ -178,6 +184,10 @@ def cli(
         return_unknown_args=return_unknown_args,
         **deprecated_kwargs,
     )
+
+    # Prevent unnecessary memory usage.
+    _unsafe_cache.clear_cache()
+
     if return_unknown_args:
         return cast(Tuple[OutT, List[str]], output)
     else:
