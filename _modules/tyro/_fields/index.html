@@ -283,7 +283,14 @@
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">is_typeddict</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">conf</span>  <span class="c1"># Avoid circular import.</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_instantiators</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">_docstrings</span><span class="p">,</span>
+    <span class="n">_instantiators</span><span class="p">,</span>
+    <span class="n">_resolver</span><span class="p">,</span>
+    <span class="n">_singleton</span><span class="p">,</span>
+    <span class="n">_strings</span><span class="p">,</span>
+    <span class="n">_unsafe_cache</span><span class="p">,</span>
+<span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 
@@ -414,7 +421,8 @@
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span></div>
 
 
-<div class="viewcode-block" id="is_nested_type"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.is_nested_type">[docs]</a><span class="k">def</span> <span class="nf">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<div class="viewcode-block" id="is_nested_type"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.is_nested_type">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;nested type&#39;, where a single</span>
 <span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
 <span class="sd">    classes).</span>

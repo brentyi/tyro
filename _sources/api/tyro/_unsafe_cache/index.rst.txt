@@ -1,0 +1,25 @@
+:orphan:
+
+:py:mod:`tyro._unsafe_cache`
+============================
+
+.. py:module:: tyro._unsafe_cache
+
+
+Module Contents
+---------------
+
+.. py:data:: CallableType
+   
+
+   
+
+.. py:function:: unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]
+
+   
+   Cache decorator that relies object IDs when arguments are unhashable. Assumes
+   immutability.
+
+.. py:function:: unsafe_hash(obj: Any) -> Any
+
+

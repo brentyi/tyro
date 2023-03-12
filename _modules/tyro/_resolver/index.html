@@ -274,7 +274,7 @@
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_type_hints</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 
 <span class="n">TypeOrCallable</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallable&quot;</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">Callable</span><span class="p">)</span>
@@ -331,7 +331,8 @@
     <span class="k">return</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">type_from_typevar</span></div>
 
 
-<div class="viewcode-block" id="resolved_fields"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolved_fields">[docs]</a><span class="k">def</span> <span class="nf">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">]:</span>
+<div class="viewcode-block" id="resolved_fields"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolved_fields">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Similar to dataclasses.fields(), but includes dataclasses.InitVar types and</span>
 <span class="sd">    resolves forward references.&quot;&quot;&quot;</span>
 
@@ -380,7 +381,8 @@
     <span class="k">return</span> <span class="n">typ</span></div>
 
 
-<div class="viewcode-block" id="narrow_type"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_type">[docs]</a><span class="k">def</span> <span class="nf">narrow_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<div class="viewcode-block" id="narrow_type"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_type">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">narrow_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat,</span>
 <span class="sd">    we should parse as Cat.</span>
 
@@ -495,7 +497,8 @@
     <span class="k">return</span> <span class="n">typ</span></div>
 
 
-<div class="viewcode-block" id="narrow_union_type"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_union_type">[docs]</a><span class="k">def</span> <span class="nf">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<div class="viewcode-block" id="narrow_union_type"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_union_type">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Narrow union types.</span>
 
 <span class="sd">    This is a shim for failing more gracefully when we we&#39;re given one of two errors:</span>

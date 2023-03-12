@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
 
     <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
-        <title>tyro._subcommand_matching - tyro</title>
+        <title>tyro._unsafe_cache - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
@@ -249,25 +249,39 @@
           </label>
         </div>
         <article role="main">
-          <section id="module-tyro._subcommand_matching">
-<span id="tyro-subcommand-matching"></span><h1><a class="reference internal" href="#module-tyro._subcommand_matching" title="tyro._subcommand_matching"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._subcommand_matching</span></code></a><a class="headerlink" href="#module-tyro._subcommand_matching" title="Permalink to this heading">#</a></h1>
+          <section id="module-tyro._unsafe_cache">
+<span id="tyro-unsafe-cache"></span><h1><a class="reference internal" href="#module-tyro._unsafe_cache" title="tyro._unsafe_cache"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._unsafe_cache</span></code></a><a class="headerlink" href="#module-tyro._unsafe_cache" title="Permalink to this heading">#</a></h1>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._unsafe_cache.CallableType">
+<span class="sig-prename descclassname"><span class="pre">tyro._unsafe_cache.</span></span><span class="sig-name descname"><span class="pre">CallableType</span></span><a class="headerlink" href="#tyro._unsafe_cache.CallableType" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._subcommand_matching.match_subcommand">
-<span class="sig-prename descclassname"><span class="pre">tyro._subcommand_matching.</span></span><span class="sig-name descname"><span class="pre">match_subcommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcommand_config_from_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro.conf._confstruct._SubcommandConfiguration</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subcommand_type_from_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">type</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_subcommand_matching/#match_subcommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._subcommand_matching.match_subcommand" title="Permalink to this definition">#</a></dt>
-<dd><p>Given a subcommand mapping and a default, return which subcommand the default
-corresponds to.</p>
+<dt class="sig sig-object py" id="tyro._unsafe_cache.unsafe_cache">
+<span class="sig-prename descclassname"><span class="pre">tyro._unsafe_cache.</span></span><span class="sig-name descname"><span class="pre">unsafe_cache</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxsize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_unsafe_cache/#unsafe_cache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._unsafe_cache.unsafe_cache" title="Permalink to this definition">#</a></dt>
+<dd><p>Cache decorator that relies object IDs when arguments are unhashable. Assumes
+immutability.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>default</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>subcommand_config_from_name</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>tyro.conf._confstruct._SubcommandConfiguration</em><em>]</em>) – </p></li>
-<li><p><strong>subcommand_type_from_name</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>type</em><em>]</em>) – </p></li>
-</ul>
+<dd class="field-odd"><p><strong>maxsize</strong> (<em>int</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Optional[str]</p>
+<dd class="field-even"><p>Callable[[CallableType], CallableType]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._unsafe_cache.unsafe_hash">
+<span class="sig-prename descclassname"><span class="pre">tyro._unsafe_cache.</span></span><span class="sig-name descname"><span class="pre">unsafe_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/tyro/_unsafe_cache/#unsafe_hash"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._unsafe_cache.unsafe_hash" title="Permalink to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> (<em>Any</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Any</p>
 </dd>
 </dl>
 </dd></dl>
@@ -319,9 +333,11 @@ corresponds to.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._subcommand_matching</span></code></a><ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._unsafe_cache</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#tyro._subcommand_matching.match_subcommand">match_subcommand</a></li>
+<li><a class="reference internal" href="#tyro._unsafe_cache.CallableType">CallableType</a></li>
+<li><a class="reference internal" href="#tyro._unsafe_cache.unsafe_cache">unsafe_cache</a></li>
+<li><a class="reference internal" href="#tyro._unsafe_cache.unsafe_hash">unsafe_hash</a></li>
 </ul>
 </li>
 </ul>
