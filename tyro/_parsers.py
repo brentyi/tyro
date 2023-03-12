@@ -30,7 +30,6 @@ from . import (
     _resolver,
     _strings,
     _subcommand_matching,
-    _unsafe_cache,
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -355,7 +354,6 @@ class SubparsersSpecification:
             option, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfiguration
             )
-            default_hash = None
             if len(found_subcommand_configs) != 0:
                 # Explicitly annotated default.
                 assert len(found_subcommand_configs) == 1, (

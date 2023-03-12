@@ -5,6 +5,8 @@ import re
 import textwrap
 from typing import Iterable, List, Sequence, Tuple, Type, Union
 
+from typing_extensions import get_args, get_origin
+
 from . import _resolver
 
 dummy_field_name = "__tyro_dummy_field__"
@@ -78,9 +80,20 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         return found_name, prefix_name
 
     # Subparser name from class name.
+    def get_name(cls: Type) -> str:
+        if hasattr(cls, "__name__"):
+            return hyphen_separated_from_camel_case(cls.__name__)
+        elif hasattr(get_origin(cls), "__name__"):
+            parts = [get_origin(cls).__name__]  # type: ignore
+            parts.extend(map(get_name, get_args(cls)))
+            return "-".join(parts)
+        else:
+            raise AssertionError(
+                f"Tried to interpret {cls} as a subcommand, but could not infer name"
+            )
+
     if len(type_from_typevar) == 0:
-        assert hasattr(cls, "__name__")
-        return hyphen_separated_from_camel_case(cls.__name__), prefix_name  # type: ignore
+        return get_name(cls), prefix_name  # type: ignore
 
     return (
         "-".join(

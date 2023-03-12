@@ -155,7 +155,11 @@ def call_from_args(
                 value, consumed_keywords_child = call_from_args(
                     chosen_f,
                     subparser_def.parser_from_name[subparser_name],
-                    field.default if type(field.default) is chosen_f else None,
+                    (
+                        field.default
+                        if type(field.default) is chosen_f
+                        else _fields.MISSING_NONPROP
+                    ),
                     value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name,
                 )

@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from typing_extensions import get_args, get_origin
 
-from . import _fields, _instantiators, _resolver, _typing, _unsafe_cache
+from . import _fields, _instantiators, _resolver, _typing
 from .conf import _confstruct
 
 
