@@ -278,6 +278,7 @@
     <span class="n">_fields</span><span class="p">,</span>
     <span class="n">_parsers</span><span class="p">,</span>
     <span class="n">_strings</span><span class="p">,</span>
+    <span class="n">_unsafe_cache</span><span class="p">,</span>
     <span class="n">conf</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
@@ -419,6 +420,11 @@
 <span class="sd">        equivalent. If `return_unknown_args` is True, returns a tuple of the output of</span>
 <span class="sd">        `f(...)` and a list of unknown arguments.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Make sure we start on a clean slate. Some tests may fail without this due to</span>
+    <span class="c1"># memory address conflicts.</span>
+    <span class="n">_unsafe_cache</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+
     <span class="n">output</span> <span class="o">=</span> <span class="n">_cli_impl</span><span class="p">(</span>
         <span class="n">f</span><span class="p">,</span>
         <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
@@ -429,6 +435,10 @@
         <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
         <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
     <span class="p">)</span>
+
+    <span class="c1"># Prevent unnecessary memory usage.</span>
+    <span class="n">_unsafe_cache</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">output</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>

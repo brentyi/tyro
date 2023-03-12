@@ -250,15 +250,25 @@
         <article role="main">
           <h1>Source code for tyro._unsafe_cache</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">TypeVar</span>
 
 <span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
+
+
+<span class="n">_cache_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="clear_cache"><a class="viewcode-back" href="../../../api/tyro/_unsafe_cache/#tyro._unsafe_cache.clear_cache">[docs]</a><span class="k">def</span> <span class="nf">clear_cache</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">_cache_list</span><span class="p">:</span>
+        <span class="n">c</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="unsafe_cache"><a class="viewcode-back" href="../../../api/tyro/_unsafe_cache/#tyro._unsafe_cache.unsafe_cache">[docs]</a><span class="k">def</span> <span class="nf">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">CallableType</span><span class="p">],</span> <span class="n">CallableType</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Cache decorator that relies object IDs when arguments are unhashable. Assumes</span>
 <span class="sd">    immutability.&quot;&quot;&quot;</span>
-    <span class="n">cache</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">_cache_list</span><span class="o">.</span><span class="n">append</span><span class="p">({})</span>
+    <span class="n">local_cache</span> <span class="o">=</span> <span class="n">_cache_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">CallableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableType</span><span class="p">:</span>
         <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -267,13 +277,13 @@
                 <span class="p">(</span><span class="s2">&quot;__kwarg__&quot;</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">unsafe_hash</span><span class="p">(</span><span class="n">v</span><span class="p">))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">cache</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">local_cache</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">local_cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
 
             <span class="n">out</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cache</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxsize</span><span class="p">:</span>
-                <span class="n">cache</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">cache</span><span class="p">)))</span>
+            <span class="n">local_cache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">local_cache</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxsize</span><span class="p">:</span>
+                <span class="n">local_cache</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">local_cache</span><span class="p">)))</span>
             <span class="k">return</span> <span class="n">out</span>
 
         <span class="k">return</span> <span class="n">wrapped_f</span>  <span class="c1"># type: ignore</span>
