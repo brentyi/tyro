@@ -281,7 +281,6 @@
     <span class="n">_resolver</span><span class="p">,</span>
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">_subcommand_matching</span><span class="p">,</span>
-    <span class="n">_unsafe_cache</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
@@ -606,7 +605,6 @@
             <span class="n">option</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
                 <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
             <span class="p">)</span>
-            <span class="n">default_hash</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Explicitly annotated default.</span>
                 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
