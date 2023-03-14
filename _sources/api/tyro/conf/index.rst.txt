@@ -170,7 +170,7 @@ Package Contents
 
    .. code-block:: python
 
-      # Recursively apply FlagConversionOff to all field in `main()`.
+      # Recursively apply FlagConversionOff to all fields in `main()`.
       @tyro.conf.configure(tyro.conf.FlagConversionOff)
       def main(field: bool) -> None:
           ...
