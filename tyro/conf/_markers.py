@@ -117,7 +117,7 @@ def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
     This decorator makes markers applicable to general functions as well:
 
     ```python
-    # Recursively apply FlagConversionOff to all field in `main()`.
+    # Recursively apply FlagConversionOff to all fields in `main()`.
     @tyro.conf.configure(tyro.conf.FlagConversionOff)
     def main(field: bool) -> None:
         ...
