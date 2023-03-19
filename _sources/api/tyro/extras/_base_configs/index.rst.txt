@@ -19,27 +19,6 @@ Module Contents
    
    Construct a Union type for defining subcommands that choose between defaults.
 
-   .. warning::
-
-       The type returned by this function can be safely used as a direct input to
-       `tyro.cli()`; use as an annotation also works but is discouraged.
-
-       Direct use of `typing.Union` and `tyro.conf.subcommand()` are preferred whenever
-       possible.
-
-       For use as an annotation, we recommend applying a TYPE_CHECKING guard:
-
-       .. code-block:: python
-
-           from typing import TYPE_CHECKING
-
-           if TYPE_CHECKING:
-               # Static type seen by language servers, type checkers, etc.
-               SelectableConfig = Config
-           else:
-               # Runtime type used by tyro.
-               SelectableConfig = subcommand_type_from_defaults(...)
-
    For example, when ``defaults`` is set to:
 
    .. code-block:: python
@@ -64,29 +43,24 @@ Module Contents
           ]
       ]
 
-   The resulting type can be used directly in tyro.cli:
+   Direct use of ``typing.Union`` and ``tyro.conf.subcommand()`` should generally be
+   preferred, but this function can be helpful for succinictness.
 
-   .. code-block:: python
+   .. warning::
+   ::
 
-      config = tyro.cli(subcommand_type_from_defaults(default_from_name))
-      reveal_type(config)  # Should be correct!
+      The type returned by this function can be safely used as an input to
+      `tyro.cli()`, but for static analysis when used for annotations we recommend
+      applying a TYPE_CHECKING guard:
 
-   Or to generate annotations for classes and functions:
+      .. code-block:: python
 
-   .. code-block:: python
+          from typing import TYPE_CHECKING
 
-      if TYPE_CHECKING:
-          # Static type seen by language servers, type checkers, etc.
-          SelectableConfig = Config
-      else:
-          # Runtime type used by tyro.
-          SelectableConfig = subcommand_type_from_defaults(default_from_name)
-
-      def train(
-          config: SelectableConfig,
-          checkpoint_path: Optional[pathlib.Path] = None,
-      ) -> None:
-          ...
-
-      tyro.cli(train)
+          if TYPE_CHECKING:
+              # Static type seen by language servers, type checkers, etc.
+              SelectableConfig = Config
+          else:
+              # Runtime type used by tyro.
+              SelectableConfig = subcommand_type_from_defaults(...)
 

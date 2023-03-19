@@ -267,27 +267,6 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Construct a Union type for defining subcommands that choose between defaults.</span>
 
-<span class="sd">    .. warning::</span>
-
-<span class="sd">        The type returned by this function can be safely used as a direct input to</span>
-<span class="sd">        `tyro.cli()`; use as an annotation also works but is discouraged.</span>
-
-<span class="sd">        Direct use of `typing.Union` and `tyro.conf.subcommand()` are preferred whenever</span>
-<span class="sd">        possible.</span>
-
-<span class="sd">        For use as an annotation, we recommend applying a TYPE_CHECKING guard:</span>
-
-<span class="sd">        .. code-block:: python</span>
-
-<span class="sd">            from typing import TYPE_CHECKING</span>
-
-<span class="sd">            if TYPE_CHECKING:</span>
-<span class="sd">                # Static type seen by language servers, type checkers, etc.</span>
-<span class="sd">                SelectableConfig = Config</span>
-<span class="sd">            else:</span>
-<span class="sd">                # Runtime type used by tyro.</span>
-<span class="sd">                SelectableConfig = subcommand_type_from_defaults(...)</span>
-
 <span class="sd">    For example, when `defaults` is set to:</span>
 
 <span class="sd">    ```python</span>
@@ -312,31 +291,26 @@
 <span class="sd">    ]</span>
 <span class="sd">    ```</span>
 
-<span class="sd">    The resulting type can be used directly in tyro.cli:</span>
+<span class="sd">    Direct use of `typing.Union` and `tyro.conf.subcommand()` should generally be</span>
+<span class="sd">    preferred, but this function can be helpful for succinictness.</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    config = tyro.cli(subcommand_type_from_defaults(default_from_name))</span>
-<span class="sd">    reveal_type(config)  # Should be correct!</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. warning::</span>
 
-<span class="sd">    Or to generate annotations for classes and functions:</span>
+<span class="sd">        The type returned by this function can be safely used as an input to</span>
+<span class="sd">        `tyro.cli()`, but for static analysis when used for annotations we recommend</span>
+<span class="sd">        applying a TYPE_CHECKING guard:</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    if TYPE_CHECKING:</span>
-<span class="sd">        # Static type seen by language servers, type checkers, etc.</span>
-<span class="sd">        SelectableConfig = Config</span>
-<span class="sd">    else:</span>
-<span class="sd">        # Runtime type used by tyro.</span>
-<span class="sd">        SelectableConfig = subcommand_type_from_defaults(default_from_name)</span>
+<span class="sd">        .. code-block:: python</span>
 
-<span class="sd">    def train(</span>
-<span class="sd">        config: SelectableConfig,</span>
-<span class="sd">        checkpoint_path: Optional[pathlib.Path] = None,</span>
-<span class="sd">    ) -&gt; None:</span>
-<span class="sd">        ...</span>
+<span class="sd">            from typing import TYPE_CHECKING</span>
 
-<span class="sd">    tyro.cli(train)</span>
-<span class="sd">    ```</span>
+<span class="sd">            if TYPE_CHECKING:</span>
+<span class="sd">                # Static type seen by language servers, type checkers, etc.</span>
+<span class="sd">                SelectableConfig = Config</span>
+<span class="sd">            else:</span>
+<span class="sd">                # Runtime type used by tyro.</span>
+<span class="sd">                SelectableConfig = subcommand_type_from_defaults(...)</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="nb">tuple</span><span class="p">(</span>

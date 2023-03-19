@@ -262,26 +262,24 @@
 <dt class="sig sig-object py" id="tyro.extras._choices_type.literal_type_from_choices">
 <span class="sig-prename descclassname"><span class="pre">tyro.extras._choices_type.</span></span><span class="sig-name descname"><span class="pre">literal_type_from_choices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/tyro/extras/_choices_type/#literal_type_from_choices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras._choices_type.literal_type_from_choices" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a <code class="docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> type that constrains values to a set of choices.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The type returned by this function can be safely used as a direct input to
-<cite>tyro.cli()</cite>; use as an annotation also works but is discouraged.</p>
-<p>Direct use of <cite>typing.Literal</cite> is preferred whenever possible.</p>
-<p>For use as an annotation, we recommend applying a TYPE_CHECKING guard:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<p>Using <code class="docutils literal notranslate"><span class="pre">Literal[...]</span></code> directly should generally be preferred, but this function can be
+helpful when choices are generated dynamically.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The type returned by this function can be safely used as an input to
+`tyro.cli()`, but for static analysis when used for annotations we recommend
+applying a TYPE_CHECKING guard:
 
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
-    <span class="n">Color</span> <span class="o">=</span> <span class="nb">str</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="c1"># Runtime type used by tyro.</span>
-    <span class="n">Color</span> <span class="o">=</span> <span class="n">literal_type_from_choices</span><span class="p">([</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">])</span>
+.. code-block:: python
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        # Static type seen by language servers, type checkers, etc.
+        Color = str
+    else:
+        # Runtime type used by tyro.
+        Color = literal_type_from_choices([&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;])
 </pre></div>
 </div>
-</div>
-<p>Using <code class="docutils literal notranslate"><span class="pre">Literal[...]</span></code> directly should generally be preferred, but this helper can be
-used in the rare case that choices are generated dynamically. (for example, the keys
-of a dictionary)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>choices</strong> (<em>Iterable</em><em>[</em><em>T</em><em>]</em>) – </p>

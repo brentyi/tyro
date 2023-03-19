@@ -285,24 +285,6 @@ flag.</p>
 <dt class="sig sig-object py" id="tyro.extras.subcommand_type_from_defaults">
 <span class="sig-prename descclassname"><span class="pre">tyro.extras.</span></span><span class="sig-name descname"><span class="pre">subcommand_type_from_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/extras/_base_configs/#subcommand_type_from_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.subcommand_type_from_defaults" title="Permalink to this definition">#</a></dt>
 <dd><p>Construct a Union type for defining subcommands that choose between defaults.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The type returned by this function can be safely used as a direct input to
-<cite>tyro.cli()</cite>; use as an annotation also works but is discouraged.</p>
-<p>Direct use of <cite>typing.Union</cite> and <cite>tyro.conf.subcommand()</cite> are preferred whenever
-possible.</p>
-<p>For use as an annotation, we recommend applying a TYPE_CHECKING guard:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
-
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
-    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">Config</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="c1"># Runtime type used by tyro.</span>
-    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
 <p>For example, when <code class="docutils literal notranslate"><span class="pre">defaults</span></code> is set to:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="n">Config</span><span class="p">(</span><span class="o">...</span><span class="p">),</span>
@@ -323,26 +305,22 @@ possible.</p>
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>The resulting type can be used directly in tyro.cli:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="n">default_from_name</span><span class="p">))</span>
-<span class="n">reveal_type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>  <span class="c1"># Should be correct!</span>
-</pre></div>
-</div>
-<p>Or to generate annotations for classes and functions:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
-    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">Config</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="c1"># Runtime type used by tyro.</span>
-    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="n">default_from_name</span><span class="p">)</span>
+<p>Direct use of <code class="docutils literal notranslate"><span class="pre">typing.Union</span></code> and <code class="docutils literal notranslate"><span class="pre">tyro.conf.subcommand()</span></code> should generally be
+preferred, but this function can be helpful for succinictness.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The type returned by this function can be safely used as an input to
+`tyro.cli()`, but for static analysis when used for annotations we recommend
+applying a TYPE_CHECKING guard:
 
-<span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">SelectableConfig</span><span class="p">,</span>
-    <span class="n">checkpoint_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="o">...</span>
+.. code-block:: python
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        # Static type seen by language servers, type checkers, etc.
+        SelectableConfig = Config
+    else:
+        # Runtime type used by tyro.
+        SelectableConfig = subcommand_type_from_defaults(...)
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -363,26 +341,24 @@ possible.</p>
 <dt class="sig sig-object py" id="tyro.extras.literal_type_from_choices">
 <span class="sig-prename descclassname"><span class="pre">tyro.extras.</span></span><span class="sig-name descname"><span class="pre">literal_type_from_choices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/extras/_choices_type/#literal_type_from_choices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.literal_type_from_choices" title="Permalink to this definition">#</a></dt>
 <dd><p>Generate a <code class="docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> type that constrains values to a set of choices.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The type returned by this function can be safely used as a direct input to
-<cite>tyro.cli()</cite>; use as an annotation also works but is discouraged.</p>
-<p>Direct use of <cite>typing.Literal</cite> is preferred whenever possible.</p>
-<p>For use as an annotation, we recommend applying a TYPE_CHECKING guard:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<p>Using <code class="docutils literal notranslate"><span class="pre">Literal[...]</span></code> directly should generally be preferred, but this function can be
+helpful when choices are generated dynamically.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The type returned by this function can be safely used as an input to
+`tyro.cli()`, but for static analysis when used for annotations we recommend
+applying a TYPE_CHECKING guard:
 
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
-    <span class="n">Color</span> <span class="o">=</span> <span class="nb">str</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="c1"># Runtime type used by tyro.</span>
-    <span class="n">Color</span> <span class="o">=</span> <span class="n">literal_type_from_choices</span><span class="p">([</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">])</span>
+.. code-block:: python
+
+    from typing import TYPE_CHECKING
+
+    if TYPE_CHECKING:
+        # Static type seen by language servers, type checkers, etc.
+        Color = str
+    else:
+        # Runtime type used by tyro.
+        Color = literal_type_from_choices([&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;])
 </pre></div>
 </div>
-</div>
-<p>Using <code class="docutils literal notranslate"><span class="pre">Literal[...]</span></code> directly should generally be preferred, but this helper can be
-used in the rare case that choices are generated dynamically. (for example, the keys
-of a dictionary)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>choices</strong> (<em>Iterable</em><em>[</em><em>T</em><em>]</em>) – </p>
