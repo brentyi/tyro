@@ -264,24 +264,19 @@
 
 <span class="sd">    .. warning::</span>
 
-<span class="sd">        Use of this helper is discouraged. It will likely be deprecated.</span>
+<span class="sd">        The type returned by this function can be safely used as a direct input to</span>
+<span class="sd">        `tyro.cli()`; use as an annotation also works but is discouraged.</span>
 
-<span class="sd">        The the returned type is understood as an annotation by ``pyright`` and</span>
-<span class="sd">        ``pylance`` (with ``from __future__ import annotations``), but it relies on</span>
-<span class="sd">        behavior that isn&#39;t defined by the Python language specifications.</span>
+<span class="sd">        Direct use of `typing.Literal` is preferred whenever possible.</span>
 
-<span class="sd">        At the cost of verbosity, using ``typing.Literal[]`` directly is better supported</span>
-<span class="sd">        by tools like ``mypy``.</span>
-
-<span class="sd">        Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``</span>
-<span class="sd">        guard:</span>
+<span class="sd">        For use as an annotation, we recommend applying a TYPE_CHECKING guard:</span>
 
 <span class="sd">        .. code-block:: python</span>
 
 <span class="sd">            from typing import TYPE_CHECKING</span>
 
 <span class="sd">            if TYPE_CHECKING:</span>
-<span class="sd">                # Static type seen by mypy, language servers, etc.</span>
+<span class="sd">                # Static type seen by language servers, type checkers, etc.</span>
 <span class="sd">                Color = str</span>
 <span class="sd">            else:</span>
 <span class="sd">                # Runtime type used by tyro.</span>

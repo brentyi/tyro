@@ -9,10 +9,8 @@ We can integrate ``tyro.cli()`` into common configuration patterns: here, we sel
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.
 
-Note that our interfaces don't prescribe any of the mechanics used for storing
-base configurations. A Hydra-style YAML approach could just as easily
-be used for the config library (although we generally prefer to avoid YAMLs; staying in
-Python is convenient for autocompletion and type checking).
+This example is verbose; to shorten, consider using
+:func:`tyro.extras.subcommand_type_from_defaults()`.
 
 
 
@@ -79,6 +77,7 @@ Python is convenient for autocompletion and type checking).
                     activation=nn.ReLU,
                 ),
                 description="Train a smaller model.",
+                prefix_name=False,
             ),
         ]
         BigConfig = Annotated[
@@ -96,10 +95,12 @@ Python is convenient for autocompletion and type checking).
                     activation=nn.GELU,
                 ),
                 description="Train a bigger model.",
+                prefix_name=False,
             ),
         ]
 
 
+        @tyro.conf.configure(tyro.conf.ConsolidateSubcommandArgs)
         def main(
             config: Union[SmallConfig, BigConfig],
             restore_checkpoint: bool = False,
@@ -123,30 +124,30 @@ Python is convenient for autocompletion and type checking).
 
 .. raw:: html
 
-        <kbd>python 03_config_systems/01_base_configs.py config:small --help</kbd>
+        <kbd>python 03_config_systems/01_base_configs.py small --help</kbd>
 
-.. program-output:: python ../../examples/03_config_systems/01_base_configs.py config:small --help
-
-------------
-
-.. raw:: html
-
-        <kbd>python 03_config_systems/01_base_configs.py config:small --config.seed 94720</kbd>
-
-.. program-output:: python ../../examples/03_config_systems/01_base_configs.py config:small --config.seed 94720
+.. program-output:: python ../../examples/03_config_systems/01_base_configs.py small --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 03_config_systems/01_base_configs.py config:big --help</kbd>
+        <kbd>python 03_config_systems/01_base_configs.py small --config.seed 94720</kbd>
 
-.. program-output:: python ../../examples/03_config_systems/01_base_configs.py config:big --help
+.. program-output:: python ../../examples/03_config_systems/01_base_configs.py small --config.seed 94720
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 03_config_systems/01_base_configs.py config:big --config.seed 94720</kbd>
+        <kbd>python 03_config_systems/01_base_configs.py big --help</kbd>
 
-.. program-output:: python ../../examples/03_config_systems/01_base_configs.py config:big --config.seed 94720
+.. program-output:: python ../../examples/03_config_systems/01_base_configs.py big --help
+
+------------
+
+.. raw:: html
+
+        <kbd>python 03_config_systems/01_base_configs.py big --config.seed 94720</kbd>
+
+.. program-output:: python ../../examples/03_config_systems/01_base_configs.py big --config.seed 94720

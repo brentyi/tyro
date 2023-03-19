@@ -254,10 +254,8 @@
 <p>We can integrate <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code> into common configuration patterns: here, we select
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.</p>
-<p>Note that our interfaces don’t prescribe any of the mechanics used for storing
-base configurations. A Hydra-style YAML approach could just as easily
-be used for the config library (although we generally prefer to avoid YAMLs; staying in
-Python is convenient for autocompletion and type checking).</p>
+<p>This example is verbose; to shorten, consider using
+<a class="reference internal" href="../../../api/tyro/extras/#tyro.extras.subcommand_type_from_defaults" title="tyro.extras.subcommand_type_from_defaults"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.subcommand_type_from_defaults()</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="linenos"> 3</span>
@@ -317,69 +315,66 @@ Python is convenient for autocompletion and type checking).</p>
 <span class="linenos">57</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
 <span class="linenos">58</span>        <span class="p">),</span>
 <span class="linenos">59</span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Train a smaller model.&quot;</span><span class="p">,</span>
-<span class="linenos">60</span>    <span class="p">),</span>
-<span class="linenos">61</span><span class="p">]</span>
-<span class="linenos">62</span><span class="n">BigConfig</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
-<span class="linenos">63</span>    <span class="n">ExperimentConfig</span><span class="p">,</span>
-<span class="linenos">64</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span>
-<span class="linenos">65</span>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;big&quot;</span><span class="p">,</span>
-<span class="linenos">66</span>        <span class="n">default</span><span class="o">=</span><span class="n">ExperimentConfig</span><span class="p">(</span>
-<span class="linenos">67</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;imagenet-50&quot;</span><span class="p">,</span>
-<span class="linenos">68</span>            <span class="n">optimizer</span><span class="o">=</span><span class="n">AdamOptimizer</span><span class="p">(),</span>
-<span class="linenos">69</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-<span class="linenos">70</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-<span class="linenos">71</span>            <span class="n">units</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
-<span class="linenos">72</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
-<span class="linenos">73</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<span class="linenos">74</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
-<span class="linenos">75</span>        <span class="p">),</span>
-<span class="linenos">76</span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Train a bigger model.&quot;</span><span class="p">,</span>
-<span class="linenos">77</span>    <span class="p">),</span>
-<span class="linenos">78</span><span class="p">]</span>
-<span class="linenos">79</span>
-<span class="linenos">80</span>
-<span class="linenos">81</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
-<span class="linenos">82</span>    <span class="n">config</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SmallConfig</span><span class="p">,</span> <span class="n">BigConfig</span><span class="p">],</span>
-<span class="linenos">83</span>    <span class="n">restore_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="linenos">84</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">85</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
-<span class="linenos">86</span>
-<span class="linenos">87</span>
-<span class="linenos">88</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">89</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
-<span class="linenos">90</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">60</span>        <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">61</span>    <span class="p">),</span>
+<span class="linenos">62</span><span class="p">]</span>
+<span class="linenos">63</span><span class="n">BigConfig</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>
+<span class="linenos">64</span>    <span class="n">ExperimentConfig</span><span class="p">,</span>
+<span class="linenos">65</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span>
+<span class="linenos">66</span>        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;big&quot;</span><span class="p">,</span>
+<span class="linenos">67</span>        <span class="n">default</span><span class="o">=</span><span class="n">ExperimentConfig</span><span class="p">(</span>
+<span class="linenos">68</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;imagenet-50&quot;</span><span class="p">,</span>
+<span class="linenos">69</span>            <span class="n">optimizer</span><span class="o">=</span><span class="n">AdamOptimizer</span><span class="p">(),</span>
+<span class="linenos">70</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+<span class="linenos">71</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="linenos">72</span>            <span class="n">units</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+<span class="linenos">73</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
+<span class="linenos">74</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">75</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
+<span class="linenos">76</span>        <span class="p">),</span>
+<span class="linenos">77</span>        <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Train a bigger model.&quot;</span><span class="p">,</span>
+<span class="linenos">78</span>        <span class="n">prefix_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">79</span>    <span class="p">),</span>
+<span class="linenos">80</span><span class="p">]</span>
+<span class="linenos">81</span>
+<span class="linenos">82</span>
+<span class="linenos">83</span><span class="nd">@tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span><span class="p">)</span>
+<span class="linenos">84</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos">85</span>    <span class="n">config</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">SmallConfig</span><span class="p">,</span> <span class="n">BigConfig</span><span class="p">],</span>
+<span class="linenos">86</span>    <span class="n">restore_checkpoint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="linenos">87</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">88</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">89</span>
+<span class="linenos">90</span>
+<span class="linenos">91</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">92</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+<span class="linenos">93</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] [--restore-checkpoint]
-                          {config:small,config:big}
+<kbd>python 03_config_systems/01_base_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] {small,big}
 
-╭─ arguments ─────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit │
-│ --restore-checkpoint    (sets: restore_checkpoint=True) │
-╰─────────────────────────────────────────────────────────╯
-╭─ subcommands ───────────────────────────────────────────╮
-│ {config:small,config:big}                               │
-│     config:small        Train a smaller model.          │
-│     config:big          Train a bigger model.           │
-╰─────────────────────────────────────────────────────────╯</pre>
+╭─ arguments ────────────────────────────────────────╮
+│ -h, --help         show this help message and exit │
+╰────────────────────────────────────────────────────╯
+╭─ subcommands ──────────────────────────────────────╮
+│ {small,big}                                        │
+│     small              Train a smaller model.      │
+│     big                Train a bigger model.       │
+╰────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py config:small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py config:small [-h]
-                                       [--config.dataset {mnist,imagenet-50}]
-                                       [--config.optimizer.learning-rate 
-FLOAT]
-                                       [--config.optimizer.betas FLOAT FLOAT]
-                                       [--config.num-layers INT]
-                                       [--config.units INT]
-                                       [--config.batch-size INT]
-                                       [--config.train-steps INT]
-                                       [--config.seed INT]
-                                       [--config.activation {fixed}]
-
-Train a smaller model.
+<kbd>python 03_config_systems/01_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py small [-h] [--config.dataset {mnist,imagenet-50}]
+                                [--config.optimizer.learning-rate FLOAT]
+                                [--config.optimizer.betas FLOAT FLOAT]
+                                [--config.num-layers INT] [--config.units INT]
+                                [--config.batch-size INT]
+                                [--config.train-steps INT] [--config.seed INT]
+                                [--config.activation {fixed}]
+                                [--restore-checkpoint]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
+│ --restore-checkpoint    (sets: restore_checkpoint=True)                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ config arguments ─────────────────────────────────────────────────────────╮
 │ --config.dataset {mnist,imagenet-50}                                       │
@@ -407,24 +402,21 @@ Train a smaller model.
 │                         (default: 0.9 0.999)                               │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py config:small --config.seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)
+<kbd>python 03_config_systems/01_base_configs.py small --config.seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)
 None</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py config:big --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py config:big [-h]
-                                     [--config.dataset {mnist,imagenet-50}]
-                                     [--config.optimizer.learning-rate FLOAT]
-                                     [--config.optimizer.betas FLOAT FLOAT]
-                                     [--config.num-layers INT]
-                                     [--config.units INT]
-                                     [--config.batch-size INT]
-                                     [--config.train-steps INT]
-                                     [--config.seed INT]
-                                     [--config.activation {fixed}]
-
-Train a bigger model.
+<kbd>python 03_config_systems/01_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py big [-h] [--config.dataset {mnist,imagenet-50}]
+                              [--config.optimizer.learning-rate FLOAT]
+                              [--config.optimizer.betas FLOAT FLOAT]
+                              [--config.num-layers INT] [--config.units INT]
+                              [--config.batch-size INT]
+                              [--config.train-steps INT] [--config.seed INT]
+                              [--config.activation {fixed}]
+                              [--restore-checkpoint]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
+│ --restore-checkpoint    (sets: restore_checkpoint=True)                    │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ config arguments ─────────────────────────────────────────────────────────╮
 │ --config.dataset {mnist,imagenet-50}                                       │
@@ -453,7 +445,7 @@ Train a bigger model.
 │                         (default: 0.9 0.999)                               │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py config:big --config.seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)
+<kbd>python 03_config_systems/01_base_configs.py big --config.seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)
 None</pre>
 </section>
 

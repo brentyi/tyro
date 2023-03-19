@@ -21,24 +21,19 @@ Module Contents
 
    .. warning::
 
-       Use of this helper is discouraged. It will likely be deprecated.
+       The type returned by this function can be safely used as a direct input to
+       `tyro.cli()`; use as an annotation also works but is discouraged.
 
-       The the returned type is understood as an annotation by ``pyright`` and
-       ``pylance`` (with ``from __future__ import annotations``), but it relies on
-       behavior that isn't defined by the Python language specifications.
+       Direct use of `typing.Literal` is preferred whenever possible.
 
-       At the cost of verbosity, using ``typing.Literal[]`` directly is better supported
-       by tools like ``mypy``.
-
-       Alternatively, we can work around this limitation with an ``if TYPE_CHECKING``
-       guard:
+       For use as an annotation, we recommend applying a TYPE_CHECKING guard:
 
        .. code-block:: python
 
            from typing import TYPE_CHECKING
 
            if TYPE_CHECKING:
-               # Static type seen by mypy, language servers, etc.
+               # Static type seen by language servers, type checkers, etc.
                Color = str
            else:
                # Runtime type used by tyro.

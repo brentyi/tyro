@@ -264,18 +264,14 @@
 <dd><p>Generate a <code class="docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> type that constrains values to a set of choices.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Use of this helper is discouraged. It will likely be deprecated.</p>
-<p>The the returned type is understood as an annotation by <code class="docutils literal notranslate"><span class="pre">pyright</span></code> and
-<code class="docutils literal notranslate"><span class="pre">pylance</span></code> (with <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">annotations</span></code>), but it relies on
-behavior that isn’t defined by the Python language specifications.</p>
-<p>At the cost of verbosity, using <code class="docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> directly is better supported
-by tools like <code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p>
-<p>Alternatively, we can work around this limitation with an <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">TYPE_CHECKING</span></code>
-guard:</p>
+<p>The type returned by this function can be safely used as a direct input to
+<cite>tyro.cli()</cite>; use as an annotation also works but is discouraged.</p>
+<p>Direct use of <cite>typing.Literal</cite> is preferred whenever possible.</p>
+<p>For use as an annotation, we recommend applying a TYPE_CHECKING guard:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="c1"># Static type seen by mypy, language servers, etc.</span>
+    <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
     <span class="n">Color</span> <span class="o">=</span> <span class="nb">str</span>
 <span class="k">else</span><span class="p">:</span>
     <span class="c1"># Runtime type used by tyro.</span>
