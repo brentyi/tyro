@@ -4,17 +4,16 @@ We can integrate `tyro.cli()` into common configuration patterns: here, we selec
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.
 
-Note that our interfaces don't prescribe any of the mechanics used for storing
-base configurations. A Hydra-style YAML approach could just as easily
-be used for the config library (although we generally prefer to avoid YAMLs; staying in
-Python is convenient for autocompletion and type checking).
+This example is verbose; to shorten, consider using
+:func:`tyro.extras.subcommand_type_from_defaults()`.
+
 
 Usage:
 `python ./10_base_configs.py --help`
-`python ./10_base_configs.py config:small --help`
-`python ./10_base_configs.py config:small --config.seed 94720`
-`python ./10_base_configs.py config:big --help`
-`python ./10_base_configs.py config:big --config.seed 94720`
+`python ./10_base_configs.py small --help`
+`python ./10_base_configs.py small --config.seed 94720`
+`python ./10_base_configs.py big --help`
+`python ./10_base_configs.py big --config.seed 94720`
 """
 
 from dataclasses import dataclass
@@ -76,6 +75,7 @@ SmallConfig = Annotated[
             activation=nn.ReLU,
         ),
         description="Train a smaller model.",
+        prefix_name=False,
     ),
 ]
 BigConfig = Annotated[
@@ -93,10 +93,12 @@ BigConfig = Annotated[
             activation=nn.GELU,
         ),
         description="Train a bigger model.",
+        prefix_name=False,
     ),
 ]
 
 
+@tyro.conf.configure(tyro.conf.ConsolidateSubcommandArgs)
 def main(
     config: Union[SmallConfig, BigConfig],
     restore_checkpoint: bool = False,
