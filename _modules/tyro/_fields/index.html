@@ -261,6 +261,7 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
@@ -645,13 +646,18 @@
 <span class="k">def</span> <span class="nf">_field_list_from_dataclass</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
-    <span class="c1"># Check if dataclass is a flax module.</span>
     <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">flax</span>
+        <span class="c1"># Check if dataclass is a flax module. This is only possible if flax is already</span>
+        <span class="c1"># loaded.</span>
+        <span class="c1">#</span>
+        <span class="c1"># We generally want to avoid importing flax, since it requires a lot of heavy</span>
+        <span class="c1"># imports.</span>
+        <span class="k">if</span> <span class="s2">&quot;flax&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="kn">import</span> <span class="nn">flax</span>
 
-        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">flax</span><span class="o">.</span><span class="n">linen</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-            <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">flax</span><span class="o">.</span><span class="n">linen</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+                <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="k">pass</span>
 
