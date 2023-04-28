@@ -10,6 +10,7 @@ import functools
 import inspect
 import itertools
 import os
+import sys
 import typing
 import warnings
 from typing import (
@@ -394,13 +395,18 @@ def _field_list_from_namedtuple(
 def _field_list_from_dataclass(
     cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    # Check if dataclass is a flax module.
     is_flax_module = False
     try:
-        import flax
+        # Check if dataclass is a flax module. This is only possible if flax is already
+        # loaded.
+        #
+        # We generally want to avoid importing flax, since it requires a lot of heavy
+        # imports.
+        if "flax" in sys.modules.keys():
+            import flax
 
-        if issubclass(cls, flax.linen.Module):
-            is_flax_module = True
+            if issubclass(cls, flax.linen.Module):
+                is_flax_module = True
     except ImportError:
         pass
 
