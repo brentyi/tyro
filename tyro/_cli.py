@@ -255,10 +255,7 @@ def _cli_impl(
     return_unknown_args: bool,
     **deprecated_kwargs,
 ) -> Union[OutT, argparse.ArgumentParser, Tuple[OutT, List[str]],]:
-    """Helper for stitching the `tyro` pipeline together.
-
-    Converts `f` into a
-    """
+    """Helper for stitching the `tyro` pipeline together."""
     if "default_instance" in deprecated_kwargs:
         warnings.warn(
             "`default_instance=` is deprecated! use `default=` instead.", stacklevel=2
