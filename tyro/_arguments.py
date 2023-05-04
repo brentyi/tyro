@@ -89,6 +89,8 @@ class BooleanOptionalAction(argparse.Action):
             print(self._no_strings)
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
+    # Typically only supported in Python 3.10, but we backport some functionality in
+    # _argparse_formatters.py
     def format_usage(self):
         return " | ".join(self.option_strings)
 
