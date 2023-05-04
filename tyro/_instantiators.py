@@ -283,9 +283,7 @@ def _instantiator_from_type_inner(
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""
     out = instantiator_from_type(typ, type_from_typevar, markers)
-
-    # TODO(5/3/2023): revisit this next condition. It looks wrong.
-    if out[1].nargs is not None:
+    if out[1].nargs == "+":
         # We currently only use allow_sequences=False for options in Literal types,
         # which are evaluated using `type()`. It should not be possible to hit this
         # condition from polling a runtime type.
@@ -506,59 +504,69 @@ def _instantiator_from_dict(
     key_instantiator, key_meta = _instantiator_from_type_inner(
         key_type, type_from_typevar, allow_sequences="fixed_length", markers=markers
     )
-    val_instantiator, val_meta = _instantiator_from_type_inner(
-        val_type, type_from_typevar, allow_sequences="fixed_length", markers=markers
-    )
 
-    key_nargs = cast(int, key_meta.nargs)  # Casts needed for mypy but not pyright!
-    val_nargs = cast(int, val_meta.nargs)
-    assert isinstance(key_nargs, int)
-    assert isinstance(val_nargs, int)
-    pair_nargs = key_nargs + val_nargs
-
-    def dict_instantiator(strings: List[str]) -> Any:
-        out = {}
-        if len(strings) % pair_nargs != 0:
-            raise ValueError("incomplete set of key value pairs!")
-
-        index = 0
-        for _ in range(len(strings) // pair_nargs):
-            k = strings[index : index + key_nargs]
-            index += key_nargs
-            v = strings[index : index + val_nargs]
-            index += val_nargs
-
-            if key_meta.choices is not None and any(
-                kj not in key_meta.choices for kj in k
-            ):
-                raise ValueError(
-                    f"invalid choice: {k} (choose from {key_meta.choices}))"
-                )
-            if val_meta.choices is not None and any(
-                vj not in val_meta.choices for vj in v
-            ):
-                raise ValueError(
-                    f"invalid choice: {v} (choose from {val_meta.choices}))"
-                )
-            out[key_instantiator(k)] = val_instantiator(v)  # type: ignore
-        return out
-
-    pair_metavar = f"{key_meta.metavar} {val_meta.metavar}"
     if _markers.UseAppendAction in markers:
+        val_instantiator, val_meta = _instantiator_from_type_inner(
+            val_type,
+            type_from_typevar,
+            allow_sequences=True,
+            markers=markers - {_markers.UseAppendAction},
+        )
+        pair_metavar = f"{key_meta.metavar} {val_meta.metavar}"
+        key_nargs = cast(int, key_meta.nargs)  # Casts needed for mypy but not pyright!
+        val_nargs = val_meta.nargs
+        assert isinstance(key_nargs, int)
 
         def append_dict_instantiator(strings: List[List[str]]) -> Any:
-            flattened = []
+            out = {}
             for s in strings:
-                flattened.extend(s)
-            return dict_instantiator(flattened)
+                out[key_instantiator(s[:key_nargs])] = val_instantiator(s[key_nargs:])  # type: ignore
+            return out
 
         return append_dict_instantiator, InstantiatorMetadata(
-            nargs=2,
+            nargs=key_nargs + val_nargs if isinstance(val_nargs, int) else "+",
             metavar=pair_metavar,
             choices=None,
             action="append",
         )
     else:
+        val_instantiator, val_meta = _instantiator_from_type_inner(
+            val_type, type_from_typevar, allow_sequences="fixed_length", markers=markers
+        )
+        pair_metavar = f"{key_meta.metavar} {val_meta.metavar}"
+        key_nargs = cast(int, key_meta.nargs)  # Casts needed for mypy but not pyright!
+        val_nargs = cast(int, val_meta.nargs)
+        assert isinstance(key_nargs, int)
+        assert isinstance(val_nargs, int)
+        pair_nargs = key_nargs + val_nargs
+
+        def dict_instantiator(strings: List[str]) -> Any:
+            out = {}
+            if len(strings) % pair_nargs != 0:
+                raise ValueError("incomplete set of key value pairs!")
+
+            index = 0
+            for _ in range(len(strings) // pair_nargs):
+                k = strings[index : index + key_nargs]
+                index += key_nargs
+                v = strings[index : index + val_nargs]
+                index += val_nargs
+
+                if key_meta.choices is not None and any(
+                    kj not in key_meta.choices for kj in k
+                ):
+                    raise ValueError(
+                        f"invalid choice: {k} (choose from {key_meta.choices}))"
+                    )
+                if val_meta.choices is not None and any(
+                    vj not in val_meta.choices for vj in v
+                ):
+                    raise ValueError(
+                        f"invalid choice: {v} (choose from {val_meta.choices}))"
+                    )
+                out[key_instantiator(k)] = val_instantiator(v)  # type: ignore
+            return out
+
         return dict_instantiator, InstantiatorMetadata(
             nargs="+",
             metavar=_strings.multi_metavar_from_single(pair_metavar),
@@ -583,41 +591,19 @@ def _instantiator_from_sequence(
     else:
         (contained_type,) = get_args(typ)
 
-    make, inner_meta = _instantiator_from_type_inner(
-        contained_type,
-        type_from_typevar,
-        allow_sequences="fixed_length",
-        markers=markers,
-    )
-
-    def sequence_instantiator(strings: List[str]) -> Any:
-        # Validate nargs.
-        assert type(inner_meta.nargs) in (int, NoneType)
-        if isinstance(inner_meta.nargs, int) and len(strings) % inner_meta.nargs != 0:
-            raise ValueError(
-                f"input {strings} is of length {len(strings)}, which is not divisible"
-                f" by {inner_meta.nargs}."
-            )
-
-        # Make tuple.
-        out = []
-        step = inner_meta.nargs if isinstance(inner_meta.nargs, int) else 1
-        for i in range(0, len(strings), step):
-            out.append(make(strings[i : i + inner_meta.nargs]))  # type: ignore
-        assert container_type is not None
-        return container_type(out)
-
     if _markers.UseAppendAction in markers:
+        make, inner_meta = _instantiator_from_type_inner(
+            contained_type,
+            type_from_typevar,
+            allow_sequences=True,
+            markers=markers - {_markers.UseAppendAction},
+        )
 
         def append_sequence_instantiator(strings: Optional[List[List[str]]]) -> Any:
             if strings is None:
                 assert container_type is not None
                 return container_type()
-
-            flattened = []
-            for s in strings:
-                flattened.extend(s)
-            return sequence_instantiator(flattened)
+            return container_type(make(s) for s in strings)  # type: ignore
 
         return append_sequence_instantiator, InstantiatorMetadata(
             nargs=inner_meta.nargs,
@@ -626,6 +612,32 @@ def _instantiator_from_sequence(
             action="append",
         )
     else:
+        make, inner_meta = _instantiator_from_type_inner(
+            contained_type,
+            type_from_typevar,
+            allow_sequences="fixed_length",
+            markers=markers,
+        )
+
+        def sequence_instantiator(strings: List[str]) -> Any:
+            # Validate nargs.
+            if (
+                isinstance(inner_meta.nargs, int)
+                and len(strings) % inner_meta.nargs != 0
+            ):
+                raise ValueError(
+                    f"input {strings} is of length {len(strings)}, which is not divisible"
+                    f" by {inner_meta.nargs}."
+                )
+
+            # Make tuple.
+            out = []
+            step = inner_meta.nargs if isinstance(inner_meta.nargs, int) else 1
+            for i in range(0, len(strings), step):
+                out.append(make(strings[i : i + inner_meta.nargs]))  # type: ignore
+            assert container_type is not None
+            return container_type(out)
+
         return sequence_instantiator, InstantiatorMetadata(
             nargs="+",
             metavar=_strings.multi_metavar_from_single(inner_meta.metavar),

@@ -16,6 +16,15 @@ def test_ambiguous_collection_0() -> None:
 
 
 def test_ambiguous_collection_1() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: List[List[int]]
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(A, args=["--x", "0", "1"])
+
+
+def test_ambiguous_collection_2() -> None:
     def main(x: Tuple[List[str], List[str]]) -> None:
         pass
 
@@ -23,7 +32,7 @@ def test_ambiguous_collection_1() -> None:
         tyro.cli(main, args=["--help"])
 
 
-def test_ambiguous_collection_2() -> None:
+def test_ambiguous_collection_3() -> None:
     def main(x: List[Union[Tuple[int, int], Tuple[int, int, int]]]) -> None:
         pass
 
