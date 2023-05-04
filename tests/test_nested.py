@@ -829,7 +829,7 @@ def test_subparser_in_nested() -> None:
 
 def test_frozen_dict() -> None:
     def main(
-        x: Mapping[str, float] = frozendict(
+        x: Mapping[str, float] = frozendict(  # type: ignore
             {
                 "num_epochs": 20,
                 "batch_size": 64,
@@ -839,7 +839,7 @@ def test_frozen_dict() -> None:
         return x
 
     assert hash(tyro.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
-        frozendict({"num_epochs": 10, "batch_size": 64})
+        frozendict({"num_epochs": 10, "batch_size": 64})  # type: ignore
     )
 
 

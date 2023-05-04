@@ -41,7 +41,7 @@ class ArgumentDefinition:
         """Add a defined argument to a parser."""
 
         # Get keyword arguments, with None values removed.
-        kwargs = dataclasses.asdict(self.lowered)
+        kwargs = dataclasses.asdict(self.lowered)  # type: ignore
         kwargs.pop("instantiator")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flag = kwargs.pop("name_or_flag")
@@ -52,7 +52,10 @@ class ArgumentDefinition:
         # MISSING value will be detected in _calling.py and the field default will
         # directly be used. This helps reduce the likelihood of issues with converting
         # the field default to a string format, then back to the desired type.
-        kwargs["default"] = _fields.MISSING_NONPROP
+        if kwargs.get("action", None) != "append":
+            kwargs["default"] = _fields.MISSING_NONPROP
+        else:
+            kwargs["default"] = []
 
         # Apply overrides in our arg configuration object.
         # Note that the `name` field is applied when the field object is instantiated!
@@ -215,8 +218,9 @@ def _rule_recursive_instantiator_from_type(
         return lowered
     try:
         instantiator, metadata = _instantiators.instantiator_from_type(
-            arg.field.typ,  # type: ignore
+            arg.field.typ,
             arg.type_from_typevar,
+            arg.field.markers,
         )
     except _instantiators.UnsupportedTypeAnnotationError as e:
         if arg.field.default in _fields.MISSING_SINGLETONS:
@@ -235,13 +239,36 @@ def _rule_recursive_instantiator_from_type(
                 default=_fields.MISSING_PROP,
             )
 
-    return dataclasses.replace(
-        lowered,
-        instantiator=instantiator,
-        choices=metadata.choices,
-        nargs=metadata.nargs,
-        metavar=metadata.metavar,
-    )
+    if metadata.action == "append":
+
+        def append_instantiator(x: Any) -> Any:
+            out = instantiator(x)
+            if arg.field.default in _fields.MISSING_SINGLETONS:
+                return instantiator(x)
+
+            return type(out)(arg.field.default) + out
+
+            return out
+
+        return dataclasses.replace(
+            lowered,
+            instantiator=append_instantiator,
+            default=None,
+            choices=metadata.choices,
+            nargs=metadata.nargs,
+            metavar=metadata.metavar,
+            action=metadata.action,
+            required=False,
+        )
+    else:
+        return dataclasses.replace(
+            lowered,
+            instantiator=instantiator,
+            choices=metadata.choices,
+            nargs=metadata.nargs,
+            metavar=metadata.metavar,
+            action=metadata.action,
+        )
 
 
 def _rule_convert_defaults_to_strings(
@@ -312,10 +339,9 @@ def _rule_generate_helptext(
         help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
 
     default = lowered.default
-    if lowered.is_fixed():
-        # For fixed args, we'll be missing the lowered default. Use field default
-        # instead.
-        assert default in _fields.MISSING_SINGLETONS
+    if lowered.is_fixed() or lowered.action == "append":
+        # Cases where we'll be missing the lowered default. Use field default instead.
+        assert default in _fields.MISSING_SINGLETONS or default is None
         default = arg.field.default
 
     if not lowered.required:
@@ -330,6 +356,15 @@ def _rule_generate_helptext(
             default_text = f"(sets: {arg.field.name}=True)"
         elif lowered.action == "store_false":
             default_text = f"(sets: {arg.field.name}=False)"
+        elif lowered.action == "append" and (
+            arg.field.default in _fields.MISSING_SINGLETONS
+            or len(arg.field.default) == 0
+        ):
+            default_text = "(repeatable)"
+        elif lowered.action == "append" and len(arg.field.default) > 0:
+            assert default is not None  # Just for type checker.
+            default_parts = map(shlex.quote, map(str, default))
+            default_text = f"(repeatable, appends: {' '.join(default_parts)})"
         elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
             default_text = "(unset by default)"
         elif lowered.nargs is not None and hasattr(default, "__iter__"):
