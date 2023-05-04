@@ -547,6 +547,8 @@ def _instantiator_from_dict(
 
             index = 0
             for _ in range(len(strings) // pair_nargs):
+                assert isinstance(key_nargs, int)
+                assert isinstance(val_nargs, int)
                 k = strings[index : index + key_nargs]
                 index += key_nargs
                 v = strings[index : index + val_nargs]

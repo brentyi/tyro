@@ -709,7 +709,7 @@ def test_append_tuple_with_default() -> None:
         tyro.cli(A, args=["--x", "1", "2", "3"])
 
 
-def test_append_nested_tuple() -> None:
+def test_append_nested_tuple_fixed_length() -> None:
     @dataclasses.dataclass
     class A:
         x: tyro.conf.UseAppendAction[Tuple[Tuple[str, int], ...]]
@@ -724,7 +724,7 @@ def test_append_nested_tuple() -> None:
         tyro.cli(A, args=["--x", "1", "2", "3"])
 
 
-def test_append_nested_tuple_with_default() -> None:
+def test_append_nested_tuple_with_default_fixed_length() -> None:
     @dataclasses.dataclass
     class A:
         x: tyro.conf.UseAppendAction[Tuple[Tuple[str, int], ...]] = (("1", 1), ("2", 2))
