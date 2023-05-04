@@ -608,10 +608,19 @@ def _instantiator_from_sequence(
         return container_type(out)
 
     if _markers.UseAppendAction in markers:
-        return lambda x: sequence_instantiator(
-            x if x is not None else []
-        ), InstantiatorMetadata(
-            nargs=None,
+
+        def append_sequence_instantiator(strings: Optional[List[List[str]]]) -> Any:
+            if strings is None:
+                assert container_type is not None
+                return container_type()
+
+            flattened = []
+            for s in strings:
+                flattened.extend(s)
+            return sequence_instantiator(flattened)
+
+        return append_sequence_instantiator, InstantiatorMetadata(
+            nargs=inner_meta.nargs,
             metavar=inner_meta.metavar,
             choices=inner_meta.choices,
             action="append",

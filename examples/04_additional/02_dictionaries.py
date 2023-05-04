@@ -9,7 +9,7 @@ Usage:
 `python ./02_dictionaries.py --typed-dict.betas 0.9 0.999`
 """
 
-from typing import Dict, Mapping, Tuple, TypedDict
+from typing import Dict, Tuple, TypedDict
 
 import tyro
 

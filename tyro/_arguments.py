@@ -54,8 +54,6 @@ class ArgumentDefinition:
         # the field default to a string format, then back to the desired type.
         if kwargs.get("action", None) != "append":
             kwargs["default"] = _fields.MISSING_NONPROP
-        elif "default" in kwargs:
-            kwargs["default"] = list(kwargs["default"])
         else:
             kwargs["default"] = []
 
@@ -241,15 +239,36 @@ def _rule_recursive_instantiator_from_type(
                 default=_fields.MISSING_PROP,
             )
 
-    return dataclasses.replace(
-        lowered,
-        instantiator=instantiator,
-        choices=metadata.choices,
-        nargs=metadata.nargs,
-        metavar=metadata.metavar,
-        action=metadata.action,
-        required=False if metadata.action == "append" else lowered.required,
-    )
+    if metadata.action == "append":
+
+        def append_instantiator(x: Any) -> Any:
+            out = instantiator(x)
+            if arg.field.default in _fields.MISSING_SINGLETONS:
+                return instantiator(x)
+
+            return type(out)(arg.field.default) + out
+
+            return out
+
+        return dataclasses.replace(
+            lowered,
+            instantiator=append_instantiator,
+            default=None,
+            choices=metadata.choices,
+            nargs=metadata.nargs,
+            metavar=metadata.metavar,
+            action=metadata.action,
+            required=False,
+        )
+    else:
+        return dataclasses.replace(
+            lowered,
+            instantiator=instantiator,
+            choices=metadata.choices,
+            nargs=metadata.nargs,
+            metavar=metadata.metavar,
+            action=metadata.action,
+        )
 
 
 def _rule_convert_defaults_to_strings(
@@ -320,10 +339,9 @@ def _rule_generate_helptext(
         help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
 
     default = lowered.default
-    if lowered.is_fixed():
-        # For fixed args, we'll be missing the lowered default. Use field default
-        # instead.
-        assert default in _fields.MISSING_SINGLETONS
+    if lowered.is_fixed() or lowered.action == "append":
+        # Cases where we'll be missing the lowered default. Use field default instead.
+        assert default in _fields.MISSING_SINGLETONS or default is None
         default = arg.field.default
 
     if not lowered.required:
