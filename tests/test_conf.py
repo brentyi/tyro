@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Dict, Generic, List, Tuple, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext
@@ -668,3 +668,157 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
             "8",
         ],
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
+
+
+def test_append_lists() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[List[int]]
+
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_tuple() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Tuple[int, ...]]
+
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 3))
+    assert tyro.cli(A, args=[]) == A(x=())
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_tuple_with_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Tuple[int, ...]] = (1, 2)
+
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 1, 2, 3))
+    assert tyro.cli(A, args=[]) == A(x=(1, 2))
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_nested_tuple_fixed_length() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Tuple[Tuple[str, int], ...]]
+
+    assert tyro.cli(A, args="--x 1 1 --x 2 2 --x 3 3".split(" ")) == A(
+        x=(("1", 1), ("2", 2), ("3", 3))
+    )
+    assert tyro.cli(A, args=[]) == A(x=())
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_nested_tuple_with_default_fixed_length() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Tuple[Tuple[str, int], ...]] = (("1", 1), ("2", 2))
+
+    assert tyro.cli(A, args="--x 1 1 --x 2 2 --x 3 3".split(" ")) == A(
+        x=(("1", 1), ("2", 2), ("1", 1), ("2", 2), ("3", 3))
+    )
+    assert tyro.cli(A, args=[]) == A(x=(("1", 1), ("2", 2)))
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_dict() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Dict[str, int]]
+
+    assert tyro.cli(A, args="--x 1 1 --x 2 2 --x 3 3".split(" ")) == A(
+        x={"1": 1, "2": 2, "3": 3}
+    )
+    assert tyro.cli(A, args=[]) == A(x={})
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_dict_with_default() -> None:
+    """Append has no impact when a dictionary has a default value."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Dict[str, int]] = dataclasses.field(
+            default_factory=lambda: {"1": 1}
+        )
+
+    assert tyro.cli(A, args=[]) == A(x={"1": 1})
+    assert tyro.cli(A, args=["--x.1", "2"]) == A(x={"1": 2})
+    with pytest.raises(SystemExit):
+        assert tyro.cli(A, args="--x 2 2 --x 3 3".split(" ")) == A(
+            x={"1": 1, "2": 2, "3": 3}
+        )
+
+
+def test_append_nested_tuple() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Tuple[Tuple[str, ...], ...]]
+
+    assert tyro.cli(A, args="--x 1 2 3 --x 4 5".split(" ")) == A(
+        x=(("1", "2", "3"), ("4", "5"))
+    )
+    assert tyro.cli(A, args=[]) == A(x=())
+
+
+def test_append_nested_tuple_with_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Tuple[Tuple[str, ...], ...]] = (("1", "2"),)
+
+    assert tyro.cli(A, args="--x 1 2 3 --x 4 5".split(" ")) == A(
+        x=(("1", "2"), ("1", "2", "3"), ("4", "5"))
+    )
+    assert tyro.cli(A, args=[]) == A(x=(("1", "2"),))
+
+
+def test_append_nested_list() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[List[List[int]]]
+
+    assert tyro.cli(A, args="--x 1 2 3 --x 4 5".split(" ")) == A(x=[[1, 2, 3], [4, 5]])
+    assert tyro.cli(A, args=[]) == A(x=[])
+
+
+def test_append_nested_dict() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[List[Dict[str, int]]]
+
+    assert tyro.cli(A, args="--x 1 2 3 4 --x 4 5".split(" ")) == A(
+        x=[{"1": 2, "3": 4}, {"4": 5}]
+    )
+    assert tyro.cli(A, args=[]) == A(x=[])
+
+
+def test_append_nested_dict_double() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Dict[str, Dict[str, int]]]
+
+    assert tyro.cli(A, args="--x 0 1 2 3 4 --x 4 5 6".split(" ")) == A(
+        x={"0": {"1": 2, "3": 4}, "4": {"5": 6}}
+    )
+    assert tyro.cli(A, args=[]) == A(x={})
