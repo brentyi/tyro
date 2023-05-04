@@ -88,6 +88,13 @@ By default, `--cmd.arg` may be generated as a flag for each dataclass in the uni
 If subcommand prefixes are omitted, we would instead simply have `--arg`.
 """
 
+UseAppendActions = Annotated[T, None]
+"""Use "append" actions for variable-length arguments.
+
+Given an annotation like `x: List[int]`, this means that `x = [0, 1, 2]` can be set via
+the CLI syntax `--x 0 --x 1 --x 2` instead of the default of `--x 0 1 2`.
+"""
+
 CallableType = TypeVar("CallableType", bound=Callable)
 
 # Dynamically generate marker singletons.

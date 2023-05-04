@@ -402,8 +402,8 @@ def _field_list_from_dataclass(
         #
         # We generally want to avoid importing flax, since it requires a lot of heavy
         # imports.
-        if "flax" in sys.modules.keys():
-            import flax
+        if "flax.linen" in sys.modules.keys():
+            import flax.linen
 
             if issubclass(cls, flax.linen.Module):
                 is_flax_module = True

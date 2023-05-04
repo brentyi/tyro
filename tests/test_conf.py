@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Dict, Generic, List, Tuple, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext
@@ -668,3 +668,74 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
             "8",
         ],
     ) == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
+
+
+def test_append_lists() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendActions[List[int]]
+
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_tuple() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendActions[Tuple[int, ...]]
+
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 3))
+    assert tyro.cli(A, args=[]) == A(x=())
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_tuple_with_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendActions[Tuple[int, ...]] = (1, 2)
+
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 1, 2, 3))
+    assert tyro.cli(A, args=[]) == A(x=(1, 2))
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_dict() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendActions[Dict[str, int]]
+
+    assert tyro.cli(A, args="--x 1 1 --x 2 2 --x 3 3".split(" ")) == A(
+        x={"1": 1, "2": 2, "3": 3}
+    )
+    assert tyro.cli(A, args=[]) == A(x={})
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_dict_with_default() -> None:
+    """Append has no impact when a dictionary has a default value."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendActions[Dict[str, int]] = dataclasses.field(
+            default_factory=lambda: {"1": 1}
+        )
+
+    assert tyro.cli(A, args=[]) == A(x={"1": 1})
+    assert tyro.cli(A, args=["--x.1", "2"]) == A(x={"1": 2})
+    with pytest.raises(SystemExit):
+        assert tyro.cli(A, args="--x 2 2 --x 3 3".split(" ")) == A(
+            x={"1": 1, "2": 2, "3": 3}
+        )

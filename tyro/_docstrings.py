@@ -308,7 +308,7 @@ def get_callable_description(f: Callable) -> str:
     docstring = _strings.dedent(docstring)
 
     if dataclasses.is_dataclass(f):
-        default_doc = f.__name__ + str(inspect.signature(f)).replace(" -> None", "")
+        default_doc = f.__name__ + str(inspect.signature(f)).replace(" -> None", "")  # type: ignore
         if docstring == default_doc:
             return ""
 

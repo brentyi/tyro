@@ -41,6 +41,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    FrozenSet,
     Hashable,
     Iterable,
     List,
@@ -63,14 +64,16 @@ from typing_extensions import (
 
 from . import _strings
 from ._typing import TypeForm
+from .conf import _markers
 
 _StandardInstantiator = Callable[[List[str]], Any]
+_AppendNargsInstantiator = Callable[[List[List[str]]], Any]
 # Special case: the only time that argparse doesn't give us a string is when the
 # argument action is set to `store_true` or `store_false`. In this case, we get
 # a bool directly, and the field action can be a no-op.
 _FlagInstantiator = Callable[[bool], bool]
 
-Instantiator = Union[_StandardInstantiator, _FlagInstantiator]
+Instantiator = Union[_StandardInstantiator, _AppendNargsInstantiator, _FlagInstantiator]
 
 NoneType = type(None)
 
@@ -79,11 +82,12 @@ NoneType = type(None)
 class InstantiatorMetadata:
     # Unlike in vanilla argparse, we never set nargs to None. To make things simpler, we
     # instead use nargs=1.
-    nargs: Union[int, Literal["+"]]
+    nargs: Optional[Union[int, Literal["+"]]]
     # Unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: str
     choices: Optional[Tuple[str, ...]]
+    action: Optional[Literal["append"]]
 
     def check_choices(self, strings: List[str]) -> None:
         if self.choices is not None and any(s not in self.choices for s in strings):
@@ -136,7 +140,9 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
 
 
 def instantiator_from_type(
-    typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
+    typ: TypeForm,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Recursive helper for parsing type annotations.
 
@@ -163,6 +169,7 @@ def instantiator_from_type(
             nargs=1,
             metavar="{None}",
             choices=("None",),
+            action=None,
         )
 
     # Instantiate os.PathLike annotations using pathlib.Path.
@@ -173,7 +180,7 @@ def instantiator_from_type(
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
-    container_out = _instantiator_from_container_type(typ, type_from_typevar)
+    container_out = _instantiator_from_container_type(typ, type_from_typevar, markers)
     if container_out is not None:
         return container_out
 
@@ -233,6 +240,7 @@ def instantiator_from_type(
             else "{" + ",".join(map(str, auto_choices)) + "}"
         ),
         choices=auto_choices,
+        action=None,
     )
 
 
@@ -241,6 +249,7 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal["fixed_length"],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     ...
 
@@ -250,6 +259,7 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[False],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
     ...
 
@@ -259,6 +269,7 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[True],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     ...
 
@@ -267,10 +278,13 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal["fixed_length", True, False],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""
-    out = instantiator_from_type(typ, type_from_typevar)
+    out = instantiator_from_type(typ, type_from_typevar, markers)
+
+    # TODO(5/3/2023): revisit this next condition. It looks wrong.
     if out[1].nargs is not None:
         # We currently only use allow_sequences=False for options in Literal types,
         # which are evaluated using `type()`. It should not be possible to hit this
@@ -284,7 +298,9 @@ def _instantiator_from_type_inner(
 
 
 def _instantiator_from_container_type(
-    typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
+    typ: TypeForm,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    markers: FrozenSet[_markers.Marker],
 ) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
     """Attempt to create an instantiator from a container type. Returns `None` is no
     container type is found."""
@@ -296,7 +312,7 @@ def _instantiator_from_container_type(
     # Unwrap Annotated and Final types.
     if type_origin in (Annotated, Final):
         contained_type = get_args(typ)[0]
-        return instantiator_from_type(contained_type, type_from_typevar)
+        return instantiator_from_type(contained_type, type_from_typevar, markers)
 
     for make, matched_origins in {
         _instantiator_from_sequence: (
@@ -312,7 +328,7 @@ def _instantiator_from_container_type(
         _instantiator_from_literal: (Literal,),
     }.items():
         if type_origin in matched_origins:
-            return make(typ, type_from_typevar)
+            return make(typ, type_from_typevar, markers)
 
     raise UnsupportedTypeAnnotationError(  # pragma: no cover
         f"Unsupported type {typ} with origin {type_origin}"
@@ -320,7 +336,9 @@ def _instantiator_from_container_type(
 
 
 def _instantiator_from_tuple(
-    typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
+    typ: TypeForm,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     types = get_args(typ)
     typeset = set(types)  # Note that sets are unordered.
@@ -330,7 +348,7 @@ def _instantiator_from_tuple(
         # Ellipsis: variable argument counts. When an ellipsis is used, tuples must
         # contain only one type.
         assert len(typeset_no_ellipsis) == 1
-        return _instantiator_from_sequence(typ, type_from_typevar)
+        return _instantiator_from_sequence(typ, type_from_typevar, markers)
 
     else:
         instantiators: List[_StandardInstantiator] = []
@@ -338,9 +356,7 @@ def _instantiator_from_tuple(
         nargs = 0
         for t in types:
             a, b = _instantiator_from_type_inner(
-                t,
-                type_from_typevar,
-                allow_sequences="fixed_length",
+                t, type_from_typevar, allow_sequences="fixed_length", markers=markers
             )
             instantiators.append(a)  # type: ignore
             metas.append(b)
@@ -364,6 +380,7 @@ def _instantiator_from_tuple(
             nargs=nargs,
             metavar=" ".join(m.metavar for m in metas),
             choices=None,
+            action=None,
         )
 
 
@@ -404,7 +421,9 @@ def _join_union_metavars(metavars: Iterable[str]) -> str:
 
 
 def _instantiator_from_union(
-    typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
+    typ: TypeForm,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     options = list(get_args(typ))
     if NoneType in options:
@@ -418,13 +437,11 @@ def _instantiator_from_union(
     # right.
     instantiators = []
     metas = []
-    nargs: Union[int, Literal["+"]] = 1
+    nargs: Optional[Union[int, Literal["+"]]] = 1
     first = True
     for t in options:
         a, b = _instantiator_from_type_inner(
-            t,
-            type_from_typevar,
-            allow_sequences=True,
+            t, type_from_typevar, allow_sequences=True, markers=markers
         )
         instantiators.append(a)
         metas.append(b)
@@ -476,22 +493,21 @@ def _instantiator_from_union(
         nargs=nargs,
         metavar=metavar,
         choices=None,
+        action=None,
     )
 
 
 def _instantiator_from_dict(
-    typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
+    typ: TypeForm,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     key_type, val_type = get_args(typ)
     key_instantiator, key_meta = _instantiator_from_type_inner(
-        key_type,
-        type_from_typevar,
-        allow_sequences="fixed_length",
+        key_type, type_from_typevar, allow_sequences="fixed_length", markers=markers
     )
     val_instantiator, val_meta = _instantiator_from_type_inner(
-        val_type,
-        type_from_typevar,
-        allow_sequences="fixed_length",
+        val_type, type_from_typevar, allow_sequences="fixed_length", markers=markers
     )
 
     key_nargs = cast(int, key_meta.nargs)  # Casts needed for mypy but not pyright!
@@ -528,15 +544,33 @@ def _instantiator_from_dict(
         return out
 
     pair_metavar = f"{key_meta.metavar} {val_meta.metavar}"
-    return dict_instantiator, InstantiatorMetadata(
-        nargs="+",
-        metavar=_strings.multi_metavar_from_single(pair_metavar),
-        choices=None,
-    )
+    if _markers.UseAppendActions in markers:
+
+        def append_dict_instantiator(strings: List[List[str]]) -> Any:
+            flattened = []
+            for s in strings:
+                flattened.extend(s)
+            return dict_instantiator(flattened)
+
+        return append_dict_instantiator, InstantiatorMetadata(
+            nargs=2,
+            metavar=pair_metavar,
+            choices=None,
+            action="append",
+        )
+    else:
+        return dict_instantiator, InstantiatorMetadata(
+            nargs="+",
+            metavar=_strings.multi_metavar_from_single(pair_metavar),
+            choices=None,
+            action=None,
+        )
 
 
 def _instantiator_from_sequence(
-    typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
+    typ: TypeForm,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc."""
     container_type = get_origin(typ)
@@ -553,6 +587,7 @@ def _instantiator_from_sequence(
         contained_type,
         type_from_typevar,
         allow_sequences="fixed_length",
+        markers=markers,
     )
 
     def sequence_instantiator(strings: List[str]) -> Any:
@@ -572,15 +607,28 @@ def _instantiator_from_sequence(
         assert container_type is not None
         return container_type(out)
 
-    return sequence_instantiator, InstantiatorMetadata(
-        nargs="+",
-        metavar=_strings.multi_metavar_from_single(inner_meta.metavar),
-        choices=inner_meta.choices,
-    )
+    if _markers.UseAppendActions in markers:
+        return lambda x: sequence_instantiator(
+            x if x is not None else []
+        ), InstantiatorMetadata(
+            nargs=None,
+            metavar=inner_meta.metavar,
+            choices=inner_meta.choices,
+            action="append",
+        )
+    else:
+        return sequence_instantiator, InstantiatorMetadata(
+            nargs="+",
+            metavar=_strings.multi_metavar_from_single(inner_meta.metavar),
+            choices=inner_meta.choices,
+            action=None,
+        )
 
 
 def _instantiator_from_literal(
-    typ: TypeForm, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
+    typ: TypeForm,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     choices = get_args(typ)
     str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)
@@ -592,5 +640,6 @@ def _instantiator_from_literal(
             nargs=1,
             metavar="{" + ",".join(str_choices) + "}",
             choices=str_choices,
+            action=None,
         ),
     )
