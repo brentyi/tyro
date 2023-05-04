@@ -339,6 +339,19 @@
 <span class="sd">If subcommand prefixes are omitted, we would instead simply have `--arg`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">UseAppendAction</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Use &quot;append&quot; actions for variable-length arguments.</span>
+
+<span class="sd">Given an annotation like `x: List[int]`, this means that `x = [0, 1, 2]` can be set via</span>
+<span class="sd">the CLI syntax `--x 0 --x 1 --x 2` instead of the default of `--x 0 1 2`.</span>
+
+<span class="sd">The resulting syntax may be more user-friendly; for `tyro`, it also enables support for</span>
+<span class="sd">otherwise ambiguous annotations like `List[List[int]]`.</span>
+
+<span class="sd">Can be applied to all variable-length sequences (`List[T]`, `Sequence[T]`,</span>
+<span class="sd">`Tuple[T, ...]`, etc), including dictionaries without default values.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 
 <span class="c1"># Dynamically generate marker singletons.</span>

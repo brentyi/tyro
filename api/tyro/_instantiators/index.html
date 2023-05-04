@@ -298,7 +298,7 @@ which map sequences of strings to the annotated type.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._instantiators.</span></span><span class="sig-name descname"><span class="pre">InstantiatorMetadata</span></span><a class="reference internal" href="../../../_modules/tyro/_instantiators/#InstantiatorMetadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._instantiators.InstantiatorMetadata" title="Permalink to this definition">#</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._instantiators.InstantiatorMetadata.nargs">
-<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="w"> </span><span class="pre">:Union[int,</span> <span class="pre">typing_extensions.Literal[+]]</span></em><a class="headerlink" href="#tyro._instantiators.InstantiatorMetadata.nargs" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Union[int,</span> <span class="pre">typing_extensions.Literal[+]]]</span></em><a class="headerlink" href="#tyro._instantiators.InstantiatorMetadata.nargs" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -309,6 +309,11 @@ which map sequences of strings to the annotated type.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._instantiators.InstantiatorMetadata.choices">
 <span class="sig-name descname"><span class="pre">choices</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[Tuple[str,</span> <span class="pre">Ellipsis]]</span></em><a class="headerlink" href="#tyro._instantiators.InstantiatorMetadata.choices" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._instantiators.InstantiatorMetadata.action">
+<span class="sig-name descname"><span class="pre">action</span></span><em class="property"><span class="w"> </span><span class="pre">:Optional[typing_extensions.Literal[append]]</span></em><a class="headerlink" href="#tyro._instantiators.InstantiatorMetadata.action" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -349,7 +354,7 @@ which map sequences of strings to the annotated type.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._instantiators.instantiator_from_type">
-<span class="sig-prename descclassname"><span class="pre">tyro._instantiators.</span></span><span class="sig-name descname"><span class="pre">instantiator_from_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_from_typevar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Instantiator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata" title="tyro._instantiators.InstantiatorMetadata"><span class="pre">InstantiatorMetadata</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_instantiators/#instantiator_from_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._instantiators.instantiator_from_type" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._instantiators.</span></span><span class="sig-name descname"><span class="pre">instantiator_from_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_from_typevar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">FrozenSet</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Instantiator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata" title="tyro._instantiators.InstantiatorMetadata"><span class="pre">InstantiatorMetadata</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_instantiators/#instantiator_from_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._instantiators.instantiator_from_type" title="Permalink to this definition">#</a></dt>
 <dd><p>Recursive helper for parsing type annotations.</p>
 <p>Returns two things:</p>
 <ul class="simple">
@@ -362,6 +367,7 @@ strings. The latter applies when argparse’s <code class="docutils literal notr
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>typ</strong> (<em>tyro._typing.TypeForm</em>) – </p></li>
 <li><p><strong>type_from_typevar</strong> (<em>Dict</em><em>[</em><em>TypeVar</em><em>, </em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>]</em>) – </p></li>
+<li><p><strong>markers</strong> (<em>FrozenSet</em><em>[</em><em>tyro.conf._markers.Marker</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type</dt>
@@ -425,6 +431,7 @@ strings. The latter applies when argparse’s <code class="docutils literal notr
 <li><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata.nargs">nargs</a></li>
 <li><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata.metavar">metavar</a></li>
 <li><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata.choices">choices</a></li>
+<li><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata.action">action</a></li>
 <li><a class="reference internal" href="#tyro._instantiators.InstantiatorMetadata.check_choices">check_choices</a></li>
 </ul>
 </li>

@@ -653,8 +653,8 @@
         <span class="c1">#</span>
         <span class="c1"># We generally want to avoid importing flax, since it requires a lot of heavy</span>
         <span class="c1"># imports.</span>
-        <span class="k">if</span> <span class="s2">&quot;flax&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="kn">import</span> <span class="nn">flax</span>
+        <span class="k">if</span> <span class="s2">&quot;flax.linen&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="kn">import</span> <span class="nn">flax.linen</span>
 
             <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">flax</span><span class="o">.</span><span class="n">linen</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
                 <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">True</span>

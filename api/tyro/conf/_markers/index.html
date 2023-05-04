@@ -337,6 +337,18 @@ If subcommand prefixes are omitted, we would instead simply have <code class="do
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf._markers.UseAppendAction">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">UseAppendAction</span></span><a class="headerlink" href="#tyro.conf._markers.UseAppendAction" title="Permalink to this definition">#</a></dt>
+<dd><p>Use “append” actions for variable-length arguments.</p>
+<p>Given an annotation like <code class="docutils literal notranslate"><span class="pre">x:</span> <span class="pre">List[int]</span></code>, this means that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></code> can be set via
+the CLI syntax <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">--x</span> <span class="pre">1</span> <span class="pre">--x</span> <span class="pre">2</span></code> instead of the default of <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">2</span></code>.</p>
+<p>The resulting syntax may be more user-friendly; for <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, it also enables support for
+otherwise ambiguous annotations like <code class="docutils literal notranslate"><span class="pre">List[List[int]]</span></code>.</p>
+<p>Can be applied to all variable-length sequences (<code class="docutils literal notranslate"><span class="pre">List[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Sequence[T]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Tuple[T,</span> <span class="pre">...]</span></code>, etc), including dictionaries without default values.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.CallableType">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">CallableType</span></span><a class="headerlink" href="#tyro.conf._markers.CallableType" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
@@ -430,6 +442,7 @@ apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf._markers.AvoidSubcommands">AvoidSubcommands</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.ConsolidateSubcommandArgs">ConsolidateSubcommandArgs</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.OmitSubcommandPrefixes">OmitSubcommandPrefixes</a></li>
+<li><a class="reference internal" href="#tyro.conf._markers.UseAppendAction">UseAppendAction</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.CallableType">CallableType</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.Marker">Marker</a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.configure">configure</a></li>

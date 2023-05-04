@@ -292,7 +292,7 @@
         <span class="sd">&quot;&quot;&quot;Add a defined argument to a parser.&quot;&quot;&quot;</span>
 
         <span class="c1"># Get keyword arguments, with None values removed.</span>
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="p">)</span>
+        <span class="n">kwargs</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;instantiator&quot;</span><span class="p">)</span>
         <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
         <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;name_or_flag&quot;</span><span class="p">)</span>
@@ -303,7 +303,10 @@
         <span class="c1"># MISSING value will be detected in _calling.py and the field default will</span>
         <span class="c1"># directly be used. This helps reduce the likelihood of issues with converting</span>
         <span class="c1"># the field default to a string format, then back to the desired type.</span>
-        <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Apply overrides in our arg configuration object.</span>
         <span class="c1"># Note that the `name` field is applied when the field object is instantiated!</span>
@@ -466,8 +469,9 @@
         <span class="k">return</span> <span class="n">lowered</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">instantiator</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">instantiator_from_type</span><span class="p">(</span>
-            <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
             <span class="n">arg</span><span class="o">.</span><span class="n">type_from_typevar</span><span class="p">,</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
@@ -486,13 +490,36 @@
                 <span class="n">default</span><span class="o">=</span><span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_PROP</span><span class="p">,</span>
             <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-        <span class="n">lowered</span><span class="p">,</span>
-        <span class="n">instantiator</span><span class="o">=</span><span class="n">instantiator</span><span class="p">,</span>
-        <span class="n">choices</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
-        <span class="n">nargs</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>
-        <span class="n">metavar</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">append_instantiator</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">instantiator</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">instantiator</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">out</span><span class="p">)(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">+</span> <span class="n">out</span>
+
+            <span class="k">return</span> <span class="n">out</span>
+
+        <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">lowered</span><span class="p">,</span>
+            <span class="n">instantiator</span><span class="o">=</span><span class="n">append_instantiator</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
+            <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">lowered</span><span class="p">,</span>
+            <span class="n">instantiator</span><span class="o">=</span><span class="n">instantiator</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">metadata</span><span class="o">.</span><span class="n">action</span><span class="p">,</span>
+        <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_rule_convert_defaults_to_strings</span><span class="p">(</span>
@@ -563,10 +590,9 @@
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">primary_help</span><span class="p">,</span> <span class="s2">&quot;helptext&quot;</span><span class="p">))</span>
 
     <span class="n">default</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">default</span>
-    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
-        <span class="c1"># For fixed args, we&#39;ll be missing the lowered default. Use field default</span>
-        <span class="c1"># instead.</span>
-        <span class="k">assert</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span> <span class="ow">or</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
+        <span class="c1"># Cases where we&#39;ll be missing the lowered default. Use field default instead.</span>
+        <span class="k">assert</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
@@ -581,6 +607,15 @@
             <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(sets: </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">=True)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;store_false&quot;</span><span class="p">:</span>
             <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(sets: </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">=False)&quot;</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+            <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Just for type checker.</span>
+            <span class="n">default_parts</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span>
+            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(repeatable, appends: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">default_parts</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
             <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(unset by default)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>

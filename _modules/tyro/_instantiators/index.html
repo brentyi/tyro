@@ -292,6 +292,7 @@
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
     <span class="n">Dict</span><span class="p">,</span>
+    <span class="n">FrozenSet</span><span class="p">,</span>
     <span class="n">Hashable</span><span class="p">,</span>
     <span class="n">Iterable</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
@@ -314,14 +315,16 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
+<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span>
 
 <span class="n">_StandardInstantiator</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">Any</span><span class="p">]</span>
+<span class="n">_AppendNargsInstantiator</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]],</span> <span class="n">Any</span><span class="p">]</span>
 <span class="c1"># Special case: the only time that argparse doesn&#39;t give us a string is when the</span>
 <span class="c1"># argument action is set to `store_true` or `store_false`. In this case, we get</span>
 <span class="c1"># a bool directly, and the field action can be a no-op.</span>
 <span class="n">_FlagInstantiator</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">bool</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
 
-<span class="n">Instantiator</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">_FlagInstantiator</span><span class="p">]</span>
+<span class="n">Instantiator</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">_AppendNargsInstantiator</span><span class="p">,</span> <span class="n">_FlagInstantiator</span><span class="p">]</span>
 
 <span class="n">NoneType</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
@@ -330,11 +333,12 @@
 <span class="k">class</span> <span class="nc">InstantiatorMetadata</span><span class="p">:</span>
     <span class="c1"># Unlike in vanilla argparse, we never set nargs to None. To make things simpler, we</span>
     <span class="c1"># instead use nargs=1.</span>
-    <span class="n">nargs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">]]</span>
+    <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">]]]</span>
     <span class="c1"># Unlike in vanilla argparse, our metavar is always a string. We handle</span>
     <span class="c1"># sequences, multiple arguments, etc, manually.</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span>
+    <span class="n">action</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;append&quot;</span><span class="p">]]</span>
 
 <div class="viewcode-block" id="InstantiatorMetadata.check_choices"><a class="viewcode-back" href="../../../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.check_choices">[docs]</a>    <span class="k">def</span> <span class="nf">check_choices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">s</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">):</span>
@@ -387,7 +391,9 @@
 
 
 <div class="viewcode-block" id="instantiator_from_type"><a class="viewcode-back" href="../../../api/tyro/_instantiators/#tyro._instantiators.instantiator_from_type">[docs]</a><span class="k">def</span> <span class="nf">instantiator_from_type</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Recursive helper for parsing type annotations.</span>
 
@@ -414,6 +420,7 @@
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{None}</span><span class="s2">&quot;</span><span class="p">,</span>
             <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">,),</span>
+            <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="c1"># Instantiate os.PathLike annotations using pathlib.Path.</span>
@@ -424,7 +431,7 @@
 
     <span class="c1"># Address container types. If a matching container is found, this will recursively</span>
     <span class="c1"># call instantiator_from_type().</span>
-    <span class="n">container_out</span> <span class="o">=</span> <span class="n">_instantiator_from_container_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
+    <span class="n">container_out</span> <span class="o">=</span> <span class="n">_instantiator_from_container_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">container_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">container_out</span>
 
@@ -484,6 +491,7 @@
             <span class="k">else</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">auto_choices</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
         <span class="p">),</span>
         <span class="n">choices</span><span class="o">=</span><span class="n">auto_choices</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -492,6 +500,7 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="o">...</span>
 
@@ -501,6 +510,7 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="o">...</span>
 
@@ -510,6 +520,7 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="o">...</span>
 
@@ -518,11 +529,12 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Thin wrapper over instantiator_from_type, with some extra asserts for catching</span>
 <span class="sd">    errors.&quot;&quot;&quot;</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">instantiator_from_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">instantiator_from_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;+&quot;</span><span class="p">:</span>
         <span class="c1"># We currently only use allow_sequences=False for options in Literal types,</span>
         <span class="c1"># which are evaluated using `type()`. It should not be possible to hit this</span>
         <span class="c1"># condition from polling a runtime type.</span>
@@ -535,7 +547,9 @@
 
 
 <span class="k">def</span> <span class="nf">_instantiator_from_container_type</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Attempt to create an instantiator from a container type. Returns `None` is no</span>
 <span class="sd">    container type is found.&quot;&quot;&quot;</span>
@@ -547,7 +561,7 @@
     <span class="c1"># Unwrap Annotated and Final types.</span>
     <span class="k">if</span> <span class="n">type_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Annotated</span><span class="p">,</span> <span class="n">Final</span><span class="p">):</span>
         <span class="n">contained_type</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">instantiator_from_type</span><span class="p">(</span><span class="n">contained_type</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instantiator_from_type</span><span class="p">(</span><span class="n">contained_type</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">make</span><span class="p">,</span> <span class="n">matched_origins</span> <span class="ow">in</span> <span class="p">{</span>
         <span class="n">_instantiator_from_sequence</span><span class="p">:</span> <span class="p">(</span>
@@ -563,7 +577,7 @@
         <span class="n">_instantiator_from_literal</span><span class="p">:</span> <span class="p">(</span><span class="n">Literal</span><span class="p">,),</span>
     <span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">type_origin</span> <span class="ow">in</span> <span class="n">matched_origins</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">make</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">make</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
 
     <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>  <span class="c1"># pragma: no cover</span>
         <span class="sa">f</span><span class="s2">&quot;Unsupported type </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2"> with origin </span><span class="si">{</span><span class="n">type_origin</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -571,7 +585,9 @@
 
 
 <span class="k">def</span> <span class="nf">_instantiator_from_tuple</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">types</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">typeset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>  <span class="c1"># Note that sets are unordered.</span>
@@ -581,7 +597,7 @@
         <span class="c1"># Ellipsis: variable argument counts. When an ellipsis is used, tuples must</span>
         <span class="c1"># contain only one type.</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typeset_no_ellipsis</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">_instantiator_from_sequence</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_instantiator_from_sequence</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">instantiators</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -589,9 +605,7 @@
         <span class="n">nargs</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
             <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-                <span class="n">t</span><span class="p">,</span>
-                <span class="n">type_from_typevar</span><span class="p">,</span>
-                <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span>
+                <span class="n">t</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
             <span class="p">)</span>
             <span class="n">instantiators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
             <span class="n">metas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -615,6 +629,7 @@
             <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">metavar</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">metas</span><span class="p">),</span>
             <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 
 
@@ -655,7 +670,9 @@
 
 
 <span class="k">def</span> <span class="nf">_instantiator_from_union</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">NoneType</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
@@ -669,13 +686,11 @@
     <span class="c1"># right.</span>
     <span class="n">instantiators</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">metas</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">nargs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">]]]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
         <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-            <span class="n">t</span><span class="p">,</span>
-            <span class="n">type_from_typevar</span><span class="p">,</span>
-            <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">t</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
         <span class="p">)</span>
         <span class="n">instantiators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
         <span class="n">metas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -727,67 +742,96 @@
         <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span>
         <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
         <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_instantiator_from_dict</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">key_type</span><span class="p">,</span> <span class="n">val_type</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">key_instantiator</span><span class="p">,</span> <span class="n">key_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-        <span class="n">key_type</span><span class="p">,</span>
-        <span class="n">type_from_typevar</span><span class="p">,</span>
-        <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">val_instantiator</span><span class="p">,</span> <span class="n">val_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-        <span class="n">val_type</span><span class="p">,</span>
-        <span class="n">type_from_typevar</span><span class="p">,</span>
-        <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span>
+        <span class="n">key_type</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
     <span class="p">)</span>
 
-    <span class="n">key_nargs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>  <span class="c1"># Casts needed for mypy but not pyright!</span>
-    <span class="n">val_nargs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">val_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
-    <span class="n">pair_nargs</span> <span class="o">=</span> <span class="n">key_nargs</span> <span class="o">+</span> <span class="n">val_nargs</span>
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">:</span>
+        <span class="n">val_instantiator</span><span class="p">,</span> <span class="n">val_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
+            <span class="n">val_type</span><span class="p">,</span>
+            <span class="n">type_from_typevar</span><span class="p">,</span>
+            <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
+        <span class="p">)</span>
+        <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">key_nargs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>  <span class="c1"># Casts needed for mypy but not pyright!</span>
+        <span class="n">val_nargs</span> <span class="o">=</span> <span class="n">val_meta</span><span class="o">.</span><span class="n">nargs</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">dict_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">%</span> <span class="n">pair_nargs</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;incomplete set of key value pairs!&quot;</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">append_dict_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">key_instantiator</span><span class="p">(</span><span class="n">s</span><span class="p">[:</span><span class="n">key_nargs</span><span class="p">])]</span> <span class="o">=</span> <span class="n">val_instantiator</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">key_nargs</span><span class="p">:])</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="n">out</span>
 
-        <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">//</span> <span class="n">pair_nargs</span><span class="p">):</span>
-            <span class="n">k</span> <span class="o">=</span> <span class="n">strings</span><span class="p">[</span><span class="n">index</span> <span class="p">:</span> <span class="n">index</span> <span class="o">+</span> <span class="n">key_nargs</span><span class="p">]</span>
-            <span class="n">index</span> <span class="o">+=</span> <span class="n">key_nargs</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">strings</span><span class="p">[</span><span class="n">index</span> <span class="p">:</span> <span class="n">index</span> <span class="o">+</span> <span class="n">val_nargs</span><span class="p">]</span>
-            <span class="n">index</span> <span class="o">+=</span> <span class="n">val_nargs</span>
+        <span class="k">return</span> <span class="n">append_dict_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="n">key_nargs</span> <span class="o">+</span> <span class="n">val_nargs</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="s2">&quot;+&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">pair_metavar</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;append&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">val_instantiator</span><span class="p">,</span> <span class="n">val_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
+            <span class="n">val_type</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
+        <span class="p">)</span>
+        <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="n">key_nargs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>  <span class="c1"># Casts needed for mypy but not pyright!</span>
+        <span class="n">val_nargs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">val_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="n">pair_nargs</span> <span class="o">=</span> <span class="n">key_nargs</span> <span class="o">+</span> <span class="n">val_nargs</span>
 
-            <span class="k">if</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
-                <span class="n">kj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">kj</span> <span class="ow">in</span> <span class="n">k</span>
-            <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;invalid choice: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> (choose from </span><span class="si">{</span><span class="n">key_meta</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">))&quot;</span>
-                <span class="p">)</span>
-            <span class="k">if</span> <span class="n">val_meta</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
-                <span class="n">vj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val_meta</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">vj</span> <span class="ow">in</span> <span class="n">v</span>
-            <span class="p">):</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;invalid choice: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> (choose from </span><span class="si">{</span><span class="n">val_meta</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">))&quot;</span>
-                <span class="p">)</span>
-            <span class="n">out</span><span class="p">[</span><span class="n">key_instantiator</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="n">val_instantiator</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">return</span> <span class="n">out</span>
+        <span class="k">def</span> <span class="nf">dict_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">%</span> <span class="n">pair_nargs</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;incomplete set of key value pairs!&quot;</span><span class="p">)</span>
 
-    <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">&quot;</span>
-    <span class="k">return</span> <span class="n">dict_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
-        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
-        <span class="n">metavar</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">multi_metavar_from_single</span><span class="p">(</span><span class="n">pair_metavar</span><span class="p">),</span>
-        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">//</span> <span class="n">pair_nargs</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                <span class="n">k</span> <span class="o">=</span> <span class="n">strings</span><span class="p">[</span><span class="n">index</span> <span class="p">:</span> <span class="n">index</span> <span class="o">+</span> <span class="n">key_nargs</span><span class="p">]</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="n">key_nargs</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">strings</span><span class="p">[</span><span class="n">index</span> <span class="p">:</span> <span class="n">index</span> <span class="o">+</span> <span class="n">val_nargs</span><span class="p">]</span>
+                <span class="n">index</span> <span class="o">+=</span> <span class="n">val_nargs</span>
+
+                <span class="k">if</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+                    <span class="n">kj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">kj</span> <span class="ow">in</span> <span class="n">k</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;invalid choice: </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> (choose from </span><span class="si">{</span><span class="n">key_meta</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">))&quot;</span>
+                    <span class="p">)</span>
+                <span class="k">if</span> <span class="n">val_meta</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span>
+                    <span class="n">vj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">val_meta</span><span class="o">.</span><span class="n">choices</span> <span class="k">for</span> <span class="n">vj</span> <span class="ow">in</span> <span class="n">v</span>
+                <span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;invalid choice: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s2"> (choose from </span><span class="si">{</span><span class="n">val_meta</span><span class="o">.</span><span class="n">choices</span><span class="si">}</span><span class="s2">))&quot;</span>
+                    <span class="p">)</span>
+                <span class="n">out</span><span class="p">[</span><span class="n">key_instantiator</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="n">val_instantiator</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="n">out</span>
+
+        <span class="k">return</span> <span class="n">dict_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">multi_metavar_from_single</span><span class="p">(</span><span class="n">pair_metavar</span><span class="p">),</span>
+            <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_instantiator_from_sequence</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc.&quot;&quot;&quot;</span>
     <span class="n">container_type</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -800,38 +844,65 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="p">(</span><span class="n">contained_type</span><span class="p">,)</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
-    <span class="n">make</span><span class="p">,</span> <span class="n">inner_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-        <span class="n">contained_type</span><span class="p">,</span>
-        <span class="n">type_from_typevar</span><span class="p">,</span>
-        <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">:</span>
+        <span class="n">make</span><span class="p">,</span> <span class="n">inner_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
+            <span class="n">contained_type</span><span class="p">,</span>
+            <span class="n">type_from_typevar</span><span class="p">,</span>
+            <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
+        <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">sequence_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="c1"># Validate nargs.</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">NoneType</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">%</span> <span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;input </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2"> is of length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span><span class="si">}</span><span class="s2">, which is not divisible&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; by </span><span class="si">{</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="si">}</span><span class="s2">.&quot;</span>
-            <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">append_sequence_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">strings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">return</span> <span class="n">container_type</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">make</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
-        <span class="c1"># Make tuple.</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">step</span> <span class="o">=</span> <span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">make</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">]))</span>  <span class="c1"># type: ignore</span>
-        <span class="k">assert</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">append_sequence_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+            <span class="n">choices</span><span class="o">=</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;append&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">make</span><span class="p">,</span> <span class="n">inner_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
+            <span class="n">contained_type</span><span class="p">,</span>
+            <span class="n">type_from_typevar</span><span class="p">,</span>
+            <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
+        <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">sequence_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
-        <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
-        <span class="n">metavar</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">multi_metavar_from_single</span><span class="p">(</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">metavar</span><span class="p">),</span>
-        <span class="n">choices</span><span class="o">=</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
-    <span class="p">)</span>
+        <span class="k">def</span> <span class="nf">sequence_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="c1"># Validate nargs.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span> <span class="o">%</span> <span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span> <span class="o">!=</span> <span class="mi">0</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;input </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2"> is of length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span><span class="si">}</span><span class="s2">, which is not divisible&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; by </span><span class="si">{</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Make tuple.</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">step</span> <span class="o">=</span> <span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">strings</span><span class="p">),</span> <span class="n">step</span><span class="p">):</span>
+                <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">make</span><span class="p">(</span><span class="n">strings</span><span class="p">[</span><span class="n">i</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">]))</span>  <span class="c1"># type: ignore</span>
+            <span class="k">assert</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sequence_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="s2">&quot;+&quot;</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">multi_metavar_from_single</span><span class="p">(</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">metavar</span><span class="p">),</span>
+            <span class="n">choices</span><span class="o">=</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_instantiator_from_literal</span><span class="p">(</span>
-    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">choices</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">str_choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">)</span>
@@ -843,6 +914,7 @@
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
             <span class="n">choices</span><span class="o">=</span><span class="n">str_choices</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">)</span>
 </pre></div>

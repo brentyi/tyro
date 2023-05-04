@@ -402,6 +402,18 @@ to prevent it from showing up in helptext.</p>
 <dd><p>Hide fields that are either manually or automatically marked as fixed.</p>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.UseAppendAction">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">UseAppendAction</span></span><a class="headerlink" href="#tyro.conf.UseAppendAction" title="Permalink to this definition">#</a></dt>
+<dd><p>Use “append” actions for variable-length arguments.</p>
+<p>Given an annotation like <code class="docutils literal notranslate"><span class="pre">x:</span> <span class="pre">List[int]</span></code>, this means that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></code> can be set via
+the CLI syntax <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">--x</span> <span class="pre">1</span> <span class="pre">--x</span> <span class="pre">2</span></code> instead of the default of <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">2</span></code>.</p>
+<p>The resulting syntax may be more user-friendly; for <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, it also enables support for
+otherwise ambiguous annotations like <code class="docutils literal notranslate"><span class="pre">List[List[int]]</span></code>.</p>
+<p>Can be applied to all variable-length sequences (<code class="docutils literal notranslate"><span class="pre">List[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Sequence[T]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Tuple[T,</span> <span class="pre">...]</span></code>, etc), including dictionaries without default values.</p>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.conf.configure">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Marker</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_markers/#configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.configure" title="Permalink to this definition">#</a></dt>
@@ -505,6 +517,7 @@ apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf.Positional">Positional</a></li>
 <li><a class="reference internal" href="#tyro.conf.Suppress">Suppress</a></li>
 <li><a class="reference internal" href="#tyro.conf.SuppressFixed">SuppressFixed</a></li>
+<li><a class="reference internal" href="#tyro.conf.UseAppendAction">UseAppendAction</a></li>
 <li><a class="reference internal" href="#tyro.conf.configure">configure</a></li>
 </ul>
 </li>

@@ -255,44 +255,34 @@
 <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> subclass.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypedDict</span>
 <span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">frozendict</span> <span class="kn">import</span> <span class="n">frozendict</span>  <span class="c1"># type: ignore</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">DictionarySchema</span><span class="p">(</span>
-<span class="linenos"> 9</span>    <span class="n">TypedDict</span><span class="p">,</span>
-<span class="linenos">10</span>    <span class="c1"># Setting `total=False` specifies that not all keys need to exist.</span>
-<span class="linenos">11</span>    <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-<span class="linenos">12</span><span class="p">):</span>
-<span class="linenos">13</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span>
-<span class="linenos">14</span>    <span class="n">betas</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span>
-<span class="linenos">17</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
-<span class="linenos">18</span>    <span class="n">typed_dict</span><span class="p">:</span> <span class="n">DictionarySchema</span><span class="p">,</span>
-<span class="linenos">19</span>    <span class="n">standard_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-<span class="linenos">20</span>        <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">3e-4</span><span class="p">,</span>
-<span class="linenos">21</span>        <span class="s2">&quot;beta1&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
-<span class="linenos">22</span>        <span class="s2">&quot;beta2&quot;</span><span class="p">:</span> <span class="mf">0.999</span><span class="p">,</span>
-<span class="linenos">23</span>    <span class="p">},</span>
-<span class="linenos">24</span>    <span class="n">frozen_dict</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="n">frozendict</span><span class="p">(</span>
-<span class="linenos">25</span>        <span class="p">{</span>
-<span class="linenos">26</span>            <span class="s2">&quot;num_epochs&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
-<span class="linenos">27</span>            <span class="s2">&quot;batch_size&quot;</span><span class="p">:</span> <span class="mi">64</span><span class="p">,</span>
-<span class="linenos">28</span>        <span class="p">}</span>
-<span class="linenos">29</span>    <span class="p">),</span>
-<span class="linenos">30</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">31</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typed_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-<span class="linenos">32</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">standard_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-<span class="linenos">33</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">frozen_dict</span><span class="p">,</span> <span class="n">frozendict</span><span class="p">)</span>
-<span class="linenos">34</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Typed dict:&quot;</span><span class="p">,</span> <span class="n">typed_dict</span><span class="p">)</span>
-<span class="linenos">35</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standard dict:&quot;</span><span class="p">,</span> <span class="n">standard_dict</span><span class="p">)</span>
-<span class="linenos">36</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Frozen dict:&quot;</span><span class="p">,</span> <span class="n">frozen_dict</span><span class="p">)</span>
-<span class="linenos">37</span>
-<span class="linenos">38</span>
-<span class="linenos">39</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">40</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="k">class</span> <span class="nc">DictionarySchema</span><span class="p">(</span>
+<span class="linenos"> 7</span>    <span class="n">TypedDict</span><span class="p">,</span>
+<span class="linenos"> 8</span>    <span class="c1"># Setting `total=False` specifies that not all keys need to exist.</span>
+<span class="linenos"> 9</span>    <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="linenos">10</span><span class="p">):</span>
+<span class="linenos">11</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span>
+<span class="linenos">12</span>    <span class="n">betas</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos">16</span>    <span class="n">typed_dict</span><span class="p">:</span> <span class="n">DictionarySchema</span><span class="p">,</span>
+<span class="linenos">17</span>    <span class="n">standard_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">18</span>        <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">3e-4</span><span class="p">,</span>
+<span class="linenos">19</span>        <span class="s2">&quot;beta1&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
+<span class="linenos">20</span>        <span class="s2">&quot;beta2&quot;</span><span class="p">:</span> <span class="mf">0.999</span><span class="p">,</span>
+<span class="linenos">21</span>    <span class="p">},</span>
+<span class="linenos">22</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">23</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typed_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+<span class="linenos">24</span>    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">standard_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+<span class="linenos">25</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Typed dict:&quot;</span><span class="p">,</span> <span class="n">typed_dict</span><span class="p">)</span>
+<span class="linenos">26</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Standard dict:&quot;</span><span class="p">,</span> <span class="n">standard_dict</span><span class="p">)</span>
+<span class="linenos">27</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">30</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -301,8 +291,6 @@
                           [--standard-dict.learning-rate FLOAT]
                           [--standard-dict.beta1 FLOAT]
                           [--standard-dict.beta2 FLOAT]
-                          [--frozen-dict.num-epochs INT]
-                          [--frozen-dict.batch-size INT]
 
 ╭─ arguments ───────────────────────────────────────╮
 │ -h, --help        show this help message and exit │
@@ -320,21 +308,13 @@
 │                   (default: 0.9)                  │
 │ --standard-dict.beta2 FLOAT                       │
 │                   (default: 0.999)                │
-╰───────────────────────────────────────────────────╯
-╭─ frozen-dict arguments ───────────────────────────╮
-│ --frozen-dict.num-epochs INT                      │
-│                   (default: 20)                   │
-│ --frozen-dict.batch-size INT                      │
-│                   (default: 64)                   │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Typed dict: {'learning_rate': 0.0003}
-Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
-Frozen dict: frozendict.frozendict({'num_epochs': 20, 'batch_size': 64})</pre>
+Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">Typed dict: {'betas': (0.9, 0.999)}
-Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
-Frozen dict: frozendict.frozendict({'num_epochs': 20, 'batch_size': 64})</pre>
+Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}</pre>
 </section>
 
         </article>
