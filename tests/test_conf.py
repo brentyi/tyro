@@ -673,7 +673,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
 def test_append_lists() -> None:
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.UseAppendActions[List[int]]
+        x: tyro.conf.UseAppendAction[List[int]]
 
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
     assert tyro.cli(A, args=[]) == A(x=[])
@@ -686,7 +686,7 @@ def test_append_lists() -> None:
 def test_append_tuple() -> None:
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.UseAppendActions[Tuple[int, ...]]
+        x: tyro.conf.UseAppendAction[Tuple[int, ...]]
 
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 3))
     assert tyro.cli(A, args=[]) == A(x=())
@@ -699,7 +699,7 @@ def test_append_tuple() -> None:
 def test_append_tuple_with_default() -> None:
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.UseAppendActions[Tuple[int, ...]] = (1, 2)
+        x: tyro.conf.UseAppendAction[Tuple[int, ...]] = (1, 2)
 
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 1, 2, 3))
     assert tyro.cli(A, args=[]) == A(x=(1, 2))
@@ -712,7 +712,7 @@ def test_append_tuple_with_default() -> None:
 def test_append_dict() -> None:
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.UseAppendActions[Dict[str, int]]
+        x: tyro.conf.UseAppendAction[Dict[str, int]]
 
     assert tyro.cli(A, args="--x 1 1 --x 2 2 --x 3 3".split(" ")) == A(
         x={"1": 1, "2": 2, "3": 3}
@@ -729,7 +729,7 @@ def test_append_dict_with_default() -> None:
 
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.UseAppendActions[Dict[str, int]] = dataclasses.field(
+        x: tyro.conf.UseAppendAction[Dict[str, int]] = dataclasses.field(
             default_factory=lambda: {"1": 1}
         )
 

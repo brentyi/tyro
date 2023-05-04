@@ -544,7 +544,7 @@ def _instantiator_from_dict(
         return out
 
     pair_metavar = f"{key_meta.metavar} {val_meta.metavar}"
-    if _markers.UseAppendActions in markers:
+    if _markers.UseAppendAction in markers:
 
         def append_dict_instantiator(strings: List[List[str]]) -> Any:
             flattened = []
@@ -607,7 +607,7 @@ def _instantiator_from_sequence(
         assert container_type is not None
         return container_type(out)
 
-    if _markers.UseAppendActions in markers:
+    if _markers.UseAppendAction in markers:
         return lambda x: sequence_instantiator(
             x if x is not None else []
         ), InstantiatorMetadata(

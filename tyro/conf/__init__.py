@@ -18,7 +18,7 @@ from ._markers import (
     Positional,
     Suppress,
     SuppressFixed,
-    UseAppendActions,
+    UseAppendAction,
     configure,
 )
 
@@ -33,6 +33,6 @@ __all__ = [
     "Positional",
     "Suppress",
     "SuppressFixed",
-    "UseAppendActions",
+    "UseAppendAction",
     "configure",
 ]
