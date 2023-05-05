@@ -530,6 +530,35 @@ def test_argconf_help() -> None:
     assert tyro.cli(main, args=["--x.nice", "3"]) == 3
 
 
+def test_argconf_no_prefix_help() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        a: Annotated[
+            int,
+            tyro.conf.arg(
+                name="nice", help="Hello world", metavar="NUMBER", prefix_name=False
+            ),
+        ] = 5
+        b: tyro.conf.Suppress[str] = "7"
+
+    def main(x: Any = Struct()) -> int:
+        return x.a
+
+    helptext = get_helptext(main)
+    assert "Hello world" in helptext
+    assert "INT" not in helptext
+    assert "NUMBER" in helptext
+    assert "--x.a" not in helptext
+    assert "--x.nice" not in helptext
+    assert "--nice" in helptext
+    assert "--x.b" not in helptext
+
+    assert tyro.cli(main, args=[]) == 5
+    with pytest.raises(SystemExit):
+        assert tyro.cli(main, args=["--x.nice", "3"]) == 3
+    assert tyro.cli(main, args=["--nice", "3"]) == 3
+
+
 def test_positional() -> None:
     def main(x: tyro.conf.Positional[int], y: int) -> int:
         return x + y
@@ -822,3 +851,19 @@ def test_append_nested_dict_double() -> None:
         x={"0": {"1": 2, "3": 4}, "4": {"5": 6}}
     )
     assert tyro.cli(A, args=[]) == A(x={})
+
+
+def test_duplicated_arg() -> None:
+    # Loosely inspired by: https://github.com/brentyi/tyro/issues/49
+    @dataclasses.dataclass
+    class ModelConfig:
+        num_slots: Annotated[int, tyro.conf.arg(name="num_slots", prefix_name=False)]
+
+    @dataclasses.dataclass
+    class TrainConfig:
+        num_slots: int
+        model: ModelConfig
+
+    assert tyro.cli(TrainConfig, args="--num-slots 3".split(" ")) == TrainConfig(
+        num_slots=3, model=ModelConfig(num_slots=3)
+    )

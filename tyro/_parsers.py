@@ -126,9 +126,9 @@ class ParserSpecification:
                         # Don't make a subparser.
                         field = dataclasses.replace(field, typ=type(field.default))
                     else:
-                        subparsers_from_prefix[
-                            subparsers_attempt.prefix
-                        ] = subparsers_attempt
+                        subparsers_from_prefix[subparsers_attempt.prefix] = (
+                            subparsers_attempt
+                        )
                         subparsers = add_subparsers_to_leaves(
                             subparsers, subparsers_attempt
                         )
@@ -345,9 +345,9 @@ class SubparsersSpecification:
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.
-        subcommand_config_from_name: Dict[
-            str, _confstruct._SubcommandConfiguration
-        ] = {}
+        subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfiguration] = (
+            {}
+        )
         subcommand_type_from_name: Dict[str, type] = {}
         for option in options_no_none:
             subcommand_name = _strings.subparser_name_from_type(prefix, option)

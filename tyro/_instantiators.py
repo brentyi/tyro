@@ -486,7 +486,8 @@ def _instantiator_from_union(
                 )
         raise ValueError(
             f"no type in {options} could be instantiated from"
-            f" {strings}.\n\nGot errors:  \n- " + "\n- ".join(errors)
+            f" {strings}.\n\nGot errors:  \n- "
+            + "\n- ".join(errors)
         )
 
     return union_instantiator, InstantiatorMetadata(

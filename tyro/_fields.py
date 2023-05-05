@@ -80,7 +80,7 @@ class FieldDefinition:
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated(typ, _confstruct._ArgConfiguration)
         if len(argconfs) == 0:
-            argconf = _confstruct._ArgConfiguration(None, None, None)
+            argconf = _confstruct._ArgConfiguration(None, None, None, True)
         else:
             assert len(argconfs) == 1
             (argconf,) = argconfs
