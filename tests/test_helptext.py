@@ -574,3 +574,15 @@ def test_pathlike() -> None:
 
     helptext = get_helptext(main)
     assert "--x PATH " in helptext
+
+
+def test_nested_bool() -> None:
+    @dataclasses.dataclass
+    class Child:
+        x: bool = False
+
+    def main(child: Child) -> None:
+        pass
+
+    helptext = get_helptext(main)
+    assert "--child.x | --child.no-x" in helptext
