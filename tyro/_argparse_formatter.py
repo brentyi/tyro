@@ -462,7 +462,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # padding=(1, 1, 0, 1),
             )
 
-    def _format_actions_usage(self, actions, groups):
+    def _format_actions_usage(self, actions, groups):  #  pragma: no cover
         """Backporting from Python 3.10, primarily to call format_usage() on actions."""
 
         # find group indices and identify actions in groups
