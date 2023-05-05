@@ -86,7 +86,6 @@ class BooleanOptionalAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         if option_string in self.option_strings:
             assert option_string is not None
-            print(self._no_strings)
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
     # Typically only supported in Python 3.10, but we backport some functionality in
