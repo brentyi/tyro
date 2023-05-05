@@ -290,7 +290,9 @@ def _instantiator_from_type_inner(
         assert allow_sequences
         if allow_sequences == "fixed_length" and not isinstance(out[1].nargs, int):
             raise UnsupportedTypeAnnotationError(
-                f"Found an unsupported (variable-length) nested sequence of type {typ}."
+                f"{typ} is a variable-length sequence, which is ambiguous when nested."
+                " For nesting variable-length sequences (example: List[List[int]]),"
+                " `tyro.conf.UseAppendAction` can help resolve ambiguities."
             )
     return out
 
@@ -628,8 +630,8 @@ def _instantiator_from_sequence(
                 and len(strings) % inner_meta.nargs != 0
             ):
                 raise ValueError(
-                    f"input {strings} is of length {len(strings)}, which is not divisible"
-                    f" by {inner_meta.nargs}."
+                    f"input {strings} is of length {len(strings)}, which is not"
+                    f" divisible by {inner_meta.nargs}."
                 )
 
             # Make tuple.
