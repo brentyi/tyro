@@ -282,8 +282,8 @@ value, automatically converted to flags.</p>
 </div>
 <hr class="docutils" />
 <kbd>python 01_basics/05_flags.py --help</kbd><pre class="ansi-block literal-block">usage: 05_flags.py [-h] --boolean {True,False}
-                   [--optional-boolean {None,True,False}] [--flag-a]
-                   [--no-flag-b]
+                   [--optional-boolean {None,True,False}]
+                   [--flag-a | --no-flag-a] [--flag-b | --no-flag-b]
 
 ╭─ arguments ──────────────────────────────────────────────────────────────╮
 │ -h, --help                                                               │
@@ -292,17 +292,19 @@ value, automatically converted to flags.</p>
 │     Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;. (required)      │
 │ --optional-boolean {None,True,False}                                     │
 │     Optional boolean. Same as above, but can be omitted. (default: None) │
-│ --flag-a                                                                 │
-│     Pass --flag-a in to set this value to True. (sets: flag_a=True)      │
-│ --no-flag-b                                                              │
-│     Pass --no-flag-b in to set this value to False. (sets: flag_b=False) │
+│ --flag-a, --no-flag-a                                                    │
+│     Pass --flag-a in to set this value to True. (default: False)         │
+│ --flag-b, --no-flag-b                                                    │
+│     Pass --no-flag-b in to set this value to False. (default: True)      │
 ╰──────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 01_basics/05_flags.py --boolean True</kbd><pre class="ansi-block literal-block">Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/05_flags.py --boolean False --flag-a</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
+<kbd>python 01_basics/05_flags.py --boolean False --flag-a</kbd><pre class="ansi-block literal-block">{'--no-flag-a'}
+Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/05_flags.py --boolean False --no-flag-b</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
+<kbd>python 01_basics/05_flags.py --boolean False --no-flag-b</kbd><pre class="ansi-block literal-block">{'--no-flag-b'}
+Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
 </section>
 
         </article>

@@ -370,11 +370,13 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
                                 [--config.batch-size INT]
                                 [--config.train-steps INT] [--config.seed INT]
                                 [--config.activation {fixed}]
-                                [--restore-checkpoint]
+                                [--restore-checkpoint | 
+--no-restore-checkpoint]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
-│ --restore-checkpoint    (sets: restore_checkpoint=True)                    │
+│ --restore-checkpoint, --no-restore-checkpoint                              │
+│                         (default: False)                                   │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ config arguments ─────────────────────────────────────────────────────────╮
 │ --config.dataset {mnist,imagenet-50}                                       │
@@ -412,11 +414,12 @@ None</pre>
                               [--config.batch-size INT]
                               [--config.train-steps INT] [--config.seed INT]
                               [--config.activation {fixed}]
-                              [--restore-checkpoint]
+                              [--restore-checkpoint | --no-restore-checkpoint]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
-│ --restore-checkpoint    (sets: restore_checkpoint=True)                    │
+│ --restore-checkpoint, --no-restore-checkpoint                              │
+│                         (default: False)                                   │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ config arguments ─────────────────────────────────────────────────────────╮
 │ --config.dataset {mnist,imagenet-50}                                       │

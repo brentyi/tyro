@@ -279,16 +279,16 @@ constructors of) standard Python classes.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/04_classes.py --help</kbd><pre class="ansi-block literal-block">usage: 04_classes.py [-h] --field1 STR --field2 INT [--flag]
+<kbd>python 04_additional/04_classes.py --help</kbd><pre class="ansi-block literal-block">usage: 04_classes.py [-h] --field1 STR --field2 INT [--flag | --no-flag]
 
 Arguments.
 
-╭─ arguments ───────────────────────────────────────────╮
-│ -h, --help          show this help message and exit   │
-│ --field1 STR        A string field. (required)        │
-│ --field2 INT        A numeric field. (required)       │
-│ --flag              A boolean flag. (sets: flag=True) │
-╰───────────────────────────────────────────────────────╯</pre>
+╭─ arguments ──────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit  │
+│ --field1 STR            A string field. (required)       │
+│ --field2 INT            A numeric field. (required)      │
+│ --flag, --no-flag       A boolean flag. (default: False) │
+╰──────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/04_classes.py --field1 hello --field2 7</kbd><pre class="ansi-block literal-block">['hello', 7, False]</pre>
 </section>

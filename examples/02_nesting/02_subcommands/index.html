@@ -300,7 +300,8 @@
 │     cmd:commit        Commit changes.             │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/02_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py cmd:commit [-h] --cmd.message STR [--cmd.all]
+<kbd>python 02_nesting/02_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py cmd:commit [-h] --cmd.message STR
+                                    [--cmd.all | --cmd.no-all]
 
 Commit changes.
 
@@ -309,10 +310,12 @@ Commit changes.
 ╰─────────────────────────────────────────────────────────╯
 ╭─ cmd arguments ─────────────────────────────────────────╮
 │ --cmd.message STR       (required)                      │
-│ --cmd.all               (sets: all=True)                │
+│ --cmd.all, --cmd.no-all                                 │
+│                         (default: False)                │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/02_subcommands.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">Commit(message='hello', all=True)</pre>
+<kbd>python 02_nesting/02_subcommands.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">{'--cmd.no-all'}
+Commit(message='hello', all=True)</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py cmd:checkout --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py cmd:checkout [-h] --cmd.branch STR
 

@@ -258,11 +258,14 @@
 
 <span class="sd">This is largely built by fussing around in argparse implementation details, and is by</span>
 <span class="sd">far the hackiest part of `tyro`.</span>
+
+<span class="sd">TODO: we may want to just maintain our own fork of argparse.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">re</span> <span class="k">as</span> <span class="nn">_re</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
 
@@ -708,7 +711,126 @@
                 <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
                 <span class="n">border_style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">,</span>
                 <span class="c1"># padding=(1, 1, 0, 1),</span>
-            <span class="p">)</span></div>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_format_actions_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>  <span class="c1">#  pragma: no cover</span>
+        <span class="sd">&quot;&quot;&quot;Backporting from Python 3.10, primarily to call format_usage() on actions.&quot;&quot;&quot;</span>
+
+        <span class="c1"># find group indices and identify actions in groups</span>
+        <span class="n">group_actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">inserts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;empty group </span><span class="si">{</span><span class="n">group</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">actions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>  <span class="c1"># type: ignore</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group_action_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">)</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">group_action_count</span>
+                <span class="k">if</span> <span class="n">actions</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span> <span class="o">==</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+                    <span class="n">suppressed_actions_count</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>
+                        <span class="n">group_actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">:</span>
+                            <span class="n">suppressed_actions_count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="n">exposed_actions_count</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">group_action_count</span> <span class="o">-</span> <span class="n">suppressed_actions_count</span>
+                    <span class="p">)</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; [&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;[&quot;</span>
+                        <span class="k">if</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;]&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;]&quot;</span>
+                    <span class="k">elif</span> <span class="n">exposed_actions_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; (&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;(&quot;</span>
+                        <span class="k">if</span> <span class="n">end</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot;)&quot;</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">inserts</span><span class="p">[</span><span class="n">end</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;)&quot;</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+                        <span class="n">inserts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span>
+
+        <span class="c1"># collect all actions format strings</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">action</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">actions</span><span class="p">):</span>
+            <span class="c1"># suppressed arguments are marked with None</span>
+            <span class="c1"># remove | separators for suppressed arguments</span>
+            <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">:</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">inserts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;|&quot;</span><span class="p">:</span>
+                    <span class="n">inserts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">inserts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;|&quot;</span><span class="p">:</span>
+                    <span class="n">inserts</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># produce all arg strings</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_metavar_for_positional</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="n">part</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_args</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+                <span class="c1"># if it&#39;s in a group, strip the outer []</span>
+                <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group_actions</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;[&quot;</span> <span class="ow">and</span> <span class="n">part</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;]&quot;</span><span class="p">:</span>
+                        <span class="n">part</span> <span class="o">=</span> <span class="n">part</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="c1"># add the action string to the list</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+            <span class="c1"># produce the first way to invoke the option in brackets</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">option_string</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">option_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># if the Optional doesn&#39;t take a value, format is:</span>
+                <span class="c1">#    -s or --long</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">part</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">format_usage</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s2">&quot;format_usage&quot;</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">option_string</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># if the Optional takes a value, format is:</span>
+                <span class="c1">#    -s ARGS or --long ARGS</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">default</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_default_metavar_for_optional</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                    <span class="n">args_string</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_args</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+                    <span class="n">part</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">option_string</span><span class="p">,</span> <span class="n">args_string</span><span class="p">)</span>
+
+                <span class="c1"># make it look optional if it&#39;s not required or in a group</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_actions</span><span class="p">:</span>
+                    <span class="n">part</span> <span class="o">=</span> <span class="s2">&quot;[</span><span class="si">%s</span><span class="s2">]&quot;</span> <span class="o">%</span> <span class="n">part</span>
+
+                <span class="c1"># add the action string to the list</span>
+                <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+
+        <span class="c1"># insert things at the necessary indices</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">inserts</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">parts</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">inserts</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+
+        <span class="c1"># join all the action items with spaces</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">parts</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">])</span>
+
+        <span class="c1"># clean up separators for mutually exclusive groups</span>
+        <span class="nb">open</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[\[(]&quot;</span>
+        <span class="n">close</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;[\])]&quot;</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;(</span><span class="si">%s</span><span class="s2">) &quot;</span> <span class="o">%</span> <span class="nb">open</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot; (</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="n">close</span><span class="p">,</span> <span class="sa">r</span><span class="s2">&quot;\1&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> *</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">open</span><span class="p">,</span> <span class="n">close</span><span class="p">),</span> <span class="sa">r</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c1"># return the text</span>
+        <span class="k">return</span> <span class="n">text</span></div>
 </pre></div>
         </article>
       </div>

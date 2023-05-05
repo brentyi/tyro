@@ -22,6 +22,8 @@
    This is largely built by fussing around in argparse implementation details, and is by
    far the hackiest part of ``tyro``.
 
+   TODO: we may want to just maintain our own fork of argparse.
+
 
 Module Contents
 ---------------

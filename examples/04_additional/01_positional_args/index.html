@@ -310,33 +310,36 @@
 <hr class="docutils" />
 <kbd>python 04_additional/01_positional_args.py --help</kbd><pre class="ansi-block literal-block">usage: 01_positional_args.py [-h] [--optimizer.algorithm {ADAM,SGD}]
                              [--optimizer.learning-rate FLOAT]
-                             [--optimizer.weight-decay FLOAT] [--force]
-                             [--verbose] [--background-rgb FLOAT FLOAT FLOAT]
+                             [--optimizer.weight-decay FLOAT]
+                             [--force | --no-force] [--verbose | --no-verbose]
+                             [--background-rgb FLOAT FLOAT FLOAT]
                              PATH PATH
 
 Command-line interface defined using a function signature. Note that this 
 docstring is parsed to generate helptext.
 
 ╭─ positional arguments ─────────────────────────────────────────────────────╮
-│ PATH              Source path. (required)                                  │
-│ PATH              Destination path. (required)                             │
+│ PATH                    Source path. (required)                            │
+│ PATH                    Destination path. (required)                       │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help        show this help message and exit                          │
-│ --force           Do not prompt before overwriting. (sets: force=True)     │
-│ --verbose         Explain what is being done. (sets: verbose=True)         │
+│ -h, --help              show this help message and exit                    │
+│ --force, --no-force     Do not prompt before overwriting. (default: False) │
+│ --verbose, --no-verbose                                                    │
+│                         Explain what is being done. (default: False)       │
 │ --background-rgb FLOAT FLOAT FLOAT                                         │
-│                   Background color. Red by default. (default: 1.0 0.0 0.0) │
+│                         Background color. Red by default. (default: 1.0    │
+│                         0.0 0.0)                                           │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ optimizer arguments ──────────────────────────────────────────────────────╮
 │ Configuration for our optimizer object.                                    │
 │ ────────────────────────────────────────────────────────────────────────── │
 │ --optimizer.algorithm {ADAM,SGD}                                           │
-│                   Gradient-based optimizer to use. (default: ADAM)         │
+│                         Gradient-based optimizer to use. (default: ADAM)   │
 │ --optimizer.learning-rate FLOAT                                            │
-│                   Learning rate to use. (default: 0.0003)                  │
+│                         Learning rate to use. (default: 0.0003)            │
 │ --optimizer.weight-decay FLOAT                                             │
-│                   Coefficient for L2 regularization. (default: 0.01)       │
+│                         Coefficient for L2 regularization. (default: 0.01) │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/01_positional_args.py ./a ./b --optimizer.learning-rate 1e-5</kbd><pre class="ansi-block literal-block">source=PosixPath('a')

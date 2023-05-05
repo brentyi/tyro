@@ -15,6 +15,19 @@
 Module Contents
 ---------------
 
+.. py:class:: BooleanOptionalAction(option_strings: Sequence[str], dest: str, default: _T | str | None = None, type: Callable[[str], _T] | argparse.FileType | None = None, choices: Iterable[_T] | None = None, required: bool = False, help: str | None = None, metavar: str | tuple[str, ...] | None = None)
+
+   Bases: :py:obj:`argparse.Action`
+
+   
+   Adapted from https://github.com/python/cpython/pull/27672
+   .. py:method:: __call__(self, parser, namespace, values, option_string=None)
+
+
+   .. py:method:: format_usage(self)
+
+
+
 .. py:class:: ArgumentDefinition
 
    
@@ -85,7 +98,7 @@ Module Contents
       
 
    .. py:attribute:: action
-      :annotation: :Optional[str]
+      :annotation: :Optional[Any]
 
       
 
