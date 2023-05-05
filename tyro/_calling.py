@@ -42,7 +42,9 @@ def call_from_args(
     def get_value_from_arg(prefixed_field_name: str) -> Any:
         """Helper for getting values from `value_from_arg` + doing some extra
         asserts."""
-        assert prefixed_field_name in value_from_prefixed_field_name
+        assert (
+            prefixed_field_name in value_from_prefixed_field_name
+        ), f"{prefixed_field_name} not in {value_from_prefixed_field_name}"
         return value_from_prefixed_field_name[prefixed_field_name]
 
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
@@ -63,9 +65,14 @@ def call_from_args(
 
             # Standard arguments.
             arg = arg_from_prefixed_field_name[prefixed_field_name]
-            consumed_keywords.add(prefixed_field_name)
+            name_maybe_prefixed = (
+                prefixed_field_name
+                if field.argconf.prefix_name
+                else _strings.make_field_name([field.name])
+            )
+            consumed_keywords.add(name_maybe_prefixed)
             if not arg.lowered.is_fixed():
-                value = get_value_from_arg(prefixed_field_name)
+                value = get_value_from_arg(name_maybe_prefixed)
 
                 if value in _fields.MISSING_SINGLETONS:
                     value = arg.field.default

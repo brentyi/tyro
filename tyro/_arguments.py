@@ -136,7 +136,10 @@ class ArgumentDefinition:
             kwargs["metavar"] = self.field.argconf.metavar
 
         # Add argument! Note that the name must be passed in as a position argument.
-        arg = parser.add_argument(name_or_flag, **kwargs)
+        try:
+            arg = parser.add_argument(name_or_flag, **kwargs)
+        except argparse.ArgumentError:
+            return
 
         # Do our best to tab complete paths.
         # There will be false positives here, but if choices is unset they should be
@@ -452,14 +455,15 @@ def _rule_set_name_or_flag_and_dest(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
-    # Positional arguments: no -- prefix.
-    if arg.field.is_positional():
-        name_or_flag = _strings.make_field_name([arg.name_prefix, arg.field.name])
+    name_or_flag = _strings.make_field_name(
+        [arg.name_prefix, arg.field.name]
+        if arg.field.argconf.prefix_name
+        else [arg.field.name]
+    )
+
     # Prefix keyword arguments with --.
-    else:
-        name_or_flag = "--" + _strings.make_field_name(
-            [arg.name_prefix, arg.field.name]
-        )
+    if not arg.field.is_positional():
+        name_or_flag = "--" + name_or_flag
 
     # Strip.
     if name_or_flag.startswith("--") and arg.subcommand_prefix != "":
@@ -472,7 +476,11 @@ def _rule_set_name_or_flag_and_dest(
     return dataclasses.replace(
         lowered,
         name_or_flag=name_or_flag,
-        dest=_strings.make_field_name([arg.dest_prefix, arg.field.name]),
+        dest=(
+            _strings.make_field_name([arg.dest_prefix, arg.field.name])
+            if arg.field.argconf.prefix_name
+            else arg.field.name
+        ),
     )
 
 

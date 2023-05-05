@@ -60,7 +60,7 @@ class _ArgConfiguration:
     name: Optional[str]
     metavar: Optional[str]
     help: Optional[str]
-    # TODO - add prefix_name: bool
+    prefix_name: bool
 
 
 def arg(
@@ -68,6 +68,7 @@ def arg(
     name: Optional[str] = None,
     metavar: Optional[str] = None,
     help: Optional[str] = None,
+    prefix_name: bool = True,
 ) -> Any:
     """Returns a metadata object for configuring arguments with `typing.Annotated`.
     Useful for aesthetics.
@@ -77,4 +78,9 @@ def arg(
     x: Annotated[int, tyro.conf.arg(...)]
     ```
     """
-    return _ArgConfiguration(name=name, metavar=metavar, help=help)
+    return _ArgConfiguration(
+        name=name,
+        metavar=metavar,
+        help=help,
+        prefix_name=prefix_name,
+    )
