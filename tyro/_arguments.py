@@ -8,7 +8,19 @@ import enum
 import functools
 import itertools
 import shlex
-from typing import Any, Dict, Mapping, Optional, Sequence, Set, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Iterable,
+    Mapping,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 import rich.markup
 import shtab
@@ -23,6 +35,64 @@ try:
 except ImportError:
     # Python 3.7.
     from backports.cached_property import cached_property  # type: ignore
+
+
+_T = TypeVar("_T")
+
+
+# TODO: refactor!
+class BooleanOptionalAction(argparse.Action):
+    """Adapted from https://github.com/python/cpython/pull/27672"""
+
+    def __init__(
+        self,
+        option_strings: Sequence[str],
+        dest: str,
+        default: _T | str | None = None,
+        type: Callable[[str], _T] | argparse.FileType | None = None,
+        choices: Iterable[_T] | None = None,
+        required: bool = False,
+        help: str | None = None,
+        metavar: str | tuple[str, ...] | None = None,
+    ) -> None:
+        _option_strings = []
+        self._no_strings = set()
+        for option_string in option_strings:
+            _option_strings.append(option_string)
+
+            if option_string.startswith("--"):
+                if "." not in option_string:
+                    option_string = "--no-" + option_string[2:]
+                else:
+                    # Loose heuristic for where to add the no- prefix.
+                    left, _, right = option_string.rpartition(".")
+                    option_string = left + ".no-" + right
+                self._no_strings.add(option_string)
+
+                _option_strings.append(option_string)
+
+        super().__init__(
+            option_strings=_option_strings,
+            dest=dest,
+            nargs=0,
+            default=default,
+            type=type,
+            choices=choices,
+            required=required,
+            help=help,
+            metavar=metavar,
+        )
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if option_string in self.option_strings:
+            assert option_string is not None
+            print(self._no_strings)
+            setattr(namespace, self.dest, option_string not in self._no_strings)
+
+    # Typically only supported in Python 3.10, but we backport some functionality in
+    # _argparse_formatters.py
+    def format_usage(self):
+        return " | ".join(self.option_strings)
 
 
 @dataclasses.dataclass(frozen=True)
@@ -52,8 +122,11 @@ class ArgumentDefinition:
         # MISSING value will be detected in _calling.py and the field default will
         # directly be used. This helps reduce the likelihood of issues with converting
         # the field default to a string format, then back to the desired type.
-        if kwargs.get("action", None) != "append":
+        action = kwargs.get("action", None)
+        if action != "append":
             kwargs["default"] = _fields.MISSING_NONPROP
+        elif action == BooleanOptionalAction:
+            pass
         else:
             kwargs["default"] = []
 
@@ -136,7 +209,7 @@ class LoweredArgumentDefinition:
     default: Optional[Any] = None
     dest: Optional[str] = None
     required: bool = False
-    action: Optional[str] = None
+    action: Optional[Any] = None
     nargs: Optional[Union[int, str]] = None
     choices: Optional[Set[Any]] = None
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
@@ -173,18 +246,11 @@ def _rule_handle_boolean_flags(
     ):
         # Treat bools as a normal parameter.
         return lowered
-    elif arg.field.default is False:
+    elif arg.field.default in (True, False):
         # Default `False` => --flag passed in flips to `True`.
         return dataclasses.replace(
             lowered,
-            action="store_true",
-            instantiator=lambda x: x,  # argparse will directly give us a bool!
-        )
-    elif arg.field.default is True:
-        # Default `True` => --no-flag passed in flips to `False`.
-        return dataclasses.replace(
-            lowered,
-            action="store_false",
+            action=BooleanOptionalAction,
             instantiator=lambda x: x,  # argparse will directly give us a bool!
         )
 
@@ -352,10 +418,6 @@ def _rule_generate_helptext(
             # Intentionally not quoted via shlex, since this can't actually be passed
             # in via the commandline.
             default_text = f"(fixed to: {str(arg.field.default)})"
-        elif lowered.action == "store_true":
-            default_text = f"(sets: {arg.field.name}=True)"
-        elif lowered.action == "store_false":
-            default_text = f"(sets: {arg.field.name}=False)"
         elif lowered.action == "append" and (
             arg.field.default in _fields.MISSING_SINGLETONS
             or len(arg.field.default) == 0
@@ -393,11 +455,6 @@ def _rule_set_name_or_flag_and_dest(
     # Positional arguments: no -- prefix.
     if arg.field.is_positional():
         name_or_flag = _strings.make_field_name([arg.name_prefix, arg.field.name])
-    # Negated booleans.
-    elif lowered.action == "store_false":
-        name_or_flag = "--" + _strings.make_field_name(
-            [arg.name_prefix, "no-" + arg.field.name]
-        )
     # Prefix keyword arguments with --.
     else:
         name_or_flag = "--" + _strings.make_field_name(
