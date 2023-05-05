@@ -19,7 +19,7 @@
 Package Contents
 ----------------
 
-.. py:function:: arg(name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None) -> Any
+.. py:function:: arg(name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True) -> Any
 
    
    Returns a metadata object for configuring arguments with ``typing.Annotated``.

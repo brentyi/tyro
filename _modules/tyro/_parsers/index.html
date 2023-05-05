@@ -377,9 +377,9 @@
                         <span class="c1"># Don&#39;t make a subparser.</span>
                         <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">subparsers_from_prefix</span><span class="p">[</span>
-                            <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">prefix</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">subparsers_attempt</span>
+                        <span class="n">subparsers_from_prefix</span><span class="p">[</span><span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">subparsers_attempt</span>
+                        <span class="p">)</span>
                         <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span>
                             <span class="n">subparsers</span><span class="p">,</span> <span class="n">subparsers_attempt</span>
                         <span class="p">)</span>
@@ -596,9 +596,9 @@
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Get subcommand configurations from `tyro.conf.subcommand()`.</span>
-        <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span>
-            <span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">{}</span>
+        <span class="p">)</span>
         <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_no_none</span><span class="p">:</span>
             <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>

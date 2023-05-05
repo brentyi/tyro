@@ -293,7 +293,9 @@
     <span class="k">def</span> <span class="nf">get_value_from_arg</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Helper for getting values from `value_from_arg` + doing some extra</span>
 <span class="sd">        asserts.&quot;&quot;&quot;</span>
-        <span class="k">assert</span> <span class="n">prefixed_field_name</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">prefixed_field_name</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefixed_field_name</span><span class="si">}</span><span class="s2"> not in </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">return</span> <span class="n">value_from_prefixed_field_name</span><span class="p">[</span><span class="n">prefixed_field_name</span><span class="p">]</span>
 
     <span class="n">arg_from_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -314,9 +316,14 @@
 
             <span class="c1"># Standard arguments.</span>
             <span class="n">arg</span> <span class="o">=</span> <span class="n">arg_from_prefixed_field_name</span><span class="p">[</span><span class="n">prefixed_field_name</span><span class="p">]</span>
-            <span class="n">consumed_keywords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">)</span>
+            <span class="n">name_maybe_prefixed</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">prefixed_field_name</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span>
+                <span class="k">else</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+            <span class="p">)</span>
+            <span class="n">consumed_keywords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name_maybe_prefixed</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">name_maybe_prefixed</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>

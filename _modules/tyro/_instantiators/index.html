@@ -737,7 +737,8 @@
                 <span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;no type in </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2"> could be instantiated from&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">Got errors:  </span><span class="se">\n</span><span class="s2">- &quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+            <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">strings</span><span class="si">}</span><span class="s2">.</span><span class="se">\n\n</span><span class="s2">Got errors:  </span><span class="se">\n</span><span class="s2">- &quot;</span>
+            <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">- &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
         <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">union_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>

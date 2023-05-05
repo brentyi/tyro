@@ -311,7 +311,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-    <span class="c1"># TODO - add prefix_name: bool</span>
+    <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span>
 
 
 <div class="viewcode-block" id="arg"><a class="viewcode-back" href="../../../../api/tyro/conf/#tyro.conf._confstruct.arg">[docs]</a><span class="k">def</span> <span class="nf">arg</span><span class="p">(</span>
@@ -319,6 +319,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Returns a metadata object for configuring arguments with `typing.Annotated`.</span>
 <span class="sd">    Useful for aesthetics.</span>
@@ -328,7 +329,12 @@
 <span class="sd">    x: Annotated[int, tyro.conf.arg(...)]</span>
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_ArgConfiguration</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_ArgConfiguration</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
+        <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span>
+        <span class="n">prefix_name</span><span class="o">=</span><span class="n">prefix_name</span><span class="p">,</span>
+    <span class="p">)</span></div>
 </pre></div>
         </article>
       </div>
