@@ -375,8 +375,7 @@ optimizer: !dataclass:OptimizerConfig
 seed: 0
 train_steps: 100000</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/01_nesting.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">{'--no-restore-checkpoint'}
-out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
+<kbd>python 02_nesting/01_nesting.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
 
 config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
 
