@@ -88,6 +88,17 @@ By default, `--cmd.arg` may be generated as a flag for each dataclass in the uni
 If subcommand prefixes are omitted, we would instead simply have `--arg`.
 """
 
+OmitArgPrefixes = Annotated[T, None]
+"""Make flags used for keyword arguments in arguments shorter by omitting prefixes.
+
+If we have a structure with the field:
+
+    cmd: NestedType
+
+By default, `--cmd.arg` may be generated as a flag. If prefixes are omitted, we would
+instead simply have `--arg`.
+"""
+
 UseAppendAction = Annotated[T, None]
 """Use "append" actions for variable-length arguments.
 

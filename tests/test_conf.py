@@ -1,3 +1,4 @@
+import argparse
 import dataclasses
 from typing import Any, Dict, Generic, List, Tuple, TypeVar, Union
 
@@ -857,13 +858,32 @@ def test_duplicated_arg() -> None:
     # Loosely inspired by: https://github.com/brentyi/tyro/issues/49
     @dataclasses.dataclass
     class ModelConfig:
-        num_slots: Annotated[int, tyro.conf.arg(name="num_slots", prefix_name=False)]
+        num_slots: Annotated[int, tyro.conf.arg(prefix_name=False)]
 
     @dataclasses.dataclass
     class TrainConfig:
         num_slots: int
         model: ModelConfig
 
-    assert tyro.cli(TrainConfig, args="--num-slots 3".split(" ")) == TrainConfig(
-        num_slots=3, model=ModelConfig(num_slots=3)
-    )
+    with pytest.raises(argparse.ArgumentError):
+        tyro.cli(TrainConfig, args="--num-slots 3".split(" "))
+
+
+def test_omit_arg_prefixes() -> None:
+    # Loosely inspired by: https://github.com/brentyi/tyro/issues/49
+    @dataclasses.dataclass
+    class ModelConfig:
+        num_slots: int
+
+    @dataclasses.dataclass
+    class TrainConfig:
+        model: ModelConfig
+
+    assert tyro.cli(
+        tyro.conf.OmitSubcommandPrefixes[TrainConfig],
+        args="--model.num-slots 3".split(" "),
+    ) == TrainConfig(ModelConfig(num_slots=3))
+
+    assert tyro.cli(
+        tyro.conf.OmitArgPrefixes[TrainConfig], args="--num-slots 3".split(" ")
+    ) == TrainConfig(ModelConfig(num_slots=3))

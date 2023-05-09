@@ -8,31 +8,16 @@ Configuration flags are applied recursively, and should generally be subscripted
 Features here are supported, but generally unnecessary and should be used sparingly.
 """
 
-from ._confstruct import arg, subcommand
-from ._markers import (
-    AvoidSubcommands,
-    ConsolidateSubcommandArgs,
-    Fixed,
-    FlagConversionOff,
-    OmitSubcommandPrefixes,
-    Positional,
-    Suppress,
-    SuppressFixed,
-    UseAppendAction,
-    configure,
-)
-
-__all__ = [
-    "arg",
-    "subcommand",
-    "AvoidSubcommands",
-    "ConsolidateSubcommandArgs",
-    "Fixed",
-    "FlagConversionOff",
-    "OmitSubcommandPrefixes",
-    "Positional",
-    "Suppress",
-    "SuppressFixed",
-    "UseAppendAction",
-    "configure",
-]
+from ._confstruct import arg as arg
+from ._confstruct import subcommand as subcommand
+from ._markers import AvoidSubcommands as AvoidSubcommands
+from ._markers import ConsolidateSubcommandArgs as ConsolidateSubcommandArgs
+from ._markers import Fixed as Fixed
+from ._markers import FlagConversionOff as FlagConversionOff
+from ._markers import OmitArgPrefixes as OmitArgPrefixes
+from ._markers import OmitSubcommandPrefixes as OmitSubcommandPrefixes
+from ._markers import Positional as Positional
+from ._markers import Suppress as Suppress
+from ._markers import SuppressFixed as SuppressFixed
+from ._markers import UseAppendAction as UseAppendAction
+from ._markers import configure as configure
