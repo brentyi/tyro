@@ -65,11 +65,7 @@ def call_from_args(
 
             # Standard arguments.
             arg = arg_from_prefixed_field_name[prefixed_field_name]
-            name_maybe_prefixed = (
-                prefixed_field_name
-                if field.argconf.prefix_name
-                else _strings.make_field_name([field.name])
-            )
+            name_maybe_prefixed = prefixed_field_name
             consumed_keywords.add(name_maybe_prefixed)
             if not arg.lowered.is_fixed():
                 value = get_value_from_arg(name_maybe_prefixed)

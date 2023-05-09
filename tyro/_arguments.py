@@ -134,11 +134,8 @@ class ArgumentDefinition:
         if self.field.argconf.metavar is not None:
             kwargs["metavar"] = self.field.argconf.metavar
 
-        # Add argument! Note that the name must be passed in as a position argument.
-        try:
-            arg = parser.add_argument(name_or_flag, **kwargs)
-        except argparse.ArgumentError:
-            return
+        # Add argument!
+        arg = parser.add_argument(name_or_flag, **kwargs)
 
         # Do our best to tab complete paths.
         # There will be false positives here, but if choices is unset they should be
@@ -457,6 +454,7 @@ def _rule_set_name_or_flag_and_dest(
     name_or_flag = _strings.make_field_name(
         [arg.name_prefix, arg.field.name]
         if arg.field.argconf.prefix_name
+        and _markers.OmitArgPrefixes not in arg.field.markers
         else [arg.field.name]
     )
 
@@ -475,11 +473,7 @@ def _rule_set_name_or_flag_and_dest(
     return dataclasses.replace(
         lowered,
         name_or_flag=name_or_flag,
-        dest=(
-            _strings.make_field_name([arg.dest_prefix, arg.field.name])
-            if arg.field.argconf.prefix_name
-            else arg.field.name
-        ),
+        dest=_strings.make_field_name([arg.dest_prefix, arg.field.name]),
     )
 
 
