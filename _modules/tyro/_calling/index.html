@@ -316,11 +316,7 @@
 
             <span class="c1"># Standard arguments.</span>
             <span class="n">arg</span> <span class="o">=</span> <span class="n">arg_from_prefixed_field_name</span><span class="p">[</span><span class="n">prefixed_field_name</span><span class="p">]</span>
-            <span class="n">name_maybe_prefixed</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">prefixed_field_name</span>
-                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span>
-                <span class="k">else</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">name_maybe_prefixed</span> <span class="o">=</span> <span class="n">prefixed_field_name</span>
             <span class="n">consumed_keywords</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name_maybe_prefixed</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">name_maybe_prefixed</span><span class="p">)</span>

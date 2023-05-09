@@ -339,6 +339,17 @@
 <span class="sd">If subcommand prefixes are omitted, we would instead simply have `--arg`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">OmitArgPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Make flags used for keyword arguments in arguments shorter by omitting prefixes.</span>
+
+<span class="sd">If we have a structure with the field:</span>
+
+<span class="sd">    cmd: NestedType</span>
+
+<span class="sd">By default, `--cmd.arg` may be generated as a flag. If prefixes are omitted, we would</span>
+<span class="sd">instead simply have `--arg`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 <span class="n">UseAppendAction</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Use &quot;append&quot; actions for variable-length arguments.</span>
 

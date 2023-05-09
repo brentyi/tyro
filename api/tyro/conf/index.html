@@ -372,6 +372,18 @@ applied to nested types.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.OmitArgPrefixes">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitArgPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitArgPrefixes" title="Permalink to this definition">#</a></dt>
+<dd><p>Make flags used for keyword arguments in arguments shorter by omitting prefixes.</p>
+<p>If we have a structure with the field:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span><span class="p">:</span> <span class="n">NestedType</span>
+</pre></div>
+</div>
+<p>By default, <code class="docutils literal notranslate"><span class="pre">--cmd.arg</span></code> may be generated as a flag. If prefixes are omitted, we would
+instead simply have <code class="docutils literal notranslate"><span class="pre">--arg</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.OmitSubcommandPrefixes">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitSubcommandPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitSubcommandPrefixes" title="Permalink to this definition">#</a></dt>
 <dd><p>Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</p>
@@ -514,6 +526,7 @@ apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf.ConsolidateSubcommandArgs">ConsolidateSubcommandArgs</a></li>
 <li><a class="reference internal" href="#tyro.conf.Fixed">Fixed</a></li>
 <li><a class="reference internal" href="#tyro.conf.FlagConversionOff">FlagConversionOff</a></li>
+<li><a class="reference internal" href="#tyro.conf.OmitArgPrefixes">OmitArgPrefixes</a></li>
 <li><a class="reference internal" href="#tyro.conf.OmitSubcommandPrefixes">OmitSubcommandPrefixes</a></li>
 <li><a class="reference internal" href="#tyro.conf.Positional">Positional</a></li>
 <li><a class="reference internal" href="#tyro.conf.Suppress">Suppress</a></li>
