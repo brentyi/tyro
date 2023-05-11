@@ -78,7 +78,8 @@ be placed at the end of the command>
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]
-"""Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
+"""Make flags used for keyword arguments in subcommands shorter by omitting the
+subcommand-specific portion of the prefix.
 
 If we have a structure with the field:
 
@@ -89,7 +90,7 @@ If subcommand prefixes are omitted, we would instead simply have `--arg`.
 """
 
 OmitArgPrefixes = Annotated[T, None]
-"""Make flags used for keyword arguments in arguments shorter by omitting prefixes.
+"""Make flags used for keyword arguments shorter by omitting prefixes.
 
 If we have a structure with the field:
 
