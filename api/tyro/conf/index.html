@@ -374,7 +374,7 @@ applied to nested types.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.OmitArgPrefixes">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitArgPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitArgPrefixes" title="Permalink to this definition">#</a></dt>
-<dd><p>Make flags used for keyword arguments in arguments shorter by omitting prefixes.</p>
+<dd><p>Make flags used for keyword arguments shorter by omitting prefixes.</p>
 <p>If we have a structure with the field:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span><span class="p">:</span> <span class="n">NestedType</span>
 </pre></div>
@@ -386,7 +386,8 @@ instead simply have <code class="docutils literal notranslate"><span class="pre"
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.OmitSubcommandPrefixes">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitSubcommandPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitSubcommandPrefixes" title="Permalink to this definition">#</a></dt>
-<dd><p>Make flags used for keyword arguments in subcommands shorter by omitting prefixes.</p>
+<dd><p>Make flags used for keyword arguments in subcommands shorter by omitting the
+subcommand-specific portion of the prefix.</p>
 <p>If we have a structure with the field:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">NestedTypeB</span><span class="p">]</span>
 </pre></div>

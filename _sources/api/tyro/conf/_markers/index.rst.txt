@@ -92,7 +92,8 @@ Module Contents
    
 
    
-   Make flags used for keyword arguments in subcommands shorter by omitting prefixes.
+   Make flags used for keyword arguments in subcommands shorter by omitting the
+   subcommand-specific portion of the prefix.
 
    If we have a structure with the field:
 
@@ -108,7 +109,7 @@ Module Contents
    
 
    
-   Make flags used for keyword arguments in arguments shorter by omitting prefixes.
+   Make flags used for keyword arguments shorter by omitting prefixes.
 
    If we have a structure with the field:
 
