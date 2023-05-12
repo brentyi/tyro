@@ -369,6 +369,7 @@ def _cli_impl(
         parser = argparse.ArgumentParser(
             prog=prog,
             formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
+            allow_abbrev=False,
         )
         parser_definition.apply(parser)
 
