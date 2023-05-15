@@ -40,15 +40,13 @@ def subcommand_type_from_defaults(
     ]
     ```
 
-    Direct use of `typing.Union` and `tyro.conf.subcommand()` should generally be
-    preferred, but this function can be helpful for succinictness.
-
+    Direct use of `typing.Union` and :func:`tyro.conf.subcommand()` should generally be
+    preferred, but this function can be helpful for succinctness.
 
     .. warning::
-
         The type returned by this function can be safely used as an input to
-        `tyro.cli()`, but for static analysis when used for annotations we recommend
-        applying a TYPE_CHECKING guard:
+        :func:`tyro.cli()`, but for static analysis when used for annotations we
+        recommend applying a `TYPE_CHECKING` guard:
 
         .. code-block:: python
 
@@ -61,6 +59,13 @@ def subcommand_type_from_defaults(
                 # Runtime type used by tyro.
                 SelectableConfig = subcommand_type_from_defaults(...)
 
+    Args:
+        defaults: A dictionary of default subcommand instances.
+        descriptions: A dictionary conttaining descriptions for helptext.
+        prefix_names: Whether to prefix subcommand names.
+
+    Returns:
+        A subcommand type, which can be passed to :func:`tyro.cli`.
     """
     return Union.__getitem__(  # type: ignore
         tuple(

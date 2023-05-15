@@ -14,12 +14,10 @@ def literal_type_from_choices(choices: Iterable[T]) -> TypeForm[T]:
     Using `Literal[...]` directly should generally be preferred, but this function can be
     helpful when choices are generated dynamically.
 
-
     .. warning::
-
         The type returned by this function can be safely used as an input to
-        `tyro.cli()`, but for static analysis when used for annotations we recommend
-        applying a TYPE_CHECKING guard:
+        :func:`tyro.cli()`, but for static analysis when used for annotations we
+        recommend applying a `TYPE_CHECKING` guard:
 
         .. code-block:: python
 
@@ -31,5 +29,11 @@ def literal_type_from_choices(choices: Iterable[T]) -> TypeForm[T]:
             else:
                 # Runtime type used by tyro.
                 Color = literal_type_from_choices(["red", "green", "blue"])
+
+    Args:
+        choices: Options to choose from.
+
+    Returns:
+        A type that can be passed to :func:`tyro.cli()`.
     """
     return Literal.__getitem__(tuple(choices))  # type: ignore
