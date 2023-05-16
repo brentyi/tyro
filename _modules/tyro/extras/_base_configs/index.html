@@ -291,15 +291,16 @@
 <span class="sd">    ]</span>
 <span class="sd">    ```</span>
 
-<span class="sd">    Direct use of `typing.Union` and `tyro.conf.subcommand()` should generally be</span>
-<span class="sd">    preferred, but this function can be helpful for succinictness.</span>
+<span class="sd">    Direct use of `typing.Union` and :func:`tyro.conf.subcommand()` should generally be</span>
+<span class="sd">    preferred, but this function can be helpful for succinctness.</span>
 
 <span class="sd">    .. warning::</span>
 <span class="sd">        The type returned by this function can be safely used as an input to</span>
-<span class="sd">        `tyro.cli()`, but for static analysis when used for annotations we recommend</span>
-<span class="sd">        applying a TYPE_CHECKING guard:</span>
+<span class="sd">        :func:`tyro.cli()`, but for static analysis when used for annotations we</span>
+<span class="sd">        recommend applying a `TYPE_CHECKING` guard:</span>
 
 <span class="sd">        .. code-block:: python</span>
+
 <span class="sd">            from typing import TYPE_CHECKING</span>
 
 <span class="sd">            if TYPE_CHECKING:</span>
@@ -309,6 +310,13 @@
 <span class="sd">                # Runtime type used by tyro.</span>
 <span class="sd">                SelectableConfig = subcommand_type_from_defaults(...)</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        defaults: A dictionary of default subcommand instances.</span>
+<span class="sd">        descriptions: A dictionary conttaining descriptions for helptext.</span>
+<span class="sd">        prefix_names: Whether to prefix subcommand names.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A subcommand type, which can be passed to :func:`tyro.cli`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
         <span class="nb">tuple</span><span class="p">(</span>

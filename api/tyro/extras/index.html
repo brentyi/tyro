@@ -305,33 +305,37 @@ flag.</p>
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>Direct use of <code class="docutils literal notranslate"><span class="pre">typing.Union</span></code> and <code class="docutils literal notranslate"><span class="pre">tyro.conf.subcommand()</span></code> should generally be
-preferred, but this function can be helpful for succinictness.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The type returned by this function can be safely used as an input to
-`tyro.cli()`, but for static analysis when used for annotations we recommend
-applying a TYPE_CHECKING guard:
+<p>Direct use of <code class="docutils literal notranslate"><span class="pre">typing.Union</span></code> and <a class="reference internal" href="../conf/#tyro.conf.subcommand" title="tyro.conf.subcommand"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.subcommand()</span></code></a> should generally be
+preferred, but this function can be helpful for succinctness.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The type returned by this function can be safely used as an input to
+<a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, but for static analysis when used for annotations we
+recommend applying a <cite>TYPE_CHECKING</cite> guard:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-.. code-block:: python
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        # Static type seen by language servers, type checkers, etc.
-        SelectableConfig = Config
-    else:
-        # Runtime type used by tyro.
-        SelectableConfig = subcommand_type_from_defaults(...)
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
+    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">Config</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Runtime type used by tyro.</span>
+    <span class="n">SelectableConfig</span> <span class="o">=</span> <span class="n">subcommand_type_from_defaults</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
 </pre></div>
+</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>defaults</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>T</em><em>]</em>) – </p></li>
-<li><p><strong>descriptions</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – </p></li>
-<li><p><strong>prefix_names</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>defaults</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>T</em><em>]</em>) – A dictionary of default subcommand instances.</p></li>
+<li><p><strong>descriptions</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – A dictionary conttaining descriptions for helptext.</p></li>
+<li><p><strong>prefix_names</strong> (<em>bool</em>) – Whether to prefix subcommand names.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tyro._typing.TypeForm[T]</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A subcommand type, which can be passed to <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tyro._typing.TypeForm[T]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -342,27 +346,31 @@ applying a TYPE_CHECKING guard:
 <dd><p>Generate a <code class="docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> type that constrains values to a set of choices.</p>
 <p>Using <code class="docutils literal notranslate"><span class="pre">Literal[...]</span></code> directly should generally be preferred, but this function can be
 helpful when choices are generated dynamically.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>The type returned by this function can be safely used as an input to
-`tyro.cli()`, but for static analysis when used for annotations we recommend
-applying a TYPE_CHECKING guard:
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The type returned by this function can be safely used as an input to
+<a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, but for static analysis when used for annotations we
+recommend applying a <cite>TYPE_CHECKING</cite> guard:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
-.. code-block:: python
-    from typing import TYPE_CHECKING
-
-    if TYPE_CHECKING:
-        # Static type seen by language servers, type checkers, etc.
-        Color = str
-    else:
-        # Runtime type used by tyro.
-        Color = literal_type_from_choices([&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;])
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
+    <span class="n">Color</span> <span class="o">=</span> <span class="nb">str</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="c1"># Runtime type used by tyro.</span>
+    <span class="n">Color</span> <span class="o">=</span> <span class="n">literal_type_from_choices</span><span class="p">([</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">])</span>
 </pre></div>
+</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>choices</strong> (<em>Iterable</em><em>[</em><em>T</em><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>choices</strong> (<em>Iterable</em><em>[</em><em>T</em><em>]</em>) – Options to choose from.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>tyro._typing.TypeForm[T]</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A type that can be passed to <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tyro._typing.TypeForm[T]</p>
 </dd>
 </dl>
 </dd></dl>

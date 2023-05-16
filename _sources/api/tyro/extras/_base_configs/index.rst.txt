@@ -43,23 +43,28 @@ Module Contents
           ]
       ]
 
-   Direct use of ``typing.Union`` and ``tyro.conf.subcommand()`` should generally be
-   preferred, but this function can be helpful for succinictness.
+   Direct use of ``typing.Union`` and :func:`tyro.conf.subcommand()` should generally be
+   preferred, but this function can be helpful for succinctness.
 
    .. warning::
-   ::
+       The type returned by this function can be safely used as an input to
+       :func:`tyro.cli()`, but for static analysis when used for annotations we
+       recommend applying a `TYPE_CHECKING` guard:
 
-      The type returned by this function can be safely used as an input to
-      `tyro.cli()`, but for static analysis when used for annotations we recommend
-      applying a TYPE_CHECKING guard:
+       .. code-block:: python
 
-      .. code-block:: python
-          from typing import TYPE_CHECKING
+           from typing import TYPE_CHECKING
 
-          if TYPE_CHECKING:
-              # Static type seen by language servers, type checkers, etc.
-              SelectableConfig = Config
-          else:
-              # Runtime type used by tyro.
-              SelectableConfig = subcommand_type_from_defaults(...)
+           if TYPE_CHECKING:
+               # Static type seen by language servers, type checkers, etc.
+               SelectableConfig = Config
+           else:
+               # Runtime type used by tyro.
+               SelectableConfig = subcommand_type_from_defaults(...)
+
+   :param defaults: A dictionary of default subcommand instances.
+   :param descriptions: A dictionary conttaining descriptions for helptext.
+   :param prefix_names: Whether to prefix subcommand names.
+
+   :returns: A subcommand type, which can be passed to :func:`tyro.cli`.
 

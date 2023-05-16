@@ -267,10 +267,11 @@
 
 <span class="sd">    .. warning::</span>
 <span class="sd">        The type returned by this function can be safely used as an input to</span>
-<span class="sd">        `tyro.cli()`, but for static analysis when used for annotations we recommend</span>
-<span class="sd">        applying a TYPE_CHECKING guard:</span>
+<span class="sd">        :func:`tyro.cli()`, but for static analysis when used for annotations we</span>
+<span class="sd">        recommend applying a `TYPE_CHECKING` guard:</span>
 
 <span class="sd">        .. code-block:: python</span>
+
 <span class="sd">            from typing import TYPE_CHECKING</span>
 
 <span class="sd">            if TYPE_CHECKING:</span>
@@ -279,6 +280,12 @@
 <span class="sd">            else:</span>
 <span class="sd">                # Runtime type used by tyro.</span>
 <span class="sd">                Color = literal_type_from_choices([&quot;red&quot;, &quot;green&quot;, &quot;blue&quot;])</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        choices: Options to choose from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A type that can be passed to :func:`tyro.cli()`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Literal</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">choices</span><span class="p">))</span>  <span class="c1"># type: ignore</span></div>
 </pre></div>
