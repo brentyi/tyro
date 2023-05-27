@@ -281,7 +281,7 @@
 
 
 <div class="viewcode-block" id="unwrap_origin_strip_extras"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_origin_strip_extras">[docs]</a><span class="k">def</span> <span class="nf">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
 <span class="sd">    returns typ.&quot;&quot;&quot;</span>
     <span class="c1"># TODO: Annotated[] handling should be revisited...</span>
     <span class="n">typ</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -293,14 +293,14 @@
 
 
 <div class="viewcode-block" id="is_dataclass"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_dataclass">[docs]</a><span class="k">def</span> <span class="nf">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">Callable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Same as `dataclasses.is_dataclass`, but also handles generic aliases.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as `dataclasses.is_dataclass`, but also handles generic aliases.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="resolve_generic_types"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolve_generic_types">[docs]</a><span class="k">def</span> <span class="nf">resolve_generic_types</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]:</span>
-    <span class="sd">&quot;&quot;&quot;If the input is a class: no-op. If it&#39;s a generic alias: returns the origin</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;If the input is a class: no-op. If it&#39;s a generic alias: returns the origin</span>
 <span class="sd">    class, and a mapping from typevars to concrete types.&quot;&quot;&quot;</span>
 
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -333,7 +333,7 @@
 
 <div class="viewcode-block" id="resolved_fields"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolved_fields">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Similar to dataclasses.fields(), but includes dataclasses.InitVar types and</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Similar to dataclasses.fields(), but includes dataclasses.InitVar types and</span>
 <span class="sd">    resolves forward references.&quot;&quot;&quot;</span>
 
     <span class="k">assert</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -369,7 +369,7 @@
 
 
 <div class="viewcode-block" id="type_from_typevar_constraints"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.type_from_typevar_constraints">[docs]</a><span class="k">def</span> <span class="nf">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Try to concretize a type from a TypeVar&#39;s bounds or constraints. Identity if</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to concretize a type from a TypeVar&#39;s bounds or constraints. Identity if</span>
 <span class="sd">    unsuccessful.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">typ</span><span class="o">.</span><span class="n">__bound__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -383,7 +383,7 @@
 
 <div class="viewcode-block" id="narrow_type"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_type">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">narrow_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat,</span>
 <span class="sd">    we should parse as Cat.</span>
 
 <span class="sd">    This should generally only be applied to fields used as nested structures, not</span>
@@ -421,7 +421,7 @@
 <div class="viewcode-block" id="narrow_container_types"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_container_types">[docs]</a><span class="k">def</span> <span class="nf">narrow_container_types</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;TypeForm narrowing for containers. Infers types of container contents.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;TypeForm narrowing for containers. Infers types of container contents.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">List</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))))</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">set</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
@@ -437,7 +437,7 @@
 <div class="viewcode-block" id="unwrap_annotated"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">[docs]</a><span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">search_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;Helper for parsing typing.Annotated types.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for parsing typing.Annotated types.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">    - int, int =&gt; (int, ())</span>
@@ -499,7 +499,7 @@
 
 <div class="viewcode-block" id="narrow_union_type"><a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_union_type">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Narrow union types.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Narrow union types.</span>
 
 <span class="sd">    This is a shim for failing more gracefully when we we&#39;re given one of two errors:</span>
 <span class="sd">    (A) A Union type that doesn&#39;t match the default value.</span>

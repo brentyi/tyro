@@ -294,7 +294,7 @@
     <span class="nd">@staticmethod</span>
     <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_ClassTokenization&quot;</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Parse the source code of a class, and cache some tokenization information.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Parse the source code of a class, and cache some tokenization information.&quot;&quot;&quot;</span>
         <span class="n">readline</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">getsource</span><span class="p">(</span><span class="n">clz</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">readline</span>
 
         <span class="n">tokens</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_Token</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -407,7 +407,7 @@
 
 <div class="viewcode-block" id="get_field_docstring"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_field_docstring">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Get docstring for a field in a class.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get docstring for a field in a class.&quot;&quot;&quot;</span>
 
     <span class="n">docstring</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -519,7 +519,7 @@
 
 <div class="viewcode-block" id="get_callable_description"><a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_callable_description">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get description associated with a callable via docstring parsing.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get description associated with a callable via docstring parsing.</span>
 
 <span class="sd">    Note that the `dataclasses.dataclass` will automatically populate __doc__ based on</span>
 <span class="sd">    the fields of the class if a docstring is not specified; this helper will ignore</span>

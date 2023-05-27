@@ -355,7 +355,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="FieldDefinition.is_positional"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional">[docs]</a>    <span class="k">def</span> <span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in the commandline.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in the commandline.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># Explicit positionals.</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
@@ -364,7 +364,7 @@
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="FieldDefinition.is_positional_call"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional_call">[docs]</a>    <span class="k">def</span> <span class="nf">is_positional_call</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in underlying Python call.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in underlying Python call.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># Explicit positionals.</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
@@ -417,14 +417,14 @@
 
 <div class="viewcode-block" id="UnsupportedNestedTypeMessage"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.UnsupportedNestedTypeMessage">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">UnsupportedNestedTypeMessage</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Reason why a callable cannot be treated as a nested type.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Reason why a callable cannot be treated as a nested type.&quot;&quot;&quot;</span>
 
     <span class="n">message</span><span class="p">:</span> <span class="nb">str</span></div>
 
 
 <div class="viewcode-block" id="is_nested_type"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.is_nested_type">[docs]</a><span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;nested type&#39;, where a single</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;nested type&#39;, where a single</span>
 <span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
 <span class="sd">    classes).</span>
 
@@ -442,7 +442,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
     <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]</span>
 <span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
 <span class="sd">    annotated callable.</span>
 
 <span class="sd">    Returns:</span>
@@ -922,7 +922,7 @@
         <span class="p">)</span>
 
     <span class="c1"># Generate field list from function signature.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Cannot extract annotations from </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">, which is not a callable type.&quot;</span>
         <span class="p">)</span>
@@ -988,7 +988,7 @@
         <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hints</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Expected fully type-annotated callable, but </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> with arguments&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">params</span><span class="p">))</span><span class="si">}</span><span class="s2"> has no annotation for&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">p</span><span class="p">:</span><span class="w"> </span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">params</span><span class="p">))</span><span class="si">}</span><span class="s2"> has no annotation for&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; &#39;</span><span class="si">{</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&#39;.&quot;</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">param</span><span class="o">.</span><span class="n">KEYWORD_ONLY</span><span class="p">:</span>
@@ -1037,7 +1037,7 @@
 <span class="k">def</span> <span class="nf">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Ensure that a dataclass type used directly as a default value is marked as</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that a dataclass type used directly as a default value is marked as</span>
 <span class="sd">    frozen.&quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
     <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
@@ -1052,7 +1052,7 @@
 <span class="k">def</span> <span class="nf">_get_dataclass_field_default</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a field.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a field.&quot;&quot;&quot;</span>
     <span class="c1"># If the dataclass&#39;s parent is explicitly marked MISSING, mark this field as missing</span>
     <span class="c1"># as well.</span>
     <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span><span class="p">:</span>

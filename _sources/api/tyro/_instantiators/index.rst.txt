@@ -45,6 +45,11 @@
 Module Contents
 ---------------
 
+.. py:data:: LiteralAlternate
+   
+
+   
+
 .. py:data:: Instantiator
    
 

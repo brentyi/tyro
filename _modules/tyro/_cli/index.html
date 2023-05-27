@@ -360,7 +360,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
-    <span class="sd">&quot;&quot;&quot;Call or instantiate `f`, with inputs populated from an automatically generated</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Call or instantiate `f`, with inputs populated from an automatically generated</span>
 <span class="sd">    CLI interface.</span>
 
 <span class="sd">    `f` should have type-annotated inputs, and can be a function or type. Note that if</span>
@@ -476,7 +476,7 @@
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Get the `argparse.ArgumentParser` object generated under-the-hood by</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the `argparse.ArgumentParser` object generated under-the-hood by</span>
 <span class="sd">    `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.</span>
 
 <span class="sd">    For tab completion, we recommend using `tyro.cli()`&#39;s built-in `--tyro-write-completion`</span>
@@ -506,7 +506,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],]:</span>
-    <span class="sd">&quot;&quot;&quot;Helper for stitching the `tyro` pipeline together.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for stitching the `tyro` pipeline together.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;default_instance&quot;</span> <span class="ow">in</span> <span class="n">deprecated_kwargs</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="s2">&quot;`default_instance=` is deprecated! use `default=` instead.&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span>
