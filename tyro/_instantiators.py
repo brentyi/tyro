@@ -62,6 +62,13 @@ from typing_extensions import (
     get_type_hints,
 )
 
+# There are cases where typing.Literal doesn't match typing_extensions.Literal:
+# https://github.com/python/typing_extensions/pull/148
+try:
+    from typing import Literal as LiteralAlternate
+except ImportError:
+    LiteralAlternate = Literal  # type: ignore
+
 from . import _strings
 from ._typing import TypeForm
 from .conf import _markers
@@ -325,7 +332,7 @@ def _instantiator_from_container_type(
         _instantiator_from_tuple: (tuple,),
         _instantiator_from_dict: (dict, collections.abc.Mapping),
         _instantiator_from_union: (Union,),
-        _instantiator_from_literal: (Literal,),
+        _instantiator_from_literal: (Literal, LiteralAlternate),
     }.items():
         if type_origin in matched_origins:
             return make(typ, type_from_typevar, markers)
