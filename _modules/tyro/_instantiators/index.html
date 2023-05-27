@@ -318,7 +318,7 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span> <span class="k">as</span> <span class="n">LiteralAlternate</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">LiteralAlternate</span> <span class="o">=</span> <span class="n">Literal</span>
+    <span class="n">LiteralAlternate</span> <span class="o">=</span> <span class="n">Literal</span>  <span class="c1"># type: ignore</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_strings</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
