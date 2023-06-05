@@ -2,6 +2,7 @@ from . import conf, extras
 from ._cli import cli
 from ._fields import MISSING_PUBLIC as MISSING
 from ._instantiators import UnsupportedTypeAnnotationError
+from typing import TYPE_CHECKING
 
 __all__ = [
     "conf",
@@ -11,6 +12,6 @@ __all__ = [
     "UnsupportedTypeAnnotationError",
 ]
 
-# Deprecated interface. We use a star import to prevent these from showing up in
-# autocomplete engines, etc.
-from ._deprecated import *  # noqa
+# Deprecated interface.
+if not TYPE_CHECKING:
+    from ._deprecated import *  # noqa

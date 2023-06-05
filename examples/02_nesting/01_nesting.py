@@ -66,8 +66,6 @@ def train(
     print(f"{out_dir=}, {restore_checkpoint=}, {checkpoint_interval=}")
     print()
     print(f"{config=}")
-    print()
-    print(tyro.to_yaml(config))
 
 
 if __name__ == "__main__":
