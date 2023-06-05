@@ -103,104 +103,54 @@ class ParserSpecification:
         subparsers_from_prefix = {}
 
         for field in field_list:
-            if isinstance(field.typ, TypeVar):
-                raise _instantiators.UnsupportedTypeAnnotationError(
-                    f"Field {field.name} has an unbound TypeVar: {field.typ}."
-                )
-
-            if _markers.Fixed not in field.markers:
-                # (1) Handle Unions over callables; these result in subparsers.
-                subparsers_attempt = SubparsersSpecification.from_field(
-                    field,
-                    type_from_typevar=type_from_typevar,
-                    parent_classes=parent_classes,
-                    prefix=_strings.make_field_name([prefix, field.name]),
-                )
-                if subparsers_attempt is not None:
-                    if subparsers_attempt.required:
-                        has_required_args = True
-                    if (
-                        not subparsers_attempt.required
-                        and _markers.AvoidSubcommands in field.markers
-                    ):
-                        # Don't make a subparser.
-                        field = dataclasses.replace(field, typ=type(field.default))
-                    else:
-                        subparsers_from_prefix[
-                            subparsers_attempt.prefix
-                        ] = subparsers_attempt
-                        subparsers = add_subparsers_to_leaves(
-                            subparsers, subparsers_attempt
-                        )
-                        continue
-
-                # (2) Handle nested callables.
-                if _fields.is_nested_type(field.typ, field.default):
-                    field = dataclasses.replace(
-                        field,
-                        typ=_resolver.narrow_type(
-                            field.typ,
-                            field.default,
-                        ),
-                    )
-                    nested_parser = ParserSpecification.from_callable_or_type(
-                        (
-                            # Recursively apply marker types.
-                            field.typ
-                            if len(field.markers) == 0
-                            else Annotated.__class_getitem__(  # type: ignore
-                                (field.typ,) + tuple(field.markers)
-                            )
-                        ),
-                        description=None,
-                        parent_classes=parent_classes,
-                        default_instance=field.default,
-                        prefix=_strings.make_field_name([prefix, field.name]),
-                        subcommand_prefix=subcommand_prefix,
-                    )
-                    if nested_parser.has_required_args:
-                        has_required_args = True
-                    args.extend(nested_parser.args)
-
-                    # Include nested subparsers.
-                    if nested_parser.subparsers is not None:
-                        subparsers_from_prefix.update(
-                            nested_parser.subparsers_from_prefix
-                        )
-                        subparsers = add_subparsers_to_leaves(
-                            subparsers, nested_parser.subparsers
-                        )
-
-                    # Include nested strings.
-                    for (
-                        k,
-                        v,
-                    ) in nested_parser.helptext_from_nested_class_field_name.items():
-                        helptext_from_nested_class_field_name[
-                            _strings.make_field_name([field.name, k])
-                        ] = v
-
-                    if field.helptext is not None:
-                        helptext_from_nested_class_field_name[
-                            _strings.make_field_name([field.name])
-                        ] = field.helptext
-                    else:
-                        helptext_from_nested_class_field_name[
-                            _strings.make_field_name([field.name])
-                        ] = _docstrings.get_callable_description(field.typ)
-                    continue
-
-            # (3) Handle primitive or fixed types. These produce a single argument!
-            arg = _arguments.ArgumentDefinition(
-                dest_prefix=prefix,
-                name_prefix=prefix,
-                subcommand_prefix=subcommand_prefix,
-                field=field,
+            field_out = handle_field(
+                field,
                 type_from_typevar=type_from_typevar,
+                parent_classes=parent_classes,
+                prefix=prefix,
+                subcommand_prefix=subcommand_prefix,
             )
-            args.append(arg)
-            if arg.lowered.required:
-                has_required_args = True
+            if isinstance(field_out, _arguments.ArgumentDefinition):
+                # Handle single arguments.
+                args.append(field_out)
+                if field_out.lowered.required:
+                    has_required_args = True
+            elif isinstance(field_out, SubparsersSpecification):
+                # Handle subparsers.
+                subparsers_from_prefix[field_out.prefix] = field_out
+                subparsers = add_subparsers_to_leaves(subparsers, field_out)
+            elif isinstance(field_out, ParserSpecification):
+                # Handle nested parsers.
+                nested_parser = field_out
+
+                if nested_parser.has_required_args:
+                    has_required_args = True
+                args.extend(nested_parser.args)
+
+                # Include nested subparsers.
+                if nested_parser.subparsers is not None:
+                    subparsers_from_prefix.update(nested_parser.subparsers_from_prefix)
+                    subparsers = add_subparsers_to_leaves(
+                        subparsers, nested_parser.subparsers
+                    )
+
+                # Include nested strings.
+                for (
+                    k,
+                    v,
+                ) in nested_parser.helptext_from_nested_class_field_name.items():
+                    helptext_from_nested_class_field_name[
+                        _strings.make_field_name([field.name, k])
+                    ] = v
+
+                if field.helptext is not None:
+                    helptext_from_nested_class_field_name[
+                        _strings.make_field_name([field.name])
+                    ] = field.helptext
+                else:
+                    helptext_from_nested_class_field_name[
+                        _strings.make_field_name([field.name])
+                    ] = _docstrings.get_callable_description(nested_parser.f)
 
         return ParserSpecification(
             f=f,
@@ -304,6 +254,77 @@ class ParserSpecification:
                 # the helptext so it doesn't matter which group.
                 assert arg.lowered.help is argparse.SUPPRESS
                 arg.add_argument(group_from_prefix[""])
+
+
+def handle_field(
+    field: _fields.FieldDefinition,
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
+    parent_classes: Set[Type[Any]],
+    prefix: str,
+    subcommand_prefix: str,
+) -> Union[
+    _arguments.ArgumentDefinition,
+    ParserSpecification,
+    SubparsersSpecification,
+]:
+    """Determine what to do with a single field definition."""
+
+    if isinstance(field.typ, TypeVar):
+        raise _instantiators.UnsupportedTypeAnnotationError(
+            f"Field {field.name} has an unbound TypeVar: {field.typ}."
+        )
+
+    if _markers.Fixed not in field.markers:
+        # (1) Handle Unions over callables; these result in subparsers.
+        subparsers_attempt = SubparsersSpecification.from_field(
+            field,
+            type_from_typevar=type_from_typevar,
+            parent_classes=parent_classes,
+            prefix=_strings.make_field_name([prefix, field.name]),
+        )
+        if subparsers_attempt is not None:
+            if (
+                not subparsers_attempt.required
+                and _markers.AvoidSubcommands in field.markers
+            ):
+                # Don't make a subparser.
+                field = dataclasses.replace(field, typ=type(field.default))
+            else:
+                return subparsers_attempt
+
+        # (2) Handle nested callables.
+        if _fields.is_nested_type(field.typ, field.default):
+            field = dataclasses.replace(
+                field,
+                typ=_resolver.narrow_type(
+                    field.typ,
+                    field.default,
+                ),
+            )
+            return ParserSpecification.from_callable_or_type(
+                (
+                    # Recursively apply marker types.
+                    field.typ
+                    if len(field.markers) == 0
+                    else Annotated.__class_getitem__(  # type: ignore
+                        (field.typ,) + tuple(field.markers)
+                    )
+                ),
+                description=None,
+                parent_classes=parent_classes,
+                default_instance=field.default,
+                prefix=_strings.make_field_name([prefix, field.name]),
+                subcommand_prefix=subcommand_prefix,
+            )
+
+    # (3) Handle primitive or fixed types. These produce a single argument!
+    return _arguments.ArgumentDefinition(
+        dest_prefix=prefix,
+        name_prefix=prefix,
+        subcommand_prefix=subcommand_prefix,
+        field=field,
+        type_from_typevar=type_from_typevar,
+    )
 
 
 @dataclasses.dataclass(frozen=True)
