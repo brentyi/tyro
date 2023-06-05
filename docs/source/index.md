@@ -46,21 +46,6 @@ To get started, we recommend browsing the examples to the left.
    By extending [shtab](https://github.com/iterative/shtab), `tyro`
    automatically generates tab completion scripts for bash, zsh, and tcsh.
 
-### In the wild
-
-`tyro` is still a new library, but being stress tested in several projects!
-
-- [nerfstudio-project/nerfstudio](https://github.com/nerfstudio-project/nerfstudio/)
-  provides a set of tools for end-to-end training, testing, and rendering of
-  neural radiance fields.
-- [Sea-Snell/JAXSeq](https://github.com/Sea-Snell/JAXSeq/) is a library for
-  distributed training of large language models in JAX.
-- [kevinzakka/obj2mjcf](https://github.com/kevinzakka/obj2mjcf) is an interface
-  for processing composite Wavefront OBJ files for Mujoco.
-- [brentyi/tensorf-jax](https://github.com/brentyi/tensorf-jax/) is an
-  unofficial implementation of
-  [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/) in JAX.
-
 <!-- prettier-ignore-start -->
 
 .. toctree::

@@ -14,7 +14,7 @@ Dictionary inputs can be specified using either a standard ``Dict[K, V]`` annota
         :linenos:
 
 
-        from typing import Dict, Mapping, Tuple, TypedDict
+        from typing import Dict, Tuple, TypedDict
 
         import tyro
 

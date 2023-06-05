@@ -144,6 +144,11 @@ See [documentation](https://brentyi.github.io/tyro) for examples.
   distributed training of large language models in JAX.
 - [kevinzakka/obj2mjcf](https://github.com/kevinzakka/obj2mjcf) is an interface
   for processing composite Wavefront OBJ files for Mujoco.
-- [brentyi/tensorf-jax](https://github.com/brentyi/tensorf-jax/) is an
-  unofficial implementation of
-  [Tensorial Radiance Fields](https://apchenstu.github.io/TensoRF/) in JAX.
+- [blurgyy/jaxngp](https://github.com/blurgyy/jaxngp) is a CUDA-accelerated
+  implementation of [instant-ngp](https://nvlabs.github.io/instant-ngp/),
+  implemented in JAX.
+- [NVIDIAGameWorks/kaolin-wisp](https://github.com/NVIDIAGameWorks/kaolin-wisp)
+  is a PyTorch library for working with neural fields.
+- [openrlbenchmark/openrlbenchmark](https://github.com/openrlbenchmark/openrlbenchmark)
+  is a comprehensive collection of tracked experiments for reinforcement
+  learning.
