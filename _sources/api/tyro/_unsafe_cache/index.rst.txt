@@ -20,8 +20,9 @@ Module Contents
 .. py:function:: unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]
 
    
-   Cache decorator that relies object IDs when arguments are unhashable. Assumes
-   immutability.
+   Cache decorator that relies object IDs when arguments are unhashable. Makes the
+   very strong assumption of not only immutability, but that unhashable types don't go
+   out of scope.
 
 .. py:function:: unsafe_hash(obj: Any) -> Any
 

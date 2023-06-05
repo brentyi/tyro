@@ -354,104 +354,54 @@
         <span class="n">subparsers_from_prefix</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-                <span class="c1"># (1) Handle Unions over callables; these result in subparsers.</span>
-                <span class="n">subparsers_attempt</span> <span class="o">=</span> <span class="n">SubparsersSpecification</span><span class="o">.</span><span class="n">from_field</span><span class="p">(</span>
-                    <span class="n">field</span><span class="p">,</span>
-                    <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
-                    <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                    <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">subparsers_attempt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
-                        <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="ow">not</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">required</span>
-                        <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-                    <span class="p">):</span>
-                        <span class="c1"># Don&#39;t make a subparser.</span>
-                        <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">subparsers_from_prefix</span><span class="p">[</span>
-                            <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">prefix</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">subparsers_attempt</span>
-                        <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span>
-                            <span class="n">subparsers</span><span class="p">,</span> <span class="n">subparsers_attempt</span>
-                        <span class="p">)</span>
-                        <span class="k">continue</span>
-
-                <span class="c1"># (2) Handle nested callables.</span>
-                <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
-                    <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                        <span class="n">field</span><span class="p">,</span>
-                        <span class="n">typ</span><span class="o">=</span><span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span>
-                            <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
-                            <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                        <span class="p">),</span>
-                    <span class="p">)</span>
-                    <span class="n">nested_parser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                        <span class="p">(</span>
-                            <span class="c1"># Recursively apply marker types.</span>
-                            <span class="n">field</span><span class="o">.</span><span class="n">typ</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-                            <span class="k">else</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-                                <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
-                            <span class="p">)</span>
-                        <span class="p">),</span>
-                        <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                        <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                        <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                        <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
-                        <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
-                        <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
-
-                    <span class="c1"># Include nested subparsers.</span>
-                    <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">subparsers_from_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-                            <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_prefix</span>
-                        <span class="p">)</span>
-                        <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span>
-                            <span class="n">subparsers</span><span class="p">,</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span>
-                        <span class="p">)</span>
-
-                    <span class="c1"># Include nested strings.</span>
-                    <span class="k">for</span> <span class="p">(</span>
-                        <span class="n">k</span><span class="p">,</span>
-                        <span class="n">v</span><span class="p">,</span>
-                    <span class="p">)</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
-                            <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
-
-                    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                        <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
-                            <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
-                            <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
-                        <span class="p">]</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">)</span>
-                    <span class="k">continue</span>
-
-            <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
-            <span class="n">arg</span> <span class="o">=</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
-                <span class="n">dest_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-                <span class="n">name_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
-                <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
+            <span class="n">field_out</span> <span class="o">=</span> <span class="n">handle_field</span><span class="p">(</span>
+                <span class="n">field</span><span class="p">,</span>
                 <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
+                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
-                <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
+                <span class="c1"># Handle single arguments.</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field_out</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">field_out</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                    <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">):</span>
+                <span class="c1"># Handle subparsers.</span>
+                <span class="n">subparsers_from_prefix</span><span class="p">[</span><span class="n">field_out</span><span class="o">.</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">field_out</span>
+                <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span><span class="n">subparsers</span><span class="p">,</span> <span class="n">field_out</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">):</span>
+                <span class="c1"># Handle nested parsers.</span>
+                <span class="n">nested_parser</span> <span class="o">=</span> <span class="n">field_out</span>
+
+                <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
+                    <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
+
+                <span class="c1"># Include nested subparsers.</span>
+                <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">subparsers_from_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_prefix</span><span class="p">)</span>
+                    <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span>
+                        <span class="n">subparsers</span><span class="p">,</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Include nested strings.</span>
+                <span class="k">for</span> <span class="p">(</span>
+                    <span class="n">k</span><span class="p">,</span>
+                    <span class="n">v</span><span class="p">,</span>
+                <span class="p">)</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
+                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
+                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
+                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                    <span class="p">]</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ParserSpecification</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
@@ -555,6 +505,77 @@
                 <span class="c1"># the helptext so it doesn&#39;t matter which group.</span>
                 <span class="k">assert</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
                 <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span></div></div>
+
+
+<div class="viewcode-block" id="handle_field"><a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.handle_field">[docs]</a><span class="k">def</span> <span class="nf">handle_field</span><span class="p">(</span>
+    <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
+    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">,</span>
+    <span class="n">ParserSpecification</span><span class="p">,</span>
+    <span class="n">SubparsersSpecification</span><span class="p">,</span>
+<span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine what to do with a single field definition.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+        <span class="c1"># (1) Handle Unions over callables; these result in subparsers.</span>
+        <span class="n">subparsers_attempt</span> <span class="o">=</span> <span class="n">SubparsersSpecification</span><span class="o">.</span><span class="n">from_field</span><span class="p">(</span>
+            <span class="n">field</span><span class="p">,</span>
+            <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
+            <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+            <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">subparsers_attempt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="n">subparsers_attempt</span><span class="o">.</span><span class="n">required</span>
+                <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+            <span class="p">):</span>
+                <span class="c1"># Don&#39;t make a subparser.</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">subparsers_attempt</span>
+
+        <span class="c1"># (2) Handle nested callables.</span>
+        <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="n">field</span><span class="p">,</span>
+                <span class="n">typ</span><span class="o">=</span><span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="c1"># Recursively apply marker types.</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">typ</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+                    <span class="k">else</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                        <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+                <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
+    <span class="k">return</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
+        <span class="n">dest_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="n">name_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
+        <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
+        <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="SubparsersSpecification"><a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
