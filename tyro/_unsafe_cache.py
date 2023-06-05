@@ -13,8 +13,9 @@ def clear_cache() -> None:
 
 
 def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
-    """Cache decorator that relies object IDs when arguments are unhashable. Assumes
-    immutability."""
+    """Cache decorator that relies object IDs when arguments are unhashable. Makes the
+    very strong assumption of not only immutability, but that unhashable types don't go
+    out of scope."""
 
     _cache_list.append({})
     local_cache = _cache_list[-1]
