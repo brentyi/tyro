@@ -310,12 +310,10 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">55</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">out_dir</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">restore_checkpoint</span><span class="si">=}</span><span class="s2">, </span><span class="si">{</span><span class="n">checkpoint_interval</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="linenos">56</span>    <span class="nb">print</span><span class="p">()</span>
 <span class="linenos">57</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">58</span>    <span class="nb">print</span><span class="p">()</span>
-<span class="linenos">59</span>    <span class="nb">print</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">to_yaml</span><span class="p">(</span><span class="n">config</span><span class="p">))</span>
-<span class="linenos">60</span>
-<span class="linenos">61</span>
-<span class="linenos">62</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">63</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+<span class="linenos">58</span>
+<span class="linenos">59</span>
+<span class="linenos">60</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">61</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
@@ -363,31 +361,11 @@ Train a model.
 <hr class="docutils" />
 <kbd>python 02_nesting/01_nesting.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
 
-config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
-
-# tyro YAML.
-!dataclass:ExperimentConfig
-batch_size: 32
-optimizer: !dataclass:OptimizerConfig
-  algorithm: !enum:OptimizerType 'SGD'
-  learning_rate: 0.0003
-  weight_decay: 0.01
-seed: 0
-train_steps: 100000</pre>
+config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/01_nesting.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
 
-config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)
-
-# tyro YAML.
-!dataclass:ExperimentConfig
-batch_size: 32
-optimizer: !dataclass:OptimizerConfig
-  algorithm: !enum:OptimizerType 'ADAM'
-  learning_rate: 0.0003
-  weight_decay: 0.01
-seed: 0
-train_steps: 100000</pre>
+config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)</pre>
 </section>
 
         </article>
