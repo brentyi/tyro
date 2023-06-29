@@ -4,16 +4,13 @@ We can integrate `tyro.cli()` into common configuration patterns: here, we selec
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.
 
-This example is verbose; to shorten, consider using
-:func:`tyro.extras.subcommand_type_from_defaults()`.
-
 
 Usage:
-`python ./10_base_configs.py --help`
-`python ./10_base_configs.py small --help`
-`python ./10_base_configs.py small --config.seed 94720`
-`python ./10_base_configs.py big --help`
-`python ./10_base_configs.py big --config.seed 94720`
+`python ./01_base_configs.py --help`
+`python ./01_base_configs.py small --help`
+`python ./01_base_configs.py small --seed 94720`
+`python ./01_base_configs.py big --help`
+`python ./01_base_configs.py big --seed 94720`
 """
 
 from dataclasses import dataclass
@@ -60,11 +57,9 @@ class ExperimentConfig:
 # Note that we could also define this library using separate YAML files (similar to
 # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
 # checking + IDE support.
-SmallConfig = Annotated[
-    ExperimentConfig,
-    tyro.conf.subcommand(
-        name="small",
-        default=ExperimentConfig(
+Configs = tyro.extras.subcommand_type_from_defaults(
+    {
+        "small": ExperimentConfig(
             dataset="mnist",
             optimizer=AdamOptimizer(),
             batch_size=2048,
@@ -74,15 +69,7 @@ SmallConfig = Annotated[
             seed=0,
             activation=nn.ReLU,
         ),
-        description="Train a smaller model.",
-        prefix_name=False,
-    ),
-]
-BigConfig = Annotated[
-    ExperimentConfig,
-    tyro.conf.subcommand(
-        name="big",
-        default=ExperimentConfig(
+        "big": ExperimentConfig(
             dataset="imagenet-50",
             optimizer=AdamOptimizer(),
             batch_size=32,
@@ -92,20 +79,9 @@ BigConfig = Annotated[
             seed=0,
             activation=nn.GELU,
         ),
-        description="Train a bigger model.",
-        prefix_name=False,
-    ),
-]
-
-
-@tyro.conf.configure(tyro.conf.ConsolidateSubcommandArgs)
-def main(
-    config: Union[SmallConfig, BigConfig],
-    restore_checkpoint: bool = False,
-) -> None:
-    print(config)
-
+    }
+)
 
 if __name__ == "__main__":
-    config = tyro.cli(main)
+    config = tyro.cli(Configs)
     print(config)
