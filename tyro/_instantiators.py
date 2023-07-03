@@ -89,7 +89,7 @@ NoneType = type(None)
 class InstantiatorMetadata:
     # Unlike in vanilla argparse, we never set nargs to None. To make things simpler, we
     # instead use nargs=1.
-    nargs: Optional[Union[int, Literal["+"]]]
+    nargs: Optional[Union[int, Literal["*"]]]
     # Unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: str
@@ -290,7 +290,7 @@ def _instantiator_from_type_inner(
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""
     out = instantiator_from_type(typ, type_from_typevar, markers)
-    if out[1].nargs == "+":
+    if out[1].nargs == "*":
         # We currently only use allow_sequences=False for options in Literal types,
         # which are evaluated using `type()`. It should not be possible to hit this
         # condition from polling a runtime type.
@@ -444,7 +444,7 @@ def _instantiator_from_union(
     # right.
     instantiators = []
     metas = []
-    nargs: Optional[Union[int, Literal["+"]]] = 1
+    nargs: Optional[Union[int, Literal["*"]]] = 1
     first = True
     for t in options:
         a, b = _instantiator_from_type_inner(
@@ -461,7 +461,7 @@ def _instantiator_from_union(
                 first = False
             elif nargs != b.nargs:
                 # Just be as general as possible if we see inconsistencies.
-                nargs = "+"
+                nargs = "*"
 
     metavar: str
     metavar = _join_union_metavars(map(lambda x: cast(str, x.metavar), metas))
@@ -480,7 +480,7 @@ def _instantiator_from_union(
                 continue
 
             # Try passing input into instantiator.
-            if len(strings) == metadata.nargs or (metadata.nargs == "+"):
+            if len(strings) == metadata.nargs or (metadata.nargs == "*"):
                 try:
                     return instantiator(strings)  # type: ignore
                 except ValueError as e:
@@ -533,7 +533,7 @@ def _instantiator_from_dict(
             return out
 
         return append_dict_instantiator, InstantiatorMetadata(
-            nargs=key_nargs + val_nargs if isinstance(val_nargs, int) else "+",
+            nargs=key_nargs + val_nargs if isinstance(val_nargs, int) else "*",
             metavar=pair_metavar,
             choices=None,
             action="append",
@@ -579,7 +579,7 @@ def _instantiator_from_dict(
             return out
 
         return dict_instantiator, InstantiatorMetadata(
-            nargs="+",
+            nargs="*",
             metavar=_strings.multi_metavar_from_single(pair_metavar),
             choices=None,
             action=None,
@@ -650,7 +650,7 @@ def _instantiator_from_sequence(
             return container_type(out)
 
         return sequence_instantiator, InstantiatorMetadata(
-            nargs="+",
+            nargs="*",
             metavar=_strings.multi_metavar_from_single(inner_meta.metavar),
             choices=inner_meta.choices,
             action=None,
