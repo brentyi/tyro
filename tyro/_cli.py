@@ -288,7 +288,9 @@ def _cli_impl(
         dummy_field = cast(
             dataclasses.Field,
             dataclasses.field(
-                default=default if default is not None else dataclasses.MISSING
+                default_factory=lambda: default
+                if default is not None
+                else dataclasses.MISSING
             ),
         )
         f = dataclasses.make_dataclass(

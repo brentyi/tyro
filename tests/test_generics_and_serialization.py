@@ -373,7 +373,7 @@ def test_pculbertson() -> None:
     # https://github.com/brentyi/tyro/issues/7
     from typing import Union
 
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class TypeA:
         data: int
 
@@ -392,7 +392,7 @@ def test_pculbertson() -> None:
 def test_annotated() -> None:
     # https://github.com/brentyi/tyro/issues/7
 
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class TypeA:
         data: int
 

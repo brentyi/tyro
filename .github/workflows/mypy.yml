@@ -17,8 +17,8 @@ jobs:
           python-version: "3.8"
       - name: Install dependencies
         run: |
-          curl -sSL https://install.python-poetry.org | python3 -
-          poetry install
+          pip install --upgrade pip
+          pip install -e ".[dev]"
       - name: Test with mypy
         run: |
-          poetry run mypy --install-types --non-interactive .
+          mypy --install-types --non-interactive .

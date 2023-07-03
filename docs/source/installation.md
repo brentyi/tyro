@@ -12,17 +12,17 @@ pip install tyro
 ## Development
 
 If you're interested in development, the recommended way to install `tyro` is
-via [poetry](https://github.com/python-poetry/poetry).
+via `pip`.
 
 ```bash
 # Clone repository and install.
 git clone git@github.com:brentyi/tyro.git
 cd tyro
-poetry install
+python -m pip install -e ".[dev]"
 
 # Run tests.
-poetry run pytest
+pytest
 
 # Check types.
-poetry run mypy --install-types .
+mypy --install-types .
 ```

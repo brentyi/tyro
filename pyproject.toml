@@ -1,41 +1,63 @@
-[tool.poetry]
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
 name = "tyro"
+authors = [
+    {name = "brentyi", email = "brentyi@berkeley.edu"},
+]
 version = "0.5.3"
 description = "Strongly typed, zero-effort CLI interfaces"
-authors = ["brentyi <brentyi@berkeley.edu>"]
-include = ["./tyro/**/*"]
 readme = "README.md"
-repository = "https://github.com/brentyi/tyro"
-homepage = "https://github.com/brentyi/tyro"
-documentation = "https://brentyi.github.io/tyro/"
+license = { text="MIT" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "docstring-parser>=0.14.1",
+    "typing-extensions>=4.3.0",
+    "PyYAML>=6.0",
+    "backports.cached-property>=1.0.2; python_version<'3.8'",
+    "colorama>=0.4.0; platform_system=='Windows'",
+    "frozendict>=2.3.4",
+    "rich>=11.1.0",
+    "shtab>=1.5.6"
+]
 
-[tool.poetry.dependencies]
-python = "^3.7"
-docstring-parser = "^0.14.1"
-typing-extensions = "^4.3.0"
-PyYAML = "^6.0"
-"backports.cached-property" = { version = "^1.0.2", python = "~3.7" }
-colorama = {version = "^0.4.0", platform = "win32"}
-frozendict = "^2.3.4"
-rich = ">=11.1.0"
-shtab = "^1.5.6"
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.1.2",
+    "pytest-cov>=3.0.0",
+    "omegaconf>=2.2.2",
+    "attrs>=21.4.0",
+    "torch>=1.10.0",
+    "pyright>=1.1.264",
+    "mypy>=0.991",
+    "numpy>=1.20.0",
+    "flax>=0.6.0",
+    "pydantic>=1.10.2",
+    "coverage[toml]>=6.5.0"
+]
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^7.1.2"
-pytest-cov = "^3.0.0"
-omegaconf = "^2.2.2"
-attrs = "^21.4.0"
-torch = "^1.10.0"
-pyright = "^1.1.264"
-mypy = "^0.991"
-numpy = ">=1.20.0"
-flax = "^0.6.0"
-pydantic = "^1.10.2"
-coverage = {extras = ["toml"], version = "^6.5.0"}
+[project.urls]
+"GitHub" = "https://github.com/brentyi/tyro"
 
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools.packages.find]
+exclude = [
+    "tests*"
+]
+
+[tool.setuptools.package-data]
+tyro = ["py.typed"]
 
 [tool.isort]
 profile = "black"
