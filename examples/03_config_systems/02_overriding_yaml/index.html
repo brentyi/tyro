@@ -286,7 +286,15 @@ override values in them.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 03_config_systems/02_overriding_yaml.py --help</kbd><pre class="ansi-block literal-block">usage: 02_overriding_yaml.py [-h] [--exp-name STR]
+<kbd>python 03_config_systems/02_overriding_yaml.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; test
+&lt;class 'dict'&gt; {'learning_rate': 0.0001, 'type': 'adam'}
+&lt;class 'dict'&gt; {'batch_size': 32, 'num_steps': 10000, 'checkpoint_steps': [500, 1000, 1500]}
+&lt;class 'float'&gt; 0.0001
+&lt;class 'str'&gt; adam
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 10000
+&lt;class 'list'&gt; [500, 1000, 1500]
+usage: 02_overriding_yaml.py [-h] [--exp-name STR]
                              [--optimizer.learning-rate FLOAT]
                              [--optimizer.type STR]
                              [--training.batch-size INT]
@@ -311,7 +319,23 @@ override values in them.</p>
 │                         (default: 500 1000 1500)        │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/02_overriding_yaml.py --training.checkpoint-steps 300 1000 9000</kbd><pre class="ansi-block literal-block">exp_name: test
+<kbd>python 03_config_systems/02_overriding_yaml.py --training.checkpoint-steps 300 1000 9000</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; test
+&lt;class 'dict'&gt; {'learning_rate': 0.0001, 'type': 'adam'}
+&lt;class 'dict'&gt; {'batch_size': 32, 'num_steps': 10000, 'checkpoint_steps': [500, 1000, 1500]}
+&lt;class 'float'&gt; 0.0001
+&lt;class 'str'&gt; adam
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 10000
+&lt;class 'list'&gt; [500, 1000, 1500]
+&lt;class 'str'&gt; test
+&lt;class 'dict'&gt; {'learning_rate': 0.0001, 'type': 'adam'}
+&lt;class 'dict'&gt; {'batch_size': 32, 'num_steps': 10000, 'checkpoint_steps': [500, 1000, 1500]}
+&lt;class 'float'&gt; 0.0001
+&lt;class 'str'&gt; adam
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 10000
+&lt;class 'list'&gt; [500, 1000, 1500]
+exp_name: test
 optimizer:
   learning_rate: 0.0001
   type: adam

@@ -282,7 +282,17 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/03_tuples.py --help</kbd><pre class="ansi-block literal-block">usage: 03_tuples.py [-h] [--color INT INT INT] [--two-colors.0.r INT]
+<kbd>python 04_additional/03_tuples.py --help</kbd><pre class="ansi-block literal-block">typing.Tuple[int, int, int] (255, 0, 0)
+typing.Tuple[__main__.Color, __main__.Color] (Color(r=255, g=0, b=0), Color(r=0, g=255, b=0))
+&lt;class '__main__.Color'&gt; Color(r=255, g=0, b=0)
+&lt;class '__main__.Color'&gt; Color(r=0, g=255, b=0)
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+usage: 03_tuples.py [-h] [--color INT INT INT] [--two-colors.0.r INT]
                     [--two-colors.0.g INT] [--two-colors.0.b INT]
                     [--two-colors.1.r INT] [--two-colors.1.g INT]
                     [--two-colors.1.b INT]
@@ -305,9 +315,49 @@ Description. This should show up in the helptext!
 │ --two-colors.1.b INT    (default: 0)                                       │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/03_tuples.py --color 127 127 127</kbd><pre class="ansi-block literal-block">TupleType(color=(127, 127, 127), two_colors=(Color(r=255, g=0, b=0), Color(r=0, g=255, b=0)))</pre>
+<kbd>python 04_additional/03_tuples.py --color 127 127 127</kbd><pre class="ansi-block literal-block">typing.Tuple[int, int, int] (255, 0, 0)
+typing.Tuple[__main__.Color, __main__.Color] (Color(r=255, g=0, b=0), Color(r=0, g=255, b=0))
+&lt;class '__main__.Color'&gt; Color(r=255, g=0, b=0)
+&lt;class '__main__.Color'&gt; Color(r=0, g=255, b=0)
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+typing.Tuple[int, int, int] (255, 0, 0)
+typing.Tuple[__main__.Color, __main__.Color] (Color(r=255, g=0, b=0), Color(r=0, g=255, b=0))
+&lt;class '__main__.Color'&gt; Color(r=255, g=0, b=0)
+&lt;class '__main__.Color'&gt; Color(r=0, g=255, b=0)
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+TupleType(color=(127, 127, 127), two_colors=(Color(r=255, g=0, b=0), Color(r=0, g=255, b=0)))</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/03_tuples.py --two-colors.1.r 127 --two-colors.1.g 0 --two-colors.1.b 0</kbd><pre class="ansi-block literal-block">TupleType(color=(255, 0, 0), two_colors=(Color(r=255, g=0, b=0), Color(r=127, g=0, b=0)))</pre>
+<kbd>python 04_additional/03_tuples.py --two-colors.1.r 127 --two-colors.1.g 0 --two-colors.1.b 0</kbd><pre class="ansi-block literal-block">typing.Tuple[int, int, int] (255, 0, 0)
+typing.Tuple[__main__.Color, __main__.Color] (Color(r=255, g=0, b=0), Color(r=0, g=255, b=0))
+&lt;class '__main__.Color'&gt; Color(r=255, g=0, b=0)
+&lt;class '__main__.Color'&gt; Color(r=0, g=255, b=0)
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+typing.Tuple[int, int, int] (255, 0, 0)
+typing.Tuple[__main__.Color, __main__.Color] (Color(r=255, g=0, b=0), Color(r=0, g=255, b=0))
+&lt;class '__main__.Color'&gt; Color(r=255, g=0, b=0)
+&lt;class '__main__.Color'&gt; Color(r=0, g=255, b=0)
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 0
+&lt;class 'int'&gt; 255
+&lt;class 'int'&gt; 0
+TupleType(color=(255, 0, 0), two_colors=(Color(r=255, g=0, b=0), Color(r=127, g=0, b=0)))</pre>
 </section>
 
         </article>

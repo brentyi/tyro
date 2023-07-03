@@ -284,7 +284,10 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/06_literals.py --help</kbd><pre class="ansi-block literal-block">usage: 06_literals.py [-h] [--strings {red,green}] [--enums {RED,GREEN}]
+<kbd>python 01_basics/06_literals.py --help</kbd><pre class="ansi-block literal-block">typing.Literal['red', 'green'] red
+typing.Literal[&lt;Color.RED: 1&gt;, &lt;Color.GREEN: 2&gt;] Color.RED
+typing.Literal[&lt;Color.RED: 1&gt;, &lt;Color.GREEN: 2&gt;, 'blue'] blue
+usage: 06_literals.py [-h] [--strings {red,green}] [--enums {RED,GREEN}]
                       [--mixed {RED,GREEN,blue}]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮

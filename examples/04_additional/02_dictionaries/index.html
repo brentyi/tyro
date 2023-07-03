@@ -286,7 +286,14 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --help</kbd><pre class="ansi-block literal-block">usage: 02_dictionaries.py [-h] [--typed-dict.learning-rate FLOAT]
+<kbd>python 04_additional/02_dictionaries.py --help</kbd><pre class="ansi-block literal-block">&lt;class '__main__.DictionarySchema'&gt; &lt;class 'inspect._empty'&gt;
+typing.Dict[str, float] {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+&lt;class 'float'&gt; &lt;tyro._fields.ExcludeFromCallType object at 0x7f454569a4a0&gt;
+typing.Tuple[float, float] &lt;tyro._fields.ExcludeFromCallType object at 0x7f454569a4a0&gt;
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.9
+&lt;class 'float'&gt; 0.999
+usage: 02_dictionaries.py [-h] [--typed-dict.learning-rate FLOAT]
                           [--typed-dict.betas FLOAT FLOAT]
                           [--standard-dict.learning-rate FLOAT]
                           [--standard-dict.beta1 FLOAT]
@@ -310,10 +317,38 @@
 │                   (default: 0.999)                │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">Typed dict: {'learning_rate': 0.0003}
+<kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">&lt;class '__main__.DictionarySchema'&gt; &lt;class 'inspect._empty'&gt;
+typing.Dict[str, float] {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+&lt;class 'float'&gt; &lt;tyro._fields.ExcludeFromCallType object at 0x7f16ab8fa4a0&gt;
+typing.Tuple[float, float] &lt;tyro._fields.ExcludeFromCallType object at 0x7f16ab8fa4a0&gt;
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.9
+&lt;class 'float'&gt; 0.999
+&lt;class '__main__.DictionarySchema'&gt; &lt;class 'inspect._empty'&gt;
+typing.Dict[str, float] {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+&lt;class 'float'&gt; &lt;tyro._fields.ExcludeFromCallType object at 0x7f16ab8fa4a0&gt;
+typing.Tuple[float, float] &lt;tyro._fields.ExcludeFromCallType object at 0x7f16ab8fa4a0&gt;
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.9
+&lt;class 'float'&gt; 0.999
+Typed dict: {'learning_rate': 0.0003}
 Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">Typed dict: {'betas': (0.9, 0.999)}
+<kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">&lt;class '__main__.DictionarySchema'&gt; &lt;class 'inspect._empty'&gt;
+typing.Dict[str, float] {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+&lt;class 'float'&gt; &lt;tyro._fields.ExcludeFromCallType object at 0x7fb104ffe4d0&gt;
+typing.Tuple[float, float] &lt;tyro._fields.ExcludeFromCallType object at 0x7fb104ffe4d0&gt;
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.9
+&lt;class 'float'&gt; 0.999
+&lt;class '__main__.DictionarySchema'&gt; &lt;class 'inspect._empty'&gt;
+typing.Dict[str, float] {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
+&lt;class 'float'&gt; &lt;tyro._fields.ExcludeFromCallType object at 0x7fb104ffe4d0&gt;
+typing.Tuple[float, float] &lt;tyro._fields.ExcludeFromCallType object at 0x7fb104ffe4d0&gt;
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.9
+&lt;class 'float'&gt; 0.999
+Typed dict: {'betas': (0.9, 0.999)}
 Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}</pre>
 </section>
 

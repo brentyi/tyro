@@ -279,7 +279,10 @@ constructors of) standard Python classes.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/04_classes.py --help</kbd><pre class="ansi-block literal-block">usage: 04_classes.py [-h] --field1 STR --field2 INT [--flag | --no-flag]
+<kbd>python 04_additional/04_classes.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'int'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+usage: 04_classes.py [-h] --field1 STR --field2 INT [--flag | --no-flag]
 
 Arguments.
 
@@ -290,7 +293,13 @@ Arguments.
 │ --flag, --no-flag       A boolean flag. (default: False) │
 ╰──────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/04_classes.py --field1 hello --field2 7</kbd><pre class="ansi-block literal-block">['hello', 7, False]</pre>
+<kbd>python 04_additional/04_classes.py --field1 hello --field2 7</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'int'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'str'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'int'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+['hello', 7, False]</pre>
 </section>
 
         </article>

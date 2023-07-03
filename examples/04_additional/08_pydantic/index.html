@@ -272,19 +272,20 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/08_pydantic.py --help</kbd><pre class="ansi-block literal-block">usage: 08_pydantic.py [-h] --field1 STR [--field2 INT]
-
-Description. This should show up in the helptext!
-
-╭─ arguments ─────────────────────────────────────────╮
-│ -h, --help          show this help message and exit │
-│ --field1 STR        (required)                      │
-│ --field2 INT        An integer field. (default: 3)  │
-╰─────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/08_pydantic.py --help</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/08_pydantic.py&quot;, line 11, in &lt;module&gt;
+    from pydantic import BaseModel, Field
+ModuleNotFoundError: No module named 'pydantic'</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/08_pydantic.py --field1 hello</kbd><pre class="ansi-block literal-block">field1='hello' field2=3</pre>
+<kbd>python 04_additional/08_pydantic.py --field1 hello</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/08_pydantic.py&quot;, line 11, in &lt;module&gt;
+    from pydantic import BaseModel, Field
+ModuleNotFoundError: No module named 'pydantic'</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/08_pydantic.py --field1 hello --field2 5</kbd><pre class="ansi-block literal-block">field1='hello' field2=5</pre>
+<kbd>python 04_additional/08_pydantic.py --field1 hello --field2 5</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/08_pydantic.py&quot;, line 11, in &lt;module&gt;
+    from pydantic import BaseModel, Field
+ModuleNotFoundError: No module named 'pydantic'</pre>
 </section>
 
         </article>

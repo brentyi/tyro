@@ -288,7 +288,11 @@ command-line interfaces beyond what is expressible via static type annotations.<
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/06_conf.py --help</kbd><pre class="ansi-block literal-block">usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
+<kbd>python 04_additional/06_conf.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'int'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fe7445e9ff0&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 5
+&lt;class 'str'&gt; Hello
+usage: 06_conf.py [-h] [--boolean {True,False}] [--fixed {fixed}]
                   [--renamed STRING]
                   INT
 
@@ -306,7 +310,15 @@ command-line interfaces beyond what is expressible via static type annotations.<
 │                         (default: Hello)                                   │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">Args(positional=5, boolean=True, fixed=5, manual='Hello')</pre>
+<kbd>python 04_additional/06_conf.py 5 --boolean True</kbd><pre class="ansi-block literal-block">&lt;class 'int'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f28907c6020&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 5
+&lt;class 'str'&gt; Hello
+&lt;class 'int'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f28907c6020&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 5
+&lt;class 'str'&gt; Hello
+Args(positional=5, boolean=True, fixed=5, manual='Hello')</pre>
 </section>
 
         </article>

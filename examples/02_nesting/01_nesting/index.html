@@ -317,7 +317,18 @@ objects. This helps with modularity and grouping in larger projects.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 02_nesting/01_nesting.py --help</kbd><pre class="ansi-block literal-block">usage: 01_nesting.py [-h] --out-dir PATH
+<kbd>python 02_nesting/01_nesting.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'pathlib.Path'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class '__main__.ExperimentConfig'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 1000
+&lt;class '__main__.OptimizerConfig'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f78064b3550&gt;
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 100000
+&lt;class 'int'&gt; 0
+&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.01
+usage: 01_nesting.py [-h] --out-dir PATH
                      [--config.optimizer.algorithm {ADAM,SGD}]
                      [--config.optimizer.learning-rate FLOAT]
                      [--config.optimizer.weight-decay FLOAT]
@@ -359,11 +370,55 @@ Train a model.
 │                         our experiments are all reproducible! (default: 0) │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/01_nesting.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
+<kbd>python 02_nesting/01_nesting.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">&lt;class 'pathlib.Path'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class '__main__.ExperimentConfig'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 1000
+&lt;class '__main__.OptimizerConfig'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f3d8e6275b0&gt;
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 100000
+&lt;class 'int'&gt; 0
+&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.01
+&lt;class 'pathlib.Path'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class '__main__.ExperimentConfig'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 1000
+&lt;class '__main__.OptimizerConfig'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f3d8e6275b0&gt;
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 100000
+&lt;class 'int'&gt; 0
+&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.01
+out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
 
 config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/01_nesting.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
+<kbd>python 02_nesting/01_nesting.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">&lt;class 'pathlib.Path'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class '__main__.ExperimentConfig'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 1000
+&lt;class '__main__.OptimizerConfig'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f41e8a37580&gt;
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 100000
+&lt;class 'int'&gt; 0
+&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.01
+&lt;class 'pathlib.Path'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class '__main__.ExperimentConfig'&gt; &lt;class 'inspect._empty'&gt;
+&lt;class 'bool'&gt; False
+&lt;class 'int'&gt; 1000
+&lt;class '__main__.OptimizerConfig'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f41e8a37580&gt;
+&lt;class 'int'&gt; 32
+&lt;class 'int'&gt; 100000
+&lt;class 'int'&gt; 0
+&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
+&lt;class 'float'&gt; 0.0003
+&lt;class 'float'&gt; 0.01
+out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
 
 config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)</pre>
 </section>

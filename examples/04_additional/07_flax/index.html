@@ -300,30 +300,15 @@ directly from <code class="docutils literal notranslate"><span class="pre">tyro.
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">usage: 07_flax.py [-h] --model.layers INT [--model.units INT]
-                  [--model.output-dim INT] [--num-iterations INT]
-
-Train a model.
-
-╭─ arguments ────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                │
-│ --num-iterations INT    Number of training iterations. (default: 1000) │
-╰────────────────────────────────────────────────────────────────────────╯
-╭─ model arguments ──────────────────────────────────────────────────────╮
-│ Model to train.                                                        │
-│ ─────────────────────────────────────────────────────────              │
-│ --model.layers INT      Layers in our network. (required)              │
-│ --model.units INT       Hidden unit count. (default: 32)               │
-│ --model.output-dim INT  Number of classes. (default: 10)               │
-╰────────────────────────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 11, in &lt;module&gt;
+    from flax import linen as nn
+ModuleNotFoundError: No module named 'flax'</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">model=Classifier(
-    # attributes
-    layers = 4
-    units = 32
-    output_dim = 10
-)
-num_iterations=1000</pre>
+<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 11, in &lt;module&gt;
+    from flax import linen as nn
+ModuleNotFoundError: No module named 'flax'</pre>
 </section>
 
         </article>

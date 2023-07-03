@@ -290,7 +290,12 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/07_unions.py --help</kbd><pre class="ansi-block literal-block">usage: 07_unions.py [-h] [--union-over-types INT|STR]
+<kbd>python 01_basics/07_unions.py --help</kbd><pre class="ansi-block literal-block">typing.Union[int, str] 0
+typing.Union[typing.Literal['red', 'green'], __main__.Color] red
+typing.Union[typing.Tuple[int, int], typing.Tuple[str]] ('1',)
+typing.Tuple[typing.Union[typing.Literal['red', 'green'], __main__.Color], ...] ('red', &lt;Color.RED: 1&gt;)
+typing.Optional[typing.Literal[0, 1, 2, 3]] None
+usage: 07_unions.py [-h] [--union-over-types INT|STR]
                     [--string-or-enum {red,green,RED,GREEN,BLUE}]
                     [--union-over-tuples {INT INT}|STR]
                     [--tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} 

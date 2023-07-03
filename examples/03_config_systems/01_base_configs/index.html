@@ -329,81 +329,30 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] {small,big}
-
-╭─ arguments ────────────────────────────────────────╮
-│ -h, --help         show this help message and exit │
-╰────────────────────────────────────────────────────╯
-╭─ subcommands ──────────────────────────────────────╮
-│ {small,big}                                        │
-│     small                                          │
-│     big                                            │
-╰────────────────────────────────────────────────────╯</pre>
+<kbd>python 03_config_systems/01_base_configs.py --help</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/03_config_systems/01_base_configs.py&quot;, line 19, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py small [-h] [--dataset {mnist,imagenet-50}]
-                                [--optimizer.learning-rate FLOAT]
-                                [--optimizer.betas FLOAT FLOAT]
-                                [--num-layers INT] [--units INT]
-                                [--batch-size INT] [--train-steps INT]
-                                [--seed INT] [--activation {fixed}]
-
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-│ --dataset {mnist,imagenet-50}                                              │
-│                         Dataset to run experiment on. (default: mnist)     │
-│ --num-layers INT        Model size. (default: 4)                           │
-│ --units INT             Model size. (default: 64)                          │
-│ --batch-size INT        Batch size. (default: 2048)                        │
-│ --train-steps INT       Total number of training steps. (default: 30000)   │
-│ --seed INT              Random seed. This is helpful for making sure that  │
-│                         our experiments are all reproducible! (default: 0) │
-│ --activation {fixed}    Activation to use. Not specifiable via the         │
-│                         commandline. (fixed to: &lt;class                     │
-│                         'torch.nn.modules.activation.ReLU'&gt;)               │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optimizer arguments ──────────────────────────────────────────────────────╮
-│ Optimizer parameters.                                                      │
-│ ────────────────────────────────────────────                               │
-│ --optimizer.learning-rate FLOAT                                            │
-│                         (default: 0.001)                                   │
-│ --optimizer.betas FLOAT FLOAT                                              │
-│                         (default: 0.9 0.999)                               │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+<kbd>python 03_config_systems/01_base_configs.py small --help</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/03_config_systems/01_base_configs.py&quot;, line 19, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</pre>
+<kbd>python 03_config_systems/01_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/03_config_systems/01_base_configs.py&quot;, line 19, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py big [-h] [--dataset {mnist,imagenet-50}]
-                              [--optimizer.learning-rate FLOAT]
-                              [--optimizer.betas FLOAT FLOAT]
-                              [--num-layers INT] [--units INT]
-                              [--batch-size INT] [--train-steps INT]
-                              [--seed INT] [--activation {fixed}]
-
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-│ --dataset {mnist,imagenet-50}                                              │
-│                         Dataset to run experiment on. (default:            │
-│                         imagenet-50)                                       │
-│ --num-layers INT        Model size. (default: 8)                           │
-│ --units INT             Model size. (default: 256)                         │
-│ --batch-size INT        Batch size. (default: 32)                          │
-│ --train-steps INT       Total number of training steps. (default: 100000)  │
-│ --seed INT              Random seed. This is helpful for making sure that  │
-│                         our experiments are all reproducible! (default: 0) │
-│ --activation {fixed}    Activation to use. Not specifiable via the         │
-│                         commandline. (fixed to: &lt;class                     │
-│                         'torch.nn.modules.activation.GELU'&gt;)               │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optimizer arguments ──────────────────────────────────────────────────────╮
-│ Optimizer parameters.                                                      │
-│ ────────────────────────────────────────────                               │
-│ --optimizer.learning-rate FLOAT                                            │
-│                         (default: 0.001)                                   │
-│ --optimizer.betas FLOAT FLOAT                                              │
-│                         (default: 0.9 0.999)                               │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
+<kbd>python 03_config_systems/01_base_configs.py big --help</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/03_config_systems/01_base_configs.py&quot;, line 19, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py big --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='imagenet-50', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=8, units=256, batch_size=32, train_steps=100000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.GELU'&gt;)</pre>
+<kbd>python 03_config_systems/01_base_configs.py big --seed 94720</kbd><pre class="ansi-block literal-block">Traceback (most recent call last):
+  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/03_config_systems/01_base_configs.py&quot;, line 19, in &lt;module&gt;
+    from torch import nn
+ModuleNotFoundError: No module named 'torch'</pre>
 </section>
 
         </article>
