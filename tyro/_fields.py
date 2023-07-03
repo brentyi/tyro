@@ -459,21 +459,43 @@ def _field_list_from_pydantic(
 
     # Handle pydantic models.
     field_list = []
-    for pd_field in cls.__fields__.values():  # type: ignore
-        helptext = pd_field.field_info.description
-        if helptext is None:
-            helptext = _docstrings.get_field_docstring(cls, pd_field.name)
+    pydantic_version = float(getattr(pydantic, "__version__", "1.0"))
+    if pydantic_version < 2.0:  # pragma: no cover
+        # Pydantic 1.xx.
+        for pd_field in cls.__fields__.values():  # type: ignore
+            helptext = pd_field.field_info.description
+            if helptext is None:
+                helptext = _docstrings.get_field_docstring(cls, pd_field.name)
 
-        field_list.append(
-            FieldDefinition.make(
-                name=pd_field.name,
-                typ=pd_field.outer_type_,
-                default=(
-                    MISSING_NONPROP if pd_field.required else pd_field.get_default()
-                ),
-                helptext=helptext,
+            field_list.append(
+                FieldDefinition.make(
+                    name=pd_field.name,
+                    typ=pd_field.outer_type_,
+                    default=(
+                        MISSING_NONPROP if pd_field.required else pd_field.get_default()
+                    ),
+                    helptext=helptext,
+                )
             )
-        )
+    else:
+        # Pydantic 2.xx.
+        for name, pd_field in cls.model_fields.items():  # type: ignore
+            helptext = pd_field.description
+            if helptext is None:
+                helptext = _docstrings.get_field_docstring(cls, name)
+
+            field_list.append(
+                FieldDefinition.make(
+                    name=name,
+                    typ=pd_field.annotation,
+                    default=(
+                        MISSING_NONPROP
+                        if pd_field.is_required()
+                        else pd_field.get_default(call_default_factory=True)
+                    ),
+                    helptext=helptext,
+                )
+            )
     return field_list
 
 

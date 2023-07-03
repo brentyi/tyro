@@ -14,10 +14,9 @@ Usage:
 """
 
 from dataclasses import dataclass
-from typing import Callable, Literal, Tuple, Union
+from typing import Callable, Literal, Tuple
 
 from torch import nn
-from typing_extensions import Annotated
 
 import tyro
 

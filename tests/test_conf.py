@@ -150,7 +150,7 @@ def test_avoid_subparser_with_default_recursive() -> None:
 
 
 def test_subparser_in_nested_with_metadata() -> None:
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class A:
         a: int
 
@@ -202,7 +202,7 @@ def test_subparser_in_nested_with_metadata() -> None:
 
 
 def test_subparser_in_nested_with_metadata_generic() -> None:
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class A:
         a: int
 
@@ -258,7 +258,7 @@ def test_subparser_in_nested_with_metadata_generic() -> None:
 
 
 def test_subparser_in_nested_with_metadata_generic_alt() -> None:
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class A:
         a: int
 

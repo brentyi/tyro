@@ -60,7 +60,7 @@ def test_nested_accidental_underscores() -> None:
 
 
 def test_nested_default() -> None:
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class B:
         y: int = 1
 
@@ -869,7 +869,7 @@ def test_nested_in_subparser() -> None:
 
 
 def test_nested_in_subparser_override_with_default() -> None:
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class Mnist:
         binary: bool = False
         """Set to load binary version of MNIST dataset."""
@@ -888,7 +888,7 @@ def test_nested_in_subparser_override_with_default() -> None:
         }
     )
 
-    @dataclasses.dataclass
+    @dataclasses.dataclass(frozen=True)
     class DatasetContainer:
         dataset: Selector = Mnist()  # type: ignore
 
