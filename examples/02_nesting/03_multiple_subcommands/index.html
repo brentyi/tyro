@@ -314,38 +314,12 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Mnist, __main__.ImageNet] Mnist(binary=False)
-typing.Union[__main__.Adam, __main__.Sgd] Adam(learning_rate=0.001, betas=(0.9, 0.999))
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-typing.Literal[50, 100, 1000] &lt;tyro._fields.NonpropagatingMissingType object at 0x7fad883d3e20&gt;
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.0003
-usage: 03_multiple_subcommands.py [-h] {dataset:mnist,dataset:image-net}
+<kbd>python 02_nesting/03_multiple_subcommands.py</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py [-h] {dataset:mnist,dataset:image-net}
 
  
 03_multiple_subcommands.py: error: the following arguments are required: {dataset:mnist,dataset:image-net}</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Mnist, __main__.ImageNet] Mnist(binary=False)
-typing.Union[__main__.Adam, __main__.Sgd] Adam(learning_rate=0.001, betas=(0.9, 0.999))
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-typing.Literal[50, 100, 1000] &lt;tyro._fields.NonpropagatingMissingType object at 0x7efc5ea8fe20&gt;
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.0003
-usage: 03_multiple_subcommands.py [-h] {dataset:mnist,dataset:image-net}
+<kbd>python 02_nesting/03_multiple_subcommands.py --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py [-h] {dataset:mnist,dataset:image-net}
 
 Example training script.
 
@@ -360,20 +334,7 @@ Example training script.
 │     dataset:image-net                             │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Mnist, __main__.ImageNet] Mnist(binary=False)
-typing.Union[__main__.Adam, __main__.Sgd] Adam(learning_rate=0.001, betas=(0.9, 0.999))
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-typing.Literal[50, 100, 1000] &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff5a6897e20&gt;
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.0003
-usage: 03_multiple_subcommands.py dataset:mnist [-h]
+<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py dataset:mnist [-h]
                                                 {optimizer:adam,optimizer:sgd}
 
 ╭─ arguments ───────────────────────────────────────╮
@@ -387,20 +348,7 @@ usage: 03_multiple_subcommands.py dataset:mnist [-h]
 │     optimizer:sgd                                 │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Mnist, __main__.ImageNet] Mnist(binary=False)
-typing.Union[__main__.Adam, __main__.Sgd] Adam(learning_rate=0.001, betas=(0.9, 0.999))
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-typing.Literal[50, 100, 1000] &lt;tyro._fields.NonpropagatingMissingType object at 0x7faeaf327e50&gt;
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.0003
-usage: 03_multiple_subcommands.py dataset:mnist optimizer:adam
+<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --help</kbd><pre class="ansi-block literal-block">usage: 03_multiple_subcommands.py dataset:mnist optimizer:adam
        [-h] [--optimizer.learning-rate FLOAT] [--optimizer.betas FLOAT FLOAT]
        [--dataset.binary | --dataset.no-binary]
 
@@ -421,25 +369,7 @@ Example training script.
 │     Set to load binary version of MNIST dataset. (default: False) │
 ╰───────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Mnist, __main__.ImageNet] Mnist(binary=False)
-typing.Union[__main__.Adam, __main__.Sgd] Adam(learning_rate=0.001, betas=(0.9, 0.999))
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; False
-typing.Literal[50, 100, 1000] &lt;tyro._fields.NonpropagatingMissingType object at 0x7efe1d39fe50&gt;
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-&lt;class 'float'&gt; 0.0003
-typing.Union[__main__.Mnist, __main__.ImageNet] Mnist(binary=False)
-typing.Union[__main__.Adam, __main__.Sgd] Adam(learning_rate=0.001, betas=(0.9, 0.999))
-&lt;class 'bool'&gt; False
-&lt;class 'float'&gt; 0.001
-typing.Tuple[float, float] (0.9, 0.999)
-Mnist(binary=True)
+<kbd>python 02_nesting/03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary</kbd><pre class="ansi-block literal-block">Mnist(binary=True)
 Adam(learning_rate=0.0003, betas=(0.9, 0.999))</pre>
 </section>
 

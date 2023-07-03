@@ -279,9 +279,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/04_enums.py --help</kbd><pre class="ansi-block literal-block">&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
-&lt;class 'float'&gt; 0.0001
-usage: 04_enums.py [-h] [--optimizer-type {ADAM,SGD}] [--learning-rate FLOAT]
+<kbd>python 01_basics/04_enums.py --help</kbd><pre class="ansi-block literal-block">usage: 04_enums.py [-h] [--optimizer-type {ADAM,SGD}] [--learning-rate FLOAT]
 
 ╭─ arguments ──────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                  │
@@ -290,17 +288,9 @@ usage: 04_enums.py [-h] [--optimizer-type {ADAM,SGD}] [--learning-rate FLOAT]
 │ --learning-rate FLOAT   Learning rate for optimizer. (default: 0.0001)   │
 ╰──────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/04_enums.py --optimizer-type SGD</kbd><pre class="ansi-block literal-block">&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
-&lt;class 'float'&gt; 0.0001
-&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
-&lt;class 'float'&gt; 0.0001
-TrainConfig(optimizer_type=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0001)</pre>
+<kbd>python 01_basics/04_enums.py --optimizer-type SGD</kbd><pre class="ansi-block literal-block">TrainConfig(optimizer_type=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0001)</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/04_enums.py --optimizer-type ADAM --learning-rate 3e-4</kbd><pre class="ansi-block literal-block">&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
-&lt;class 'float'&gt; 0.0001
-&lt;enum 'OptimizerType'&gt; OptimizerType.ADAM
-&lt;class 'float'&gt; 0.0001
-TrainConfig(optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003)</pre>
+<kbd>python 01_basics/04_enums.py --optimizer-type ADAM --learning-rate 3e-4</kbd><pre class="ansi-block literal-block">TrainConfig(optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003)</pre>
 </section>
 
         </article>

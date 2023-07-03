@@ -289,11 +289,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 02_nesting/02_subcommands.py --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff213b0f8b0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff213b0f8b0&gt;
-&lt;class 'bool'&gt; False
-usage: 02_subcommands.py [-h] {cmd:checkout,cmd:commit}
+<kbd>python 02_nesting/02_subcommands.py --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py [-h] {cmd:checkout,cmd:commit}
 
 ╭─ arguments ───────────────────────────────────────╮
 │ -h, --help        show this help message and exit │
@@ -304,11 +300,7 @@ usage: 02_subcommands.py [-h] {cmd:checkout,cmd:commit}
 │     cmd:commit        Commit changes.             │
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/02_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f35bcd0b8b0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f35bcd0b8b0&gt;
-&lt;class 'bool'&gt; False
-usage: 02_subcommands.py cmd:commit [-h] --cmd.message STR
+<kbd>python 02_nesting/02_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py cmd:commit [-h] --cmd.message STR
                                     [--cmd.all | --cmd.no-all]
 
 Commit changes.
@@ -322,20 +314,9 @@ Commit changes.
 │                         (default: False)                │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/02_subcommands.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f07dd98b910&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f07dd98b910&gt;
-&lt;class 'bool'&gt; False
-typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f07dd98b910&gt;
-&lt;class 'bool'&gt; False
-Commit(message='hello', all=True)</pre>
+<kbd>python 02_nesting/02_subcommands.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">Commit(message='hello', all=True)</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/02_subcommands.py cmd:checkout --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f1b957778b0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f1b957778b0&gt;
-&lt;class 'bool'&gt; False
-usage: 02_subcommands.py cmd:checkout [-h] --cmd.branch STR
+<kbd>python 02_nesting/02_subcommands.py cmd:checkout --help</kbd><pre class="ansi-block literal-block">usage: 02_subcommands.py cmd:checkout [-h] --cmd.branch STR
 
 Checkout a branch.
 
@@ -346,13 +327,7 @@ Checkout a branch.
 │ --cmd.branch STR        (required)                      │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/02_subcommands.py cmd:checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fca59bcf8e0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fca59bcf8e0&gt;
-&lt;class 'bool'&gt; False
-typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fca59bcf8e0&gt;
-Checkout(branch='main')</pre>
+<kbd>python 02_nesting/02_subcommands.py cmd:checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">Checkout(branch='main')</pre>
 </section>
 
         </article>

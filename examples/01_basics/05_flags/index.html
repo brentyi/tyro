@@ -281,11 +281,7 @@ value, automatically converted to flags.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/05_flags.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'bool'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f1bd2edadd0&gt;
-typing.Optional[bool] None
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; True
-usage: 05_flags.py [-h] --boolean {True,False}
+<kbd>python 01_basics/05_flags.py --help</kbd><pre class="ansi-block literal-block">usage: 05_flags.py [-h] --boolean {True,False}
                    [--optional-boolean {None,True,False}]
                    [--flag-a | --no-flag-a] [--flag-b | --no-flag-b]
 
@@ -302,35 +298,11 @@ usage: 05_flags.py [-h] --boolean {True,False}
 │     Pass --no-flag-b in to set this value to False. (default: True)      │
 ╰──────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/05_flags.py --boolean True</kbd><pre class="ansi-block literal-block">&lt;class 'bool'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff46a306dd0&gt;
-typing.Optional[bool] None
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; True
-&lt;class 'bool'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff46a306dd0&gt;
-typing.Optional[bool] None
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; True
-Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
+<kbd>python 01_basics/05_flags.py --boolean True</kbd><pre class="ansi-block literal-block">Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/05_flags.py --boolean False --flag-a</kbd><pre class="ansi-block literal-block">&lt;class 'bool'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f78bcb62e00&gt;
-typing.Optional[bool] None
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; True
-&lt;class 'bool'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f78bcb62e00&gt;
-typing.Optional[bool] None
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; True
-Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
+<kbd>python 01_basics/05_flags.py --boolean False --flag-a</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=True, flag_b=True)</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/05_flags.py --boolean False --no-flag-b</kbd><pre class="ansi-block literal-block">&lt;class 'bool'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f213f426e00&gt;
-typing.Optional[bool] None
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; True
-&lt;class 'bool'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f213f426e00&gt;
-typing.Optional[bool] None
-&lt;class 'bool'&gt; False
-&lt;class 'bool'&gt; True
-Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
+<kbd>python 01_basics/05_flags.py --boolean False --no-flag-b</kbd><pre class="ansi-block literal-block">Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)</pre>
 </section>
 
         </article>
