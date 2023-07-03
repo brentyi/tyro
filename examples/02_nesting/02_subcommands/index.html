@@ -290,8 +290,8 @@
 </div>
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff696e238b0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff696e238b0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff213b0f8b0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7ff213b0f8b0&gt;
 &lt;class 'bool'&gt; False
 usage: 02_subcommands.py [-h] {cmd:checkout,cmd:commit}
 
@@ -305,8 +305,8 @@ usage: 02_subcommands.py [-h] {cmd:checkout,cmd:commit}
 ╰───────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py cmd:commit --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f65f5cbf8b0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f65f5cbf8b0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f35bcd0b8b0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f35bcd0b8b0&gt;
 &lt;class 'bool'&gt; False
 usage: 02_subcommands.py cmd:commit [-h] --cmd.message STR
                                     [--cmd.all | --cmd.no-all]
@@ -323,17 +323,17 @@ Commit changes.
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py cmd:commit --cmd.message hello --cmd.all</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f4865597910&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f4865597910&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f07dd98b910&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f07dd98b910&gt;
 &lt;class 'bool'&gt; False
 typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f4865597910&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f07dd98b910&gt;
 &lt;class 'bool'&gt; False
 Commit(message='hello', all=True)</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py cmd:checkout --help</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fe734d6b8b0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fe734d6b8b0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f1b957778b0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f1b957778b0&gt;
 &lt;class 'bool'&gt; False
 usage: 02_subcommands.py cmd:checkout [-h] --cmd.branch STR
 
@@ -347,11 +347,11 @@ Checkout a branch.
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 02_nesting/02_subcommands.py cmd:checkout --cmd.branch main</kbd><pre class="ansi-block literal-block">typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f3351fcb8e0&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f3351fcb8e0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fca59bcf8e0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fca59bcf8e0&gt;
 &lt;class 'bool'&gt; False
 typing.Union[__main__.Checkout, __main__.Commit] &lt;class 'inspect._empty'&gt;
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f3351fcb8e0&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fca59bcf8e0&gt;
 Checkout(branch='main')</pre>
 </section>
 

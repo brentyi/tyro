@@ -710,8 +710,8 @@
 
     <span class="c1"># Handle pydantic models.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">pydantic_version</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">pydantic</span><span class="p">,</span><span class="s2">&quot;__version__&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0&quot;</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">pydantic_version</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>
+    <span class="n">pydantic_version</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">pydantic</span><span class="p">,</span> <span class="s2">&quot;__version__&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0&quot;</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">pydantic_version</span> <span class="o">&lt;</span> <span class="mf">2.0</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="c1"># Pydantic 1.xx.</span>
         <span class="k">for</span> <span class="n">pd_field</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>  <span class="c1"># type: ignore</span>
             <span class="n">helptext</span> <span class="o">=</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span>
@@ -740,7 +740,9 @@
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                     <span class="n">typ</span><span class="o">=</span><span class="n">pd_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="p">(</span>
-                        <span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">is_required</span><span class="p">()</span> <span class="k">else</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">MISSING_NONPROP</span>
+                        <span class="k">if</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">is_required</span><span class="p">()</span>
+                        <span class="k">else</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                     <span class="p">),</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="p">)</span>

@@ -539,7 +539,9 @@
         <span class="n">dummy_field</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
             <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span>
             <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
-                <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span>
+                <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">default</span>
+                <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="k">else</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span>
             <span class="p">),</span>
         <span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">make_dataclass</span><span class="p">(</span>

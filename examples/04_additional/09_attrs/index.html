@@ -276,7 +276,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/09_attrs.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f5511e78460&gt;
+<kbd>python 04_additional/09_attrs.py --help</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fd59d9dc490&gt;
 &lt;class 'int'&gt; 5
 usage: 09_attrs.py [-h] --field1 STR [--field2 INT]
 
@@ -288,15 +288,15 @@ Description. This should show up in the helptext!
 │ --field2 INT        A required integer field. (default: 5) │
 ╰────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/09_attrs.py --field1 hello</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f7cfa908430&gt;
+<kbd>python 04_additional/09_attrs.py --field1 hello</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fb009cec460&gt;
 &lt;class 'int'&gt; 5
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f7cfa908430&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fb009cec460&gt;
 &lt;class 'int'&gt; 5
 Args(field1='hello', field2=5)</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/09_attrs.py --field1 hello --field2 5</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f6c0b4f8490&gt;
+<kbd>python 04_additional/09_attrs.py --field1 hello --field2 5</kbd><pre class="ansi-block literal-block">&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fb7fd270430&gt;
 &lt;class 'int'&gt; 5
-&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7f6c0b4f8490&gt;
+&lt;class 'str'&gt; &lt;tyro._fields.NonpropagatingMissingType object at 0x7fb7fd270430&gt;
 &lt;class 'int'&gt; 5
 Args(field1='hello', field2=5)</pre>
 </section>
