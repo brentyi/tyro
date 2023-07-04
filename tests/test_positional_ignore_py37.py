@@ -96,8 +96,7 @@ def test_optional_list():
 
     assert tyro.cli(main, args=["None"]) is None
     assert tyro.cli(main, args=["1", "2"]) == [1, 2]
-    with pytest.raises(SystemExit):
-        tyro.cli(main, args=[])
+    assert tyro.cli(main, args=[]) == []
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["hm"])
 

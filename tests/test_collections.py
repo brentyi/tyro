@@ -64,10 +64,9 @@ def test_tuple_with_literal_and_default() -> None:
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
     assert tyro.cli(A, args=[]) == A(x=(1, 2))
+    assert tyro.cli(A, args=["--x"]) == A(x=())
     with pytest.raises(SystemExit):
         tyro.cli(A, args=["--x", "1", "2", "3", "4"])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
 
 
 def test_positional_tuple_with_literal_and_default() -> None:
@@ -116,8 +115,7 @@ def test_tuples_variable() -> None:
         x: Tuple[int, ...]
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=())
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -130,8 +128,7 @@ def test_tuples_variable_bool() -> None:
     assert tyro.cli(A, args=["--x", "True", "True", "False"]) == A(
         x=(True, True, False)
     )
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=())
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -142,8 +139,7 @@ def test_tuples_variable_optional() -> None:
         x: Optional[Tuple[int, ...]] = None
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=(1, 2, 3))
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=())
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
@@ -153,8 +149,7 @@ def test_sequences() -> None:
         x: Sequence[int]
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -165,8 +160,7 @@ def test_lists() -> None:
         x: List[int]
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -177,10 +171,9 @@ def test_list_with_literal() -> None:
         x: List[Literal[1, 2, 3]]
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
     with pytest.raises(SystemExit):
         tyro.cli(A, args=["--x", "1", "2", "3", "4"])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -198,10 +191,9 @@ def test_list_with_enums() -> None:
     assert tyro.cli(A, args=["--x", "RED", "RED", "BLUE"]) == A(
         x=[Color.RED, Color.RED, Color.BLUE]
     )
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
     with pytest.raises(SystemExit):
         tyro.cli(A, args=["--x", "RED", "RED", "YELLOW"])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -232,8 +224,7 @@ def test_lists_bool() -> None:
     assert tyro.cli(A, args=["--x", "True", "False", "True"]) == A(
         x=[True, False, True]
     )
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -244,8 +235,7 @@ def test_sets() -> None:
         x: Set[int]
 
     assert tyro.cli(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(set())
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -256,8 +246,7 @@ def test_frozen_sets() -> None:
         x: FrozenSet[int]
 
     assert tyro.cli(A, args=["--x", "1", "2", "3", "3"]) == A(x=frozenset({1, 2, 3}))
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=frozenset())
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -270,8 +259,7 @@ def test_deque() -> None:
     assert tyro.cli(A, args=["--x", "1", "2", "3", "3"]) == A(
         x=collections.deque([1, 2, 3, 3])
     )
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(collections.deque())
     with pytest.raises(SystemExit):
         tyro.cli(A, args=[])
 
@@ -283,8 +271,7 @@ def test_sets_with_default() -> None:
 
     assert tyro.cli(A, args=[]) == A(x={0, 1, 2})
     assert tyro.cli(A, args=["--x", "1", "2", "3", "3"]) == A(x={1, 2, 3})
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=set())
 
 
 def test_optional_sequences() -> None:
@@ -293,8 +280,8 @@ def test_optional_sequences() -> None:
         x: Optional[Sequence[int]] = None
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
+    assert tyro.cli(A, args=["--x", "None"]) == A(x=None)
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
@@ -304,8 +291,8 @@ def test_optional_lists() -> None:
         x: Optional[List[int]] = None
 
     assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
+    assert tyro.cli(A, args=["--x", "None"]) == A(x=None)
     assert tyro.cli(A, args=[]) == A(x=None)
 
 
