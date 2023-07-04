@@ -528,7 +528,8 @@ def test_metavar_6() -> None:
 
     helptext = get_helptext(main)
     assert (
-        "--x [{INT INT}|{STR STR} INT INT [{INT INT}|{STR STR} INT INT ...]]" in helptext
+        "--x [{INT INT}|{STR STR} INT INT [{INT INT}|{STR STR} INT INT ...]]"
+        in helptext
     )
 
 
