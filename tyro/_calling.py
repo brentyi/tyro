@@ -72,6 +72,17 @@ def call_from_args(
 
                 if value in _fields.MISSING_SINGLETONS:
                     value = arg.field.default
+
+                    # Consider a function with a positional sequence argument:
+                    #
+                    #     def f(x: tuple[int, ...], /)
+                    #
+                    # If we run this script with no arguments, we should interpret this
+                    # as empty input for x. But the argparse default will be a MISSING
+                    # value, and the field default will be inspect.Parameter.empty.
+                    if value in _fields.MISSING_SINGLETONS:
+                        assert field.is_positional() and arg.lowered.nargs in ("?", "*")
+                        value = []
                 else:
                     if arg.lowered.nargs == "?":
                         # Special case for optional positional arguments: this is the

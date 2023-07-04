@@ -1,8 +1,9 @@
+from typing import TYPE_CHECKING
+
 from . import conf, extras
 from ._cli import cli
 from ._fields import MISSING_PUBLIC as MISSING
 from ._instantiators import UnsupportedTypeAnnotationError
-from typing import TYPE_CHECKING
 
 __all__ = [
     "conf",

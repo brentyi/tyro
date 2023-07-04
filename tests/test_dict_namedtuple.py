@@ -24,12 +24,11 @@ def test_basic_dict() -> None:
         "hey": 5,
         "hello": 2,
     }
+    assert tyro.cli(main, args="--params".split(" ")) == {}
     with pytest.raises(SystemExit):
         tyro.cli(main, args="--params hey 5 hello hey".split(" "))
     with pytest.raises(SystemExit):
         tyro.cli(main, args="--params hey 5 hello".split(" "))
-    with pytest.raises(SystemExit):
-        tyro.cli(main, args="--params".split(" "))
 
 
 def test_dict_with_default() -> None:
