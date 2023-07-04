@@ -129,9 +129,9 @@ def strip_ansi_sequences(x: str):
 def multi_metavar_from_single(single: str) -> str:
     if len(strip_ansi_sequences(single)) >= 32:
         # Shorten long metavars
-        return f"{single} [...]"
+        return f"[{single} [...]]"
     else:
-        return f"{single} [{single} ...]"
+        return f"[{single} [{single} ...]]"
 
 
 def remove_single_line_breaks(helptext: str) -> str:

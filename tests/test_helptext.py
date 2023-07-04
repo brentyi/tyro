@@ -359,7 +359,7 @@ def test_generic_list_helptext() -> None:
         x: List[T]
 
     helptext = get_helptext(GenericTupleHelptext[int])
-    assert "--x INT [INT ...]" in helptext
+    assert "--x [INT [INT ...]]" in helptext
 
 
 def test_literal_helptext() -> None:
@@ -445,7 +445,7 @@ def test_optional_helptext() -> None:
     assert cast(str, cast(str, OptionalHelptext.__doc__)[:20]) in helptext
     assert "2% milk" in helptext
     assert "--x {None}|INT" in helptext
-    assert "--y {None}|INT [{None}|INT ...]" in helptext
+    assert "--y [{None}|INT [{None}|INT ...]]" in helptext
     assert "[--z {None}|INT]" in helptext
 
 
@@ -469,7 +469,7 @@ def test_metavar_1() -> None:
 
     # The comma formatting is unfortunate, but matches argparse's default behavior.
     helptext = get_helptext(main)
-    assert "--x {0,1,2,3,hey,there,hello}|{INT [INT ...]}" in helptext
+    assert "--x {0,1,2,3,hey,there,hello}|{[INT [INT ...]]}" in helptext
 
 
 def test_metavar_2() -> None:
@@ -519,7 +519,7 @@ def test_metavar_5() -> None:
         pass
 
     helptext = get_helptext(main)
-    assert "[--x {INT INT}|{STR STR} [{INT INT}|{STR STR} ...]]" in helptext
+    assert "[--x [{INT INT}|{STR STR} [{INT INT}|{STR STR} ...]]]" in helptext
 
 
 def test_metavar_6() -> None:
@@ -528,7 +528,7 @@ def test_metavar_6() -> None:
 
     helptext = get_helptext(main)
     assert (
-        "--x {INT INT}|{STR STR} INT INT [{INT INT}|{STR STR} INT INT ...]" in helptext
+        "--x [{INT INT}|{STR STR} INT INT [{INT INT}|{STR STR} INT INT ...]]" in helptext
     )
 
 
