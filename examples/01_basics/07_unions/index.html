@@ -293,8 +293,8 @@
 <kbd>python 01_basics/07_unions.py --help</kbd><pre class="ansi-block literal-block">usage: 07_unions.py [-h] [--union-over-types INT|STR]
                     [--string-or-enum {red,green,RED,GREEN,BLUE}]
                     [--union-over-tuples {INT INT}|STR]
-                    [--tuple-of-string-or-enum {red,green,RED,GREEN,BLUE} 
-[{red,green,RED,GREEN,BLUE} ...]]
+                    [--tuple-of-string-or-enum [{red,green,RED,GREEN,BLUE} 
+[{red,green,RED,GREEN,BLUE} ...]]]
                     [--integer {None,0,1,2,3}]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
@@ -306,8 +306,8 @@
 │     Unions can be used to specify multiple allowable types. (default: red) │
 │ --union-over-tuples {INT INT}|STR                                          │
 │     Unions also work over more complex nested types. (default: 1)          │
-│ --tuple-of-string-or-enum {red,green,RED,GREEN,BLUE}                       │
-│ [{red,green,RED,GREEN,BLUE} ...]                                           │
+│ --tuple-of-string-or-enum [{red,green,RED,GREEN,BLUE}                      │
+│ [{red,green,RED,GREEN,BLUE} ...]]                                          │
 │     And can be nested in other types. (default: red RED)                   │
 │ --integer {None,0,1,2,3}                                                   │
 │     Optional[T] is equivalent to Union[T, None]. (default: None)           │

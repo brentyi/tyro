@@ -63,7 +63,7 @@ Module Contents
 .. py:class:: InstantiatorMetadata
 
    .. py:attribute:: nargs
-      :annotation: :Optional[Union[int, typing_extensions.Literal[+]]]
+      :annotation: :Optional[Union[int, typing_extensions.Literal[*]]]
 
       
 
