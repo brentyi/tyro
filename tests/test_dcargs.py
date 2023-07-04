@@ -677,11 +677,14 @@ def test_variadics() -> None:
         main, args="--args 1 2 3 --kwargs learning_rate 1e-4 beta1 0.99".split(" ")
     ) == ((1, 2, 3), {"learning_rate": 1e-4, "beta1": 0.99})
 
+
 def test_empty_container() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[int, ...] = (1, 2, 3)
-        y: Union[int, str, List[bool]] = dataclasses.field(default_factory=lambda: [1, 2, 3])
+        y: Union[int, str, List[bool]] = dataclasses.field(
+            default_factory=lambda: [False, False, True]
+        )
 
     assert tyro.cli(A, args="--x".split(" ")).x == ()
     assert tyro.cli(A, args="--y".split(" ")).y == []
