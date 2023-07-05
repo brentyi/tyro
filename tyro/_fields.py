@@ -459,8 +459,8 @@ def _field_list_from_pydantic(
 
     # Handle pydantic models.
     field_list = []
-    pydantic_version = float(getattr(pydantic, "__version__", "1.0"))
-    if pydantic_version < 2.0:  # pragma: no cover
+    pydantic_version = int(getattr(pydantic, "__version__", "1.0.0").partition(".")[0])
+    if pydantic_version < 2:  # pragma: no cover
         # Pydantic 1.xx.
         for pd_field in cls.__fields__.values():  # type: ignore
             helptext = pd_field.field_info.description
