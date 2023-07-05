@@ -148,7 +148,7 @@ See [documentation](https://brentyi.github.io/tyro) for examples.
   implementation of [instant-ngp](https://nvlabs.github.io/instant-ngp/),
   implemented in JAX.
 - [NVIDIAGameWorks/kaolin-wisp](https://github.com/NVIDIAGameWorks/kaolin-wisp)
-  is a PyTorch library for working with neural fields.
+  combines `tyro` with [`hydra-zen`](https://github.com/mit-ll-responsible-ai/hydra-zen)
+  for neural fields in PyTorch.
 - [openrlbenchmark/openrlbenchmark](https://github.com/openrlbenchmark/openrlbenchmark)
-  is a comprehensive collection of tracked experiments for reinforcement
-  learning.
+  is a collection of tracked experiments for reinforcement learning.
