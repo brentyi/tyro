@@ -43,6 +43,7 @@ dev = [
     "pyright>=1.1.264",
     "mypy>=0.991",
     "numpy>=1.20.0",
+    "orbax==0.1.6",  # Needed for flax install in Python 3.7 as of 7/27/2023.
     "flax>=0.6.0",
     "pydantic>=1.10.2",
     "coverage[toml]>=6.5.0"
