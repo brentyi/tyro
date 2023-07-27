@@ -294,7 +294,7 @@ def _cli_impl(
             fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
             frozen=True,
         )
-        default_instance_internal = f(default_instance_internal)
+        default_instance_internal = f(default_instance_internal)  # type: ignore
         dummy_wrapped = True
     else:
         dummy_wrapped = False
