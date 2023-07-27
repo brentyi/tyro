@@ -272,7 +272,7 @@
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">_parent_contained_dataclasses</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Takes a dataclass type, and recursively searches its fields for dataclass or enum</span>
+    <span class="sd">&quot;&quot;&quot;Takes a dataclass type, and recursively searches its fields for dataclass or enum</span>
 <span class="sd">    types.&quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="n">parent_contained_dataclasses</span> <span class="o">=</span> <span class="p">(</span>
@@ -423,7 +423,7 @@
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">DataclassType</span><span class="p">],</span>
     <span class="n">stream</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataclassType</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Re-construct a dataclass instance from a yaml-compatible string, which should be</span>
+    <span class="sd">&quot;&quot;&quot;Re-construct a dataclass instance from a yaml-compatible string, which should be</span>
 <span class="sd">    generated from `tyro.extras.to_yaml()`.</span>
 
 <span class="sd">    As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general</span>
@@ -452,7 +452,7 @@
 
 
 <div class="viewcode-block" id="to_yaml"><a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._serialization.to_yaml">[docs]</a><span class="k">def</span> <span class="nf">to_yaml</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Serialize a dataclass; returns a yaml-compatible string that can be deserialized</span>
+    <span class="sd">&quot;&quot;&quot;Serialize a dataclass; returns a yaml-compatible string that can be deserialized</span>
 <span class="sd">    via `tyro.extras.from_yaml()`.</span>
 
 <span class="sd">    As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general</span>

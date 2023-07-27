@@ -381,7 +381,7 @@
 
 
 <div class="viewcode-block" id="configure"><a class="viewcode-back" href="../../../../api/tyro/conf/#tyro.conf._markers.configure">[docs]</a><span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="o">*</span><span class="n">markers</span><span class="p">:</span> <span class="n">Marker</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">CallableType</span><span class="p">],</span> <span class="n">CallableType</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator for configuring functions.</span>
+    <span class="sd">&quot;&quot;&quot;Decorator for configuring functions.</span>
 
 <span class="sd">    Configuration markers are implemented via `typing.Annotated` and straightforward to</span>
 <span class="sd">    apply to types, for example:</span>
@@ -400,8 +400,8 @@
 <span class="sd">    ```</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_inner</span><span class="p">(</span><span class="nb">callable</span><span class="p">:</span> <span class="n">CallableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableType</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="nb">callable</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+    <span class="k">def</span> <span class="nf">_inner</span><span class="p">(</span><span class="n">callable</span><span class="p">:</span> <span class="n">CallableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableType</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">callable</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">return</span> <span class="n">_inner</span></div>
 

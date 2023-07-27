@@ -266,18 +266,18 @@ to be written somewhere where your shell will find it.</p>
 <span class="c1"># tyro/examples.</span>
 
 <span class="c1"># (1) Make directory for local completions.</span>
-mkdir<span class="w"> </span>-p<span class="w"> </span>~/.zfunc
+mkdir -p ~/.zfunc
 
 <span class="c1"># (2) Write completion script. The name here (_01_functions_py) doesn&#39;t matter,</span>
 <span class="c1"># as long as it&#39;s prefixed with an underscore.</span>
-python<span class="w"> </span>01_functions.py<span class="w"> </span>--tyro-write-completion<span class="w"> </span>zsh<span class="w"> </span>~/.zfunc/_01_functions_py
+python 01_functions.py --tyro-write-completion zsh ~/.zfunc/_01_functions_py
 </pre></div>
 </div>
 <p>And if it’s not in your <code class="docutils literal notranslate"><span class="pre">.zshrc</span></code> already:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># (3) Add .zfunc to our function search path, then initialize completions.</span>
 <span class="c1"># Ideally this should go in your .zshrc!</span>
 <span class="nv">fpath</span><span class="o">+=</span>~/.zfunc
-autoload<span class="w"> </span>-Uz<span class="w"> </span>compinit<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>compinit
+autoload -Uz compinit <span class="o">&amp;&amp;</span> compinit
 </pre></div>
 </div>
 </section>
@@ -299,11 +299,11 @@ loaded automatically on demand when the respective command is being completed
 
 <span class="c1"># (1) Find and make completion directory.</span>
 <span class="nv">completion_dir</span><span class="o">=</span><span class="si">${</span><span class="nv">BASH_COMPLETION_USER_DIR</span><span class="k">:-</span><span class="si">${</span><span class="nv">XDG_DATA_HOME</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.local/share</span><span class="si">}</span><span class="p">/bash-completion</span><span class="si">}</span>/completions/
-mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$completion_dir</span>
+mkdir -p <span class="nv">$completion_dir</span>
 
 <span class="c1"># (2) Write completion scripts. Note that the name of the completion script must</span>
 <span class="c1"># match the name of the file.</span>
-python<span class="w"> </span>01_functions.py<span class="w"> </span>--tyro-write-completion<span class="w"> </span>bash<span class="w"> </span><span class="si">${</span><span class="nv">completion_dir</span><span class="si">}</span>/01_functions.py
+python 01_functions.py --tyro-write-completion bash <span class="si">${</span><span class="nv">completion_dir</span><span class="si">}</span>/01_functions.py
 </pre></div>
 </div>
 <p>In contrast to zsh, tab completion in bash requires that scripts are either set

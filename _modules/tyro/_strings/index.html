@@ -268,7 +268,7 @@
 
 
 <div class="viewcode-block" id="make_field_name"><a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.make_field_name">[docs]</a><span class="k">def</span> <span class="nf">make_field_name</span><span class="p">(</span><span class="n">parts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Join parts of a field name together. Used for nesting.</span>
+    <span class="sd">&quot;&quot;&quot;Join parts of a field name together. Used for nesting.</span>
 
 <span class="sd">    (&#39;parent_1&#39;, &#39;child&#39;) =&gt; &#39;parent-1.child&#39;</span>
 <span class="sd">    (&#39;parents&#39;, &#39;1&#39;, &#39;_child_node&#39;) =&gt; &#39;parents.1._child-node&#39;</span>
@@ -296,7 +296,7 @@
 
 
 <div class="viewcode-block" id="dedent"><a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.dedent">[docs]</a><span class="k">def</span> <span class="nf">dedent</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as textwrap.dedent, but ignores the first line.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Same as textwrap.dedent, but ignores the first line.&quot;&quot;&quot;</span>
     <span class="n">first_line</span><span class="p">,</span> <span class="n">line_break</span><span class="p">,</span> <span class="n">rest</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">line_break</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
