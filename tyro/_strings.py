@@ -107,9 +107,9 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     )
 
 
-def subparser_name_from_type(prefix: str, cls: Union[Type, None]) -> str:
+def subparser_name_from_type(prefix: str, cls: Type) -> str:
     suffix, use_prefix = (
-        _subparser_name_from_type(cls) if cls is not None else ("None", True)
+        _subparser_name_from_type(cls) if cls is not type(None) else ("None", True)
     )
     if len(prefix) == 0 or not use_prefix:
         return suffix
