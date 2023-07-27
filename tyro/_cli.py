@@ -292,6 +292,7 @@ def _cli_impl(
         f = dataclasses.make_dataclass(
             cls_name="",
             fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
+            frozen=True,
         )
         default_instance_internal = f(default_instance_internal)
         dummy_wrapped = True
