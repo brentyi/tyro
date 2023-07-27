@@ -287,16 +287,13 @@ def _cli_impl(
     if not _fields.is_nested_type(cast(type, f), default_instance_internal):
         dummy_field = cast(
             dataclasses.Field,
-            dataclasses.field(
-                default_factory=lambda: default
-                if default is not None
-                else dataclasses.MISSING
-            ),
+            dataclasses.field(),
         )
         f = dataclasses.make_dataclass(
             cls_name="",
             fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
         )
+        default_instance_internal = f(default_instance_internal)
         dummy_wrapped = True
     else:
         dummy_wrapped = False
