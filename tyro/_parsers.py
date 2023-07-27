@@ -337,7 +337,6 @@ class SubparsersSpecification:
     prefix: str
     required: bool
     default_instance: Any
-    can_be_none: bool  # If underlying type is Optional[Something].
 
     @staticmethod
     def from_field(
@@ -352,15 +351,20 @@ class SubparsersSpecification:
             return None
 
         # We don't use sets here to retain order of subcommands.
+        options: List[Union[type, Callable]]
         options = [
             _resolver.apply_type_from_typevar(typ, type_from_typevar)
             for typ in get_args(typ)
         ]
-        options_no_none = [o for o in options if o is not type(None)]  # noqa
+        options = [
+            # Cast seems unnecessary but needed in mypy... (1.4.1)
+            cast(Callable, none_proxy) if o is type(None) else o
+            for o in options
+        ]
         if not all(
             [
-                _fields.is_nested_type(o, _fields.MISSING_NONPROP)
-                for o in options_no_none
+                _fields.is_nested_type(cast(type, o), _fields.MISSING_NONPROP)
+                for o in options
             ]
         ):
             return None
@@ -370,8 +374,10 @@ class SubparsersSpecification:
             str, _confstruct._SubcommandConfiguration
         ] = {}
         subcommand_type_from_name: Dict[str, type] = {}
-        for option in options_no_none:
-            subcommand_name = _strings.subparser_name_from_type(prefix, option)
+        for option in options:
+            subcommand_name = _strings.subparser_name_from_type(
+                prefix, type(None) if option is none_proxy else cast(type, option)
+            )
             option, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfiguration
             )
@@ -384,7 +390,7 @@ class SubparsersSpecification:
                 subcommand_config_from_name[subcommand_name] = found_subcommand_configs[
                     0
                 ]
-            subcommand_type_from_name[subcommand_name] = option
+            subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
         if field.default is None or field.default in _fields.MISSING_SINGLETONS:
@@ -401,14 +407,16 @@ class SubparsersSpecification:
                     f"`{prefix}` was provided a default value of type"
                     f" {type(field.default)} but no matching subcommand was found. A"
                     " type may be missing in the Union type declaration for"
-                    f" `{prefix}`, which currently expects {options_no_none}."
+                    f" `{prefix}`, which currently expects {options}."
                 )
                 return None
 
         # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
-        for option in options_no_none:
-            subcommand_name = _strings.subparser_name_from_type(prefix, option)
+        for option in options:
+            subcommand_name = _strings.subparser_name_from_type(
+                prefix, type(None) if option is none_proxy else cast(type, option)
+            )
             option, _ = _resolver.unwrap_annotated(option)
 
             # Get a subcommand config: either pulled from the type annotations or the
@@ -495,25 +503,13 @@ class SubparsersSpecification:
             prefix=prefix,
             required=required,
             default_instance=field.default,
-            can_be_none=options != options_no_none,
         )
 
     def apply(
         self, parent_parser: argparse.ArgumentParser
     ) -> Tuple[argparse.ArgumentParser, ...]:
         title = "subcommands"
-        metavar = (
-            "{"
-            + ",".join(
-                (
-                    (_strings.subparser_name_from_type(self.prefix, None),)
-                    if self.can_be_none
-                    else ()
-                )
-                + tuple(self.parser_from_name.keys())
-            )
-            + "}"
-        )
+        metavar = "{" + ",".join(self.parser_from_name.keys()) + "}"
         if not self.required:
             title = "optional " + title
             metavar = f"[{metavar}]"
@@ -526,13 +522,6 @@ class SubparsersSpecification:
             title=title,
             metavar=metavar,
         )
-
-        if self.can_be_none:
-            subparser = argparse_subparsers.add_parser(
-                name=_strings.subparser_name_from_type(self.prefix, None),
-                formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
-                help="",
-            )
 
         subparser_tree_leaves: List[argparse.ArgumentParser] = []
         for name, subparser_def in self.parser_from_name.items():
@@ -568,3 +557,7 @@ def add_subparsers_to_leaves(
         parser_from_name=new_parsers_from_name,
         required=root.required or leaf.required,
     )
+
+
+def none_proxy() -> None:
+    return None

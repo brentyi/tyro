@@ -169,6 +169,67 @@ def test_optional_nested() -> None:
     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
 
 
+def test_optional_nested_multiple() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/60"""
+
+    @dataclasses.dataclass(frozen=True)
+    class OutputHeadSettings:
+        number_of_outputs: int = 1
+
+    @dataclasses.dataclass(frozen=True)
+    class OptimizerSettings:
+        name: str = "adam"
+
+    @dataclasses.dataclass(frozen=True)
+    class ModelSettings:
+        output_head_settings: Optional[OutputHeadSettings] = None
+        optimizer_settings: Optional[OptimizerSettings] = None
+
+    assert tyro.cli(
+        ModelSettings,
+        args="output-head-settings:None optimizer-settings:None".split(" "),
+    ) == ModelSettings(None, None)
+
+    with pytest.raises(SystemExit):
+        # Order cannot be flipped, unfortunately.
+        tyro.cli(
+            ModelSettings,
+            args="optimizer-settings:None output-head-settings:None".split(" "),
+        )
+
+    assert tyro.cli(
+        ModelSettings,
+        args="output-head-settings:output-head-settings optimizer-settings:None".split(
+            " "
+        ),
+    ) == ModelSettings(OutputHeadSettings(1), None)
+
+    assert tyro.cli(
+        ModelSettings,
+        args="output-head-settings:output-head-settings --output-head-settings.number-of-outputs 5 optimizer-settings:None".split(
+            " "
+        ),
+    ) == ModelSettings(OutputHeadSettings(5), None)
+
+    assert tyro.cli(
+        tyro.conf.OmitSubcommandPrefixes[
+            tyro.conf.ConsolidateSubcommandArgs[ModelSettings]
+        ],
+        args="output-head-settings:output-head-settings optimizer-settings:None --number-of-outputs 5".split(
+            " "
+        ),
+    ) == ModelSettings(OutputHeadSettings(5), None)
+
+    assert tyro.cli(
+        tyro.conf.OmitSubcommandPrefixes[
+            tyro.conf.ConsolidateSubcommandArgs[ModelSettings]
+        ],
+        args="output-head-settings:output-head-settings optimizer-settings:optimizer-settings --name sgd --number-of-outputs 5".split(
+            " "
+        ),
+    ) == ModelSettings(OutputHeadSettings(5), OptimizerSettings("sgd"))
+
+
 def test_subparser() -> None:
     @dataclasses.dataclass
     class HTTPServer:

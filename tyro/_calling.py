@@ -143,15 +143,6 @@ def call_from_args(
                     or subparser_def.default_instance is not None
                 )
                 value = subparser_def.default_instance
-            elif (
-                subparser_def.can_be_none
-                and subparser_name
-                == _strings.subparser_name_from_type(prefixed_field_name, None)
-            ):
-                # do either
-                # Optional[Union[A, B, ...]] or Union[A, B, None], or have a
-                # default/default_factory set.
-                value = None
             else:
                 options = map(
                     lambda x: _resolver.apply_type_from_typevar(x, type_from_typevar),
@@ -166,18 +157,22 @@ def call_from_args(
                         chosen_f = option
                         break
                 assert chosen_f is not None
-                value, consumed_keywords_child = call_from_args(
-                    chosen_f,
-                    subparser_def.parser_from_name[subparser_name],
-                    (
-                        field.default
-                        if type(field.default) is chosen_f
-                        else _fields.MISSING_NONPROP
-                    ),
-                    value_from_prefixed_field_name,
-                    field_name_prefix=prefixed_field_name,
-                )
-                consumed_keywords |= consumed_keywords_child
+
+                if chosen_f is type(None):
+                    value = None
+                else:
+                    value, consumed_keywords_child = call_from_args(
+                        chosen_f,
+                        subparser_def.parser_from_name[subparser_name],
+                        (
+                            field.default
+                            if type(field.default) is chosen_f
+                            else _fields.MISSING_NONPROP
+                        ),
+                        value_from_prefixed_field_name,
+                        field_name_prefix=prefixed_field_name,
+                    )
+                    consumed_keywords |= consumed_keywords_child
 
         if value is _fields.EXCLUDE_FROM_CALL:
             continue
