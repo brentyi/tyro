@@ -588,7 +588,6 @@
     <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
-    <span class="n">can_be_none</span><span class="p">:</span> <span class="nb">bool</span>  <span class="c1"># If underlying type is Optional[Something].</span>
 
 <div class="viewcode-block" id="SubparsersSpecification.from_field"><a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.from_field">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_field</span><span class="p">(</span>
@@ -603,15 +602,20 @@
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># We don&#39;t use sets here to retain order of subcommands.</span>
+        <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="n">options_no_none</span> <span class="o">=</span> <span class="p">[</span><span class="n">o</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span> <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)]</span>  <span class="c1"># noqa</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="c1"># Cast seems unnecessary but needed in mypy... (1.4.1)</span>
+            <span class="n">cast</span><span class="p">(</span><span class="n">Callable</span><span class="p">,</span> <span class="n">none_proxy</span><span class="p">)</span> <span class="k">if</span> <span class="n">o</span> <span class="ow">is</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">else</span> <span class="n">o</span>
+            <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span>
+        <span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options_no_none</span>
+                <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">o</span><span class="p">),</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span>
             <span class="p">]</span>
         <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -621,8 +625,10 @@
             <span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
         <span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_no_none</span><span class="p">:</span>
-            <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span>
+                <span class="n">prefix</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">option</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
                 <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
             <span class="p">)</span>
@@ -635,7 +641,7 @@
                 <span class="n">subcommand_config_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span>
                     <span class="mi">0</span>
                 <span class="p">]</span>
-            <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">option</span>
+            <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
 
         <span class="c1"># If a field default is provided, try to find a matching subcommand name.</span>
         <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
@@ -652,14 +658,16 @@
                     <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
                     <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> but no matching subcommand was found. A&quot;</span>
                     <span class="s2">&quot; type may be missing in the Union type declaration for&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options_no_none</span><span class="si">}</span><span class="s2">.&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">.&quot;</span>
                 <span class="p">)</span>
                 <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Add subcommands for each option.</span>
         <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options_no_none</span><span class="p">:</span>
-            <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span>
+                <span class="n">prefix</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="n">option</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
 
             <span class="c1"># Get a subcommand config: either pulled from the type annotations or the</span>
@@ -746,25 +754,13 @@
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
             <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span>
             <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-            <span class="n">can_be_none</span><span class="o">=</span><span class="n">options</span> <span class="o">!=</span> <span class="n">options_no_none</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="SubparsersSpecification.apply"><a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">parent_parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;subcommands&quot;</span>
-        <span class="n">metavar</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s2">&quot;{&quot;</span>
-            <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="kc">None</span><span class="p">),)</span>
-                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_be_none</span>
-                    <span class="k">else</span> <span class="p">()</span>
-                <span class="p">)</span>
-                <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="p">)</span>
-            <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
-        <span class="p">)</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
             <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;optional &quot;</span> <span class="o">+</span> <span class="n">title</span>
             <span class="n">metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2">]&quot;</span>
@@ -777,13 +773,6 @@
             <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
         <span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">can_be_none</span><span class="p">:</span>
-            <span class="n">subparser</span> <span class="o">=</span> <span class="n">argparse_subparsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
-                <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgparseHelpFormatter</span><span class="p">,</span>
-                <span class="n">help</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
 
         <span class="n">subparser_tree_leaves</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">subparser_def</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -819,6 +808,10 @@
         <span class="n">parser_from_name</span><span class="o">=</span><span class="n">new_parsers_from_name</span><span class="p">,</span>
         <span class="n">required</span><span class="o">=</span><span class="n">root</span><span class="o">.</span><span class="n">required</span> <span class="ow">or</span> <span class="n">leaf</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
     <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="none_proxy"><a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.none_proxy">[docs]</a><span class="k">def</span> <span class="nf">none_proxy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
 </pre></div>
         </article>
       </div>

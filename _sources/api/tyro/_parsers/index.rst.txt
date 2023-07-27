@@ -124,11 +124,6 @@ Module Contents
 
       
 
-   .. py:attribute:: can_be_none
-      :annotation: :bool
-
-      
-
    .. py:method:: from_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], prefix: str) -> Optional[SubparsersSpecification]
       :staticmethod:
 
@@ -138,5 +133,8 @@ Module Contents
 
 
 .. py:function:: add_subparsers_to_leaves(root: Optional[SubparsersSpecification], leaf: SubparsersSpecification) -> SubparsersSpecification
+
+
+.. py:function:: none_proxy() -> None
 
 
