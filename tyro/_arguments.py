@@ -398,9 +398,6 @@ def _rule_generate_helptext(
         primary_help = _strings.make_field_name([arg.name_prefix, arg.field.name])
 
     if primary_help is not None and primary_help != "":
-        # Note that the percent symbol needs some extra handling in argparse.
-        # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-        primary_help = primary_help.replace("%", "%%")
         help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
 
     default = lowered.default
@@ -444,7 +441,9 @@ def _rule_generate_helptext(
     else:
         help_parts.append(_rich_tag_if_enabled("(required)", "helptext_required"))
 
-    return dataclasses.replace(lowered, help=" ".join(help_parts))
+    # Note that the percent symbol needs some extra handling in argparse.
+    # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
+    return dataclasses.replace(lowered, help=" ".join(help_parts).replace("%", "%%"))
 
 
 def _rule_set_name_or_flag_and_dest(
