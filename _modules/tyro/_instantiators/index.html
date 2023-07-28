@@ -353,7 +353,7 @@
 
 
 <div class="viewcode-block" id="UnsupportedTypeAnnotationError"><a class="viewcode-back" href="../../../api/tyro/#tyro._instantiators.UnsupportedTypeAnnotationError">[docs]</a><span class="k">class</span> <span class="nc">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Exception raised when an unsupported type annotation is detected.&quot;&quot;&quot;</span></div>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised when an unsupported type annotation is detected.&quot;&quot;&quot;</span></div>
 
 
 <span class="n">_builtin_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
@@ -365,7 +365,7 @@
 
 
 <div class="viewcode-block" id="is_type_string_converter"><a class="viewcode-back" href="../../../api/tyro/_instantiators/#tyro._instantiators.is_type_string_converter">[docs]</a><span class="k">def</span> <span class="nf">is_type_string_converter</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Check if type is a string converter, i.e., (arg: Union[str, Any]) -&gt; T.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if type is a string converter, i.e., (arg: Union[str, Any]) -&gt; T.&quot;&quot;&quot;</span>
     <span class="n">param_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">has_var_positional</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
@@ -402,7 +402,7 @@
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Recursive helper for parsing type annotations.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursive helper for parsing type annotations.</span>
 
 <span class="sd">    Returns two things:</span>
 <span class="sd">    - An instantiator function, for instantiating the type from a string or list of</span>
@@ -445,7 +445,7 @@
     <span class="c1"># Validate that typ is a `(arg: str) -&gt; T` type converter, as expected by argparse.</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_builtin_set</span><span class="p">:</span>
         <span class="k">pass</span>
-    <span class="k">elif</span> <span class="ow">not</span> <span class="n">callable</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">callable</span><span class="p">(</span><span class="n">typ</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Expected </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2"> to be an `(arg: str) -&gt; T` type converter, but is not&quot;</span>
             <span class="s2">&quot; callable.&quot;</span>
@@ -464,7 +464,7 @@
         <span class="n">auto_choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">typ</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">instantiator_base_case</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Given a type and and a string from the command-line, reconstruct an object. Not</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a type and and a string from the command-line, reconstruct an object. Not</span>
 <span class="sd">        intended to deal with containers.</span>
 
 <span class="sd">        This is intended to replace all calls to `type(string)`, which can cause unexpected</span>
@@ -538,7 +538,7 @@
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Thin wrapper over instantiator_from_type, with some extra asserts for catching</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Thin wrapper over instantiator_from_type, with some extra asserts for catching</span>
 <span class="sd">    errors.&quot;&quot;&quot;</span>
     <span class="n">out</span> <span class="o">=</span> <span class="n">instantiator_from_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
@@ -560,7 +560,7 @@
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;Attempt to create an instantiator from a container type. Returns `None` is no</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Attempt to create an instantiator from a container type. Returns `None` is no</span>
 <span class="sd">    container type is found.&quot;&quot;&quot;</span>
 
     <span class="n">type_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -643,7 +643,7 @@
 
 
 <span class="k">def</span> <span class="nf">_join_union_metavars</span><span class="p">(</span><span class="n">metavars</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Metavar generation helper for unions. Could be revisited.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Metavar generation helper for unions. Could be revisited.</span>
 
 <span class="sd">    Examples:</span>
 <span class="sd">        None, INT =&gt; NONE|INT</span>
@@ -842,7 +842,7 @@
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc.&quot;&quot;&quot;</span>
     <span class="n">container_type</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">:</span>
         <span class="n">container_type</span> <span class="o">=</span> <span class="nb">list</span>

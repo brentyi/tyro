@@ -297,7 +297,7 @@
 
 
 <div class="viewcode-block" id="set_accent_color"><a class="viewcode-back" href="../../../api/tyro/extras/#tyro._argparse_formatter.set_accent_color">[docs]</a><span class="k">def</span> <span class="nf">set_accent_color</span><span class="p">(</span><span class="n">accent_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Set an accent color to use in help messages. Takes any color supported by `rich`,</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set an accent color to use in help messages. Takes any color supported by `rich`,</span>
 <span class="sd">    see `python -m rich.color`. Experimental.&quot;&quot;&quot;</span>
     <span class="n">THEME</span><span class="o">.</span><span class="n">border</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">THEME</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -331,7 +331,7 @@
 
 
 <div class="viewcode-block" id="ansi_context"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.ansi_context">[docs]</a><span class="k">def</span> <span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Context for working with ANSI codes + argparse:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Context for working with ANSI codes + argparse:</span>
 <span class="sd">    - Applies a temporary monkey patch for making argparse ignore ANSI codes when</span>
 <span class="sd">      wrapping usage text.</span>
 <span class="sd">    - Enables support for Windows via colorama.</span>
@@ -395,7 +395,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Override _format_args() to ignore nargs and always expect single string</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Override _format_args() to ignore nargs and always expect single string</span>
 <span class="sd">        metavars.&quot;&quot;&quot;</span>
         <span class="n">get_metavar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metavar_formatter</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
 
@@ -714,7 +714,7 @@
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_format_actions_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>  <span class="c1">#  pragma: no cover</span>
-        <span class="sd">&quot;&quot;&quot;Backporting from Python 3.10, primarily to call format_usage() on actions.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backporting from Python 3.10, primarily to call format_usage() on actions.&quot;&quot;&quot;</span>
 
         <span class="c1"># find group indices and identify actions in groups</span>
         <span class="n">group_actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>

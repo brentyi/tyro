@@ -261,11 +261,11 @@ directly from <code class="docutils literal notranslate"><span class="pre">tyro.
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Classifier</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="linenos"> 8</span>    <span class="n">layers</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos"> 9</span>    <span class="sd">&quot;&quot;&quot;Layers in our network.&quot;&quot;&quot;</span>
+<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Layers in our network.&quot;&quot;&quot;</span>
 <span class="linenos">10</span>    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
-<span class="linenos">11</span>    <span class="sd">&quot;&quot;&quot;Hidden unit count.&quot;&quot;&quot;</span>
+<span class="linenos">11</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Hidden unit count.&quot;&quot;&quot;</span>
 <span class="linenos">12</span>    <span class="n">output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span>
-<span class="linenos">13</span>    <span class="sd">&quot;&quot;&quot;Number of classes.&quot;&quot;&quot;</span>
+<span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of classes.&quot;&quot;&quot;</span>
 <span class="linenos">14</span>
 <span class="linenos">15</span>    <span class="nd">@nn</span><span class="o">.</span><span class="n">compact</span>
 <span class="linenos">16</span>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
@@ -285,7 +285,7 @@ directly from <code class="docutils literal notranslate"><span class="pre">tyro.
 <span class="linenos">30</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Classifier</span><span class="p">,</span> <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">33</span>    <span class="sd">&quot;&quot;&quot;Train a model.</span>
+<span class="linenos">33</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.</span>
 <span class="linenos">34</span>
 <span class="linenos">35</span><span class="sd">    Args:</span>
 <span class="linenos">36</span><span class="sd">        model: Model to train.</span>
@@ -300,35 +300,30 @@ directly from <code class="docutils literal notranslate"><span class="pre">tyro.
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">/home/runner/.local/lib/python3.10/site-packages/flax/struct.py:132: FutureWarning: jax.tree_util.register_keypaths is deprecated, and will be removed in a future release. Please use `register_pytree_with_keys()` instead.
-  jax.tree_util.register_keypaths(data_clz, keypaths)
-Traceback (most recent call last):
-  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 11, in &lt;module&gt;
-    from flax import linen as nn
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/__init__.py&quot;, line 20, in &lt;module&gt;
-    from . import linen
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/linen/__init__.py&quot;, line 47, in &lt;module&gt;
-    from .attention import (
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/linen/attention.py&quot;, line 22, in &lt;module&gt;
-    from flax.linen.linear import default_kernel_init
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/linen/linear.py&quot;, line 30, in &lt;module&gt;
-    from jax import ShapedArray
-ImportError: cannot import name 'ShapedArray' from 'jax' (/home/runner/.local/lib/python3.10/site-packages/jax/__init__.py)</pre>
+<kbd>python 04_additional/07_flax.py --help</kbd><pre class="ansi-block literal-block">usage: 07_flax.py [-h] --model.layers INT [--model.units INT]
+                  [--model.output-dim INT] [--num-iterations INT]
+
+Train a model.
+
+╭─ arguments ────────────────────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit                │
+│ --num-iterations INT    Number of training iterations. (default: 1000) │
+╰────────────────────────────────────────────────────────────────────────╯
+╭─ model arguments ──────────────────────────────────────────────────────╮
+│ Model to train.                                                        │
+│ ─────────────────────────────────────────────────────────              │
+│ --model.layers INT      Layers in our network. (required)              │
+│ --model.units INT       Hidden unit count. (default: 32)               │
+│ --model.output-dim INT  Number of classes. (default: 10)               │
+╰────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">/home/runner/.local/lib/python3.10/site-packages/flax/struct.py:132: FutureWarning: jax.tree_util.register_keypaths is deprecated, and will be removed in a future release. Please use `register_pytree_with_keys()` instead.
-  jax.tree_util.register_keypaths(data_clz, keypaths)
-Traceback (most recent call last):
-  File &quot;/home/runner/work/tyro/tyro/docs/source/../../examples/04_additional/07_flax.py&quot;, line 11, in &lt;module&gt;
-    from flax import linen as nn
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/__init__.py&quot;, line 20, in &lt;module&gt;
-    from . import linen
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/linen/__init__.py&quot;, line 47, in &lt;module&gt;
-    from .attention import (
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/linen/attention.py&quot;, line 22, in &lt;module&gt;
-    from flax.linen.linear import default_kernel_init
-  File &quot;/home/runner/.local/lib/python3.10/site-packages/flax/linen/linear.py&quot;, line 30, in &lt;module&gt;
-    from jax import ShapedArray
-ImportError: cannot import name 'ShapedArray' from 'jax' (/home/runner/.local/lib/python3.10/site-packages/jax/__init__.py)</pre>
+<kbd>python 04_additional/07_flax.py --model.layers 4</kbd><pre class="ansi-block literal-block">model=Classifier(
+    # attributes
+    layers = 4
+    units = 32
+    output_dim = 10
+)
+num_iterations=1000</pre>
 </section>
 
         </article>
