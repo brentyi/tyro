@@ -43,7 +43,9 @@ dev = [
     "pyright>=1.1.264",
     "mypy>=0.991",
     "numpy>=1.20.0",
-    "flax==0.6.0",  # Pinning needed for Python 3.7 compatibility.
+    # As of 7/27/2023, flax install fails for Python 3.7 without pinning to an
+    # old version. But doing so breaks other Python versions.
+    "flax>=0.6.9;python_version>='3.8'", 
     "pydantic>=1.10.2",
     "coverage[toml]>=6.5.0"
 ]
