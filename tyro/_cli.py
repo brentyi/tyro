@@ -355,7 +355,7 @@ def _cli_impl(
         _arguments.USE_RICH = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
-    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
+    parser_spec = _parsers.ParserSpecification.from_callable_or_type(
         f,
         description=description,
         parent_classes=set(),  # Used for recursive calls.
@@ -366,16 +366,17 @@ def _cli_impl(
 
     # Generate parser!
     with _argparse_formatter.ansi_context():
-        parser = argparse.ArgumentParser(
+        parser = _argparse_formatter.TyroArgumentParser(
             prog=prog,
             formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
             allow_abbrev=False,
         )
-        parser_definition.apply(parser)
+        parser._parser_specification = parser_spec
+        parser_spec.apply(parser)
 
         # Print help message when no arguments are passed in. (but arguments are
         # expected)
-        if len(args) == 0 and parser_definition.has_required_args:
+        if len(args) == 0 and parser_spec.has_required_args:
             args = ["--help"]
 
         if return_parser:
@@ -429,16 +430,51 @@ def _cli_impl(
         # Attempt to call `f` using whatever was passed in.
         out, consumed_keywords = _calling.call_from_args(
             f,
-            parser_definition,
+            parser_spec,
             default_instance_internal,
             value_from_prefixed_field_name,
             field_name_prefix="",
         )
     except _calling.InstantiationError as e:
+        assert isinstance(e, _calling.InstantiationError)
+
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        parser.print_usage()
-        print()
-        print(e.args[0])
+        from rich.console import Console, Group
+        from rich.padding import Padding
+        from rich.panel import Panel
+        from rich.rule import Rule
+        from rich.style import Style
+
+        from ._argparse_formatter import THEME
+
+        console = Console(theme=THEME.as_rich_theme())
+        print(parser.format_usage().strip() + "\n")
+        console.print(
+            Panel(
+                Group(
+                    f"[bright_red][bold]Error parsing {e.arg.lowered.name_or_flag}[/bold]:[/bright_red] "
+                    f"{e.message}",
+                    *(
+                        []
+                        if e.arg.lowered.help is None
+                        else [
+                            Rule(style=Style(color="red")),
+                            "Argument helptext:",
+                            Padding(
+                                Group(
+                                    f"{e.arg.lowered.name_or_flag} [bold]{e.arg.lowered.metavar}[/bold]",
+                                    e.arg.lowered.help,
+                                ),
+                                pad=(1, 0, 1, 4),
+                            ),
+                        ]
+                    ),
+                ),
+                title="Value error",
+                title_align="left",
+                border_style=Style(color="red"),
+            )
+        )
         raise SystemExit()
 
     assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (

@@ -16,18 +16,20 @@ import dataclasses
 import itertools
 import re as _re
 import shutil
-from typing import Any, ContextManager, Generator, List, Optional
+from typing import Any, ContextManager, Dict, Generator, List, Optional, Set
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
 from rich.padding import Padding
 from rich.panel import Panel
+from rich.rule import Rule
 from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
 
 from . import _arguments, _strings
+from ._parsers import ParserSpecification
 
 
 @dataclasses.dataclass
@@ -129,6 +131,109 @@ def str_from_rich(
     with console.capture() as out:
         console.print(renderable, soft_wrap=soft_wrap)
     return out.get().rstrip("\n")
+
+
+class TyroArgumentParser(argparse.ArgumentParser):
+    _parser_specification: ParserSpecification
+
+    def error(self, message):
+        """Improve error messages from argparse.
+
+        error(message: string)
+
+        Prints a usage message incorporating the message to stderr and
+        exits.
+
+        If you override this in a subclass, it should not return -- it
+        should either exit or raise an exception.
+        """
+        print(self.format_usage().strip() + "\n")
+
+        extra_info: List[RenderableType] = []
+        if message.startswith("unrecognized arguments: "):
+            unrecognized_arguments = message.partition(":")[2].strip().split(" ")
+
+            # Argument name => subcommands it came from.
+            found_arguments: Dict[str, Set[str]] = {}
+
+            def _recursive_arg_search(
+                parser_spec: ParserSpecification, subcommands: str
+            ) -> None:
+                """Find all possible arguments that could have been passed in."""
+                for arg in parser_spec.args:
+                    argument_display = (
+                        arg.lowered.name_or_flag + " " + arg.lowered.metavar
+                        if arg.lowered.metavar is not None
+                        else arg.lowered.name_or_flag
+                    )
+                    if argument_display not in found_arguments:
+                        found_arguments[argument_display] = set([subcommands])
+                    else:
+                        found_arguments[argument_display].add(subcommands)
+
+                if parser_spec.subparsers is not None:
+                    for (
+                        subparser_name,
+                        subparser,
+                    ) in parser_spec.subparsers.parser_from_name.items():
+                        _recursive_arg_search(
+                            subparser, subcommands + " " + subparser_name
+                        )
+
+            _recursive_arg_search(self._parser_specification, self.prog)
+
+            if len(found_arguments) > 0:
+                for unrecognized_argument in unrecognized_arguments:
+                    # Sort arguments by similarity.
+                    score_from_argument: Dict[str, float] = {}
+                    unrecognized_charset = set(unrecognized_argument)
+                    for argument in found_arguments.keys():
+                        # Compute a score for each argument.
+                        # TODO: this is currently IoU, which is a terrible metric.
+                        found_charset = set(argument)
+                        score = len(unrecognized_charset & found_charset) / len(
+                            unrecognized_charset | found_charset
+                        )
+
+                        # Minimum score to display.
+                        if score > 0.6:
+                            score_from_argument[argument] = score
+
+                    # No arguments passed score threshold.
+                    if len(score_from_argument) == 0:
+                        continue
+
+                    # Add information about similar arguments.
+                    extra_info.append(Rule(style=Style(color="red")))
+                    extra_info.append("You may have been looking for:")
+                    extra_info.append("")
+                    for argument in sorted(
+                        score_from_argument.keys(), key=score_from_argument.__getitem__
+                    ):
+                        extra_info.append(
+                            Padding(f"[bold]{argument}[/bold]", (0, 0, 0, 4))
+                        )
+                        for subcommand in found_arguments[argument]:
+                            extra_info.append(
+                                Padding(
+                                    "in " + subcommand,
+                                    (0, 0, 0, 8),
+                                    style=Style(dim=True),
+                                )
+                            )
+                    extra_info.append("")
+
+        # print(self._parser_specification)
+        console = Console(theme=THEME.as_rich_theme())
+        console.print(
+            Panel(
+                Group(f"[bright_red]{message}[/bright_red]", *extra_info),
+                title="Parsing error",
+                title_align="left",
+                border_style=Style(color="red"),
+            )
+        )
+        raise SystemExit()
 
 
 class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -438,9 +543,9 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             max_width = max(map(len, lines))
 
             if self.formatter._tyro_rule is None:
-                # Note: we don't use rich.rule.Rule() because this will make all of
-                # the panels expand to fill the full width of the console. (this only
-                # impacts single-column layouts)
+                # We don't use rich.rule.Rule() because this will make all of the panels
+                # expand to fill the full width of the console. This only impacts
+                # single-column layouts.
                 self.formatter._tyro_rule = Text.from_ansi(
                     "─" * max_width, style=THEME.border, overflow="crop"
                 )
@@ -580,3 +685,15 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         # return the text
         return text
+
+    def _format_usage(self, usage, actions, groups, prefix) -> str:
+        # Format the usage label.
+        if prefix is None:
+            prefix = str_from_rich("[bold]usage[/bold]: ")
+        usage = super()._format_usage(
+            usage,
+            actions,
+            groups,
+            prefix,
+        )
+        return "\n\n" + usage

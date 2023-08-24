@@ -3,7 +3,18 @@ namespaces."""
 
 from __future__ import annotations
 
-from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
+import dataclasses
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import get_args
 
@@ -11,9 +22,13 @@ from . import _arguments, _fields, _parsers, _resolver, _strings
 from .conf import _markers
 
 
+@dataclasses.dataclass(frozen=True)
 class InstantiationError(Exception):
     """Exception raised when instantiation fail; this typically means that values from
     the CLI are invalid."""
+
+    message: str
+    arg: _arguments.ArgumentDefinition
 
 
 T = TypeVar("T")
@@ -94,7 +109,8 @@ def call_from_args(
                         value = arg.lowered.instantiator(value)
                     except ValueError as e:
                         raise InstantiationError(
-                            f"Parsing error for {arg.lowered.name_or_flag}: {e.args[0]}"
+                            e.args[0],
+                            arg,
                         )
             else:
                 assert arg.field.default not in _fields.MISSING_SINGLETONS
@@ -102,8 +118,9 @@ def call_from_args(
                 parsed_value = value_from_prefixed_field_name.get(prefixed_field_name)
                 if parsed_value not in _fields.MISSING_SINGLETONS:
                     raise InstantiationError(
-                        f"{arg.lowered.name_or_flag}={parsed_value} was passed in, but"
-                        " is a fixed argument that cannot be parsed"
+                        f"{arg.lowered.name_or_flag} was passed in, but"
+                        " is a fixed argument that cannot be parsed",
+                        arg,
                     )
         elif (
             prefixed_field_name
