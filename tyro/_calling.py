@@ -4,17 +4,7 @@ namespaces."""
 from __future__ import annotations
 
 import dataclasses
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Sequence,
-    Set,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
 
 from typing_extensions import get_args
 

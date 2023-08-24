@@ -9,6 +9,7 @@ import functools
 import itertools
 import shlex
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -29,12 +30,15 @@ from . import _fields, _instantiators, _resolver, _strings
 from ._typing import TypeForm
 from .conf import _markers
 
-try:
-    # Python >=3.8.
-    from functools import cached_property
-except ImportError:
-    # Python 3.7.
-    from backports.cached_property import cached_property  # type: ignore
+if TYPE_CHECKING:
+    cached_property = property
+else:
+    try:
+        # Python >=3.8.
+        from functools import cached_property
+    except ImportError:
+        # Python 3.7.
+        from backports.cached_property import cached_property  # type: ignore
 
 
 _T = TypeVar("_T")

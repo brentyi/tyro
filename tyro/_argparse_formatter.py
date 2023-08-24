@@ -16,7 +16,7 @@ import dataclasses
 import itertools
 import re as _re
 import shutil
-from typing import Any, ContextManager, Dict, Generator, List, Optional, Set
+from typing import Any, ContextManager, Dict, Generator, List, NoReturn, Optional, Set
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
@@ -136,7 +136,7 @@ def str_from_rich(
 class TyroArgumentParser(argparse.ArgumentParser):
     _parser_specification: ParserSpecification
 
-    def error(self, message):
+    def error(self, message: str) -> NoReturn:
         """Improve error messages from argparse.
 
         error(message: string)
@@ -154,22 +154,35 @@ class TyroArgumentParser(argparse.ArgumentParser):
             unrecognized_arguments = message.partition(":")[2].strip().split(" ")
 
             # Argument name => subcommands it came from.
-            found_arguments: Dict[str, Set[str]] = {}
+            location_from_argument: Dict[str, Set[str]] = {}
 
             def _recursive_arg_search(
                 parser_spec: ParserSpecification, subcommands: str
             ) -> None:
                 """Find all possible arguments that could have been passed in."""
+
+                # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
+                # only appear in the help message for "leaf" subparsers.
+                help_flag = (
+                    " (other subcommands) --help"
+                    if parser_spec.consolidate_subcommand_args
+                    and parser_spec.subparsers is not None
+                    else " --help"
+                )
                 for arg in parser_spec.args:
                     argument_display = (
                         arg.lowered.name_or_flag + " " + arg.lowered.metavar
                         if arg.lowered.metavar is not None
                         else arg.lowered.name_or_flag
                     )
-                    if argument_display not in found_arguments:
-                        found_arguments[argument_display] = set([subcommands])
+                    if argument_display not in location_from_argument:
+                        location_from_argument[argument_display] = set(
+                            [subcommands + help_flag]
+                        )
                     else:
-                        found_arguments[argument_display].add(subcommands)
+                        location_from_argument[argument_display].add(
+                            subcommands + help_flag
+                        )
 
                 if parser_spec.subparsers is not None:
                     for (
@@ -182,12 +195,12 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
             _recursive_arg_search(self._parser_specification, self.prog)
 
-            if len(found_arguments) > 0:
+            if len(location_from_argument) > 0:
                 for unrecognized_argument in unrecognized_arguments:
                     # Sort arguments by similarity.
                     score_from_argument: Dict[str, float] = {}
                     unrecognized_charset = set(unrecognized_argument)
-                    for argument in found_arguments.keys():
+                    for argument in location_from_argument.keys():
                         # Compute a score for each argument.
                         # TODO: this is currently IoU, which is a terrible metric.
                         found_charset = set(argument)
@@ -205,7 +218,11 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
                     # Add information about similar arguments.
                     extra_info.append(Rule(style=Style(color="red")))
-                    extra_info.append("You may have been looking for:")
+                    extra_info.append(
+                        f"Arguments similar to {unrecognized_argument}:"
+                        if len(unrecognized_arguments) > 1
+                        else "Similar arguments:"
+                    )
                     extra_info.append("")
                     for argument in sorted(
                         score_from_argument.keys(), key=score_from_argument.__getitem__
@@ -213,12 +230,11 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         extra_info.append(
                             Padding(f"[bold]{argument}[/bold]", (0, 0, 0, 4))
                         )
-                        for subcommand in found_arguments[argument]:
+                        for subcommand in location_from_argument[argument]:
                             extra_info.append(
                                 Padding(
-                                    "in " + subcommand,
+                                    f"in [cyan]{subcommand}[/cyan]",
                                     (0, 0, 0, 8),
-                                    style=Style(dim=True),
                                 )
                             )
                     extra_info.append("")
@@ -227,10 +243,10 @@ class TyroArgumentParser(argparse.ArgumentParser):
         console = Console(theme=THEME.as_rich_theme())
         console.print(
             Panel(
-                Group(f"[bright_red]{message}[/bright_red]", *extra_info),
+                Group(f"[bold]{message}[/bold]", *extra_info),
                 title="Parsing error",
                 title_align="left",
-                border_style=Style(color="red"),
+                border_style=Style(color="bright_red"),
             )
         )
         raise SystemExit()

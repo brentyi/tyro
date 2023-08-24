@@ -439,7 +439,7 @@ def _cli_impl(
         assert isinstance(e, _calling.InstantiationError)
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        from rich.console import Console, Group
+        from rich.console import Console, Group, RenderableType
         from rich.padding import Padding
         from rich.panel import Panel
         from rich.rule import Rule
@@ -454,7 +454,8 @@ def _cli_impl(
                 Group(
                     f"[bright_red][bold]Error parsing {e.arg.lowered.name_or_flag}[/bold]:[/bright_red] "
                     f"{e.message}",
-                    *(
+                    *cast(  # Cast to appease mypy...
+                        List[RenderableType],
                         []
                         if e.arg.lowered.help is None
                         else [
@@ -467,7 +468,7 @@ def _cli_impl(
                                 ),
                                 pad=(1, 0, 1, 4),
                             ),
-                        ]
+                        ],
                     ),
                 ),
                 title="Value error",
