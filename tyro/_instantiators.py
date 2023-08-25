@@ -46,6 +46,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Set,
     Tuple,
     TypeVar,
     Union,
@@ -93,7 +94,7 @@ class InstantiatorMetadata:
     # Unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: str
-    choices: Optional[Tuple[str, ...]]
+    choices: Optional[Set[str]]
     action: Optional[Literal["append"]]
 
     def check_choices(self, strings: List[str]) -> None:
@@ -175,7 +176,7 @@ def instantiator_from_type(
         return instantiator, InstantiatorMetadata(
             nargs=1,
             metavar="{None}",
-            choices=("None",),
+            choices={"None",},
             action=None,
         )
 
@@ -206,11 +207,11 @@ def instantiator_from_type(
         )
 
     # Special case `choices` for some types, as implemented in `instance_from_string()`.
-    auto_choices: Optional[Tuple[str, ...]] = None
+    auto_choices: Optional[Set[str]] = None
     if typ is bool:
-        auto_choices = ("True", "False")
+        auto_choices = {"True", "False"}
     elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
-        auto_choices = tuple(x.name for x in typ)
+        auto_choices = set(x.name for x in typ)
 
     def instantiator_base_case(strings: List[str]) -> Any:
         """Given a type and and a string from the command-line, reconstruct an object. Not
@@ -671,7 +672,7 @@ def _instantiator_from_literal(
         InstantiatorMetadata(
             nargs=1,
             metavar="{" + ",".join(str_choices) + "}",
-            choices=str_choices,
+            choices=set(str_choices),
             action=None,
         ),
     )

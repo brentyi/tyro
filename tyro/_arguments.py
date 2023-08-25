@@ -14,6 +14,7 @@ from typing import (
     Callable,
     Dict,
     Iterable,
+    List,
     Mapping,
     Optional,
     Sequence,
@@ -211,10 +212,10 @@ class LoweredArgumentDefinition:
     name_or_flag: str = ""
     default: Optional[Any] = None
     dest: Optional[str] = None
-    required: bool = False
+    required: Optional[bool] = None
     action: Optional[Any] = None
     nargs: Optional[Union[int, str]] = None
-    choices: Optional[Set[Any]] = None
+    choices: Optional[Union[Set[str], List[str]]] = None
     # Note: unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: Optional[str] = None
