@@ -161,7 +161,13 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
         extra_info: List[RenderableType] = []
         if message.startswith("unrecognized arguments: "):
-            unrecognized_arguments = message.partition(":")[2].strip().split(" ")
+            unrecognized_arguments = [
+                arg
+                for arg in message.partition(":")[2].strip().split(" ")
+                # If we pass in `--spell-chekc on`, we only want `spell-chekc` and not
+                # `on`.
+                if arg.startswith("--")
+            ]
 
             # Argument name => subcommands it came from.
             arguments: List[_ArgumentInfo] = []
@@ -208,11 +214,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:
-                # If we pass in `--spell-chekc on`, we only want `spell-chekc` and
-                # not `on`.
-                if not unrecognized_argument.startswith("--"):
-                    continue
-
                 # Sort arguments by similarity.
                 scored_arguments: List[Tuple[_ArgumentInfo, float]] = []
                 for argument in arguments:
