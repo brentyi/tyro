@@ -264,10 +264,8 @@ def _cli_impl(
     if deprecated_kwargs.get("avoid_subparsers", False):
         f = conf.AvoidSubcommands[f]  # type: ignore
         warnings.warn(
-            (
-                "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`"
-                " instead."
-            ),
+            "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`"
+            " instead.",
             stacklevel=2,
         )
 
@@ -452,23 +450,25 @@ def _cli_impl(
         console.print(
             Panel(
                 Group(
-                    f"[bright_red][bold]Error parsing {e.arg.lowered.name_or_flag}[/bold]:[/bright_red] "
-                    f"{e.message}",
+                    "[bright_red][bold]Error parsing"
+                    f" {e.arg.lowered.name_or_flag}[/bold]:[/bright_red] {e.message}",
                     *cast(  # Cast to appease mypy...
                         List[RenderableType],
-                        []
-                        if e.arg.lowered.help is None
-                        else [
-                            Rule(style=Style(color="red")),
-                            "Argument helptext:",
-                            Padding(
-                                Group(
-                                    f"{e.arg.lowered.name_or_flag} [bold]{e.arg.lowered.metavar}[/bold]",
-                                    e.arg.lowered.help,
+                        (
+                            []
+                            if e.arg.lowered.help is None
+                            else [
+                                Rule(style=Style(color="red")),
+                                "Argument helptext:",
+                                Padding(
+                                    Group(
+                                        f"{e.arg.lowered.name_or_flag} [bold]{e.arg.lowered.metavar}[/bold]",
+                                        e.arg.lowered.help,
+                                    ),
+                                    pad=(1, 0, 1, 4),
                                 ),
-                                pad=(1, 0, 1, 4),
-                            ),
-                        ],
+                            ]
+                        ),
                     ),
                 ),
                 title="Value error",

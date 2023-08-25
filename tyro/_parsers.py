@@ -357,8 +357,12 @@ class SubparsersSpecification:
             for typ in get_args(typ)
         ]
         options = [
-            # Cast seems unnecessary but needed in mypy... (1.4.1)
-            cast(Callable, none_proxy) if o is type(None) else o
+            (
+                # Cast seems unnecessary but needed in mypy... (1.4.1)
+                cast(Callable, none_proxy)
+                if o is type(None)
+                else o
+            )
             for o in options
         ]
         if not all(

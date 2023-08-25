@@ -17,7 +17,7 @@ import difflib
 import itertools
 import re as _re
 import shutil
-from typing import Any, ContextManager, Generator, List, NoReturn, Optional, Set, Tuple
+from typing import Any, ContextManager, Generator, List, NoReturn, Optional, Tuple
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
