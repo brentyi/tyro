@@ -17,6 +17,7 @@ import difflib
 import itertools
 import re as _re
 import shutil
+import sys
 from typing import Any, ContextManager, Generator, List, NoReturn, Optional, Tuple
 
 from rich.columns import Columns
@@ -274,7 +275,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 border_style=Style(color="bright_red"),
             )
         )
-        raise SystemExit()
+        sys.exit(2)
 
 
 class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):

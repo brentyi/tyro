@@ -409,7 +409,7 @@ def _cli_impl(
                         root_prefix=f"tyro_{parser.prog}",
                     )
                 )
-            raise SystemExit()
+            sys.exit()
 
         if return_unknown_args:
             namespace, unknown_args = parser.parse_known_args(args=args)
@@ -465,18 +465,18 @@ def _cli_impl(
                                         f"{e.arg.lowered.name_or_flag} [bold]{e.arg.lowered.metavar}[/bold]",
                                         e.arg.lowered.help,
                                     ),
-                                    pad=(1, 0, 1, 4),
+                                    pad=(0, 0, 0, 4),
                                 ),
                             ]
                         ),
                     ),
                 ),
-                title="Value error",
+                title="[bold]Value error[/bold]",
                 title_align="left",
                 border_style=Style(color="red"),
             )
         )
-        raise SystemExit()
+        sys.exit(2)
 
     assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (
         f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
