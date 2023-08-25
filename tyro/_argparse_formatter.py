@@ -13,10 +13,11 @@ TODO: we may want to just maintain our own fork of argparse.
 import argparse
 import contextlib
 import dataclasses
+import difflib
 import itertools
 import re as _re
 import shutil
-from typing import Any, ContextManager, Dict, Generator, List, NoReturn, Optional, Set
+from typing import Any, ContextManager, Generator, List, NoReturn, Optional, Set, Tuple
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
@@ -133,6 +134,14 @@ def str_from_rich(
     return out.get().rstrip("\n")
 
 
+@dataclasses.dataclass(frozen=True)
+class _ArgumentInfo:
+    flag: str
+    metavar: Optional[str]
+    help_command: str
+    help: Optional[str]
+
+
 class TyroArgumentParser(argparse.ArgumentParser):
     _parser_specification: ParserSpecification
 
@@ -154,7 +163,8 @@ class TyroArgumentParser(argparse.ArgumentParser):
             unrecognized_arguments = message.partition(":")[2].strip().split(" ")
 
             # Argument name => subcommands it came from.
-            location_from_argument: Dict[str, Set[str]] = {}
+            arguments: List[_ArgumentInfo] = []
+            has_subcommands = False
 
             def _recursive_arg_search(
                 parser_spec: ParserSpecification, subcommands: str
@@ -170,21 +180,21 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     else " --help"
                 )
                 for arg in parser_spec.args:
-                    argument_display = (
-                        arg.lowered.name_or_flag + " " + arg.lowered.metavar
-                        if arg.lowered.metavar is not None
-                        else arg.lowered.name_or_flag
+                    if arg.field.is_positional() or arg.lowered.is_fixed():
+                        # Skip positional arguments.
+                        continue
+                    arguments.append(
+                        _ArgumentInfo(
+                            arg.lowered.name_or_flag,
+                            metavar=arg.lowered.metavar,
+                            help_command=subcommands + help_flag,
+                            help=arg.lowered.help,
+                        )
                     )
-                    if argument_display not in location_from_argument:
-                        location_from_argument[argument_display] = set(
-                            [subcommands + help_flag]
-                        )
-                    else:
-                        location_from_argument[argument_display].add(
-                            subcommands + help_flag
-                        )
 
                 if parser_spec.subparsers is not None:
+                    nonlocal has_subcommands
+                    has_subcommands = True
                     for (
                         subparser_name,
                         subparser,
@@ -195,56 +205,71 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
             _recursive_arg_search(self._parser_specification, self.prog)
 
-            if len(location_from_argument) > 0:
-                for unrecognized_argument in unrecognized_arguments:
-                    # Sort arguments by similarity.
-                    score_from_argument: Dict[str, float] = {}
-                    unrecognized_charset = set(unrecognized_argument)
-                    for argument in location_from_argument.keys():
-                        # Compute a score for each argument.
-                        # TODO: this is currently IoU, which is a terrible metric.
-                        found_charset = set(argument)
-                        score = len(unrecognized_charset & found_charset) / len(
-                            unrecognized_charset | found_charset
-                        )
+            # Show similar arguments for keyword options.
+            for unrecognized_argument in unrecognized_arguments:
+                # If we pass in `--spell-chekc on`, we only want `spell-chekc` and
+                # not `on`.
+                if not unrecognized_argument.startswith("--"):
+                    continue
 
-                        # Minimum score to display.
-                        if score > 0.6:
-                            score_from_argument[argument] = score
+                # Sort arguments by similarity.
+                scored_arguments: List[Tuple[_ArgumentInfo, float]] = []
+                for argument in arguments:
+                    # Compute a score for each argument.
+                    score = difflib.SequenceMatcher(
+                        a=unrecognized_argument, b=argument.flag
+                    ).ratio()
+                    scored_arguments.append((argument, score))
 
-                    # No arguments passed score threshold.
-                    if len(score_from_argument) == 0:
-                        continue
-
-                    # Add information about similar arguments.
-                    extra_info.append(Rule(style=Style(color="red")))
-                    extra_info.append(
-                        f"Arguments similar to {unrecognized_argument}:"
-                        if len(unrecognized_arguments) > 1
-                        else "Similar arguments:"
+                # Add information about similar arguments.
+                prev_argument_flag: Optional[str] = None
+                for i, (argument, score) in enumerate(
+                    # Sort scores greatest to least.
+                    sorted(
+                        scored_arguments,
+                        key=lambda arg_score: -arg_score[1],
                     )
-                    extra_info.append("")
-                    for argument in sorted(
-                        score_from_argument.keys(), key=score_from_argument.__getitem__
-                    ):
+                ):
+                    if score < 0.4:
+                        break
+                    if score < 0.6 and i > 1:
+                        break
+
+                    # Add a header before the first similar argument.
+                    if i == 0:
+                        extra_info.append(Rule(style=Style(color="red")))
                         extra_info.append(
-                            Padding(f"[bold]{argument}[/bold]", (0, 0, 0, 4))
+                            f"Arguments similar to {unrecognized_argument}:"
+                            if len(unrecognized_arguments) > 1
+                            else "Similar arguments:"
                         )
-                        for subcommand in location_from_argument[argument]:
-                            extra_info.append(
-                                Padding(
-                                    f"in [cyan]{subcommand}[/cyan]",
-                                    (0, 0, 0, 8),
-                                )
+
+                    if not (has_subcommands and prev_argument_flag == argument.flag):
+                        extra_info.append(
+                            Padding(
+                                f"[bold]{argument.flag if argument.metavar is None else argument.flag + ' ' + argument.metavar}[/bold]",
+                                (0, 0, 0, 4),
                             )
-                    extra_info.append("")
+                        )
+                        prev_argument_flag = argument.flag
+
+                    # Uncomment to show similarity metric.
+                    # extra_info.append(Padding(f"[green]Similarity: {score:.02f}[/green]", (0, 0, 0, 8)))
+                    if has_subcommands:
+                        extra_info.append(
+                            Padding(
+                                f"in [cyan]{argument.help_command}[/cyan]", (0, 0, 0, 8)
+                            )
+                        )
+                    elif argument.help is not None:
+                        extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
 
         # print(self._parser_specification)
         console = Console(theme=THEME.as_rich_theme())
         console.print(
             Panel(
-                Group(f"[bold]{message}[/bold]", *extra_info),
-                title="Parsing error",
+                Group(f"{message}", *extra_info),
+                title="[bold]Parsing error[/bold]",
                 title_align="left",
                 border_style=Style(color="bright_red"),
             )
