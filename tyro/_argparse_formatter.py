@@ -231,9 +231,9 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         key=lambda arg_score: -arg_score[1],
                     )
                 ):
-                    if score < 0.4:
+                    if score < 0.8:
                         break
-                    if score < 0.6 and i > 1:
+                    if score < 0.9 and i >= 1:
                         break
 
                     # Add a header before the first similar argument.
@@ -255,7 +255,11 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         prev_argument_flag = argument.flag
 
                     # Uncomment to show similarity metric.
-                    # extra_info.append(Padding(f"[green]Similarity: {score:.02f}[/green]", (0, 0, 0, 8)))
+                    # extra_info.append(
+                    #     Padding(
+                    #         f"[green]Similarity: {score:.02f}[/green]", (0, 0, 0, 8)
+                    #     )
+                    # )
                     if has_subcommands:
                         extra_info.append(
                             Padding(
