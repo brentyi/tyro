@@ -538,6 +538,7 @@ class SubparsersSpecification:
                 name,
                 formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
+                allow_abbrev=False,
             )
             subparser_tree_leaves.extend(subparser_def.apply(subparser))
 
