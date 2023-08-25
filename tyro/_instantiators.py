@@ -176,7 +176,9 @@ def instantiator_from_type(
         return instantiator, InstantiatorMetadata(
             nargs=1,
             metavar="{None}",
-            choices={"None",},
+            choices={
+                "None",
+            },
             action=None,
         )
 
@@ -207,11 +209,11 @@ def instantiator_from_type(
         )
 
     # Special case `choices` for some types, as implemented in `instance_from_string()`.
-    auto_choices: Optional[Set[str]] = None
+    auto_choices: Optional[Tuple[str, ...]] = None
     if typ is bool:
-        auto_choices = {"True", "False"}
+        auto_choices = ("True", "False")
     elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
-        auto_choices = set(x.name for x in typ)
+        auto_choices = tuple(x.name for x in typ)
 
     def instantiator_base_case(strings: List[str]) -> Any:
         """Given a type and and a string from the command-line, reconstruct an object. Not
@@ -247,7 +249,7 @@ def instantiator_from_type(
             if auto_choices is None
             else "{" + ",".join(map(str, auto_choices)) + "}"
         ),
-        choices=auto_choices,
+        choices=None if auto_choices is None else set(auto_choices),
         action=None,
     )
 
