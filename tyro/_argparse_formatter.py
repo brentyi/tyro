@@ -452,7 +452,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
             # Argument name => subcommands it came from.
             arguments: List[_ArgumentInfo] = []
             has_subcommands = False
-            same_exists = True
+            same_exists = False
 
             def _recursive_arg_search(
                 parser_spec: ParserSpecification, subcommands: str
