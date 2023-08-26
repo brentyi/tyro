@@ -452,6 +452,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
             # Argument name => subcommands it came from.
             arguments: List[_ArgumentInfo] = []
             has_subcommands = False
+            same_exists = True
 
             def _recursive_arg_search(
                 parser_spec: ParserSpecification, subcommands: str
@@ -479,6 +480,14 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         )
                     )
 
+                    # An unrecognized argument.
+                    nonlocal same_exists
+                    if (
+                        not same_exists
+                        and arg.lowered.name_or_flag in unrecognized_arguments
+                    ):
+                        same_exists = True
+
                 if parser_spec.subparsers is not None:
                     nonlocal has_subcommands
                     has_subcommands = True
@@ -491,6 +500,11 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         )
 
             _recursive_arg_search(self._parser_specification, self.prog)
+
+            if has_subcommands and same_exists:
+                message = (
+                    "unrecognized or misplaced arguments:" + message.partition(":")[2]
+                )
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:
