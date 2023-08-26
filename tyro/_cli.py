@@ -49,7 +49,7 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
-    return_unknown_args: Literal[False],
+    return_unknown_args: Literal[False] = False,
 ) -> OutT:
     ...
 

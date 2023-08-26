@@ -540,6 +540,10 @@ class SubparsersSpecification:
                 help=helptext,
                 allow_abbrev=False,
             )
+            assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
+            assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
+            subparser._parsing_known_args = parent_parser._parsing_known_args
+            subparser._parser_specification = subparser_def
             subparser_tree_leaves.extend(subparser_def.apply(subparser))
 
         return tuple(subparser_tree_leaves)
