@@ -41,7 +41,7 @@ dev = [
     "attrs>=21.4.0",
     "torch>=1.10.0",
     "pyright>=1.1.264",
-    "mypy>=1.5.1",
+    "mypy>=1.4.1",
     "numpy>=1.20.0",
     # As of 7/27/2023, flax install fails for Python 3.7 without pinning to an
     # old version. But doing so breaks other Python versions.
