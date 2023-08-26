@@ -29,6 +29,7 @@ from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
+from typing_extensions import override
 
 from . import _arguments, _strings
 from ._parsers import ParserSpecification
@@ -145,7 +146,35 @@ class _ArgumentInfo:
 
 class TyroArgumentParser(argparse.ArgumentParser):
     _parser_specification: ParserSpecification
+    _parsing_known_args: bool
 
+    @override
+    def _parse_optional(
+        self, arg_string: str
+    ) -> Optional[Tuple[Optional[argparse.Action], str, Optional[str]]]:
+        """Improve error messages when we have subparsers."""
+        out = super()._parse_optional(arg_string)
+        if self._parsing_known_args:
+            return out
+
+        # If the Action is `None`, it means we've found an unknown argument.
+        # By default, this won't raise an error in the case of:
+        #
+        #     # We've misspelled `binary`!
+        #     python 03_multiple_subcommands.py dataset:mnist --dataset.binayr True
+        #
+        # When there's a subcommand that follows dataset:mnist. Instead,
+        # --dataset.binayr is consumed and we get an error that `True` is not a valid
+        # subcommand. This can be really confusing when we have a lot of keyword
+        # arguments.
+        #
+        # With the following check, we'll instead raise an error that --dataset.binayr
+        # is an unrecognized argument.
+        if out is not None and out[0] is None:
+            self.error(f"unrecognized arguments: {arg_string}")
+        return out
+
+    @override
     def error(self, message: str) -> NoReturn:
         """Improve error messages from argparse.
 
@@ -295,6 +324,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         super().__init__(prog, indent_increment, max_help_position, width)
 
+    @override
     def _format_args(self, action, default_metavar):
         """Override _format_args() to ignore nargs and always expect single string
         metavars."""
@@ -318,6 +348,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             )
         return out
 
+    @override
     def add_argument(self, action):  # pragma: no cover
         # Patch to avoid super long arguments from shifting the helptext of all of the
         # fields.
@@ -338,9 +369,11 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         del textwrap.len  # type: ignore
         return out
 
+    @override
     def _fill_text(self, text, width, indent):
         return "".join(indent + line for line in text.splitlines(keepends=True))
 
+    @override
     def format_help(self):
         # Try with and without a fixed help position, then return the shorter help
         # message.
@@ -362,6 +395,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         else:
             return out
 
+    @override
     class _Section(object):
         def __init__(self, formatter, parent, heading=None):
             self.formatter = formatter
@@ -733,6 +767,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         # return the text
         return text
 
+    @override
     def _format_usage(self, usage, actions, groups, prefix) -> str:
         # Format the usage label.
         if prefix is None:

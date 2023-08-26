@@ -49,7 +49,7 @@ def cli(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
-    return_unknown_args: Literal[False] = False,
+    return_unknown_args: Literal[False],
 ) -> OutT:
     ...
 
@@ -370,6 +370,7 @@ def _cli_impl(
             allow_abbrev=False,
         )
         parser._parser_specification = parser_spec
+        parser._parsing_known_args = return_unknown_args
         parser_spec.apply(parser)
 
         # Print help message when no arguments are passed in. (but arguments are
