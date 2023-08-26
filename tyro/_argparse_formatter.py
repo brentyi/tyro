@@ -528,7 +528,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 ):
                     if score < 0.8:
                         break
-                    if score < 0.9 and i >= 1:
+                    if score < 0.9 and i >= 1 and prev_argument_flag != argument.flag:
                         break
 
                     # Add a header before the first similar argument.
