@@ -371,6 +371,7 @@ def _cli_impl(
         )
         parser._parser_specification = parser_spec
         parser._parsing_known_args = return_unknown_args
+        parser._args = args
         parser_spec.apply(parser)
 
         # Print help message when no arguments are passed in. (but arguments are

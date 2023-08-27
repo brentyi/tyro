@@ -143,11 +143,14 @@ class _ArgumentInfo:
     metavar: Optional[str]
     usage_hint: str
     help: Optional[str]
+    subcommand_match_score: float
+    """Priority value used when an argument is in the current subcommand tree."""
 
 
 class TyroArgumentParser(argparse.ArgumentParser):
     _parser_specification: ParserSpecification
     _parsing_known_args: bool
+    _args: List[str]
 
     @override
     def _parse_known_args(self, arg_strings, namespace):
@@ -455,7 +458,9 @@ class TyroArgumentParser(argparse.ArgumentParser):
             same_exists = False
 
             def _recursive_arg_search(
-                parser_spec: ParserSpecification, subcommands: str
+                parser_spec: ParserSpecification,
+                subcommands: str,
+                subcommand_match_score: float,
             ) -> None:
                 """Find all possible arguments that could have been passed in."""
 
@@ -473,10 +478,13 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         continue
                     arguments.append(
                         _ArgumentInfo(
+                            # Currently doesn't handle actions well, eg boolean optional
+                            # arguments.
                             arg.lowered.name_or_flag,
                             metavar=arg.lowered.metavar,
                             usage_hint=subcommands + help_flag,
                             help=arg.lowered.help,
+                            subcommand_match_score=subcommand_match_score,
                         )
                     )
 
@@ -496,13 +504,17 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         subparser,
                     ) in parser_spec.subparsers.parser_from_name.items():
                         _recursive_arg_search(
-                            subparser, subcommands + " " + subparser_name
+                            subparser,
+                            subcommands + " " + subparser_name,
+                            subcommand_match_score=subcommand_match_score
+                            + (1 if subparser_name in self._args else -0.001),
                         )
 
             _recursive_arg_search(
                 self._parser_specification,
                 # Remove other subcommands.
                 self.prog.split(" ")[0],
+                0,
             )
 
             if has_subcommands and same_exists:
@@ -526,13 +538,20 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
                 # Add information about similar arguments.
                 prev_argument_flag: Optional[str] = None
-                prev_argument_help: Optional[str] = None
-                for i, (argument, score) in enumerate(
+                show_arguments = []
+                unique_counter = 0
+                for argument, score in (
                     # Sort scores greatest to least.
                     sorted(
                         scored_arguments,
                         key=lambda arg_score: (
+                            # Highest scores first.
                             -arg_score[1],
+                            # Prefer arguments available in the currently specified
+                            # subcommands.
+                            -arg_score[0].subcommand_match_score,
+                            # Cluster by flag name, usage hint, help message.
+                            arg_score[0].flag,
                             arg_score[0].usage_hint,
                             arg_score[0].help,
                         ),
@@ -540,17 +559,52 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 ):
                     if score < 0.8:
                         break
-                    if score < 0.9 and i >= 1 and prev_argument_flag != argument.flag:
+                    if (
+                        score < 0.9
+                        and unique_counter >= 3
+                        and prev_argument_flag != argument.flag
+                    ):
                         break
+                    unique_counter += prev_argument_flag != argument.flag
 
+                    show_arguments.append(argument)
+                    prev_argument_flag = argument.flag
+                del prev_argument_flag
+
+                prev_argument_flag: Optional[str] = None
+                prev_argument_help: Optional[str] = None
+                same_counter = 0
+                dots_printed = False
+                if len(show_arguments) > 0:
+                    extra_info.append(Rule(style=Style(color="red")))
+                    extra_info.append(
+                        f"Arguments similar to {unrecognized_argument}:"
+                        if len(show_arguments) > 1
+                        else "Similar arguments:"
+                    )
+                for argument in show_arguments:
                     # Add a header before the first similar argument.
-                    if i == 0:
-                        extra_info.append(Rule(style=Style(color="red")))
-                        extra_info.append(
-                            f"Arguments similar to {unrecognized_argument}:"
-                            if len(unrecognized_arguments) > 1
-                            else "Similar arguments:"
-                        )
+
+                    same_counter += 1
+                    if argument.flag != prev_argument_flag:
+                        same_counter = 0
+
+                    # For arguments with the same name, only show a limited number of
+                    # subcommands / help messages.
+                    if (
+                        len(show_arguments) >= 16
+                        and same_counter >= 8
+                        and argument.flag == prev_argument_flag
+                    ):
+                        if not dots_printed:
+                            extra_info.append(
+                                Padding(
+                                    "[...]",
+                                    (0, 0, 0, 8),
+                                )
+                            )
+                        dots_printed = True
+                        continue
 
                     if not (has_subcommands and argument.flag == prev_argument_flag):
                         extra_info.append(
@@ -566,6 +620,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     #         f"[green]Similarity: {score:.02f}[/green]", (0, 0, 0, 8)
                     #     )
                     # )
+
                     if argument.help is not None and (
                         # Only print help messages if it's not the same as the previous
                         # one.
@@ -578,8 +633,8 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     if has_subcommands:
                         extra_info.append(
                             Padding(
-                                f"[dim]in[/dim] [green]{argument.usage_hint}[/green]",
-                                (0, 0, 0, 8),
+                                f"in [green]{argument.usage_hint}[/green]",
+                                (0, 0, 0, 12),
                             )
                         )
 
@@ -590,7 +645,10 @@ class TyroArgumentParser(argparse.ArgumentParser):
         console = Console(theme=THEME.as_rich_theme())
         console.print(
             Panel(
-                Group(f"{message}", *extra_info),
+                Group(
+                    f"{message[0].upper() + message[1:]}" if len(message) > 0 else "",
+                    *extra_info,
+                ),
                 title="[bold]Parsing error[/bold]",
                 title_align="left",
                 border_style=Style(color="bright_red"),
