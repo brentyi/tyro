@@ -141,7 +141,7 @@ def str_from_rich(
 class _ArgumentInfo:
     flag: str
     metavar: Optional[str]
-    help_command: str
+    usage_hint: str
     help: Optional[str]
 
 
@@ -475,7 +475,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         _ArgumentInfo(
                             arg.lowered.name_or_flag,
                             metavar=arg.lowered.metavar,
-                            help_command=subcommands + help_flag,
+                            usage_hint=subcommands + help_flag,
                             help=arg.lowered.help,
                         )
                     )
@@ -499,11 +499,18 @@ class TyroArgumentParser(argparse.ArgumentParser):
                             subparser, subcommands + " " + subparser_name
                         )
 
-            _recursive_arg_search(self._parser_specification, self.prog)
+            _recursive_arg_search(
+                self._parser_specification,
+                # Remove other subcommands.
+                self.prog.split(" ")[0],
+            )
 
             if has_subcommands and same_exists:
+                misplaced_arguments = message.partition(":")[2].strip()
                 message = (
-                    "unrecognized or misplaced arguments:" + message.partition(":")[2]
+                    "unrecognized or misplaced arguments: " + misplaced_arguments
+                    if " " in misplaced_arguments
+                    else "unrecognized or misplaced argument: " + misplaced_arguments
                 )
 
             # Show similar arguments for keyword options.
@@ -519,11 +526,16 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
                 # Add information about similar arguments.
                 prev_argument_flag: Optional[str] = None
+                prev_argument_help: Optional[str] = None
                 for i, (argument, score) in enumerate(
                     # Sort scores greatest to least.
                     sorted(
                         scored_arguments,
-                        key=lambda arg_score: -arg_score[1],
+                        key=lambda arg_score: (
+                            -arg_score[1],
+                            arg_score[0].usage_hint,
+                            arg_score[0].help,
+                        ),
                     )
                 ):
                     if score < 0.8:
@@ -540,14 +552,13 @@ class TyroArgumentParser(argparse.ArgumentParser):
                             else "Similar arguments:"
                         )
 
-                    if not (has_subcommands and prev_argument_flag == argument.flag):
+                    if not (has_subcommands and argument.flag == prev_argument_flag):
                         extra_info.append(
                             Padding(
                                 f"[bold]{argument.flag if argument.metavar is None else argument.flag + ' ' + argument.metavar}[/bold]",
                                 (0, 0, 0, 4),
                             )
                         )
-                        prev_argument_flag = argument.flag
 
                     # Uncomment to show similarity metric.
                     # extra_info.append(
@@ -555,14 +566,25 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     #         f"[green]Similarity: {score:.02f}[/green]", (0, 0, 0, 8)
                     #     )
                     # )
+                    if argument.help is not None and (
+                        # Only print help messages if it's not the same as the previous
+                        # one.
+                        argument.help != prev_argument_help
+                        or argument.flag != prev_argument_flag
+                    ):
+                        extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
+
+                    # Show the subcommand that this argument is available in.
                     if has_subcommands:
                         extra_info.append(
                             Padding(
-                                f"in [cyan]{argument.help_command}[/cyan]", (0, 0, 0, 8)
+                                f"[dim]in[/dim] [green]{argument.usage_hint}[/green]",
+                                (0, 0, 0, 8),
                             )
                         )
-                    elif argument.help is not None:
-                        extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
+
+                    prev_argument_flag = argument.flag
+                    prev_argument_help = argument.help
 
         # print(self._parser_specification)
         console = Console(theme=THEME.as_rich_theme())
