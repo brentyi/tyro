@@ -569,7 +569,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
                     show_arguments.append(argument)
                     prev_argument_flag = argument.flag
-                del prev_argument_flag
 
                 prev_argument_flag: Optional[str] = None
                 prev_argument_help: Optional[str] = None
