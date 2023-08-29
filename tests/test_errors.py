@@ -272,3 +272,102 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
     assert "Arguments similar to --track" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--help") == 2  # Should show two possible subcommands.
+
+
+def test_similar_arguments_subcommands_multiple_contains_match() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track0: bool
+        track1: bool
+        track2: bool
+        track3: bool
+        track4: bool
+        track5: bool
+        track6: bool
+        track7: bool
+        track8: bool
+        track9: bool
+        track10: bool
+        track11: bool
+        track12: bool
+        track13: bool
+        track14: bool
+        track15: bool
+        track16: bool
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Arguments similar to --track" in error
+    assert error.count("--reward.track") == 10
+    assert "[...]" not in error
+    assert error.count("--help") == 20
+
+
+def test_similar_arguments_subcommands_multiple_contains_match() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassC:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassD:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassE:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassF:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassG:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassH:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassI:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(
+            Union[
+                ClassA, ClassB, ClassC, ClassD, ClassE, ClassF, ClassG, ClassH, ClassI
+            ],
+            args="--track".split(" "),
+        )
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Arguments similar to --track" in error
+    assert error.count("--reward.track") == 1
+    assert "[...]" in error
+    assert error.count("--help") == 4

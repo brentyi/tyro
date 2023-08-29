@@ -153,7 +153,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
     _args: List[str]
 
     @override
-    def _parse_known_args(self, arg_strings, namespace):
+    def _parse_known_args(self, arg_strings, namespace):  # pragma: no cover
         """We override _parse_known_args() to improve error messages in the presence of
         subcommands. Difference is marked with <new>...</new> below."""
         # replace arg strings that are file references
@@ -592,18 +592,23 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         if len(show_arguments) > 1
                         else "Similar arguments:"
                     )
+
+                unique_counter = 0
                 for argument in show_arguments:
                     # Add a header before the first similar argument.
 
                     same_counter += 1
                     if argument.flag != prev_argument_flag:
                         same_counter = 0
+                        if unique_counter >= 10:
+                            break
+                        unique_counter += 1
 
                     # For arguments with the same name, only show a limited number of
                     # subcommands / help messages.
                     if (
-                        len(show_arguments) >= 16
-                        and same_counter >= 8
+                        len(show_arguments) >= 8
+                        and same_counter >= 4
                         and argument.flag == prev_argument_flag
                     ):
                         if not dots_printed:
