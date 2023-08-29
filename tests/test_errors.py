@@ -189,7 +189,7 @@ def test_similar_arguments_subcommands() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))
+        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -214,7 +214,7 @@ def test_similar_arguments_subcommands_multiple() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))
+        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -240,7 +240,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--rd.trac".split(" "))
+        tyro.cli(Union[ClassA, ClassB], args="--rd.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -249,7 +249,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
     assert error.count("--help") == 2  # Should show two possible subcommands.
 
 
-def test_similar_arguments_subcommands_multiple_contains_match() -> None:
+def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
     @dataclasses.dataclass
     class RewardConfig:
         track: bool
@@ -265,7 +265,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))
+        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -274,7 +274,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
     assert error.count("--help") == 2  # Should show two possible subcommands.
 
 
-def test_similar_arguments_subcommands_multiple_contains_match() -> None:
+def test_similar_arguments_subcommands_overflow_different() -> None:
     @dataclasses.dataclass
     class RewardConfig:
         track0: bool
@@ -305,7 +305,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))
+        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -315,7 +315,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
     assert error.count("--help") == 20
 
 
-def test_similar_arguments_subcommands_multiple_contains_match() -> None:
+def test_similar_arguments_subcommands_overflow_same() -> None:
     @dataclasses.dataclass
     class RewardConfig:
         track: bool
@@ -358,7 +358,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(
+        tyro.cli(  # type: ignore
             Union[
                 ClassA, ClassB, ClassC, ClassD, ClassE, ClassF, ClassG, ClassH, ClassI
             ],
