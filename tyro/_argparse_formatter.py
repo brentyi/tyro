@@ -531,9 +531,20 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 scored_arguments: List[Tuple[_ArgumentInfo, float]] = []
                 for argument in arguments:
                     # Compute a score for each argument.
-                    score = difflib.SequenceMatcher(
-                        a=unrecognized_argument, b=argument.flag
-                    ).ratio()
+                    assert unrecognized_argument.startswith("--")
+                    if argument.flag.endswith(unrecognized_argument[2:]):
+                        score = 1.0
+                    elif len(unrecognized_argument) >= 4 and all(
+                        map(
+                            lambda part: part in argument.flag,
+                            unrecognized_argument[2:].split("."),
+                        )
+                    ):
+                        score = 1.0
+                    else:
+                        score = difflib.SequenceMatcher(
+                            a=unrecognized_argument, b=argument.flag
+                        ).ratio()
                     scored_arguments.append((argument, score))
 
                 # Add information about similar arguments.

@@ -1,4 +1,6 @@
+import contextlib
 import dataclasses
+import io
 from typing import List, Tuple, TypeVar, Union
 
 import pytest
@@ -148,3 +150,125 @@ def test_ambiguous_sequence() -> None:
 
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
+
+
+def test_similar_arguments_basic() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+
+    @dataclasses.dataclass
+    class Class:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Class, args="--reward.trac".split(" "))
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Similar arguments" in error
+
+    # --reward.track should appear in both the usage string and as a similar argument.
+    assert error.count("--reward.track") == 2
+    assert error.count("--help") == 0
+
+
+def test_similar_arguments_subcommands() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Arguments similar to --reward.trac" in error
+    assert error.count("--reward.track") == 1
+    assert error.count("--help") == 2
+
+
+def test_similar_arguments_subcommands_multiple() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+        trace: int
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Arguments similar to --reward.trac" in error
+    assert error.count("--reward.track {True,False}") == 1
+    assert error.count("--reward.trace INT") == 1
+    assert error.count("--help") == 4
+
+
+def test_similar_arguments_subcommands_multiple_contains_match() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+        trace: int
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Union[ClassA, ClassB], args="--rd.trac".split(" "))
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Arguments similar to --rd.trac" in error
+    assert error.count("--reward.track {True,False}") == 1
+    assert error.count("--help") == 2  # Should show two possible subcommands.
+
+
+def test_similar_arguments_subcommands_multiple_contains_match() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+        trace: int
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Arguments similar to --track" in error
+    assert error.count("--reward.track {True,False}") == 1
+    assert error.count("--help") == 2  # Should show two possible subcommands.
