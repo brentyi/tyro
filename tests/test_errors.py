@@ -246,7 +246,8 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
     assert "Unrecognized argument" in error
     assert "Arguments similar to --rd.trac" in error
     assert error.count("--reward.track {True,False}") == 1
-    assert error.count("--help") == 2  # Should show two possible subcommands.
+    assert error.count("--reward.trace INT") == 1
+    assert error.count("--help") == 4  # 2 subcommands * 2 arguments.
 
 
 def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
