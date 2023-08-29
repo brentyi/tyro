@@ -130,7 +130,7 @@ will work out-of-the-box.
 
 These examples only scratch the surface of what's possible. `tyro` aims to
 support all reasonable type annotations, which can help us define things like
-hierachical structures, enums, unions, variable-length inputs, and subcommands.
+hierarchical structures, enums, unions, variable-length inputs, and subcommands.
 See [documentation](https://brentyi.github.io/tyro) for examples.
 
 ### In the wild
