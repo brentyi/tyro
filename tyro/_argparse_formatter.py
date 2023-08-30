@@ -19,6 +19,7 @@ import itertools
 import re as _re
 import shutil
 import sys
+from gettext import gettext as _
 from typing import Any, Generator, List, NoReturn, Optional, Tuple
 
 from rich.columns import Columns
@@ -136,7 +137,7 @@ def str_from_rich(
 
 @dataclasses.dataclass(frozen=True)
 class _ArgumentInfo:
-    flag: str
+    option_strings: Tuple[str, ...]
     metavar: Optional[str]
     usage_hint: str
     help: Optional[str]
@@ -237,8 +238,8 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 for conflict_action in action_conflicts.get(action, []):
                     if conflict_action in seen_non_default_actions:
                         msg = _("not allowed with argument %s")
-                        action_name = _get_action_name(conflict_action)
-                        raise ArgumentError(action, msg % action_name)
+                        action_name = argparse._get_action_name(conflict_action)
+                        raise argparse.ArgumentError(action, msg % action_name)
 
             # take the action if we didn't receive a SUPPRESS value
             # (e.g. from a default)
@@ -293,7 +294,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                             explicit_arg = new_explicit_arg
                         else:
                             msg = _("ignored explicit argument %r")
-                            raise ArgumentError(action, msg % explicit_arg)
+                            raise argparse.ArgumentError(action, msg % explicit_arg)
 
                     # if the action expect exactly one argument, we've
                     # successfully matched the option; exit the loop
@@ -307,7 +308,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     # explicit argument
                     else:
                         msg = _("ignored explicit argument %r")
-                        raise ArgumentError(action, msg % explicit_arg)
+                        raise argparse.ArgumentError(action, msg % explicit_arg)
 
                 # if there is no explicit argument, try to match the
                 # optional's string arguments with the following strings
@@ -417,7 +418,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
         if required_actions:
             self.error(
-                argparse._("the following arguments are required: %s")
+                _("the following arguments are required: %s")
                 % ", ".join(required_actions)
             )
 
@@ -436,7 +437,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         if action.help is not argparse.SUPPRESS
                     ]
                     msg = _("one of the arguments %s is required")
-                    self.error(msg % " ".join(names))
+                    self.error(msg % " ".join(names))  # type: ignore
 
         # return the updated namespace and the extra arguments
         return namespace, extras
@@ -504,11 +505,20 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     ):
                         continue
 
+                    option_strings = (arg.lowered.name_or_flag,)
+
+                    # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
+                    # ("--flag", "--no-flag").
+                    if arg.lowered.action is not None:
+                        option_strings = arg.lowered.action(
+                            option_strings, dest=""  # dest should not matter.
+                        ).option_strings
+
                     arguments.append(
                         _ArgumentInfo(
                             # Currently doesn't handle actions well, eg boolean optional
                             # arguments.
-                            arg.lowered.name_or_flag,
+                            option_strings,
                             metavar=arg.lowered.metavar,
                             usage_hint=subcommands + help_flag,
                             help=arg.lowered.help,
@@ -560,26 +570,31 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 for argument in arguments:
                     # Compute a score for each argument.
                     assert unrecognized_argument.startswith("--")
-                    if argument.flag.endswith(
-                        unrecognized_argument[2:]
-                    ) or argument.flag.startswith(unrecognized_argument[2:]):
-                        score = 0.9
-                    elif len(unrecognized_argument) >= 4 and all(
-                        map(
-                            lambda part: part in argument.flag,
-                            unrecognized_argument[2:].split("."),
-                        )
-                    ):
-                        score = 0.9
-                    else:
-                        score = difflib.SequenceMatcher(
-                            a=unrecognized_argument, b=argument.flag
-                        ).ratio()
-                    scored_arguments.append((argument, score))
+
+                    def get_score(option_string: str) -> float:
+                        if option_string.endswith(
+                            unrecognized_argument[2:]
+                        ) or option_string.startswith(unrecognized_argument[2:]):
+                            return 0.9
+                        elif len(unrecognized_argument) >= 4 and all(
+                            map(
+                                lambda part: part in option_string,
+                                unrecognized_argument[2:].split("."),
+                            )
+                        ):
+                            return 0.9
+                        else:
+                            return difflib.SequenceMatcher(
+                                a=unrecognized_argument, b=option_string
+                            ).ratio()
+
+                    scored_arguments.append(
+                        (argument, max(map(get_score, argument.option_strings)))
+                    )
 
                 # Add information about similar arguments.
-                prev_argument_flag: Optional[str] = None
-                show_arguments = []
+                prev_arg_option_strings: Optional[Tuple[str, ...]] = None
+                show_arguments: List[_ArgumentInfo] = []
                 unique_counter = 0
                 for argument, score in (
                     # Sort scores greatest to least.
@@ -592,7 +607,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                             # subcommands.
                             -arg_score[0].subcommand_match_score,
                             # Cluster by flag name, usage hint, help message.
-                            arg_score[0].flag,
+                            arg_score[0].option_strings[0],
                             arg_score[0].usage_hint,
                             arg_score[0].help,
                         ),
@@ -603,15 +618,15 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     if (
                         score < 0.9
                         and unique_counter >= 3
-                        and prev_argument_flag != argument.flag
+                        and prev_arg_option_strings != argument.option_strings
                     ):
                         break
-                    unique_counter += prev_argument_flag != argument.flag
+                    unique_counter += prev_arg_option_strings != argument.option_strings
 
                     show_arguments.append(argument)
-                    prev_argument_flag = argument.flag
+                    prev_arg_option_strings = argument.option_strings
 
-                prev_argument_flag = None
+                prev_arg_option_strings = None
                 prev_argument_help: Optional[str] = None
                 same_counter = 0
                 dots_printed = False
@@ -627,7 +642,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 unique_counter = 0
                 for argument in show_arguments:
                     same_counter += 1
-                    if argument.flag != prev_argument_flag:
+                    if argument.option_strings != prev_arg_option_strings:
                         same_counter = 0
                         if unique_counter >= 10:
                             break
@@ -638,7 +653,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     if (
                         len(show_arguments) >= 8
                         and same_counter >= 4
-                        and argument.flag == prev_argument_flag
+                        and argument.option_strings == prev_arg_option_strings
                     ):
                         if not dots_printed:
                             extra_info.append(
@@ -650,10 +665,21 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         dots_printed = True
                         continue
 
-                    if not (has_subcommands and argument.flag == prev_argument_flag):
+                    if not (
+                        has_subcommands
+                        and argument.option_strings == prev_arg_option_strings
+                    ):
                         extra_info.append(
                             Padding(
-                                f"[bold]{argument.flag if argument.metavar is None else argument.flag + ' ' + argument.metavar}[/bold]",
+                                "[bold]"
+                                + (
+                                    ", ".join(argument.option_strings)
+                                    if argument.metavar is None
+                                    else ", ".join(argument.option_strings)
+                                    + " "
+                                    + argument.metavar
+                                )
+                                + "[/bold]",
                                 (0, 0, 0, 4),
                             )
                         )
@@ -669,7 +695,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         # Only print help messages if it's not the same as the previous
                         # one.
                         argument.help != prev_argument_help
-                        or argument.flag != prev_argument_flag
+                        or argument.option_strings != prev_arg_option_strings
                     ):
                         extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
 
@@ -682,7 +708,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                             )
                         )
 
-                    prev_argument_flag = argument.flag
+                    prev_arg_option_strings = argument.option_strings
                     prev_argument_help = argument.help
 
         # print(self._parser_specification)
@@ -1065,7 +1091,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         group_action_count - suppressed_actions_count
                     )
 
-                    if not group.required:
+                    if not group.required:  # type: ignore
                         if start in inserts:
                             inserts[start] += " ["
                         else:

@@ -432,3 +432,24 @@ def test_similar_arguments_subcommands_overflow_same_startswith_multiple() -> No
     assert "rewarde" not in error
     assert "[...]" in error
     assert error.count("--help") == 4
+
+
+def test_similar_flag() -> None:
+    @dataclasses.dataclass
+    class Args:
+        flag: bool = False
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(
+            Args,
+            args="--lag".split(" "),
+        )
+
+    error = target.getvalue()
+
+    # Printed in the usage message.
+    assert error.count("--flag | --no-flag") == 1
+
+    # Printed in the similar argument list.
+    assert error.count("--flag, --no-flag") == 1
