@@ -509,7 +509,13 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
                     # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
                     # ("--flag", "--no-flag").
-                    if arg.lowered.action is not None:
+                    if (
+                        arg.lowered.action is not None
+                        # Actions are sometimes strings in Python 3.7, eg "append".
+                        # We'll ignore these, but this kind of thing is a good reason
+                        # for just forking argparse.
+                        and callable(arg.lowered.action)
+                    ):
                         option_strings = arg.lowered.action(
                             option_strings, dest=""  # dest should not matter.
                         ).option_strings
