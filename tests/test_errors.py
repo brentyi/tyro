@@ -193,7 +193,7 @@ def test_similar_arguments_subcommands() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Arguments similar to --reward.trac" in error
+    assert "Similar arguments:" in error
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 2
 
@@ -214,7 +214,7 @@ def test_similar_arguments_subcommands_multiple() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))  # type: ignore
+        tyro.cli(Union[ClassA, ClassB], args="--fjdkslaj --reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -244,7 +244,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Arguments similar to --rd.trac" in error
+    assert "Similar arguments" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--reward.trace INT") == 1
     assert error.count("--help") == 4  # 2 subcommands * 2 arguments.
@@ -270,7 +270,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Arguments similar to --track" in error
+    assert "Similar arguments" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--help") == 2  # Should show two possible subcommands.
 
@@ -310,7 +310,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Arguments similar to --track" in error
+    assert "Similar arguments" in error
     assert error.count("--reward.track") == 10
     assert "[...]" not in error
     assert error.count("--help") == 20
@@ -368,7 +368,67 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Arguments similar to --track" in error
+    assert "Similar arguments" in error
     assert error.count("--reward.track") == 1
+    assert "[...]" in error
+    assert error.count("--help") == 4
+
+
+def test_similar_arguments_subcommands_overflow_same_startswith_multiple() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+
+    @dataclasses.dataclass
+    class ClassA:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassB:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassC:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassD:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassE:
+        reward: RewardConfig
+        rewarde: tyro.conf.Suppress[int] = 10
+
+    @dataclasses.dataclass
+    class ClassF:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassG:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassH:
+        reward: RewardConfig
+
+    @dataclasses.dataclass
+    class ClassI:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(  # type: ignore
+            Union[
+                ClassA, ClassB, ClassC, ClassD, ClassE, ClassF, ClassG, ClassH, ClassI
+            ],
+            args="--track --ffff".split(" "),
+        )
+
+    error = target.getvalue()
+    assert "Unrecognized argument" in error
+    assert "Arguments similar to --track" in error
+    assert error.count("--rewar") == 1
+    assert "rewarde" not in error
     assert "[...]" in error
     assert error.count("--help") == 4

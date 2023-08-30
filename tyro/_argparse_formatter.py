@@ -19,7 +19,7 @@ import itertools
 import re as _re
 import shutil
 import sys
-from typing import Any, ContextManager, Generator, List, NoReturn, Optional, Tuple
+from typing import Any, Generator, List, NoReturn, Optional, Tuple
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
@@ -32,7 +32,7 @@ from rich.text import Text
 from rich.theme import Theme
 from typing_extensions import override
 
-from . import _arguments, _strings
+from . import _arguments, _strings, conf
 from ._parsers import ParserSpecification
 
 
@@ -85,47 +85,44 @@ def monkeypatch_len(obj: Any) -> int:
         return len(obj)
 
 
-def ansi_context() -> ContextManager[None]:
+@contextlib.contextmanager
+def ansi_context() -> Generator[None, None, None]:
     """Context for working with ANSI codes + argparse:
     - Applies a temporary monkey patch for making argparse ignore ANSI codes when
       wrapping usage text.
     - Enables support for Windows via colorama.
     """
 
-    @contextlib.contextmanager
-    def inner() -> Generator[None, None, None]:
-        if not hasattr(argparse, "len"):
-            # Sketchy, but seems to work.
-            argparse.len = monkeypatch_len  # type: ignore
-            try:
-                # Use Colorama to support coloring in Windows shells.
-                import colorama  # type: ignore
+    if not hasattr(argparse, "len"):
+        # Sketchy, but seems to work.
+        argparse.len = monkeypatch_len  # type: ignore
+        try:
+            # Use Colorama to support coloring in Windows shells.
+            import colorama  # type: ignore
 
-                # Notes:
-                #
-                # (1) This context manager looks very nice and local, but under-the-hood
-                # does some global operations which look likely to cause unexpected
-                # behavior if another library relies on `colorama.init()` and
-                # `colorama.deinit()`.
-                #
-                # (2) SSHed into a non-Windows machine from a WinAPI terminal => this
-                # won't work.
-                #
-                # Fixing these issues doesn't seem worth it: it doesn't seem like there
-                # are low-effort solutions for either problem, and more modern terminals
-                # in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.
-                with colorama.colorama_text():
-                    yield
-
-            except ImportError:
+            # Notes:
+            #
+            # (1) This context manager looks very nice and local, but under-the-hood
+            # does some global operations which look likely to cause unexpected
+            # behavior if another library relies on `colorama.init()` and
+            # `colorama.deinit()`.
+            #
+            # (2) SSHed into a non-Windows machine from a WinAPI terminal => this
+            # won't work.
+            #
+            # Fixing these issues doesn't seem worth it: it doesn't seem like there
+            # are low-effort solutions for either problem, and more modern terminals
+            # in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.
+            with colorama.colorama_text():
                 yield
 
-            del argparse.len  # type: ignore
-        else:
-            # No-op when the context manager is nested.
+        except ImportError:
             yield
 
-    return inner()
+        del argparse.len  # type: ignore
+    else:
+        # No-op when the context manager is nested.
+        yield
 
 
 def str_from_rich(
@@ -147,15 +144,42 @@ class _ArgumentInfo:
     """Priority value used when an argument is in the current subcommand tree."""
 
 
+# By default, unrecognized arguments won't raise an error in the case of:
+#
+#     # We've misspelled `binary`!
+#     python 03_multiple_subcommands.py dataset:mnist --dataset.binayr True
+#
+# When there's a subcommand that follows dataset:mnist. Instead,
+# --dataset.binayr is consumed and we get an error that `True` is not a valid
+# subcommand. This can be really confusing when we have a lot of keyword
+# arguments.
+#
+# Our current solution is to manually track unrecognized arguments in _parse_known_args,
+# and in error() override other errors when unrecognized arguments are present.
+global_unrecognized_args: List[str] = []
+
+
 class TyroArgumentParser(argparse.ArgumentParser):
     _parser_specification: ParserSpecification
     _parsing_known_args: bool
     _args: List[str]
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
     @override
     def _parse_known_args(self, arg_strings, namespace):  # pragma: no cover
         """We override _parse_known_args() to improve error messages in the presence of
         subcommands. Difference is marked with <new>...</new> below."""
+
+        # <new>
+        # Reset the unused argument list in the root parser.
+        # Subparsers will have spaces in self.prog.
+        if " " not in self.prog:
+            global global_unrecognized_args
+            global_unrecognized_args = []
+        # </new>
+
         # replace arg strings that are file references
         if self.fromfile_prefix_chars is not None:
             arg_strings = self._read_args_from_files(arg_strings)
@@ -235,22 +259,11 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 # if we found no optional action, skip it
                 if action is None:
                     # <new>
-                    #
-                    # If the Action is `None`, it means we've found an unknown argument.
-                    # By default, this won't raise an error in the case of:
-                    #
-                    #     # We've misspelled `binary`!
-                    #     python 03_multiple_subcommands.py dataset:mnist --dataset.binayr True
-                    #
-                    # When there's a subcommand that follows dataset:mnist. Instead,
-                    # --dataset.binayr is consumed and we get an error that `True` is not a valid
-                    # subcommand. This can be really confusing when we have a lot of keyword
-                    # arguments.
-                    #
-                    # With the following check, we'll instead raise an error that --dataset.binayr
-                    # is an unrecognized argument.
+                    # Manually track unused arguments to assist with error messages
+                    # later.
                     if not self._parsing_known_args:
-                        self.error(f"unrecognized arguments: {option_string}")
+                        global global_unrecognized_args
+                        global_unrecognized_args.append(option_string)
                     # </new>
 
                     extras.append(arg_strings[start_index])
@@ -443,10 +456,17 @@ class TyroArgumentParser(argparse.ArgumentParser):
         print(self.format_usage().strip() + "\n")
 
         extra_info: List[RenderableType] = []
-        if message.startswith("unrecognized arguments: "):
+        global global_unrecognized_args
+        if len(global_unrecognized_args) == 0 and message.startswith(
+            "unrecognized arguments: "
+        ):
+            global_unrecognized_args = message.partition(":")[2].strip().split(" ")
+
+        if len(global_unrecognized_args) > 0:
+            message = f"Unrecognized arguments: {' '.join(global_unrecognized_args)}"
             unrecognized_arguments = [
                 arg
-                for arg in message.partition(":")[2].strip().split(" ")
+                for arg in global_unrecognized_args
                 # If we pass in `--spell-chekc on`, we only want `spell-chekc` and not
                 # `on`.
                 if arg.startswith("--")
@@ -476,6 +496,14 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     if arg.field.is_positional() or arg.lowered.is_fixed():
                         # Skip positional arguments.
                         continue
+
+                    # Skip suppressed arguments.
+                    if conf.Suppress in arg.field.markers or (
+                        conf.SuppressFixed in arg.field.markers
+                        and conf.Fixed in arg.field.markers
+                    ):
+                        continue
+
                     arguments.append(
                         _ArgumentInfo(
                             # Currently doesn't handle actions well, eg boolean optional
@@ -532,15 +560,17 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 for argument in arguments:
                     # Compute a score for each argument.
                     assert unrecognized_argument.startswith("--")
-                    if argument.flag.endswith(unrecognized_argument[2:]):
-                        score = 1.0
+                    if argument.flag.endswith(
+                        unrecognized_argument[2:]
+                    ) or argument.flag.startswith(unrecognized_argument[2:]):
+                        score = 0.9
                     elif len(unrecognized_argument) >= 4 and all(
                         map(
                             lambda part: part in argument.flag,
                             unrecognized_argument[2:].split("."),
                         )
                     ):
-                        score = 1.0
+                        score = 0.9
                     else:
                         score = difflib.SequenceMatcher(
                             a=unrecognized_argument, b=argument.flag
@@ -586,17 +616,16 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 same_counter = 0
                 dots_printed = False
                 if len(show_arguments) > 0:
+                    # Add a header before the first similar argument.
                     extra_info.append(Rule(style=Style(color="red")))
                     extra_info.append(
-                        f"Arguments similar to {unrecognized_argument}:"
-                        if len(show_arguments) > 1
-                        else "Similar arguments:"
+                        "Similar arguments:"
+                        if len(unrecognized_arguments) == 1
+                        else f"Arguments similar to {unrecognized_argument}:"
                     )
 
                 unique_counter = 0
                 for argument in show_arguments:
-                    # Add a header before the first similar argument.
-
                     same_counter += 1
                     if argument.flag != prev_argument_flag:
                         same_counter = 0
@@ -615,7 +644,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                             extra_info.append(
                                 Padding(
                                     "[...]",
-                                    (0, 0, 0, 8),
+                                    (0, 0, 0, 12),
                                 )
                             )
                         dots_printed = True
