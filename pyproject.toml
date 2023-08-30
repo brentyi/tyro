@@ -43,7 +43,6 @@ dev = [
     "pyright>=1.1.264",
     "mypy>=1.4.1",
     "numpy>=1.20.0",
-    "jax!=0.4.15", # https://github.com/google/jax/issues/17371
     # As of 7/27/2023, flax install fails for Python 3.7 without pinning to an
     # old version. But doing so breaks other Python versions.
     "flax>=0.6.9;python_version>='3.8'", 
