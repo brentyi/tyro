@@ -454,7 +454,13 @@ class TyroArgumentParser(argparse.ArgumentParser):
         If you override this in a subclass, it should not return -- it
         should either exit or raise an exception.
         """
-        print(self.format_usage().strip() + "\n")
+        console = Console(theme=THEME.as_rich_theme())
+
+        usage = self.format_usage().strip() + "\n"
+        if len(usage) < 400:
+            print(usage)
+        else:
+            console.print(f"[bold]help:[/bold] {self.prog} --help\n")
 
         extra_info: List[RenderableType] = []
         global global_unrecognized_args
@@ -718,7 +724,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     prev_argument_help = argument.help
 
         # print(self._parser_specification)
-        console = Console(theme=THEME.as_rich_theme())
         console.print(
             Panel(
                 Group(
