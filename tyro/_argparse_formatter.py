@@ -97,7 +97,7 @@ def ansi_context() -> Generator[None, None, None]:
     if not hasattr(argparse, "len"):
         # Sketchy, but seems to work.
         argparse.len = monkeypatch_len  # type: ignore
-        try:
+        try:  # pragma: no cover
             # Use Colorama to support coloring in Windows shells.
             import colorama  # type: ignore
 
@@ -442,6 +442,14 @@ class TyroArgumentParser(argparse.ArgumentParser):
         # return the updated namespace and the extra arguments
         return namespace, extras
 
+    def _print_usage_succinct(self, console: Console) -> None:
+        """Print usage, but abridged if too long."""
+        usage = self.format_usage().strip() + "\n"
+        if len(usage) < 400:
+            print(usage)
+        else:
+            console.print(f"[bold]help:[/bold] {self.prog} --help\n")
+
     @override
     def error(self, message: str) -> NoReturn:
         """Improve error messages from argparse.
@@ -454,13 +462,9 @@ class TyroArgumentParser(argparse.ArgumentParser):
         If you override this in a subclass, it should not return -- it
         should either exit or raise an exception.
         """
-        console = Console(theme=THEME.as_rich_theme())
 
-        usage = self.format_usage().strip() + "\n"
-        if len(usage) < 400:
-            print(usage)
-        else:
-            console.print(f"[bold]help:[/bold] {self.prog} --help\n")
+        console = Console(theme=THEME.as_rich_theme())
+        self._print_usage_succinct(console)
 
         extra_info: List[RenderableType] = []
         global global_unrecognized_args

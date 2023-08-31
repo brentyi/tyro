@@ -448,7 +448,7 @@ def _cli_impl(
         from ._argparse_formatter import THEME
 
         console = Console(theme=THEME.as_rich_theme())
-        print(parser.format_usage().strip() + "\n")
+        parser._print_usage_succinct(console)
         console.print(
             Panel(
                 Group(
