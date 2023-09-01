@@ -306,7 +306,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--tracked".split(" "))  # type: ignore
+        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
