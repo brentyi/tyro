@@ -46,6 +46,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Set,
     Tuple,
     TypeVar,
     Union,
@@ -93,7 +94,7 @@ class InstantiatorMetadata:
     # Unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: str
-    choices: Optional[Tuple[str, ...]]
+    choices: Optional[Set[str]]
     action: Optional[Literal["append"]]
 
     def check_choices(self, strings: List[str]) -> None:
@@ -175,7 +176,9 @@ def instantiator_from_type(
         return instantiator, InstantiatorMetadata(
             nargs=1,
             metavar="{None}",
-            choices=("None",),
+            choices={
+                "None",
+            },
             action=None,
         )
 
@@ -246,7 +249,7 @@ def instantiator_from_type(
             if auto_choices is None
             else "{" + ",".join(map(str, auto_choices)) + "}"
         ),
-        choices=auto_choices,
+        choices=None if auto_choices is None else set(auto_choices),
         action=None,
     )
 
@@ -671,7 +674,7 @@ def _instantiator_from_literal(
         InstantiatorMetadata(
             nargs=1,
             metavar="{" + ",".join(str_choices) + "}",
-            choices=str_choices,
+            choices=set(str_choices),
             action=None,
         ),
     )

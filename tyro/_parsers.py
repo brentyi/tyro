@@ -357,8 +357,12 @@ class SubparsersSpecification:
             for typ in get_args(typ)
         ]
         options = [
-            # Cast seems unnecessary but needed in mypy... (1.4.1)
-            cast(Callable, none_proxy) if o is type(None) else o
+            (
+                # Cast seems unnecessary but needed in mypy... (1.4.1)
+                cast(Callable, none_proxy)
+                if o is type(None)
+                else o
+            )
             for o in options
         ]
         if not all(
@@ -534,7 +538,16 @@ class SubparsersSpecification:
                 name,
                 formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
                 help=helptext,
+                allow_abbrev=False,
             )
+
+            # Attributes used for error message generation.
+            assert isinstance(subparser, _argparse_formatter.TyroArgumentParser)
+            assert isinstance(parent_parser, _argparse_formatter.TyroArgumentParser)
+            subparser._parsing_known_args = parent_parser._parsing_known_args
+            subparser._parser_specification = parent_parser._parser_specification
+            subparser._args = parent_parser._args
+
             subparser_tree_leaves.extend(subparser_def.apply(subparser))
 
         return tuple(subparser_tree_leaves)

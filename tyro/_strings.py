@@ -3,7 +3,7 @@
 import functools
 import re
 import textwrap
-from typing import Iterable, List, Sequence, Tuple, Type, Union
+from typing import Iterable, List, Sequence, Tuple, Type
 
 from typing_extensions import get_args, get_origin
 
