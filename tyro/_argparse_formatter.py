@@ -447,7 +447,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
         usage = self.format_usage().strip() + "\n"
         if len(usage) < 400:
             print(usage)
-        else:
+        else:  # pragma: no cover
             console.print(f"[bold]help:[/bold] {self.prog} --help\n")
 
     @override
