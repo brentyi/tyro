@@ -839,11 +839,9 @@ def _get_dataclass_field_default(
             return getattr(parent_default_instance, field.name)
         else:
             warnings.warn(
-                (
-                    f"Could not find field {field.name} in default instance"
-                    f" {parent_default_instance}, which has"
-                    f" type {type(parent_default_instance)},"
-                ),
+                f"Could not find field {field.name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
                 stacklevel=2,
             )
 

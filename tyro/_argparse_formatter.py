@@ -5,29 +5,36 @@ messages with ones that:
     - Use `rich` for formatting.
     - Can be themed with an accent color.
 
-This is largely built by fussing around in argparse implementation details, and is by
-far the hackiest part of `tyro`.
+This is largely built by fussing around in argparse implementation details, and is
+extremely chaotic as a result.
 
-TODO: we may want to just maintain our own fork of argparse.
+TODO: the current implementation should be robust given our test coverage, but unideal
+long-term. We should just maintain our own fork of argparse.
 """
 import argparse
 import contextlib
 import dataclasses
+import difflib
 import itertools
 import re as _re
 import shutil
-from typing import Any, ContextManager, Generator, List, Optional
+import sys
+from gettext import gettext as _
+from typing import Any, Generator, List, NoReturn, Optional, Tuple
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
 from rich.padding import Padding
 from rich.panel import Panel
+from rich.rule import Rule
 from rich.style import Style
 from rich.table import Table
 from rich.text import Text
 from rich.theme import Theme
+from typing_extensions import override
 
-from . import _arguments, _strings
+from . import _arguments, _strings, conf
+from ._parsers import ParserSpecification
 
 
 @dataclasses.dataclass
@@ -79,47 +86,44 @@ def monkeypatch_len(obj: Any) -> int:
         return len(obj)
 
 
-def ansi_context() -> ContextManager[None]:
+@contextlib.contextmanager
+def ansi_context() -> Generator[None, None, None]:
     """Context for working with ANSI codes + argparse:
     - Applies a temporary monkey patch for making argparse ignore ANSI codes when
       wrapping usage text.
     - Enables support for Windows via colorama.
     """
 
-    @contextlib.contextmanager
-    def inner() -> Generator[None, None, None]:
-        if not hasattr(argparse, "len"):
-            # Sketchy, but seems to work.
-            argparse.len = monkeypatch_len  # type: ignore
-            try:
-                # Use Colorama to support coloring in Windows shells.
-                import colorama  # type: ignore
+    if not hasattr(argparse, "len"):
+        # Sketchy, but seems to work.
+        argparse.len = monkeypatch_len  # type: ignore
+        try:  # pragma: no cover
+            # Use Colorama to support coloring in Windows shells.
+            import colorama  # type: ignore
 
-                # Notes:
-                #
-                # (1) This context manager looks very nice and local, but under-the-hood
-                # does some global operations which look likely to cause unexpected
-                # behavior if another library relies on `colorama.init()` and
-                # `colorama.deinit()`.
-                #
-                # (2) SSHed into a non-Windows machine from a WinAPI terminal => this
-                # won't work.
-                #
-                # Fixing these issues doesn't seem worth it: it doesn't seem like there
-                # are low-effort solutions for either problem, and more modern terminals
-                # in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.
-                with colorama.colorama_text():
-                    yield
-
-            except ImportError:
+            # Notes:
+            #
+            # (1) This context manager looks very nice and local, but under-the-hood
+            # does some global operations which look likely to cause unexpected
+            # behavior if another library relies on `colorama.init()` and
+            # `colorama.deinit()`.
+            #
+            # (2) SSHed into a non-Windows machine from a WinAPI terminal => this
+            # won't work.
+            #
+            # Fixing these issues doesn't seem worth it: it doesn't seem like there
+            # are low-effort solutions for either problem, and more modern terminals
+            # in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.
+            with colorama.colorama_text():
                 yield
 
-            del argparse.len  # type: ignore
-        else:
-            # No-op when the context manager is nested.
+        except ImportError:
             yield
 
-    return inner()
+        del argparse.len  # type: ignore
+    else:
+        # No-op when the context manager is nested.
+        yield
 
 
 def str_from_rich(
@@ -129,6 +133,613 @@ def str_from_rich(
     with console.capture() as out:
         console.print(renderable, soft_wrap=soft_wrap)
     return out.get().rstrip("\n")
+
+
+@dataclasses.dataclass(frozen=True)
+class _ArgumentInfo:
+    option_strings: Tuple[str, ...]
+    metavar: Optional[str]
+    usage_hint: str
+    help: Optional[str]
+    subcommand_match_score: float
+    """Priority value used when an argument is in the current subcommand tree."""
+
+
+# By default, unrecognized arguments won't raise an error in the case of:
+#
+#     # We've misspelled `binary`!
+#     python 03_multiple_subcommands.py dataset:mnist --dataset.binayr True
+#
+# When there's a subcommand that follows dataset:mnist. Instead,
+# --dataset.binayr is consumed and we get an error that `True` is not a valid
+# subcommand. This can be really confusing when we have a lot of keyword
+# arguments.
+#
+# Our current solution is to manually track unrecognized arguments in _parse_known_args,
+# and in error() override other errors when unrecognized arguments are present.
+global_unrecognized_args: List[str] = []
+
+
+class TyroArgumentParser(argparse.ArgumentParser):
+    _parser_specification: ParserSpecification
+    _parsing_known_args: bool
+    _args: List[str]
+
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+    @override
+    def _parse_known_args(self, arg_strings, namespace):  # pragma: no cover
+        """We override _parse_known_args() to improve error messages in the presence of
+        subcommands. Difference is marked with <new>...</new> below."""
+
+        # <new>
+        # Reset the unused argument list in the root parser.
+        # Subparsers will have spaces in self.prog.
+        if " " not in self.prog:
+            global global_unrecognized_args
+            global_unrecognized_args = []
+        # </new>
+
+        # replace arg strings that are file references
+        if self.fromfile_prefix_chars is not None:
+            arg_strings = self._read_args_from_files(arg_strings)
+
+        # map all mutually exclusive arguments to the other arguments
+        # they can't occur with
+        action_conflicts = {}
+        for mutex_group in self._mutually_exclusive_groups:
+            group_actions = mutex_group._group_actions
+            for i, mutex_action in enumerate(mutex_group._group_actions):
+                conflicts = action_conflicts.setdefault(mutex_action, [])
+                conflicts.extend(group_actions[:i])
+                conflicts.extend(group_actions[i + 1 :])
+
+        # find all option indices, and determine the arg_string_pattern
+        # which has an 'O' if there is an option at an index,
+        # an 'A' if there is an argument, or a '-' if there is a '--'
+        option_string_indices = {}
+        arg_string_pattern_parts = []
+        arg_strings_iter = iter(arg_strings)
+        for i, arg_string in enumerate(arg_strings_iter):
+            # all args after -- are non-options
+            if arg_string == "--":
+                arg_string_pattern_parts.append("-")
+                for arg_string in arg_strings_iter:
+                    arg_string_pattern_parts.append("A")
+
+            # otherwise, add the arg to the arg strings
+            # and note the index if it was an option
+            else:
+                option_tuple = self._parse_optional(arg_string)
+                if option_tuple is None:
+                    pattern = "A"
+                else:
+                    option_string_indices[i] = option_tuple
+                    pattern = "O"
+                arg_string_pattern_parts.append(pattern)
+
+        # join the pieces together to form the pattern
+        arg_strings_pattern = "".join(arg_string_pattern_parts)
+
+        # converts arg strings to the appropriate and then takes the action
+        seen_actions = set()
+        seen_non_default_actions = set()
+
+        def take_action(action, argument_strings, option_string=None):
+            seen_actions.add(action)
+            argument_values = self._get_values(action, argument_strings)
+
+            # error if this argument is not allowed with other previously
+            # seen arguments, assuming that actions that use the default
+            # value don't really count as "present"
+            if argument_values is not action.default:
+                seen_non_default_actions.add(action)
+                for conflict_action in action_conflicts.get(action, []):
+                    if conflict_action in seen_non_default_actions:
+                        msg = _("not allowed with argument %s")
+                        action_name = argparse._get_action_name(conflict_action)
+                        raise argparse.ArgumentError(action, msg % action_name)
+
+            # take the action if we didn't receive a SUPPRESS value
+            # (e.g. from a default)
+            if argument_values is not argparse.SUPPRESS:
+                action(self, namespace, argument_values, option_string)
+
+        # function to convert arg_strings into an optional action
+        def consume_optional(start_index):
+            # get the optional identified at this index
+            option_tuple = option_string_indices[start_index]
+            action, option_string, explicit_arg = option_tuple
+
+            # identify additional optionals in the same arg string
+            # (e.g. -xyz is the same as -x -y -z if no args are required)
+            match_argument = self._match_argument
+            action_tuples = []
+            while True:
+                # if we found no optional action, skip it
+                if action is None:
+                    # <new>
+                    # Manually track unused arguments to assist with error messages
+                    # later.
+                    if not self._parsing_known_args:
+                        global global_unrecognized_args
+                        global_unrecognized_args.append(option_string)
+                    # </new>
+
+                    extras.append(arg_strings[start_index])
+                    return start_index + 1
+
+                # if there is an explicit argument, try to match the
+                # optional's string arguments to only this
+                if explicit_arg is not None:
+                    arg_count = match_argument(action, "A")
+
+                    # if the action is a single-dash option and takes no
+                    # arguments, try to parse more single-dash options out
+                    # of the tail of the option string
+                    chars = self.prefix_chars
+                    if (
+                        arg_count == 0
+                        and option_string[1] not in chars
+                        and explicit_arg != ""
+                    ):
+                        action_tuples.append((action, [], option_string))
+                        char = option_string[0]
+                        option_string = char + explicit_arg[0]
+                        new_explicit_arg = explicit_arg[1:] or None
+                        optionals_map = self._option_string_actions
+                        if option_string in optionals_map:
+                            action = optionals_map[option_string]
+                            explicit_arg = new_explicit_arg
+                        else:
+                            msg = _("ignored explicit argument %r")
+                            raise argparse.ArgumentError(action, msg % explicit_arg)
+
+                    # if the action expect exactly one argument, we've
+                    # successfully matched the option; exit the loop
+                    elif arg_count == 1:
+                        stop = start_index + 1
+                        args = [explicit_arg]
+                        action_tuples.append((action, args, option_string))
+                        break
+
+                    # error if a double-dash option did not use the
+                    # explicit argument
+                    else:
+                        msg = _("ignored explicit argument %r")
+                        raise argparse.ArgumentError(action, msg % explicit_arg)
+
+                # if there is no explicit argument, try to match the
+                # optional's string arguments with the following strings
+                # if successful, exit the loop
+                else:
+                    start = start_index + 1
+                    selected_patterns = arg_strings_pattern[start:]
+                    arg_count = match_argument(action, selected_patterns)
+                    stop = start + arg_count
+                    args = arg_strings[start:stop]
+                    action_tuples.append((action, args, option_string))
+                    break
+
+            # add the Optional to the list and return the index at which
+            # the Optional's string args stopped
+            assert action_tuples
+            for action, args, option_string in action_tuples:
+                take_action(action, args, option_string)
+            return stop
+
+        # the list of Positionals left to be parsed; this is modified
+        # by consume_positionals()
+        positionals = self._get_positional_actions()
+
+        # function to convert arg_strings into positional actions
+        def consume_positionals(start_index):
+            # match as many Positionals as possible
+            match_partial = self._match_arguments_partial
+            selected_pattern = arg_strings_pattern[start_index:]
+            arg_counts = match_partial(positionals, selected_pattern)
+
+            # slice off the appropriate arg strings for each Positional
+            # and add the Positional and its args to the list
+            for action, arg_count in zip(positionals, arg_counts):
+                args = arg_strings[start_index : start_index + arg_count]
+                start_index += arg_count
+                take_action(action, args)
+
+            # slice off the Positionals that we just parsed and return the
+            # index at which the Positionals' string args stopped
+            positionals[:] = positionals[len(arg_counts) :]
+            return start_index
+
+        # consume Positionals and Optionals alternately, until we have
+        # passed the last option string
+        extras = []
+        start_index = 0
+        if option_string_indices:
+            max_option_string_index = max(option_string_indices)
+        else:
+            max_option_string_index = -1
+        while start_index <= max_option_string_index:
+            # consume any Positionals preceding the next option
+            next_option_string_index = min(
+                [index for index in option_string_indices if index >= start_index]
+            )
+            if start_index != next_option_string_index:
+                positionals_end_index = consume_positionals(start_index)
+
+                # only try to parse the next optional if we didn't consume
+                # the option string during the positionals parsing
+                if positionals_end_index > start_index:
+                    start_index = positionals_end_index
+                    continue
+                else:
+                    start_index = positionals_end_index
+
+            # if we consumed all the positionals we could and we're not
+            # at the index of an option string, there were extra arguments
+            if start_index not in option_string_indices:
+                strings = arg_strings[start_index:next_option_string_index]
+                extras.extend(strings)
+                start_index = next_option_string_index
+
+            # consume the next optional and any arguments for it
+            start_index = consume_optional(start_index)
+
+        # consume any positionals following the last Optional
+        stop_index = consume_positionals(start_index)
+
+        # if we didn't consume all the argument strings, there were extras
+        extras.extend(arg_strings[stop_index:])
+
+        # make sure all required actions were present and also convert
+        # action defaults which were not given as arguments
+        required_actions = []
+        for action in self._actions:
+            if action not in seen_actions:
+                if action.required:
+                    required_actions.append(argparse._get_action_name(action))
+                else:
+                    # Convert action default now instead of doing it before
+                    # parsing arguments to avoid calling convert functions
+                    # twice (which may fail) if the argument was given, but
+                    # only if it was defined already in the namespace
+                    if (
+                        action.default is not None
+                        and isinstance(action.default, str)
+                        and hasattr(namespace, action.dest)
+                        and action.default is getattr(namespace, action.dest)
+                    ):
+                        setattr(
+                            namespace,
+                            action.dest,
+                            self._get_value(action, action.default),
+                        )
+
+        if required_actions:
+            self.error(
+                _("the following arguments are required: %s")
+                % ", ".join(required_actions)
+            )
+
+        # make sure all required groups had one option present
+        for group in self._mutually_exclusive_groups:
+            if group.required:
+                for action in group._group_actions:
+                    if action in seen_non_default_actions:
+                        break
+
+                # if no actions were used, report the error
+                else:
+                    names = [
+                        argparse._get_action_name(action)
+                        for action in group._group_actions
+                        if action.help is not argparse.SUPPRESS
+                    ]
+                    msg = _("one of the arguments %s is required")
+                    self.error(msg % " ".join(names))  # type: ignore
+
+        # return the updated namespace and the extra arguments
+        return namespace, extras
+
+    def _print_usage_succinct(self, console: Console) -> None:
+        """Print usage, but abridged if too long."""
+        usage = self.format_usage().strip() + "\n"
+        if len(usage) < 400:
+            print(usage)
+        else:  # pragma: no cover
+            console.print(f"[bold]help:[/bold] {self.prog} --help\n")
+
+    @override
+    def error(self, message: str) -> NoReturn:
+        """Improve error messages from argparse.
+
+        error(message: string)
+
+        Prints a usage message incorporating the message to stderr and
+        exits.
+
+        If you override this in a subclass, it should not return -- it
+        should either exit or raise an exception.
+        """
+
+        console = Console(theme=THEME.as_rich_theme())
+        self._print_usage_succinct(console)
+
+        extra_info: List[RenderableType] = []
+        global global_unrecognized_args
+        if len(global_unrecognized_args) == 0 and message.startswith(
+            "unrecognized arguments: "
+        ):
+            global_unrecognized_args = message.partition(":")[2].strip().split(" ")
+
+        if len(global_unrecognized_args) > 0:
+            message = f"Unrecognized arguments: {' '.join(global_unrecognized_args)}"
+            unrecognized_arguments = [
+                arg
+                for arg in global_unrecognized_args
+                # If we pass in `--spell-chekc on`, we only want `spell-chekc` and not
+                # `on`.
+                if arg.startswith("--")
+            ]
+
+            # Argument name => subcommands it came from.
+            arguments: List[_ArgumentInfo] = []
+            has_subcommands = False
+            same_exists = False
+
+            def _recursive_arg_search(
+                parser_spec: ParserSpecification,
+                subcommands: str,
+                subcommand_match_score: float,
+            ) -> None:
+                """Find all possible arguments that could have been passed in."""
+
+                # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
+                # only appear in the help message for "leaf" subparsers.
+                help_flag = (
+                    " (other subcommands) --help"
+                    if parser_spec.consolidate_subcommand_args
+                    and parser_spec.subparsers is not None
+                    else " --help"
+                )
+                for arg in parser_spec.args:
+                    if arg.field.is_positional() or arg.lowered.is_fixed():
+                        # Skip positional arguments.
+                        continue
+
+                    # Skip suppressed arguments.
+                    if conf.Suppress in arg.field.markers or (
+                        conf.SuppressFixed in arg.field.markers
+                        and conf.Fixed in arg.field.markers
+                    ):
+                        continue
+
+                    option_strings = (arg.lowered.name_or_flag,)
+
+                    # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
+                    # ("--flag", "--no-flag").
+                    if (
+                        arg.lowered.action is not None
+                        # Actions are sometimes strings in Python 3.7, eg "append".
+                        # We'll ignore these, but this kind of thing is a good reason
+                        # for just forking argparse.
+                        and callable(arg.lowered.action)
+                    ):
+                        option_strings = arg.lowered.action(
+                            option_strings, dest=""  # dest should not matter.
+                        ).option_strings
+
+                    arguments.append(
+                        _ArgumentInfo(
+                            # Currently doesn't handle actions well, eg boolean optional
+                            # arguments.
+                            option_strings,
+                            metavar=arg.lowered.metavar,
+                            usage_hint=subcommands + help_flag,
+                            help=arg.lowered.help,
+                            subcommand_match_score=subcommand_match_score,
+                        )
+                    )
+
+                    # An unrecognized argument.
+                    nonlocal same_exists
+                    if (
+                        not same_exists
+                        and arg.lowered.name_or_flag in unrecognized_arguments
+                    ):
+                        same_exists = True
+
+                if parser_spec.subparsers is not None:
+                    nonlocal has_subcommands
+                    has_subcommands = True
+                    for (
+                        subparser_name,
+                        subparser,
+                    ) in parser_spec.subparsers.parser_from_name.items():
+                        _recursive_arg_search(
+                            subparser,
+                            subcommands + " " + subparser_name,
+                            subcommand_match_score=subcommand_match_score
+                            + (1 if subparser_name in self._args else -0.001),
+                        )
+
+            _recursive_arg_search(
+                self._parser_specification,
+                # Remove other subcommands.
+                self.prog.split(" ")[0],
+                0,
+            )
+
+            if has_subcommands and same_exists:
+                misplaced_arguments = message.partition(":")[2].strip()
+                message = (
+                    "unrecognized or misplaced arguments: " + misplaced_arguments
+                    if " " in misplaced_arguments
+                    else "unrecognized or misplaced argument: " + misplaced_arguments
+                )
+
+            # Show similar arguments for keyword options.
+            for unrecognized_argument in unrecognized_arguments:
+                # Sort arguments by similarity.
+                scored_arguments: List[Tuple[_ArgumentInfo, float]] = []
+                for argument in arguments:
+                    # Compute a score for each argument.
+                    assert unrecognized_argument.startswith("--")
+
+                    def get_score(option_string: str) -> float:
+                        if option_string.endswith(
+                            unrecognized_argument[2:]
+                        ) or option_string.startswith(unrecognized_argument[2:]):
+                            return 0.9
+                        elif len(unrecognized_argument) >= 4 and all(
+                            map(
+                                lambda part: part in option_string,
+                                unrecognized_argument[2:].split("."),
+                            )
+                        ):
+                            return 0.9
+                        else:
+                            return difflib.SequenceMatcher(
+                                a=unrecognized_argument, b=option_string
+                            ).ratio()
+
+                    scored_arguments.append(
+                        (argument, max(map(get_score, argument.option_strings)))
+                    )
+
+                # Add information about similar arguments.
+                prev_arg_option_strings: Optional[Tuple[str, ...]] = None
+                show_arguments: List[_ArgumentInfo] = []
+                unique_counter = 0
+                for argument, score in (
+                    # Sort scores greatest to least.
+                    sorted(
+                        scored_arguments,
+                        key=lambda arg_score: (
+                            # Highest scores first.
+                            -arg_score[1],
+                            # Prefer arguments available in the currently specified
+                            # subcommands.
+                            -arg_score[0].subcommand_match_score,
+                            # Cluster by flag name, usage hint, help message.
+                            arg_score[0].option_strings[0],
+                            arg_score[0].usage_hint,
+                            arg_score[0].help,
+                        ),
+                    )
+                ):
+                    if score < 0.8:
+                        break
+                    if (
+                        score < 0.9
+                        and unique_counter >= 3
+                        and prev_arg_option_strings != argument.option_strings
+                    ):
+                        break
+                    unique_counter += prev_arg_option_strings != argument.option_strings
+
+                    show_arguments.append(argument)
+                    prev_arg_option_strings = argument.option_strings
+
+                prev_arg_option_strings = None
+                prev_argument_help: Optional[str] = None
+                same_counter = 0
+                dots_printed = False
+                if len(show_arguments) > 0:
+                    # Add a header before the first similar argument.
+                    extra_info.append(Rule(style=Style(color="red")))
+                    extra_info.append(
+                        "Similar arguments:"
+                        if len(unrecognized_arguments) == 1
+                        else f"Arguments similar to {unrecognized_argument}:"
+                    )
+
+                unique_counter = 0
+                for argument in show_arguments:
+                    same_counter += 1
+                    if argument.option_strings != prev_arg_option_strings:
+                        same_counter = 0
+                        if unique_counter >= 10:
+                            break
+                        unique_counter += 1
+
+                    # For arguments with the same name, only show a limited number of
+                    # subcommands / help messages.
+                    if (
+                        len(show_arguments) >= 8
+                        and same_counter >= 4
+                        and argument.option_strings == prev_arg_option_strings
+                    ):
+                        if not dots_printed:
+                            extra_info.append(
+                                Padding(
+                                    "[...]",
+                                    (0, 0, 0, 12),
+                                )
+                            )
+                        dots_printed = True
+                        continue
+
+                    if not (
+                        has_subcommands
+                        and argument.option_strings == prev_arg_option_strings
+                    ):
+                        extra_info.append(
+                            Padding(
+                                "[bold]"
+                                + (
+                                    ", ".join(argument.option_strings)
+                                    if argument.metavar is None
+                                    else ", ".join(argument.option_strings)
+                                    + " "
+                                    + argument.metavar
+                                )
+                                + "[/bold]",
+                                (0, 0, 0, 4),
+                            )
+                        )
+
+                    # Uncomment to show similarity metric.
+                    # extra_info.append(
+                    #     Padding(
+                    #         f"[green]Similarity: {score:.02f}[/green]", (0, 0, 0, 8)
+                    #     )
+                    # )
+
+                    if argument.help is not None and (
+                        # Only print help messages if it's not the same as the previous
+                        # one.
+                        argument.help != prev_argument_help
+                        or argument.option_strings != prev_arg_option_strings
+                    ):
+                        extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
+
+                    # Show the subcommand that this argument is available in.
+                    if has_subcommands:
+                        extra_info.append(
+                            Padding(
+                                f"in [green]{argument.usage_hint}[/green]",
+                                (0, 0, 0, 12),
+                            )
+                        )
+
+                    prev_arg_option_strings = argument.option_strings
+                    prev_argument_help = argument.help
+
+        # print(self._parser_specification)
+        console.print(
+            Panel(
+                Group(
+                    f"{message[0].upper() + message[1:]}" if len(message) > 0 else "",
+                    *extra_info,
+                ),
+                title="[bold]Parsing error[/bold]",
+                title_align="left",
+                border_style=Style(color="bright_red"),
+            )
+        )
+        sys.exit(2)
 
 
 class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -143,6 +754,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         super().__init__(prog, indent_increment, max_help_position, width)
 
+    @override
     def _format_args(self, action, default_metavar):
         """Override _format_args() to ignore nargs and always expect single string
         metavars."""
@@ -166,6 +778,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             )
         return out
 
+    @override
     def add_argument(self, action):  # pragma: no cover
         # Patch to avoid super long arguments from shifting the helptext of all of the
         # fields.
@@ -186,9 +799,11 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         del textwrap.len  # type: ignore
         return out
 
+    @override
     def _fill_text(self, text, width, indent):
         return "".join(indent + line for line in text.splitlines(keepends=True))
 
+    @override
     def format_help(self):
         # Try with and without a fixed help position, then return the shorter help
         # message.
@@ -210,6 +825,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         else:
             return out
 
+    @override
     class _Section(object):
         def __init__(self, formatter, parent, heading=None):
             self.formatter = formatter
@@ -438,9 +1054,9 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             max_width = max(map(len, lines))
 
             if self.formatter._tyro_rule is None:
-                # Note: we don't use rich.rule.Rule() because this will make all of
-                # the panels expand to fill the full width of the console. (this only
-                # impacts single-column layouts)
+                # We don't use rich.rule.Rule() because this will make all of the panels
+                # expand to fill the full width of the console. This only impacts
+                # single-column layouts.
                 self.formatter._tyro_rule = Text.from_ansi(
                     "─" * max_width, style=THEME.border, overflow="crop"
                 )
@@ -490,7 +1106,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         group_action_count - suppressed_actions_count
                     )
 
-                    if not group.required:
+                    if not group.required:  # type: ignore
                         if start in inserts:
                             inserts[start] += " ["
                         else:
@@ -580,3 +1196,16 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
         # return the text
         return text
+
+    @override
+    def _format_usage(self, usage, actions, groups, prefix) -> str:
+        # Format the usage label.
+        if prefix is None:
+            prefix = str_from_rich("[bold]usage[/bold]: ")
+        usage = super()._format_usage(
+            usage,
+            actions,
+            groups,
+            prefix,
+        )
+        return "\n\n" + usage

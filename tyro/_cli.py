@@ -264,10 +264,8 @@ def _cli_impl(
     if deprecated_kwargs.get("avoid_subparsers", False):
         f = conf.AvoidSubcommands[f]  # type: ignore
         warnings.warn(
-            (
-                "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`"
-                " instead."
-            ),
+            "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`"
+            " instead.",
             stacklevel=2,
         )
 
@@ -355,7 +353,7 @@ def _cli_impl(
         _arguments.USE_RICH = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
-    parser_definition = _parsers.ParserSpecification.from_callable_or_type(
+    parser_spec = _parsers.ParserSpecification.from_callable_or_type(
         f,
         description=description,
         parent_classes=set(),  # Used for recursive calls.
@@ -366,16 +364,19 @@ def _cli_impl(
 
     # Generate parser!
     with _argparse_formatter.ansi_context():
-        parser = argparse.ArgumentParser(
+        parser = _argparse_formatter.TyroArgumentParser(
             prog=prog,
             formatter_class=_argparse_formatter.TyroArgparseHelpFormatter,
             allow_abbrev=False,
         )
-        parser_definition.apply(parser)
+        parser._parser_specification = parser_spec
+        parser._parsing_known_args = return_unknown_args
+        parser._args = args
+        parser_spec.apply(parser)
 
         # Print help message when no arguments are passed in. (but arguments are
         # expected)
-        if len(args) == 0 and parser_definition.has_required_args:
+        if len(args) == 0 and parser_spec.has_required_args:
             args = ["--help"]
 
         if return_parser:
@@ -410,7 +411,7 @@ def _cli_impl(
                         root_prefix=f"tyro_{parser.prog}",
                     )
                 )
-            raise SystemExit()
+            sys.exit()
 
         if return_unknown_args:
             namespace, unknown_args = parser.parse_known_args(args=args)
@@ -429,17 +430,55 @@ def _cli_impl(
         # Attempt to call `f` using whatever was passed in.
         out, consumed_keywords = _calling.call_from_args(
             f,
-            parser_definition,
+            parser_spec,
             default_instance_internal,
             value_from_prefixed_field_name,
             field_name_prefix="",
         )
     except _calling.InstantiationError as e:
+        assert isinstance(e, _calling.InstantiationError)
+
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        parser.print_usage()
-        print()
-        print(e.args[0])
-        raise SystemExit()
+        from rich.console import Console, Group, RenderableType
+        from rich.padding import Padding
+        from rich.panel import Panel
+        from rich.rule import Rule
+        from rich.style import Style
+
+        from ._argparse_formatter import THEME
+
+        console = Console(theme=THEME.as_rich_theme())
+        parser._print_usage_succinct(console)
+        console.print(
+            Panel(
+                Group(
+                    "[bright_red][bold]Error parsing"
+                    f" {e.arg.lowered.name_or_flag}[/bold]:[/bright_red] {e.message}",
+                    *cast(  # Cast to appease mypy...
+                        List[RenderableType],
+                        (
+                            []
+                            if e.arg.lowered.help is None
+                            else [
+                                Rule(style=Style(color="red")),
+                                "Argument helptext:",
+                                Padding(
+                                    Group(
+                                        f"{e.arg.lowered.name_or_flag} [bold]{e.arg.lowered.metavar}[/bold]",
+                                        e.arg.lowered.help,
+                                    ),
+                                    pad=(0, 0, 0, 4),
+                                ),
+                            ]
+                        ),
+                    ),
+                ),
+                title="[bold]Value error[/bold]",
+                title_align="left",
+                border_style=Style(color="red"),
+            )
+        )
+        sys.exit(2)
 
     assert len(value_from_prefixed_field_name.keys() - consumed_keywords) == 0, (
         f"Parsed {value_from_prefixed_field_name.keys()}, but only consumed"
