@@ -259,9 +259,10 @@ messages with ones that:</p>
 - Can be themed with an accent color.
 </pre></div>
 </div>
-<p>This is largely built by fussing around in argparse implementation details, and is by
-far the hackiest part of <code class="docutils literal notranslate"><span class="pre">tyro</span></code>.</p>
-<p>TODO: we may want to just maintain our own fork of argparse.</p>
+<p>This is largely built by fussing around in argparse implementation details, and is
+extremely chaotic as a result.</p>
+<p>TODO: the current implementation should be robust given our test coverage, but unideal
+long-term. We should just maintain our own fork of argparse.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Permalink to this heading">#</a></h2>
 <dl class="py class">
@@ -354,7 +355,7 @@ see <code class="docutils literal notranslate"><span class="pre">python</span> <
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.ansi_context">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">ansi_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#ansi_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.ansi_context" title="Permalink to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">ansi_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#ansi_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.ansi_context" title="Permalink to this definition">#</a></dt>
 <dd><p>Context for working with ANSI codes + argparse:</p>
 <ul class="simple">
 <li><p>Applies a temporary monkey patch for making argparse ignore ANSI codes when
@@ -363,7 +364,7 @@ wrapping usage text.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>ContextManager[None]</p>
+<dd class="field-odd"><p>Generator[None, None, None]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -383,6 +384,56 @@ wrapping usage text.</p></li>
 <dd class="field-even"><p>str</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._argparse_formatter.global_unrecognized_args">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">global_unrecognized_args</span></span><em class="property"><span class="w"> </span><span class="pre">:List[str]</span> <span class="pre">=</span> <span class="pre">[]</span></em><a class="headerlink" href="#tyro._argparse_formatter.global_unrecognized_args" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgumentParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroArgumentParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgumentParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgumentParser" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code></p>
+<p>Object for parsing command line strings into Python objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>(</strong><strong>default</strong> (<em>- usage -- A usage message</em>) – <code class="docutils literal notranslate"><span class="pre">os.path.basename(sys.argv[0])</span></code>)</p></li>
+<li><p><strong>(</strong><strong>default</strong> – auto-generated from arguments)</p></li>
+<li><p><strong>does</strong> (<em>- description -- A description of what the program</em>) – </p></li>
+<li><p><strong>descriptions</strong> (<em>- epilog -- Text following the argument</em>) – </p></li>
+<li><p><strong>one</strong> (<em>- parents -- Parsers whose arguments should be copied into this</em>) – </p></li>
+<li><p><strong>messages</strong> (<em>- formatter_class -- HelpFormatter class for printing help</em>) – </p></li>
+<li><p><strong>arguments</strong> (<em>- argument_default -- The default value for all</em>) – </p></li>
+<li><p><strong>containing</strong> (<em>- fromfile_prefix_chars -- Characters that prefix files</em>) – additional arguments</p></li>
+<li><p><strong>arguments</strong> – </p></li>
+<li><p><strong>conflicts</strong> (<em>- conflict_handler -- String indicating how to handle</em>) – </p></li>
+<li><p><strong>option</strong> (<em>- add_help -- Add a -h/-help</em>) – </p></li>
+<li><p><strong>unambiguously</strong> (<em>- allow_abbrev -- Allow long options to be abbreviated</em>) – </p></li>
+<li><p><strong>with</strong> (<em>- exit_on_error -- Determines whether</em><em> or </em><em>not ArgumentParser exits</em>) – error info when an error occurs</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgumentParser.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NoReturn</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgumentParser.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgumentParser.error" title="Permalink to this definition">#</a></dt>
+<dd><p>Improve error messages from argparse.</p>
+<p>error(message: string)</p>
+<p>Prints a usage message incorporating the message to stderr and
+exits.</p>
+<p>If you override this in a subclass, it should not return – it
+should either exit or raise an exception.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>NoReturn</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -471,6 +522,11 @@ provided by the class are considered an implementation detail.
 <li><a class="reference internal" href="#tyro._argparse_formatter.monkeypatch_len">monkeypatch_len</a></li>
 <li><a class="reference internal" href="#tyro._argparse_formatter.ansi_context">ansi_context</a></li>
 <li><a class="reference internal" href="#tyro._argparse_formatter.str_from_rich">str_from_rich</a></li>
+<li><a class="reference internal" href="#tyro._argparse_formatter.global_unrecognized_args">global_unrecognized_args</a></li>
+<li><a class="reference internal" href="#tyro._argparse_formatter.TyroArgumentParser">TyroArgumentParser</a><ul>
+<li><a class="reference internal" href="#tyro._argparse_formatter.TyroArgumentParser.error">error</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro._argparse_formatter.TyroArgparseHelpFormatter">TyroArgparseHelpFormatter</a><ul>
 <li><a class="reference internal" href="#tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help">format_help</a></li>
 </ul>

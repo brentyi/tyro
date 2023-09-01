@@ -256,29 +256,36 @@
 <span class="sd">    - Use `rich` for formatting.</span>
 <span class="sd">    - Can be themed with an accent color.</span>
 
-<span class="sd">This is largely built by fussing around in argparse implementation details, and is by</span>
-<span class="sd">far the hackiest part of `tyro`.</span>
+<span class="sd">This is largely built by fussing around in argparse implementation details, and is</span>
+<span class="sd">extremely chaotic as a result.</span>
 
-<span class="sd">TODO: we may want to just maintain our own fork of argparse.</span>
+<span class="sd">TODO: the current implementation should be robust given our test coverage, but unideal</span>
+<span class="sd">long-term. We should just maintain our own fork of argparse.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">difflib</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">import</span> <span class="nn">re</span> <span class="k">as</span> <span class="nn">_re</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ContextManager</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">rich.columns</span> <span class="kn">import</span> <span class="n">Columns</span>
 <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
 <span class="kn">from</span> <span class="nn">rich.padding</span> <span class="kn">import</span> <span class="n">Padding</span>
 <span class="kn">from</span> <span class="nn">rich.panel</span> <span class="kn">import</span> <span class="n">Panel</span>
+<span class="kn">from</span> <span class="nn">rich.rule</span> <span class="kn">import</span> <span class="n">Rule</span>
 <span class="kn">from</span> <span class="nn">rich.style</span> <span class="kn">import</span> <span class="n">Style</span>
 <span class="kn">from</span> <span class="nn">rich.table</span> <span class="kn">import</span> <span class="n">Table</span>
 <span class="kn">from</span> <span class="nn">rich.text</span> <span class="kn">import</span> <span class="n">Text</span>
 <span class="kn">from</span> <span class="nn">rich.theme</span> <span class="kn">import</span> <span class="n">Theme</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">override</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
+<span class="kn">from</span> <span class="nn">._parsers</span> <span class="kn">import</span> <span class="n">ParserSpecification</span>
 
 
 <div class="viewcode-block" id="TyroTheme"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
@@ -330,47 +337,44 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ansi_context"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.ansi_context">[docs]</a><span class="k">def</span> <span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ContextManager</span><span class="p">[</span><span class="kc">None</span><span class="p">]:</span>
+<div class="viewcode-block" id="ansi_context"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.ansi_context">[docs]</a><span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
+<span class="k">def</span> <span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Context for working with ANSI codes + argparse:</span>
 <span class="sd">    - Applies a temporary monkey patch for making argparse ignore ANSI codes when</span>
 <span class="sd">      wrapping usage text.</span>
 <span class="sd">    - Enables support for Windows via colorama.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-    <span class="k">def</span> <span class="nf">inner</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">):</span>
-            <span class="c1"># Sketchy, but seems to work.</span>
-            <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="c1"># Use Colorama to support coloring in Windows shells.</span>
-                <span class="kn">import</span> <span class="nn">colorama</span>  <span class="c1"># type: ignore</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">argparse</span><span class="p">,</span> <span class="s2">&quot;len&quot;</span><span class="p">):</span>
+        <span class="c1"># Sketchy, but seems to work.</span>
+        <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
+        <span class="k">try</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="c1"># Use Colorama to support coloring in Windows shells.</span>
+            <span class="kn">import</span> <span class="nn">colorama</span>  <span class="c1"># type: ignore</span>
 
-                <span class="c1"># Notes:</span>
-                <span class="c1">#</span>
-                <span class="c1"># (1) This context manager looks very nice and local, but under-the-hood</span>
-                <span class="c1"># does some global operations which look likely to cause unexpected</span>
-                <span class="c1"># behavior if another library relies on `colorama.init()` and</span>
-                <span class="c1"># `colorama.deinit()`.</span>
-                <span class="c1">#</span>
-                <span class="c1"># (2) SSHed into a non-Windows machine from a WinAPI terminal =&gt; this</span>
-                <span class="c1"># won&#39;t work.</span>
-                <span class="c1">#</span>
-                <span class="c1"># Fixing these issues doesn&#39;t seem worth it: it doesn&#39;t seem like there</span>
-                <span class="c1"># are low-effort solutions for either problem, and more modern terminals</span>
-                <span class="c1"># in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.</span>
-                <span class="k">with</span> <span class="n">colorama</span><span class="o">.</span><span class="n">colorama_text</span><span class="p">():</span>
-                    <span class="k">yield</span>
-
-            <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="c1"># Notes:</span>
+            <span class="c1">#</span>
+            <span class="c1"># (1) This context manager looks very nice and local, but under-the-hood</span>
+            <span class="c1"># does some global operations which look likely to cause unexpected</span>
+            <span class="c1"># behavior if another library relies on `colorama.init()` and</span>
+            <span class="c1"># `colorama.deinit()`.</span>
+            <span class="c1">#</span>
+            <span class="c1"># (2) SSHed into a non-Windows machine from a WinAPI terminal =&gt; this</span>
+            <span class="c1"># won&#39;t work.</span>
+            <span class="c1">#</span>
+            <span class="c1"># Fixing these issues doesn&#39;t seem worth it: it doesn&#39;t seem like there</span>
+            <span class="c1"># are low-effort solutions for either problem, and more modern terminals</span>
+            <span class="c1"># in Windows (PowerShell, MSYS2, ...) do support ANSI codes anyways.</span>
+            <span class="k">with</span> <span class="n">colorama</span><span class="o">.</span><span class="n">colorama_text</span><span class="p">():</span>
                 <span class="k">yield</span>
 
-            <span class="k">del</span> <span class="n">argparse</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># type: ignore</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># No-op when the context manager is nested.</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
             <span class="k">yield</span>
 
-    <span class="k">return</span> <span class="n">inner</span><span class="p">()</span></div>
+        <span class="k">del</span> <span class="n">argparse</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># type: ignore</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No-op when the context manager is nested.</span>
+        <span class="k">yield</span></div>
 
 
 <div class="viewcode-block" id="str_from_rich"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.str_from_rich">[docs]</a><span class="k">def</span> <span class="nf">str_from_rich</span><span class="p">(</span>
@@ -380,6 +384,613 @@
     <span class="k">with</span> <span class="n">console</span><span class="o">.</span><span class="n">capture</span><span class="p">()</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
         <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">renderable</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="o">=</span><span class="n">soft_wrap</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">_ArgumentInfo</span><span class="p">:</span>
+    <span class="n">option_strings</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">usage_hint</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+    <span class="n">subcommand_match_score</span><span class="p">:</span> <span class="nb">float</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Priority value used when an argument is in the current subcommand tree.&quot;&quot;&quot;</span>
+
+
+<span class="c1"># By default, unrecognized arguments won&#39;t raise an error in the case of:</span>
+<span class="c1">#</span>
+<span class="c1">#     # We&#39;ve misspelled `binary`!</span>
+<span class="c1">#     python 03_multiple_subcommands.py dataset:mnist --dataset.binayr True</span>
+<span class="c1">#</span>
+<span class="c1"># When there&#39;s a subcommand that follows dataset:mnist. Instead,</span>
+<span class="c1"># --dataset.binayr is consumed and we get an error that `True` is not a valid</span>
+<span class="c1"># subcommand. This can be really confusing when we have a lot of keyword</span>
+<span class="c1"># arguments.</span>
+<span class="c1">#</span>
+<span class="c1"># Our current solution is to manually track unrecognized arguments in _parse_known_args,</span>
+<span class="c1"># and in error() override other errors when unrecognized arguments are present.</span>
+<span class="n">global_unrecognized_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="TyroArgumentParser"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgumentParser">[docs]</a><span class="k">class</span> <span class="nc">TyroArgumentParser</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>
+    <span class="n">_parser_specification</span><span class="p">:</span> <span class="n">ParserSpecification</span>
+    <span class="n">_parsing_known_args</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span> <span class="nf">_parse_known_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_strings</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;We override _parse_known_args() to improve error messages in the presence of</span>
+<span class="sd">        subcommands. Difference is marked with &lt;new&gt;...&lt;/new&gt; below.&quot;&quot;&quot;</span>
+
+        <span class="c1"># &lt;new&gt;</span>
+        <span class="c1"># Reset the unused argument list in the root parser.</span>
+        <span class="c1"># Subparsers will have spaces in self.prog.</span>
+        <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="p">:</span>
+            <span class="k">global</span> <span class="n">global_unrecognized_args</span>
+            <span class="n">global_unrecognized_args</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># &lt;/new&gt;</span>
+
+        <span class="c1"># replace arg strings that are file references</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fromfile_prefix_chars</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">arg_strings</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_args_from_files</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">)</span>
+
+        <span class="c1"># map all mutually exclusive arguments to the other arguments</span>
+        <span class="c1"># they can&#39;t occur with</span>
+        <span class="n">action_conflicts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">mutex_group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutually_exclusive_groups</span><span class="p">:</span>
+            <span class="n">group_actions</span> <span class="o">=</span> <span class="n">mutex_group</span><span class="o">.</span><span class="n">_group_actions</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mutex_action</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mutex_group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">):</span>
+                <span class="n">conflicts</span> <span class="o">=</span> <span class="n">action_conflicts</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">mutex_action</span><span class="p">,</span> <span class="p">[])</span>
+                <span class="n">conflicts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">group_actions</span><span class="p">[:</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">conflicts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">group_actions</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:])</span>
+
+        <span class="c1"># find all option indices, and determine the arg_string_pattern</span>
+        <span class="c1"># which has an &#39;O&#39; if there is an option at an index,</span>
+        <span class="c1"># an &#39;A&#39; if there is an argument, or a &#39;-&#39; if there is a &#39;--&#39;</span>
+        <span class="n">option_string_indices</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">arg_string_pattern_parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">arg_strings_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">arg_string</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">arg_strings_iter</span><span class="p">):</span>
+            <span class="c1"># all args after -- are non-options</span>
+            <span class="k">if</span> <span class="n">arg_string</span> <span class="o">==</span> <span class="s2">&quot;--&quot;</span><span class="p">:</span>
+                <span class="n">arg_string_pattern_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">arg_string</span> <span class="ow">in</span> <span class="n">arg_strings_iter</span><span class="p">:</span>
+                    <span class="n">arg_string_pattern_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
+
+            <span class="c1"># otherwise, add the arg to the arg strings</span>
+            <span class="c1"># and note the index if it was an option</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">option_tuple</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_optional</span><span class="p">(</span><span class="n">arg_string</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">option_tuple</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">pattern</span> <span class="o">=</span> <span class="s2">&quot;A&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">option_string_indices</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">option_tuple</span>
+                    <span class="n">pattern</span> <span class="o">=</span> <span class="s2">&quot;O&quot;</span>
+                <span class="n">arg_string_pattern_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+
+        <span class="c1"># join the pieces together to form the pattern</span>
+        <span class="n">arg_strings_pattern</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_string_pattern_parts</span><span class="p">)</span>
+
+        <span class="c1"># converts arg strings to the appropriate and then takes the action</span>
+        <span class="n">seen_actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">seen_non_default_actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="k">def</span> <span class="nf">take_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argument_strings</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">seen_actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+            <span class="n">argument_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_values</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argument_strings</span><span class="p">)</span>
+
+            <span class="c1"># error if this argument is not allowed with other previously</span>
+            <span class="c1"># seen arguments, assuming that actions that use the default</span>
+            <span class="c1"># value don&#39;t really count as &quot;present&quot;</span>
+            <span class="k">if</span> <span class="n">argument_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">action</span><span class="o">.</span><span class="n">default</span><span class="p">:</span>
+                <span class="n">seen_non_default_actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">conflict_action</span> <span class="ow">in</span> <span class="n">action_conflicts</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="p">[]):</span>
+                    <span class="k">if</span> <span class="n">conflict_action</span> <span class="ow">in</span> <span class="n">seen_non_default_actions</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;not allowed with argument </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="n">action_name</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_get_action_name</span><span class="p">(</span><span class="n">conflict_action</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">action_name</span><span class="p">)</span>
+
+            <span class="c1"># take the action if we didn&#39;t receive a SUPPRESS value</span>
+            <span class="c1"># (e.g. from a default)</span>
+            <span class="k">if</span> <span class="n">argument_values</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">:</span>
+                <span class="n">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">argument_values</span><span class="p">,</span> <span class="n">option_string</span><span class="p">)</span>
+
+        <span class="c1"># function to convert arg_strings into an optional action</span>
+        <span class="k">def</span> <span class="nf">consume_optional</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
+            <span class="c1"># get the optional identified at this index</span>
+            <span class="n">option_tuple</span> <span class="o">=</span> <span class="n">option_string_indices</span><span class="p">[</span><span class="n">start_index</span><span class="p">]</span>
+            <span class="n">action</span><span class="p">,</span> <span class="n">option_string</span><span class="p">,</span> <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">option_tuple</span>
+
+            <span class="c1"># identify additional optionals in the same arg string</span>
+            <span class="c1"># (e.g. -xyz is the same as -x -y -z if no args are required)</span>
+            <span class="n">match_argument</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_match_argument</span>
+            <span class="n">action_tuples</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># if we found no optional action, skip it</span>
+                <span class="k">if</span> <span class="n">action</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># &lt;new&gt;</span>
+                    <span class="c1"># Manually track unused arguments to assist with error messages</span>
+                    <span class="c1"># later.</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parsing_known_args</span><span class="p">:</span>
+                        <span class="k">global</span> <span class="n">global_unrecognized_args</span>
+                        <span class="n">global_unrecognized_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
+                    <span class="c1"># &lt;/new&gt;</span>
+
+                    <span class="n">extras</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span><span class="p">])</span>
+                    <span class="k">return</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
+
+                <span class="c1"># if there is an explicit argument, try to match the</span>
+                <span class="c1"># optional&#39;s string arguments to only this</span>
+                <span class="k">if</span> <span class="n">explicit_arg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">arg_count</span> <span class="o">=</span> <span class="n">match_argument</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="s2">&quot;A&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># if the action is a single-dash option and takes no</span>
+                    <span class="c1"># arguments, try to parse more single-dash options out</span>
+                    <span class="c1"># of the tail of the option string</span>
+                    <span class="n">chars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefix_chars</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">arg_count</span> <span class="o">==</span> <span class="mi">0</span>
+                        <span class="ow">and</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">chars</span>
+                        <span class="ow">and</span> <span class="n">explicit_arg</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+                    <span class="p">):</span>
+                        <span class="n">action_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="p">[],</span> <span class="n">option_string</span><span class="p">))</span>
+                        <span class="n">char</span> <span class="o">=</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">option_string</span> <span class="o">=</span> <span class="n">char</span> <span class="o">+</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">new_explicit_arg</span> <span class="o">=</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="kc">None</span>
+                        <span class="n">optionals_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_option_string_actions</span>
+                        <span class="k">if</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">optionals_map</span><span class="p">:</span>
+                            <span class="n">action</span> <span class="o">=</span> <span class="n">optionals_map</span><span class="p">[</span><span class="n">option_string</span><span class="p">]</span>
+                            <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">new_explicit_arg</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;ignored explicit argument </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">explicit_arg</span><span class="p">)</span>
+
+                    <span class="c1"># if the action expect exactly one argument, we&#39;ve</span>
+                    <span class="c1"># successfully matched the option; exit the loop</span>
+                    <span class="k">elif</span> <span class="n">arg_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">stop</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">explicit_arg</span><span class="p">]</span>
+                        <span class="n">action_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span><span class="p">))</span>
+                        <span class="k">break</span>
+
+                    <span class="c1"># error if a double-dash option did not use the</span>
+                    <span class="c1"># explicit argument</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;ignored explicit argument </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">raise</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">explicit_arg</span><span class="p">)</span>
+
+                <span class="c1"># if there is no explicit argument, try to match the</span>
+                <span class="c1"># optional&#39;s string arguments with the following strings</span>
+                <span class="c1"># if successful, exit the loop</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="n">selected_patterns</span> <span class="o">=</span> <span class="n">arg_strings_pattern</span><span class="p">[</span><span class="n">start</span><span class="p">:]</span>
+                    <span class="n">arg_count</span> <span class="o">=</span> <span class="n">match_argument</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">selected_patterns</span><span class="p">)</span>
+                    <span class="n">stop</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">arg_count</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="n">arg_strings</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span>
+                    <span class="n">action_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span><span class="p">))</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># add the Optional to the list and return the index at which</span>
+            <span class="c1"># the Optional&#39;s string args stopped</span>
+            <span class="k">assert</span> <span class="n">action_tuples</span>
+            <span class="k">for</span> <span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">action_tuples</span><span class="p">:</span>
+                <span class="n">take_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">option_string</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">stop</span>
+
+        <span class="c1"># the list of Positionals left to be parsed; this is modified</span>
+        <span class="c1"># by consume_positionals()</span>
+        <span class="n">positionals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_positional_actions</span><span class="p">()</span>
+
+        <span class="c1"># function to convert arg_strings into positional actions</span>
+        <span class="k">def</span> <span class="nf">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
+            <span class="c1"># match as many Positionals as possible</span>
+            <span class="n">match_partial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_match_arguments_partial</span>
+            <span class="n">selected_pattern</span> <span class="o">=</span> <span class="n">arg_strings_pattern</span><span class="p">[</span><span class="n">start_index</span><span class="p">:]</span>
+            <span class="n">arg_counts</span> <span class="o">=</span> <span class="n">match_partial</span><span class="p">(</span><span class="n">positionals</span><span class="p">,</span> <span class="n">selected_pattern</span><span class="p">)</span>
+
+            <span class="c1"># slice off the appropriate arg strings for each Positional</span>
+            <span class="c1"># and add the Positional and its args to the list</span>
+            <span class="k">for</span> <span class="n">action</span><span class="p">,</span> <span class="n">arg_count</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">positionals</span><span class="p">,</span> <span class="n">arg_counts</span><span class="p">):</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span> <span class="p">:</span> <span class="n">start_index</span> <span class="o">+</span> <span class="n">arg_count</span><span class="p">]</span>
+                <span class="n">start_index</span> <span class="o">+=</span> <span class="n">arg_count</span>
+                <span class="n">take_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+            <span class="c1"># slice off the Positionals that we just parsed and return the</span>
+            <span class="c1"># index at which the Positionals&#39; string args stopped</span>
+            <span class="n">positionals</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">positionals</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">arg_counts</span><span class="p">)</span> <span class="p">:]</span>
+            <span class="k">return</span> <span class="n">start_index</span>
+
+        <span class="c1"># consume Positionals and Optionals alternately, until we have</span>
+        <span class="c1"># passed the last option string</span>
+        <span class="n">extras</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">start_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">option_string_indices</span><span class="p">:</span>
+            <span class="n">max_option_string_index</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">option_string_indices</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">max_option_string_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">while</span> <span class="n">start_index</span> <span class="o">&lt;=</span> <span class="n">max_option_string_index</span><span class="p">:</span>
+            <span class="c1"># consume any Positionals preceding the next option</span>
+            <span class="n">next_option_string_index</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">index</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">option_string_indices</span> <span class="k">if</span> <span class="n">index</span> <span class="o">&gt;=</span> <span class="n">start_index</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">start_index</span> <span class="o">!=</span> <span class="n">next_option_string_index</span><span class="p">:</span>
+                <span class="n">positionals_end_index</span> <span class="o">=</span> <span class="n">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+
+                <span class="c1"># only try to parse the next optional if we didn&#39;t consume</span>
+                <span class="c1"># the option string during the positionals parsing</span>
+                <span class="k">if</span> <span class="n">positionals_end_index</span> <span class="o">&gt;</span> <span class="n">start_index</span><span class="p">:</span>
+                    <span class="n">start_index</span> <span class="o">=</span> <span class="n">positionals_end_index</span>
+                    <span class="k">continue</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">start_index</span> <span class="o">=</span> <span class="n">positionals_end_index</span>
+
+            <span class="c1"># if we consumed all the positionals we could and we&#39;re not</span>
+            <span class="c1"># at the index of an option string, there were extra arguments</span>
+            <span class="k">if</span> <span class="n">start_index</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">option_string_indices</span><span class="p">:</span>
+                <span class="n">strings</span> <span class="o">=</span> <span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span><span class="p">:</span><span class="n">next_option_string_index</span><span class="p">]</span>
+                <span class="n">extras</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
+                <span class="n">start_index</span> <span class="o">=</span> <span class="n">next_option_string_index</span>
+
+            <span class="c1"># consume the next optional and any arguments for it</span>
+            <span class="n">start_index</span> <span class="o">=</span> <span class="n">consume_optional</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+
+        <span class="c1"># consume any positionals following the last Optional</span>
+        <span class="n">stop_index</span> <span class="o">=</span> <span class="n">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">)</span>
+
+        <span class="c1"># if we didn&#39;t consume all the argument strings, there were extras</span>
+        <span class="n">extras</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">[</span><span class="n">stop_index</span><span class="p">:])</span>
+
+        <span class="c1"># make sure all required actions were present and also convert</span>
+        <span class="c1"># action defaults which were not given as arguments</span>
+        <span class="n">required_actions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_actions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen_actions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                    <span class="n">required_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">_get_action_name</span><span class="p">(</span><span class="n">action</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Convert action default now instead of doing it before</span>
+                    <span class="c1"># parsing arguments to avoid calling convert functions</span>
+                    <span class="c1"># twice (which may fail) if the argument was given, but</span>
+                    <span class="c1"># only if it was defined already in the namespace</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">action</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">action</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">action</span><span class="o">.</span><span class="n">dest</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="n">action</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="n">action</span><span class="o">.</span><span class="n">dest</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="nb">setattr</span><span class="p">(</span>
+                            <span class="n">namespace</span><span class="p">,</span>
+                            <span class="n">action</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">action</span><span class="o">.</span><span class="n">default</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">required_actions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="n">_</span><span class="p">(</span><span class="s2">&quot;the following arguments are required: </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="o">%</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">required_actions</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># make sure all required groups had one option present</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mutually_exclusive_groups</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">group</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">seen_non_default_actions</span><span class="p">:</span>
+                        <span class="k">break</span>
+
+                <span class="c1"># if no actions were used, report the error</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="n">argparse</span><span class="o">.</span><span class="n">_get_action_name</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">group</span><span class="o">.</span><span class="n">_group_actions</span>
+                        <span class="k">if</span> <span class="n">action</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
+                    <span class="p">]</span>
+                    <span class="n">msg</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;one of the arguments </span><span class="si">%s</span><span class="s2"> is required&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">msg</span> <span class="o">%</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+
+        <span class="c1"># return the updated namespace and the extra arguments</span>
+        <span class="k">return</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">extras</span>
+
+    <span class="k">def</span> <span class="nf">_print_usage_succinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">console</span><span class="p">:</span> <span class="n">Console</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Print usage, but abridged if too long.&quot;&quot;&quot;</span>
+        <span class="n">usage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_usage</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">usage</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">400</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">usage</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+            <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold]help:[/bold] </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="TyroArgumentParser.error"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgumentParser.error">[docs]</a>    <span class="nd">@override</span>
+    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Improve error messages from argparse.</span>
+
+<span class="sd">        error(message: string)</span>
+
+<span class="sd">        Prints a usage message incorporating the message to stderr and</span>
+<span class="sd">        exits.</span>
+
+<span class="sd">        If you override this in a subclass, it should not return -- it</span>
+<span class="sd">        should either exit or raise an exception.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_print_usage_succinct</span><span class="p">(</span><span class="n">console</span><span class="p">)</span>
+
+        <span class="n">extra_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">global</span> <span class="n">global_unrecognized_args</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+            <span class="s2">&quot;unrecognized arguments: &quot;</span>
+        <span class="p">):</span>
+            <span class="n">global_unrecognized_args</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized arguments: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">unrecognized_arguments</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">arg</span>
+                <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">global_unrecognized_args</span>
+                <span class="c1"># If we pass in `--spell-chekc on`, we only want `spell-chekc` and not</span>
+                <span class="c1"># `on`.</span>
+                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="c1"># Argument name =&gt; subcommands it came from.</span>
+            <span class="n">arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="k">def</span> <span class="nf">_recursive_arg_search</span><span class="p">(</span>
+                <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
+                <span class="n">subcommands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                <span class="n">subcommand_match_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">                </span><span class="sd">&quot;&quot;&quot;Find all possible arguments that could have been passed in.&quot;&quot;&quot;</span>
+
+                <span class="c1"># When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will</span>
+                <span class="c1"># only appear in the help message for &quot;leaf&quot; subparsers.</span>
+                <span class="n">help_flag</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot; (other subcommands) --help&quot;</span>
+                    <span class="k">if</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span>
+                    <span class="ow">and</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="s2">&quot; --help&quot;</span>
+                <span class="p">)</span>
+                <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
+                        <span class="c1"># Skip positional arguments.</span>
+                        <span class="k">continue</span>
+
+                    <span class="c1"># Skip suppressed arguments.</span>
+                    <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
+                        <span class="n">conf</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                        <span class="ow">and</span> <span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                    <span class="p">):</span>
+                        <span class="k">continue</span>
+
+                    <span class="n">option_strings</span> <span class="o">=</span> <span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="p">,)</span>
+
+                    <span class="c1"># Handle actions, eg BooleanOptionalAction will map (&quot;--flag&quot;,) to</span>
+                    <span class="c1"># (&quot;--flag&quot;, &quot;--no-flag&quot;).</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                        <span class="c1"># Actions are sometimes strings in Python 3.7, eg &quot;append&quot;.</span>
+                        <span class="c1"># We&#39;ll ignore these, but this kind of thing is a good reason</span>
+                        <span class="c1"># for just forking argparse.</span>
+                        <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+                    <span class="p">):</span>
+                        <span class="n">option_strings</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span><span class="p">(</span>
+                            <span class="n">option_strings</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;&quot;</span>  <span class="c1"># dest should not matter.</span>
+                        <span class="p">)</span><span class="o">.</span><span class="n">option_strings</span>
+
+                    <span class="n">arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">_ArgumentInfo</span><span class="p">(</span>
+                            <span class="c1"># Currently doesn&#39;t handle actions well, eg boolean optional</span>
+                            <span class="c1"># arguments.</span>
+                            <span class="n">option_strings</span><span class="p">,</span>
+                            <span class="n">metavar</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+                            <span class="n">usage_hint</span><span class="o">=</span><span class="n">subcommands</span> <span class="o">+</span> <span class="n">help_flag</span><span class="p">,</span>
+                            <span class="n">help</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
+                            <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span><span class="p">,</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                    <span class="c1"># An unrecognized argument.</span>
+                    <span class="k">nonlocal</span> <span class="n">same_exists</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="ow">not</span> <span class="n">same_exists</span>
+                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span> <span class="ow">in</span> <span class="n">unrecognized_arguments</span>
+                    <span class="p">):</span>
+                        <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">nonlocal</span> <span class="n">has_subcommands</span>
+                    <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">for</span> <span class="p">(</span>
+                        <span class="n">subparser_name</span><span class="p">,</span>
+                        <span class="n">subparser</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="n">_recursive_arg_search</span><span class="p">(</span>
+                            <span class="n">subparser</span><span class="p">,</span>
+                            <span class="n">subcommands</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
+                            <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span>
+                            <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="k">else</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+            <span class="n">_recursive_arg_search</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">,</span>
+                <span class="c1"># Remove other subcommands.</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">has_subcommands</span> <span class="ow">and</span> <span class="n">same_exists</span><span class="p">:</span>
+                <span class="n">misplaced_arguments</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;unrecognized or misplaced arguments: &quot;</span> <span class="o">+</span> <span class="n">misplaced_arguments</span>
+                    <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">in</span> <span class="n">misplaced_arguments</span>
+                    <span class="k">else</span> <span class="s2">&quot;unrecognized or misplaced argument: &quot;</span> <span class="o">+</span> <span class="n">misplaced_arguments</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Show similar arguments for keyword options.</span>
+            <span class="k">for</span> <span class="n">unrecognized_argument</span> <span class="ow">in</span> <span class="n">unrecognized_arguments</span><span class="p">:</span>
+                <span class="c1"># Sort arguments by similarity.</span>
+                <span class="n">scored_arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
+                    <span class="c1"># Compute a score for each argument.</span>
+                    <span class="k">assert</span> <span class="n">unrecognized_argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
+
+                    <span class="k">def</span> <span class="nf">get_score</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">option_string</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
+                            <span class="n">unrecognized_argument</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
+                        <span class="p">)</span> <span class="ow">or</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">unrecognized_argument</span><span class="p">[</span><span class="mi">2</span><span class="p">:]):</span>
+                            <span class="k">return</span> <span class="mf">0.9</span>
+                        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_argument</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+                            <span class="nb">map</span><span class="p">(</span>
+                                <span class="k">lambda</span> <span class="n">part</span><span class="p">:</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">option_string</span><span class="p">,</span>
+                                <span class="n">unrecognized_argument</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">),</span>
+                            <span class="p">)</span>
+                        <span class="p">):</span>
+                            <span class="k">return</span> <span class="mf">0.9</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">return</span> <span class="n">difflib</span><span class="o">.</span><span class="n">SequenceMatcher</span><span class="p">(</span>
+                                <span class="n">a</span><span class="o">=</span><span class="n">unrecognized_argument</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="n">option_string</span>
+                            <span class="p">)</span><span class="o">.</span><span class="n">ratio</span><span class="p">()</span>
+
+                    <span class="n">scored_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">get_score</span><span class="p">,</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)))</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Add information about similar arguments.</span>
+                <span class="n">prev_arg_option_strings</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">show_arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">unique_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">argument</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="p">(</span>
+                    <span class="c1"># Sort scores greatest to least.</span>
+                    <span class="nb">sorted</span><span class="p">(</span>
+                        <span class="n">scored_arguments</span><span class="p">,</span>
+                        <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">arg_score</span><span class="p">:</span> <span class="p">(</span>
+                            <span class="c1"># Highest scores first.</span>
+                            <span class="o">-</span><span class="n">arg_score</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="c1"># Prefer arguments available in the currently specified</span>
+                            <span class="c1"># subcommands.</span>
+                            <span class="o">-</span><span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">subcommand_match_score</span><span class="p">,</span>
+                            <span class="c1"># Cluster by flag name, usage hint, help message.</span>
+                            <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">option_strings</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">usage_hint</span><span class="p">,</span>
+                            <span class="n">arg_score</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
+                        <span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="k">if</span> <span class="n">score</span> <span class="o">&lt;</span> <span class="mf">0.8</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="n">score</span> <span class="o">&lt;</span> <span class="mf">0.9</span>
+                        <span class="ow">and</span> <span class="n">unique_counter</span> <span class="o">&gt;=</span> <span class="mi">3</span>
+                        <span class="ow">and</span> <span class="n">prev_arg_option_strings</span> <span class="o">!=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
+                    <span class="p">):</span>
+                        <span class="k">break</span>
+                    <span class="n">unique_counter</span> <span class="o">+=</span> <span class="n">prev_arg_option_strings</span> <span class="o">!=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
+
+                    <span class="n">show_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
+                    <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
+
+                <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">prev_argument_help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">same_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">dots_printed</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">show_arguments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Add a header before the first similar argument.</span>
+                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)))</span>
+                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="s2">&quot;Similar arguments:&quot;</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unrecognized_arguments</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+                        <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;Arguments similar to </span><span class="si">{</span><span class="n">unrecognized_argument</span><span class="si">}</span><span class="s2">:&quot;</span>
+                    <span class="p">)</span>
+
+                <span class="n">unique_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">show_arguments</span><span class="p">:</span>
+                    <span class="n">same_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_option_strings</span><span class="p">:</span>
+                        <span class="n">same_counter</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">if</span> <span class="n">unique_counter</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
+                            <span class="k">break</span>
+                        <span class="n">unique_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                    <span class="c1"># For arguments with the same name, only show a limited number of</span>
+                    <span class="c1"># subcommands / help messages.</span>
+                    <span class="k">if</span> <span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">show_arguments</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">8</span>
+                        <span class="ow">and</span> <span class="n">same_counter</span> <span class="o">&gt;=</span> <span class="mi">4</span>
+                        <span class="ow">and</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="n">prev_arg_option_strings</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">dots_printed</span><span class="p">:</span>
+                            <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                <span class="n">Padding</span><span class="p">(</span>
+                                    <span class="s2">&quot;[...]&quot;</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                                <span class="p">)</span>
+                            <span class="p">)</span>
+                        <span class="n">dots_printed</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">continue</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+                        <span class="n">has_subcommands</span>
+                        <span class="ow">and</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="n">prev_arg_option_strings</span>
+                    <span class="p">):</span>
+                        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">Padding</span><span class="p">(</span>
+                                <span class="s2">&quot;[bold]&quot;</span>
+                                <span class="o">+</span> <span class="p">(</span>
+                                    <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">argument</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span>
+                                    <span class="k">else</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                                    <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                                    <span class="o">+</span> <span class="n">argument</span><span class="o">.</span><span class="n">metavar</span>
+                                <span class="p">)</span>
+                                <span class="o">+</span> <span class="s2">&quot;[/bold]&quot;</span><span class="p">,</span>
+                                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+
+                    <span class="c1"># Uncomment to show similarity metric.</span>
+                    <span class="c1"># extra_info.append(</span>
+                    <span class="c1">#     Padding(</span>
+                    <span class="c1">#         f&quot;[green]Similarity: {score:.02f}[/green]&quot;, (0, 0, 0, 8)</span>
+                    <span class="c1">#     )</span>
+                    <span class="c1"># )</span>
+
+                    <span class="k">if</span> <span class="n">argument</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+                        <span class="c1"># Only print help messages if it&#39;s not the same as the previous</span>
+                        <span class="c1"># one.</span>
+                        <span class="n">argument</span><span class="o">.</span><span class="n">help</span> <span class="o">!=</span> <span class="n">prev_argument_help</span>
+                        <span class="ow">or</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_option_strings</span>
+                    <span class="p">):</span>
+                        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Padding</span><span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">help</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
+
+                    <span class="c1"># Show the subcommand that this argument is available in.</span>
+                    <span class="k">if</span> <span class="n">has_subcommands</span><span class="p">:</span>
+                        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">Padding</span><span class="p">(</span>
+                                <span class="sa">f</span><span class="s2">&quot;in [green]</span><span class="si">{</span><span class="n">argument</span><span class="o">.</span><span class="n">usage_hint</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">,</span>
+                                <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+
+                    <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
+                    <span class="n">prev_argument_help</span> <span class="o">=</span> <span class="n">argument</span><span class="o">.</span><span class="n">help</span>
+
+        <span class="c1"># print(self._parser_specification)</span>
+        <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+            <span class="n">Panel</span><span class="p">(</span>
+                <span class="n">Group</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">extra_info</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;[bold]Parsing error[/bold]&quot;</span><span class="p">,</span>
+                <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">border_style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;bright_red&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="TyroArgparseHelpFormatter"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter">[docs]</a><span class="k">class</span> <span class="nc">TyroArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
@@ -394,6 +1005,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
 
+    <span class="nd">@override</span>
     <span class="k">def</span> <span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Override _format_args() to ignore nargs and always expect single string</span>
 <span class="sd">        metavars.&quot;&quot;&quot;</span>
@@ -417,6 +1029,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span>
 
+    <span class="nd">@override</span>
     <span class="k">def</span> <span class="nf">add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="c1"># Patch to avoid super long arguments from shifting the helptext of all of the</span>
         <span class="c1"># fields.</span>
@@ -437,10 +1050,12 @@
         <span class="k">del</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># type: ignore</span>
         <span class="k">return</span> <span class="n">out</span>
 
+    <span class="nd">@override</span>
     <span class="k">def</span> <span class="nf">_fill_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">indent</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
-<div class="viewcode-block" id="TyroArgparseHelpFormatter.format_help"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help">[docs]</a>    <span class="k">def</span> <span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TyroArgparseHelpFormatter.format_help"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help">[docs]</a>    <span class="nd">@override</span>
+    <span class="k">def</span> <span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Try with and without a fixed help position, then return the shorter help</span>
         <span class="c1"># message.</span>
         <span class="c1"># For dense multi-column layouts, the fixed help position is often shorter.</span>
@@ -461,6 +1076,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">out</span></div>
 
+    <span class="nd">@override</span>
     <span class="k">class</span> <span class="nc">_Section</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
         <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span>
@@ -689,9 +1305,9 @@
             <span class="n">max_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">lines</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># Note: we don&#39;t use rich.rule.Rule() because this will make all of</span>
-                <span class="c1"># the panels expand to fill the full width of the console. (this only</span>
-                <span class="c1"># impacts single-column layouts)</span>
+                <span class="c1"># We don&#39;t use rich.rule.Rule() because this will make all of the panels</span>
+                <span class="c1"># expand to fill the full width of the console. This only impacts</span>
+                <span class="c1"># single-column layouts.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="o">=</span> <span class="n">Text</span><span class="o">.</span><span class="n">from_ansi</span><span class="p">(</span>
                     <span class="s2">&quot;─&quot;</span> <span class="o">*</span> <span class="n">max_width</span><span class="p">,</span> <span class="n">style</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">border</span><span class="p">,</span> <span class="n">overflow</span><span class="o">=</span><span class="s2">&quot;crop&quot;</span>
                 <span class="p">)</span>
@@ -741,7 +1357,7 @@
                         <span class="n">group_action_count</span> <span class="o">-</span> <span class="n">suppressed_actions_count</span>
                     <span class="p">)</span>
 
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">group</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
                         <span class="k">if</span> <span class="n">start</span> <span class="ow">in</span> <span class="n">inserts</span><span class="p">:</span>
                             <span class="n">inserts</span><span class="p">[</span><span class="n">start</span><span class="p">]</span> <span class="o">+=</span> <span class="s2">&quot; [&quot;</span>
                         <span class="k">else</span><span class="p">:</span>
@@ -830,7 +1446,20 @@
         <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         <span class="c1"># return the text</span>
-        <span class="k">return</span> <span class="n">text</span></div>
+        <span class="k">return</span> <span class="n">text</span>
+
+    <span class="nd">@override</span>
+    <span class="k">def</span> <span class="nf">_format_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">usage</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="c1"># Format the usage label.</span>
+        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">prefix</span> <span class="o">=</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="s2">&quot;[bold]usage[/bold]: &quot;</span><span class="p">)</span>
+        <span class="n">usage</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_format_usage</span><span class="p">(</span>
+            <span class="n">usage</span><span class="p">,</span>
+            <span class="n">actions</span><span class="p">,</span>
+            <span class="n">groups</span><span class="p">,</span>
+            <span class="n">prefix</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">usage</span></div>
 </pre></div>
         </article>
       </div>

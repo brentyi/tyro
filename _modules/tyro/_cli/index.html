@@ -515,10 +515,8 @@
     <span class="k">if</span> <span class="n">deprecated_kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;avoid_subparsers&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">AvoidSubcommands</span><span class="p">[</span><span class="n">f</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="p">(</span>
-                <span class="s2">&quot;`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`&quot;</span>
-                <span class="s2">&quot; instead.&quot;</span>
-            <span class="p">),</span>
+            <span class="s2">&quot;`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`&quot;</span>
+            <span class="s2">&quot; instead.&quot;</span><span class="p">,</span>
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -606,7 +604,7 @@
         <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
-    <span class="n">parser_definition</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+    <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
         <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
@@ -617,16 +615,19 @@
 
     <span class="c1"># Generate parser!</span>
     <span class="k">with</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ansi_context</span><span class="p">():</span>
-        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgumentParser</span><span class="p">(</span>
             <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
             <span class="n">formatter_class</span><span class="o">=</span><span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgparseHelpFormatter</span><span class="p">,</span>
             <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="p">)</span>
-        <span class="n">parser_definition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">parser_spec</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">_parsing_known_args</span> <span class="o">=</span> <span class="n">return_unknown_args</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="n">parser_spec</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
         <span class="c1"># Print help message when no arguments are passed in. (but arguments are</span>
         <span class="c1"># expected)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
             <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
@@ -661,7 +662,7 @@
                         <span class="n">root_prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;tyro_</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                     <span class="p">)</span>
                 <span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">()</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
             <span class="n">namespace</span><span class="p">,</span> <span class="n">unknown_args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_known_args</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">)</span>
@@ -680,17 +681,55 @@
         <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
         <span class="n">out</span><span class="p">,</span> <span class="n">consumed_keywords</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">call_from_args</span><span class="p">(</span>
             <span class="n">f</span><span class="p">,</span>
-            <span class="n">parser_definition</span><span class="p">,</span>
+            <span class="n">parser_spec</span><span class="p">,</span>
             <span class="n">default_instance_internal</span><span class="p">,</span>
             <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
             <span class="n">field_name_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span><span class="p">)</span>
+
         <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">print_usage</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">()</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">raise</span> <span class="ne">SystemExit</span><span class="p">()</span>
+        <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
+        <span class="kn">from</span> <span class="nn">rich.padding</span> <span class="kn">import</span> <span class="n">Padding</span>
+        <span class="kn">from</span> <span class="nn">rich.panel</span> <span class="kn">import</span> <span class="n">Panel</span>
+        <span class="kn">from</span> <span class="nn">rich.rule</span> <span class="kn">import</span> <span class="n">Rule</span>
+        <span class="kn">from</span> <span class="nn">rich.style</span> <span class="kn">import</span> <span class="n">Style</span>
+
+        <span class="kn">from</span> <span class="nn">._argparse_formatter</span> <span class="kn">import</span> <span class="n">THEME</span>
+
+        <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">_print_usage_succinct</span><span class="p">(</span><span class="n">console</span><span class="p">)</span>
+        <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+            <span class="n">Panel</span><span class="p">(</span>
+                <span class="n">Group</span><span class="p">(</span>
+                    <span class="s2">&quot;[bright_red][bold]Error parsing&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2">[/bold]:[/bright_red] </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="o">*</span><span class="n">cast</span><span class="p">(</span>  <span class="c1"># Cast to appease mypy...</span>
+                        <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">],</span>
+                        <span class="p">(</span>
+                            <span class="p">[]</span>
+                            <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="kc">None</span>
+                            <span class="k">else</span> <span class="p">[</span>
+                                <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                                <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
+                                <span class="n">Padding</span><span class="p">(</span>
+                                    <span class="n">Group</span><span class="p">(</span>
+                                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2"> [bold]</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">[/bold]&quot;</span><span class="p">,</span>
+                                        <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
+                                    <span class="p">),</span>
+                                    <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                                <span class="p">),</span>
+                            <span class="p">]</span>
+                        <span class="p">),</span>
+                    <span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;[bold]Value error[/bold]&quot;</span><span class="p">,</span>
+                <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">border_style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">consumed_keywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
         <span class="sa">f</span><span class="s2">&quot;Parsed </span><span class="si">{</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s2">, but only consumed&quot;</span>

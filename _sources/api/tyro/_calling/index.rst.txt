@@ -22,6 +22,16 @@ Module Contents
    
    Exception raised when instantiation fail; this typically means that values from
    the CLI are invalid.
+   .. py:attribute:: message
+      :annotation: :str
+
+      
+
+   .. py:attribute:: arg
+      :annotation: :tyro._arguments.ArgumentDefinition
+
+      
+
 
 .. py:data:: T
    

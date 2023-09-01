@@ -73,7 +73,7 @@ Module Contents
       
 
    .. py:attribute:: choices
-      :annotation: :Optional[Tuple[str, Ellipsis]]
+      :annotation: :Optional[Set[str]]
 
       
 

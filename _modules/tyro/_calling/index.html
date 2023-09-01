@@ -254,6 +254,7 @@
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span>
@@ -262,9 +263,13 @@
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span>
 
 
-<div class="viewcode-block" id="InstantiationError"><a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.InstantiationError">[docs]</a><span class="k">class</span> <span class="nc">InstantiationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="InstantiationError"><a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.InstantiationError">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">InstantiationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised when instantiation fail; this typically means that values from</span>
-<span class="sd">    the CLI are invalid.&quot;&quot;&quot;</span></div>
+<span class="sd">    the CLI are invalid.&quot;&quot;&quot;</span>
+
+    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span></div>
 
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
@@ -345,7 +350,8 @@
                         <span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">instantiator</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
-                            <span class="sa">f</span><span class="s2">&quot;Parsing error for </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                            <span class="n">arg</span><span class="p">,</span>
                         <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
@@ -353,8 +359,9 @@
                 <span class="n">parsed_value</span> <span class="o">=</span> <span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">parsed_value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">parsed_value</span><span class="si">}</span><span class="s2"> was passed in, but&quot;</span>
-                        <span class="s2">&quot; is a fixed argument that cannot be parsed&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2"> was passed in, but&quot;</span>
+                        <span class="s2">&quot; is a fixed argument that cannot be parsed&quot;</span><span class="p">,</span>
+                        <span class="n">arg</span><span class="p">,</span>
                     <span class="p">)</span>
         <span class="k">elif</span> <span class="p">(</span>
             <span class="n">prefixed_field_name</span>

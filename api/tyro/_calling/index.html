@@ -260,7 +260,20 @@ namespaces.</p>
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._calling.</span></span><span class="sig-name descname"><span class="pre">InstantiationError</span></span><a class="reference internal" href="../../../_modules/tyro/_calling/#InstantiationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._calling.InstantiationError" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></p>
 <p>Exception raised when instantiation fail; this typically means that values from
-the CLI are invalid.</p>
+the CLI are invalid.
+.. py:attribute:: message</p>
+<blockquote>
+<div><dl class="field-list simple">
+<dt class="field-odd">annotation</dt>
+<dd class="field-odd"><p>:str</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._calling.InstantiationError.arg">
+<span class="sig-name descname"><span class="pre">arg</span></span><em class="property"><span class="w"> </span><span class="pre">:tyro._arguments.ArgumentDefinition</span></em><a class="headerlink" href="#tyro._calling.InstantiationError.arg" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py data">
@@ -338,7 +351,10 @@ the CLI are invalid.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._calling</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#tyro._calling.InstantiationError">InstantiationError</a></li>
+<li><a class="reference internal" href="#tyro._calling.InstantiationError">InstantiationError</a><ul>
+<li><a class="reference internal" href="#tyro._calling.InstantiationError.arg">arg</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro._calling.T">T</a></li>
 <li><a class="reference internal" href="#tyro._calling.call_from_args">call_from_args</a></li>
 </ul>
