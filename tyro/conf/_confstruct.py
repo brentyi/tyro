@@ -46,7 +46,7 @@ def subcommand(
                 NestedTypeA, subcommand("a", ...)
             ],
             Annotated[
-                NestedTypeA, subcommand("b", ...)
+                NestedTypeB, subcommand("b", ...)
             ],
         ]
     )
