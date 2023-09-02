@@ -568,6 +568,20 @@ def test_positional() -> None:
     assert tyro.cli(main, args="--y 3 5".split(" ")) == 8
 
 
+def test_positional_required_args() -> None:
+    @dataclasses.dataclass
+    class Args:
+        x: int
+        y: int = 3
+
+    assert tyro.cli(
+        tyro.conf.PositionalRequiredArgs[Args], args="5 --y 3".split(" ")
+    ) == Args(5, 3)
+    assert tyro.cli(
+        tyro.conf.PositionalRequiredArgs[Args], args="--y 3 5".split(" ")
+    ) == Args(5, 3)
+
+
 def test_positional_order_swap() -> None:
     def main(x: int, y: tyro.conf.Positional[int]) -> int:
         return x + y

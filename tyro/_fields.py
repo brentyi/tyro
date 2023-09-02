@@ -110,6 +110,11 @@ class FieldDefinition:
             _markers.Positional in self.markers
             # Dummy dataclasses should have a single positional field.
             or self.name == _strings.dummy_field_name
+            or (
+                # Make required arguments positional.
+                _markers.PositionalRequiredArguments in self.markers
+                and self.default in MISSING_SINGLETONS
+            )
         )
 
     def is_positional_call(self) -> bool:
