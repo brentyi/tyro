@@ -11,6 +11,9 @@ extremely chaotic as a result.
 TODO: the current implementation should be robust given our test coverage, but unideal
 long-term. We should just maintain our own fork of argparse.
 """
+
+from __future__ import annotations
+
 import argparse
 import contextlib
 import dataclasses
@@ -20,7 +23,7 @@ import re as _re
 import shutil
 import sys
 from gettext import gettext as _
-from typing import Any, Generator, List, NoReturn, Optional, Tuple
+from typing import Any, Dict, Generator, List, NoReturn, Optional, Set, Tuple
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
@@ -71,6 +74,95 @@ def set_accent_color(accent_color: Optional[str]) -> None:
         # color=accent_color if accent_color is not None else "cyan",
         # dim=accent_color is not None,
     )
+
+
+def recursive_arg_search(
+    args: List[str],
+    parser_spec: ParserSpecification,
+    subcommands: str,
+    unrecognized_arguments: Set[str],
+) -> Tuple[List[_ArgumentInfo], bool, bool]:
+    # Argument name => subcommands it came from.
+    arguments: List[_ArgumentInfo] = []
+    has_subcommands = False
+    same_exists = False
+
+    def _recursive_arg_search(
+        parser_spec: ParserSpecification,
+        subcommands: str,
+        subcommand_match_score: float,
+    ) -> None:
+        """Find all possible arguments that could have been passed in."""
+
+        # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
+        # only appear in the help message for "leaf" subparsers.
+        help_flag = (
+            " (other subcommands) --help"
+            if parser_spec.consolidate_subcommand_args
+            and parser_spec.subparsers is not None
+            else " --help"
+        )
+        for arg in parser_spec.args:
+            if arg.field.is_positional() or arg.lowered.is_fixed():
+                # Skip positional arguments.
+                continue
+
+            # Skip suppressed arguments.
+            if conf.Suppress in arg.field.markers or (
+                conf.SuppressFixed in arg.field.markers
+                and conf.Fixed in arg.field.markers
+            ):
+                continue
+
+            option_strings = (arg.lowered.name_or_flag,)
+
+            # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
+            # ("--flag", "--no-flag").
+            if (
+                arg.lowered.action is not None
+                # Actions are sometimes strings in Python 3.7, eg "append".
+                # We'll ignore these, but this kind of thing is a good reason
+                # for just forking argparse.
+                and callable(arg.lowered.action)
+            ):
+                option_strings = arg.lowered.action(
+                    option_strings, dest=""  # dest should not matter.
+                ).option_strings
+
+            arguments.append(
+                _ArgumentInfo(
+                    # Currently doesn't handle actions well, eg boolean optional
+                    # arguments.
+                    option_strings,
+                    metavar=arg.lowered.metavar,
+                    usage_hint=subcommands + help_flag,
+                    help=arg.lowered.help,
+                    subcommand_match_score=subcommand_match_score,
+                )
+            )
+
+            # An unrecognized argument.
+            nonlocal same_exists
+            if not same_exists and arg.lowered.name_or_flag in unrecognized_arguments:
+                same_exists = True
+
+        if parser_spec.subparsers is not None:
+            nonlocal has_subcommands
+            has_subcommands = True
+            for (
+                subparser_name,
+                subparser,
+            ) in parser_spec.subparsers.parser_from_name.items():
+                _recursive_arg_search(
+                    subparser,
+                    subcommands + " " + subparser_name,
+                    subcommand_match_score=subcommand_match_score
+                    + (1 if subparser_name in args else -0.001),
+                )
+
+    _recursive_arg_search(parser_spec, subcommands, 0)
+
+    return arguments, has_subcommands, same_exists
 
 
 # TODO: this is a prototype; for a v1.0.0 release we should revisit whether the global
@@ -442,14 +534,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
         # return the updated namespace and the extra arguments
         return namespace, extras
 
-    def _print_usage_succinct(self, console: Console) -> None:
-        """Print usage, but abridged if too long."""
-        usage = self.format_usage().strip() + "\n"
-        if len(usage) < 400:
-            print(usage)
-        else:  # pragma: no cover
-            console.print(f"[bold]help:[/bold] {self.prog} --help\n")
-
     @override
     def error(self, message: str) -> NoReturn:
         """Improve error messages from argparse.
@@ -464,7 +548,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
         """
 
         console = Console(theme=THEME.as_rich_theme())
-        self._print_usage_succinct(console)
 
         extra_info: List[RenderableType] = []
         global global_unrecognized_args
@@ -475,100 +558,18 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
         if len(global_unrecognized_args) > 0:
             message = f"Unrecognized arguments: {' '.join(global_unrecognized_args)}"
-            unrecognized_arguments = [
+            unrecognized_arguments = set(
                 arg
                 for arg in global_unrecognized_args
                 # If we pass in `--spell-chekc on`, we only want `spell-chekc` and not
                 # `on`.
                 if arg.startswith("--")
-            ]
-
-            # Argument name => subcommands it came from.
-            arguments: List[_ArgumentInfo] = []
-            has_subcommands = False
-            same_exists = False
-
-            def _recursive_arg_search(
-                parser_spec: ParserSpecification,
-                subcommands: str,
-                subcommand_match_score: float,
-            ) -> None:
-                """Find all possible arguments that could have been passed in."""
-
-                # When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will
-                # only appear in the help message for "leaf" subparsers.
-                help_flag = (
-                    " (other subcommands) --help"
-                    if parser_spec.consolidate_subcommand_args
-                    and parser_spec.subparsers is not None
-                    else " --help"
-                )
-                for arg in parser_spec.args:
-                    if arg.field.is_positional() or arg.lowered.is_fixed():
-                        # Skip positional arguments.
-                        continue
-
-                    # Skip suppressed arguments.
-                    if conf.Suppress in arg.field.markers or (
-                        conf.SuppressFixed in arg.field.markers
-                        and conf.Fixed in arg.field.markers
-                    ):
-                        continue
-
-                    option_strings = (arg.lowered.name_or_flag,)
-
-                    # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
-                    # ("--flag", "--no-flag").
-                    if (
-                        arg.lowered.action is not None
-                        # Actions are sometimes strings in Python 3.7, eg "append".
-                        # We'll ignore these, but this kind of thing is a good reason
-                        # for just forking argparse.
-                        and callable(arg.lowered.action)
-                    ):
-                        option_strings = arg.lowered.action(
-                            option_strings, dest=""  # dest should not matter.
-                        ).option_strings
-
-                    arguments.append(
-                        _ArgumentInfo(
-                            # Currently doesn't handle actions well, eg boolean optional
-                            # arguments.
-                            option_strings,
-                            metavar=arg.lowered.metavar,
-                            usage_hint=subcommands + help_flag,
-                            help=arg.lowered.help,
-                            subcommand_match_score=subcommand_match_score,
-                        )
-                    )
-
-                    # An unrecognized argument.
-                    nonlocal same_exists
-                    if (
-                        not same_exists
-                        and arg.lowered.name_or_flag in unrecognized_arguments
-                    ):
-                        same_exists = True
-
-                if parser_spec.subparsers is not None:
-                    nonlocal has_subcommands
-                    has_subcommands = True
-                    for (
-                        subparser_name,
-                        subparser,
-                    ) in parser_spec.subparsers.parser_from_name.items():
-                        _recursive_arg_search(
-                            subparser,
-                            subcommands + " " + subparser_name,
-                            subcommand_match_score=subcommand_match_score
-                            + (1 if subparser_name in self._args else -0.001),
-                        )
-
-            _recursive_arg_search(
-                self._parser_specification,
-                # Remove other subcommands.
-                self.prog.split(" ")[0],
-                0,
+            )
+            arguments, has_subcommands, same_exists = recursive_arg_search(
+                args=self._args,
+                parser_spec=self._parser_specification,
+                subcommands=self.prog.partition(" ")[0],
+                unrecognized_arguments=unrecognized_arguments,
             )
 
             if has_subcommands and same_exists:
@@ -727,16 +728,78 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     prev_arg_option_strings = argument.option_strings
                     prev_argument_help = argument.help
 
-        # print(self._parser_specification)
+
+        elif message.startswith("the following arguments are required:"):
+            info_from_required_arg: Dict[str, Optional[_ArgumentInfo]] = {}
+            for arg in message.partition(":")[2].strip().split(", "):
+                info_from_required_arg[arg] = None
+
+            arguments, has_subcommands, same_exists = recursive_arg_search(
+                args=self._args,
+                parser_spec=self._parser_specification,
+                subcommands=self.prog.partition(" ")[0],
+                unrecognized_arguments=set(),
+            )
+            del has_subcommands, same_exists
+
+            for arg_info in arguments:
+                # Iterate over each option string separately. This can help us support
+                # aliases in the future.
+                for option_string in arg_info.option_strings:
+                    # If the option string was found...
+                    if option_string in info_from_required_arg and (
+                        # And it's the first time it was found...
+                        info_from_required_arg[option_string] is None
+                        # Or we found a better one...
+                        or arg_info.subcommand_match_score
+                        > info_from_required_arg[option_string].subcommand_match_score  # type: ignore
+                    ):
+                        # Record the argument info.
+                        info_from_required_arg[option_string] = arg_info
+
+            # Try to print help text for required arguments.
+            first = True
+            for argument in info_from_required_arg.values():
+                if argument is None:
+                    continue
+                if first:
+                    extra_info.extend(
+                        [
+                            Rule(style=Style(color="red")),
+                            "Argument helptext:",
+                        ]
+                    )
+                    first = False
+
+                extra_info.append(
+                    Padding(
+                        "[bold]"
+                        + (
+                            ", ".join(argument.option_strings)
+                            if argument.metavar is None
+                            else ", ".join(argument.option_strings)
+                            + " "
+                            + argument.metavar
+                        )
+                        + "[/bold]",
+                        (0, 0, 0, 4),
+                    )
+                )
+                if argument.help is not None:
+                    extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
+
         console.print(
             Panel(
                 Group(
                     f"{message[0].upper() + message[1:]}" if len(message) > 0 else "",
                     *extra_info,
+                    Rule(style=Style(color="red")),
+                    f"For full helptext, see [bold]{self.prog} --help[/bold]"
                 ),
                 title="[bold]Parsing error[/bold]",
                 title_align="left",
                 border_style=Style(color="bright_red"),
+                expand=False,
             )
         )
         sys.exit(2)
