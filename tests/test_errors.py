@@ -272,7 +272,9 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
     assert "Unrecognized argument" in error
     assert "Similar arguments" in error
     assert error.count("--reward.track {True,False}") == 1
-    assert error.count("--help") == 3  # Should show two possible subcommands + usage hint.
+    assert (
+        error.count("--help") == 3
+    )  # Should show two possible subcommands + usage hint.
 
 
 def test_similar_arguments_subcommands_overflow_different() -> None:

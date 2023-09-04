@@ -598,7 +598,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
             for unrecognized_argument in unrecognized_arguments:
                 # Sort arguments by similarity.
                 scored_arguments: List[Tuple[_ArgumentInfo, float]] = []
-                for argument in arguments:
+                for arg_info in arguments:
                     # Compute a score for each argument.
                     assert unrecognized_argument.startswith("--")
 
@@ -620,14 +620,14 @@ class TyroArgumentParser(argparse.ArgumentParser):
                             ).ratio()
 
                     scored_arguments.append(
-                        (argument, max(map(get_score, argument.option_strings)))
+                        (arg_info, max(map(get_score, arg_info.option_strings)))
                     )
 
                 # Add information about similar arguments.
                 prev_arg_option_strings: Optional[Tuple[str, ...]] = None
                 show_arguments: List[_ArgumentInfo] = []
                 unique_counter = 0
-                for argument, score in (
+                for arg_info, score in (
                     # Sort scores greatest to least.
                     sorted(
                         scored_arguments,
@@ -649,13 +649,13 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     if (
                         score < 0.9
                         and unique_counter >= 3
-                        and prev_arg_option_strings != argument.option_strings
+                        and prev_arg_option_strings != arg_info.option_strings
                     ):
                         break
-                    unique_counter += prev_arg_option_strings != argument.option_strings
+                    unique_counter += prev_arg_option_strings != arg_info.option_strings
 
-                    show_arguments.append(argument)
-                    prev_arg_option_strings = argument.option_strings
+                    show_arguments.append(arg_info)
+                    prev_arg_option_strings = arg_info.option_strings
 
                 prev_arg_option_strings = None
                 prev_argument_help: Optional[str] = None
@@ -671,9 +671,9 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     )
 
                 unique_counter = 0
-                for argument in show_arguments:
+                for arg_info in show_arguments:
                     same_counter += 1
-                    if argument.option_strings != prev_arg_option_strings:
+                    if arg_info.option_strings != prev_arg_option_strings:
                         same_counter = 0
                         if unique_counter >= 10:
                             break
@@ -684,7 +684,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     if (
                         len(show_arguments) >= 8
                         and same_counter >= 4
-                        and argument.option_strings == prev_arg_option_strings
+                        and arg_info.option_strings == prev_arg_option_strings
                     ):
                         if not dots_printed:
                             extra_info.append(
@@ -698,17 +698,17 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
                     if not (
                         has_subcommands
-                        and argument.option_strings == prev_arg_option_strings
+                        and arg_info.option_strings == prev_arg_option_strings
                     ):
                         extra_info.append(
                             Padding(
                                 "[bold]"
                                 + (
-                                    ", ".join(argument.option_strings)
-                                    if argument.metavar is None
-                                    else ", ".join(argument.option_strings)
+                                    ", ".join(arg_info.option_strings)
+                                    if arg_info.metavar is None
+                                    else ", ".join(arg_info.option_strings)
                                     + " "
-                                    + argument.metavar
+                                    + arg_info.metavar
                                 )
                                 + "[/bold]",
                                 (0, 0, 0, 4),
@@ -722,25 +722,25 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     #     )
                     # )
 
-                    if argument.help is not None and (
+                    if arg_info.help is not None and (
                         # Only print help messages if it's not the same as the previous
                         # one.
-                        argument.help != prev_argument_help
-                        or argument.option_strings != prev_arg_option_strings
+                        arg_info.help != prev_argument_help
+                        or arg_info.option_strings != prev_arg_option_strings
                     ):
-                        extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
+                        extra_info.append(Padding(arg_info.help, (0, 0, 0, 8)))
 
                     # Show the subcommand that this argument is available in.
                     if has_subcommands:
                         extra_info.append(
                             Padding(
-                                f"in [green]{argument.usage_hint}[/green]",
+                                f"in [green]{arg_info.usage_hint}[/green]",
                                 (0, 0, 0, 12),
                             )
                         )
 
-                    prev_arg_option_strings = argument.option_strings
-                    prev_argument_help = argument.help
+                    prev_arg_option_strings = arg_info.option_strings
+                    prev_argument_help = arg_info.help
 
         elif message.startswith("the following arguments are required:"):
             info_from_required_arg: Dict[str, Optional[_ArgumentInfo]] = {}
@@ -772,8 +772,8 @@ class TyroArgumentParser(argparse.ArgumentParser):
 
             # Try to print help text for required arguments.
             first = True
-            for argument in info_from_required_arg.values():
-                if argument is None:
+            for maybe_arg in info_from_required_arg.values():
+                if maybe_arg is None:
                     # No argument info found. This will currently happen for
                     # subcommands.
                     continue
@@ -791,18 +791,18 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     Padding(
                         "[bold]"
                         + (
-                            ", ".join(argument.option_strings)
-                            if argument.metavar is None
-                            else ", ".join(argument.option_strings)
+                            ", ".join(maybe_arg.option_strings)
+                            if maybe_arg.metavar is None
+                            else ", ".join(maybe_arg.option_strings)
                             + " "
-                            + argument.metavar
+                            + maybe_arg.metavar
                         )
                         + "[/bold]",
                         (0, 0, 0, 4),
                     )
                 )
-                if argument.help is not None:
-                    extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
+                if maybe_arg.help is not None:
+                    extra_info.append(Padding(maybe_arg.help, (0, 0, 0, 8)))
                 if has_subcommands:
                     # We are explicit about where the argument helptext is being
                     # extracted from because the `subcommand_match_score` heuristic
@@ -812,7 +812,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     # sure that if it does fail that it's obvious to the user.
                     extra_info.append(
                         Padding(
-                            f"in [green]{argument.usage_hint}[/green]",
+                            f"in [green]{maybe_arg.usage_hint}[/green]",
                             (0, 0, 0, 12),
                         )
                     )
