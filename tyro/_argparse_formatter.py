@@ -79,9 +79,22 @@ def set_accent_color(accent_color: Optional[str]) -> None:
 def recursive_arg_search(
     args: List[str],
     parser_spec: ParserSpecification,
-    subcommands: str,
+    prog: str,
     unrecognized_arguments: Set[str],
 ) -> Tuple[List[_ArgumentInfo], bool, bool]:
+    """Recursively search for arguments in a ParserSpecification. Used for error message
+    printing.
+
+    Returns a list of arguments, whether the parser has subcommands or not, and -- if
+    `unrecognized_arguments` is passed in --- whether an unrecognized argument exists
+    under a different subparser.
+
+    Args:
+        args: Arguments being parsed. Used for heuristics on subcommands.
+        parser_spec: Argument parser specification.
+        subcommands: Prog corresponding to parser_spec.
+        unrecognized_arguments: Used for same_exists return value.
+    """
     # Argument name => subcommands it came from.
     arguments: List[_ArgumentInfo] = []
     has_subcommands = False
@@ -89,7 +102,7 @@ def recursive_arg_search(
 
     def _recursive_arg_search(
         parser_spec: ParserSpecification,
-        subcommands: str,
+        prog: str,
         subcommand_match_score: float,
     ) -> None:
         """Find all possible arguments that could have been passed in."""
@@ -135,7 +148,7 @@ def recursive_arg_search(
                     # arguments.
                     option_strings,
                     metavar=arg.lowered.metavar,
-                    usage_hint=subcommands + help_flag,
+                    usage_hint=prog + help_flag,
                     help=arg.lowered.help,
                     subcommand_match_score=subcommand_match_score,
                 )
@@ -155,12 +168,13 @@ def recursive_arg_search(
             ) in parser_spec.subparsers.parser_from_name.items():
                 _recursive_arg_search(
                     subparser,
-                    subcommands + " " + subparser_name,
+                    prog + " " + subparser_name,
+                    # Leaky (!!) heuristic for if this subcommand is matched or not.
                     subcommand_match_score=subcommand_match_score
                     + (1 if subparser_name in args else -0.001),
                 )
 
-    _recursive_arg_search(parser_spec, subcommands, 0)
+    _recursive_arg_search(parser_spec, prog, 0)
 
     return arguments, has_subcommands, same_exists
 
@@ -568,7 +582,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
             arguments, has_subcommands, same_exists = recursive_arg_search(
                 args=self._args,
                 parser_spec=self._parser_specification,
-                subcommands=self.prog.partition(" ")[0],
+                prog=self.prog.partition(" ")[0],
                 unrecognized_arguments=unrecognized_arguments,
             )
 
@@ -728,7 +742,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     prev_arg_option_strings = argument.option_strings
                     prev_argument_help = argument.help
 
-
         elif message.startswith("the following arguments are required:"):
             info_from_required_arg: Dict[str, Optional[_ArgumentInfo]] = {}
             for arg in message.partition(":")[2].strip().split(", "):
@@ -737,10 +750,10 @@ class TyroArgumentParser(argparse.ArgumentParser):
             arguments, has_subcommands, same_exists = recursive_arg_search(
                 args=self._args,
                 parser_spec=self._parser_specification,
-                subcommands=self.prog.partition(" ")[0],
+                prog=self.prog.partition(" ")[0],
                 unrecognized_arguments=set(),
             )
-            del has_subcommands, same_exists
+            del same_exists
 
             for arg_info in arguments:
                 # Iterate over each option string separately. This can help us support
@@ -761,7 +774,10 @@ class TyroArgumentParser(argparse.ArgumentParser):
             first = True
             for argument in info_from_required_arg.values():
                 if argument is None:
+                    # No argument info found. This will currently happen for
+                    # subcommands.
                     continue
+
                 if first:
                     extra_info.extend(
                         [
@@ -787,6 +803,19 @@ class TyroArgumentParser(argparse.ArgumentParser):
                 )
                 if argument.help is not None:
                     extra_info.append(Padding(argument.help, (0, 0, 0, 8)))
+                if has_subcommands:
+                    # We are explicit about where the argument helptext is being
+                    # extracted from because the `subcommand_match_score` heuristic
+                    # above is flawed.
+                    #
+                    # The stars really need to be aligned for it to fail, but this makes
+                    # sure that if it does fail that it's obvious to the user.
+                    extra_info.append(
+                        Padding(
+                            f"in [green]{argument.usage_hint}[/green]",
+                            (0, 0, 0, 12),
+                        )
+                    )
 
         console.print(
             Panel(
@@ -794,7 +823,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     f"{message[0].upper() + message[1:]}" if len(message) > 0 else "",
                     *extra_info,
                     Rule(style=Style(color="red")),
-                    f"For full helptext, see [bold]{self.prog} --help[/bold]"
+                    f"For full helptext, see [bold]{self.prog} --help[/bold]",
                 ),
                 title="[bold]Parsing error[/bold]",
                 title_align="left",
