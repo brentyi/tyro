@@ -744,6 +744,11 @@
                 <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                     <span class="n">typ</span><span class="o">=</span><span class="n">pd_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span>
+                    <span class="n">markers</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span>
+                        <span class="n">meta</span>
+                        <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">metadata</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
+                    <span class="p">),</span>
                     <span class="n">default</span><span class="o">=</span><span class="p">(</span>
                         <span class="n">MISSING_NONPROP</span>
                         <span class="k">if</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">is_required</span><span class="p">()</span>
