@@ -570,7 +570,10 @@ class TyroArgumentParser(argparse.ArgumentParser):
         ):
             global_unrecognized_args = message.partition(":")[2].strip().split(" ")
 
+        message_title = "Parsing error"
+
         if len(global_unrecognized_args) > 0:
+            message_title = "Unrecognized arguments"
             message = f"Unrecognized arguments: {' '.join(global_unrecognized_args)}"
             unrecognized_arguments = set(
                 arg
@@ -587,12 +590,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
             )
 
             if has_subcommands and same_exists:
-                misplaced_arguments = message.partition(":")[2].strip()
-                message = (
-                    "unrecognized or misplaced arguments: " + misplaced_arguments
-                    if " " in misplaced_arguments
-                    else "unrecognized or misplaced argument: " + misplaced_arguments
-                )
+                message = f"Unrecognized or misplaced arguments: {' '.join(global_unrecognized_args)}"
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:
@@ -743,6 +741,8 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     prev_argument_help = arg_info.help
 
         elif message.startswith("the following arguments are required:"):
+            message_title = "Required arguments"
+
             info_from_required_arg: Dict[str, Optional[_ArgumentInfo]] = {}
             for arg in message.partition(":")[2].strip().split(", "):
                 info_from_required_arg[arg] = None
@@ -823,9 +823,9 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     f"{message[0].upper() + message[1:]}" if len(message) > 0 else "",
                     *extra_info,
                     Rule(style=Style(color="red")),
-                    f"For full helptext, see [bold]{self.prog} --help[/bold]",
+                    f"For full helptext, run [bold]{self.prog} --help[/bold]",
                 ),
-                title="[bold]Parsing error[/bold]",
+                title=f"[bold]{message_title}[/bold]",
                 title_align="left",
                 border_style=Style(color="bright_red"),
                 expand=False,

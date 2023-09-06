@@ -325,7 +325,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     # Usage print should be clipped.
     error = target.getvalue()
-    assert "For full helptext, see" in error
+    assert "For full helptext, run" in error
 
 
 def test_similar_arguments_subcommands_overflow_same() -> None:
