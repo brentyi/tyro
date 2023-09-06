@@ -17,6 +17,7 @@ from ._markers import FlagConversionOff as FlagConversionOff
 from ._markers import OmitArgPrefixes as OmitArgPrefixes
 from ._markers import OmitSubcommandPrefixes as OmitSubcommandPrefixes
 from ._markers import Positional as Positional
+from ._markers import PositionalRequiredArgs as PositionalRequiredArgs
 from ._markers import Suppress as Suppress
 from ._markers import SuppressFixed as SuppressFixed
 from ._markers import UseAppendAction as UseAppendAction
