@@ -361,6 +361,11 @@
             <span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
             <span class="c1"># Dummy dataclasses should have a single positional field.</span>
             <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span>
+            <span class="ow">or</span> <span class="p">(</span>
+                <span class="c1"># Make required arguments positional.</span>
+                <span class="n">_markers</span><span class="o">.</span><span class="n">PositionalRequiredArgs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+            <span class="p">)</span>
         <span class="p">)</span></div>
 
 <div class="viewcode-block" id="FieldDefinition.is_positional_call"><a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional_call">[docs]</a>    <span class="k">def</span> <span class="nf">is_positional_call</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>

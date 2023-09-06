@@ -21,6 +21,12 @@ Module Contents
    A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a positional
    argument.
 
+.. py:data:: PositionalRequiredArgs
+   
+
+   
+   Make all arguments without defaults positional.
+
 .. py:data:: Fixed
    
 

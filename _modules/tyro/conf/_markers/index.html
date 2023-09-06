@@ -269,6 +269,9 @@
 <span class="sd">&quot;&quot;&quot;A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional</span>
 <span class="sd">argument.&quot;&quot;&quot;</span>
 
+<span class="n">PositionalRequiredArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Make all arguments without defaults positional.&quot;&quot;&quot;</span>
+
 <span class="c1"># Private marker. For when an argument is not only positional in the CLI, but also in</span>
 <span class="c1"># the callable.</span>
 <span class="n">_PositionalCall</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
