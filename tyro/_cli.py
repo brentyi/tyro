@@ -376,8 +376,8 @@ def _cli_impl(
 
         # Print help message when no arguments are passed in. (but arguments are
         # expected)
-        if len(args) == 0 and parser_spec.has_required_args:
-            args = ["--help"]
+        # if len(args) == 0 and parser_spec.has_required_args:
+        #     args = ["--help"]
 
         if return_parser:
             _arguments.USE_RICH = True
@@ -448,7 +448,6 @@ def _cli_impl(
         from ._argparse_formatter import THEME
 
         console = Console(theme=THEME.as_rich_theme())
-        parser._print_usage_succinct(console)
         console.print(
             Panel(
                 Group(
@@ -469,6 +468,8 @@ def _cli_impl(
                                     ),
                                     pad=(0, 0, 0, 4),
                                 ),
+                                Rule(style=Style(color="red")),
+                                f"For full helptext, see [bold]{parser.prog} --help[/bold]",
                             ]
                         ),
                     ),
