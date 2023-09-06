@@ -13,7 +13,7 @@ import tyro
 def test_attrs_basic() -> None:
     @attr.s
     class ManyTypesA:
-        i: int = attr.ib()
+        i: tyro.conf.Positional[int] = attr.ib()
         s: str = attr.ib()
         f: float = attr.ib()
         p: pathlib.Path = attr.ib()
@@ -22,7 +22,6 @@ def test_attrs_basic() -> None:
     assert tyro.cli(
         ManyTypesA,
         args=[
-            "--i",
             "5",
             "--s",
             "5",
