@@ -18,6 +18,9 @@ Positional = Annotated[T, None]
 """A type `T` can be annotated as `Positional[T]` if we want to parse it as a positional
 argument."""
 
+PositionalRequiredArgs = Annotated[T, None]
+"""Make all arguments without defaults positional."""
+
 # Private marker. For when an argument is not only positional in the CLI, but also in
 # the callable.
 _PositionalCall = Annotated[T, None]
