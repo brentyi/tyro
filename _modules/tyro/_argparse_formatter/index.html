@@ -262,6 +262,9 @@
 <span class="sd">TODO: the current implementation should be robust given our test coverage, but unideal</span>
 <span class="sd">long-term. We should just maintain our own fork of argparse.</span>
 <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
@@ -271,7 +274,7 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">rich.columns</span> <span class="kn">import</span> <span class="n">Columns</span>
 <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
@@ -322,6 +325,109 @@
         <span class="c1"># color=accent_color if accent_color is not None else &quot;cyan&quot;,</span>
         <span class="c1"># dim=accent_color is not None,</span>
     <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="recursive_arg_search"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.recursive_arg_search">[docs]</a><span class="k">def</span> <span class="nf">recursive_arg_search</span><span class="p">(</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">unrecognized_arguments</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursively search for arguments in a ParserSpecification. Used for error message</span>
+<span class="sd">    printing.</span>
+
+<span class="sd">    Returns a list of arguments, whether the parser has subcommands or not, and -- if</span>
+<span class="sd">    `unrecognized_arguments` is passed in --- whether an unrecognized argument exists</span>
+<span class="sd">    under a different subparser.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args: Arguments being parsed. Used for heuristics on subcommands.</span>
+<span class="sd">        parser_spec: Argument parser specification.</span>
+<span class="sd">        subcommands: Prog corresponding to parser_spec.</span>
+<span class="sd">        unrecognized_arguments: Used for same_exists return value.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Argument name =&gt; subcommands it came from.</span>
+    <span class="n">arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">_recursive_arg_search</span><span class="p">(</span>
+        <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
+        <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">subcommand_match_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find all possible arguments that could have been passed in.&quot;&quot;&quot;</span>
+
+        <span class="c1"># When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will</span>
+        <span class="c1"># only appear in the help message for &quot;leaf&quot; subparsers.</span>
+        <span class="n">help_flag</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot; (other subcommands) --help&quot;</span>
+            <span class="k">if</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span>
+            <span class="ow">and</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="s2">&quot; --help&quot;</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
+                <span class="c1"># Skip positional arguments.</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Skip suppressed arguments.</span>
+            <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
+                <span class="n">conf</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                <span class="ow">and</span> <span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">option_strings</span> <span class="o">=</span> <span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="p">,)</span>
+
+            <span class="c1"># Handle actions, eg BooleanOptionalAction will map (&quot;--flag&quot;,) to</span>
+            <span class="c1"># (&quot;--flag&quot;, &quot;--no-flag&quot;).</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="c1"># Actions are sometimes strings in Python 3.7, eg &quot;append&quot;.</span>
+                <span class="c1"># We&#39;ll ignore these, but this kind of thing is a good reason</span>
+                <span class="c1"># for just forking argparse.</span>
+                <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">option_strings</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span><span class="p">(</span>
+                    <span class="n">option_strings</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;&quot;</span>  <span class="c1"># dest should not matter.</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">option_strings</span>
+
+            <span class="n">arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">_ArgumentInfo</span><span class="p">(</span>
+                    <span class="c1"># Currently doesn&#39;t handle actions well, eg boolean optional</span>
+                    <span class="c1"># arguments.</span>
+                    <span class="n">option_strings</span><span class="p">,</span>
+                    <span class="n">metavar</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
+                    <span class="n">usage_hint</span><span class="o">=</span><span class="n">prog</span> <span class="o">+</span> <span class="n">help_flag</span><span class="p">,</span>
+                    <span class="n">help</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
+                    <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c1"># An unrecognized argument.</span>
+            <span class="k">nonlocal</span> <span class="n">same_exists</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">same_exists</span> <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span> <span class="ow">in</span> <span class="n">unrecognized_arguments</span><span class="p">:</span>
+                <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">nonlocal</span> <span class="n">has_subcommands</span>
+            <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="p">(</span>
+                <span class="n">subparser_name</span><span class="p">,</span>
+                <span class="n">subparser</span><span class="p">,</span>
+            <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">_recursive_arg_search</span><span class="p">(</span>
+                    <span class="n">subparser</span><span class="p">,</span>
+                    <span class="n">prog</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
+                    <span class="c1"># Leaky (!!) heuristic for if this subcommand is matched or not.</span>
+                    <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span>
+                    <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">in</span> <span class="n">args</span> <span class="k">else</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">),</span>
+                <span class="p">)</span>
+
+    <span class="n">_recursive_arg_search</span><span class="p">(</span><span class="n">parser_spec</span><span class="p">,</span> <span class="n">prog</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">arguments</span><span class="p">,</span> <span class="n">has_subcommands</span><span class="p">,</span> <span class="n">same_exists</span></div>
 
 
 <span class="c1"># TODO: this is a prototype; for a v1.0.0 release we should revisit whether the global</span>
@@ -693,14 +799,6 @@
         <span class="c1"># return the updated namespace and the extra arguments</span>
         <span class="k">return</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">extras</span>
 
-    <span class="k">def</span> <span class="nf">_print_usage_succinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">console</span><span class="p">:</span> <span class="n">Console</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Print usage, but abridged if too long.&quot;&quot;&quot;</span>
-        <span class="n">usage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_usage</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">usage</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">400</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">usage</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-            <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;[bold]help:[/bold] </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
 <div class="viewcode-block" id="TyroArgumentParser.error"><a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgumentParser.error">[docs]</a>    <span class="nd">@override</span>
     <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Improve error messages from argparse.</span>
@@ -715,7 +813,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_print_usage_succinct</span><span class="p">(</span><span class="n">console</span><span class="p">)</span>
 
         <span class="n">extra_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">global</span> <span class="n">global_unrecognized_args</span>
@@ -724,117 +821,33 @@
         <span class="p">):</span>
             <span class="n">global_unrecognized_args</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
 
+        <span class="n">message_title</span> <span class="o">=</span> <span class="s2">&quot;Parsing error&quot;</span>
+
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">message_title</span> <span class="o">=</span> <span class="s2">&quot;Unrecognized arguments&quot;</span>
             <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized arguments: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
-            <span class="n">unrecognized_arguments</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">unrecognized_arguments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
                 <span class="n">arg</span>
                 <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">global_unrecognized_args</span>
                 <span class="c1"># If we pass in `--spell-chekc on`, we only want `spell-chekc` and not</span>
                 <span class="c1"># `on`.</span>
                 <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
-            <span class="p">]</span>
-
-            <span class="c1"># Argument name =&gt; subcommands it came from.</span>
-            <span class="n">arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">False</span>
-
-            <span class="k">def</span> <span class="nf">_recursive_arg_search</span><span class="p">(</span>
-                <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
-                <span class="n">subcommands</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                <span class="n">subcommand_match_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">                </span><span class="sd">&quot;&quot;&quot;Find all possible arguments that could have been passed in.&quot;&quot;&quot;</span>
-
-                <span class="c1"># When tyro.conf.ConsolidateSubcommandArgs is turned on, arguments will</span>
-                <span class="c1"># only appear in the help message for &quot;leaf&quot; subparsers.</span>
-                <span class="n">help_flag</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot; (other subcommands) --help&quot;</span>
-                    <span class="k">if</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span>
-                    <span class="ow">and</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="k">else</span> <span class="s2">&quot; --help&quot;</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">or</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
-                        <span class="c1"># Skip positional arguments.</span>
-                        <span class="k">continue</span>
-
-                    <span class="c1"># Skip suppressed arguments.</span>
-                    <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
-                        <span class="n">conf</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-                        <span class="ow">and</span> <span class="n">conf</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
-                    <span class="p">):</span>
-                        <span class="k">continue</span>
-
-                    <span class="n">option_strings</span> <span class="o">=</span> <span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="p">,)</span>
-
-                    <span class="c1"># Handle actions, eg BooleanOptionalAction will map (&quot;--flag&quot;,) to</span>
-                    <span class="c1"># (&quot;--flag&quot;, &quot;--no-flag&quot;).</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                        <span class="c1"># Actions are sometimes strings in Python 3.7, eg &quot;append&quot;.</span>
-                        <span class="c1"># We&#39;ll ignore these, but this kind of thing is a good reason</span>
-                        <span class="c1"># for just forking argparse.</span>
-                        <span class="ow">and</span> <span class="nb">callable</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span><span class="p">)</span>
-                    <span class="p">):</span>
-                        <span class="n">option_strings</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">action</span><span class="p">(</span>
-                            <span class="n">option_strings</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;&quot;</span>  <span class="c1"># dest should not matter.</span>
-                        <span class="p">)</span><span class="o">.</span><span class="n">option_strings</span>
-
-                    <span class="n">arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="n">_ArgumentInfo</span><span class="p">(</span>
-                            <span class="c1"># Currently doesn&#39;t handle actions well, eg boolean optional</span>
-                            <span class="c1"># arguments.</span>
-                            <span class="n">option_strings</span><span class="p">,</span>
-                            <span class="n">metavar</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="p">,</span>
-                            <span class="n">usage_hint</span><span class="o">=</span><span class="n">subcommands</span> <span class="o">+</span> <span class="n">help_flag</span><span class="p">,</span>
-                            <span class="n">help</span><span class="o">=</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
-                            <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span><span class="p">,</span>
-                        <span class="p">)</span>
-                    <span class="p">)</span>
-
-                    <span class="c1"># An unrecognized argument.</span>
-                    <span class="k">nonlocal</span> <span class="n">same_exists</span>
-                    <span class="k">if</span> <span class="p">(</span>
-                        <span class="ow">not</span> <span class="n">same_exists</span>
-                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span> <span class="ow">in</span> <span class="n">unrecognized_arguments</span>
-                    <span class="p">):</span>
-                        <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">True</span>
-
-                <span class="k">if</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">nonlocal</span> <span class="n">has_subcommands</span>
-                    <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="k">for</span> <span class="p">(</span>
-                        <span class="n">subparser_name</span><span class="p">,</span>
-                        <span class="n">subparser</span><span class="p">,</span>
-                    <span class="p">)</span> <span class="ow">in</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                        <span class="n">_recursive_arg_search</span><span class="p">(</span>
-                            <span class="n">subparser</span><span class="p">,</span>
-                            <span class="n">subcommands</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="n">subparser_name</span><span class="p">,</span>
-                            <span class="n">subcommand_match_score</span><span class="o">=</span><span class="n">subcommand_match_score</span>
-                            <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_args</span> <span class="k">else</span> <span class="o">-</span><span class="mf">0.001</span><span class="p">),</span>
-                        <span class="p">)</span>
-
-            <span class="n">_recursive_arg_search</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">,</span>
-                <span class="c1"># Remove other subcommands.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
-                <span class="mi">0</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">arguments</span><span class="p">,</span> <span class="n">has_subcommands</span><span class="p">,</span> <span class="n">same_exists</span> <span class="o">=</span> <span class="n">recursive_arg_search</span><span class="p">(</span>
+                <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span>
+                <span class="n">parser_spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">,</span>
+                <span class="n">prog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">unrecognized_arguments</span><span class="o">=</span><span class="n">unrecognized_arguments</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">has_subcommands</span> <span class="ow">and</span> <span class="n">same_exists</span><span class="p">:</span>
-                <span class="n">misplaced_arguments</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="s2">&quot;unrecognized or misplaced arguments: &quot;</span> <span class="o">+</span> <span class="n">misplaced_arguments</span>
-                    <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">in</span> <span class="n">misplaced_arguments</span>
-                    <span class="k">else</span> <span class="s2">&quot;unrecognized or misplaced argument: &quot;</span> <span class="o">+</span> <span class="n">misplaced_arguments</span>
-                <span class="p">)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized or misplaced arguments: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
 
             <span class="c1"># Show similar arguments for keyword options.</span>
             <span class="k">for</span> <span class="n">unrecognized_argument</span> <span class="ow">in</span> <span class="n">unrecognized_arguments</span><span class="p">:</span>
                 <span class="c1"># Sort arguments by similarity.</span>
                 <span class="n">scored_arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">arg_info</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
                     <span class="c1"># Compute a score for each argument.</span>
                     <span class="k">assert</span> <span class="n">unrecognized_argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
 
@@ -856,14 +869,14 @@
                             <span class="p">)</span><span class="o">.</span><span class="n">ratio</span><span class="p">()</span>
 
                     <span class="n">scored_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                        <span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">get_score</span><span class="p">,</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)))</span>
+                        <span class="p">(</span><span class="n">arg_info</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">get_score</span><span class="p">,</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)))</span>
                     <span class="p">)</span>
 
                 <span class="c1"># Add information about similar arguments.</span>
                 <span class="n">prev_arg_option_strings</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">show_arguments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">unique_counter</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">argument</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="k">for</span> <span class="n">arg_info</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="p">(</span>
                     <span class="c1"># Sort scores greatest to least.</span>
                     <span class="nb">sorted</span><span class="p">(</span>
                         <span class="n">scored_arguments</span><span class="p">,</span>
@@ -885,13 +898,13 @@
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="n">score</span> <span class="o">&lt;</span> <span class="mf">0.9</span>
                         <span class="ow">and</span> <span class="n">unique_counter</span> <span class="o">&gt;=</span> <span class="mi">3</span>
-                        <span class="ow">and</span> <span class="n">prev_arg_option_strings</span> <span class="o">!=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
+                        <span class="ow">and</span> <span class="n">prev_arg_option_strings</span> <span class="o">!=</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span>
                     <span class="p">):</span>
                         <span class="k">break</span>
-                    <span class="n">unique_counter</span> <span class="o">+=</span> <span class="n">prev_arg_option_strings</span> <span class="o">!=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
+                    <span class="n">unique_counter</span> <span class="o">+=</span> <span class="n">prev_arg_option_strings</span> <span class="o">!=</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span>
 
-                    <span class="n">show_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">argument</span><span class="p">)</span>
-                    <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
+                    <span class="n">show_arguments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_info</span><span class="p">)</span>
+                    <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span>
 
                 <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">prev_argument_help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -907,9 +920,9 @@
                     <span class="p">)</span>
 
                 <span class="n">unique_counter</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">show_arguments</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">arg_info</span> <span class="ow">in</span> <span class="n">show_arguments</span><span class="p">:</span>
                     <span class="n">same_counter</span> <span class="o">+=</span> <span class="mi">1</span>
-                    <span class="k">if</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_option_strings</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_option_strings</span><span class="p">:</span>
                         <span class="n">same_counter</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="k">if</span> <span class="n">unique_counter</span> <span class="o">&gt;=</span> <span class="mi">10</span><span class="p">:</span>
                             <span class="k">break</span>
@@ -920,7 +933,7 @@
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="nb">len</span><span class="p">(</span><span class="n">show_arguments</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">8</span>
                         <span class="ow">and</span> <span class="n">same_counter</span> <span class="o">&gt;=</span> <span class="mi">4</span>
-                        <span class="ow">and</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="n">prev_arg_option_strings</span>
+                        <span class="ow">and</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="n">prev_arg_option_strings</span>
                     <span class="p">):</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">dots_printed</span><span class="p">:</span>
                             <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -934,17 +947,17 @@
 
                     <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
                         <span class="n">has_subcommands</span>
-                        <span class="ow">and</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="n">prev_arg_option_strings</span>
+                        <span class="ow">and</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">==</span> <span class="n">prev_arg_option_strings</span>
                     <span class="p">):</span>
                         <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                             <span class="n">Padding</span><span class="p">(</span>
                                 <span class="s2">&quot;[bold]&quot;</span>
                                 <span class="o">+</span> <span class="p">(</span>
-                                    <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
-                                    <span class="k">if</span> <span class="n">argument</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span>
-                                    <span class="k">else</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                                    <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span>
+                                    <span class="k">else</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
                                     <span class="o">+</span> <span class="s2">&quot; &quot;</span>
-                                    <span class="o">+</span> <span class="n">argument</span><span class="o">.</span><span class="n">metavar</span>
+                                    <span class="o">+</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">metavar</span>
                                 <span class="p">)</span>
                                 <span class="o">+</span> <span class="s2">&quot;[/bold]&quot;</span><span class="p">,</span>
                                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
@@ -958,36 +971,115 @@
                     <span class="c1">#     )</span>
                     <span class="c1"># )</span>
 
-                    <span class="k">if</span> <span class="n">argument</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
+                    <span class="k">if</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span>
                         <span class="c1"># Only print help messages if it&#39;s not the same as the previous</span>
                         <span class="c1"># one.</span>
-                        <span class="n">argument</span><span class="o">.</span><span class="n">help</span> <span class="o">!=</span> <span class="n">prev_argument_help</span>
-                        <span class="ow">or</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_option_strings</span>
+                        <span class="n">arg_info</span><span class="o">.</span><span class="n">help</span> <span class="o">!=</span> <span class="n">prev_argument_help</span>
+                        <span class="ow">or</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span> <span class="o">!=</span> <span class="n">prev_arg_option_strings</span>
                     <span class="p">):</span>
-                        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Padding</span><span class="p">(</span><span class="n">argument</span><span class="o">.</span><span class="n">help</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
+                        <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Padding</span><span class="p">(</span><span class="n">arg_info</span><span class="o">.</span><span class="n">help</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
 
                     <span class="c1"># Show the subcommand that this argument is available in.</span>
                     <span class="k">if</span> <span class="n">has_subcommands</span><span class="p">:</span>
                         <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                             <span class="n">Padding</span><span class="p">(</span>
-                                <span class="sa">f</span><span class="s2">&quot;in [green]</span><span class="si">{</span><span class="n">argument</span><span class="o">.</span><span class="n">usage_hint</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">,</span>
+                                <span class="sa">f</span><span class="s2">&quot;in [green]</span><span class="si">{</span><span class="n">arg_info</span><span class="o">.</span><span class="n">usage_hint</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">,</span>
                                 <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
                             <span class="p">)</span>
                         <span class="p">)</span>
 
-                    <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="n">argument</span><span class="o">.</span><span class="n">option_strings</span>
-                    <span class="n">prev_argument_help</span> <span class="o">=</span> <span class="n">argument</span><span class="o">.</span><span class="n">help</span>
+                    <span class="n">prev_arg_option_strings</span> <span class="o">=</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span>
+                    <span class="n">prev_argument_help</span> <span class="o">=</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">help</span>
 
-        <span class="c1"># print(self._parser_specification)</span>
+        <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;the following arguments are required:&quot;</span><span class="p">):</span>
+            <span class="n">message_title</span> <span class="o">=</span> <span class="s2">&quot;Required arguments&quot;</span>
+
+            <span class="n">info_from_required_arg</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_ArgumentInfo</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;, &quot;</span><span class="p">):</span>
+                <span class="n">info_from_required_arg</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="n">arguments</span><span class="p">,</span> <span class="n">has_subcommands</span><span class="p">,</span> <span class="n">same_exists</span> <span class="o">=</span> <span class="n">recursive_arg_search</span><span class="p">(</span>
+                <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_args</span><span class="p">,</span>
+                <span class="n">parser_spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parser_specification</span><span class="p">,</span>
+                <span class="n">prog</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="n">unrecognized_arguments</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>
+            <span class="p">)</span>
+            <span class="k">del</span> <span class="n">same_exists</span>
+
+            <span class="k">for</span> <span class="n">arg_info</span> <span class="ow">in</span> <span class="n">arguments</span><span class="p">:</span>
+                <span class="c1"># Iterate over each option string separately. This can help us support</span>
+                <span class="c1"># aliases in the future.</span>
+                <span class="k">for</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
+                    <span class="c1"># If the option string was found...</span>
+                    <span class="k">if</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">info_from_required_arg</span> <span class="ow">and</span> <span class="p">(</span>
+                        <span class="c1"># And it&#39;s the first time it was found...</span>
+                        <span class="n">info_from_required_arg</span><span class="p">[</span><span class="n">option_string</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span>
+                        <span class="c1"># Or we found a better one...</span>
+                        <span class="ow">or</span> <span class="n">arg_info</span><span class="o">.</span><span class="n">subcommand_match_score</span>
+                        <span class="o">&gt;</span> <span class="n">info_from_required_arg</span><span class="p">[</span><span class="n">option_string</span><span class="p">]</span><span class="o">.</span><span class="n">subcommand_match_score</span>  <span class="c1"># type: ignore</span>
+                    <span class="p">):</span>
+                        <span class="c1"># Record the argument info.</span>
+                        <span class="n">info_from_required_arg</span><span class="p">[</span><span class="n">option_string</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_info</span>
+
+            <span class="c1"># Try to print help text for required arguments.</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">for</span> <span class="n">maybe_arg</span> <span class="ow">in</span> <span class="n">info_from_required_arg</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">maybe_arg</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="c1"># No argument info found. This will currently happen for</span>
+                    <span class="c1"># subcommands.</span>
+                    <span class="k">continue</span>
+
+                <span class="k">if</span> <span class="n">first</span><span class="p">:</span>
+                    <span class="n">extra_info</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                        <span class="p">[</span>
+                            <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                            <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
+                        <span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">first</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">Padding</span><span class="p">(</span>
+                        <span class="s2">&quot;[bold]&quot;</span>
+                        <span class="o">+</span> <span class="p">(</span>
+                            <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">maybe_arg</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="kc">None</span>
+                            <span class="k">else</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span>
+                            <span class="o">+</span> <span class="s2">&quot; &quot;</span>
+                            <span class="o">+</span> <span class="n">maybe_arg</span><span class="o">.</span><span class="n">metavar</span>
+                        <span class="p">)</span>
+                        <span class="o">+</span> <span class="s2">&quot;[/bold]&quot;</span><span class="p">,</span>
+                        <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">maybe_arg</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Padding</span><span class="p">(</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">help</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">has_subcommands</span><span class="p">:</span>
+                    <span class="c1"># We are explicit about where the argument helptext is being</span>
+                    <span class="c1"># extracted from because the `subcommand_match_score` heuristic</span>
+                    <span class="c1"># above is flawed.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># The stars really need to be aligned for it to fail, but this makes</span>
+                    <span class="c1"># sure that if it does fail that it&#39;s obvious to the user.</span>
+                    <span class="n">extra_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="n">Padding</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;in [green]</span><span class="si">{</span><span class="n">maybe_arg</span><span class="o">.</span><span class="n">usage_hint</span><span class="si">}</span><span class="s2">[/green]&quot;</span><span class="p">,</span>
+                            <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
         <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
             <span class="n">Panel</span><span class="p">(</span>
                 <span class="n">Group</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
                     <span class="o">*</span><span class="n">extra_info</span><span class="p">,</span>
+                    <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                    <span class="sa">f</span><span class="s2">&quot;For full helptext, run [bold]</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
                 <span class="p">),</span>
-                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;[bold]Parsing error[/bold]&quot;</span><span class="p">,</span>
+                <span class="n">title</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;[bold]</span><span class="si">{</span><span class="n">message_title</span><span class="si">}</span><span class="s2">[/bold]&quot;</span><span class="p">,</span>
                 <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
                 <span class="n">border_style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;bright_red&quot;</span><span class="p">),</span>
+                <span class="n">expand</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div></div>

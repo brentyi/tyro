@@ -335,6 +335,30 @@ see <code class="docutils literal notranslate"><span class="pre">python</span> <
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._argparse_formatter.recursive_arg_search">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">recursive_arg_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrecognized_arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">_ArgumentInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#recursive_arg_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.recursive_arg_search" title="Permalink to this definition">#</a></dt>
+<dd><p>Recursively search for arguments in a ParserSpecification. Used for error message
+printing.</p>
+<p>Returns a list of arguments, whether the parser has subcommands or not, and – if
+<code class="docutils literal notranslate"><span class="pre">unrecognized_arguments</span></code> is passed in — whether an unrecognized argument exists
+under a different subparser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – Arguments being parsed. Used for heuristics on subcommands.</p></li>
+<li><p><strong>parser_spec</strong> (<a class="reference internal" href="../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>tyro._parsers.ParserSpecification</em></a>) – Argument parser specification.</p></li>
+<li><p><strong>subcommands</strong> – Prog corresponding to parser_spec.</p></li>
+<li><p><strong>unrecognized_arguments</strong> (<em>Set</em><em>[</em><em>str</em><em>]</em>) – Used for same_exists return value.</p></li>
+<li><p><strong>prog</strong> (<em>str</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Tuple[List[_ArgumentInfo], bool, bool]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.THEME">
 <span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">THEME</span></span><a class="headerlink" href="#tyro._argparse_formatter.THEME" title="Permalink to this definition">#</a></dt>
@@ -518,6 +542,7 @@ provided by the class are considered an implementation detail.
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._argparse_formatter.set_accent_color">set_accent_color</a></li>
+<li><a class="reference internal" href="#tyro._argparse_formatter.recursive_arg_search">recursive_arg_search</a></li>
 <li><a class="reference internal" href="#tyro._argparse_formatter.THEME">THEME</a></li>
 <li><a class="reference internal" href="#tyro._argparse_formatter.monkeypatch_len">monkeypatch_len</a></li>
 <li><a class="reference internal" href="#tyro._argparse_formatter.ansi_context">ansi_context</a></li>

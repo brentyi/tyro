@@ -81,6 +81,21 @@ Module Contents
    Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
    see ``python -m rich.color``. Experimental.
 
+.. py:function:: recursive_arg_search(args: List[str], parser_spec: tyro._parsers.ParserSpecification, prog: str, unrecognized_arguments: Set[str]) -> Tuple[List[_ArgumentInfo], bool, bool]
+
+   
+   Recursively search for arguments in a ParserSpecification. Used for error message
+   printing.
+
+   Returns a list of arguments, whether the parser has subcommands or not, and -- if
+   ``unrecognized_arguments`` is passed in --- whether an unrecognized argument exists
+   under a different subparser.
+
+   :param args: Arguments being parsed. Used for heuristics on subcommands.
+   :param parser_spec: Argument parser specification.
+   :param subcommands: Prog corresponding to parser_spec.
+   :param unrecognized_arguments: Used for same_exists return value.
+
 .. py:data:: THEME
    
 

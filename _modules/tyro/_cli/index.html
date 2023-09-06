@@ -627,8 +627,8 @@
 
         <span class="c1"># Print help message when no arguments are passed in. (but arguments are</span>
         <span class="c1"># expected)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">parser_spec</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
-            <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;--help&quot;</span><span class="p">]</span>
+        <span class="c1"># if len(args) == 0 and parser_spec.has_required_args:</span>
+        <span class="c1">#     args = [&quot;--help&quot;]</span>
 
         <span class="k">if</span> <span class="n">return_parser</span><span class="p">:</span>
             <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
@@ -699,7 +699,6 @@
         <span class="kn">from</span> <span class="nn">._argparse_formatter</span> <span class="kn">import</span> <span class="n">THEME</span>
 
         <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">_print_usage_succinct</span><span class="p">(</span><span class="n">console</span><span class="p">)</span>
         <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
             <span class="n">Panel</span><span class="p">(</span>
                 <span class="n">Group</span><span class="p">(</span>
@@ -720,6 +719,8 @@
                                     <span class="p">),</span>
                                     <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                                 <span class="p">),</span>
+                                <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                                <span class="sa">f</span><span class="s2">&quot;For full helptext, see [bold]</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
                             <span class="p">]</span>
                         <span class="p">),</span>
                     <span class="p">),</span>
