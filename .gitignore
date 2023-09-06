@@ -1,3 +1,5 @@
+# pyenv and direnv alternative
+.rtx.toml
 *.swp
 *.pyc
 *.egg-info
