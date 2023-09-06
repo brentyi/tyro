@@ -170,8 +170,8 @@ def test_similar_arguments_basic() -> None:
     assert "Similar arguments" in error
 
     # --reward.track should appear in both the usage string and as a similar argument.
-    assert error.count("--reward.track") == 2
-    assert error.count("--help") == 0
+    assert error.count("--reward.track") == 1
+    assert error.count("--help") == 1
 
 
 def test_similar_arguments_subcommands() -> None:
@@ -195,7 +195,7 @@ def test_similar_arguments_subcommands() -> None:
     assert "Unrecognized argument" in error
     assert "Similar arguments:" in error
     assert error.count("--reward.track") == 1
-    assert error.count("--help") == 2
+    assert error.count("--help") == 3
 
 
 def test_similar_arguments_subcommands_multiple() -> None:
@@ -221,7 +221,7 @@ def test_similar_arguments_subcommands_multiple() -> None:
     assert "Arguments similar to --reward.trac" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--reward.trace INT") == 1
-    assert error.count("--help") == 4
+    assert error.count("--help") == 5
 
 
 def test_similar_arguments_subcommands_multiple_contains_match() -> None:
@@ -247,7 +247,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
     assert "Similar arguments" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--reward.trace INT") == 1
-    assert error.count("--help") == 4  # 2 subcommands * 2 arguments.
+    assert error.count("--help") == 5  # 2 subcommands * 2 arguments + usage hint.
 
 
 def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
@@ -272,7 +272,9 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
     assert "Unrecognized argument" in error
     assert "Similar arguments" in error
     assert error.count("--reward.track {True,False}") == 1
-    assert error.count("--help") == 2  # Should show two possible subcommands.
+    assert (
+        error.count("--help") == 3
+    )  # Should show two possible subcommands + usage hint.
 
 
 def test_similar_arguments_subcommands_overflow_different() -> None:
@@ -313,7 +315,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
     assert "Similar arguments" in error
     assert error.count("--reward.track") == 10
     assert "[...]" not in error
-    assert error.count("--help") == 20
+    assert error.count("--help") == 21
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
@@ -323,7 +325,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     # Usage print should be clipped.
     error = target.getvalue()
-    assert "help:" in error
+    assert "For full helptext, run" in error
 
 
 def test_similar_arguments_subcommands_overflow_same() -> None:
@@ -381,7 +383,7 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
     assert "Similar arguments" in error
     assert error.count("--reward.track") == 1
     assert "[...]" in error
-    assert error.count("--help") == 4
+    assert error.count("--help") == 5
 
 
 def test_similar_arguments_subcommands_overflow_same_startswith_multiple() -> None:
@@ -441,7 +443,7 @@ def test_similar_arguments_subcommands_overflow_same_startswith_multiple() -> No
     assert error.count("--rewar") == 1
     assert "rewarde" not in error
     assert "[...]" in error
-    assert error.count("--help") == 4
+    assert error.count("--help") == 5
 
 
 def test_similar_flag() -> None:
@@ -458,8 +460,8 @@ def test_similar_flag() -> None:
 
     error = target.getvalue()
 
-    # Printed in the usage message.
-    assert error.count("--flag | --no-flag") == 1
+    # We don't print usage text anymore.
+    assert error.count("--flag | --no-flag") == 0
 
     # Printed in the similar argument list.
     assert error.count("--flag, --no-flag") == 1
