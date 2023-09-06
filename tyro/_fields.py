@@ -493,6 +493,11 @@ def _field_list_from_pydantic(
                 FieldDefinition.make(
                     name=name,
                     typ=pd_field.annotation,
+                    markers=tuple(
+                        meta
+                        for meta in pd_field.metadata
+                        if isinstance(meta, _markers._Marker)
+                    ),
                     default=(
                         MISSING_NONPROP
                         if pd_field.is_required()
