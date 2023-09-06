@@ -7,6 +7,7 @@ import pytest
 from pydantic import BaseModel, Field
 
 import tyro
+from tyro import conf
 
 
 def test_pydantic() -> None:
@@ -97,3 +98,12 @@ def test_pydantic_field_helptext_from_docstring() -> None:
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
     assert "Documentation 3" in helptext
+
+
+def test_pydantic_positional_annotation() -> None:
+    class AnnotatedAsPositional(BaseModel):
+        name: conf.Positional[str]
+        """This is annotated as a positional argument."""
+
+    result = tyro.cli(AnnotatedAsPositional, args=["myname"])
+    assert isinstance(result, AnnotatedAsPositional)
