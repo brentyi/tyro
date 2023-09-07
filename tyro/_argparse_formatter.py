@@ -663,7 +663,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     # Add a header before the first similar argument.
                     extra_info.append(Rule(style=Style(color="red")))
                     extra_info.append(
-                        "Similar arguments:"
+                        "Perhaps you meant:"
                         if len(unrecognized_arguments) == 1
                         else f"Arguments similar to {unrecognized_argument}:"
                     )
