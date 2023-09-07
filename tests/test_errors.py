@@ -167,7 +167,7 @@ def test_similar_arguments_basic() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Similar arguments" in error
+    assert "Perhaps you meant:" in error
 
     # --reward.track should appear in both the usage string and as a similar argument.
     assert error.count("--reward.track") == 1
@@ -193,7 +193,7 @@ def test_similar_arguments_subcommands() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Similar arguments:" in error
+    assert "Perhaps you meant::" in error
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 3
 
@@ -244,7 +244,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Similar arguments" in error
+    assert "Perhaps you meant:" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--reward.trace INT") == 1
     assert error.count("--help") == 5  # 2 subcommands * 2 arguments + usage hint.
@@ -270,7 +270,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Similar arguments" in error
+    assert "Perhaps you meant:" in error
     assert error.count("--reward.track {True,False}") == 1
     assert (
         error.count("--help") == 3
@@ -312,7 +312,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Similar arguments" in error
+    assert "Perhaps you meant:" in error
     assert error.count("--reward.track") == 10
     assert "[...]" not in error
     assert error.count("--help") == 21
@@ -380,7 +380,7 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Similar arguments" in error
+    assert "Perhaps you meant:" in error
     assert error.count("--reward.track") == 1
     assert "[...]" in error
     assert error.count("--help") == 5
