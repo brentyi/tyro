@@ -193,7 +193,7 @@ def test_similar_arguments_subcommands() -> None:
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
-    assert "Perhaps you meant::" in error
+    assert "Perhaps you meant:" in error
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 3
 
