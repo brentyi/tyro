@@ -299,7 +299,9 @@ def _cli_impl(
 
     # Read and fix arguments. If the user passes in --field_name instead of
     # --field-name, correct for them.
-    args = list(sys.argv[1:]) if args is None else list(args)
+    if args is None:
+        args = sys.argv[1:]
+    args = eval(str(list(args)))
 
     # Fix arguments. This will modify all option-style arguments replacing
     # underscores with dashes. This is to support the common convention of using
