@@ -670,7 +670,7 @@ def test_multiple_subparsers_helptext_underscores() -> None:
     assert "Field a description." in helptext
     assert "Field b description." not in helptext
     assert "Field c description." not in helptext
-    
+
     helptext = get_helptext(
         MultipleSubparsers,
         args=["a:subcommand_one", "b:subcommand_one", "--help"],
