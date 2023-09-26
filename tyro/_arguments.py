@@ -463,7 +463,6 @@ def _rule_set_name_or_flag_and_dest(
         and _markers.OmitArgPrefixes not in arg.field.markers
         else [arg.field.name]
     )
-    print(name_or_flag)
 
     # Prefix keyword arguments with --.
     if not arg.field.is_positional():
