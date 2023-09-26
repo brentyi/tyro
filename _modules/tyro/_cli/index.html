@@ -1,17 +1,17 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../../../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
+    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>tyro._cli - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
     <link rel="stylesheet" type="text/css" href="../../../_static/ansi.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -157,7 +157,7 @@
   <span class="sidebar-brand-text">tyro</span>
   
 </a><form class="sidebar-search-container" method="get" action="../../../search/" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -210,7 +210,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
@@ -301,6 +301,7 @@
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span>
     <span class="o">...</span>
 
@@ -314,6 +315,7 @@
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
     <span class="o">...</span>
 
@@ -330,6 +332,7 @@
     <span class="c1"># of the callable itself.</span>
     <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span>
     <span class="o">...</span>
 
@@ -346,11 +349,14 @@
     <span class="c1"># of the callable itself.</span>
     <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
     <span class="o">...</span>
 
 
-<div class="viewcode-block" id="cli"><a class="viewcode-back" href="../../../api/tyro/#tyro._cli.cli">[docs]</a><span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
+<div class="viewcode-block" id="cli">
+<a class="viewcode-back" href="../../../api/tyro/#tyro._cli.cli">[docs]</a>
+<span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -358,6 +364,7 @@
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Call or instantiate `f`, with inputs populated from an automatically generated</span>
@@ -414,6 +421,10 @@
 <span class="sd">        return_unknown_args: If True, return a tuple of the output of `f` and a list of</span>
 <span class="sd">            unknown arguments. Mirrors the unknown arguments returned from</span>
 <span class="sd">            `argparse.ArgumentParser.parse_known_args()`.</span>
+<span class="sd">        use_underscores: If True, use underscores as a word delimeter instead of hyphens.</span>
+<span class="sd">            This primarily impacts helptext; underscores and hyphens are treated equivalently</span>
+<span class="sd">            when parsing happens. We default helptext to hyphens to follow the GNU style guide.</span>
+<span class="sd">            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The output of `f(...)` or an instance `f`. If `f` is a class, the two are</span>
@@ -425,16 +436,18 @@
     <span class="c1"># memory address conflicts.</span>
     <span class="n">_unsafe_cache</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
 
-    <span class="n">output</span> <span class="o">=</span> <span class="n">_cli_impl</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">,</span>
-        <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-        <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
-        <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-        <span class="n">return_parser</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="k">with</span> <span class="n">_strings</span><span class="o">.</span><span class="n">delimeter_context</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="k">if</span> <span class="n">use_underscores</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">_cli_impl</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">,</span>
+            <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">return_parser</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
+            <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 
     <span class="c1"># Prevent unnecessary memory usage.</span>
     <span class="n">_unsafe_cache</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
@@ -445,6 +458,7 @@
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">OutT</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span></div>
 
 
+
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
@@ -452,6 +466,7 @@
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
     <span class="o">...</span>
 
@@ -463,11 +478,14 @@
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
     <span class="o">...</span>
 
 
-<div class="viewcode-block" id="get_parser"><a class="viewcode-back" href="../../../api/tyro/extras/#tyro._cli.get_parser">[docs]</a><span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
+<div class="viewcode-block" id="get_parser">
+<a class="viewcode-back" href="../../../api/tyro/extras/#tyro._cli.get_parser">[docs]</a>
+<span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="c1"># Note that we have no `args` argument, since this is only used when</span>
@@ -475,24 +493,28 @@
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the `argparse.ArgumentParser` object generated under-the-hood by</span>
 <span class="sd">    `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.</span>
 
 <span class="sd">    For tab completion, we recommend using `tyro.cli()`&#39;s built-in `--tyro-write-completion`</span>
 <span class="sd">    flag.&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>
-        <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
-        <span class="n">_cli_impl</span><span class="p">(</span>
-            <span class="n">f</span><span class="p">,</span>
-            <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-            <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-            <span class="n">return_parser</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">return_unknown_args</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="p">),</span>
-    <span class="p">)</span></div>
+    <span class="k">with</span> <span class="n">_strings</span><span class="o">.</span><span class="n">delimeter_context</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="k">if</span> <span class="n">use_underscores</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>
+            <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
+            <span class="n">_cli_impl</span><span class="p">(</span>
+                <span class="n">f</span><span class="p">,</span>
+                <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">args</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">return_parser</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">return_unknown_args</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span></div>
+
 
 
 <span class="k">def</span> <span class="nf">_cli_impl</span><span class="p">(</span>
@@ -553,19 +575,21 @@
     <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 
     <span class="c1"># Fix arguments. This will modify all option-style arguments replacing</span>
-    <span class="c1"># underscores with dashes. This is to support the common convention of using</span>
-    <span class="c1"># underscores in variable names, but dashes in command line arguments.</span>
+    <span class="c1"># underscores with hyphens, or vice versa if use_underscores=True.</span>
     <span class="c1"># If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.</span>
     <span class="n">modified_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
             <span class="k">continue</span>
 
+        <span class="n">delimeter</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">get_delimeter</span><span class="p">()</span>
+        <span class="n">to_swap_delimeter</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span> <span class="k">if</span> <span class="n">delimeter</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span> <span class="k">else</span> <span class="s2">&quot;_&quot;</span>
+
         <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
             <span class="n">arg</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-            <span class="n">fixed</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">val</span>
+            <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_swap_delimeter</span><span class="p">,</span> <span class="n">delimeter</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">val</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">fixed</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+            <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">to_swap_delimeter</span><span class="p">,</span> <span class="n">delimeter</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">return_unknown_args</span>
             <span class="ow">and</span> <span class="n">fixed</span> <span class="ow">in</span> <span class="n">modified_args</span>
@@ -788,11 +812,9 @@
       
     </aside>
   </div>
-</div><script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/scripts/furo.js"></script>
+</div><script src="../../../_static/documentation_options.js?v=187304be"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>

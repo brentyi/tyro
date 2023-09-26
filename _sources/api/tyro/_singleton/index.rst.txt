@@ -11,7 +11,8 @@ Module Contents
 
 .. py:class:: Singleton
 
-   .. py:method:: init(self, *args, **kwds)
+
+   .. py:method:: init(*args, **kwds)
 
 
 

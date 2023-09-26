@@ -1,18 +1,18 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Building configuration systems" href="../building_configuration_systems/" /><link rel="prev" title="Helptext generation" href="../helptext_generation/" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
+    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Tab completion - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b20cc3f5" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css?v=932cb7ac" />
     <link rel="stylesheet" type="text/css" href="../_static/ansi.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -158,7 +158,7 @@
   <span class="sidebar-brand-text">tyro</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search/" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -211,7 +211,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
@@ -235,7 +235,8 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -250,7 +251,7 @@
         </div>
         <article role="main">
           <section id="tab-completion">
-<h1>Tab completion<a class="headerlink" href="#tab-completion" title="Permalink to this heading">#</a></h1>
+<h1>Tab completion<a class="headerlink" href="#tab-completion" title="Link to this heading">#</a></h1>
 <p>Interfaces built with <a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be tab completed in interactive
 shells without any source code modification.</p>
 <p>Completion scripts can be generated by passing the
@@ -259,7 +260,7 @@ generates a completion script via <a class="reference external" href="https://do
 prints it to stdout. To set up tab completion, the printed script simply needs
 to be written somewhere where your shell will find it.</p>
 <section id="zsh">
-<h2>Zsh<a class="headerlink" href="#zsh" title="Permalink to this heading">#</a></h2>
+<h2>Zsh<a class="headerlink" href="#zsh" title="Link to this heading">#</a></h2>
 <p>For zsh, one option is to emulate the pattern used for completions in
 <a class="reference external" href="https://python-poetry.org/docs">poetry</a>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up zsh autocompletion for 01_functions.py, which is located in</span>
@@ -282,7 +283,7 @@ autoload<span class="w"> </span>-Uz<span class="w"> </span>compinit<span class="
 </div>
 </section>
 <section id="bash">
-<h2>Bash<a class="headerlink" href="#bash" title="Permalink to this heading">#</a></h2>
+<h2>Bash<a class="headerlink" href="#bash" title="Link to this heading">#</a></h2>
 <p>Local completion scripts for bash can be written as described in the
 <a class="reference external" href="https://github.com/scop/bash-completion/blob/master/README.md#FAQ">bash-complete documentation</a>.</p>
 <blockquote>
@@ -293,7 +294,7 @@ autoload<span class="w"> </span>-Uz<span class="w"> </span>compinit<span class="
 loaded automatically on demand when the respective command is being completed
 […]</p>
 </div></blockquote>
-<p>Borrowing from the <code class="docutils literal notranslate"><span class="pre">bash-completion</span></code> source<a class="footnote-reference brackets" href="#fn-bash-completion" id="id1">1</a>, we can run:</p>
+<p>Borrowing from the <code class="docutils literal notranslate"><span class="pre">bash-completion</span></code> source<a class="footnote-reference brackets" href="#fn-bash-completion" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, we can run:</p>
 <!-- prettier-ignore-start --><!-- prettier-ignore-end --><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up bash autocompletion for 01_functions.py, which is located in</span>
 <span class="c1"># tyro/examples.</span>
 
@@ -314,11 +315,12 @@ with the <code class="docutils literal notranslate"><span class="pre">python</sp
 <li><p>A permissions update: <code class="docutils literal notranslate"><span class="pre">chmod</span> <span class="pre">+x</span> <span class="pre">./01_functions.py</span></code>.</p></li>
 <li><p>A shebang as the first line of your script: <code class="docutils literal notranslate"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></code></p></li>
 </ol>
-<dl class="footnote brackets">
-<dt class="label" id="fn-bash-completion"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">completion_dir</span></code> query is borrowed from <a class="reference external" href="https://github.com/scop/bash-completion/blob/966a4e043822613040546e8c003509798c5fae1a/bash_completion#L2440">here</a>.</p>
-</dd>
-</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="fn-bash-completion" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p><code class="docutils literal notranslate"><span class="pre">completion_dir</span></code> query is borrowed from <a class="reference external" href="https://github.com/scop/bash-completion/blob/966a4e043822613040546e8c003509798c5fae1a/bash_completion#L2440">here</a>.</p>
+</aside>
+</aside>
 </section>
 </section>
 
@@ -334,10 +336,10 @@ with the <code class="docutils literal notranslate"><span class="pre">python</sp
                 </div>
                 <div class="title">Building configuration systems</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="../helptext_generation/">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
@@ -378,7 +380,7 @@ with the <code class="docutils literal notranslate"><span class="pre">python</sp
       <div class="toc-sticky toc-scroll">
         <div class="toc-title-container">
           <span class="toc-title">
-            Contents
+            On this page
           </span>
         </div>
         <div class="toc-tree-container">
@@ -398,11 +400,9 @@ with the <code class="docutils literal notranslate"><span class="pre">python</sp
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=187304be"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>

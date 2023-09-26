@@ -15,22 +15,21 @@ Module Contents
 ---------------
 
 .. py:data:: ENUM_YAML_TAG_PREFIX
-   :annotation: = !enum:
+   :value: '!enum:'
 
    
 
 .. py:data:: DATACLASS_YAML_TAG_PREFIX
-   :annotation: = !dataclass:
+   :value: '!dataclass:'
 
    
 
 .. py:data:: MISSING_YAML_TAG_PREFIX
-   :annotation: = !missing
+   :value: '!missing'
 
    
 
 .. py:data:: DataclassType
-   
 
    
 

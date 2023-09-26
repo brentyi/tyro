@@ -31,47 +31,48 @@ Module Contents
 
 .. py:class:: TyroTheme
 
+
    .. py:attribute:: border
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
    .. py:attribute:: description
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
    .. py:attribute:: invocation
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
    .. py:attribute:: metavar
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
    .. py:attribute:: metavar_fixed
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
    .. py:attribute:: helptext
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
    .. py:attribute:: helptext_required
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
    .. py:attribute:: helptext_default
-      :annotation: :rich.style.Style
+      :type: rich.style.Style
 
       
 
-   .. py:method:: as_rich_theme(self) -> rich.theme.Theme
+   .. py:method:: as_rich_theme() -> rich.theme.Theme
 
 
 
@@ -97,7 +98,6 @@ Module Contents
    :param unrecognized_arguments: Used for same_exists return value.
 
 .. py:data:: THEME
-   
 
    
 
@@ -118,11 +118,13 @@ Module Contents
 
 
 .. py:data:: global_unrecognized_args
-   :annotation: :List[str] = []
+   :type: List[str]
+   :value: []
 
    
 
 .. py:class:: TyroArgumentParser(*args, **kwargs)
+
 
    Bases: :py:obj:`argparse.ArgumentParser`
 
@@ -142,7 +144,7 @@ Module Contents
    :keyword - add_help -- Add a -h/-help option:
    :keyword - allow_abbrev -- Allow long options to be abbreviated unambiguously:
    :keyword - exit_on_error -- Determines whether or not ArgumentParser exits with: error info when an error occurs
-   .. py:method:: error(self, message: str) -> NoReturn
+   .. py:method:: error(message: str) -> NoReturn
 
       
       Improve error messages from argparse.
@@ -158,6 +160,7 @@ Module Contents
 
 .. py:class:: TyroArgparseHelpFormatter(prog: str)
 
+
    Bases: :py:obj:`argparse.RawDescriptionHelpFormatter`
 
    
@@ -165,10 +168,10 @@ Module Contents
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
-   .. py:method:: add_argument(self, action)
+   .. py:method:: add_argument(action)
 
 
-   .. py:method:: format_help(self)
+   .. py:method:: format_help()
 
 
 

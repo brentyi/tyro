@@ -19,7 +19,7 @@
 Package Contents
 ----------------
 
-.. py:function:: arg(name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True) -> Any
+.. py:function:: arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True) -> Any
 
    
    Returns a metadata object for configuring arguments with ``typing.Annotated``.
@@ -65,7 +65,6 @@ Package Contents
       )
 
 .. py:data:: AvoidSubcommands
-   
 
    
    Avoid creating subcommands when a default is provided for unions over nested types.
@@ -75,7 +74,6 @@ Package Contents
    applied to nested types.
 
 .. py:data:: ConsolidateSubcommandArgs
-   
 
    
    Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
@@ -101,7 +99,6 @@ Package Contents
    be placed at the end of the command>
 
 .. py:data:: Fixed
-   
 
    
    A type ``T`` can be annotated as ``Fixed[T]`` to prevent ``tyro.cli`` from parsing it; a
@@ -109,7 +106,6 @@ Package Contents
    will also be marked as fixed automatically.
 
 .. py:data:: FlagConversionOff
-   
 
    
    Turn off flag conversion for booleans with default values. Instead, types annotated
@@ -119,7 +115,6 @@ Package Contents
    applied to nested types.
 
 .. py:data:: OmitArgPrefixes
-   
 
    
    Make flags used for keyword arguments shorter by omitting prefixes.
@@ -135,7 +130,6 @@ Package Contents
    instead simply have ``--arg``.
 
 .. py:data:: OmitSubcommandPrefixes
-   
 
    
    Make flags used for keyword arguments in subcommands shorter by omitting the
@@ -152,33 +146,28 @@ Package Contents
    If subcommand prefixes are omitted, we would instead simply have ``--arg``.
 
 .. py:data:: Positional
-   
 
    
    A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a positional
    argument.
 
 .. py:data:: PositionalRequiredArgs
-   
 
    
    Make all arguments without defaults positional.
 
 .. py:data:: Suppress
-   
 
    
    A type ``T`` can be annotated as ``Suppress[T]`` to prevent ``tyro.cli`` from parsing it, and
    to prevent it from showing up in helptext.
 
 .. py:data:: SuppressFixed
-   
 
    
    Hide fields that are either manually or automatically marked as fixed.
 
 .. py:data:: UseAppendAction
-   
 
    
    Use "append" actions for variable-length arguments.

@@ -46,47 +46,46 @@ Module Contents
 ---------------
 
 .. py:data:: LiteralAlternate
-   
 
    
 
 .. py:data:: Instantiator
-   
 
    
 
 .. py:data:: NoneType
-   
 
    
 
 .. py:class:: InstantiatorMetadata
 
+
    .. py:attribute:: nargs
-      :annotation: :Optional[Union[int, typing_extensions.Literal[*]]]
+      :type: Optional[Union[int, typing_extensions.Literal[*]]]
 
       
 
    .. py:attribute:: metavar
-      :annotation: :str
+      :type: str
 
       
 
    .. py:attribute:: choices
-      :annotation: :Optional[Set[str]]
+      :type: Optional[Set[str]]
 
       
 
    .. py:attribute:: action
-      :annotation: :Optional[typing_extensions.Literal[append]]
+      :type: Optional[typing_extensions.Literal[append]]
 
       
 
-   .. py:method:: check_choices(self, strings: List[str]) -> None
+   .. py:method:: check_choices(strings: List[str]) -> None
 
 
 
 .. py:exception:: UnsupportedTypeAnnotationError
+
 
    Bases: :py:obj:`Exception`
 

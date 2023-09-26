@@ -15,9 +15,26 @@ Module Contents
 ---------------
 
 .. py:data:: dummy_field_name
-   :annotation: = __tyro_dummy_field__
+   :value: '__tyro_dummy_field__'
 
    
+
+.. py:data:: DELIMETER
+   :type: typing_extensions.Literal[-, _]
+   :value: '-'
+
+   
+
+.. py:function:: delimeter_context(delimeter: typing_extensions.Literal[-, _])
+
+   
+   Context for setting the delimeter. Determines if ``field_a`` is populated as
+   ``--field-a`` or ``--field_a``. Not thread-safe.
+
+.. py:function:: get_delimeter() -> typing_extensions.Literal[-, _]
+
+   
+   Get delimeter used to separate words.
 
 .. py:function:: make_field_name(parts: Sequence[str]) -> str
 

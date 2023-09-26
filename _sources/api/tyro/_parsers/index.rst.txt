@@ -15,56 +15,56 @@ Module Contents
 ---------------
 
 .. py:data:: T
-   
 
    
 
 .. py:class:: ParserSpecification
 
+
    
    Each parser contains a list of arguments and optionally some subparsers.
    .. py:attribute:: f
-      :annotation: :Callable
+      :type: Callable
 
       
 
    .. py:attribute:: description
-      :annotation: :str
+      :type: str
 
       
 
    .. py:attribute:: args
-      :annotation: :List[tyro._arguments.ArgumentDefinition]
+      :type: List[tyro._arguments.ArgumentDefinition]
 
       
 
    .. py:attribute:: helptext_from_nested_class_field_name
-      :annotation: :Dict[str, Optional[str]]
+      :type: Dict[str, Optional[str]]
 
       
 
    .. py:attribute:: subparsers
-      :annotation: :Optional[SubparsersSpecification]
+      :type: Optional[SubparsersSpecification]
 
       
 
    .. py:attribute:: subparsers_from_prefix
-      :annotation: :Dict[str, SubparsersSpecification]
+      :type: Dict[str, SubparsersSpecification]
 
       
 
    .. py:attribute:: prefix
-      :annotation: :str
+      :type: str
 
       
 
    .. py:attribute:: has_required_args
-      :annotation: :bool
+      :type: bool
 
       
 
    .. py:attribute:: consolidate_subcommand_args
-      :annotation: :bool
+      :type: bool
 
       
 
@@ -74,12 +74,12 @@ Module Contents
       
       Create a parser definition from a callable or type.
 
-   .. py:method:: apply(self, parser: argparse.ArgumentParser) -> Tuple[argparse.ArgumentParser, Ellipsis]
+   .. py:method:: apply(parser: argparse.ArgumentParser) -> Tuple[argparse.ArgumentParser, Ellipsis]
 
       
       Create defined arguments and subparsers.
 
-   .. py:method:: apply_args(self, parser: argparse.ArgumentParser) -> None
+   .. py:method:: apply_args(parser: argparse.ArgumentParser) -> None
 
       
       Create defined arguments and subparsers.
@@ -92,35 +92,36 @@ Module Contents
 
 .. py:class:: SubparsersSpecification
 
+
    
    Structure for defining subparsers. Each subparser is a parser with a name.
    .. py:attribute:: name
-      :annotation: :str
+      :type: str
 
       
 
    .. py:attribute:: description
-      :annotation: :Optional[str]
+      :type: Optional[str]
 
       
 
    .. py:attribute:: parser_from_name
-      :annotation: :Dict[str, ParserSpecification]
+      :type: Dict[str, ParserSpecification]
 
       
 
    .. py:attribute:: prefix
-      :annotation: :str
+      :type: str
 
       
 
    .. py:attribute:: required
-      :annotation: :bool
+      :type: bool
 
       
 
    .. py:attribute:: default_instance
-      :annotation: :Any
+      :type: Any
 
       
 
@@ -128,7 +129,7 @@ Module Contents
       :staticmethod:
 
 
-   .. py:method:: apply(self, parent_parser: argparse.ArgumentParser) -> Tuple[argparse.ArgumentParser, Ellipsis]
+   .. py:method:: apply(parent_parser: argparse.ArgumentParser) -> Tuple[argparse.ArgumentParser, Ellipsis]
 
 
 

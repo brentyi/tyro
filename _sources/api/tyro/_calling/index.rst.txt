@@ -17,24 +17,24 @@ Module Contents
 
 .. py:exception:: InstantiationError
 
+
    Bases: :py:obj:`Exception`
 
    
    Exception raised when instantiation fail; this typically means that values from
    the CLI are invalid.
    .. py:attribute:: message
-      :annotation: :str
+      :type: str
 
       
 
    .. py:attribute:: arg
-      :annotation: :tyro._arguments.ArgumentDefinition
+      :type: tyro._arguments.ArgumentDefinition
 
       
 
 
 .. py:data:: T
-   
 
    
 

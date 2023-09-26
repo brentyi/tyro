@@ -1,18 +1,18 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" lang="en" data-content_root="../">
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
-    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Helptext generation" href="../helptext_generation/" /><link rel="prev" title="Attrs Integration" href="../examples/04_additional/09_attrs/" />
 
-    <meta name="generator" content="sphinx-5.0.2, furo 2022.06.21"/>
+    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Goals and alternatives - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?digest=40978830699223671f4072448e654b5958f38b89" />
-    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css" />
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b20cc3f5" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/compact_table_header.css?v=932cb7ac" />
     <link rel="stylesheet" type="text/css" href="../_static/ansi.css" />
-    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="../_static/styles/furo-extensions.css?v=36a5483c" />
     
     
 
@@ -158,7 +158,7 @@
   <span class="sidebar-brand-text">tyro</span>
   
 </a><form class="sidebar-search-container" method="get" action="../search/" role="search">
-  <input class="sidebar-search" placeholder=Search name="q" aria-label="Search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
   <input type="hidden" name="check_keywords" value="yes">
   <input type="hidden" name="area" value="default">
 </form>
@@ -211,7 +211,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
 <ul>
-<li class="toctree-l1 has-children"><a class="reference internal" href="../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle child pages in navigation</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
@@ -235,7 +235,8 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          <div class="theme-toggle-container theme-toggle-content">
+          
+<div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
               <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
@@ -250,9 +251,9 @@
         </div>
         <article role="main">
           <section id="goals-and-alternatives">
-<h1>Goals and alternatives<a class="headerlink" href="#goals-and-alternatives" title="Permalink to this heading">#</a></h1>
+<h1>Goals and alternatives<a class="headerlink" href="#goals-and-alternatives" title="Link to this heading">#</a></h1>
 <section id="design-goals">
-<h2>Design goals<a class="headerlink" href="#design-goals" title="Permalink to this heading">#</a></h2>
+<h2>Design goals<a class="headerlink" href="#design-goals" title="Link to this heading">#</a></h2>
 <p>The core functionality of <code class="docutils literal notranslate"><span class="pre">tyro</span></code> — generating argument parsers from type
 annotations — overlaps significantly with features offered by other libraries.
 Usage distinctions are the result of two API goals:</p>
@@ -281,19 +282,6 @@ statically checked.</p></li>
 <p>More concretely, we can also compare specific features. A noncomprehensive set:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-<col style="width: 9%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"></th>
 <th class="head"><p>Dataclasses</p></th>
@@ -336,11 +324,11 @@ statically checked.</p></li>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/roee30/datargs">datargs</a></p></td>
 <td><p>✓</p></td>
 <td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-literals" id="id1">1</a></p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-literals" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
 <td></td>
 <td></td>
 <td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-unions-nested" id="id2">2</a></p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-unions-nested" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -352,7 +340,7 @@ statically checked.</p></li>
 <td><p>✓</p></td>
 <td></td>
 <td><p>✓</p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-tap-unions-nested" id="id3">3</a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-tap-unions-nested" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -360,11 +348,11 @@ statically checked.</p></li>
 <tr class="row-even"><td><p><a class="reference external" href="https://github.com/lebrice/SimpleParsing">simple-parsing</a></p></td>
 <td><p>✓</p></td>
 <td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-literals" id="id4">4</a></p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-literals" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-unions-nested" id="id5">5</a></p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-unions-nested" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td></td>
@@ -412,8 +400,8 @@ statically checked.</p></li>
 <td></td>
 <td></td>
 <td></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-typer-unions-nested" id="id6">6</a></p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id7">7</a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-unions-nested" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
 <td></td>
 <td></td>
 </tr>
@@ -433,10 +421,10 @@ statically checked.</p></li>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id8">8</a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-unions-nested" id="id9">9</a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-unions-nested" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -479,7 +467,7 @@ for integration with fields generated using standard argparse definitions
 (<code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>).</p>
 </section>
 <section id="note-on-configuration-systems">
-<h2>Note on configuration systems<a class="headerlink" href="#note-on-configuration-systems" title="Permalink to this heading">#</a></h2>
+<h2>Note on configuration systems<a class="headerlink" href="#note-on-configuration-systems" title="Link to this heading">#</a></h2>
 <p>Our API is designed to be used to configure general applications and
 computational experiments written in Python, but intentionally tries to avoid
 building a full configuration framework (for example, <code class="docutils literal notranslate"><span class="pre">hydra</span></code>). These frameworks
@@ -498,35 +486,44 @@ like specific formats, processes, or directory structures for working with saved
 configurations. This requires more moving parts, which can be limiting if any
 one of them is insufficient for a particular use case. (or if you just don’t
 like working with YAML formats)</p>
-<dl class="footnote brackets">
-<dt class="label" id="fn-datargs-literals"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>Not supported for mixed types (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>).</p>
-</dd>
-<dt class="label" id="fn-datargs-unions-nested"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
-<dd><p>One allowed per class.</p>
-</dd>
-<dt class="label" id="fn-tap-unions-nested"><span class="brackets"><a class="fn-backref" href="#id3">3</a></span></dt>
-<dd><p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
-</dd>
-<dt class="label" id="fn-simp-literals"><span class="brackets"><a class="fn-backref" href="#id4">4</a></span></dt>
-<dd><p>Not supported for mixed (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>) or in container (eg <code class="docutils literal notranslate"><span class="pre">List[Literal[1,</span> <span class="pre">2]]</span></code>) types.</p>
-</dd>
-<dt class="label" id="fn-simp-unions-nested"><span class="brackets"><a class="fn-backref" href="#id5">5</a></span></dt>
-<dd><p>One allowed per class.</p>
-</dd>
-<dt class="label" id="fn-typer-unions-nested"><span class="brackets"><a class="fn-backref" href="#id6">6</a></span></dt>
-<dd><p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
-</dd>
-<dt class="label" id="fn-typer-containers"><span class="brackets"><a class="fn-backref" href="#id7">7</a></span></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">typer</span></code> uses positional arguments for all required fields, which means that only one variable-length argument (such as <code class="docutils literal notranslate"><span class="pre">List[int]</span></code>) without a default is supported per argument parser.</p>
-</dd>
-<dt class="label" id="fn-yahp-docstrings"><span class="brackets"><a class="fn-backref" href="#id8">8</a></span></dt>
-<dd><p>Via the <code class="docutils literal notranslate"><span class="pre">hp.auto()</span></code> function, which can parse docstrings from external classes. Usage is different from the more direct parsing that <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, <code class="docutils literal notranslate"><span class="pre">tap</span></code>, and <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>/<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code> support.</p>
-</dd>
-<dt class="label" id="fn-yahp-unions-nested"><span class="brackets"><a class="fn-backref" href="#id9">9</a></span></dt>
-<dd><p>Not supported, but similar functionality available via <a class="reference external" href="https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html">“registries”</a>.</p>
-</dd>
-</dl>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="fn-datargs-literals" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
+<p>Not supported for mixed types (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>).</p>
+</aside>
+<aside class="footnote brackets" id="fn-datargs-unions-nested" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
+<p>One allowed per class.</p>
+</aside>
+<aside class="footnote brackets" id="fn-tap-unions-nested" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
+<p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
+</aside>
+<aside class="footnote brackets" id="fn-simp-literals" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
+<p>Not supported for mixed (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>) or in container (eg <code class="docutils literal notranslate"><span class="pre">List[Literal[1,</span> <span class="pre">2]]</span></code>) types.</p>
+</aside>
+<aside class="footnote brackets" id="fn-simp-unions-nested" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
+<p>One allowed per class.</p>
+</aside>
+<aside class="footnote brackets" id="fn-typer-unions-nested" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">6</a><span class="fn-bracket">]</span></span>
+<p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
+</aside>
+<aside class="footnote brackets" id="fn-typer-containers" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">7</a><span class="fn-bracket">]</span></span>
+<p><code class="docutils literal notranslate"><span class="pre">typer</span></code> uses positional arguments for all required fields, which means that only one variable-length argument (such as <code class="docutils literal notranslate"><span class="pre">List[int]</span></code>) without a default is supported per argument parser.</p>
+</aside>
+<aside class="footnote brackets" id="fn-yahp-docstrings" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">8</a><span class="fn-bracket">]</span></span>
+<p>Via the <code class="docutils literal notranslate"><span class="pre">hp.auto()</span></code> function, which can parse docstrings from external classes. Usage is different from the more direct parsing that <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, <code class="docutils literal notranslate"><span class="pre">tap</span></code>, and <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>/<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code> support.</p>
+</aside>
+<aside class="footnote brackets" id="fn-yahp-unions-nested" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">9</a><span class="fn-bracket">]</span></span>
+<p>Not supported, but similar functionality available via <a class="reference external" href="https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html">“registries”</a>.</p>
+</aside>
+</aside>
 </section>
 </section>
 
@@ -542,10 +539,10 @@ like working with YAML formats)</p>
                 </div>
                 <div class="title">Helptext generation</div>
               </div>
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
           <a class="prev-page" href="../examples/04_additional/09_attrs/">
-              <svg><use href="#svg-arrow-right"></use></svg>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
@@ -586,7 +583,7 @@ like working with YAML formats)</p>
       <div class="toc-sticky toc-scroll">
         <div class="toc-title-container">
           <span class="toc-title">
-            Contents
+            On this page
           </span>
         </div>
         <div class="toc-tree-container">
@@ -606,11 +603,9 @@ like working with YAML formats)</p>
       
     </aside>
   </div>
-</div><script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
-    <script src="../_static/jquery.js"></script>
-    <script src="../_static/underscore.js"></script>
-    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
-    <script src="../_static/doctools.js"></script>
-    <script src="../_static/scripts/furo.js"></script>
+</div><script src="../_static/documentation_options.js?v=187304be"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/scripts/furo.js?v=32e29ea5"></script>
     </body>
 </html>

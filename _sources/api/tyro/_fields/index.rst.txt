@@ -17,57 +17,58 @@ Module Contents
 
 .. py:class:: FieldDefinition
 
+
    .. py:attribute:: name
-      :annotation: :str
+      :type: str
 
       
 
    .. py:attribute:: typ
-      :annotation: :tyro._typing.TypeForm[Any]
+      :type: tyro._typing.TypeForm[Any]
 
       
 
    .. py:attribute:: default
-      :annotation: :Any
+      :type: Any
 
       
 
    .. py:attribute:: helptext
-      :annotation: :Optional[str]
+      :type: Optional[str]
 
       
 
    .. py:attribute:: markers
-      :annotation: :FrozenSet[tyro.conf._markers._Marker]
+      :type: FrozenSet[tyro.conf._markers._Marker]
 
       
 
    .. py:attribute:: argconf
-      :annotation: :tyro.conf._confstruct._ArgConfiguration
+      :type: tyro.conf._confstruct._ArgConfiguration
 
       
 
    .. py:attribute:: call_argname
-      :annotation: :Any
+      :type: Any
 
       
 
-   .. py:method:: __post_init__(self)
+   .. py:method:: __post_init__()
 
 
    .. py:method:: make(name: str, typ: tyro._typing.TypeForm[Any], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers._Marker, Ellipsis] = ())
       :staticmethod:
 
 
-   .. py:method:: add_markers(self, markers: Tuple[tyro.conf._markers._Marker, Ellipsis]) -> FieldDefinition
+   .. py:method:: add_markers(markers: Tuple[tyro.conf._markers._Marker, Ellipsis]) -> FieldDefinition
 
 
-   .. py:method:: is_positional(self) -> bool
+   .. py:method:: is_positional() -> bool
 
       
       Returns True if the argument should be positional in the commandline.
 
-   .. py:method:: is_positional_call(self) -> bool
+   .. py:method:: is_positional_call() -> bool
 
       
       Returns True if the argument should be positional in underlying Python call.
@@ -75,52 +76,52 @@ Module Contents
 
 .. py:class:: PropagatingMissingType
 
+
    Bases: :py:obj:`tyro._singleton.Singleton`
 
 
 .. py:class:: NonpropagatingMissingType
+
 
    Bases: :py:obj:`tyro._singleton.Singleton`
 
 
 .. py:class:: ExcludeFromCallType
 
+
    Bases: :py:obj:`tyro._singleton.Singleton`
 
 
 .. py:data:: MISSING_PROP
-   
 
    
 
 .. py:data:: MISSING_NONPROP
-   
 
    
 
 .. py:data:: EXCLUDE_FROM_CALL
-   
 
    
 
 .. py:data:: MISSING
-   :annotation: :Any
+   :type: Any
 
    
    Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
    ``default_instance`` for ``tyro.cli()`` as required.
 
 .. py:data:: MISSING_SINGLETONS
-   
 
    
 
 .. py:class:: UnsupportedNestedTypeMessage
 
+
    
    Reason why a callable cannot be treated as a nested type.
    .. py:attribute:: message
-      :annotation: :str
+      :type: str
 
       
 
@@ -146,17 +147,14 @@ Module Contents
              A list of field definitions.
 
 .. py:data:: DefaultInstance
-   
 
    
 
 .. py:data:: pydantic
-   
 
    
 
 .. py:data:: attr
-   
 
    
 
