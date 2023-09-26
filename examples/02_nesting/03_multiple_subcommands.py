@@ -3,7 +3,6 @@
 Multiple unions over nested types are populated using a series of subcommands.
 
 Usage:
-`python ./03_multiple_subcommands.py`
 `python ./03_multiple_subcommands.py --help`
 `python ./03_multiple_subcommands.py dataset:mnist --help`
 `python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --help`

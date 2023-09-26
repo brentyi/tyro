@@ -77,14 +77,6 @@ Multiple unions over nested types are populated using a series of subcommands.
 
 .. raw:: html
 
-        <kbd>python 02_nesting/03_multiple_subcommands.py</kbd>
-
-.. program-output:: python ../../examples/02_nesting/03_multiple_subcommands.py
-
-------------
-
-.. raw:: html
-
         <kbd>python 02_nesting/03_multiple_subcommands.py --help</kbd>
 
 .. program-output:: python ../../examples/02_nesting/03_multiple_subcommands.py --help
