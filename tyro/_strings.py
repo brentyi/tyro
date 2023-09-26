@@ -56,6 +56,8 @@ def make_field_name(parts: Sequence[str]) -> str:
             p = "_" * num_underscore_prefix + (
                 p[num_underscore_prefix:].replace("_", "-")
             )
+        else:
+            p = p.replace("-", "_")
         out.append(p)
 
     return "".join(out)
