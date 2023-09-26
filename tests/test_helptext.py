@@ -587,3 +587,101 @@ def test_nested_bool() -> None:
 
     helptext = get_helptext(main)
     assert "--child.x | --child.no-x" in helptext
+
+
+def test_multiple_subparsers_helptext_hyphens() -> None:
+    @dataclasses.dataclass
+    class SubcommandOne:
+        """2% milk."""  # % symbol is prone to bugs in argparse.
+
+        arg_x: int = 0
+        arg_flag: bool = False
+
+    @dataclasses.dataclass
+    class SubcommandTwo:
+        arg_y: int = 1
+
+    @dataclasses.dataclass
+    class SubcommandThree:
+        arg_z: int = 2
+
+    @dataclasses.dataclass
+    class MultipleSubparsers:
+        # Field a description.
+        a: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        # Field b description.
+        b: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        # Field c description.
+        c: Union[SubcommandOne, SubcommandTwo, SubcommandThree] = dataclasses.field(
+            default_factory=SubcommandThree
+        )
+
+    helptext = get_helptext(MultipleSubparsers)
+
+    assert "2% milk." in helptext
+    assert "Field a description." in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description." not in helptext
+
+    helptext = get_helptext(
+        MultipleSubparsers, args=["a:subcommand-one", "b:subcommand-one", "--help"]
+    )
+
+    assert "2% milk." in helptext
+    assert "Field a description." not in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description." in helptext
+    assert "(default: c:subcommand-three)" in helptext
+    assert "--b.arg-x" in helptext
+    assert "--b.no-arg-flag" in helptext
+    assert "--b.arg-flag" in helptext
+
+
+def test_multiple_subparsers_helptext_underscores() -> None:
+    @dataclasses.dataclass
+    class SubcommandOne:
+        """2% milk."""  # % symbol is prone to bugs in argparse.
+
+        arg_x: int = 0
+        arg_flag: bool = False
+
+    @dataclasses.dataclass
+    class SubcommandTwo:
+        arg_y: int = 1
+
+    @dataclasses.dataclass
+    class SubcommandThree:
+        arg_z: int = 2
+
+    @dataclasses.dataclass
+    class MultipleSubparsers:
+        # Field a description.
+        a: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        # Field b description.
+        b: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        # Field c description.
+        c: Union[SubcommandOne, SubcommandTwo, SubcommandThree] = dataclasses.field(
+            default_factory=SubcommandThree
+        )
+
+    helptext = get_helptext(MultipleSubparsers, use_underscores=True)
+
+    assert "2% milk." in helptext
+    assert "Field a description." in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description." not in helptext
+    
+    helptext = get_helptext(
+        MultipleSubparsers,
+        args=["a:subcommand_one", "b:subcommand_one", "--help"],
+        use_underscores=True,
+    )
+
+    assert "2% milk." in helptext
+    assert "Field a description." not in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description." in helptext
+    assert "(default: c:subcommand_three)" in helptext
+    assert "--b.arg_x" in helptext
+    assert "--b.no_arg_flag" in helptext
+    assert "--b.arg_flag" in helptext

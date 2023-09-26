@@ -688,3 +688,34 @@ def test_empty_container() -> None:
 
     assert tyro.cli(A, args="--x".split(" ")).x == ()
     assert tyro.cli(A, args="--y".split(" ")).y == []
+
+
+def test_unknown_args_with_consistent_duplicates_use_underscores() -> None:
+    @dataclasses.dataclass
+    class A:
+        a_b: List[int] = dataclasses.field(default_factory=list)
+        c_d: List[int] = dataclasses.field(default_factory=list)
+
+    # Tests logic for consistent duplicate arguments when performing argument fixing.
+    # i.e., we can fix arguments if the separator is consistent (all _'s or all -'s).
+    a, unknown_args = tyro.cli(
+        A,
+        args=[
+            "--a-b",
+            "5",
+            "--a-b",
+            "7",
+            "--c_d",
+            "5",
+            "--c_d",
+            "7",
+            "--e-f",
+            "--e-f",
+            "--g_h",
+            "--g_h",
+        ],
+        return_unknown_args=True,
+        use_underscores=True,
+    )
+    assert a == A(a_b=[7], c_d=[7])
+    assert unknown_args == ["--e-f", "--e-f", "--g_h", "--g_h"]

@@ -67,11 +67,13 @@ class BooleanOptionalAction(argparse.Action):
 
             if option_string.startswith("--"):
                 if "." not in option_string:
-                    option_string = "--no-" + option_string[2:]
+                    option_string = (
+                        "--no" + _strings.get_delimeter() + option_string[2:]
+                    )
                 else:
-                    # Loose heuristic for where to add the no- prefix.
+                    # Loose heuristic for where to add the no-/no_ prefix.
                     left, _, right = option_string.rpartition(".")
-                    option_string = left + ".no-" + right
+                    option_string = left + ".no" + _strings.get_delimeter() + right
                 self._no_strings.add(option_string)
 
                 _option_strings.append(option_string)

@@ -50,6 +50,7 @@ def cli(
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
     return_unknown_args: Literal[False] = False,
+    use_underscores: bool = False,
 ) -> OutT:
     ...
 
@@ -63,6 +64,7 @@ def cli(
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
     return_unknown_args: Literal[True],
+    use_underscores: bool = False,
 ) -> Tuple[OutT, List[str]]:
     ...
 
@@ -79,6 +81,7 @@ def cli(
     # of the callable itself.
     default: None = None,
     return_unknown_args: Literal[False] = False,
+    use_underscores: bool = False,
 ) -> OutT:
     ...
 
@@ -95,6 +98,7 @@ def cli(
     # of the callable itself.
     default: None = None,
     return_unknown_args: Literal[True],
+    use_underscores: bool = False,
 ) -> Tuple[OutT, List[str]]:
     ...
 
@@ -107,6 +111,7 @@ def cli(
     args: Optional[Sequence[str]] = None,
     default: Optional[OutT] = None,
     return_unknown_args: bool = False,
+    use_underscores: bool = False,
     **deprecated_kwargs,
 ) -> Union[OutT, Tuple[OutT, List[str]]]:
     """Call or instantiate `f`, with inputs populated from an automatically generated
@@ -163,6 +168,10 @@ def cli(
         return_unknown_args: If True, return a tuple of the output of `f` and a list of
             unknown arguments. Mirrors the unknown arguments returned from
             `argparse.ArgumentParser.parse_known_args()`.
+        use_underscores: If True, use underscores as a word delimeter instead of hyphens.
+            This primarily impacts helptext; underscores and hyphens are treated equivalently
+            when parsing happens. We default helptext to hyphens to follow the GNU style guide.
+            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
 
     Returns:
         The output of `f(...)` or an instance `f`. If `f` is a class, the two are
@@ -174,16 +183,18 @@ def cli(
     # memory address conflicts.
     _unsafe_cache.clear_cache()
 
-    output = _cli_impl(
-        f,
-        prog=prog,
-        description=description,
-        args=args,
-        default=default,
-        return_parser=False,
-        return_unknown_args=return_unknown_args,
-        **deprecated_kwargs,
-    )
+    with _strings.delimeter_context("_" if use_underscores else "-"):
+        output = _cli_impl(
+            f,
+            prog=prog,
+            description=description,
+            args=args,
+            default=default,
+            return_parser=False,
+            return_unknown_args=return_unknown_args,
+            use_underscores=use_underscores,
+            **deprecated_kwargs,
+        )
 
     # Prevent unnecessary memory usage.
     _unsafe_cache.clear_cache()
@@ -201,6 +212,7 @@ def get_parser(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     default: Optional[OutT] = None,
+    use_underscores: bool = False,
 ) -> argparse.ArgumentParser:
     ...
 
@@ -212,6 +224,7 @@ def get_parser(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     default: Optional[OutT] = None,
+    use_underscores: bool = False,
 ) -> argparse.ArgumentParser:
     ...
 
@@ -224,24 +237,27 @@ def get_parser(
     prog: Optional[str] = None,
     description: Optional[str] = None,
     default: Optional[OutT] = None,
+    use_underscores: bool = False,
 ) -> argparse.ArgumentParser:
     """Get the `argparse.ArgumentParser` object generated under-the-hood by
     `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.
 
     For tab completion, we recommend using `tyro.cli()`'s built-in `--tyro-write-completion`
     flag."""
-    return cast(
-        argparse.ArgumentParser,
-        _cli_impl(
-            f,
-            prog=prog,
-            description=description,
-            args=None,
-            default=default,
-            return_parser=True,
-            return_unknown_args=False,
-        ),
-    )
+    with _strings.delimeter_context("_" if use_underscores else "-"):
+        return cast(
+            argparse.ArgumentParser,
+            _cli_impl(
+                f,
+                prog=prog,
+                description=description,
+                args=None,
+                default=default,
+                return_parser=True,
+                return_unknown_args=False,
+                use_underscores=use_underscores,
+            ),
+        )
 
 
 def _cli_impl(
@@ -302,19 +318,21 @@ def _cli_impl(
     args = list(sys.argv[1:]) if args is None else list(args)
 
     # Fix arguments. This will modify all option-style arguments replacing
-    # underscores with dashes. This is to support the common convention of using
-    # underscores in variable names, but dashes in command line arguments.
+    # underscores with hyphens, or vice versa if use_underscores=True.
     # If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.
     modified_args: Dict[str, str] = {}
     for index, arg in enumerate(args):
         if not arg.startswith("--"):
             continue
 
+        delimeter = _strings.get_delimeter()
+        to_swap_delimeter = "-" if delimeter == "_" else "_"
+
         if "=" in arg:
             arg, _, val = arg.partition("=")
-            fixed = arg.replace("_", "-") + "=" + val
+            fixed = "--" + arg[2:].replace(to_swap_delimeter, delimeter) + "=" + val
         else:
-            fixed = arg.replace("_", "-")
+            fixed = "--" + arg[2:].replace(to_swap_delimeter, delimeter)
         if (
             return_unknown_args
             and fixed in modified_args
