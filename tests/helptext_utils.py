@@ -11,13 +11,15 @@ import tyro._arguments
 import tyro._strings
 
 
-def get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
+def get_helptext(
+    f: Callable, args: List[str] = ["--help"], use_underscores: bool = False
+) -> str:
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(f, args=args)
+        tyro.cli(f, args=args, use_underscores=use_underscores)
 
     # Check tyro.extras.get_parser().
-    parser = tyro.extras.get_parser(f)
+    parser = tyro.extras.get_parser(f, use_underscores=use_underscores)
     assert isinstance(parser, argparse.ArgumentParser)
 
     # Returned parser should have formatting information stripped. External tools rarely
@@ -44,7 +46,7 @@ def get_helptext(f: Callable, args: List[str] = ["--help"]) -> str:
     target2 = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target2):
         tyro._arguments.USE_RICH = False
-        tyro.cli(f, args=args)
+        tyro.cli(f, args=args, use_underscores=use_underscores)
         tyro._arguments.USE_RICH = True
 
     if target2.getvalue() != tyro._strings.strip_ansi_sequences(target.getvalue()):

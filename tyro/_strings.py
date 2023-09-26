@@ -1,19 +1,37 @@
 """Utilities and constants for working with strings."""
 
+import contextlib
 import functools
 import re
 import textwrap
 from typing import Iterable, List, Sequence, Tuple, Type
 
-from typing_extensions import get_args, get_origin
+from typing_extensions import Literal, get_args, get_origin
 
 from . import _resolver
 
 dummy_field_name = "__tyro_dummy_field__"
+DELIMETER: Literal["-", "_"] = "-"
 
 
 def _strip_dummy_field_names(parts: Iterable[str]) -> Iterable[str]:
     return filter(lambda name: len(name) > 0 and name != dummy_field_name, parts)
+
+
+@contextlib.contextmanager
+def delimeter_context(delimeter: Literal["-", "_"]):
+    """Context for setting the delimeter. Determines if `field_a` is populated as
+    `--field-a` or `--field_a`. Not thread-safe."""
+    global DELIMETER
+    delimeter_restore = DELIMETER
+    DELIMETER = delimeter
+    yield
+    DELIMETER = delimeter_restore
+
+
+def get_delimeter() -> Literal["-", "_"]:
+    """Get delimeter used to separate words."""
+    return DELIMETER
 
 
 def make_field_name(parts: Sequence[str]) -> str:
@@ -28,13 +46,18 @@ def make_field_name(parts: Sequence[str]) -> str:
             out.append(".")
 
         # Replace all underscores with hyphens, except ones at the start of a string.
-        num_underscore_prefix = 0
-        for i in range(len(p)):
-            if p[i] == "_":
-                num_underscore_prefix += 1
-            else:
-                break
-        p = "_" * num_underscore_prefix + p[num_underscore_prefix:].replace("_", "-")
+        if get_delimeter() == "-":
+            num_underscore_prefix = 0
+            for i in range(len(p)):
+                if p[i] == "_":
+                    num_underscore_prefix += 1
+                else:
+                    break
+            p = "_" * num_underscore_prefix + (
+                p[num_underscore_prefix:].replace("_", "-")
+            )
+        else:
+            p = p.replace("-", "_")
         out.append(p)
 
     return "".join(out)
@@ -52,13 +75,13 @@ def dedent(text: str) -> str:
     return f"{first_line.strip()}\n{textwrap.dedent(rest)}"
 
 
-_camel_separator_pattern = functools.lru_cache(maxsize=1)(
-    lambda: re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
-)
-
-
 def hyphen_separated_from_camel_case(name: str) -> str:
-    return _camel_separator_pattern().sub(r"-\1", name).lower()
+    out = (
+        re.compile("((?<=[a-z0-9])[A-Z]|(?!^)[A-Z](?=[a-z]))")
+        .sub(get_delimeter() + r"\1", name)
+        .lower()
+    )
+    return out
 
 
 def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
@@ -85,7 +108,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         if orig is not None and hasattr(orig, "__name__"):
             parts = [orig.__name__]  # type: ignore
             parts.extend(map(get_name, get_args(cls)))
-            return "-".join(parts)
+            return get_delimeter().join(parts)
         elif hasattr(cls, "__name__"):
             return hyphen_separated_from_camel_case(cls.__name__)
         else:
@@ -97,7 +120,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         return get_name(cls), prefix_name  # type: ignore
 
     return (
-        "-".join(
+        get_delimeter().join(
             map(
                 lambda x: _subparser_name_from_type(x)[0],
                 [cls] + list(type_from_typevar.values()),
@@ -113,7 +136,12 @@ def subparser_name_from_type(prefix: str, cls: Type) -> str:
     )
     if len(prefix) == 0 or not use_prefix:
         return suffix
-    return f"{prefix}:{suffix}".replace("_", "-")
+
+    if get_delimeter() == "-":
+        return f"{prefix}:{suffix}".replace("_", "-")
+    else:
+        assert get_delimeter() == "_"
+        return f"{prefix}:{suffix}"
 
 
 @functools.lru_cache(maxsize=None)
