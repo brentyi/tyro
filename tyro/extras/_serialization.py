@@ -1,11 +1,15 @@
 """Type-safe, human-readable serialization helpers for dataclasses."""
+from __future__ import annotations
 
 import dataclasses
 import enum
 import functools
-from typing import IO, Any, Optional, Set, Type, TypeVar, Union
+from typing import IO, TYPE_CHECKING, Any, Optional, Set, Type, TypeVar, Union
 
-import yaml
+if TYPE_CHECKING:
+    # Since serialization functionality is deprecated, the yaml dependency is optional.
+    import yaml
+
 from typing_extensions import get_args, get_origin
 
 from .. import _fields, _resolver
@@ -70,6 +74,8 @@ def _get_contained_special_types_from_type(
 
 
 def _make_loader(cls: Type[Any]) -> Type[yaml.Loader]:
+    import yaml
+
     class DataclassLoader(yaml.Loader):
         pass
 
@@ -120,6 +126,8 @@ def _make_loader(cls: Type[Any]) -> Type[yaml.Loader]:
 
 
 def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
+    import yaml
+
     class DataclassDumper(yaml.Dumper):
         def ignore_aliases(self, data):
             return super().ignore_aliases(data) or data is _fields.MISSING_PROP
@@ -194,6 +202,8 @@ def from_yaml(
     Returns:
         Instantiated dataclass.
     """
+    import yaml
+
     out = yaml.load(stream, Loader=_make_loader(cls))
     origin_cls = get_origin(cls)
     assert isinstance(out, origin_cls if origin_cls is not None else cls)
@@ -222,4 +232,6 @@ def to_yaml(instance: Any) -> str:
     Returns:
         YAML string.
     """
+    import yaml
+
     return "# tyro YAML.\n" + yaml.dump(instance, Dumper=_make_dumper(instance))
