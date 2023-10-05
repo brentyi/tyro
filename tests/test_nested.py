@@ -989,3 +989,31 @@ def test_nested_in_subparser_override_with_default() -> None:
         container=DatasetContainer(ImageNet(50))
     )
     assert tyro.cli(train, args=["sgd"]) == Sgd(container=DatasetContainer(Mnist()))
+
+
+def test_underscore_prefix() -> None:
+    """https://github.com/brentyi/tyro/issues/77"""
+
+    @dataclasses.dataclass
+    class PrivateConfig:
+        pass
+
+    @dataclasses.dataclass
+    class BaseConfig:
+        _private: PrivateConfig = dataclasses.field(
+            default_factory=lambda: PrivateConfig()
+        )
+
+    @dataclasses.dataclass
+    class Level1(BaseConfig):
+        pass
+
+    @dataclasses.dataclass
+    class Level2(BaseConfig):
+        child: Level1 = dataclasses.field(default_factory=lambda: Level1())
+
+    @dataclasses.dataclass
+    class Level3(BaseConfig):
+        child: Level2 = dataclasses.field(default_factory=lambda: Level2())
+
+    tyro.cli(Level3, args=[])
