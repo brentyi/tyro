@@ -37,13 +37,32 @@
 
 <br />
 
-<strong><code>tyro</code></strong> is a tool for building command-line
-interfaces and configuration objects in Python.
+<strong><code>tyro</code></strong> is a tool for generating command-line
+interfaces and configuration objects from type-annotated Python. We:
 
-Our core interface, `tyro.cli()`, generates command-line interfaces from
-type-annotated callables.
+- Introduce a single-function core API, `tyro.cli()`, which is minimal enough to
+  use in throwaway scripts but flexible enough to be hardened in larger
+  projects.
+- Support a broad range of Python type constructs, including basics (`int`,
+  `str`, `bool`, `float`, `pathlib.Path`, ...), both fixed- and variable-length
+  containers (`list[T]`, `tuple[T1, T2, ...]`, `set[T]`, `dict[K, V]`), unions
+  (`X | Y`, `Union[X, Y]`), literals (`Literal`), and generics (`TypeVar`).
+- Understand hierarchy, nesting, and tools you may already use, like
+  `dataclasses`, `pydantic`, and `attrs`.
+- Generate helptext automatically from defaults, annotations, and docstrings.
+- Provide flexible support for subcommands, as well as choosing between and
+  overriding values in configuration objects.
+- Enable tab completion in both your IDE and terminal.
+- Expose fine-grained configuration via PEP 529 runtime annotations
+  (`tyro.conf.*`).
 
----
+`tyro`'s use cases overlaps significantly with many other tools. The differences
+are a result of several API goals:
+
+- Focusing on a single, uninvasive function.
+- Prioritizing compatibility with language servers and type checkers.
+- Avoiding assumptions on serialization formats (like YAML or JSON) for
+  configuration objects.
 
 ### Brief walkthrough
 
@@ -65,10 +84,10 @@ print(total)
 ```
 
 This pattern is dramatically cleaner than manually parsing `sys.argv`, but has
-several issues: it lacks type checking and IDE support (consider: jumping to
+several issues: it requires a significant amount of parsing-specific
+boilerplate, lacks type checking and IDE support (consider: jumping to
 definitions, finding references, docstrings, refactoring and renaming tools),
-requires a significant amount of parsing-specific boilerplate, and becomes
-difficult to manage for larger projects.
+and becomes difficult to manage for larger projects.
 
 The basic goal of `tyro.cli()` is to provide a wrapper for `argparse` that
 solves these issues.
@@ -122,17 +141,6 @@ args = tyro.cli(Args)
 print(args.a + args.b)
 ```
 
-Unlike directly using `argparse`, both the function-based and dataclass-based
-approaches are compatible with static analysis; tab completion and type checking
-will work out-of-the-box.
-
-**(3) Additional features.**
-
-These examples only scratch the surface of what's possible. `tyro` aims to
-support all reasonable type annotations, which can help us define things like
-hierarchical structures, enums, unions, variable-length inputs, and subcommands.
-See [documentation](https://brentyi.github.io/tyro) for examples.
-
 ### In the wild
 
 `tyro` is still a new library, but being stress tested in several projects!
@@ -148,7 +156,8 @@ See [documentation](https://brentyi.github.io/tyro) for examples.
   implementation of [instant-ngp](https://nvlabs.github.io/instant-ngp/),
   implemented in JAX.
 - [NVIDIAGameWorks/kaolin-wisp](https://github.com/NVIDIAGameWorks/kaolin-wisp)
-  combines `tyro` with [`hydra-zen`](https://github.com/mit-ll-responsible-ai/hydra-zen)
-  for neural fields in PyTorch.
+  combines `tyro` with
+  [`hydra-zen`](https://github.com/mit-ll-responsible-ai/hydra-zen) for neural
+  fields in PyTorch.
 - [openrlbenchmark/openrlbenchmark](https://github.com/openrlbenchmark/openrlbenchmark)
   is a collection of tracked experiments for reinforcement learning.

@@ -64,7 +64,6 @@ def call_from_args(
 
         # Resolve field type.
         field_type = field.typ
-
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords
 
