@@ -34,33 +34,32 @@ def get_delimeter() -> Literal["-", "_"]:
     return DELIMETER
 
 
+def replace_delimeter_in_part(p: str) -> str:
+    """Replace hyphens with underscores (or vice versa) except when at the start."""
+    if get_delimeter() == "-":
+        num_underscore_prefix = 0
+        for i in range(len(p)):
+            if p[i] == "_":
+                num_underscore_prefix += 1
+            else:
+                break
+        p = "_" * num_underscore_prefix + (p[num_underscore_prefix:].replace("_", "-"))
+    else:
+        p = p.replace("-", "_")
+    return p
+
+
 def make_field_name(parts: Sequence[str]) -> str:
     """Join parts of a field name together. Used for nesting.
 
     ('parent_1', 'child') => 'parent-1.child'
     ('parents', '1', '_child_node') => 'parents.1._child-node'
+    ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
     """
     out: List[str] = []
-    for i, p in enumerate(_strip_dummy_field_names(parts)):
-        if i > 0:
-            out.append(".")
-
-        # Replace all underscores with hyphens, except ones at the start of a string.
-        if get_delimeter() == "-":
-            num_underscore_prefix = 0
-            for i in range(len(p)):
-                if p[i] == "_":
-                    num_underscore_prefix += 1
-                else:
-                    break
-            p = "_" * num_underscore_prefix + (
-                p[num_underscore_prefix:].replace("_", "-")
-            )
-        else:
-            p = p.replace("-", "_")
-        out.append(p)
-
-    return "".join(out)
+    for p in _strip_dummy_field_names(parts):
+        out.extend(map(replace_delimeter_in_part, p.split(".")))
+    return ".".join(out)
 
 
 def make_subparser_dest(name: str) -> str:
@@ -138,7 +137,7 @@ def subparser_name_from_type(prefix: str, cls: Type) -> str:
         return suffix
 
     if get_delimeter() == "-":
-        return f"{prefix}:{suffix}".replace("_", "-")
+        return f"{prefix}:{make_field_name(suffix.split('.'))}"
     else:
         assert get_delimeter() == "_"
         return f"{prefix}:{suffix}"
