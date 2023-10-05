@@ -291,6 +291,24 @@
 
 
 
+<div class="viewcode-block" id="replace_delimeter_in_part">
+<a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.replace_delimeter_in_part">[docs]</a>
+<span class="k">def</span> <span class="nf">replace_delimeter_in_part</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace hyphens with underscores (or vice versa) except when at the start.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">get_delimeter</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
+        <span class="n">num_underscore_prefix</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
+                <span class="n">num_underscore_prefix</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span> <span class="o">*</span> <span class="n">num_underscore_prefix</span> <span class="o">+</span> <span class="p">(</span><span class="n">p</span><span class="p">[</span><span class="n">num_underscore_prefix</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span></div>
+
+
+
 <div class="viewcode-block" id="make_field_name">
 <a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.make_field_name">[docs]</a>
 <span class="k">def</span> <span class="nf">make_field_name</span><span class="p">(</span><span class="n">parts</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -298,28 +316,12 @@
 
 <span class="sd">    (&#39;parent_1&#39;, &#39;child&#39;) =&gt; &#39;parent-1.child&#39;</span>
 <span class="sd">    (&#39;parents&#39;, &#39;1&#39;, &#39;_child_node&#39;) =&gt; &#39;parents.1._child-node&#39;</span>
+<span class="sd">    (&#39;parents&#39;, &#39;1&#39;, &#39;middle._child_node&#39;) =&gt; &#39;parents.1.middle._child-node&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">out</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_strip_dummy_field_names</span><span class="p">(</span><span class="n">parts</span><span class="p">)):</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
-
-        <span class="c1"># Replace all underscores with hyphens, except ones at the start of a string.</span>
-        <span class="k">if</span> <span class="n">get_delimeter</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
-            <span class="n">num_underscore_prefix</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="n">p</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span><span class="p">:</span>
-                    <span class="n">num_underscore_prefix</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="k">break</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span> <span class="o">*</span> <span class="n">num_underscore_prefix</span> <span class="o">+</span> <span class="p">(</span>
-                <span class="n">p</span><span class="p">[</span><span class="n">num_underscore_prefix</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">)</span>
-        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_strip_dummy_field_names</span><span class="p">(</span><span class="n">parts</span><span class="p">):</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">replace_delimeter_in_part</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">out</span><span class="p">)</span></div>
 
 
 
@@ -409,7 +411,7 @@
         <span class="k">return</span> <span class="n">suffix</span>
 
     <span class="k">if</span> <span class="n">get_delimeter</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">make_field_name</span><span class="p">(</span><span class="n">suffix</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">get_delimeter</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;_&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">suffix</span><span class="si">}</span><span class="s2">&quot;</span></div>

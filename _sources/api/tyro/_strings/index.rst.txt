@@ -36,6 +36,11 @@ Module Contents
    
    Get delimeter used to separate words.
 
+.. py:function:: replace_delimeter_in_part(p: str) -> str
+
+   
+   Replace hyphens with underscores (or vice versa) except when at the start.
+
 .. py:function:: make_field_name(parts: Sequence[str]) -> str
 
    
@@ -43,6 +48,7 @@ Module Contents
 
    ('parent_1', 'child') => 'parent-1.child'
    ('parents', '1', '_child_node') => 'parents.1._child-node'
+   ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
 
 .. py:function:: make_subparser_dest(name: str) -> str
 
