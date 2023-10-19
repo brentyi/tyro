@@ -172,7 +172,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="examples/01_basics/01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/01_basics/02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/01_basics/03_containers/">Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/01_basics/03_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/01_basics/04_enums/">Enums</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/01_basics/05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/01_basics/06_literals/">Choices</a></li>
@@ -254,10 +254,28 @@
 <h1>tyro<a class="headerlink" href="#tyro" title="Link to this heading">#</a></h1>
 <p><a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Build status icon" src="https://github.com/brentyi/tyro/workflows/build/badge.svg" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Mypy status icon" src="https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=main" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Lint status icon" src="https://github.com/brentyi/tyro/workflows/lint/badge.svg" /></a> <a class="reference external" href="https://codecov.io/gh/brentyi/tyro"><img alt="Test coverage status icon" src="https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg" /></a> <a class="reference external" href="https://pypi.org/project/tyro/"><img alt="Version icon" src="https://img.shields.io/pypi/pyversions/tyro" /></a></p>
 <p><code class="code docutils literal notranslate"><span class="pre">tyro</span></code> is a tool for generating command-line interfaces and configuration
-objects from type-annotated Python, with a goal of being lightweight enough for
-throwaway scripts but flexible enough for large projects.</p>
-<p>Our core interface, <a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, generates command-line interfaces from
-type-annotated callables.</p>
+objects in Python.</p>
+<p>Our core API, <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code>,</p>
+<ul class="simple">
+<li><p><strong>Generates CLI interfaces</strong> from a comprehensive set of Python type
+constructs.</p></li>
+<li><p><strong>Populates helptext automatically</strong> from defaults, annotations, and
+docstrings.</p></li>
+<li><p><strong>Understands nesting</strong> of <code class="docutils literal notranslate"><span class="pre">dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, and <code class="docutils literal notranslate"><span class="pre">attrs</span></code> structures.</p></li>
+<li><p><strong>Prioritizes static analysis</strong> for type checking and autocompletion with
+tools like
+<a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance">Pylance</a>,
+<a class="reference external" href="https://github.com/microsoft/pyright">Pyright</a>, and
+<a class="reference external" href="https://github.com/python/mypy">mypy</a>.</p></li>
+</ul>
+<p>For power users, it also:</p>
+<ul class="simple">
+<li><p><strong>Supports subcommands</strong>, as well as choosing between and overriding values in
+configuration objects.</p></li>
+<li><p><strong>Generates shell completion</strong> scripts for <code class="docutils literal notranslate"><span class="pre">bash</span></code>, <code class="docutils literal notranslate"><span class="pre">zsh</span></code>, and <code class="docutils literal notranslate"><span class="pre">tcsh</span></code>.</p></li>
+<li><p><strong>Supports fine-grained configuration</strong> via PEP 529 runtime annotations
+(<code class="docutils literal notranslate"><span class="pre">tyro.conf.*</span></code>).</p></li>
+</ul>
 <p>To get started, we recommend browsing the examples to the left.</p>
 <section id="why-tyro">
 <h2>Why <code class="docutils literal notranslate"><span class="pre">tyro</span></code>?<a class="headerlink" href="#why-tyro" title="Link to this heading">#</a></h2>

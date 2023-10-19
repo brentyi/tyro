@@ -3,11 +3,28 @@
 |build| |nbsp| |mypy| |nbsp| |lint| |nbsp| |coverage| |nbsp| |versions|
 
 :code:`tyro` is a tool for generating command-line interfaces and configuration
-objects from type-annotated Python, with a goal of being lightweight enough for
-throwaway scripts but flexible enough for large projects.
+objects in Python.
 
-Our core interface, :func:`tyro.cli()`, generates command-line interfaces from
-type-annotated callables.
+Our core API, `tyro.cli()`,
+
+- **Generates CLI interfaces** from a comprehensive set of Python type
+  constructs.
+- **Populates helptext automatically** from defaults, annotations, and
+  docstrings.
+- **Understands nesting** of `dataclasses`, `pydantic`, and `attrs` structures.
+- **Prioritizes static analysis** for type checking and autocompletion with
+  tools like
+  [Pylance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance),
+  [Pyright](https://github.com/microsoft/pyright), and
+  [mypy](https://github.com/python/mypy).
+
+For power users, it also:
+
+- **Supports subcommands**, as well as choosing between and overriding values in
+  configuration objects.
+- **Generates shell completion** scripts for `bash`, `zsh`, and `tcsh`.
+- **Supports fine-grained configuration** via PEP 529 runtime annotations
+  (`tyro.conf.*`).
 
 To get started, we recommend browsing the examples to the left.
 
