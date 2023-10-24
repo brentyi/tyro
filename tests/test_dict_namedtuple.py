@@ -98,6 +98,7 @@ def test_total_false_typeddict() -> None:
         args="--i 5 --s 5".split(" "),
     ) == dict(i=5, s="5")
 
+    assert tyro.cli(ManyTypesTypedDict, args=[]) == dict()
     assert tyro.cli(ManyTypesTypedDict, args="--i 5".split(" ")) == dict(i=5)
     assert tyro.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
 
@@ -115,6 +116,9 @@ def test_total_false_required_typeddict() -> None:
     with pytest.raises(SystemExit):
         # `s` is Required[].
         assert tyro.cli(ManyTypesTypedDict, args="--i 5".split(" ")) == dict(i=5)
+    assert tyro.cli(
+        ManyTypesTypedDict, args="--i 5".split(" "), default={"s": "5"}
+    ) == dict(i=5, s="5")
     assert tyro.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
 
 
@@ -131,6 +135,9 @@ def test_total_true_not_required_typeddict() -> None:
     with pytest.raises(SystemExit):
         # `s` is Required[].
         assert tyro.cli(ManyTypesTypedDict, args="--i 5".split(" ")) == dict(i=5)
+    assert tyro.cli(
+        ManyTypesTypedDict, args="--i 5".split(" "), default={"s": "5"}
+    ) == dict(i=5, s="5")
     assert tyro.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
 
 
@@ -142,20 +149,16 @@ def test_total_false_nested_typeddict() -> None:
     class ParentTypedDict(TypedDict, total=False):
         child: ChildTypedDict
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
-        tyro.cli(
-            ParentTypedDict,
-            args="--child.i 5 --child.s 5".split(" "),
-        )
+    assert tyro.cli(
+        ParentTypedDict,
+        args="--child.i 5 --child.s 5".split(" "),
+    ) == {"child": {"i": 5, "s": "5"}}
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
-        assert (
-            tyro.cli(
-                ParentTypedDict,
-                args=[""],
-            )
-            == {}
-        )
+    # total=False is ~ignored on the parent.
+    assert tyro.cli(
+        ParentTypedDict,
+        args=[],
+    ) == {"child": {}}
 
 
 def test_total_false_typeddict_with_nested() -> None:
@@ -167,17 +170,17 @@ def test_total_false_typeddict_with_nested() -> None:
         i: int
         s: Inner
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    # --s.j is (unfortunately) still required.
+    with pytest.raises(SystemExit):
         tyro.cli(
             ManyTypesTypedDict,
             args="".split(" "),
         )
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
-        tyro.cli(
-            ManyTypesTypedDict,
-            args="--x.i 5 --x.s 5 5".split(" "),
-        )
+    assert tyro.cli(
+        ManyTypesTypedDict,
+        args="--s.j 5".split(" "),
+    ) == {"s": Inner(5.0)}
 
 
 def test_total_false_typeddict_with_tuple() -> None:

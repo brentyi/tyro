@@ -353,35 +353,38 @@ def _field_list_from_typeddict(
     assert isinstance(total, bool)
     assert not valid_default_instance or isinstance(default_instance, dict)
     for name, typ in get_type_hints(cls, include_extras=True).items():
+        typ_origin = get_origin(typ)
         if valid_default_instance:
             default = default_instance.get(name, MISSING_PROP)  # type: ignore
-        elif get_origin(typ) is Required and total is False:
+        elif typ_origin is Required and total is False:
             # Support total=False.
             default = MISSING_PROP
-            args = get_args(typ)
-            assert len(args) == 1, "typing.Required[T] requires a concrete type T."
-            typ = args[0]
-            del args
         elif total is False:
             # Support total=False.
             default = EXCLUDE_FROM_CALL
             if is_nested_type(typ, MISSING_NONPROP):
-                raise _instantiators.UnsupportedTypeAnnotationError(
-                    "`total=False` not supported for nested structures."
-                )
-        elif get_origin(typ) is NotRequired:
+                # total=False behavior is unideal for nested structures.
+                pass
+                # raise _instantiators.UnsupportedTypeAnnotationError(
+                #     "`total=False` not supported for nested structures."
+                # )
+        elif typ_origin is NotRequired:
             # Support typing.NotRequired[].
             default = EXCLUDE_FROM_CALL
-            args = get_args(typ)
-            assert len(args) == 1, "typing.NotRequired[T] requires a concrete type T."
-            typ = args[0]
-            del args
-            if is_nested_type(typ, MISSING_NONPROP):
-                raise _instantiators.UnsupportedTypeAnnotationError(
-                    "`NotRequired[]` not supported for nested structures."
-                )
         else:
             default = MISSING_PROP
+
+        # Nested types need to be populated / can't be excluded from the call.
+        if default is EXCLUDE_FROM_CALL and is_nested_type(typ, MISSING_NONPROP):
+            default = MISSING_NONPROP
+
+        if typ_origin in (Required, NotRequired):
+            args = get_args(typ)
+            assert (
+                len(args) == 1
+            ), "typing.Required[] and typing.NotRequired[T] require a concrete type T."
+            typ = args[0]
+            del args
 
         field_list.append(
             FieldDefinition.make(
