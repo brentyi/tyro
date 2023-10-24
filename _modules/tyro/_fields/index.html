@@ -281,7 +281,14 @@
 
 <span class="kn">import</span> <span class="nn">docstring_parser</span>
 <span class="kn">import</span> <span class="nn">typing_extensions</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_type_hints</span><span class="p">,</span> <span class="n">is_typeddict</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">NotRequired</span><span class="p">,</span>
+    <span class="n">Required</span><span class="p">,</span>
+    <span class="n">get_args</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_type_hints</span><span class="p">,</span>
+    <span class="n">is_typeddict</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">conf</span>  <span class="c1"># Avoid circular import.</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
@@ -629,18 +636,42 @@
         <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
         <span class="ow">and</span> <span class="n">default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">EXCLUDE_FROM_CALL</span>
     <span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__total__&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">valid_default_instance</span><span class="p">:</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">default_instance</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">MISSING_PROP</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__total__&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">typ_origin</span> <span class="ow">is</span> <span class="n">Required</span> <span class="ow">and</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Support total=False.</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+        <span class="k">elif</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Support total=False.</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
             <span class="k">if</span> <span class="n">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
-                <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                    <span class="s2">&quot;`total=False` not supported for nested structures.&quot;</span>
-                <span class="p">)</span>
+                <span class="c1"># total=False behavior is unideal for nested structures.</span>
+                <span class="k">pass</span>
+                <span class="c1"># raise _instantiators.UnsupportedTypeAnnotationError(</span>
+                <span class="c1">#     &quot;`total=False` not supported for nested structures.&quot;</span>
+                <span class="c1"># )</span>
+        <span class="k">elif</span> <span class="n">typ_origin</span> <span class="ow">is</span> <span class="n">NotRequired</span><span class="p">:</span>
+            <span class="c1"># Support typing.NotRequired[].</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+
+        <span class="c1"># Nested types need to be populated / can&#39;t be excluded from the call.</span>
+        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span> <span class="ow">and</span> <span class="n">is_nested_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
+
+        <span class="k">if</span> <span class="n">typ_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Required</span><span class="p">,</span> <span class="n">NotRequired</span><span class="p">):</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="p">),</span> <span class="s2">&quot;typing.Required[] and typing.NotRequired[T] require a concrete type T.&quot;</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">args</span>
 
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
@@ -848,7 +879,7 @@
     <span class="c1"># doesn&#39;t happen</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
                 <span class="s2">&quot;If contained types of a tuple are not specified in the annotation, a&quot;</span>
                 <span class="s2">&quot; default instance must be specified.&quot;</span>
             <span class="p">)</span>
@@ -899,7 +930,7 @@
     <span class="n">contained_type</span><span class="p">:</span> <span class="n">Any</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Sequence type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> needs either an explicit type or a&quot;</span>
                 <span class="s2">&quot; default to infer from.&quot;</span>
             <span class="p">)</span>
@@ -958,9 +989,9 @@
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
-            <span class="s2">&quot;Nested dictionary structures must have a default instance specified.&quot;</span>
+            <span class="s2">&quot;Nested dictionary structures must have non-empty default instance specified.&quot;</span>
         <span class="p">)</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
