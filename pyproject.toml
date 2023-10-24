@@ -68,7 +68,7 @@ profile = "black"
 python_version = "3.8"
 ignore_missing_imports = true
 warn_unused_configs = true
-exclude = "./tests/test_py311_generated"
+exclude = "^tests/test_py311_generated/.*"
 
 [tool.coverage.report]
 exclude_lines = [
