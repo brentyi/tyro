@@ -6,7 +6,7 @@ import pathlib
 from typing import Any, Dict, Mapping, NamedTuple, Tuple, Union, cast
 
 import pytest
-from typing_extensions import Literal, TypedDict
+from typing_extensions import Literal, NotRequired, Required, TypedDict
 
 import tyro
 import tyro._strings
@@ -99,6 +99,38 @@ def test_total_false_typeddict() -> None:
     ) == dict(i=5, s="5")
 
     assert tyro.cli(ManyTypesTypedDict, args="--i 5".split(" ")) == dict(i=5)
+    assert tyro.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
+
+
+def test_total_false_required_typeddict() -> None:
+    class ManyTypesTypedDict(TypedDict, total=False):
+        i: int
+        s: Required[str]
+
+    assert tyro.cli(
+        ManyTypesTypedDict,
+        args="--i 5 --s 5".split(" "),
+    ) == dict(i=5, s="5")
+
+    with pytest.raises(SystemExit):
+        # `s` is Required[].
+        assert tyro.cli(ManyTypesTypedDict, args="--i 5".split(" ")) == dict(i=5)
+    assert tyro.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
+
+
+def test_total_true_not_required_typeddict() -> None:
+    class ManyTypesTypedDict(TypedDict, total=True):
+        i: NotRequired[int]
+        s: str
+
+    assert tyro.cli(
+        ManyTypesTypedDict,
+        args="--i 5 --s 5".split(" "),
+    ) == dict(i=5, s="5")
+
+    with pytest.raises(SystemExit):
+        # `s` is Required[].
+        assert tyro.cli(ManyTypesTypedDict, args="--i 5".split(" ")) == dict(i=5)
     assert tyro.cli(ManyTypesTypedDict, args="--s 5".split(" ")) == dict(s="5")
 
 
@@ -486,7 +518,7 @@ def test_nested_dict_annotations() -> None:
     del overrided_config
 
     overrided_config = tyro.cli(
-        Dict[str, Dict[str, str]],
+        Dict[str, Dict[str, Dict]],
         default=loaded_config,
         args=[
             "--optimizer.scheduler.schedule-type",

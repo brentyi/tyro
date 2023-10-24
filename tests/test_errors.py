@@ -114,7 +114,9 @@ def test_tuple_needs_default() -> None:
     def main(arg: tuple) -> None:  # type: ignore
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    # This formerly raised an error, but now defaults to Tuple[str, ...].
+    #  with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
 
@@ -148,7 +150,9 @@ def test_ambiguous_sequence() -> None:
     def main(value: list) -> None:
         return None
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    # This formerly raised an error, but now defaults to List[str].
+    #  with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
 
