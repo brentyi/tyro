@@ -320,7 +320,7 @@ def _instantiator_from_container_type(
     if typ in (dict, Dict):
         typ = Dict[str, str]
     elif typ in (tuple, Tuple):
-        typ = Tuple[str, ...]
+        typ = Tuple[str, ...]  # type: ignore
     elif typ in (list, List, collections.abc.Sequence, Sequence):
         typ = List[str]
     elif typ in (set, Set):
