@@ -42,8 +42,7 @@ interfaces and configuration objects in Python.
 
 Our core API, `tyro.cli()`,
 
-- **Generates CLI interfaces** from a comprehensive set of Python type
-  constructs.
+- **Generates CLI interfaces** from Python type signatures.
 - **Populates helptext automatically** from defaults, annotations, and
   docstrings.
 - **Understands nesting** of `dataclasses`, `pydantic`, and `attrs` structures.
@@ -53,12 +52,12 @@ Our core API, `tyro.cli()`,
   [Pyright](https://github.com/microsoft/pyright), and
   [mypy](https://github.com/python/mypy).
 
-For power users, it also:
+For advanced users, it also supports:
 
-- **Supports subcommands**, as well as choosing between and overriding values in
+- **Subcommands**, as well as choosing between and overriding values in
   configuration objects.
-- **Generates shell completion** scripts for `bash`, `zsh`, and `tcsh`.
-- **Supports fine-grained configuration** via PEP 529 runtime annotations
+- **Completion script generation** for `bash`, `zsh`, and `tcsh`.
+- **Fine-grained configuration** via PEP 529 runtime annotations
   (`tyro.conf.*`).
 
 For examples and the API reference, see our
@@ -174,7 +173,7 @@ particularly like:
   integration with configuration file formats like YAML and JSON.
 - [clipstick](https://github.com/sander76/clipstick), which focuses on
   generating CLIs from Pydantic models.
-- [datargs](https://github.com/roee30/datargs) provides a minimal API for
+- [datargs](https://github.com/roee30/datargs), which provides a minimal API for
   dataclasses.
 - [fire](https://github.com/google/python-fire) and
   [clize](https://github.com/epsy/clize), which support arguments without type

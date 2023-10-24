@@ -46,6 +46,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     TypeVar,
@@ -314,6 +315,16 @@ def _instantiator_from_container_type(
 ) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
     """Attempt to create an instantiator from a container type. Returns `None` is no
     container type is found."""
+
+    # Default generic types to strings.
+    if typ in (dict, Dict):
+        typ = Dict[str, str]
+    elif typ in (tuple, Tuple):
+        typ = Tuple[str, ...]  # type: ignore
+    elif typ in (list, List, collections.abc.Sequence, Sequence):
+        typ = List[str]
+    elif typ in (set, Set):
+        typ = Set[str]
 
     type_origin = get_origin(typ)
     if type_origin is None:

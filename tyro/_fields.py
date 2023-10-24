@@ -30,7 +30,14 @@ from typing import (
 
 import docstring_parser
 import typing_extensions
-from typing_extensions import get_args, get_type_hints, is_typeddict
+from typing_extensions import (
+    NotRequired,
+    Required,
+    get_args,
+    get_origin,
+    get_type_hints,
+    is_typeddict,
+)
 
 from . import conf  # Avoid circular import.
 from . import (
@@ -342,18 +349,42 @@ def _field_list_from_typeddict(
         default_instance not in MISSING_SINGLETONS
         and default_instance is not EXCLUDE_FROM_CALL
     )
+    total = getattr(cls, "__total__", True)
+    assert isinstance(total, bool)
     assert not valid_default_instance or isinstance(default_instance, dict)
     for name, typ in get_type_hints(cls, include_extras=True).items():
+        typ_origin = get_origin(typ)
         if valid_default_instance:
             default = default_instance.get(name, MISSING_PROP)  # type: ignore
-        elif getattr(cls, "__total__") is False:
+        elif typ_origin is Required and total is False:
+            # Support total=False.
+            default = MISSING_PROP
+        elif total is False:
+            # Support total=False.
             default = EXCLUDE_FROM_CALL
             if is_nested_type(typ, MISSING_NONPROP):
-                raise _instantiators.UnsupportedTypeAnnotationError(
-                    "`total=False` not supported for nested structures."
-                )
+                # total=False behavior is unideal for nested structures.
+                pass
+                # raise _instantiators.UnsupportedTypeAnnotationError(
+                #     "`total=False` not supported for nested structures."
+                # )
+        elif typ_origin is NotRequired:
+            # Support typing.NotRequired[].
+            default = EXCLUDE_FROM_CALL
         else:
             default = MISSING_PROP
+
+        # Nested types need to be populated / can't be excluded from the call.
+        if default is EXCLUDE_FROM_CALL and is_nested_type(typ, MISSING_NONPROP):
+            default = MISSING_NONPROP
+
+        if typ_origin in (Required, NotRequired):
+            args = get_args(typ)
+            assert (
+                len(args) == 1
+            ), "typing.Required[] and typing.NotRequired[T] require a concrete type T."
+            typ = args[0]
+            del args
 
         field_list.append(
             FieldDefinition.make(
@@ -561,7 +592,7 @@ def _field_list_from_tuple(
     # doesn't happen
     if len(children) == 0:
         if default_instance in MISSING_SINGLETONS:
-            raise _instantiators.UnsupportedTypeAnnotationError(
+            return UnsupportedNestedTypeMessage(
                 "If contained types of a tuple are not specified in the annotation, a"
                 " default instance must be specified."
             )
@@ -612,7 +643,7 @@ def _field_list_from_sequence_checked(
     contained_type: Any
     if len(get_args(f)) == 0:
         if default_instance in MISSING_SINGLETONS:
-            raise _instantiators.UnsupportedTypeAnnotationError(
+            return UnsupportedNestedTypeMessage(
                 f"Sequence type {f} needs either an explicit type or a"
                 " default to infer from."
             )
@@ -671,9 +702,9 @@ def _field_list_from_dict(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    if default_instance in MISSING_SINGLETONS:
+    if default_instance in MISSING_SINGLETONS or len(cast(dict, default_instance)) == 0:
         return UnsupportedNestedTypeMessage(
-            "Nested dictionary structures must have a default instance specified."
+            "Nested dictionary structures must have non-empty default instance specified."
         )
     field_list = []
     for k, v in cast(dict, default_instance).items():

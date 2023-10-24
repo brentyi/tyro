@@ -9,6 +9,7 @@ from typing import (
     Dict,
     FrozenSet,
     List,
+    Literal,
     Optional,
     Sequence,
     Set,
@@ -17,7 +18,6 @@ from typing import (
 )
 
 import pytest
-from typing_extensions import Literal
 
 import tyro
 

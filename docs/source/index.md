@@ -18,12 +18,12 @@ Our core API, `tyro.cli()`,
   [Pyright](https://github.com/microsoft/pyright), and
   [mypy](https://github.com/python/mypy).
 
-For power users, it also:
+For advanced users, it also supports:
 
-- **Supports subcommands**, as well as choosing between and overriding values in
+- **Subcommands**, as well as choosing between and overriding values in
   configuration objects.
-- **Generates shell completion** scripts for `bash`, `zsh`, and `tcsh`.
-- **Supports fine-grained configuration** via PEP 529 runtime annotations
+- **Completion script generation** for `bash`, `zsh`, and `tcsh`.
+- **Fine-grained configuration** via PEP 529 runtime annotations
   (`tyro.conf.*`).
 
 To get started, we recommend browsing the examples to the left.
