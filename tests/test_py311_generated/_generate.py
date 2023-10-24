@@ -4,6 +4,6 @@ of `typing_extensions`."""
 import pathlib
 
 for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py"):
-    (pathlib.Path(__file__).absolute().parent / test_path.name).write_text(
-        test_path.read_text().replace("typing_extensions", "typing")
-    )
+    (
+        pathlib.Path(__file__).absolute().parent / (test_path.stem + "_generated.py")
+    ).write_text(test_path.read_text().replace("typing_extensions", "typing"))
