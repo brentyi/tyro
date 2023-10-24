@@ -458,3 +458,10 @@ def test_tuple_narrowing() -> None:
         return x
 
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == (0, 1, 2, "3")
+
+
+def test_no_type_collections():
+    assert tyro.cli(dict, args="a b c d".split(" ")) == {"a": "b", "c": "d"}
+    assert tyro.cli(list, args="a b c d".split(" ")) == ["a", "b", "c", "d"]
+    assert tyro.cli(tuple, args="a b c d".split(" ")) == ("a", "b", "c", "d")
+    assert tyro.cli(set, args="a b c d".split(" ")) == {"a", "b", "c", "d"}
