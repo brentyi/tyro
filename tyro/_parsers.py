@@ -347,6 +347,7 @@ class SubparsersSpecification:
     prefix: str
     required: bool
     default_instance: Any
+    options: Tuple[Union[TypeForm[Any], Callable], ...]
 
     @staticmethod
     def from_field(
@@ -375,6 +376,19 @@ class SubparsersSpecification:
             )
             for o in options
         ]
+
+        # If specified, swap types using tyro.conf.subcommand(constructor=...).
+        for i, option in enumerate(options):
+            _, found_subcommand_configs = _resolver.unwrap_annotated(
+                option, _confstruct._SubcommandConfiguration
+            )
+            if (
+                len(found_subcommand_configs) > 0
+                and found_subcommand_configs[0].constructor_factory is not None
+            ):
+                options[i] = found_subcommand_configs[0].constructor_factory()
+
+        # Exit if we don't contain nested types.
         if not all(
             [
                 _fields.is_nested_type(cast(type, o), _fields.MISSING_NONPROP)
@@ -443,6 +457,7 @@ class SubparsersSpecification:
                     description=None,
                     default=_fields.MISSING_NONPROP,
                     prefix_name=True,
+                    constructor_factory=None,
                 )
 
             # If names match, borrow subcommand default from field default.
@@ -517,6 +532,7 @@ class SubparsersSpecification:
             prefix=prefix,
             required=required,
             default_instance=field.default,
+            options=tuple(options),
         )
 
     def apply(

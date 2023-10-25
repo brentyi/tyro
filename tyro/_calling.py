@@ -169,20 +169,9 @@ def call_from_args(
                 )
                 value = subparser_def.default_instance
             else:
-                options = map(
-                    lambda x: _resolver.apply_type_from_typevar(x, type_from_typevar),
-                    get_args(_resolver.unwrap_annotated(field_type)[0]),
-                )
-                chosen_f = None
-                for option in options:
-                    if (
-                        _strings.subparser_name_from_type(prefixed_field_name, option)
-                        == subparser_name
-                    ):
-                        chosen_f = option
-                        break
-                assert chosen_f is not None
-
+                chosen_f = subparser_def.options[
+                    list(subparser_def.parser_from_name.keys()).index(subparser_name)
+                ]
                 if chosen_f is type(None):
                     value = None
                 else:
