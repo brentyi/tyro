@@ -269,9 +269,9 @@ def handle_field(
 ]:
     """Determine what to do with a single field definition."""
 
-    if isinstance(field.typ, TypeVar):
+    if isinstance(field.type_or_callable, TypeVar):
         raise _instantiators.UnsupportedTypeAnnotationError(
-            f"Field {field.name} has an unbound TypeVar: {field.typ}."
+            f"Field {field.name} has an unbound TypeVar: {field.type_or_callable}."
         )
 
     if _markers.Fixed not in field.markers:
@@ -288,26 +288,26 @@ def handle_field(
                 and _markers.AvoidSubcommands in field.markers
             ):
                 # Don't make a subparser.
-                field = dataclasses.replace(field, typ=type(field.default))
+                field = dataclasses.replace(field, type_or_callable=type(field.default))
             else:
                 return subparsers_attempt
 
         # (2) Handle nested callables.
-        if _fields.is_nested_type(field.typ, field.default):
+        if _fields.is_nested_type(field.type_or_callable, field.default):
             field = dataclasses.replace(
                 field,
-                typ=_resolver.narrow_type(
-                    field.typ,
+                type_or_callable=_resolver.narrow_type(
+                    field.type_or_callable,
                     field.default,
                 ),
             )
             return ParserSpecification.from_callable_or_type(
                 (
                     # Recursively apply marker types.
-                    field.typ
+                    field.type_or_callable
                     if len(field.markers) == 0
                     else Annotated.__class_getitem__(  # type: ignore
-                        (field.typ,) + tuple(field.markers)
+                        (field.type_or_callable,) + tuple(field.markers)
                     )
                 ),
                 description=None,
@@ -346,7 +346,7 @@ class SubparsersSpecification:
         prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
-        typ = _resolver.unwrap_annotated(field.typ)[0]
+        typ = _resolver.unwrap_annotated(field.type_or_callable)[0]
         if get_origin(typ) is not Union:
             return None
 

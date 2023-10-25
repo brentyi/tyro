@@ -63,7 +63,7 @@ def call_from_args(
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
 
         # Resolve field type.
-        field_type = field.typ
+        field_type = field.type_or_callable
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords
 

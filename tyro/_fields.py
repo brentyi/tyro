@@ -55,7 +55,7 @@ from .conf import _confstruct, _markers
 @dataclasses.dataclass(frozen=True)
 class FieldDefinition:
     name: str
-    typ: TypeForm[Any]
+    type_or_callable: Union[TypeForm[Any], Callable]
     default: Any
     helptext: Optional[str]
     markers: FrozenSet[_markers._Marker]
@@ -77,7 +77,7 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        typ: TypeForm[Any],
+        type_or_callable: TypeForm[Any],
         default: Any,
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
@@ -85,18 +85,24 @@ class FieldDefinition:
         markers: Tuple[_markers._Marker, ...] = (),
     ):
         # Try to extract argconf overrides from type.
-        _, argconfs = _resolver.unwrap_annotated(typ, _confstruct._ArgConfiguration)
+        _, argconfs = _resolver.unwrap_annotated(
+            type_or_callable, _confstruct._ArgConfiguration
+        )
         if len(argconfs) == 0:
-            argconf = _confstruct._ArgConfiguration(None, None, None, True)
+            argconf = _confstruct._ArgConfiguration(None, None, None, True, None)
         else:
             assert len(argconfs) == 1
             (argconf,) = argconfs
             helptext = argconf.help
 
-        typ, inferred_markers = _resolver.unwrap_annotated(typ, _markers._Marker)
+        type_or_callable, inferred_markers = _resolver.unwrap_annotated(
+            type_or_callable, _markers._Marker
+        )
         return FieldDefinition(
             name if argconf.name is None else argconf.name,
-            typ,
+            type_or_callable
+            if argconf.constructor_factory is None
+            else argconf.constructor_factory(),
             default,
             helptext,
             frozenset(inferred_markers).union(markers),
@@ -184,7 +190,9 @@ class UnsupportedNestedTypeMessage:
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def is_nested_type(typ: TypeForm[Any], default_instance: DefaultInstance) -> bool:
+def is_nested_type(
+    typ: Union[TypeForm[Any], Callable], default_instance: DefaultInstance
+) -> bool:
     """Determine whether a type should be treated as a 'nested type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
     classes).
@@ -227,12 +235,12 @@ def field_list_from_callable(
 
     # Try to resolve types in our list of fields.
     def resolve(field: FieldDefinition) -> FieldDefinition:
-        typ = field.typ
+        typ = field.type_or_callable
         typ = _resolver.apply_type_from_typevar(typ, type_from_typevar)
         typ = _resolver.type_from_typevar_constraints(typ)
         typ = _resolver.narrow_container_types(typ, field.default)
         typ = _resolver.narrow_union_type(typ, field.default)
-        field = dataclasses.replace(field, typ=typ)
+        field = dataclasses.replace(field, type_or_callable=typ)
         return field
 
     field_list = list(map(resolve, field_list))
@@ -389,7 +397,7 @@ def _field_list_from_typeddict(
         field_list.append(
             FieldDefinition.make(
                 name=name,
-                typ=typ,
+                type_or_callable=typ,
                 default=default,
                 helptext=_docstrings.get_field_docstring(cls, name),
             )
@@ -420,7 +428,7 @@ def _field_list_from_namedtuple(
         field_list.append(
             FieldDefinition.make(
                 name=name,
-                typ=typ,
+                type_or_callable=typ,
                 default=default,
                 helptext=_docstrings.get_field_docstring(cls, name),
             )
@@ -468,7 +476,7 @@ def _field_list_from_dataclass(
         field_list.append(
             FieldDefinition.make(
                 name=dc_field.name,
-                typ=dc_field.type,
+                type_or_callable=dc_field.type,
                 default=default,
                 helptext=helptext,
             )
@@ -506,7 +514,7 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=pd_field.name,
-                    typ=pd_field.outer_type_,
+                    type_or_callable=pd_field.outer_type_,
                     default=(
                         MISSING_NONPROP if pd_field.required else pd_field.get_default()
                     ),
@@ -523,7 +531,7 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=name,
-                    typ=pd_field.annotation,
+                    type_or_callable=pd_field.annotation,
                     markers=tuple(
                         meta
                         for meta in pd_field.metadata
@@ -569,7 +577,7 @@ def _field_list_from_attrs(
         field_list.append(
             FieldDefinition.make(
                 name=attr_field.name,
-                typ=attr_field.type,
+                type_or_callable=attr_field.type,
                 default=default,
                 helptext=_docstrings.get_field_docstring(cls, attr_field.name),
             )
@@ -581,7 +589,7 @@ def _field_list_from_tuple(
     f: Union[Callable, TypeForm[Any]], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     # Fixed-length tuples.
-    field_list = []
+    field_list: List[FieldDefinition] = []
     children = get_args(f)
     if Ellipsis in children:
         return _try_field_list_from_sequence_inner(
@@ -615,7 +623,7 @@ def _field_list_from_tuple(
                 # argument, but in practice the brackets are annoying because they
                 # require escaping.
                 name=str(i),
-                typ=child,
+                type_or_callable=child,
                 default=default_i,
                 helptext="",
                 # This should really set the positional marker, but the CLI is more
@@ -626,7 +634,7 @@ def _field_list_from_tuple(
 
     contains_nested = False
     for field in field_list:
-        contains_nested |= is_nested_type(field.typ, field.default)
+        contains_nested |= is_nested_type(field.type_or_callable, field.default)
     if not contains_nested:
         # We could also check for variable length children, which can be populated when
         # the tuple is interpreted as a nested field but not a directly parsed one.
@@ -690,7 +698,7 @@ def _try_field_list_from_sequence_inner(
         field_list.append(
             FieldDefinition.make(
                 name=str(i),
-                typ=contained_type,
+                type_or_callable=contained_type,
                 default=default_i,
                 helptext="",
             )
@@ -711,7 +719,7 @@ def _field_list_from_dict(
         field_list.append(
             FieldDefinition.make(
                 name=str(k) if not isinstance(k, enum.Enum) else k.name,
-                typ=type(v),
+                type_or_callable=type(v),
                 default=v,
                 helptext=None,
                 # Dictionary specific key:
@@ -836,7 +844,7 @@ def _field_list_from_params(
             FieldDefinition.make(
                 name=param.name,
                 # Note that param.annotation doesn't resolve forward references.
-                typ=typ,
+                type_or_callable=typ,
                 default=default,
                 helptext=helptext,
                 markers=markers,

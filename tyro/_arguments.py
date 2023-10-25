@@ -164,9 +164,9 @@ class ArgumentDefinition:
             )
             complete_as_path = (
                 # Catch types like Path, List[Path], Tuple[Path, ...] etc.
-                "Path" in str(self.field.typ)
+                "Path" in str(self.field.type_or_callable)
                 # For string types, we require more evidence.
-                or ("str" in str(self.field.typ) and name_suggests_path)
+                or ("str" in str(self.field.type_or_callable) and name_suggests_path)
             )
             if complete_as_path:
                 arg.complete = shtab.DIRECTORY if name_suggests_dir else shtab.FILE  # type: ignore
@@ -241,7 +241,7 @@ def _rule_handle_boolean_flags(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
-    if _resolver.apply_type_from_typevar(arg.field.typ, arg.type_from_typevar) is not bool:  # type: ignore
+    if _resolver.apply_type_from_typevar(arg.field.type_or_callable, arg.type_from_typevar) is not bool:  # type: ignore
         return lowered
 
     if (
@@ -290,7 +290,7 @@ def _rule_recursive_instantiator_from_type(
         return lowered
     try:
         instantiator, metadata = _instantiators.instantiator_from_type(
-            arg.field.typ,
+            arg.field.type_or_callable,
             arg.type_from_typevar,
             arg.field.markers,
         )
