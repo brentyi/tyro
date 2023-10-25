@@ -97,7 +97,7 @@ class ParserSpecification:
 
         has_required_args = False
         args = []
-        helptext_from_nested_class_field_name = {}
+        helptext_from_nested_class_field_name: Dict[str, Optional[str]] = {}
 
         subparsers = None
         subparsers_from_prefix = {}
@@ -143,13 +143,14 @@ class ParserSpecification:
                         _strings.make_field_name([field.name, k])
                     ] = v
 
+                class_field_name = _strings.make_field_name([field.name])
                 if field.helptext is not None:
                     helptext_from_nested_class_field_name[
-                        _strings.make_field_name([field.name])
+                        class_field_name
                     ] = field.helptext
                 else:
                     helptext_from_nested_class_field_name[
-                        _strings.make_field_name([field.name])
+                        class_field_name
                     ] = _docstrings.get_callable_description(nested_parser.f)
 
                 # If arguments are in an optional group, it indicates that the default_instance
@@ -158,9 +159,14 @@ class ParserSpecification:
                     len(nested_parser.args) >= 1
                     and _markers._OPTIONAL_GROUP in nested_parser.args[0].field.markers
                 ):
-                    helptext_from_nested_class_field_name[
-                        _strings.make_field_name([field.name])
-                    ] += "\n\nDefault: " + str(field.default)
+                    current_helptext = helptext_from_nested_class_field_name[
+                        class_field_name
+                    ]
+                    helptext_from_nested_class_field_name[class_field_name] = (
+                        ("" if current_helptext is None else current_helptext + "\n\n")
+                        + "Default: "
+                        + str(field.default)
+                    )
 
         return ParserSpecification(
             f=f,
