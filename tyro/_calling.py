@@ -4,6 +4,7 @@ namespaces."""
 from __future__ import annotations
 
 import dataclasses
+import itertools
 from typing import (
     Any,
     Callable,
@@ -29,7 +30,7 @@ class InstantiationError(Exception):
     the CLI are invalid."""
 
     message: str
-    arg: _arguments.ArgumentDefinition
+    arg: Union[_arguments.ArgumentDefinition, str]
 
 
 T = TypeVar("T")
@@ -37,7 +38,6 @@ T = TypeVar("T")
 
 def call_from_args(
     f: Callable[..., T],
-    arg: Optional[_arguments.ArgumentDefinition],
     parser_definition: _parsers.ParserSpecification,
     default_instance: Union[T, _fields.NonpropagatingMissingType],
     value_from_prefixed_field_name: Dict[str, Any],
@@ -70,6 +70,9 @@ def call_from_args(
             _strings.make_field_name([arg.dest_prefix, arg.field.name])
         ] = arg
 
+    optional_group = any([_markers._OPTIONAL_GROUP in f.markers for f in field_list])
+    any_arguments_provided = False
+
     for field in field_list:
         value: Any
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
@@ -96,10 +99,14 @@ def call_from_args(
                     # If we run this script with no arguments, we should interpret this
                     # as empty input for x. But the argparse default will be a MISSING
                     # value, and the field default will be inspect.Parameter.empty.
-                    if value in _fields.MISSING_SINGLETONS:
-                        assert field.is_positional() and arg.lowered.nargs in ("?", "*")
+                    if (
+                        value in _fields.MISSING_SINGLETONS
+                        and field.is_positional()
+                        and arg.lowered.nargs in ("?", "*")
+                    ):
                         value = []
                 else:
+                    any_arguments_provided = True
                     if arg.lowered.nargs == "?":
                         # Special case for optional positional arguments: this is the
                         # only time that arguments don't come back as a list.
@@ -132,7 +139,6 @@ def call_from_args(
                 field_type = type(field.default)
             value, consumed_keywords_child = call_from_args(
                 field_type,
-                arg,
                 parser_definition,
                 field.default,
                 value_from_prefixed_field_name,
@@ -182,7 +188,6 @@ def call_from_args(
                 else:
                     value, consumed_keywords_child = call_from_args(
                         chosen_f,
-                        arg,
                         subparser_def.parser_from_name[subparser_name],
                         (
                             field.default
@@ -207,6 +212,36 @@ def call_from_args(
             positional_args.append(value)
         else:
             kwargs[field.call_argname] = value
+
+    # Logic for _markers._OPTIONAL_GROUP.
+    is_missing_list = [
+        v in _fields.MISSING_SINGLETONS
+        for v in itertools.chain(positional_args, kwargs.values())
+    ]
+    if any(is_missing_list):
+        if not any_arguments_provided:
+            # No arguments were provided in this group.
+            return default_instance, consumed_keywords  # type: ignore
+
+        message = "either all arguments must be provided or none of them."
+        if len(positional_args) > 0:
+            missing_positional = [
+                i
+                for i, v in enumerate(positional_args)
+                if v in _fields.MISSING_SINGLETONS
+            ]
+            if len(missing_positional):
+                message += f" We're missing positional arguments {missing_positional}."
+        if len(kwargs) > 0:
+            missing_kwargs = [
+                k for k, v in kwargs.items() if v in _fields.MISSING_SINGLETONS
+            ]
+            if len(missing_kwargs):
+                message += f" We're missing keyword arguments {missing_kwargs}."
+        raise InstantiationError(
+            message,
+            field_name_prefix,
+        )
 
     # Note: we unwrap types both before and after narrowing. This is because narrowing
     # sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just
@@ -233,10 +268,7 @@ def call_from_args(
     # If unwrapped_f raises a ValueError, wrap the message with a more informative
     # InstantiationError if possible.
     except ValueError as e:
-        if arg is not None:
-            raise InstantiationError(
-                e.args[0],
-                arg,
-            )
-        else:
-            raise e
+        raise InstantiationError(
+            e.args[0],
+            field_name_prefix,
+        )

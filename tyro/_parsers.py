@@ -152,6 +152,16 @@ class ParserSpecification:
                         _strings.make_field_name([field.name])
                     ] = _docstrings.get_callable_description(nested_parser.f)
 
+                # If arguments are in an optional group, it indicates that the default_instance
+                # will be used if none of the arguments are passed in.
+                if (
+                    len(nested_parser.args) >= 1
+                    and _markers._OPTIONAL_GROUP in nested_parser.args[0].field.markers
+                ):
+                    helptext_from_nested_class_field_name[
+                        _strings.make_field_name([field.name])
+                    ] += "\n\nDefault: " + str(field.default)
+
         return ParserSpecification(
             f=f,
             description=_strings.remove_single_line_breaks(

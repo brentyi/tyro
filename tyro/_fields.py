@@ -110,7 +110,7 @@ class FieldDefinition:
             call_argname_override if call_argname_override is not None else name,
         )
 
-    def add_markers(self, markers: Tuple[_markers._Marker, ...]) -> FieldDefinition:
+    def add_markers(self, markers: Tuple[Any, ...]) -> FieldDefinition:
         return dataclasses.replace(
             self,
             markers=self.markers.union(markers),
@@ -152,6 +152,10 @@ class ExcludeFromCallType(_singleton.Singleton):
     pass
 
 
+class NotRequiredButWeDontKnowTheValueType(_singleton.Singleton):
+    pass
+
+
 # We have two types of missing sentinels: a propagating missing value, which when set as
 # a default will set all child values of nested structures as missing as well, and a
 # nonpropagating missing sentinel, which does not override child defaults.
@@ -159,6 +163,9 @@ MISSING_PROP = PropagatingMissingType()
 MISSING_NONPROP = NonpropagatingMissingType()
 
 # When total=False in a TypedDict, we exclude fields from the constructor by default.
+NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE = NotRequiredButWeDontKnowTheValueType()
+
+
 EXCLUDE_FROM_CALL = ExcludeFromCallType()
 
 # Note that our "public" missing API will always be the propagating missing sentinel.
@@ -734,13 +741,6 @@ def _try_field_list_from_general_callable(
     cls: Optional[TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    # Handle general callables.
-    if default_instance not in MISSING_SINGLETONS:
-        return UnsupportedNestedTypeMessage(
-            "`default_instance` is supported only for select types:"
-            " dataclasses, lists, NamedTuple, TypedDict, etc."
-        )
-
     # Generate field list from function signature.
     if not callable(f):
         return UnsupportedNestedTypeMessage(
@@ -752,11 +752,15 @@ def _try_field_list_from_general_callable(
         params = params[1:]
 
     out = _field_list_from_params(f, cls, params)
-    if not isinstance(out, UnsupportedNestedTypeMessage):
+    if isinstance(out, UnsupportedNestedTypeMessage):
+        # Return error message.
         return out
 
-    # Return error message.
-    assert isinstance(out, UnsupportedNestedTypeMessage)
+    # If a default is provided: .
+    if default_instance not in MISSING_SINGLETONS:
+        for i, field in enumerate(out):
+            out[i] = field.add_markers((_markers._OPTIONAL_GROUP,))
+
     return out
 
 

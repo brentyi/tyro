@@ -965,4 +965,30 @@ def test_custom_constructor_3() -> None:
         tyro.cli(Config, args="--x.json 5".split(" "))
 
     error = target.getvalue()
-    assert "Error parsing --x.json: 5 is not a dict!" in error
+    assert "Error parsing x: 5 is not a dict!" in error
+
+
+def test_custom_constructor_4() -> None:
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=int)] = 3.23
+
+    assert tyro.cli(Config, args="--x 5".split(" ")) == Config(x=5)
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+
+
+def test_custom_constructor_5() -> None:
+    def make_float(a: float, b: float, c: float = 3) -> float:
+        return a * b * c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(Config, args="--x.a 5 --x.b 2 --x.c 3".split(" ")) == Config(x=30)
+    assert tyro.cli(Config, args="--x.a 5 --x.b 2".split(" ")) == Config(x=30)
+
+    # --x.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.a 5".split(" "))

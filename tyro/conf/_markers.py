@@ -29,6 +29,9 @@ _PositionalCall = Annotated[T, None]
 _UnpackArgsCall = Annotated[T, None]
 _UnpackKwargsCall = Annotated[T, None]
 
+# Private marker.
+_OPTIONAL_GROUP = Annotated[T, None]
+
 # TODO: the verb tenses here are inconsistent, naming could be revisited.
 # Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.
 

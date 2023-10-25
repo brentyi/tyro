@@ -231,7 +231,10 @@ def _rule_handle_defaults(
     """Set `required=True` if a default value is set."""
 
     # Mark lowered as required if a default is set.
-    if arg.field.default in _fields.MISSING_SINGLETONS:
+    if (
+        arg.field.default in _fields.MISSING_SINGLETONS
+        and _markers._OPTIONAL_GROUP not in arg.field.markers
+    ):
         return dataclasses.replace(lowered, default=None, required=True)
 
     return dataclasses.replace(lowered, default=arg.field.default)
@@ -432,6 +435,8 @@ def _rule_generate_helptext(
             default_text = f"(repeatable, appends: {' '.join(default_parts)})"
         elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
             default_text = "(unset by default)"
+        elif _markers._OPTIONAL_GROUP in arg.field.markers:
+            default_text = "(optional)"
         elif lowered.nargs is not None and hasattr(default, "__iter__"):
             # For tuple types, we might have default as (0, 1, 2, 3).
             # For list types, we might have default as [0, 1, 2, 3].
