@@ -4,7 +4,18 @@ namespaces."""
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Sequence,
+    Set,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from typing_extensions import get_args
 
@@ -26,6 +37,7 @@ T = TypeVar("T")
 
 def call_from_args(
     f: Callable[..., T],
+    arg: Optional[_arguments.ArgumentDefinition],
     parser_definition: _parsers.ParserSpecification,
     default_instance: Union[T, _fields.NonpropagatingMissingType],
     value_from_prefixed_field_name: Dict[str, Any],
@@ -120,6 +132,7 @@ def call_from_args(
                 field_type = type(field.default)
             value, consumed_keywords_child = call_from_args(
                 field_type,
+                arg,
                 parser_definition,
                 field.default,
                 value_from_prefixed_field_name,
@@ -169,6 +182,7 @@ def call_from_args(
                 else:
                     value, consumed_keywords_child = call_from_args(
                         chosen_f,
+                        arg,
                         subparser_def.parser_from_name[subparser_name],
                         (
                             field.default
@@ -203,14 +217,26 @@ def call_from_args(
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
 
-    if unwrapped_f in (tuple, list, set):
-        assert len(positional_args) == 0
-        # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
-        # use keyword arguments.
-        assert len(positional_args) == 0
-        return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
-    elif unwrapped_f is dict:
-        assert len(positional_args) == 0
-        return kwargs, consumed_keywords  # type: ignore
-    else:
-        return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
+    try:
+        if unwrapped_f in (tuple, list, set):
+            assert len(positional_args) == 0
+            # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
+            # use keyword arguments.
+            assert len(positional_args) == 0
+            return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
+        elif unwrapped_f is dict:
+            assert len(positional_args) == 0
+            return kwargs, consumed_keywords  # type: ignore
+        else:
+            return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
+
+    # If unwrapped_f raises a ValueError, wrap the message with a more informative
+    # InstantiationError if possible.
+    except ValueError as e:
+        if arg is not None:
+            raise InstantiationError(
+                e.args[0],
+                arg,
+            )
+        else:
+            raise e

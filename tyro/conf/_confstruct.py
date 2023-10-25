@@ -112,11 +112,14 @@ def arg(
         prefix_name: Whether or not to prefix the name of the argument based on where
             it is in a nested structure.
         constructor: A constructor type or function. This should either be (a) a subtype
-            of an argument's annotated type, or (b) a function that returns an instance of
-            the annotated type. This will be used in place of the argument's type for
-            parsing arguments. No validation is done.
+            of an argument's annotated type, or (b) a function with type-annotated
+            inputs that returns an instance of the annotated type. This will be used in
+            place of the argument's type for parsing arguments. No validation is done.
         constructor_factory: A function that returns a constructor type or function.
             Useful when the constructor isn't immediately available.
+
+    Returns:
+        Object to attach via `typing.Annotated[]`.
     """
     assert not (
         constructor is not None and constructor_factory is not None

@@ -1,5 +1,9 @@
 import argparse
+import contextlib
 import dataclasses
+import io
+import json as json_
+import shlex
 from typing import Any, Dict, Generic, List, Tuple, TypeVar, Union
 
 import pytest
@@ -901,3 +905,64 @@ def test_omit_arg_prefixes() -> None:
     assert tyro.cli(
         tyro.conf.OmitArgPrefixes[TrainConfig], args="--num-slots 3".split(" ")
     ) == TrainConfig(ModelConfig(num_slots=3))
+
+
+def test_custom_constructor_0() -> None:
+    def times_two(n: str) -> int:
+        return int(n) * 2
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[int, tyro.conf.arg(constructor=times_two)]
+
+    assert tyro.cli(Config, args="--x.n 5".split(" ")) == Config(x=10)
+
+
+def test_custom_constructor_1() -> None:
+    def times_two(n: int) -> int:
+        return int(n) * 2
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[int, tyro.conf.arg(constructor=times_two)]
+
+    assert tyro.cli(Config, args="--x.n 5".split(" ")) == Config(x=10)
+
+
+def test_custom_constructor_2() -> None:
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=int)]
+
+    assert tyro.cli(Config, args="--x 5".split(" ")) == Config(x=5)
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x 5.23".split(" "))
+
+
+def test_custom_constructor_3() -> None:
+    def dict_from_json(json: str) -> dict:
+        out = json_.loads(json)
+        if not isinstance(out, dict):
+            raise ValueError(f"{json} is not a dict!")
+        return out
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[
+            dict,
+            tyro.conf.arg(
+                metavar="JSON",
+                constructor=dict_from_json,
+            ),
+        ]
+
+    assert tyro.cli(
+        Config, args=shlex.split('--x.json \'{"hello": "world"}\'')
+    ) == Config(x={"hello": "world"})
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args="--x.json 5".split(" "))
+
+    error = target.getvalue()
+    assert "Error parsing --x.json: 5 is not a dict!" in error

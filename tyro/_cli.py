@@ -448,6 +448,7 @@ def _cli_impl(
         # Attempt to call `f` using whatever was passed in.
         out, consumed_keywords = _calling.call_from_args(
             f,
+            None,
             parser_spec,
             default_instance_internal,
             value_from_prefixed_field_name,
