@@ -6,8 +6,7 @@ Subcommands from Functions
 
 
 :func:`tyro.extras.subcommand_cli_from_dict()` provides a shorthand that generates a
-subcommand CLI from a dictionary that maps subcommand name to the corresponding function
-to call.
+subcommand CLI from a dictionary.
 
 
 
