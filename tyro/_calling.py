@@ -4,6 +4,7 @@ namespaces."""
 from __future__ import annotations
 
 import dataclasses
+import itertools
 from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
 
 from typing_extensions import get_args
@@ -18,7 +19,7 @@ class InstantiationError(Exception):
     the CLI are invalid."""
 
     message: str
-    arg: _arguments.ArgumentDefinition
+    arg: Union[_arguments.ArgumentDefinition, str]
 
 
 T = TypeVar("T")
@@ -58,12 +59,15 @@ def call_from_args(
             _strings.make_field_name([arg.dest_prefix, arg.field.name])
         ] = arg
 
+    optional_group = any([_markers._OPTIONAL_GROUP in f.markers for f in field_list])
+    any_arguments_provided = False
+
     for field in field_list:
         value: Any
         prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
 
         # Resolve field type.
-        field_type = field.typ
+        field_type = field.type_or_callable
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords
 
@@ -84,10 +88,14 @@ def call_from_args(
                     # If we run this script with no arguments, we should interpret this
                     # as empty input for x. But the argparse default will be a MISSING
                     # value, and the field default will be inspect.Parameter.empty.
-                    if value in _fields.MISSING_SINGLETONS:
-                        assert field.is_positional() and arg.lowered.nargs in ("?", "*")
+                    if (
+                        value in _fields.MISSING_SINGLETONS
+                        and field.is_positional_call()
+                        and arg.lowered.nargs in ("?", "*")
+                    ):
                         value = []
                 else:
+                    any_arguments_provided = True
                     if arg.lowered.nargs == "?":
                         # Special case for optional positional arguments: this is the
                         # only time that arguments don't come back as a list.
@@ -150,35 +158,21 @@ def call_from_args(
                 )
                 value = subparser_def.default_instance
             else:
-                options = map(
-                    lambda x: _resolver.apply_type_from_typevar(x, type_from_typevar),
-                    get_args(_resolver.unwrap_annotated(field_type)[0]),
+                chosen_f = subparser_def.options[
+                    list(subparser_def.parser_from_name.keys()).index(subparser_name)
+                ]
+                value, consumed_keywords_child = call_from_args(
+                    chosen_f,
+                    subparser_def.parser_from_name[subparser_name],
+                    (
+                        field.default
+                        if type(field.default) is chosen_f
+                        else _fields.MISSING_NONPROP
+                    ),
+                    value_from_prefixed_field_name,
+                    field_name_prefix=prefixed_field_name,
                 )
-                chosen_f = None
-                for option in options:
-                    if (
-                        _strings.subparser_name_from_type(prefixed_field_name, option)
-                        == subparser_name
-                    ):
-                        chosen_f = option
-                        break
-                assert chosen_f is not None
-
-                if chosen_f is type(None):
-                    value = None
-                else:
-                    value, consumed_keywords_child = call_from_args(
-                        chosen_f,
-                        subparser_def.parser_from_name[subparser_name],
-                        (
-                            field.default
-                            if type(field.default) is chosen_f
-                            else _fields.MISSING_NONPROP
-                        ),
-                        value_from_prefixed_field_name,
-                        field_name_prefix=prefixed_field_name,
-                    )
-                    consumed_keywords |= consumed_keywords_child
+                consumed_keywords |= consumed_keywords_child
 
         if value is _fields.EXCLUDE_FROM_CALL:
             continue
@@ -194,6 +188,28 @@ def call_from_args(
         else:
             kwargs[field.call_argname] = value
 
+    # Logic for _markers._OPTIONAL_GROUP.
+    is_missing_list = [
+        v in _fields.MISSING_SINGLETONS
+        for v in itertools.chain(positional_args, kwargs.values())
+    ]
+    if any(is_missing_list):
+        if not any_arguments_provided:
+            # No arguments were provided in this group.
+            return default_instance, consumed_keywords  # type: ignore
+
+        message = "either all arguments must be provided or none of them."
+        if len(kwargs) > 0:
+            missing_kwargs = [
+                k for k, v in kwargs.items() if v in _fields.MISSING_SINGLETONS
+            ]
+            if len(missing_kwargs):
+                message += f" We're missing arguments {missing_kwargs}."
+        raise InstantiationError(
+            message,
+            field_name_prefix,
+        )
+
     # Note: we unwrap types both before and after narrowing. This is because narrowing
     # sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just
     # `tuple`.
@@ -203,14 +219,23 @@ def call_from_args(
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
 
-    if unwrapped_f in (tuple, list, set):
-        assert len(positional_args) == 0
-        # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
-        # use keyword arguments.
-        assert len(positional_args) == 0
-        return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
-    elif unwrapped_f is dict:
-        assert len(positional_args) == 0
-        return kwargs, consumed_keywords  # type: ignore
-    else:
-        return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
+    try:
+        if unwrapped_f in (tuple, list, set):
+            assert len(positional_args) == 0
+            # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
+            # use keyword arguments.
+            assert len(positional_args) == 0
+            return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
+        elif unwrapped_f is dict:
+            assert len(positional_args) == 0
+            return kwargs, consumed_keywords  # type: ignore
+        else:
+            return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
+
+    # If unwrapped_f raises a ValueError, wrap the message with a more informative
+    # InstantiationError if possible.
+    except ValueError as e:
+        raise InstantiationError(
+            e.args[0],
+            field_name_prefix,
+        )

@@ -97,7 +97,7 @@ class ParserSpecification:
 
         has_required_args = False
         args = []
-        helptext_from_nested_class_field_name = {}
+        helptext_from_nested_class_field_name: Dict[str, Optional[str]] = {}
 
         subparsers = None
         subparsers_from_prefix = {}
@@ -143,14 +143,30 @@ class ParserSpecification:
                         _strings.make_field_name([field.name, k])
                     ] = v
 
+                class_field_name = _strings.make_field_name([field.name])
                 if field.helptext is not None:
                     helptext_from_nested_class_field_name[
-                        _strings.make_field_name([field.name])
+                        class_field_name
                     ] = field.helptext
                 else:
                     helptext_from_nested_class_field_name[
-                        _strings.make_field_name([field.name])
+                        class_field_name
                     ] = _docstrings.get_callable_description(nested_parser.f)
+
+                # If arguments are in an optional group, it indicates that the default_instance
+                # will be used if none of the arguments are passed in.
+                if (
+                    len(nested_parser.args) >= 1
+                    and _markers._OPTIONAL_GROUP in nested_parser.args[0].field.markers
+                ):
+                    current_helptext = helptext_from_nested_class_field_name[
+                        class_field_name
+                    ]
+                    helptext_from_nested_class_field_name[class_field_name] = (
+                        ("" if current_helptext is None else current_helptext + "\n\n")
+                        + "Default: "
+                        + str(field.default)
+                    )
 
         return ParserSpecification(
             f=f,
@@ -269,9 +285,9 @@ def handle_field(
 ]:
     """Determine what to do with a single field definition."""
 
-    if isinstance(field.typ, TypeVar):
+    if isinstance(field.type_or_callable, TypeVar):
         raise _instantiators.UnsupportedTypeAnnotationError(
-            f"Field {field.name} has an unbound TypeVar: {field.typ}."
+            f"Field {field.name} has an unbound TypeVar: {field.type_or_callable}."
         )
 
     if _markers.Fixed not in field.markers:
@@ -288,26 +304,26 @@ def handle_field(
                 and _markers.AvoidSubcommands in field.markers
             ):
                 # Don't make a subparser.
-                field = dataclasses.replace(field, typ=type(field.default))
+                field = dataclasses.replace(field, type_or_callable=type(field.default))
             else:
                 return subparsers_attempt
 
         # (2) Handle nested callables.
-        if _fields.is_nested_type(field.typ, field.default):
+        if _fields.is_nested_type(field.type_or_callable, field.default):
             field = dataclasses.replace(
                 field,
-                typ=_resolver.narrow_type(
-                    field.typ,
+                type_or_callable=_resolver.narrow_type(
+                    field.type_or_callable,
                     field.default,
                 ),
             )
             return ParserSpecification.from_callable_or_type(
                 (
                     # Recursively apply marker types.
-                    field.typ
+                    field.type_or_callable
                     if len(field.markers) == 0
                     else Annotated.__class_getitem__(  # type: ignore
-                        (field.typ,) + tuple(field.markers)
+                        (field.type_or_callable,) + tuple(field.markers)
                     )
                 ),
                 description=None,
@@ -337,6 +353,7 @@ class SubparsersSpecification:
     prefix: str
     required: bool
     default_instance: Any
+    options: Tuple[Union[TypeForm[Any], Callable], ...]
 
     @staticmethod
     def from_field(
@@ -346,7 +363,7 @@ class SubparsersSpecification:
         prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
-        typ = _resolver.unwrap_annotated(field.typ)[0]
+        typ = _resolver.unwrap_annotated(field.type_or_callable)[0]
         if get_origin(typ) is not Union:
             return None
 
@@ -365,6 +382,19 @@ class SubparsersSpecification:
             )
             for o in options
         ]
+
+        # If specified, swap types using tyro.conf.subcommand(constructor=...).
+        for i, option in enumerate(options):
+            _, found_subcommand_configs = _resolver.unwrap_annotated(
+                option, _confstruct._SubcommandConfiguration
+            )
+            if (
+                len(found_subcommand_configs) > 0
+                and found_subcommand_configs[0].constructor_factory is not None
+            ):
+                options[i] = found_subcommand_configs[0].constructor_factory()
+
+        # Exit if we don't contain nested types.
         if not all(
             [
                 _fields.is_nested_type(cast(type, o), _fields.MISSING_NONPROP)
@@ -433,6 +463,7 @@ class SubparsersSpecification:
                     description=None,
                     default=_fields.MISSING_NONPROP,
                     prefix_name=True,
+                    constructor_factory=None,
                 )
 
             # If names match, borrow subcommand default from field default.
@@ -507,6 +538,7 @@ class SubparsersSpecification:
             prefix=prefix,
             required=required,
             default_instance=field.default,
+            options=tuple(options),
         )
 
     def apply(

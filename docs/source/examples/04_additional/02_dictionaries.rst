@@ -16,10 +16,12 @@ Dictionary inputs can be specified using either a standard ``Dict[K, V]`` annota
 
         from typing import Dict, Tuple, TypedDict
 
+        from typing_extensions import NotRequired
+
         import tyro
 
 
-        class DictionarySchema(
+        class DictionarySchemaA(
             TypedDict,
             # Setting `total=False` specifies that not all keys need to exist.
             total=False,
@@ -28,17 +30,26 @@ Dictionary inputs can be specified using either a standard ``Dict[K, V]`` annota
             betas: Tuple[float, float]
 
 
+        class DictionarySchemaB(TypedDict):
+            learning_rate: NotRequired[float]
+            """NotRequired[] specifies that a particular key doesn't need to exist."""
+            betas: Tuple[float, float]
+
+
         def main(
-            typed_dict: DictionarySchema,
+            typed_dict_a: DictionarySchemaA,
+            typed_dict_b: DictionarySchemaB,
             standard_dict: Dict[str, float] = {
                 "learning_rate": 3e-4,
                 "beta1": 0.9,
                 "beta2": 0.999,
             },
         ) -> None:
-            assert isinstance(typed_dict, dict)
+            assert isinstance(typed_dict_a, dict)
+            assert isinstance(typed_dict_b, dict)
             assert isinstance(standard_dict, dict)
-            print("Typed dict:", typed_dict)
+            print("Typed dict A:", typed_dict_a)
+            print("Typed dict B:", typed_dict_b)
             print("Standard dict:", standard_dict)
 
 

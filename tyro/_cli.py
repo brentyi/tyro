@@ -470,12 +470,13 @@ def _cli_impl(
             Panel(
                 Group(
                     "[bright_red][bold]Error parsing"
-                    f" {e.arg.lowered.name_or_flag}[/bold]:[/bright_red] {e.message}",
+                    f" {e.arg.lowered.name_or_flag if isinstance(e.arg, _arguments.ArgumentDefinition) else e.arg}[/bold]:[/bright_red] {e.message}",
                     *cast(  # Cast to appease mypy...
                         List[RenderableType],
                         (
                             []
-                            if e.arg.lowered.help is None
+                            if not isinstance(e.arg, _arguments.ArgumentDefinition)
+                            or e.arg.lowered.help is None
                             else [
                                 Rule(style=Style(color="red")),
                                 "Argument helptext:",

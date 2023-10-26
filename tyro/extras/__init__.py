@@ -10,3 +10,6 @@ from ._base_configs import (
 from ._choices_type import literal_type_from_choices as literal_type_from_choices
 from ._serialization import from_yaml as from_yaml
 from ._serialization import to_yaml as to_yaml
+from ._subcommand_cli_from_dict import (
+    subcommand_cli_from_dict as subcommand_cli_from_dict,
+)
