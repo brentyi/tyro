@@ -171,21 +171,18 @@ def call_from_args(
                 chosen_f = subparser_def.options[
                     list(subparser_def.parser_from_name.keys()).index(subparser_name)
                 ]
-                if chosen_f is type(None):
-                    value = None
-                else:
-                    value, consumed_keywords_child = call_from_args(
-                        chosen_f,
-                        subparser_def.parser_from_name[subparser_name],
-                        (
-                            field.default
-                            if type(field.default) is chosen_f
-                            else _fields.MISSING_NONPROP
-                        ),
-                        value_from_prefixed_field_name,
-                        field_name_prefix=prefixed_field_name,
-                    )
-                    consumed_keywords |= consumed_keywords_child
+                value, consumed_keywords_child = call_from_args(
+                    chosen_f,
+                    subparser_def.parser_from_name[subparser_name],
+                    (
+                        field.default
+                        if type(field.default) is chosen_f
+                        else _fields.MISSING_NONPROP
+                    ),
+                    value_from_prefixed_field_name,
+                    field_name_prefix=prefixed_field_name,
+                )
+                consumed_keywords |= consumed_keywords_child
 
         if value is _fields.EXCLUDE_FROM_CALL:
             continue
