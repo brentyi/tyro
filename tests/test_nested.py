@@ -1017,3 +1017,38 @@ def test_underscore_prefix() -> None:
         child: Level2 = dataclasses.field(default_factory=lambda: Level2())
 
     tyro.cli(Level3, args=[])
+
+
+def test_subcommand_dict_helper() -> None:
+    def checkout(branch: str) -> str:
+        """Check out a branch."""
+        return branch
+
+    def commit(message: str, all: bool = False) -> Tuple[str, bool]:
+        """Make a commit."""
+        return (message, all)
+
+    assert (
+        tyro.extras.subcommand_cli_from_dict(
+            {
+                "checkout": checkout,
+                "commit": commit,
+            },
+            args="checkout --branch main".split(" "),
+        )
+        == "main"
+    )
+    assert tyro.extras.subcommand_cli_from_dict(
+        {
+            "checkout": checkout,
+            "commit": commit,
+        },
+        args="commit --message hello".split(" "),
+    ) == ("hello", False)
+    assert tyro.extras.subcommand_cli_from_dict(
+        {
+            "checkout": checkout,
+            "commit": commit,
+        },
+        args="commit --message hello --all".split(" "),
+    ) == ("hello", True)

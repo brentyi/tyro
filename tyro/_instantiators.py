@@ -149,7 +149,7 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
 
 
 def instantiator_from_type(
-    typ: TypeForm,
+    typ: Union[TypeForm[Any], Callable],
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     markers: FrozenSet[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
@@ -191,7 +191,9 @@ def instantiator_from_type(
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
-    container_out = _instantiator_from_container_type(typ, type_from_typevar, markers)
+    container_out = _instantiator_from_container_type(
+        cast(TypeForm[Any], typ), type_from_typevar, markers
+    )
     if container_out is not None:
         return container_out
 
@@ -309,7 +311,7 @@ def _instantiator_from_type_inner(
 
 
 def _instantiator_from_container_type(
-    typ: TypeForm,
+    typ: TypeForm[Any],
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     markers: FrozenSet[_markers.Marker],
 ) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
