@@ -999,7 +999,7 @@ def test_custom_constructor_5() -> None:
 
 
 def test_custom_constructor_6() -> None:
-    def make_float(a: float, /, b: float, c: float = 3) -> float:
+    def make_float(a: tyro.conf.Positional[float], b: float, c: float = 3) -> float:
         return a * b * c
 
     @dataclasses.dataclass
