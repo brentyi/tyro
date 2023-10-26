@@ -184,6 +184,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../02_nesting/02_subcommands/">Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/05_subcommands_func/">Subcommands from Functions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
 <ul>
@@ -201,6 +202,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../04_additional/07_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../04_additional/09_attrs/">Attrs Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../04_additional/10_custom_constructors/">Custom Constructors</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -280,11 +282,21 @@ collection types: <code class="docutils literal notranslate"><span class="pre">t
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/03_collections.py --help</kbd><pre class="ansi-block literal-block">python: can't open file '/home/runner/work/tyro/tyro/docs/source/../../examples/01_basics/03_collections.py': [Errno 2] No such file or directory</pre>
+<kbd>python 01_basics/03_collections.py --help</kbd><pre class="ansi-block literal-block">usage: 03_collections.py [-h] --dataset-sources [PATH [PATH ...]]
+                         [--image-dimensions INT INT]
+
+╭─ arguments ────────────────────────────────────────────────────────────╮
+│ -h, --help                                                             │
+│     show this help message and exit                                    │
+│ --dataset-sources [PATH [PATH ...]]                                    │
+│     Paths to load training data from. This can be multiple! (required) │
+│ --image-dimensions INT INT                                             │
+│     Height and width of some image data. (default: 32 32)              │
+╰────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/03_collections.py --dataset-sources ./data --image-dimensions 16 16</kbd><pre class="ansi-block literal-block">python: can't open file '/home/runner/work/tyro/tyro/docs/source/../../examples/01_basics/03_collections.py': [Errno 2] No such file or directory</pre>
+<kbd>python 01_basics/03_collections.py --dataset-sources ./data --image-dimensions 16 16</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(16, 16))</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/03_collections.py --dataset-sources ./data</kbd><pre class="ansi-block literal-block">python: can't open file '/home/runner/work/tyro/tyro/docs/source/../../examples/01_basics/03_collections.py': [Errno 2] No such file or directory</pre>
+<kbd>python 01_basics/03_collections.py --dataset-sources ./data</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(32, 32))</pre>
 </section>
 
         </article>

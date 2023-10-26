@@ -183,6 +183,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/02_subcommands/">Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/05_subcommands_func/">Subcommands from Functions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
 <ul>
@@ -200,6 +201,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -352,7 +354,7 @@
 
         <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">helptext_from_nested_class_field_name</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">helptext_from_nested_class_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">subparsers</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">subparsers_from_prefix</span> <span class="o">=</span> <span class="p">{}</span>
@@ -398,14 +400,30 @@
                         <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
+                <span class="n">class_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
-                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                        <span class="n">class_field_name</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
-                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                        <span class="n">class_field_name</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
+
+                <span class="c1"># If arguments are in an optional group, it indicates that the default_instance</span>
+                <span class="c1"># will be used if none of the arguments are passed in.</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span>
+                    <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                <span class="p">):</span>
+                    <span class="n">current_helptext</span> <span class="o">=</span> <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
+                        <span class="n">class_field_name</span>
+                    <span class="p">]</span>
+                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">current_helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">current_helptext</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="o">+</span> <span class="s2">&quot;Default: &quot;</span>
+                        <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+                    <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">ParserSpecification</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
@@ -534,9 +552,9 @@
 <span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine what to do with a single field definition.&quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
@@ -553,26 +571,26 @@
                 <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">AvoidSubcommands</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
             <span class="p">):</span>
                 <span class="c1"># Don&#39;t make a subparser.</span>
-                <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
+                <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">type_or_callable</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">subparsers_attempt</span>
 
         <span class="c1"># (2) Handle nested callables.</span>
-        <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                 <span class="n">field</span><span class="p">,</span>
-                <span class="n">typ</span><span class="o">=</span><span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span>
-                    <span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,</span>
+                <span class="n">type_or_callable</span><span class="o">=</span><span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span>
                     <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="c1"># Recursively apply marker types.</span>
-                    <span class="n">field</span><span class="o">.</span><span class="n">typ</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
                     <span class="k">else</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-                        <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
+                        <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
                     <span class="p">)</span>
                 <span class="p">),</span>
                 <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -605,6 +623,7 @@
     <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="n">options</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
 
 <div class="viewcode-block" id="SubparsersSpecification.from_field">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.from_field">[docs]</a>
@@ -616,7 +635,7 @@
         <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SubparsersSpecification</span><span class="p">]:</span>
         <span class="c1"># Union of classes should create subparsers.</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Union</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
@@ -635,6 +654,19 @@
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span>
         <span class="p">]</span>
+
+        <span class="c1"># If specified, swap types using tyro.conf.subcommand(constructor=...).</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">option</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">options</span><span class="p">):</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+                <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                <span class="ow">and</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">):</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">()</span>
+
+        <span class="c1"># Exit if we don&#39;t contain nested types.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
             <span class="p">[</span>
                 <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">o</span><span class="p">),</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
@@ -703,6 +735,7 @@
                     <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
                     <span class="n">prefix_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">constructor_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="p">)</span>
 
             <span class="c1"># If names match, borrow subcommand default from field default.</span>
@@ -777,6 +810,7 @@
             <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
             <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span>
             <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">options</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span></div>
 
 

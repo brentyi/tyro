@@ -125,6 +125,11 @@ Module Contents
 
       
 
+   .. py:attribute:: options
+      :type: Tuple[Union[tyro._typing.TypeForm[Any], Callable], Ellipsis]
+
+      
+
    .. py:method:: from_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], prefix: str) -> Optional[SubparsersSpecification]
       :staticmethod:
 

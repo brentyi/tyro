@@ -183,6 +183,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/02_nesting/02_subcommands/">Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/02_nesting/05_subcommands_func/">Subcommands from Functions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
 <ul>
@@ -200,6 +201,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/07_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -250,7 +252,7 @@
         <article role="main">
           <h1>Source code for tyro.conf._confstruct</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">from</span> <span class="nn">.._fields</span> <span class="kn">import</span> <span class="n">MISSING_NONPROP</span>
 
@@ -261,9 +263,36 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]]</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">subcommand</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">subcommand</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="o">...</span>
 
 
 <div class="viewcode-block" id="subcommand">
@@ -274,7 +303,12 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">),</span> <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for configuring subcommands with `typing.Annotated`.</span>
 <span class="sd">    Useful for aesthetics.</span>
 
@@ -288,7 +322,7 @@
 
 <span class="sd">    This will create two subcommands: `nested-type-a` and `nested-type-b`.</span>
 
-<span class="sd">    Annotating each type with `tyro.metadata.subcommand()` allows us to override for</span>
+<span class="sd">    Annotating each type with `tyro.conf.subcommand()` allows us to override for</span>
 <span class="sd">    each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix</span>
 <span class="sd">    the name or not.</span>
 
@@ -304,8 +338,31 @@
 <span class="sd">        ]</span>
 <span class="sd">    )</span>
 <span class="sd">    ```</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        name: The name of the subcommand in the CLI.</span>
+<span class="sd">        default: A default value for the subcommand, for struct-like types. (eg</span>
+<span class="sd">             dataclasses)</span>
+<span class="sd">        description: Description of this option to use in the helptext. Defaults to</span>
+<span class="sd">            docstring.</span>
+<span class="sd">        prefix_name: Whether to prefix the name of the subcommand based on where it</span>
+<span class="sd">            is in a nested structure.</span>
+<span class="sd">        constructor: A constructor type or function. This should either be (a) a subtype</span>
+<span class="sd">            of an argument&#39;s annotated type, or (b) a function with type-annotated</span>
+<span class="sd">            inputs that returns an instance of the annotated type. This will be used in</span>
+<span class="sd">            place of the argument&#39;s type for parsing arguments. No validation is done.</span>
+<span class="sd">        constructor_factory: A function that returns a constructor type or function.</span>
+<span class="sd">            Useful when the constructor isn&#39;t immediately available.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">_SubcommandConfiguration</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">prefix_name</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">_SubcommandConfiguration</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">default</span><span class="p">,</span>
+        <span class="n">description</span><span class="p">,</span>
+        <span class="n">prefix_name</span><span class="p">,</span>
+        <span class="n">constructor_factory</span><span class="o">=</span><span class="n">constructor_factory</span>
+        <span class="k">if</span> <span class="n">constructor</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">constructor</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
 
 
@@ -315,6 +372,33 @@
     <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]]</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">arg</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">arg</span><span class="p">(</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="o">...</span>
 
 
 <div class="viewcode-block" id="arg">
@@ -325,20 +409,42 @@
     <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">help</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">prefix_name</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">constructor</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">Union</span><span class="p">[</span><span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for configuring arguments with `typing.Annotated`.</span>
-<span class="sd">    Useful for aesthetics.</span>
-
-<span class="sd">    Usage:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for fine-grained argument configuration with</span>
+<span class="sd">    `typing.Annotated`. Should typically not be required.</span>
 <span class="sd">    ```python</span>
 <span class="sd">    x: Annotated[int, tyro.conf.arg(...)]</span>
 <span class="sd">    ```</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        name: A new name for the argument.</span>
+<span class="sd">        metavar: Argument name in usage messages. The type is used by default.</span>
+<span class="sd">        help: Helptext for this argument. The docstring is used by default.</span>
+<span class="sd">        prefix_name: Whether or not to prefix the name of the argument based on where</span>
+<span class="sd">            it is in a nested structure.</span>
+<span class="sd">        constructor: A constructor type or function. This should either be (a) a subtype</span>
+<span class="sd">            of an argument&#39;s annotated type, or (b) a function with type-annotated</span>
+<span class="sd">            inputs that returns an instance of the annotated type. This will be used in</span>
+<span class="sd">            place of the argument&#39;s type for parsing arguments. No validation is done.</span>
+<span class="sd">        constructor_factory: A function that returns a constructor type or function.</span>
+<span class="sd">            Useful when the constructor isn&#39;t immediately available.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Object to attach via `typing.Annotated[]`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
+        <span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">),</span> <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
     <span class="k">return</span> <span class="n">_ArgConfiguration</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
         <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
         <span class="n">help</span><span class="o">=</span><span class="n">help</span><span class="p">,</span>
         <span class="n">prefix_name</span><span class="o">=</span><span class="n">prefix_name</span><span class="p">,</span>
+        <span class="n">constructor_factory</span><span class="o">=</span><span class="n">constructor_factory</span>
+        <span class="k">if</span> <span class="n">constructor</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="k">else</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">constructor</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>

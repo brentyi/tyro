@@ -19,50 +19,34 @@
 Package Contents
 ----------------
 
-.. py:function:: arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True) -> Any
+.. py:function:: arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None) -> Any
+                 arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True, constructor: Optional[Union[Type, Callable]] = None, constructor_factory: None = None) -> Any
 
    
-   Returns a metadata object for configuring arguments with ``typing.Annotated``.
-   Useful for aesthetics.
-
-   Usage:
+   Returns a metadata object for fine-grained argument configuration with
+   ``typing.Annotated``. Should typically not be required.
 
    .. code-block:: python
 
       x: Annotated[int, tyro.conf.arg(...)]
 
-.. py:function:: subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True) -> Any
+   :param name: A new name for the argument.
+   :param metavar: Argument name in usage messages. The type is used by default.
+   :param help: Helptext for this argument. The docstring is used by default.
+   :param prefix_name: Whether or not to prefix the name of the argument based on where
+                       it is in a nested structure.
+   :param constructor: A constructor type or function. This should either be (a) a subtype
+                       of an argument's annotated type, or (b) a function with type-annotated
+                       inputs that returns an instance of the annotated type. This will be used in
+                       place of the argument's type for parsing arguments. No validation is done.
+   :param constructor_factory: A function that returns a constructor type or function.
+                               Useful when the constructor isn't immediately available.
 
-   
-   Returns a metadata object for configuring subcommands with ``typing.Annotated``.
-   Useful for aesthetics.
+   :returns: Object to attach via ``typing.Annotated[]``.
 
-   Consider the standard approach for creating subcommands:
+.. py:function:: subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None) -> Any
+                 subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True, constructor: Optional[Union[Type, Callable]] = None, constructor_factory: None = None) -> Any
 
-   .. code-block:: python
-
-      tyro.cli(
-          Union[NestedTypeA, NestedTypeB]
-      )
-
-   This will create two subcommands: ``nested-type-a`` and ``nested-type-b``.
-
-   Annotating each type with ``tyro.metadata.subcommand()`` allows us to override for
-   each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix
-   the name or not.
-
-   .. code-block:: python
-
-      tyro.cli(
-          Union[
-              Annotated[
-                  NestedTypeA, subcommand("a", ...)
-              ],
-              Annotated[
-                  NestedTypeB, subcommand("b", ...)
-              ],
-          ]
-      )
 
 .. py:data:: AvoidSubcommands
 

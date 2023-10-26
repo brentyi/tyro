@@ -182,6 +182,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/02_nesting/02_subcommands/">Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/02_nesting/05_subcommands_func/">Subcommands from Functions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
 <ul>
@@ -199,6 +200,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/07_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/09_attrs/">Attrs Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -694,6 +696,8 @@
 </li>
           <li><a href="../api/tyro/extras/_serialization/#module-tyro.extras._serialization">tyro.extras._serialization</a>
 </li>
+          <li><a href="../api/tyro/extras/_subcommand_cli_from_dict/#module-tyro.extras._subcommand_cli_from_dict">tyro.extras._subcommand_cli_from_dict</a>
+</li>
         </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
@@ -721,10 +725,10 @@
           <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.nargs">(tyro._instantiators.InstantiatorMetadata attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_container_types">narrow_container_types() (in module tyro._resolver)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_type">narrow_type() (in module tyro._resolver)</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_union_type">narrow_union_type() (in module tyro._resolver)</a>
@@ -734,6 +738,10 @@
         <li><a href="../api/tyro/_instantiators/#tyro._instantiators.NoneType">NoneType (in module tyro._instantiators)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.NonpropagatingMissingType">NonpropagatingMissingType (class in tyro._fields)</a>
+</li>
+        <li><a href="../api/tyro/_fields/#tyro._fields.NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE (in module tyro._fields)</a>
+</li>
+        <li><a href="../api/tyro/_fields/#tyro._fields.NotRequiredButWeDontKnowTheValueType">NotRequiredButWeDontKnowTheValueType (class in tyro._fields)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -749,14 +757,16 @@
           <li><a href="../api/tyro/conf/_markers/#tyro.conf._markers.OmitArgPrefixes">(in module tyro.conf._markers)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/conf/#tyro.conf.OmitSubcommandPrefixes">OmitSubcommandPrefixes (in module tyro.conf)</a>
 
         <ul>
           <li><a href="../api/tyro/conf/_markers/#tyro.conf._markers.OmitSubcommandPrefixes">(in module tyro.conf._markers)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.options">options (tyro._parsers.SubparsersSpecification attribute)</a>
+</li>
         <li><a href="../api/tyro/_cli/#tyro._cli.OutT">OutT (in module tyro._cli)</a>
 </li>
     </ul></td>
@@ -847,16 +857,22 @@
           <li><a href="../api/tyro/conf/_confstruct/#tyro.conf._confstruct.subcommand">(in module tyro.conf._confstruct)</a>
 </li>
         </ul></li>
+        <li><a href="../api/tyro/extras/#tyro.extras.subcommand_cli_from_dict">subcommand_cli_from_dict() (in module tyro.extras)</a>
+
+        <ul>
+          <li><a href="../api/tyro/extras/_subcommand_cli_from_dict/#tyro.extras._subcommand_cli_from_dict.subcommand_cli_from_dict">(in module tyro.extras._subcommand_cli_from_dict)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.subcommand_prefix">subcommand_prefix (tyro._arguments.ArgumentDefinition attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/extras/#tyro.extras.subcommand_type_from_defaults">subcommand_type_from_defaults() (in module tyro.extras)</a>
 
         <ul>
           <li><a href="../api/tyro/extras/_base_configs/#tyro.extras._base_configs.subcommand_type_from_defaults">(in module tyro.extras._base_configs)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_strings/#tyro._strings.subparser_name_from_type">subparser_name_from_type() (in module tyro._strings)</a>
 </li>
         <li><a href="../api/tyro/_parsers/#tyro._parsers.ParserSpecification.subparsers">subparsers (tyro._parsers.ParserSpecification attribute)</a>
@@ -898,6 +914,8 @@
 </li>
           <li><a href="../api/tyro/extras/_choices_type/#tyro.extras._choices_type.T">(in module tyro.extras._choices_type)</a>
 </li>
+          <li><a href="../api/tyro/extras/_subcommand_cli_from_dict/#tyro.extras._subcommand_cli_from_dict.T">(in module tyro.extras._subcommand_cli_from_dict)</a>
+</li>
         </ul></li>
         <li><a href="../api/tyro/_argparse_formatter/#tyro._argparse_formatter.THEME">THEME (in module tyro._argparse_formatter)</a>
 </li>
@@ -907,11 +925,11 @@
           <li><a href="../api/tyro/extras/_serialization/#tyro.extras._serialization.to_yaml">(in module tyro.extras._serialization)</a>
 </li>
         </ul></li>
-        <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.typ">typ (tyro._fields.FieldDefinition attribute)</a>
-</li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.type_from_typevar">type_from_typevar (tyro._arguments.ArgumentDefinition attribute)</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.type_from_typevar_constraints">type_from_typevar_constraints() (in module tyro._resolver)</a>
+</li>
+        <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.type_or_callable">type_or_callable (tyro._fields.FieldDefinition attribute)</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.TypeOrCallable">TypeOrCallable (in module tyro._resolver)</a>
 </li>
@@ -1076,6 +1094,13 @@
 
         <ul>
           <li><a href="../api/tyro/extras/_serialization/#module-tyro.extras._serialization">module</a>
+</li>
+        </ul></li>
+        <li>
+    tyro.extras._subcommand_cli_from_dict
+
+        <ul>
+          <li><a href="../api/tyro/extras/_subcommand_cli_from_dict/#module-tyro.extras._subcommand_cli_from_dict">module</a>
 </li>
         </ul></li>
         <li><a href="../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter">TyroArgparseHelpFormatter (class in tyro._argparse_formatter)</a>

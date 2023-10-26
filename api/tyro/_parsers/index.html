@@ -184,6 +184,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/02_subcommands/">Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/05_subcommands_func/">Subcommands from Functions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
 <ul>
@@ -201,6 +202,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -420,6 +422,11 @@
 <span class="sig-name descname"><span class="pre">default_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.default_instance" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.options">
+<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.options" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.from_field">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_fields/#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition"><span class="pre">tyro._fields.FieldDefinition</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_from_typevar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeVar</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><span class="pre">SubparsersSpecification</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/_parsers/#SubparsersSpecification.from_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.from_field" title="Link to this definition">#</a></dt>
@@ -550,6 +557,7 @@
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.prefix"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.required"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.required</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.default_instance"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.default_instance</span></code></a></li>
+<li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.options"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.options</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.from_field"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.from_field()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.apply"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.apply()</span></code></a></li>
 </ul>

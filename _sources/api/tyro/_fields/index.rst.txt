@@ -23,8 +23,8 @@ Module Contents
 
       
 
-   .. py:attribute:: typ
-      :type: tyro._typing.TypeForm[Any]
+   .. py:attribute:: type_or_callable
+      :type: Union[tyro._typing.TypeForm[Any], Callable]
 
       
 
@@ -56,11 +56,11 @@ Module Contents
    .. py:method:: __post_init__()
 
 
-   .. py:method:: make(name: str, typ: tyro._typing.TypeForm[Any], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers._Marker, Ellipsis] = ())
+   .. py:method:: make(name: str, type_or_callable: tyro._typing.TypeForm[Any], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers._Marker, Ellipsis] = ())
       :staticmethod:
 
 
-   .. py:method:: add_markers(markers: Tuple[tyro.conf._markers._Marker, Ellipsis]) -> FieldDefinition
+   .. py:method:: add_markers(markers: Tuple[Any, Ellipsis]) -> FieldDefinition
 
 
    .. py:method:: is_positional() -> bool
@@ -92,11 +92,21 @@ Module Contents
    Bases: :py:obj:`tyro._singleton.Singleton`
 
 
+.. py:class:: NotRequiredButWeDontKnowTheValueType
+
+
+   Bases: :py:obj:`tyro._singleton.Singleton`
+
+
 .. py:data:: MISSING_PROP
 
    
 
 .. py:data:: MISSING_NONPROP
+
+   
+
+.. py:data:: NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE
 
    
 
@@ -126,7 +136,7 @@ Module Contents
       
 
 
-.. py:function:: is_nested_type(typ: tyro._typing.TypeForm[Any], default_instance: DefaultInstance) -> bool
+.. py:function:: is_nested_type(typ: Union[tyro._typing.TypeForm[Any], Callable], default_instance: DefaultInstance) -> bool
 
    
    Determine whether a type should be treated as a 'nested type', where a single

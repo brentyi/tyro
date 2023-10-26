@@ -157,3 +157,10 @@ Package Contents
 
    :returns: YAML string.
 
+.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False) -> T
+                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False) -> Any
+
+   
+   Generate a subcommand CLI from a dictionary that maps subcommand name to the
+   corresponding function to call (or object to instantiate).
+

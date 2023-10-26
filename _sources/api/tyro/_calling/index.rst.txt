@@ -29,7 +29,7 @@ Module Contents
       
 
    .. py:attribute:: arg
-      :type: tyro._arguments.ArgumentDefinition
+      :type: Union[tyro._arguments.ArgumentDefinition, str]
 
       
 
