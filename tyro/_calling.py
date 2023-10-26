@@ -5,17 +5,7 @@ from __future__ import annotations
 
 import dataclasses
 import itertools
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Sequence,
-    Set,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
 
 from typing_extensions import get_args
 
@@ -100,7 +90,7 @@ def call_from_args(
                     # value, and the field default will be inspect.Parameter.empty.
                     if (
                         value in _fields.MISSING_SINGLETONS
-                        and field.is_positional()
+                        and field.is_positional_call()
                         and arg.lowered.nargs in ("?", "*")
                     ):
                         value = []
@@ -209,20 +199,12 @@ def call_from_args(
             return default_instance, consumed_keywords  # type: ignore
 
         message = "either all arguments must be provided or none of them."
-        if len(positional_args) > 0:
-            missing_positional = [
-                i
-                for i, v in enumerate(positional_args)
-                if v in _fields.MISSING_SINGLETONS
-            ]
-            if len(missing_positional):
-                message += f" We're missing positional arguments {missing_positional}."
         if len(kwargs) > 0:
             missing_kwargs = [
                 k for k, v in kwargs.items() if v in _fields.MISSING_SINGLETONS
             ]
             if len(missing_kwargs):
-                message += f" We're missing keyword arguments {missing_kwargs}."
+                message += f" We're missing arguments {missing_kwargs}."
         raise InstantiationError(
             message,
             field_name_prefix,
