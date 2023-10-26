@@ -992,3 +992,67 @@ def test_custom_constructor_5() -> None:
     # --x.b is required!
     with pytest.raises(SystemExit):
         tyro.cli(Config, args="--x.a 5".split(" "))
+
+    # --x.a and --x.b are required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.c 5".split(" "))
+
+
+def test_custom_constructor_6() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        a: int
+        b: int
+        c: int = 3
+
+    def make_float(struct: Struct) -> float:
+        return struct.a * struct.b * struct.c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(
+        Config, args="--x.struct.a 5 --x.struct.b 2 --x.struct.c 3".split(" ")
+    ) == Config(x=30)
+    assert tyro.cli(Config, args="--x.struct.a 5 --x.struct.b 2".split(" ")) == Config(
+        x=30
+    )
+
+    # --x.struct.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.struct.a 5".split(" "))
+
+    # --x.struct.a and --x.struct.b are required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.struct.c 5".split(" "))
+
+
+def test_custom_constructor_7() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        a: tyro.conf.Positional[int]
+        b: int
+        c: int = 3
+
+    def make_float(struct: Struct) -> float:
+        return struct.a * struct.b * struct.c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(
+        Config, args="--x.struct.b 2 --x.struct.c 3 5".split(" ")
+    ) == Config(x=30)
+    assert tyro.cli(Config, args="--x.struct.b 2 5".split(" ")) == Config(x=30)
+
+    # --x.struct.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="5".split(" "))
+
+    # --x.struct.a and --x.struct.b are required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.struct.c 5".split(" "))

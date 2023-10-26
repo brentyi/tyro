@@ -435,8 +435,23 @@ def _rule_generate_helptext(
             default_text = f"(repeatable, appends: {' '.join(default_parts)})"
         elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
             default_text = "(unset by default)"
-        elif _markers._OPTIONAL_GROUP in arg.field.markers:
+        elif (
+            _markers._OPTIONAL_GROUP in arg.field.markers
+            and default in _fields.MISSING_SINGLETONS
+        ):
+            # Argument in an optional group, but with no default. This is typically used
+            # when general (non-argument, non-dataclass) object arguments are given a
+            # default, or when we use `tyro.conf.arg(constructor=...)`.
+            #
+            # There are some usage details that aren't communicated right now in the
+            # helptext. For example: all arguments within an optional group without a
+            # default should be passed in or none at all.
             default_text = "(optional)"
+        elif _markers._OPTIONAL_GROUP in arg.field.markers:
+            # Argument in an optional group, but which also have a default.
+            assert default is not None  # Just for type checker.
+            default_parts = map(shlex.quote, map(str, default))
+            default_text = f"(default if used: {' '.join(default_parts)})"
         elif lowered.nargs is not None and hasattr(default, "__iter__"):
             # For tuple types, we might have default as (0, 1, 2, 3).
             # For list types, we might have default as [0, 1, 2, 3].
