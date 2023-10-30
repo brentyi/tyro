@@ -141,7 +141,7 @@ Module Contents
 .. py:function:: configure(*markers: Marker) -> Callable[[CallableType], CallableType]
 
    
-   Decorator for configuring functions.
+   Decorator for applying configuration options.
 
    Configuration markers are implemented via ``typing.Annotated`` and straightforward to
    apply to types, for example:
@@ -158,4 +158,6 @@ Module Contents
       @tyro.conf.configure(tyro.conf.FlagConversionOff)
       def main(field: bool) -> None:
           ...
+
+   :param markers: Options to apply.
 
