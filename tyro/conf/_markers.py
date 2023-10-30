@@ -136,7 +136,7 @@ Marker = Any
 
 
 def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
-    """Decorator for configuring functions.
+    """Decorator for applying configuration options.
 
     Configuration markers are implemented via `typing.Annotated` and straightforward to
     apply to types, for example:
@@ -153,10 +153,15 @@ def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
     def main(field: bool) -> None:
         ...
     ```
+
+    Args:
+        markers: Options to apply.
     """
 
     def _inner(callable: CallableType) -> CallableType:
-        return Annotated.__class_getitem__((callable,) + tuple(markers))  # type: ignore
+        # We'll read from __tyro_markers__ in `_resolver.unwrap_annotated()`.
+        callable.__tyro_markers__ = markers  # type: ignore
+        return callable
 
     return _inner
 
