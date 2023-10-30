@@ -9,9 +9,7 @@ Usage:
 `python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}"`  --dict2.json "{\"hello\": \"world\"}"`
 """
 
-import dataclasses
 import json as json_
-from typing import Dict
 
 from typing_extensions import Annotated
 

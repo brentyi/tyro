@@ -193,18 +193,24 @@ def unwrap_annotated(
     - Annotated[int, 1], int => (int, (1,))
     - Annotated[int, "1"], int => (int, ())
     """
+    targets = tuple(
+        x
+        for x in getattr(typ, "__tyro_markers__", tuple())
+        if search_type is not None and isinstance(x, search_type)
+    )
+    assert isinstance(targets, tuple)
     if not hasattr(typ, "__metadata__"):
-        return typ, ()
+        return typ, targets
 
     args = get_args(typ)
     assert len(args) >= 2
 
-    # Don't search for a specific metadata type if `None` is passed in.
-    if search_type is None:
-        return args[0], ()
-
     # Look through metadata for desired metadata type.
-    targets = tuple(x for x in args[1:] if isinstance(x, search_type))
+    targets = tuple(
+        x
+        for x in targets + args[1:]
+        if search_type is not None and isinstance(x, search_type)
+    )
     return args[0], targets
 
 

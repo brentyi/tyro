@@ -1,5 +1,9 @@
 import argparse
+import contextlib
 import dataclasses
+import io
+import json as json_
+import shlex
 from typing import Annotated, Any, Dict, Generic, List, Tuple, TypeVar, Union
 
 import pytest
@@ -900,3 +904,188 @@ def test_omit_arg_prefixes() -> None:
     assert tyro.cli(
         tyro.conf.OmitArgPrefixes[TrainConfig], args="--num-slots 3".split(" ")
     ) == TrainConfig(ModelConfig(num_slots=3))
+
+
+def test_custom_constructor_0() -> None:
+    def times_two(n: str) -> int:
+        return int(n) * 2
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[int, tyro.conf.arg(constructor=times_two)]
+
+    assert tyro.cli(Config, args="--x.n 5".split(" ")) == Config(x=10)
+
+
+def test_custom_constructor_1() -> None:
+    def times_two(n: int) -> int:
+        return int(n) * 2
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[int, tyro.conf.arg(constructor=times_two)]
+
+    assert tyro.cli(Config, args="--x.n 5".split(" ")) == Config(x=10)
+
+
+def test_custom_constructor_2() -> None:
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=int)]
+
+    assert tyro.cli(Config, args="--x 5".split(" ")) == Config(x=5)
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x 5.23".split(" "))
+
+
+def test_custom_constructor_3() -> None:
+    def dict_from_json(json: str) -> dict:
+        out = json_.loads(json)
+        if not isinstance(out, dict):
+            raise ValueError(f"{json} is not a dict!")
+        return out
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[
+            dict,
+            tyro.conf.arg(
+                metavar="JSON",
+                constructor=dict_from_json,
+            ),
+        ]
+
+    assert tyro.cli(
+        Config, args=shlex.split('--x.json \'{"hello": "world"}\'')
+    ) == Config(x={"hello": "world"})
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args="--x.json 5".split(" "))
+
+    error = target.getvalue()
+    assert "Error parsing x: 5 is not a dict!" in error
+
+
+def test_custom_constructor_4() -> None:
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=int)] = 3.23
+
+    assert tyro.cli(Config, args="--x 5".split(" ")) == Config(x=5)
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+
+
+def test_custom_constructor_5() -> None:
+    def make_float(a: float, b: float, c: float = 3) -> float:
+        return a * b * c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(Config, args="--x.a 5 --x.b 2 --x.c 3".split(" ")) == Config(x=30)
+    assert tyro.cli(Config, args="--x.a 5 --x.b 2".split(" ")) == Config(x=30)
+
+    # --x.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.a 5".split(" "))
+
+    # --x.a and --x.b are required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.c 5".split(" "))
+
+
+def test_custom_constructor_6() -> None:
+    def make_float(a: tyro.conf.Positional[float], b: float, c: float = 3) -> float:
+        return a * b * c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(Config, args="--x.b 2 --x.c 3 5".split(" ")) == Config(x=30)
+    assert tyro.cli(Config, args="--x.b 2 5".split(" ")) == Config(x=30)
+
+    # --x.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="5".split(" "))
+
+    # --x.a and --x.b are required!
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args="--x.c 5".split(" "))
+    error = target.getvalue()
+    assert "We're missing" in error
+
+
+def test_custom_constructor_7() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        a: int
+        b: int
+        c: int = 3
+
+    def make_float(struct: Struct) -> float:
+        return struct.a * struct.b * struct.c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(
+        Config, args="--x.struct.a 5 --x.struct.b 2 --x.struct.c 3".split(" ")
+    ) == Config(x=30)
+    assert tyro.cli(Config, args="--x.struct.a 5 --x.struct.b 2".split(" ")) == Config(
+        x=30
+    )
+
+    # --x.struct.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.struct.a 5".split(" "))
+
+    # --x.struct.a and --x.struct.b are required!
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args="--x.struct.c 5".split(" "))
+    error = target.getvalue()
+    assert "We're missing arguments" in error
+    assert "'b'" in error
+    assert "'a'" in error  # The 5 is parsed into `a`.
+
+
+def test_custom_constructor_8() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        a: tyro.conf.Positional[int]
+        b: int
+        c: int = 3
+
+    def make_float(struct: Struct) -> float:
+        return struct.a * struct.b * struct.c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(
+        Config, args="--x.struct.b 2 --x.struct.c 3 5".split(" ")
+    ) == Config(x=30)
+    assert tyro.cli(Config, args="--x.struct.b 2 5".split(" ")) == Config(x=30)
+
+    # --x.struct.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="5".split(" "))
+
+    # --x.struct.a and --x.struct.b are required!
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args="--x.struct.b 5".split(" "))
+    error = target.getvalue()
+    assert "We're missing arguments" in error
+    assert "'a'" in error
+    assert "'b'" not in error
