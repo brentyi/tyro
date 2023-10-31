@@ -270,7 +270,7 @@
 <span class="linenos">12</span>
 <span class="linenos">13</span><span class="k">def</span> <span class="nf">commit</span><span class="p">(</span>
 <span class="linenos">14</span>    <span class="n">message</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-m&quot;</span><span class="p">])],</span>
-<span class="linenos">15</span>    <span class="nb">all</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-a&quot;</span><span class="p">])],</span>
+<span class="linenos">15</span>    <span class="nb">all</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-a&quot;</span><span class="p">])]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="linenos">16</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos">17</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a commit.&quot;&quot;&quot;</span>
 <span class="linenos">18</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="nb">all</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -297,27 +297,19 @@
 │     commit              Make a commit.                  │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py commit --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py commit [-h] --message STR --all STR
+<kbd>python 04_additional/11_aliases.py commit --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py commit [-h] --message STR [--all | --no-all | -a]
 
 Make a commit.
 
 ╭─ arguments ─────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit │
 │ --message STR, -m STR   (required)                      │
-│ --all STR, -a STR       (required)                      │
+│ --all, --no-all, -a     (default: False)                │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py commit --message hello --all</kbd><pre class="ansi-block literal-block">╭─ Parsing error ────────────────────────────────────╮
-│ Argument --all/-a: expected 1 argument             │
-│ ────────────────────────────────────────────────── │
-│ For full helptext, run 11_aliases.py commit --help │
-╰────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/11_aliases.py commit --message hello --all</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py commit -m hello -a</kbd><pre class="ansi-block literal-block">╭─ Parsing error ────────────────────────────────────╮
-│ Argument --all/-a: expected 1 argument             │
-│ ────────────────────────────────────────────────── │
-│ For full helptext, run 11_aliases.py commit --help │
-╰────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/11_aliases.py commit -m hello -a</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/11_aliases.py checkout --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py checkout [-h] --branch STR
 

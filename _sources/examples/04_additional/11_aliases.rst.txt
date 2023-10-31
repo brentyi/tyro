@@ -27,7 +27,7 @@ Argument aliases
 
         def commit(
             message: Annotated[str, tyro.conf.arg(aliases=["-m"])],
-            all: Annotated[str, tyro.conf.arg(aliases=["-a"])],
+            all: Annotated[bool, tyro.conf.arg(aliases=["-a"])] = False,
         ) -> None:
             """Make a commit."""
             print(f"{message=} {all=}")
