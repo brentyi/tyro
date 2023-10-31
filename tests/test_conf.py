@@ -1135,6 +1135,8 @@ def test_alias() -> None:
     assert "'a'" in error
     assert "'b'" not in error
 
+    assert "--x.struct.a INT, --all INT, -d INT" in get_helptext(Config)
+
 
 def test_positional_alias() -> None:
     """Positional arguments with aliases (which will be ignored)."""
