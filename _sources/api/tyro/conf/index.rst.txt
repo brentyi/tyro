@@ -19,8 +19,8 @@
 Package Contents
 ----------------
 
-.. py:function:: arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None) -> Any
-                 arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, prefix_name: bool = True, constructor: Optional[Union[Type, Callable]] = None, constructor_factory: None = None) -> Any
+.. py:function:: arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, aliases: Optional[Sequence[str]] = None, prefix_name: Optional[bool] = None, constructor: None = None, constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None) -> Any
+                 arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, aliases: Optional[Sequence[str]] = None, prefix_name: Optional[bool] = None, constructor: Optional[Union[Type, Callable]] = None, constructor_factory: None = None) -> Any
 
    
    Returns a metadata object for fine-grained argument configuration with
@@ -33,8 +33,11 @@ Package Contents
    :param name: A new name for the argument.
    :param metavar: Argument name in usage messages. The type is used by default.
    :param help: Helptext for this argument. The docstring is used by default.
+   :param aliases: Aliases for this argument. All strings in the sequence should start
+                   with a hyphen (-). Aliases will *not* currently be prefixed in a nested
+                   structure, and are not supported for positional arguments.
    :param prefix_name: Whether or not to prefix the name of the argument based on where
-                       it is in a nested structure.
+                       it is in a nested structure. Arguments are prefixed by default.
    :param constructor: A constructor type or function. This should either be (a) a subtype
                        of an argument's annotated type, or (b) a function with type-annotated
                        inputs that returns an instance of the annotated type. This will be used in

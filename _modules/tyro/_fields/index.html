@@ -202,6 +202,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument aliases</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -337,7 +338,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">type_or_callable</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
+        <span class="n">type_or_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span>
         <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
         <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">call_argname_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -348,12 +349,26 @@
         <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
             <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">argconfs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">argconf</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">argconfs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-            <span class="p">(</span><span class="n">argconf</span><span class="p">,)</span> <span class="o">=</span> <span class="n">argconfs</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span>
+        <span class="n">argconf</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span><span class="p">(</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="kc">None</span><span class="p">,</span>
+            <span class="n">help</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">aliases</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">prefix_name</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">constructor_factory</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">overwrite_argconf</span> <span class="ow">in</span> <span class="n">argconfs</span><span class="p">:</span>
+            <span class="c1"># Apply any annotated argument configuration values.</span>
+            <span class="n">argconf</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="n">argconf</span><span class="p">,</span>
+                <span class="o">**</span><span class="p">{</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">overwrite_argconf</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">overwrite_argconf</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">overwrite_argconf</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                <span class="p">},</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">helptext</span> <span class="o">=</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span>
 
         <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">inferred_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
             <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span>

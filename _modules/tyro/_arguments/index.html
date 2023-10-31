@@ -202,6 +202,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument aliases</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -404,8 +405,19 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;metavar&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span>
 
-        <span class="c1"># Add argument!</span>
-        <span class="n">arg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># Add argument, with aliases if available.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">():</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+                <span class="n">name_or_flag</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="kn">import</span> <span class="nn">warnings</span>
+
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Aliases were specified, but </span><span class="si">{</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2"> is positional. Aliases will be ignored.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">arg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name_or_flag</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1"># Do our best to tab complete paths.</span>
         <span class="c1"># There will be false positives here, but if choices is unset they should be</span>
