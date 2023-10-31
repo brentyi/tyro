@@ -77,7 +77,7 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        type_or_callable: TypeForm[Any],
+        type_or_callable: Union[TypeForm[Any], Callable],
         default: Any,
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
@@ -88,12 +88,26 @@ class FieldDefinition:
         _, argconfs = _resolver.unwrap_annotated(
             type_or_callable, _confstruct._ArgConfiguration
         )
-        if len(argconfs) == 0:
-            argconf = _confstruct._ArgConfiguration(None, None, None, True, None)
-        else:
-            assert len(argconfs) == 1
-            (argconf,) = argconfs
-            helptext = argconf.help
+        argconf = _confstruct._ArgConfiguration(
+            None,
+            None,
+            help=None,
+            aliases=None,
+            prefix_name=True,
+            constructor_factory=None,
+        )
+        for overwrite_argconf in argconfs:
+            # Apply any annotated argument configuration values.
+            argconf = dataclasses.replace(
+                argconf,
+                **{
+                    field.name: getattr(overwrite_argconf, field.name)
+                    for field in dataclasses.fields(overwrite_argconf)
+                    if getattr(overwrite_argconf, field.name) is not None
+                },
+            )
+            if argconf.help is not None:
+                helptext = argconf.help
 
         type_or_callable, inferred_markers = _resolver.unwrap_annotated(
             type_or_callable, _markers._Marker

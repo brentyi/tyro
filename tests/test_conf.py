@@ -1090,3 +1090,82 @@ def test_custom_constructor_8() -> None:
     assert "We're missing arguments" in error
     assert "'a'" in error
     assert "'b'" not in error
+
+
+def test_alias() -> None:
+    """Arguments with aliases."""
+
+    @dataclasses.dataclass
+    class Struct:
+        a: Annotated[int, tyro.conf.arg(aliases=["--all", "-d"])]
+        b: int
+        c: int = 3
+
+    def make_float(struct: Struct) -> float:
+        return struct.a * struct.b * struct.c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    assert tyro.cli(
+        Config, args="--x.struct.b 2 --x.struct.c 3 --x.struct.a 5".split(" ")
+    ) == Config(x=30)
+    assert tyro.cli(
+        Config, args="--x.struct.b 2 --x.struct.c 3 -d 5".split(" ")
+    ) == Config(x=30)
+    assert tyro.cli(
+        Config, args="--x.struct.b 2 --x.struct.c 3 --all 5".split(" ")
+    ) == Config(x=30)
+    assert tyro.cli(Config, args="--x.struct.b 2 --x.struct.a 5".split(" ")) == Config(
+        x=30
+    )
+
+    # --x.struct.b is required!
+    with pytest.raises(SystemExit):
+        tyro.cli(Config, args="--x.struct.a 5".split(" "))
+
+    # --x.struct.a and --x.struct.b are required!
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(Config, args="--x.struct.b 5".split(" "))
+    error = target.getvalue()
+    assert "We're missing arguments" in error
+    assert "'a'" in error
+    assert "'b'" not in error
+
+    assert "--x.struct.a INT, --all INT, -d INT" in get_helptext(Config)
+
+
+def test_positional_alias() -> None:
+    """Positional arguments with aliases (which will be ignored)."""
+
+    @dataclasses.dataclass
+    class Struct:
+        a: Annotated[tyro.conf.Positional[int], tyro.conf.arg(aliases=["--all", "-d"])]
+        b: int
+        c: int = 3
+
+    def make_float(struct: Struct) -> float:
+        return struct.a * struct.b * struct.c
+
+    @dataclasses.dataclass
+    class Config:
+        x: Annotated[float, tyro.conf.arg(constructor=make_float)] = 3.23
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Config, args=[]) == Config(x=3.23)
+    with pytest.warns(UserWarning):
+        assert tyro.cli(
+            Config, args="--x.struct.b 2 --x.struct.c 3 5".split(" ")
+        ) == Config(x=30)
+
+    with pytest.raises(SystemExit), pytest.warns(UserWarning):
+        assert tyro.cli(
+            Config, args="--x.struct.b 2 --x.struct.c 3 -d 5".split(" ")
+        ) == Config(x=30)
+    with pytest.raises(SystemExit), pytest.warns(UserWarning):
+        assert tyro.cli(
+            Config, args="--x.struct.b 2 --x.struct.c 3 --all 5".split(" ")
+        ) == Config(x=30)

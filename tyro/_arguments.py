@@ -141,8 +141,19 @@ class ArgumentDefinition:
         if self.field.argconf.metavar is not None:
             kwargs["metavar"] = self.field.argconf.metavar
 
-        # Add argument!
-        arg = parser.add_argument(name_or_flag, **kwargs)
+        # Add argument, with aliases if available.
+        if self.field.argconf.aliases is not None and not self.field.is_positional():
+            arg = parser.add_argument(
+                name_or_flag, *self.field.argconf.aliases, **kwargs
+            )
+        else:
+            if self.field.argconf.aliases is not None:
+                import warnings
+
+                warnings.warn(
+                    f"Aliases were specified, but {name_or_flag} is positional. Aliases will be ignored."
+                )
+            arg = parser.add_argument(name_or_flag, **kwargs)
 
         # Do our best to tab complete paths.
         # There will be false positives here, but if choices is unset they should be
