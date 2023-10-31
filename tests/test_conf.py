@@ -1118,7 +1118,9 @@ def test_alias() -> None:
     assert tyro.cli(
         Config, args="--x.struct.b 2 --x.struct.c 3 --all 5".split(" ")
     ) == Config(x=30)
-    assert tyro.cli(Config, args="--x.struct.b 2 --x.struct.a 5".split(" ")) == Config(x=30)
+    assert tyro.cli(Config, args="--x.struct.b 2 --x.struct.a 5".split(" ")) == Config(
+        x=30
+    )
 
     # --x.struct.b is required!
     with pytest.raises(SystemExit):
