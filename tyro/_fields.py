@@ -846,6 +846,7 @@ def _field_list_from_params(
             # This will create a `--args T [T ...]` CLI argument.
             markers = (_markers._UnpackArgsCall,)
             typ = Tuple.__getitem__((typ, ...))  # type: ignore
+            default = ()
         elif param.kind is inspect.Parameter.VAR_KEYWORD:
             # Handle *kwargs signatures.
             #
@@ -857,6 +858,7 @@ def _field_list_from_params(
             # conjunction.
             markers = (_markers._UnpackKwargsCall,)
             typ = Dict.__getitem__((str, typ))  # type: ignore
+            default = {}
 
         field_list.append(
             FieldDefinition.make(
