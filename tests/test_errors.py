@@ -469,3 +469,13 @@ def test_similar_flag() -> None:
 
     # Printed in the similar argument list.
     assert error.count("--flag, --no-flag") == 1
+
+
+def test_value_error() -> None:
+    """https://github.com/brentyi/tyro/issues/86"""
+
+    def main() -> None:
+        raise ValueError("This shouldn't be caught by tyro")
+
+    with pytest.raises(ValueError):
+        tyro.cli(main, args=[])

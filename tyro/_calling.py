@@ -219,23 +219,28 @@ def call_from_args(
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
 
-    try:
-        if unwrapped_f in (tuple, list, set):
-            assert len(positional_args) == 0
-            # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
-            # use keyword arguments.
-            assert len(positional_args) == 0
-            return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
-        elif unwrapped_f is dict:
-            assert len(positional_args) == 0
-            return kwargs, consumed_keywords  # type: ignore
-        else:
+    if unwrapped_f in (tuple, list, set):
+        assert len(positional_args) == 0
+        # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
+        # use keyword arguments.
+        assert len(positional_args) == 0
+        return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
+    elif unwrapped_f is dict:
+        assert len(positional_args) == 0
+        return kwargs, consumed_keywords  # type: ignore
+    else:
+        if field_name_prefix == "":
+            # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
+            # raises a ValueError, this shouldn't be caught.
             return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
-
-    # If unwrapped_f raises a ValueError, wrap the message with a more informative
-    # InstantiationError if possible.
-    except ValueError as e:
-        raise InstantiationError(
-            e.args[0],
-            field_name_prefix,
-        )
+        else:
+            # Try to catch ValueErrors raised by field constructors.
+            try:
+                return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
+            # If unwrapped_f raises a ValueError, wrap the message with a more informative
+            # InstantiationError if possible.
+            except ValueError as e:
+                raise InstantiationError(
+                    e.args[0],
+                    field_name_prefix,
+                )
