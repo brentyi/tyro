@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Any, Literal, Optional, Union
 
 import pytest
@@ -17,6 +18,17 @@ def test_tuple():
         return x
 
     assert tyro.cli(main, args=["--x", "True", "False"]) == (True, "False")
+
+
+def test_tuple_nested():
+    @dataclasses.dataclass
+    class Args:
+        a: int
+
+    def main(x: tuple[Args, Args]) -> Any:
+        return x
+
+    assert tyro.cli(main, args=["--x.0.a", "3", "--x.1.a", "4"]) == (Args(3), Args(4))
 
 
 def test_tuple_variable():
