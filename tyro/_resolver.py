@@ -26,7 +26,7 @@ from typing_extensions import Annotated, get_args, get_origin, get_type_hints
 from . import _fields, _unsafe_cache
 from ._typing import TypeForm
 
-TypeOrCallable = TypeVar("TypeOrCallable", TypeForm, Callable)
+TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
 
 
 def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:

@@ -360,7 +360,7 @@ def _try_field_list_from_callable(
         return UnsupportedNestedTypeMessage(f"{f} should be parsed directly!")
     elif (
         cls is not None
-        and issubclass(cls, os.PathLike)
+        and issubclass(_resolver.unwrap_origin_strip_extras(cls), os.PathLike)
         and _instantiators.is_type_string_converter(cls)
     ):
         return UnsupportedNestedTypeMessage(
