@@ -491,4 +491,6 @@ def test_value_error_subcommand() -> None:
         raise ValueError("This shouldn't be caught by tyro")
 
     with pytest.raises(ValueError):
-        tyro.extras.subcommand_cli_from_dict({"main1": main1, "main2": main2}, args=["main1"])
+        tyro.extras.subcommand_cli_from_dict(
+            {"main1": main1, "main2": main2}, args=["main1"]
+        )
