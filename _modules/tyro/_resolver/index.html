@@ -280,7 +280,7 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 
-<span class="n">TypeOrCallable</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallable&quot;</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">,</span> <span class="n">Callable</span><span class="p">)</span>
+<span class="n">TypeOrCallable</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallable&quot;</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="unwrap_origin_strip_extras">

@@ -653,7 +653,7 @@
         <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="p">(</span>
         <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="bp">cls</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span>
         <span class="ow">and</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">is_type_string_converter</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
