@@ -239,7 +239,7 @@ def _rule_handle_defaults(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
-    """Set `required=True` if a default value is set."""
+    """Set `required=False` if a default value is set."""
 
     # Mark lowered as required if a default is set.
     if (

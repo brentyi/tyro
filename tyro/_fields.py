@@ -378,13 +378,14 @@ def _field_list_from_typeddict(
         default_instance not in MISSING_SINGLETONS
         and default_instance is not EXCLUDE_FROM_CALL
     )
+    assert not valid_default_instance or isinstance(default_instance, dict)
     total = getattr(cls, "__total__", True)
     assert isinstance(total, bool)
     assert not valid_default_instance or isinstance(default_instance, dict)
     for name, typ in get_type_hints(cls, include_extras=True).items():
         typ_origin = get_origin(typ)
-        if valid_default_instance:
-            default = default_instance.get(name, MISSING_PROP)  # type: ignore
+        if valid_default_instance and name in cast(dict, default_instance):
+            default = cast(dict, default_instance)[name]
         elif typ_origin is Required and total is False:
             # Support total=False.
             default = MISSING_PROP

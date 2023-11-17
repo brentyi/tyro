@@ -1176,12 +1176,12 @@ def test_flag_alias() -> None:
     class Struct:
         flag: Annotated[bool, tyro.conf.arg(aliases=["-f", "--flg"])] = False
 
-    assert tyro.cli(Struct, args=[]).flag == False
-    assert tyro.cli(Struct, args="--flag".split(" ")).flag == True
-    assert tyro.cli(Struct, args="--no-flag".split(" ")).flag == False
-    assert tyro.cli(Struct, args="--flg".split(" ")).flag == True
-    assert tyro.cli(Struct, args="--no-flg".split(" ")).flag == False
-    assert tyro.cli(Struct, args="-f".split(" ")).flag == True
+    assert tyro.cli(Struct, args=[]).flag is False
+    assert tyro.cli(Struct, args="--flag".split(" ")).flag is True
+    assert tyro.cli(Struct, args="--no-flag".split(" ")).flag is False
+    assert tyro.cli(Struct, args="--flg".split(" ")).flag is True
+    assert tyro.cli(Struct, args="--no-flg".split(" ")).flag is False
+    assert tyro.cli(Struct, args="-f".split(" ")).flag is True
 
     # BooleanOptionalAction will ignore arguments that aren't prefixed with --.
     with pytest.raises(SystemExit):

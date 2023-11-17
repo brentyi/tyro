@@ -59,7 +59,6 @@ def call_from_args(
             _strings.make_field_name([arg.dest_prefix, arg.field.name])
         ] = arg
 
-    optional_group = any([_markers._OPTIONAL_GROUP in f.markers for f in field_list])
     any_arguments_provided = False
 
     for field in field_list:
