@@ -569,7 +569,8 @@
         <span class="c1"># Check that the default value matches the final resolved type.</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+                <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
                 <span class="c1"># If a custom constructor is set, field.type_or_callable may not be</span>
                 <span class="c1"># matched to the annotated type.</span>
                 <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">custom_constructor</span>
