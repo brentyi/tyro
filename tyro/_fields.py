@@ -9,6 +9,7 @@ import enum
 import functools
 import inspect
 import itertools
+import numbers
 import os
 import sys
 import typing
@@ -56,9 +57,12 @@ from .conf import _confstruct, _markers
 class FieldDefinition:
     name: str
     type_or_callable: Union[TypeForm[Any], Callable]
+    """Type or callable for this field. This should have all Annotated[] annotations
+    stripped."""
     default: Any
     helptext: Optional[str]
     markers: FrozenSet[_markers._Marker]
+    custom_constructor: bool
 
     argconf: _confstruct._ArgConfiguration
 
@@ -119,9 +123,12 @@ class FieldDefinition:
             else argconf.constructor_factory(),
             default,
             helptext,
-            frozenset(inferred_markers).union(markers),
-            argconf,
-            call_argname_override if call_argname_override is not None else name,
+            markers=frozenset(inferred_markers).union(markers),
+            custom_constructor=argconf.constructor_factory is not None,
+            argconf=argconf,
+            call_argname=call_argname_override
+            if call_argname_override is not None
+            else name,
         )
 
     def add_markers(self, markers: Tuple[Any, ...]) -> FieldDefinition:
@@ -202,6 +209,11 @@ try:
 except ImportError:
     pass
 
+DEFAULT_SENTINEL_SINGLETONS = MISSING_SINGLETONS + [
+    NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE,
+    EXCLUDE_FROM_CALL,
+]
+
 
 @dataclasses.dataclass(frozen=True)
 class UnsupportedNestedTypeMessage:
@@ -261,6 +273,31 @@ def field_list_from_callable(
         typ = _resolver.type_from_typevar_constraints(typ)
         typ = _resolver.narrow_container_types(typ, field.default)
         typ = _resolver.narrow_union_type(typ, field.default)
+
+        # Check that the default value matches the final resolved type.
+        try:
+            if (
+                not isinstance(field.default, typ)  # type: ignore
+                # If a custom constructor is set, field.type_or_callable may not be
+                # matched to the annotated type.
+                and not field.custom_constructor
+                and field.default not in DEFAULT_SENTINEL_SINGLETONS
+                # The numeric tower in Python is wacky. This logic is non-critical, so
+                # we'll just skip it (+the complexity) for numbers.
+                and not isinstance(field.default, numbers.Number)
+            ):
+                # If the default value doesn't match the resolved type, we expand the
+                # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
+                warnings.warn(
+                    f"The field {field.name} is annotated with type {field.type_or_callable}, "
+                    f"but the default value {field.default} has type {type(field.default)}. "
+                    f"We'll try to handle this gracefully, but it may cause unexpected behavior."
+                )
+                typ = Union[typ, type(field.default)]  # type: ignore
+        except TypeError:
+            # An isinstance() check wasn't possible.
+            pass
+
         field = dataclasses.replace(field, type_or_callable=typ)
         return field
 

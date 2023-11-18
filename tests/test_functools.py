@@ -42,7 +42,7 @@ def test_partial_helptext_class() -> None:
         def __init__(self, a: int, b: str) -> None:
             self.inner = b * a
 
-    helptext = get_helptext(functools.partial(Main, b=3))
+    helptext = get_helptext(functools.partial(Main, b="3"))
     assert "partial" not in helptext
     assert "Hello!" in helptext
 
@@ -76,7 +76,7 @@ def test_wraps_partial_func_helptext() -> None:
 
     assert tyro.cli(functools.partial(wrapper, a=3), args=["--b", "hi"]) == 3
 
-    helptext = get_helptext(functools.partial(wrapper, b=3))
+    helptext = get_helptext(functools.partial(wrapper, b="3"))
     assert "wraps" not in helptext
     assert "Hello!" in helptext
     assert "Argument." in helptext
@@ -95,7 +95,7 @@ def test_wraps_partial_class_helptext() -> None:
 
     assert tyro.cli(functools.partial(wrapper, a=3), args=["--b", "hi"]) == 3
 
-    helptext = get_helptext(functools.partial(wrapper, b=3))
+    helptext = get_helptext(functools.partial(wrapper, b="3"))
     assert "wraps" not in helptext
     assert "Hello!" in helptext
 
@@ -127,7 +127,7 @@ def test_wraps_partial_dataclass() -> None:
         == "hellohellohello"
     )
 
-    helptext = get_helptext(functools.partial(wrapper, b=3))
+    helptext = get_helptext(functools.partial(wrapper, b="3"))
     assert "wraps" not in helptext
     assert "Hello!" in helptext
     assert "Second field." in helptext
