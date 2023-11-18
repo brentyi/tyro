@@ -277,7 +277,8 @@ def field_list_from_callable(
         # Check that the default value matches the final resolved type.
         try:
             if (
-                not isinstance(field.default, typ)  # type: ignore
+                type(typ) is type
+                and not isinstance(field.default, typ)  # type: ignore
                 # If a custom constructor is set, field.type_or_callable may not be
                 # matched to the annotated type.
                 and not field.custom_constructor
