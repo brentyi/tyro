@@ -680,6 +680,27 @@ def test_unpack() -> None:
     ) == ((1, 2, 3), {"learning_rate": 1e-4, "beta1": 0.99})
 
 
+def test_unpack_with_other_args() -> None:
+    def main(
+        other1: str, other2: str = "3", *args: int, **kwargs: float
+    ) -> Tuple[str, str, Tuple[int, ...], Dict[str, float]]:
+        return other1, other2, args, kwargs
+
+    assert tyro.cli(main, args=["--other1", "hi"]) == ("hi", "3", (), {})
+    assert tyro.cli(main, args="--other1 ok --args --kwargs".split(" ")) == (
+        "ok",
+        "3",
+        (),
+        {},
+    )
+    assert tyro.cli(
+        main,
+        args="--args 1 2 3 --kwargs learning_rate 1e-4 beta1 0.99 --other1 hello".split(
+            " "
+        ),
+    ) == ("hello", "3", (1, 2, 3), {"learning_rate": 1e-4, "beta1": 0.99})
+
+
 def test_empty_container() -> None:
     @dataclasses.dataclass
     class A:
