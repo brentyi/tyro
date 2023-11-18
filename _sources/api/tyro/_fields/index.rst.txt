@@ -27,6 +27,8 @@ Module Contents
       :type: Union[tyro._typing.TypeForm[Any], Callable]
 
       
+      Type or callable for this field. This should have all Annotated[] annotations
+      stripped.
 
    .. py:attribute:: default
       :type: Any
@@ -40,6 +42,11 @@ Module Contents
 
    .. py:attribute:: markers
       :type: FrozenSet[tyro.conf._markers._Marker]
+
+      
+
+   .. py:attribute:: custom_constructor
+      :type: bool
 
       
 
@@ -122,6 +129,10 @@ Module Contents
    ``default_instance`` for ``tyro.cli()`` as required.
 
 .. py:data:: MISSING_SINGLETONS
+
+   
+
+.. py:data:: DEFAULT_SENTINEL_SINGLETONS
 
    
 

@@ -263,6 +263,7 @@
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span>
@@ -312,9 +313,12 @@
 <span class="k">class</span> <span class="nc">FieldDefinition</span><span class="p">:</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">type_or_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Type or callable for this field. This should have all Annotated[] annotations</span>
+<span class="sd">    stripped.&quot;&quot;&quot;</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
     <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">]</span>
+    <span class="n">custom_constructor</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="n">argconf</span><span class="p">:</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span>
 
@@ -380,9 +384,12 @@
             <span class="k">else</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">(),</span>
             <span class="n">default</span><span class="p">,</span>
             <span class="n">helptext</span><span class="p">,</span>
-            <span class="nb">frozenset</span><span class="p">(</span><span class="n">inferred_markers</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
-            <span class="n">argconf</span><span class="p">,</span>
-            <span class="n">call_argname_override</span> <span class="k">if</span> <span class="n">call_argname_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">inferred_markers</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
+            <span class="n">custom_constructor</span><span class="o">=</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">argconf</span><span class="o">=</span><span class="n">argconf</span><span class="p">,</span>
+            <span class="n">call_argname</span><span class="o">=</span><span class="n">call_argname_override</span>
+            <span class="k">if</span> <span class="n">call_argname_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="n">name</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
@@ -486,6 +493,11 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">pass</span>
 
+<span class="n">DEFAULT_SENTINEL_SINGLETONS</span> <span class="o">=</span> <span class="n">MISSING_SINGLETONS</span> <span class="o">+</span> <span class="p">[</span>
+    <span class="n">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE</span><span class="p">,</span>
+    <span class="n">EXCLUDE_FROM_CALL</span><span class="p">,</span>
+<span class="p">]</span>
+
 
 <div class="viewcode-block" id="UnsupportedNestedTypeMessage">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.UnsupportedNestedTypeMessage">[docs]</a>
@@ -553,6 +565,31 @@
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_container_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+
+        <span class="c1"># Check that the default value matches the final resolved type.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+                <span class="c1"># If a custom constructor is set, field.type_or_callable may not be</span>
+                <span class="c1"># matched to the annotated type.</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">custom_constructor</span>
+                <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
+                <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
+                <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
+                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
+                <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;The field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is annotated with type </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;but the default value </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2"> has type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">typ</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># An isinstance() check wasn&#39;t possible.</span>
+            <span class="k">pass</span>
+
         <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">type_or_callable</span><span class="o">=</span><span class="n">typ</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">field</span>
 
