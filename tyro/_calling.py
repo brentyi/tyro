@@ -177,12 +177,16 @@ def call_from_args(
             continue
 
         if _markers._UnpackArgsCall in field.markers:
+            if len(positional_args) == 0 and len(kwargs) > 0:
+                positional_args.extend(kwargs.values())
+                kwargs.clear()
             assert isinstance(value, tuple)
             positional_args.extend(value)
         elif _markers._UnpackKwargsCall in field.markers:
             assert isinstance(value, dict)
             kwargs.update(value)
         elif field.is_positional_call():
+            assert len(kwargs) == 0
             positional_args.append(value)
         else:
             kwargs[field.call_argname] = value
