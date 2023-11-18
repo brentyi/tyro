@@ -494,3 +494,17 @@ def test_value_error_subcommand() -> None:
         tyro.extras.subcommand_cli_from_dict(
             {"main1": main1, "main2": main2}, args=["main1"]
         )
+
+
+def test_wrong_annotation() -> None:
+    @dataclasses.dataclass
+    class Args:
+        x: dict = None  # type: ignore
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Args, args=[]).x is None
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Args, args="--x key value k v".split(" ")).x == {
+            "key": "value",
+            "k": "v",
+        }
