@@ -402,10 +402,10 @@
 
 
 
-<div class="viewcode-block" id="narrow_type">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_type">[docs]</a>
+<div class="viewcode-block" id="narrow_subtypes">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_subtypes">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">narrow_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">narrow_subtypes</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat,</span>
 <span class="sd">    we should parse as Cat.</span>
 
@@ -442,9 +442,9 @@
 
 
 
-<div class="viewcode-block" id="narrow_container_types">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_container_types">[docs]</a>
-<span class="k">def</span> <span class="nf">narrow_container_types</span><span class="p">(</span>
+<div class="viewcode-block" id="narrow_collection_types">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_collection_types">[docs]</a>
+<span class="k">def</span> <span class="nf">narrow_collection_types</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;TypeForm narrowing for containers. Infers types of container contents.&quot;&quot;&quot;</span>
@@ -550,7 +550,7 @@
 <span class="sd">    --</span>
 <span class="sd">    For (A):</span>
 
-<span class="sd">    We raise a warning, then take the type of the default value.</span>
+<span class="sd">    We raise a warning, then add the type of the default value to the union.</span>
 <span class="sd">    Loosely motivated by: https://github.com/brentyi/tyro/issues/20</span>
 
 <span class="sd">    --</span>
@@ -598,7 +598,7 @@
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2"> does not match any type in Union:&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">options_unwrapped</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">options</span> <span class="o">+</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">),))</span>  <span class="c1"># type: ignore</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="k">pass</span>
 

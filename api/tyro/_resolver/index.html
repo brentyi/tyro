@@ -351,8 +351,8 @@ unsuccessful.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._resolver.narrow_type">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#narrow_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.narrow_type" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="tyro._resolver.narrow_subtypes">
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_subtypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#narrow_subtypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.narrow_subtypes" title="Link to this definition">#</a></dt>
 <dd><p>Type narrowing: if we annotate as Animal but specify a default instance of Cat,
 we should parse as Cat.</p>
 <p>This should generally only be applied to fields used as nested structures, not
@@ -373,8 +373,8 @@ strings!)</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._resolver.narrow_container_types">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_container_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#narrow_container_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.narrow_container_types" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="tyro._resolver.narrow_collection_types">
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_collection_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#narrow_collection_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.narrow_collection_types" title="Link to this definition">#</a></dt>
 <dd><p>TypeForm narrowing for containers. Infers types of container contents.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -445,7 +445,7 @@ strings!)</p>
 </div></blockquote>
 <p>–
 For (A):</p>
-<p>We raise a warning, then take the type of the default value.
+<p>We raise a warning, then add the type of the default value to the union.
 Loosely motivated by: <a class="reference external" href="https://github.com/brentyi/tyro/issues/20">https://github.com/brentyi/tyro/issues/20</a></p>
 <p>–
 For (B):</p>
@@ -546,8 +546,8 @@ likely require a big code refactor.</p>
 <li><a class="reference internal" href="#tyro._resolver.resolved_fields"><code class="docutils literal notranslate"><span class="pre">resolved_fields()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.is_namedtuple"><code class="docutils literal notranslate"><span class="pre">is_namedtuple()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.type_from_typevar_constraints"><code class="docutils literal notranslate"><span class="pre">type_from_typevar_constraints()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._resolver.narrow_type"><code class="docutils literal notranslate"><span class="pre">narrow_type()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._resolver.narrow_container_types"><code class="docutils literal notranslate"><span class="pre">narrow_container_types()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.narrow_subtypes"><code class="docutils literal notranslate"><span class="pre">narrow_subtypes()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.narrow_collection_types"><code class="docutils literal notranslate"><span class="pre">narrow_collection_types()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.MetadataType"><code class="docutils literal notranslate"><span class="pre">MetadataType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.unwrap_annotated"><code class="docutils literal notranslate"><span class="pre">unwrap_annotated()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.apply_type_from_typevar"><code class="docutils literal notranslate"><span class="pre">apply_type_from_typevar()</span></code></a></li>

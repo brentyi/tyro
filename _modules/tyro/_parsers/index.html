@@ -258,7 +258,6 @@
 
 <span class="kn">import</span> <span class="nn">argparse</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
@@ -580,7 +579,7 @@
         <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                 <span class="n">field</span><span class="p">,</span>
-                <span class="n">type_or_callable</span><span class="o">=</span><span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_type</span><span class="p">(</span>
+                <span class="n">type_or_callable</span><span class="o">=</span><span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_subtypes</span><span class="p">(</span>
                     <span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span>
                     <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="p">),</span>
@@ -706,17 +705,15 @@
             <span class="n">default_name</span> <span class="o">=</span> <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">subcommand_config_from_name</span><span class="p">,</span> <span class="n">subcommand_type_from_name</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="c1"># This should really be an error, but we can raise a warning to make</span>
-                <span class="c1"># hacking at subcommands easier:</span>
-                <span class="c1"># https://github.com/brentyi/tyro/issues/20</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> but no matching subcommand was found. A&quot;</span>
-                    <span class="s2">&quot; type may be missing in the Union type declaration for&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">.&quot;</span>
-                <span class="p">)</span>
-                <span class="k">return</span> <span class="kc">None</span>
+
+            <span class="c1"># This should never be triggered because union types are expanded when</span>
+            <span class="c1"># a bad default value is provided.</span>
+            <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> but no matching subcommand was found. A&quot;</span>
+                <span class="s2">&quot; type may be missing in the Union type declaration for&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
 
         <span class="c1"># Add subcommands for each option.</span>
         <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
