@@ -723,6 +723,7 @@ def test_append_lists() -> None:
     class A:
         x: tyro.conf.UseAppendAction[List[int]]
 
+    assert tyro.cli(A, args=[]) == A(x=[])
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
     assert tyro.cli(A, args=[]) == A(x=[])
     with pytest.raises(SystemExit):
@@ -736,6 +737,7 @@ def test_append_tuple() -> None:
     class A:
         x: tyro.conf.UseAppendAction[Tuple[int, ...]]
 
+    assert tyro.cli(A, args=[]) == A(x=())
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 3))
     assert tyro.cli(A, args=[]) == A(x=())
     with pytest.raises(SystemExit):

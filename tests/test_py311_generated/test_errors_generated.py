@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import List, Tuple, TypeVar, Union
+from typing import Dict, List, Literal, Tuple, TypeVar, Union
 
 import pytest
 
@@ -469,3 +469,84 @@ def test_similar_flag() -> None:
 
     # Printed in the similar argument list.
     assert error.count("--flag, --no-flag") == 1
+
+
+def test_value_error() -> None:
+    """https://github.com/brentyi/tyro/issues/86"""
+
+    def main() -> None:
+        raise ValueError("This shouldn't be caught by tyro")
+
+    with pytest.raises(ValueError):
+        tyro.cli(main, args=[])
+
+
+def test_value_error_subcommand() -> None:
+    """https://github.com/brentyi/tyro/issues/86"""
+
+    def main1() -> None:
+        raise ValueError("This shouldn't be caught by tyro")
+
+    def main2() -> None:
+        raise ValueError("This shouldn't be caught by tyro")
+
+    with pytest.raises(ValueError):
+        tyro.extras.subcommand_cli_from_dict(
+            {"main1": main1, "main2": main2}, args=["main1"]
+        )
+
+
+def test_wrong_annotation() -> None:
+    @dataclasses.dataclass
+    class Args:
+        x: dict = None  # type: ignore
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Args, args=[]).x is None
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Args, args="--x key value k v".split(" ")).x == {
+            "key": "value",
+            "k": "v",
+        }
+
+
+def test_bad_dict_control() -> None:
+    assert tyro.cli(
+        Dict[Literal["a", "b"], Literal["c", "d"]], args="a c b d".split(" ")
+    ) == {"a": "c", "b": "d"}
+
+
+def test_bad_dict_key() -> None:
+    with pytest.raises(SystemExit):
+        tyro.cli(Dict[Literal["a", "b"], Literal["c", "d"]], args="c c d d".split(" "))
+
+
+def test_bad_dict_val() -> None:
+    assert tyro.cli(
+        Dict[Literal["a", "b"], Literal["c", "d"]], args="a c b d".split(" ")
+    ) == {"a": "c", "b": "d"}
+    with pytest.raises(SystemExit):
+        tyro.cli(Dict[Literal["a", "b"], Literal["c", "d"]], args="a a b b".split(" "))
+
+
+def test_invalid_subcommand_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+
+    @dataclasses.dataclass
+    class C:
+        c: int
+
+    assert tyro.cli(Union[A, B], args="a --a 5".split(" ")) == A(5)  # type: ignore
+    assert tyro.cli(Union[A, B], args="b --b 5".split(" ")) == B(5)  # type: ignore
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Union[A, B], default=C(3), args=[]) == C(3)  # type: ignore
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Union[A, B], default=C(3), args="b --b 5".split(" ")) == B(5)  # type: ignore

@@ -28,7 +28,7 @@ def test_partial_helptext_func() -> None:
         """Hello!"""
         return b * a
 
-    helptext = get_helptext(functools.partial(main, b=3))
+    helptext = get_helptext(functools.partial(main, b="3"))
     assert "partial" not in helptext
     assert "Hello!" in helptext
 
@@ -40,7 +40,7 @@ def test_partial_helptext_class() -> None:
         def __init__(self, a: int, b: str) -> None:
             self.inner = b * a
 
-    helptext = get_helptext(functools.partial(Main, b=3))
+    helptext = get_helptext(functools.partial(Main, b="3"))
     assert "partial" not in helptext
     assert "Hello!" in helptext
 

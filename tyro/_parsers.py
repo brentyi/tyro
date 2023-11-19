@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
-import warnings
 from typing import (
     Any,
     Callable,
@@ -312,7 +311,7 @@ def handle_field(
         if _fields.is_nested_type(field.type_or_callable, field.default):
             field = dataclasses.replace(
                 field,
-                type_or_callable=_resolver.narrow_type(
+                type_or_callable=_resolver.narrow_subtypes(
                     field.type_or_callable,
                     field.default,
                 ),
@@ -433,17 +432,15 @@ class SubparsersSpecification:
             default_name = _subcommand_matching.match_subcommand(
                 field.default, subcommand_config_from_name, subcommand_type_from_name
             )
-            if default_name is None:
-                # This should really be an error, but we can raise a warning to make
-                # hacking at subcommands easier:
-                # https://github.com/brentyi/tyro/issues/20
-                warnings.warn(
-                    f"`{prefix}` was provided a default value of type"
-                    f" {type(field.default)} but no matching subcommand was found. A"
-                    " type may be missing in the Union type declaration for"
-                    f" `{prefix}`, which currently expects {options}."
-                )
-                return None
+
+            # This should never be triggered because union types are expanded when
+            # a bad default value is provided.
+            assert default_name is not None, (
+                f"`{prefix}` was provided a default value of type"
+                f" {type(field.default)} but no matching subcommand was found. A"
+                " type may be missing in the Union type declaration for"
+                f" `{prefix}`, which currently expects {options}."
+            )
 
         # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}

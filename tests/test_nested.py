@@ -3,6 +3,7 @@ from typing import Any, Generic, Mapping, Optional, Tuple, TypeVar, Union
 
 import pytest
 from frozendict import frozendict  # type: ignore
+from helptext_utils import get_helptext
 from typing_extensions import Annotated, Literal
 
 import tyro
@@ -406,10 +407,8 @@ def test_subparser_with_default_bad() -> None:
     # Tolerate bad static types: https://github.com/brentyi/tyro/issues/20
     # Should give us a bunch of warnings!
     with pytest.warns(UserWarning):
-        assert tyro.cli(
-            DefaultSubparser, args=["--x", "1", "--bc", "3"]
-        ) == DefaultSubparser(
-            1, 3  # type: ignore
+        assert tyro.cli(DefaultSubparser, args=["--x", "1"]) == DefaultSubparser(
+            1, 5  # type: ignore
         )
 
 
@@ -428,7 +427,7 @@ def test_subparser_with_default_bad_alt() -> None:
         c: int
 
     with pytest.warns(UserWarning):
-        assert tyro.cli(Union[A, B], default=C(3), args=["--c", "2"]) == C(2)  # type: ignore
+        assert tyro.cli(Union[A, B], default=C(3), args=["c", "--c", "2"]) == C(2)  # type: ignore
 
 
 def test_optional_subparser() -> None:
@@ -1052,3 +1051,18 @@ def test_subcommand_dict_helper() -> None:
         },
         args="commit --message hello --all".split(" "),
     ) == ("hello", True)
+
+
+def test_subcommand_by_type_tree() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class A:
+        a: Union[int, str]
+
+    @dataclasses.dataclass
+    class Args:
+        inner: Union[
+            Annotated[A, tyro.conf.subcommand(name="alt", default=A(5))], A
+        ] = A("hello")
+
+    assert tyro.cli(Args, args=[]) == Args(A("hello"))
+    assert "default: inner:alt" in get_helptext(Args)

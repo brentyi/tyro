@@ -254,7 +254,7 @@ def field_list_from_callable(
     """
     # Resolve generic types.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
-    f = _resolver.narrow_type(f, default_instance)
+    f = _resolver.narrow_subtypes(f, default_instance)
 
     # Try to generate field list.
     field_list = _try_field_list_from_callable(f, default_instance)
@@ -271,33 +271,34 @@ def field_list_from_callable(
         typ = field.type_or_callable
         typ = _resolver.apply_type_from_typevar(typ, type_from_typevar)
         typ = _resolver.type_from_typevar_constraints(typ)
-        typ = _resolver.narrow_container_types(typ, field.default)
+        typ = _resolver.narrow_collection_types(typ, field.default)
         typ = _resolver.narrow_union_type(typ, field.default)
 
         # Check that the default value matches the final resolved type.
-        try:
-            if (
-                type(typ) is type
-                and not isinstance(field.default, typ)  # type: ignore
-                # If a custom constructor is set, field.type_or_callable may not be
-                # matched to the annotated type.
-                and not field.custom_constructor
-                and field.default not in DEFAULT_SENTINEL_SINGLETONS
-                # The numeric tower in Python is wacky. This logic is non-critical, so
-                # we'll just skip it (+the complexity) for numbers.
-                and not isinstance(field.default, numbers.Number)
-            ):
-                # If the default value doesn't match the resolved type, we expand the
-                # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
-                warnings.warn(
-                    f"The field {field.name} is annotated with type {field.type_or_callable}, "
-                    f"but the default value {field.default} has type {type(field.default)}. "
-                    f"We'll try to handle this gracefully, but it may cause unexpected behavior."
-                )
-                typ = Union[typ, type(field.default)]  # type: ignore
-        except TypeError:
-            # An isinstance() check wasn't possible.
-            pass
+        # There's some similar Union-specific logic for this in narrow_union_type(). We
+        # may be able to consolidate this.
+        if (
+            # Be relatively conservative: isinstance() can be checked on non-type
+            # types (like unions in Python >=3.10), but we'll only consider single types
+            # for now.
+            type(typ) is type
+            and not isinstance(field.default, typ)  # type: ignore
+            # If a custom constructor is set, field.type_or_callable may not be
+            # matched to the annotated type.
+            and not field.custom_constructor
+            and field.default not in DEFAULT_SENTINEL_SINGLETONS
+            # The numeric tower in Python is wacky. This logic is non-critical, so
+            # we'll just skip it (+the complexity) for numbers.
+            and not isinstance(field.default, numbers.Number)
+        ):
+            # If the default value doesn't match the resolved type, we expand the
+            # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
+            warnings.warn(
+                f"The field {field.name} is annotated with type {field.type_or_callable}, "
+                f"but the default value {field.default} has type {type(field.default)}. "
+                f"We'll try to handle this gracefully, but it may cause unexpected behavior."
+            )
+            typ = Union[typ, type(field.default)]  # type: ignore
 
         field = dataclasses.replace(field, type_or_callable=typ)
         return field
@@ -339,7 +340,8 @@ def _try_field_list_from_callable(
 
     # Unwrap generics.
     f, _ = _resolver.resolve_generic_types(f)
-    f = _resolver.narrow_type(f, default_instance)
+    f = _resolver.narrow_subtypes(f, default_instance)
+    f = _resolver.narrow_collection_types(f, default_instance)
     f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
 
     # If `f` is a type:
@@ -389,7 +391,7 @@ def _try_field_list_from_callable(
         set,
         typing.Sequence,
     ):
-        return _field_list_from_sequence_checked(f, default_instance)
+        return _field_list_from_nontuple_sequence_checked(f, default_instance)
 
     # General cases.
     if (
@@ -705,18 +707,19 @@ def _field_list_from_tuple(
     return field_list
 
 
-def _field_list_from_sequence_checked(
+def _field_list_from_nontuple_sequence_checked(
     f: Union[Callable, TypeForm[Any]], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    """Tuples are handled differently due to variadics (tuple[T1, T2, T3, ..., Tn]),
+    while list[], sequence[], set[], etc only have one typevar."""
     contained_type: Any
     if len(get_args(f)) == 0:
-        if default_instance in MISSING_SINGLETONS:
-            return UnsupportedNestedTypeMessage(
-                f"Sequence type {f} needs either an explicit type or a"
-                " default to infer from."
-            )
-        assert isinstance(default_instance, Iterable)
-        contained_type = next(iter(default_instance))
+        # A raw collection type (list, tuple, etc) was passed in, but narrowing also failed.
+        assert default_instance in MISSING_SINGLETONS, f"{default_instance} {f}"
+        return UnsupportedNestedTypeMessage(
+            f"Sequence type {f} needs either an explicit type or a"
+            " default to infer from."
+        )
     else:
         (contained_type,) = get_args(f)
     return _try_field_list_from_sequence_inner(contained_type, default_instance)

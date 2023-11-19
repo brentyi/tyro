@@ -55,8 +55,9 @@ def match_subcommand(
         ):
             return subcommand_name
 
-    # Failed!
-    return None
+    # Failed. This should never happen, we'll raise an error outside of this function if
+    # this is the case.
+    return None  # pragma: no cover
 
 
 @dataclasses.dataclass(frozen=True)

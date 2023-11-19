@@ -131,7 +131,7 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def narrow_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
+def narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
     """Type narrowing: if we annotate as Animal but specify a default instance of Cat,
     we should parse as Cat.
 
@@ -167,10 +167,12 @@ def narrow_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
     return typ
 
 
-def narrow_container_types(
+def narrow_collection_types(
     typ: TypeOrCallable, default_instance: Any
 ) -> TypeOrCallable:
     """TypeForm narrowing for containers. Infers types of container contents."""
+    if hasattr(default_instance, "__len__") and len(default_instance) == 0:
+        return typ
     if typ is list and isinstance(default_instance, list):
         typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
     elif typ is set and isinstance(default_instance, set):
@@ -264,7 +266,7 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     --
     For (A):
 
-    We raise a warning, then take the type of the default value.
+    We raise a warning, then add the type of the default value to the union.
     Loosely motivated by: https://github.com/brentyi/tyro/issues/20
 
     --
@@ -312,7 +314,7 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
                 f"{type(default_instance)} does not match any type in Union:"
                 f" {options_unwrapped}"
             )
-            return type(default_instance)
+            return Union.__getitem__(options + (type(default_instance),))  # type: ignore
     except TypeError:
         pass
 
