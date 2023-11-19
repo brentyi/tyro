@@ -895,11 +895,9 @@
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
         <span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">append_sequence_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">strings</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                <span class="k">return</span> <span class="n">container_type</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">make</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">def</span> <span class="nf">append_sequence_instantiator</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">strings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">container_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">make</span><span class="p">)(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">append_sequence_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="n">inner_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span>

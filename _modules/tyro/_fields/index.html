@@ -569,29 +569,28 @@
         <span class="c1"># Check that the default value matches the final resolved type.</span>
         <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
         <span class="c1"># may be able to consolidate this.</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-                <span class="c1"># If a custom constructor is set, field.type_or_callable may not be</span>
-                <span class="c1"># matched to the annotated type.</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">custom_constructor</span>
-                <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
-                <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
-                <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
-                <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
-            <span class="p">):</span>
-                <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
-                <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;The field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is annotated with type </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">, &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;but the default value </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2"> has type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
-                <span class="p">)</span>
-                <span class="n">typ</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="c1"># An isinstance() check wasn&#39;t possible.</span>
-            <span class="k">pass</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="c1"># Be relatively conservative: isinstance() can be checked on non-type</span>
+            <span class="c1"># types (like unions in Python &gt;=3.10), but we&#39;ll only consider single types</span>
+            <span class="c1"># for now.</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="c1"># If a custom constructor is set, field.type_or_callable may not be</span>
+            <span class="c1"># matched to the annotated type.</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">custom_constructor</span>
+            <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
+            <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
+            <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
+            <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is annotated with type </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;but the default value </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2"> has type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
 
         <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">type_or_callable</span><span class="o">=</span><span class="n">typ</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">field</span>
