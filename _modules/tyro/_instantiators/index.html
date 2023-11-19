@@ -878,6 +878,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc.&quot;&quot;&quot;</span>
     <span class="n">container_type</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">container_type</span> <span class="ow">is</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">:</span>
         <span class="n">container_type</span> <span class="o">=</span> <span class="nb">list</span>
 
