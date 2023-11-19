@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Any, Literal, Optional, Union
 
 import pytest
@@ -5,28 +6,39 @@ import pytest
 import tyro
 
 
-def test_list():
+def test_list() -> None:
     def main(x: list[bool]) -> Any:
         return x
 
     assert tyro.cli(main, args=["--x", "True", "False"]) == [True, False]
 
 
-def test_tuple():
+def test_tuple() -> None:
     def main(x: tuple[bool, str]) -> Any:
         return x
 
     assert tyro.cli(main, args=["--x", "True", "False"]) == (True, "False")
 
 
-def test_tuple_variable():
+def test_tuple_nested() -> None:
+    @dataclasses.dataclass
+    class Args:
+        a: int
+
+    def main(x: tuple[Args, Args]) -> Any:
+        return x
+
+    assert tyro.cli(main, args=["--x.0.a", "3", "--x.1.a", "4"]) == (Args(3), Args(4))
+
+
+def test_tuple_variable() -> None:
     def main(x: tuple[Union[bool, str], ...]) -> Any:
         return x
 
     assert tyro.cli(main, args=["--x", "True", "Wrong"]) == (True, "Wrong")
 
 
-def test_super_nested():
+def test_super_nested() -> None:
     def main(
         x: Optional[
             list[

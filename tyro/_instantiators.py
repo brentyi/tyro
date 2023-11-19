@@ -609,6 +609,7 @@ def _instantiator_from_sequence(
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc."""
     container_type = get_origin(typ)
+    assert container_type is not None
     if container_type is collections.abc.Sequence:
         container_type = list
 
@@ -626,11 +627,9 @@ def _instantiator_from_sequence(
             markers=markers - {_markers.UseAppendAction},
         )
 
-        def append_sequence_instantiator(strings: Optional[List[List[str]]]) -> Any:
-            if strings is None:
-                assert container_type is not None
-                return container_type()
-            return container_type(make(s) for s in strings)  # type: ignore
+        def append_sequence_instantiator(strings: List[List[str]]) -> Any:
+            assert strings is not None
+            return container_type(cast(_StandardInstantiator, make)(s) for s in strings)
 
         return append_sequence_instantiator, InstantiatorMetadata(
             nargs=inner_meta.nargs,

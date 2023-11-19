@@ -1,9 +1,10 @@
 import contextlib
 import dataclasses
 import io
-from typing import List, Tuple, TypeVar, Union
+from typing import Dict, List, Tuple, TypeVar, Union
 
 import pytest
+from typing_extensions import Literal
 
 import tyro
 
@@ -508,3 +509,45 @@ def test_wrong_annotation() -> None:
             "key": "value",
             "k": "v",
         }
+
+
+def test_bad_dict_control() -> None:
+    assert tyro.cli(
+        Dict[Literal["a", "b"], Literal["c", "d"]], args="a c b d".split(" ")
+    ) == {"a": "c", "b": "d"}
+
+
+def test_bad_dict_key() -> None:
+    with pytest.raises(SystemExit):
+        tyro.cli(Dict[Literal["a", "b"], Literal["c", "d"]], args="c c d d".split(" "))
+
+
+def test_bad_dict_val() -> None:
+    assert tyro.cli(
+        Dict[Literal["a", "b"], Literal["c", "d"]], args="a c b d".split(" ")
+    ) == {"a": "c", "b": "d"}
+    with pytest.raises(SystemExit):
+        tyro.cli(Dict[Literal["a", "b"], Literal["c", "d"]], args="a a b b".split(" "))
+
+
+def test_invalid_subcommand_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        a: int
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+
+    @dataclasses.dataclass
+    class C:
+        c: int
+
+    assert tyro.cli(Union[A, B], args="a --a 5".split(" ")) == A(5)  # type: ignore
+    assert tyro.cli(Union[A, B], args="b --b 5".split(" ")) == B(5)  # type: ignore
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Union[A, B], default=C(3), args=[]) == C(3)  # type: ignore
+
+    with pytest.warns(UserWarning):
+        assert tyro.cli(Union[A, B], default=C(3), args="b --b 5".split(" ")) == B(5)  # type: ignore

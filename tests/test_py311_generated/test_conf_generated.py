@@ -722,6 +722,7 @@ def test_append_lists() -> None:
     class A:
         x: tyro.conf.UseAppendAction[List[int]]
 
+    assert tyro.cli(A, args=[]) == A(x=[])
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
     assert tyro.cli(A, args=[]) == A(x=[])
     with pytest.raises(SystemExit):
@@ -735,6 +736,7 @@ def test_append_tuple() -> None:
     class A:
         x: tyro.conf.UseAppendAction[Tuple[int, ...]]
 
+    assert tyro.cli(A, args=[]) == A(x=())
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=(1, 2, 3))
     assert tyro.cli(A, args=[]) == A(x=())
     with pytest.raises(SystemExit):
@@ -1168,3 +1170,20 @@ def test_positional_alias() -> None:
         assert tyro.cli(
             Config, args="--x.struct.b 2 --x.struct.c 3 --all 5".split(" ")
         ) == Config(x=30)
+
+
+def test_flag_alias() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        flag: Annotated[bool, tyro.conf.arg(aliases=["-f", "--flg"])] = False
+
+    assert tyro.cli(Struct, args=[]).flag is False
+    assert tyro.cli(Struct, args="--flag".split(" ")).flag is True
+    assert tyro.cli(Struct, args="--no-flag".split(" ")).flag is False
+    assert tyro.cli(Struct, args="--flg".split(" ")).flag is True
+    assert tyro.cli(Struct, args="--no-flg".split(" ")).flag is False
+    assert tyro.cli(Struct, args="-f".split(" ")).flag is True
+
+    # BooleanOptionalAction will ignore arguments that aren't prefixed with --.
+    with pytest.raises(SystemExit):
+        tyro.cli(Struct, args="-no-f".split(" "))

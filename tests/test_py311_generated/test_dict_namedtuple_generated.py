@@ -541,3 +541,107 @@ def test_nested_dict_annotations() -> None:
     )
     assert overrided_config["optimizer"]["scheduler"]["schedule-type"] == "exponential"
     del overrided_config
+
+
+def test_functional_typeddict():
+    """Source: https://github.com/brentyi/tyro/issues/87"""
+    NerfMLPHiddenLayers_0 = TypedDict(
+        "NerfMLPHiddenLayers0",
+        {
+            "hidden_layers.0": int,
+            "hidden_layers.1": int,
+            "hidden_layers.2": int,
+            "hidden_layers.3": int,
+            "hidden_layers.4": int,
+            "hidden_layers.5": int,
+            "hidden_layers.6": int,
+            "hidden_layers.7": int,
+        },
+    )
+    NerfMLPHiddenLayers_1 = TypedDict(
+        "NerfMLPHiddenLayers1",
+        {
+            "hidden_layers.0": NotRequired[int],
+            "hidden_layers.1": NotRequired[int],
+            "hidden_layers.2": NotRequired[int],
+            "hidden_layers.3": NotRequired[int],
+            "hidden_layers.4": NotRequired[int],
+            "hidden_layers.5": NotRequired[int],
+            "hidden_layers.6": NotRequired[int],
+            "hidden_layers.7": NotRequired[int],
+        },
+    )
+    NerfMLPHiddenLayers_2 = TypedDict(
+        "NerfMLPHiddenLayers2",
+        {
+            "hidden_layers.0": int,
+            "hidden_layers.1": int,
+            "hidden_layers.2": int,
+            "hidden_layers.3": int,
+            "hidden_layers.4": int,
+            "hidden_layers.5": int,
+            "hidden_layers.6": int,
+            "hidden_layers.7": int,
+        },
+        total=False,
+    )
+    with pytest.raises(SystemExit):
+        tyro.cli(NerfMLPHiddenLayers_0, args=["--hidden_layers.0", "3"])
+    assert tyro.cli(NerfMLPHiddenLayers_1, args=["--hidden_layers.0", "3"]) == {
+        "hidden_layers.0": 3
+    }
+    assert tyro.cli(NerfMLPHiddenLayers_2, args=["--hidden_layers.0", "3"]) == {
+        "hidden_layers.0": 3
+    }
+
+
+def test_functional_typeddict_with_default():
+    """Source: https://github.com/brentyi/tyro/issues/87"""
+    NerfMLPHiddenLayers_0 = TypedDict(
+        "NerfMLPHiddenLayers0",
+        {
+            "hidden_layers.0": int,
+            "hidden_layers.1": int,
+            "hidden_layers.2": int,
+            "hidden_layers.3": int,
+            "hidden_layers.4": int,
+            "hidden_layers.5": int,
+            "hidden_layers.6": int,
+            "hidden_layers.7": int,
+        },
+    )
+    NerfMLPHiddenLayers_1 = TypedDict(
+        "NerfMLPHiddenLayers1",
+        {
+            "hidden_layers.0": NotRequired[int],
+            "hidden_layers.1": NotRequired[int],
+            "hidden_layers.2": NotRequired[int],
+            "hidden_layers.3": NotRequired[int],
+            "hidden_layers.4": NotRequired[int],
+            "hidden_layers.5": NotRequired[int],
+            "hidden_layers.6": NotRequired[int],
+            "hidden_layers.7": NotRequired[int],
+        },
+    )
+    NerfMLPHiddenLayers_2 = TypedDict(
+        "NerfMLPHiddenLayers2",
+        {
+            "hidden_layers.0": int,
+            "hidden_layers.1": int,
+            "hidden_layers.2": int,
+            "hidden_layers.3": int,
+            "hidden_layers.4": int,
+            "hidden_layers.5": int,
+            "hidden_layers.6": int,
+            "hidden_layers.7": int,
+        },
+        total=False,
+    )
+    with pytest.raises(SystemExit):
+        tyro.cli(NerfMLPHiddenLayers_0, args=["--hidden_layers.0", "3"], default={})
+    assert tyro.cli(
+        NerfMLPHiddenLayers_1, args=["--hidden_layers.0", "3"], default={}
+    ) == {"hidden_layers.0": 3}
+    assert tyro.cli(
+        NerfMLPHiddenLayers_2, args=["--hidden_layers.0", "3"], default={}
+    ) == {"hidden_layers.0": 3}
