@@ -1191,6 +1191,8 @@ def test_flag_alias() -> None:
 
 
 def test_subcommand_constructor_mix() -> None:
+    """https://github.com/brentyi/tyro/issues/89"""
+
     def checkout(branch: str) -> str:
         """Check out a branch."""
         return branch
