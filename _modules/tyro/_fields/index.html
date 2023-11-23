@@ -521,6 +521,17 @@
 
 <span class="sd">    TODO: we should come up with a better name than &#39;nested type&#39;, which is a little bit</span>
 <span class="sd">    misleading.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Need to swap types.</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+        <span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="n">conf</span><span class="o">.</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span>
+    <span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">subcommand_confs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+        <span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="n">conf</span><span class="o">.</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
+    <span class="p">)</span>
+    <span class="k">for</span> <span class="n">union_conf</span> <span class="ow">in</span> <span class="n">argconfs</span> <span class="o">+</span> <span class="n">subcommand_confs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">union_conf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">union_conf</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">()</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">),</span>
         <span class="n">UnsupportedNestedTypeMessage</span><span class="p">,</span>
