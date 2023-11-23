@@ -1187,3 +1187,72 @@ def test_flag_alias() -> None:
     # BooleanOptionalAction will ignore arguments that aren't prefixed with --.
     with pytest.raises(SystemExit):
         tyro.cli(Struct, args="-no-f".split(" "))
+
+
+def test_subcommand_constructor_mix() -> None:
+    """https://github.com/brentyi/tyro/issues/89"""
+
+    def checkout(branch: str) -> str:
+        """Check out a branch."""
+        return branch
+
+    def commit(message: str, all: bool = False) -> str:
+        """Make a commit."""
+        return f"{message=} {all=}"
+
+    @dataclasses.dataclass
+    class Arg:
+        foo: int = 1
+
+    assert (
+        tyro.cli(
+            Union[
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="checkout", constructor=checkout),
+                ],
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="commit", constructor=commit),
+                ],
+                Arg,
+            ],
+            args=["arg"],
+        )
+        == Arg()
+    )
+
+    assert (
+        tyro.cli(
+            Union[
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="checkout", constructor=checkout),
+                ],
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="commit", constructor=commit),
+                ],
+                Arg,
+            ],
+            args=["checkout", "--branch", "main"],
+        )
+        == "main"
+    )
+    assert (
+        tyro.cli(
+            Union[
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="checkout", constructor=checkout),
+                ],
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="commit", constructor=commit),
+                ],
+                Arg,
+            ],
+            args=["commit", "--message", "hi", "--all"],
+        )
+        == "message='hi' all=True"
+    )
