@@ -1219,4 +1219,4 @@ def test_subcommand_constructor_mix() -> None:
 
     assert tyro.cli(t, args=["arg"]) == Arg()
     assert tyro.cli(t, args=["checkout", "--branch", "main"]) == "main"
-    assert tyro.cli(t, args=["commit", "--message", "hi", "--all"]) == "'hi' True"
+    assert tyro.cli(t, args=["commit", "--message", "hi", "--all"]) == "hi True"
