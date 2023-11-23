@@ -1213,8 +1213,9 @@ def test_subcommand_constructor_mix() -> None:
         Annotated[
             Any,
             tyro.conf.subcommand(
-                name="commit", constructor=tyro.conf.FlagConversionOff[commit]
+                name="commit", constructor=commit
             ),
+            tyro.conf.FlagConversionOff,
         ],
         Arg,
     ]
