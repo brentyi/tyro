@@ -391,7 +391,12 @@ class SubparsersSpecification:
                 len(found_subcommand_configs) > 0
                 and found_subcommand_configs[0].constructor_factory is not None
             ):
-                options[i] = found_subcommand_configs[0].constructor_factory()
+                options[i] = Annotated.__class_getitem__(
+                    (
+                        found_subcommand_configs[0].constructor_factory(),
+                        *_resolver.unwrap_annotated(option, Any)[1],
+                    )
+                )
 
         # Exit if we don't contain nested types.
         if not all(
@@ -411,7 +416,7 @@ class SubparsersSpecification:
             subcommand_name = _strings.subparser_name_from_type(
                 prefix, type(None) if option is none_proxy else cast(type, option)
             )
-            option, found_subcommand_configs = _resolver.unwrap_annotated(
+            option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfiguration
             )
             if len(found_subcommand_configs) != 0:
@@ -448,7 +453,6 @@ class SubparsersSpecification:
             subcommand_name = _strings.subparser_name_from_type(
                 prefix, type(None) if option is none_proxy else cast(type, option)
             )
-            option, _ = _resolver.unwrap_annotated(option)
 
             # Get a subcommand config: either pulled from the type annotations or the
             # field default.

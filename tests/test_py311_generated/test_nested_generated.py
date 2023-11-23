@@ -1,19 +1,10 @@
 import dataclasses
-from typing import (
-    Annotated,
-    Any,
-    Generic,
-    Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    TypeVar,
-    Union,
-)
+from typing import Any, Generic, Mapping, Optional, Tuple, TypeVar, Union
 
 import pytest
 from frozendict import frozendict  # type: ignore
 from helptext_utils import get_helptext
+from typing import Annotated, Literal
 
 import tyro
 

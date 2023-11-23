@@ -3,21 +3,10 @@ import copy
 import dataclasses
 import io
 import pathlib
-from typing import (
-    Any,
-    Dict,
-    Literal,
-    Mapping,
-    NamedTuple,
-    NotRequired,
-    Required,
-    Tuple,
-    TypedDict,
-    Union,
-    cast,
-)
+from typing import Any, Dict, Mapping, NamedTuple, Tuple, Union, cast
 
 import pytest
+from typing import Literal, NotRequired, Required, TypedDict
 
 import tyro
 import tyro._strings
