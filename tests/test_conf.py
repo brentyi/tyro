@@ -1205,7 +1205,7 @@ def test_subcommand_constructor_mix() -> None:
     class Arg:
         foo: int = 1
 
-    t: Any = tyro.conf.OmitArgPrefixes[  # OmitArgPrefixes should do nothing.
+    t: Any = Annotated[
         Union[
             Annotated[
                 Any,
@@ -1217,7 +1217,8 @@ def test_subcommand_constructor_mix() -> None:
                 tyro.conf.FlagConversionOff,
             ],
             Arg,
-        ]
+        ],
+        tyro.conf.OmitArgPrefixes,  # Should do nothing.
     ]
 
     assert tyro.cli(t, args=["arg"]) == Arg()

@@ -1204,17 +1204,20 @@ def test_subcommand_constructor_mix() -> None:
     class Arg:
         foo: int = 1
 
-    t: Any = Union[
-        Annotated[
-            Any,
-            tyro.conf.subcommand(name="checkout-renamed", constructor=checkout),
+    t: Any = Annotated[
+        Union[
+            Annotated[
+                Any,
+                tyro.conf.subcommand(name="checkout-renamed", constructor=checkout),
+            ],
+            Annotated[
+                Any,
+                tyro.conf.subcommand(name="commit", constructor=commit),
+                tyro.conf.FlagConversionOff,
+            ],
+            Arg,
         ],
-        Annotated[
-            Any,
-            tyro.conf.subcommand(name="commit", constructor=commit),
-            tyro.conf.FlagConversionOff,
-        ],
-        Arg,
+        tyro.conf.OmitArgPrefixes,  # Should do nothing.
     ]
 
     assert tyro.cli(t, args=["arg"]) == Arg()
