@@ -5,21 +5,24 @@ import enum
 import os
 import pathlib
 from typing import (
+    Annotated,
     Any,
     AnyStr,
     Callable,
     ClassVar,
     Dict,
+    Final,
     List,
+    Literal,
     Optional,
     Tuple,
+    TypeAlias,
     TypeVar,
     Union,
 )
 
 import pytest
 import torch
-from typing import Annotated, Final, Literal, TypeAlias
 
 import tyro
 

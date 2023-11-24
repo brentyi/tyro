@@ -2,11 +2,10 @@ import contextlib
 import dataclasses
 import enum
 import io
-from typing import Generic, List, Tuple, Type, TypeVar, Union
+from typing import Annotated, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
 import yaml
-from typing import Annotated
 
 import tyro
 

@@ -391,10 +391,10 @@ class SubparsersSpecification:
                 len(found_subcommand_configs) > 0
                 and found_subcommand_configs[0].constructor_factory is not None
             ):
-                options[i] = Annotated.__class_getitem__(
+                options[i] = Annotated.__class_getitem__(  # type: ignore
                     (
                         found_subcommand_configs[0].constructor_factory(),
-                        *_resolver.unwrap_annotated(option, Any)[1],
+                        *_resolver.unwrap_annotated(option, Any)[1],  # type: ignore
                     )
                 )
 

@@ -3,11 +3,22 @@ import enum
 import os
 import pathlib
 from collections.abc import Callable
-from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
+from typing import (
+    Annotated,
+    Any,
+    Dict,
+    Generic,
+    List,
+    Literal,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+    cast,
+)
 
 import torch.nn as nn
 from helptext_utils import get_helptext
-from typing import Annotated, Literal
 
 
 def test_helptext() -> None:

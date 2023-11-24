@@ -4,11 +4,10 @@ import dataclasses
 import io
 import json as json_
 import shlex
-from typing import Any, Dict, Generic, List, Tuple, TypeVar, Union
+from typing import Annotated, Any, Dict, Generic, List, Tuple, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext
-from typing import Annotated
 
 import tyro
 
@@ -1212,9 +1211,8 @@ def test_subcommand_constructor_mix() -> None:
         ],
         Annotated[
             Any,
-            tyro.conf.subcommand(
-                name="commit", constructor=tyro.conf.FlagConversionOff[commit]
-            ),
+            tyro.conf.subcommand(name="commit", constructor=commit),
+            tyro.conf.FlagConversionOff,
         ],
         Arg,
     ]
