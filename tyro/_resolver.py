@@ -52,6 +52,11 @@ def resolve_generic_types(
     class, and a mapping from typevars to concrete types."""
 
     origin_cls = get_origin(cls)
+    annotations = ()
+    if origin_cls is Annotated:
+        annotations = get_args(cls)[1:]
+        cls = get_args(cls)[0]
+        origin_cls = get_origin(cls)
 
     type_from_typevar = {}
     if (
@@ -76,7 +81,10 @@ def resolve_generic_types(
             typevar_values = get_args(base)
             type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
-    return cls, type_from_typevar
+    if len(annotations) == 0:
+        return cls, type_from_typevar
+    else:
+        return Annotated.__class_getitem__((cls, *annotations)), type_from_typevar  # type: ignore
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)

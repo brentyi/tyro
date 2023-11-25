@@ -21,7 +21,7 @@ T = TypeVar("T")
 class Checkout(Generic[T]):
     """Check out a branch."""
 
-    branch: str
+    branch: T
 
 
 @dataclasses.dataclass
@@ -74,8 +74,7 @@ def test_case3() -> None:
                     | Annotated[Commit, tyro.conf.subcommand(name="commit")]
                 ),
                 tyro.conf.arg(name=""),
-            ]
-            # ], args=["--help"])
+            ],
         ],
         args=["commit", "./path.txt"],
     )
