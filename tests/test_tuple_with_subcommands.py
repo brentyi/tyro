@@ -32,7 +32,7 @@ class Arg:
     verbose: bool = True
 
 
-def test_case1():
+def test_case1() -> None:
     o = tyro.cli(
         Union[
             Checkout[str],
@@ -43,7 +43,7 @@ def test_case1():
     assert o == Commit(input=Path("path.txt"))
 
 
-def test_case2():
+def test_case2() -> None:
     arg, action = tyro.cli(
         Tuple[
             Arg,
@@ -63,7 +63,7 @@ def test_case2():
     assert action.input == Path("./path.txt")
 
 
-def test_case3():
+def test_case3() -> None:
     o = tyro.cli(
         Tuple[
             Annotated[
@@ -84,7 +84,7 @@ def test_case3():
     assert o == (Arg(), Commit(Path("./path.txt")))
 
 
-def test_case4():
+def test_case4() -> None:
     o = tyro.cli(
         Tuple[
             Annotated[
@@ -98,3 +98,18 @@ def test_case4():
         args=["commit", "./path.txt"],
     )
     assert o == (Commit(Path("./path.txt")),)
+
+
+def test_case5() -> None:
+    assert tyro.cli(
+        tyro.conf.OmitArgPrefixes[
+            Tuple[
+                Union[
+                    Annotated[Checkout[str], tyro.conf.subcommand(prefix_name=False)],
+                    Annotated[Commit, tyro.conf.subcommand(prefix_name=False)],
+                ],
+                Arg,
+            ]
+        ],
+        args=["--no-verbose", "checkout", "branch"],
+    ) == (Checkout("branch"), Arg(False))
