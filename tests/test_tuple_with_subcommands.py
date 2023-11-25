@@ -105,11 +105,14 @@ def test_case5() -> None:
         tyro.conf.OmitArgPrefixes[
             Tuple[
                 Union[
-                    Annotated[Checkout[str], tyro.conf.subcommand(prefix_name=False)],
+                    Annotated[
+                        Checkout[str],
+                        tyro.conf.subcommand(prefix_name=False),
+                    ],
                     Annotated[Commit, tyro.conf.subcommand(prefix_name=False)],
                 ],
                 Arg,
             ]
         ],
-        args=["--no-verbose", "checkout", "branch"],
+        args=["--no-verbose", "checkout-str", "--branch", "branch"],
     ) == (Checkout("branch"), Arg(False))

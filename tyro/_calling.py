@@ -63,7 +63,9 @@ def call_from_args(
 
     for field in field_list:
         value: Any
-        prefixed_field_name = _strings.make_field_name([field_name_prefix, field.intern_name])
+        prefixed_field_name = _strings.make_field_name(
+            [field_name_prefix, field.intern_name]
+        )
 
         # Resolve field type.
         field_type = field.type_or_callable
