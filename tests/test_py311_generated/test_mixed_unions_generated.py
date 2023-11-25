@@ -29,7 +29,7 @@ def test_subparser_strip_non_nested() -> None:
     class DefaultSubparser:
         x: int
         # Note that we add [int, str] to the annotation here... this should be ignored.
-        bc: (int | str | DefaultHTTPServer | DefaultSMTPServer) = dataclasses.field(
+        bc: int | str | DefaultHTTPServer | DefaultSMTPServer = dataclasses.field(
             default_factory=lambda: DefaultHTTPServer(5)
         )
 
@@ -74,7 +74,7 @@ def test_subparser_strip_nested() -> None:
     class DefaultSubparser:
         x: int
         # Note that we add [int, str] to the annotation here... this should be ignored.
-        bc: (int | str | DefaultHTTPServer | DefaultSMTPServer) = 5
+        bc: int | str | DefaultHTTPServer | DefaultSMTPServer = 5
 
     assert (
         tyro.cli(DefaultSubparser, args=["--x", "1", "--bc", "5"])

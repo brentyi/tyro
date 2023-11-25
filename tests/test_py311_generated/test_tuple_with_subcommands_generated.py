@@ -38,7 +38,7 @@ class Arg:
 
 def test_case1() -> None:
     o = tyro.cli(
-        (Checkout[str] | Commit),
+        Checkout[str] | Commit,
         args=["commit", "./path.txt"],
     )
     assert o == Commit(input=Path("path.txt"))
@@ -49,7 +49,7 @@ def test_case2() -> None:
         Tuple[
             Arg,
             Annotated[
-                (Checkout[str] | Commit),
+                Checkout[str] | Commit,
                 tyro.conf.arg(name=""),
             ],
         ],
@@ -69,10 +69,8 @@ def test_case3() -> None:
                 tyro.conf.arg(name=""),
             ],
             Annotated[
-                (
-                    Annotated[Checkout[str], tyro.conf.subcommand(name="checkout")]
-                    | Annotated[Commit, tyro.conf.subcommand(name="commit")]
-                ),
+                Annotated[Checkout[str], tyro.conf.subcommand(name="checkout")]
+                | Annotated[Commit, tyro.conf.subcommand(name="commit")],
                 tyro.conf.arg(name=""),
             ],
         ],
@@ -85,10 +83,8 @@ def test_case4() -> None:
     o = tyro.cli(
         Tuple[
             Annotated[
-                (
-                    Annotated[Checkout[str], tyro.conf.subcommand(name="checkout")]
-                    | Annotated[Commit, tyro.conf.subcommand(name="commit")]
-                ),
+                Annotated[Checkout[str], tyro.conf.subcommand(name="checkout")]
+                | Annotated[Commit, tyro.conf.subcommand(name="commit")],
                 tyro.conf.arg(name=""),
             ]
         ],
@@ -101,13 +97,11 @@ def test_case5() -> None:
     assert tyro.cli(
         tyro.conf.OmitArgPrefixes[
             Tuple[
-                (
-                    Annotated[
-                        Checkout[str],
-                        tyro.conf.subcommand(prefix_name=False),
-                    ]
-                    | Annotated[Commit, tyro.conf.subcommand(prefix_name=False)]
-                ),
+                Annotated[
+                    Checkout[str],
+                    tyro.conf.subcommand(prefix_name=False),
+                ]
+                | Annotated[Commit, tyro.conf.subcommand(prefix_name=False)],
                 Arg,
             ]
         ],

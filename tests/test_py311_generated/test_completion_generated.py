@@ -25,7 +25,7 @@ class TypeB:
 
 @dataclasses.dataclass(frozen=True)
 class Wrapper:
-    supertype: (TypeA | TypeB) = TypeA()
+    supertype: TypeA | TypeB = TypeA()
 
 
 def test_bash():

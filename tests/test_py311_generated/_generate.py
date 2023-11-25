@@ -1,5 +1,5 @@
 """Generate a Python 3.11 version of tests. This will use imports from `typing` instead
-of `typing_extensions`."""
+of `typing_extensions`, and replace Union[A, B] types with A | B."""
 
 import pathlib
 import subprocess
@@ -13,8 +13,8 @@ for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py
         if b.strip()[0] == '"':
             break  # Don't bother with forward references!
 
-        new_content_parts = [new_content, "("]
-        # for
+        new_content_parts = [new_content]
+
         bracket_count = 0
         for i, char in enumerate(b):
             if char == "[":
@@ -27,7 +27,7 @@ for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py
             elif bracket_count == -1:
                 while new_content_parts[-1] in (" ", "|"):
                     new_content_parts.pop(-1)
-                new_content_parts.append(")" + b[i + 1 :])
+                new_content_parts.append(b[i + 1 :])
                 break
             elif char != "\n":
                 new_content_parts.append(char)

@@ -309,7 +309,7 @@ def test_nested_optional_types() -> None:
 
 
 def test_union_over_collections() -> None:
-    def main(a: (Tuple[float, ...] | Tuple[int, ...])) -> Any:
+    def main(a: Tuple[float, ...] | Tuple[int, ...]) -> Any:
         return a
 
     assert tyro.cli(main, args="--a 3.3 3.3 7.0".split(" ")) == (3.3, 3.3, 7.0)
@@ -317,7 +317,7 @@ def test_union_over_collections() -> None:
 
 
 def test_union_over_collections_2() -> None:
-    def main(a: (Tuple[str, float, str] | Tuple[str, str, float])) -> Any:
+    def main(a: Tuple[str, float, str] | Tuple[str, str, float]) -> Any:
         return a
 
     assert tyro.cli(main, args="--a 3.3 hey 7.0".split(" ")) == ("3.3", "hey", 7.0)
@@ -325,7 +325,7 @@ def test_union_over_collections_2() -> None:
 
 
 def test_union_over_collections_3() -> None:
-    def main(a: (Tuple[int, int] | Tuple[int, int, int])) -> Tuple[int, ...]:
+    def main(a: Tuple[int, int] | Tuple[int, int, int]) -> Tuple[int, ...]:
         return a
 
     assert tyro.cli(main, args=["--a", "5", "5"]) == (5, 5)
@@ -391,7 +391,7 @@ def test_super_nested() -> None:
                 Tuple[
                     Optional[int],
                     Literal[3, 4],
-                    (Tuple[int, int] | Tuple[str, str]),
+                    Tuple[int, int] | Tuple[str, str],
                 ]
             ]
         ] = None

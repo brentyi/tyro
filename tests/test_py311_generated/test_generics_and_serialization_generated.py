@@ -259,7 +259,7 @@ def test_generic_subparsers() -> None:
 
     @dataclasses.dataclass
     class Subparser(Generic[T1, T2]):
-        command: (T1 | T2)
+        command: T1 | T2
 
     parsed_instance = tyro.cli(
         Subparser[CommandOne, CommandTwo],
@@ -298,7 +298,7 @@ def test_generic_subparsers_in_container() -> None:
 
     @dataclasses.dataclass
     class Subparser(Generic[T1, T2]):
-        command: (T1 | T2)
+        command: T1 | T2
 
     parsed_instance = tyro.cli(
         Subparser[Command[int], Command[float]],
@@ -381,7 +381,7 @@ def test_pculbertson() -> None:
 
     @dataclasses.dataclass
     class Wrapper:
-        subclass: (TypeA | TypeB) = TypeA(1)
+        subclass: TypeA | TypeB = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))

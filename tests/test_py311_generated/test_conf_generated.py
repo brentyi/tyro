@@ -25,9 +25,9 @@ def test_omit_subcommand_prefix() -> None:
     @dataclasses.dataclass
     class DefaultInstanceSubparser:
         x: int
-        # bc: (DefaultInstanceHTTPServer| DefaultInstanceSMTPServer)
+        # bc: DefaultInstanceHTTPServer| DefaultInstanceSMTPServer
         bc: tyro.conf.OmitSubcommandPrefixes[
-            (DefaultInstanceHTTPServer | DefaultInstanceSMTPServer)
+            DefaultInstanceHTTPServer | DefaultInstanceSMTPServer
         ]
 
     assert (
@@ -78,7 +78,7 @@ def test_avoid_subparser_with_default() -> None:
     class DefaultInstanceSubparser:
         x: int
         bc: tyro.conf.AvoidSubcommands[
-            (DefaultInstanceHTTPServer | DefaultInstanceSMTPServer)
+            DefaultInstanceHTTPServer | DefaultInstanceSMTPServer
         ]
 
     assert (
@@ -119,7 +119,7 @@ def test_avoid_subparser_with_default_recursive() -> None:
     @dataclasses.dataclass
     class DefaultInstanceSubparser:
         x: int
-        bc: (DefaultInstanceHTTPServer | DefaultInstanceSMTPServer)
+        bc: DefaultInstanceHTTPServer | DefaultInstanceSMTPServer
 
     assert (
         tyro.cli(
@@ -164,10 +164,9 @@ def test_subparser_in_nested_with_metadata() -> None:
 
     @dataclasses.dataclass
     class Nested2:
-        subcommand: (
-            Annotated[A, tyro.conf.subcommand("command-a", default=A(7))]
-            | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
-        )
+        subcommand: Annotated[
+            A, tyro.conf.subcommand("command-a", default=A(7))
+        ] | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
 
     @dataclasses.dataclass
     class Nested1:
@@ -223,10 +222,8 @@ def test_subparser_in_nested_with_metadata_generic() -> None:
     @dataclasses.dataclass
     class Nested1:
         nested2: Nested2[
-            (
-                Annotated[A, tyro.conf.subcommand("command-a", default=A(7))]
-                | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
-            )
+            Annotated[A, tyro.conf.subcommand("command-a", default=A(7))]
+            | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
         ]
 
     @dataclasses.dataclass
@@ -274,10 +271,9 @@ def test_subparser_in_nested_with_metadata_generic_alt() -> None:
 
     @dataclasses.dataclass
     class Nested2(Generic[T]):
-        subcommand: (
-            Annotated[T, tyro.conf.subcommand("command-a", default=A(7))]
-            | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
-        )
+        subcommand: Annotated[
+            T, tyro.conf.subcommand("command-a", default=A(7))
+        ] | Annotated[B, tyro.conf.subcommand("command-b", default=B(9))]
 
     @dataclasses.dataclass
     class Nested1:
@@ -329,11 +325,11 @@ def test_subparser_in_nested_with_metadata_default_matching() -> None:
 
     @dataclasses.dataclass
     class Nested:
-        subcommand: (
-            Annotated[B, tyro.conf.subcommand("one", default=default_one)]
-            | Annotated[B, tyro.conf.subcommand("two")]
-            | Annotated[B, tyro.conf.subcommand("three", default=default_three)]
-        )
+        subcommand: Annotated[
+            B, tyro.conf.subcommand("one", default=default_one)
+        ] | Annotated[B, tyro.conf.subcommand("two")] | Annotated[
+            B, tyro.conf.subcommand("three", default=default_three)
+        ]
 
     # Match by hash.
     def main_one(x: Nested = Nested(default_one)) -> None:
@@ -606,9 +602,9 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
     @dataclasses.dataclass
     class DefaultInstanceSubparser:
         x: int
-        # bc: (DefaultInstanceHTTPServer| DefaultInstanceSMTPServer)
+        # bc: DefaultInstanceHTTPServer| DefaultInstanceSMTPServer
         bc: tyro.conf.OmitSubcommandPrefixes[
-            (DefaultInstanceHTTPServer | DefaultInstanceSMTPServer)
+            DefaultInstanceHTTPServer | DefaultInstanceSMTPServer
         ] = dataclasses.field(default_factory=DefaultInstanceHTTPServer)
 
     assert (
@@ -682,8 +678,8 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
     @dataclasses.dataclass
     class DefaultInstanceSubparser:
         x: int
-        # bc: (DefaultInstanceHTTPServer| DefaultInstanceSMTPServer)
-        bc: (DefaultInstanceHTTPServer | DefaultInstanceSMTPServer)
+        # bc: DefaultInstanceHTTPServer| DefaultInstanceSMTPServer
+        bc: DefaultInstanceHTTPServer | DefaultInstanceSMTPServer
 
     @tyro.conf.configure(
         tyro.conf.OmitSubcommandPrefixes,
@@ -1205,18 +1201,16 @@ def test_subcommand_constructor_mix() -> None:
         foo: int = 1
 
     t: Any = Annotated[
-        (
-            Annotated[
-                Any,
-                tyro.conf.subcommand(name="checkout-renamed", constructor=checkout),
-            ]
-            | Annotated[
-                Any,
-                tyro.conf.subcommand(name="commit", constructor=commit),
-                tyro.conf.FlagConversionOff,
-            ]
-            | Arg
-        ),
+        Annotated[
+            Any,
+            tyro.conf.subcommand(name="checkout-renamed", constructor=checkout),
+        ]
+        | Annotated[
+            Any,
+            tyro.conf.subcommand(name="commit", constructor=commit),
+            tyro.conf.FlagConversionOff,
+        ]
+        | Arg,
         tyro.conf.OmitArgPrefixes,  # Should do nothing.
     ]
 

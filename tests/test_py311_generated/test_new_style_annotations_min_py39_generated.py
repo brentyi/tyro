@@ -32,7 +32,7 @@ def test_tuple_nested() -> None:
 
 
 def test_tuple_variable() -> None:
-    def main(x: tuple[(bool | str), ...]) -> Any:
+    def main(x: tuple[bool | str, ...]) -> Any:
         return x
 
     assert tyro.cli(main, args=["--x", "True", "Wrong"]) == (True, "Wrong")
@@ -45,7 +45,7 @@ def test_super_nested() -> None:
                 tuple[
                     Optional[int],
                     Literal[3, 4],
-                    (tuple[int, int] | tuple[str, str]),
+                    tuple[int, int] | tuple[str, str],
                 ]
             ]
         ] = None
