@@ -428,7 +428,9 @@ class SubparsersSpecification:
         subcommand_type_from_name: Dict[str, type] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                extern_prefix,
+                ""
+                if _markers.OmitSubcommandPrefixes in field.markers
+                else extern_prefix,
                 type(None) if option is none_proxy else cast(type, option),
             )
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -466,7 +468,9 @@ class SubparsersSpecification:
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                extern_prefix,
+                ""
+                if _markers.OmitSubcommandPrefixes in field.markers
+                else extern_prefix,
                 type(None) if option is none_proxy else cast(type, option),
             )
 

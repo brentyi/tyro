@@ -9,7 +9,7 @@ import tyro
 @dataclasses.dataclass
 class A1:
     x: int
-    bc: "Union[B, C]"
+    bc: "(B| C)"
 
 
 @dataclasses.dataclass

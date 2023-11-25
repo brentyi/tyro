@@ -8,7 +8,6 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
-    Union,
 )
 
 import pytest
@@ -259,7 +258,7 @@ def test_subparser() -> None:
     @dataclasses.dataclass
     class Subparser:
         x: int
-        bc: Union[HTTPServer, SMTPServer]
+        bc: (HTTPServer | SMTPServer)
 
     assert tyro.cli(
         Subparser, args=["--x", "1", "bc:http-server", "--bc.y", "3"]
@@ -291,10 +290,10 @@ def test_subparser_root() -> None:
     @dataclasses.dataclass
     class Subparser:
         x: int
-        bc: Union[HTTPServer, SMTPServer]
+        bc: (HTTPServer | SMTPServer)
 
     assert tyro.cli(
-        Union[HTTPServer, SMTPServer], args=["http-server", "--y", "3"]  # type: ignore
+        (HTTPServer | SMTPServer), args=["http-server", "--y", "3"]  # type: ignore
     ) == HTTPServer(y=3)
 
 
@@ -310,7 +309,7 @@ def test_subparser_with_default() -> None:
     @dataclasses.dataclass
     class DefaultSubparser:
         x: int
-        bc: Union[DefaultHTTPServer, DefaultSMTPServer] = dataclasses.field(
+        bc: (DefaultHTTPServer | DefaultSMTPServer) = dataclasses.field(
             default_factory=lambda: DefaultHTTPServer(5)
         )
 
@@ -354,7 +353,7 @@ def test_subparser_with_default_alternate() -> None:
     @dataclasses.dataclass
     class DefaultInstanceSubparser:
         x: int
-        bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        bc: (DefaultInstanceHTTPServer | DefaultInstanceSMTPServer)
 
     assert (
         tyro.cli(
@@ -409,7 +408,7 @@ def test_subparser_with_default_bad() -> None:
     @dataclasses.dataclass
     class DefaultSubparser:
         x: int
-        bc: Union[DefaultHTTPServer, DefaultSMTPServer] = dataclasses.field(
+        bc: (DefaultHTTPServer | DefaultSMTPServer) = dataclasses.field(
             default_factory=lambda: 5  # type: ignore
         )
 
@@ -436,7 +435,7 @@ def test_subparser_with_default_bad_alt() -> None:
         c: int
 
     with pytest.warns(UserWarning):
-        assert tyro.cli(Union[A, B], default=C(3), args=["c", "--c", "2"]) == C(2)  # type: ignore
+        assert tyro.cli((A | B), default=C(3), args=["c", "--c", "2"]) == C(2)  # type: ignore
 
 
 def test_optional_subparser() -> None:
@@ -451,7 +450,7 @@ def test_optional_subparser() -> None:
     @dataclasses.dataclass
     class OptionalSubparser:
         x: int
-        bc: Optional[Union[OptionalHTTPServer, OptionalSMTPServer]]
+        bc: Optional[(OptionalHTTPServer | OptionalSMTPServer)]
 
     assert tyro.cli(
         OptionalSubparser, args=["--x", "1", "bc:optional-http-server", "--bc.y", "3"]
@@ -520,9 +519,9 @@ def test_multiple_subparsers() -> None:
 
     @dataclasses.dataclass
     class MultipleSubparsers:
-        a: Union[Subcommand1, Subcommand2, Subcommand3]
-        b: Union[Subcommand1, Subcommand2, Subcommand3]
-        c: Union[Subcommand1, Subcommand2, Subcommand3]
+        a: (Subcommand1 | Subcommand2 | Subcommand3)
+        b: (Subcommand1 | Subcommand2 | Subcommand3)
+        c: (Subcommand1 | Subcommand2 | Subcommand3)
 
     with pytest.raises(SystemExit):
         tyro.cli(MultipleSubparsers, args=[])
@@ -568,9 +567,9 @@ def test_multiple_subparsers_with_default() -> None:
 
     @dataclasses.dataclass
     class MultipleSubparsers:
-        a: Union[Subcommand1, Subcommand2, Subcommand3] = Subcommand1(tyro.MISSING)
-        b: Union[Subcommand1, Subcommand2, Subcommand3] = Subcommand2(7)
-        c: Union[Subcommand1, Subcommand2, Subcommand3] = Subcommand3(3)
+        a: (Subcommand1 | Subcommand2 | Subcommand3) = Subcommand1(tyro.MISSING)
+        b: (Subcommand1 | Subcommand2 | Subcommand3) = Subcommand2(7)
+        c: (Subcommand1 | Subcommand2 | Subcommand3) = Subcommand3(3)
 
     with pytest.raises(SystemExit):
         tyro.cli(
@@ -661,11 +660,11 @@ def test_nested_subparsers_with_default() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class Subcommand2:
-        y: Union[Subcommand1, Subcommand3]
+        y: (Subcommand1 | Subcommand3)
 
     @dataclasses.dataclass(frozen=True)
     class MultipleSubparsers:
-        a: Union[Subcommand1, Subcommand2] = Subcommand2(Subcommand1(tyro.MISSING))
+        a: (Subcommand1 | Subcommand2) = Subcommand2(Subcommand1(tyro.MISSING))
 
     with pytest.raises(SystemExit):
         tyro.cli(MultipleSubparsers, args=[])
@@ -697,12 +696,12 @@ def test_nested_subparsers_multiple() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class Subcommand2:
-        y: Union[Subcommand1, Subcommand3]
+        y: (Subcommand1 | Subcommand3)
 
     @dataclasses.dataclass(frozen=True)
     class MultipleSubparsers:
-        a: Union[Subcommand1, Subcommand2]
-        b: Union[Subcommand1, Subcommand2]
+        a: (Subcommand1 | Subcommand2)
+        b: (Subcommand1 | Subcommand2)
 
     with pytest.raises(SystemExit):
         tyro.cli(MultipleSubparsers, args=[])
@@ -737,12 +736,12 @@ def test_nested_subparsers_multiple_in_container() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class Subcommand2:
-        y: Union[Subcommand1, Subcommand3]
+        y: (Subcommand1 | Subcommand3)
 
     @dataclasses.dataclass(frozen=True)
     class MultipleSubparsers:
-        a: Union[Subcommand1, Subcommand2]
-        b: Union[Subcommand1, Subcommand2]
+        a: (Subcommand1 | Subcommand2)
+        b: (Subcommand1 | Subcommand2)
 
     @dataclasses.dataclass(frozen=True)
     class Root:
@@ -815,7 +814,7 @@ def test_tuple_nesting_union() -> None:
         y: float
         z: float
 
-    def main(x: Union[Tuple[Tuple[Color], Location, float], Tuple[Color, Color]]):
+    def main(x: (Tuple[Tuple[Color], Location, float] | Tuple[Color, Color])):
         return x
 
     assert tyro.cli(
@@ -834,13 +833,13 @@ def test_generic_subparsers() -> None:
     class A(Generic[T]):
         x: T
 
-    def main(x: Union[A[int], A[float]]) -> Any:
+    def main(x: (A[int] | A[float])) -> Any:
         return x
 
     assert tyro.cli(main, args="x:a-float --x.x 3.2".split(" ")) == A(3.2)
     assert tyro.cli(main, args="x:a-int --x.x 3".split(" ")) == A(3)
 
-    def main_with_default(x: Union[A[int], A[float]] = A(5)) -> Any:
+    def main_with_default(x: (A[int] | A[float]) = A(5)) -> Any:
         return x
 
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):
@@ -883,7 +882,7 @@ def test_subparser_in_nested() -> None:
 
     @dataclasses.dataclass
     class Nested2:
-        subcommand: Union[A, B]
+        subcommand: (A | B)
 
     @dataclasses.dataclass
     class Nested1:
@@ -935,7 +934,7 @@ def test_nested_in_subparser() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class Wrapper:
-        supertype: Union[TypeA, TypeB] = TypeA()
+        supertype: (TypeA | TypeB) = TypeA()
 
     assert tyro.cli(Wrapper, args=[]) == Wrapper()
     assert (
@@ -989,7 +988,7 @@ def test_nested_in_subparser_override_with_default() -> None:
     @tyro.conf.configure(tyro.conf.OmitSubcommandPrefixes)
     def train(
         optimizer: Optimizers = Adam(container=DatasetContainer(ImageNet(50))),  # type: ignore
-    ) -> Union[Adam, Sgd]:
+    ) -> Adam | Sgd:
         return optimizer
 
     assert tyro.cli(train, args=[]) == Adam(container=DatasetContainer(ImageNet(50)))
@@ -1065,13 +1064,13 @@ def test_subcommand_dict_helper() -> None:
 def test_subcommand_by_type_tree() -> None:
     @dataclasses.dataclass(frozen=True)
     class A:
-        a: Union[int, str]
+        a: (int | str)
 
     @dataclasses.dataclass
     class Args:
-        inner: Union[
-            Annotated[A, tyro.conf.subcommand(name="alt", default=A(5))], A
-        ] = A("hello")
+        inner: (Annotated[A, tyro.conf.subcommand(name="alt", default=A(5))] | A) = A(
+            "hello"
+        )
 
     assert tyro.cli(Args, args=[]) == Args(A("hello"))
     assert "default: inner:alt" in get_helptext(Args)

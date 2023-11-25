@@ -84,8 +84,8 @@ be placed at the end of the command>
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]
-"""Make flags used for keyword arguments in subcommands shorter by omitting the
-subcommand-specific portion of the prefix.
+"""Make CLI inputs used for subcommands shorter by omitting the subcommand-specific
+portion of the prefix.
 
 If we have a structure with the field:
 
@@ -93,6 +93,10 @@ If we have a structure with the field:
 
 By default, `--cmd.arg` may be generated as a flag for each dataclass in the union.
 If subcommand prefixes are omitted, we would instead simply have `--arg`.
+
+By default, `cmd:nested-type-a` and `cmd:nested-type-b` may be generated as subcommand.
+If subcommand prefixes are omitted, we would instead simply have `nested-type-a` and
+`nested-type-b`.
 """
 
 OmitArgPrefixes = Annotated[T, None]
