@@ -1,0 +1,100 @@
+"""Tests adapted from https://github.com/brentyi/tyro/issues/89, which catches edge
+cases when combining nested tuple types, renamed arguments, and subcommands.
+
+Largely written by @wookayin.
+"""
+
+import dataclasses
+from pathlib import Path
+from typing import Annotated, Generic, Tuple, TypeVar, Union
+
+import tyro.conf
+
+T = TypeVar("T")
+
+
+@dataclasses.dataclass
+class Checkout(Generic[T]):
+    """Check out a branch."""
+
+    branch: str
+
+
+@dataclasses.dataclass
+class Commit:
+    """Commit something."""
+
+    input: tyro.conf.Positional[Path]
+
+
+@dataclasses.dataclass
+class Arg:
+    verbose: bool = True
+
+
+def test_case1():
+    o = tyro.cli(
+        Union[
+            Checkout[str],
+            Commit,
+        ],
+        args=["commit", "./path.txt"],
+    )
+    assert o == Commit(input=Path("path.txt"))
+
+
+def test_case2():
+    arg, action = tyro.cli(
+        Tuple[
+            Arg,
+            Annotated[
+                Union[
+                    Checkout[str],
+                    Commit,
+                ],
+                tyro.conf.arg(name=""),
+            ],
+        ],
+        args=["commit", "./path.txt"],
+    )
+
+    assert isinstance(arg, Arg)
+    assert isinstance(action, Commit)
+    assert action.input == Path("./path.txt")
+
+
+def test_case3():
+    o = tyro.cli(
+        Tuple[
+            Annotated[
+                Arg,
+                tyro.conf.arg(name=""),
+            ],
+            Annotated[
+                Union[
+                    Annotated[Checkout[str], tyro.conf.subcommand(name="checkout")],
+                    Annotated[Commit, tyro.conf.subcommand(name="commit")],
+                ],
+                tyro.conf.arg(name=""),
+            ]
+            # ], args=["--help"])
+        ],
+        args=["commit", "./path.txt"],
+    )
+    assert o == (Arg(), Commit(Path("./path.txt")))
+
+
+def test_case4():
+    o = tyro.cli(
+        Tuple[
+            Annotated[
+                Union[
+                    Annotated[Checkout[str], tyro.conf.subcommand(name="checkout")],
+                    Annotated[Commit, tyro.conf.subcommand(name="commit")],
+                ],
+                tyro.conf.arg(name=""),
+            ]
+        ],
+        args=["commit", "./path.txt"],
+    )
+    assert o == (Commit(Path("./path.txt")),)

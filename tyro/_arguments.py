@@ -105,8 +105,8 @@ class BooleanOptionalAction(argparse.Action):
 class ArgumentDefinition:
     """Structure containing everything needed to define an argument."""
 
-    dest_prefix: str  # True prefix. (eg for the argument's dest field)
-    name_prefix: str  # User-facing prefix.
+    intern_prefix: str  # True prefix. (eg for the argument's dest field)
+    extern_prefix: str  # User-facing prefix.
     subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
     type_from_typevar: Dict[TypeVar, TypeForm[Any]]
@@ -163,14 +163,14 @@ class ArgumentDefinition:
                 # The conditions are intended to be conservative; if a directory path is
                 # registered as a normal file one that's OK, the reverse on the other
                 # hand will be overly restrictive.
-                self.field.name.endswith("_dir")
-                or self.field.name.endswith("_directory")
-                or self.field.name.endswith("_folder")
+                self.field.intern_name.endswith("_dir")
+                or self.field.intern_name.endswith("_directory")
+                or self.field.intern_name.endswith("_folder")
             )
             name_suggests_path = (
-                self.field.name.endswith("_file")
-                or self.field.name.endswith("_path")
-                or self.field.name.endswith("_filename")
+                self.field.intern_name.endswith("_file")
+                or self.field.intern_name.endswith("_path")
+                or self.field.intern_name.endswith("_filename")
                 or name_suggests_dir
             )
             complete_as_path = (
@@ -275,7 +275,7 @@ def _rule_handle_boolean_flags(
         )
 
     assert False, (
-        f"Expected a boolean as a default for {arg.field.name}, but got"
+        f"Expected a boolean as a default for {arg.field.intern_name}, but got"
         f" {lowered.default}."
     )
 
@@ -312,7 +312,7 @@ def _rule_recursive_instantiator_from_type(
         if arg.field.default in _fields.MISSING_SINGLETONS:
             raise _instantiators.UnsupportedTypeAnnotationError(
                 "Unsupported type annotation for the field"
-                f" {_strings.make_field_name([arg.name_prefix, arg.field.name])}. To"
+                f" {_strings.make_field_name([arg.extern_prefix, arg.field.intern_name])}. To"
                 " suppress this error, assign the field a default value."
             ) from e
         else:
@@ -416,7 +416,9 @@ def _rule_generate_helptext(
     primary_help = arg.field.helptext
 
     if primary_help is None and _markers.Positional in arg.field.markers:
-        primary_help = _strings.make_field_name([arg.name_prefix, arg.field.name])
+        primary_help = _strings.make_field_name(
+            [arg.extern_prefix, arg.field.intern_name]
+        )
 
     if primary_help is not None and primary_help != "":
         help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
@@ -489,10 +491,10 @@ def _rule_set_name_or_flag_and_dest(
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
     name_or_flag = _strings.make_field_name(
-        [arg.name_prefix, arg.field.name]
+        [arg.extern_prefix, arg.field.extern_name]
         if arg.field.argconf.prefix_name
         and _markers.OmitArgPrefixes not in arg.field.markers
-        else [arg.field.name]
+        else [arg.field.extern_name]
     )
 
     # Prefix keyword arguments with --.
@@ -504,19 +506,20 @@ def _rule_set_name_or_flag_and_dest(
         # If OmitArgPrefixes was applied, then the subcommand prefix was already
         # stripped. :)
         _markers.OmitArgPrefixes not in arg.field.markers
+        and _markers.Positional not in arg.field.markers
         and name_or_flag.startswith("--")
         and arg.subcommand_prefix != ""
     ):
         # This will run even when unused because we want the assert.
         strip_prefix = "--" + arg.subcommand_prefix + "."
-        assert name_or_flag.startswith(strip_prefix)
         if _markers.OmitSubcommandPrefixes in arg.field.markers:
+            assert name_or_flag.startswith(strip_prefix), name_or_flag
             name_or_flag = "--" + name_or_flag[len(strip_prefix) :]
 
     return dataclasses.replace(
         lowered,
         name_or_flag=name_or_flag,
-        dest=_strings.make_field_name([arg.dest_prefix, arg.field.name]),
+        dest=_strings.make_field_name([arg.intern_prefix, arg.field.intern_name]),
     )
 
 
@@ -543,6 +546,9 @@ def _rule_positional_special_handling(
 
     return dataclasses.replace(
         lowered,
+        name_or_flag=_strings.make_field_name(
+            [arg.intern_prefix, arg.field.intern_name]
+        ),
         dest=None,
         required=None,  # Can't be passed in for positionals.
         metavar=metavar,

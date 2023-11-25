@@ -51,8 +51,9 @@ class ParserSpecification:
     subparsers: Optional[SubparsersSpecification]
     # - A set of subparser groups, which reflect the tree structure built by the
     # hierarchy of a nested config structure.
-    subparsers_from_prefix: Dict[str, SubparsersSpecification]
-    prefix: str
+    subparsers_from_intern_prefix: Dict[str, SubparsersSpecification]
+    intern_prefix: str
+    extern_prefix: str
     has_required_args: bool
     consolidate_subcommand_args: bool
 
@@ -64,7 +65,8 @@ class ParserSpecification:
         default_instance: Union[
             T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
         ],
-        prefix: str,
+        intern_prefix: str,
+        extern_prefix: str,
         subcommand_prefix: str = "",
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
@@ -96,7 +98,7 @@ class ParserSpecification:
 
         has_required_args = False
         args = []
-        helptext_from_nested_class_field_name: Dict[str, Optional[str]] = {}
+        helptext_from_intern_prefixed_field_name: Dict[str, Optional[str]] = {}
 
         subparsers = None
         subparsers_from_prefix = {}
@@ -106,7 +108,8 @@ class ParserSpecification:
                 field,
                 type_from_typevar=type_from_typevar,
                 parent_classes=parent_classes,
-                prefix=prefix,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
                 subcommand_prefix=subcommand_prefix,
             )
             if isinstance(field_out, _arguments.ArgumentDefinition):
@@ -116,7 +119,7 @@ class ParserSpecification:
                     has_required_args = True
             elif isinstance(field_out, SubparsersSpecification):
                 # Handle subparsers.
-                subparsers_from_prefix[field_out.prefix] = field_out
+                subparsers_from_prefix[field_out.intern_prefix] = field_out
                 subparsers = add_subparsers_to_leaves(subparsers, field_out)
             elif isinstance(field_out, ParserSpecification):
                 # Handle nested parsers.
@@ -128,7 +131,9 @@ class ParserSpecification:
 
                 # Include nested subparsers.
                 if nested_parser.subparsers is not None:
-                    subparsers_from_prefix.update(nested_parser.subparsers_from_prefix)
+                    subparsers_from_prefix.update(
+                        nested_parser.subparsers_from_intern_prefix
+                    )
                     subparsers = add_subparsers_to_leaves(
                         subparsers, nested_parser.subparsers
                     )
@@ -138,17 +143,17 @@ class ParserSpecification:
                     k,
                     v,
                 ) in nested_parser.helptext_from_nested_class_field_name.items():
-                    helptext_from_nested_class_field_name[
-                        _strings.make_field_name([field.name, k])
+                    helptext_from_intern_prefixed_field_name[
+                        _strings.make_field_name([field.intern_name, k])
                     ] = v
 
-                class_field_name = _strings.make_field_name([field.name])
+                class_field_name = _strings.make_field_name([field.intern_name])
                 if field.helptext is not None:
-                    helptext_from_nested_class_field_name[
+                    helptext_from_intern_prefixed_field_name[
                         class_field_name
                     ] = field.helptext
                 else:
-                    helptext_from_nested_class_field_name[
+                    helptext_from_intern_prefixed_field_name[
                         class_field_name
                     ] = _docstrings.get_callable_description(nested_parser.f)
 
@@ -158,10 +163,10 @@ class ParserSpecification:
                     len(nested_parser.args) >= 1
                     and _markers._OPTIONAL_GROUP in nested_parser.args[0].field.markers
                 ):
-                    current_helptext = helptext_from_nested_class_field_name[
+                    current_helptext = helptext_from_intern_prefixed_field_name[
                         class_field_name
                     ]
-                    helptext_from_nested_class_field_name[class_field_name] = (
+                    helptext_from_intern_prefixed_field_name[class_field_name] = (
                         ("" if current_helptext is None else current_helptext + "\n\n")
                         + "Default: "
                         + str(field.default)
@@ -175,10 +180,11 @@ class ParserSpecification:
                 else _docstrings.get_callable_description(f)
             ),
             args=args,
-            helptext_from_nested_class_field_name=helptext_from_nested_class_field_name,
+            helptext_from_nested_class_field_name=helptext_from_intern_prefixed_field_name,
             subparsers=subparsers,
-            subparsers_from_prefix=subparsers_from_prefix,
-            prefix=prefix,
+            subparsers_from_intern_prefix=subparsers_from_prefix,
+            intern_prefix=intern_prefix,
+            extern_prefix=extern_prefix,
             has_required_args=has_required_args,
             consolidate_subcommand_args=consolidate_subcommand_args,
         )
@@ -246,13 +252,13 @@ class ParserSpecification:
         for arg in self.args:
             if (
                 arg.lowered.help is not argparse.SUPPRESS
-                and arg.dest_prefix not in group_from_prefix
+                and arg.intern_prefix not in group_from_prefix
             ):
                 description = self.helptext_from_nested_class_field_name.get(
-                    arg.dest_prefix
+                    arg.intern_prefix
                 )
-                group_from_prefix[arg.dest_prefix] = parser.add_argument_group(
-                    format_group_name(arg.dest_prefix),
+                group_from_prefix[arg.intern_prefix] = parser.add_argument_group(
+                    format_group_name(arg.intern_prefix),
                     description=description,
                 )
 
@@ -262,8 +268,8 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            if arg.dest_prefix in group_from_prefix:
-                arg.add_argument(group_from_prefix[arg.dest_prefix])
+            if arg.intern_prefix in group_from_prefix:
+                arg.add_argument(group_from_prefix[arg.intern_prefix])
             else:
                 # Suppressed argument: still need to add them, but they won't show up in
                 # the helptext so it doesn't matter which group.
@@ -275,7 +281,8 @@ def handle_field(
     field: _fields.FieldDefinition,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     parent_classes: Set[Type[Any]],
-    prefix: str,
+    intern_prefix: str,
+    extern_prefix: str,
     subcommand_prefix: str,
 ) -> Union[
     _arguments.ArgumentDefinition,
@@ -286,7 +293,7 @@ def handle_field(
 
     if isinstance(field.type_or_callable, TypeVar):
         raise _instantiators.UnsupportedTypeAnnotationError(
-            f"Field {field.name} has an unbound TypeVar: {field.type_or_callable}."
+            f"Field {field.intern_name} has an unbound TypeVar: {field.type_or_callable}."
         )
 
     if _markers.Fixed not in field.markers:
@@ -295,7 +302,8 @@ def handle_field(
             field,
             type_from_typevar=type_from_typevar,
             parent_classes=parent_classes,
-            prefix=_strings.make_field_name([prefix, field.name]),
+            intern_prefix=_strings.make_field_name([intern_prefix, field.intern_name]),
+            extern_prefix=_strings.make_field_name([extern_prefix, field.extern_name]),
         )
         if subparsers_attempt is not None:
             if (
@@ -328,14 +336,19 @@ def handle_field(
                 description=None,
                 parent_classes=parent_classes,
                 default_instance=field.default,
-                prefix=_strings.make_field_name([prefix, field.name]),
+                intern_prefix=_strings.make_field_name(
+                    [intern_prefix, field.intern_name]
+                ),
+                extern_prefix=_strings.make_field_name(
+                    [extern_prefix, field.extern_name]
+                ),
                 subcommand_prefix=subcommand_prefix,
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
     return _arguments.ArgumentDefinition(
-        dest_prefix=prefix,
-        name_prefix=prefix,
+        intern_prefix=intern_prefix,
+        extern_prefix=extern_prefix,
         subcommand_prefix=subcommand_prefix,
         field=field,
         type_from_typevar=type_from_typevar,
@@ -349,7 +362,7 @@ class SubparsersSpecification:
     name: str
     description: Optional[str]
     parser_from_name: Dict[str, ParserSpecification]
-    prefix: str
+    intern_prefix: str
     required: bool
     default_instance: Any
     options: Tuple[Union[TypeForm[Any], Callable], ...]
@@ -359,7 +372,8 @@ class SubparsersSpecification:
         field: _fields.FieldDefinition,
         type_from_typevar: Dict[TypeVar, TypeForm[Any]],
         parent_classes: Set[Type[Any]],
-        prefix: str,
+        intern_prefix: str,
+        extern_prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_or_callable)[0]
@@ -414,7 +428,8 @@ class SubparsersSpecification:
         subcommand_type_from_name: Dict[str, type] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                prefix, type(None) if option is none_proxy else cast(type, option)
+                extern_prefix,
+                type(None) if option is none_proxy else cast(type, option),
             )
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
                 option, _confstruct._SubcommandConfiguration
@@ -441,17 +456,18 @@ class SubparsersSpecification:
             # This should never be triggered because union types are expanded when
             # a bad default value is provided.
             assert default_name is not None, (
-                f"`{prefix}` was provided a default value of type"
+                f"`{extern_prefix}` was provided a default value of type"
                 f" {type(field.default)} but no matching subcommand was found. A"
                 " type may be missing in the Union type declaration for"
-                f" `{prefix}`, which currently expects {options}."
+                f" `{extern_prefix}`, which currently expects {options}."
             )
 
         # Add subcommands for each option.
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                prefix, type(None) if option is none_proxy else cast(type, option)
+                extern_prefix,
+                type(None) if option is none_proxy else cast(type, option),
             )
 
             # Get a subcommand config: either pulled from the type annotations or the
@@ -482,15 +498,16 @@ class SubparsersSpecification:
                 description=subcommand_config.description,
                 parent_classes=parent_classes,
                 default_instance=subcommand_config.default,
-                prefix=prefix,
-                subcommand_prefix=prefix,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
+                subcommand_prefix=intern_prefix,
             )
 
             # Apply prefix to helptext in nested classes in subparsers.
             subparser = dataclasses.replace(
                 subparser,
                 helptext_from_nested_class_field_name={
-                    _strings.make_field_name([prefix, k]): v
+                    _strings.make_field_name([intern_prefix, k]): v
                     for k, v in subparser.helptext_from_nested_class_field_name.items()
                 },
             )
@@ -530,13 +547,13 @@ class SubparsersSpecification:
         )
 
         return SubparsersSpecification(
-            name=field.name,
+            name=field.intern_name,
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.
             description=description,
             parser_from_name=parser_from_name,
-            prefix=prefix,
+            intern_prefix=intern_prefix,
             required=required,
             default_instance=field.default,
             options=tuple(options),
@@ -553,7 +570,7 @@ class SubparsersSpecification:
 
         # Add subparsers to every node in previous level of the tree.
         argparse_subparsers = parent_parser.add_subparsers(
-            dest=_strings.make_subparser_dest(self.prefix),
+            dest=_strings.make_subparser_dest(self.intern_prefix),
             description=self.description,
             required=self.required,
             title=title,

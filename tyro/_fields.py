@@ -55,7 +55,8 @@ from .conf import _confstruct, _markers
 
 @dataclasses.dataclass(frozen=True)
 class FieldDefinition:
-    name: str
+    intern_name: str
+    extern_name: str
     type_or_callable: Union[TypeForm[Any], Callable]
     """Type or callable for this field. This should have all Annotated[] annotations
     stripped."""
@@ -75,7 +76,7 @@ class FieldDefinition:
             _markers.Fixed in self.markers or _markers.Suppress in self.markers
         ) and self.default in MISSING_SINGLETONS:
             raise _instantiators.UnsupportedTypeAnnotationError(
-                f"Field {self.name} is missing a default value!"
+                f"Field {self.intern_name} is missing a default value!"
             )
 
     @staticmethod
@@ -117,12 +118,13 @@ class FieldDefinition:
             type_or_callable, _markers._Marker
         )
         return FieldDefinition(
-            name if argconf.name is None else argconf.name,
-            type_or_callable
+            intern_name=name,
+            extern_name=name if argconf.name is None else argconf.name,
+            type_or_callable=type_or_callable
             if argconf.constructor_factory is None
             else argconf.constructor_factory(),
-            default,
-            helptext,
+            default=default,
+            helptext=helptext,
             markers=frozenset(inferred_markers).union(markers),
             custom_constructor=argconf.constructor_factory is not None,
             argconf=argconf,
@@ -143,7 +145,7 @@ class FieldDefinition:
             # Explicit positionals.
             _markers.Positional in self.markers
             # Dummy dataclasses should have a single positional field.
-            or self.name == _strings.dummy_field_name
+            or self.intern_name == _strings.dummy_field_name
             or (
                 # Make required arguments positional.
                 _markers.PositionalRequiredArgs in self.markers
@@ -157,7 +159,7 @@ class FieldDefinition:
             # Explicit positionals.
             _markers._PositionalCall in self.markers
             # Dummy dataclasses should have a single positional field.
-            or self.name == _strings.dummy_field_name
+            or self.intern_name == _strings.dummy_field_name
         )
 
 
@@ -305,7 +307,7 @@ def field_list_from_callable(
             # If the default value doesn't match the resolved type, we expand the
             # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
             warnings.warn(
-                f"The field {field.name} is annotated with type {field.type_or_callable}, "
+                f"The field {field.intern_name} is annotated with type {field.type_or_callable}, "
                 f"but the default value {field.default} has type {type(field.default)}. "
                 f"We'll try to handle this gracefully, but it may cause unexpected behavior."
             )
@@ -707,7 +709,16 @@ def _field_list_from_tuple(
 
     contains_nested = False
     for field in field_list:
+        if get_origin(field.type_or_callable) is Union:
+            for option in get_args(field.type_or_callable):
+                # The second argument here is the default value, which can help with
+                # narrowing but is generall not necessary.
+                contains_nested |= is_nested_type(option, MISSING_NONPROP)
+
         contains_nested |= is_nested_type(field.type_or_callable, field.default)
+
+        if contains_nested:
+            break
     if not contains_nested:
         # We could also check for variable length children, which can be populated when
         # the tuple is interpreted as a nested field but not a directly parsed one.
