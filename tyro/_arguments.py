@@ -500,7 +500,13 @@ def _rule_set_name_or_flag_and_dest(
         name_or_flag = "--" + name_or_flag
 
     # Strip.
-    if name_or_flag.startswith("--") and arg.subcommand_prefix != "":
+    if (
+        # If OmitArgPrefixes was applied, then the subcommand prefix was already
+        # stripped. :)
+        _markers.OmitArgPrefixes not in arg.field.markers
+        and name_or_flag.startswith("--")
+        and arg.subcommand_prefix != ""
+    ):
         # This will run even when unused because we want the assert.
         strip_prefix = "--" + arg.subcommand_prefix + "."
         assert name_or_flag.startswith(strip_prefix)

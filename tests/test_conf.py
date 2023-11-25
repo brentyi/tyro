@@ -915,9 +915,9 @@ def test_custom_constructor_0() -> None:
 
     @dataclasses.dataclass
     class Config:
-        x: Annotated[int, tyro.conf.arg(constructor=times_two)]
+        x: Annotated[int, tyro.conf.arg(name="x-renamed", constructor=times_two)]
 
-    assert tyro.cli(Config, args="--x.n 5".split(" ")) == Config(x=10)
+    assert tyro.cli(Config, args="--x-renamed.n 5".split(" ")) == Config(x=10)
 
 
 def test_custom_constructor_1() -> None:
@@ -1205,18 +1205,22 @@ def test_subcommand_constructor_mix() -> None:
     class Arg:
         foo: int = 1
 
-    t: Any = Union[
-        Annotated[
-            Any,
-            tyro.conf.subcommand(name="checkout", constructor=checkout),
+    t: Any = Annotated[
+        Union[
+            Annotated[
+                Any,
+                tyro.conf.subcommand(name="checkout-renamed", constructor=checkout),
+            ],
+            Annotated[
+                Any,
+                tyro.conf.subcommand(name="commit", constructor=commit),
+                tyro.conf.FlagConversionOff,
+            ],
+            Arg,
         ],
-        Annotated[
-            Any,
-            tyro.conf.subcommand(name="commit", constructor=commit),
-        ],
-        Arg,
+        tyro.conf.OmitArgPrefixes,  # Should do nothing.
     ]
 
     assert tyro.cli(t, args=["arg"]) == Arg()
-    assert tyro.cli(t, args=["checkout", "--branch", "main"]) == "main"
-    assert tyro.cli(t, args=["commit", "--message", "hi", "--all"]) == "hi True"
+    assert tyro.cli(t, args=["checkout-renamed", "--branch", "main"]) == "main"
+    assert tyro.cli(t, args=["commit", "--message", "hi", "--all", "True"]) == "hi True"
