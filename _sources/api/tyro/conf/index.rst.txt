@@ -30,7 +30,7 @@ Package Contents
 
       x: Annotated[int, tyro.conf.arg(...)]
 
-   :param name: A new name for the argument.
+   :param name: A new name for the argument in the CLI.
    :param metavar: Argument name in usage messages. The type is used by default.
    :param help: Helptext for this argument. The docstring is used by default.
    :param aliases: Aliases for this argument. All strings in the sequence should start
@@ -50,6 +50,50 @@ Package Contents
 .. py:function:: subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None) -> Any
                  subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True, constructor: Optional[Union[Type, Callable]] = None, constructor_factory: None = None) -> Any
 
+   
+   Returns a metadata object for configuring subcommands with ``typing.Annotated``.
+   Useful for aesthetics.
+
+   Consider the standard approach for creating subcommands:
+
+   .. code-block:: python
+
+      tyro.cli(
+          Union[NestedTypeA, NestedTypeB]
+      )
+
+   This will create two subcommands: ``nested-type-a`` and ``nested-type-b``.
+
+   Annotating each type with ``tyro.conf.subcommand()`` allows us to override for
+   each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix
+   the name or not.
+
+   .. code-block:: python
+
+      tyro.cli(
+          Union[
+              Annotated[
+                  NestedTypeA, subcommand("a", ...)
+              ],
+              Annotated[
+                  NestedTypeB, subcommand("b", ...)
+              ],
+          ]
+      )
+
+   :param name: The name of the subcommand in the CLI.
+   :param default: A default value for the subcommand, for struct-like types. (eg
+                   dataclasses)
+   :param description: Description of this option to use in the helptext. Defaults to
+                       docstring.
+   :param prefix_name: Whether to prefix the name of the subcommand based on where it
+                       is in a nested structure.
+   :param constructor: A constructor type or function. This should either be (a) a subtype
+                       of an argument's annotated type, or (b) a function with type-annotated
+                       inputs that returns an instance of the annotated type. This will be used in
+                       place of the argument's type for parsing arguments. No validation is done.
+   :param constructor_factory: A function that returns a constructor type or function.
+                               Useful when the constructor isn't immediately available.
 
 .. py:data:: AvoidSubcommands
 
