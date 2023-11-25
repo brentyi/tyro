@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Dict, List, Literal, Tuple, TypeVar
+from typing import Dict, List, Literal, Tuple, TypeVar, Union
 
 import pytest
 

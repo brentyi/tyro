@@ -64,6 +64,8 @@ from typing_extensions import (
     get_type_hints,
 )
 
+from . import _resolver
+
 # There are cases where typing.Literal doesn't match typing_extensions.Literal:
 # https://github.com/python/typing_extensions/pull/148
 try:
@@ -130,6 +132,10 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
     # Some checks we can do if the signature is available!
     for i, param in enumerate(signature.parameters.values()):
         annotation = type_annotations.get(param.name, param.annotation)
+
+        # Hack: apply_type_from_typevar applies shims, like UnionType => Union
+        # conversion.
+        annotation = _resolver.apply_type_from_typevar(annotation, {})
         if i == 0 and not (
             (get_origin(annotation) is Union and str in get_args(annotation))
             or annotation in (str, inspect.Parameter.empty)

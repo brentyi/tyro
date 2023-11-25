@@ -4,7 +4,7 @@ import dataclasses
 import io
 import json as json_
 import shlex
-from typing import Annotated, Any, Dict, Generic, List, Tuple, TypeVar
+from typing import Annotated, Any, Dict, Generic, List, Tuple, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext

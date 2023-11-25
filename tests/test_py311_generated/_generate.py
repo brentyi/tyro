@@ -2,6 +2,7 @@
 of `typing_extensions`."""
 
 import pathlib
+import subprocess
 
 for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py"):
     content = test_path.read_text().replace("typing_extensions", "typing")
@@ -33,6 +34,10 @@ for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py
 
         content = "".join(new_content_parts)
 
-    (
-        pathlib.Path(__file__).absolute().parent / (test_path.stem + "_generated.py")
-    ).write_text(content)
+    out_path = pathlib.Path(__file__).absolute().parent / (
+        test_path.stem + "_generated.py"
+    )
+    out_path.write_text(content)
+
+    subprocess.run(["isort", str(out_path)])
+    subprocess.run(["black", str(out_path)])

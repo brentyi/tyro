@@ -6,7 +6,9 @@ Largely written by @wookayin.
 
 import dataclasses
 from pathlib import Path
-from typing import Annotated, Generic, Tuple, TypeVar, Union
+from typing import Generic, Tuple, TypeVar, Union
+
+from typing_extensions import Annotated
 
 import tyro.conf
 

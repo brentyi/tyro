@@ -2,7 +2,7 @@ import contextlib
 import dataclasses
 import enum
 import io
-from typing import Annotated, Generic, List, Tuple, Type, TypeVar
+from typing import Annotated, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
 import yaml
@@ -370,6 +370,7 @@ def test_generic_inherited_type_narrowing() -> None:
 
 def test_pculbertson() -> None:
     # https://github.com/brentyi/tyro/issues/7
+    from typing import Union
 
     @dataclasses.dataclass(frozen=True)
     class TypeA:

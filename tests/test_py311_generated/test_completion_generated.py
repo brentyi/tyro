@@ -1,6 +1,7 @@
 import contextlib
 import dataclasses
 import io
+from typing import Union
 
 import pytest
 
