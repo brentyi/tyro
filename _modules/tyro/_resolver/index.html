@@ -314,6 +314,11 @@
 <span class="sd">    class, and a mapping from typevars to concrete types.&quot;&quot;&quot;</span>
 
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="n">annotations</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">if</span> <span class="n">origin_cls</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+        <span class="n">annotations</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
     <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="p">(</span>
@@ -338,7 +343,10 @@
             <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
             <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">)))</span>
 
-    <span class="k">return</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">type_from_typevar</span></div>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">type_from_typevar</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">annotations</span><span class="p">)),</span> <span class="n">type_from_typevar</span>  <span class="c1"># type: ignore</span></div>
 
 
 

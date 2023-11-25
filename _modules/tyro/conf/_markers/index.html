@@ -338,8 +338,8 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
-<span class="sd">&quot;&quot;&quot;Make flags used for keyword arguments in subcommands shorter by omitting the</span>
-<span class="sd">subcommand-specific portion of the prefix.</span>
+<span class="sd">&quot;&quot;&quot;Make CLI inputs used for subcommands shorter by omitting the subcommand-specific</span>
+<span class="sd">portion of the prefix.</span>
 
 <span class="sd">If we have a structure with the field:</span>
 
@@ -347,6 +347,10 @@
 
 <span class="sd">By default, `--cmd.arg` may be generated as a flag for each dataclass in the union.</span>
 <span class="sd">If subcommand prefixes are omitted, we would instead simply have `--arg`.</span>
+
+<span class="sd">By default, `cmd:nested-type-a` and `cmd:nested-type-b` may be generated as subcommand.</span>
+<span class="sd">If subcommand prefixes are omitted, we would instead simply have `nested-type-a` and</span>
+<span class="sd">`nested-type-b`.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">OmitArgPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>

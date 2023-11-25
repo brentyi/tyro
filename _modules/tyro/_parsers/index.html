@@ -307,8 +307,9 @@
     <span class="n">subparsers</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SubparsersSpecification</span><span class="p">]</span>
     <span class="c1"># - A set of subparser groups, which reflect the tree structure built by the</span>
     <span class="c1"># hierarchy of a nested config structure.</span>
-    <span class="n">subparsers_from_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">]</span>
-    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">subparsers_from_intern_prefix</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">]</span>
+    <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">has_required_args</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">consolidate_subcommand_args</span><span class="p">:</span> <span class="nb">bool</span>
 
@@ -322,7 +323,8 @@
         <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
             <span class="n">T</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">PropagatingMissingType</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span>
         <span class="p">],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserSpecification</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a parser definition from a callable or type.&quot;&quot;&quot;</span>
@@ -354,7 +356,7 @@
 
         <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">helptext_from_nested_class_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">subparsers</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">subparsers_from_prefix</span> <span class="o">=</span> <span class="p">{}</span>
@@ -364,7 +366,8 @@
                 <span class="n">field</span><span class="p">,</span>
                 <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
@@ -374,7 +377,7 @@
                     <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">SubparsersSpecification</span><span class="p">):</span>
                 <span class="c1"># Handle subparsers.</span>
-                <span class="n">subparsers_from_prefix</span><span class="p">[</span><span class="n">field_out</span><span class="o">.</span><span class="n">prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">field_out</span>
+                <span class="n">subparsers_from_prefix</span><span class="p">[</span><span class="n">field_out</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">field_out</span>
                 <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span><span class="n">subparsers</span><span class="p">,</span> <span class="n">field_out</span><span class="p">)</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">):</span>
                 <span class="c1"># Handle nested parsers.</span>
@@ -386,7 +389,9 @@
 
                 <span class="c1"># Include nested subparsers.</span>
                 <span class="k">if</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">subparsers_from_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_prefix</span><span class="p">)</span>
+                    <span class="n">subparsers_from_prefix</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span>
+                    <span class="p">)</span>
                     <span class="n">subparsers</span> <span class="o">=</span> <span class="n">add_subparsers_to_leaves</span><span class="p">(</span>
                         <span class="n">subparsers</span><span class="p">,</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">subparsers</span>
                     <span class="p">)</span>
@@ -396,17 +401,17 @@
                     <span class="n">k</span><span class="p">,</span>
                     <span class="n">v</span><span class="p">,</span>
                 <span class="p">)</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
-                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
+                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span>
+                        <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">,</span> <span class="n">k</span><span class="p">])</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
 
-                <span class="n">class_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">class_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
+                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span>
                         <span class="n">class_field_name</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
+                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span>
                         <span class="n">class_field_name</span>
                     <span class="p">]</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
 
@@ -416,10 +421,10 @@
                     <span class="nb">len</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span>
                     <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">nested_parser</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
                 <span class="p">):</span>
-                    <span class="n">current_helptext</span> <span class="o">=</span> <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span>
+                    <span class="n">current_helptext</span> <span class="o">=</span> <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span>
                         <span class="n">class_field_name</span>
                     <span class="p">]</span>
-                    <span class="n">helptext_from_nested_class_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
                         <span class="p">(</span><span class="s2">&quot;&quot;</span> <span class="k">if</span> <span class="n">current_helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">current_helptext</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
                         <span class="o">+</span> <span class="s2">&quot;Default: &quot;</span>
                         <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
@@ -433,10 +438,11 @@
                 <span class="k">else</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
             <span class="p">),</span>
             <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
-            <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="n">helptext_from_nested_class_field_name</span><span class="p">,</span>
+            <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">,</span>
             <span class="n">subparsers</span><span class="o">=</span><span class="n">subparsers</span><span class="p">,</span>
-            <span class="n">subparsers_from_prefix</span><span class="o">=</span><span class="n">subparsers_from_prefix</span><span class="p">,</span>
-            <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+            <span class="n">subparsers_from_intern_prefix</span><span class="o">=</span><span class="n">subparsers_from_prefix</span><span class="p">,</span>
+            <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+            <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
             <span class="n">has_required_args</span><span class="o">=</span><span class="n">has_required_args</span><span class="p">,</span>
             <span class="n">consolidate_subcommand_args</span><span class="o">=</span><span class="n">consolidate_subcommand_args</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -510,13 +516,13 @@
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
-                <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_prefix</span>
+                <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_prefix</span>
             <span class="p">):</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                    <span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span>
+                    <span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span>
                 <span class="p">)</span>
-                <span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
-                    <span class="n">format_group_name</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span><span class="p">),</span>
+                <span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">]</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span>
+                    <span class="n">format_group_name</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">),</span>
                     <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
                 <span class="p">)</span>
 
@@ -526,8 +532,8 @@
                 <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">positional_group</span><span class="p">)</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span> <span class="ow">in</span> <span class="n">group_from_prefix</span><span class="p">:</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span> <span class="ow">in</span> <span class="n">group_from_prefix</span><span class="p">:</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_prefix</span><span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># Suppressed argument: still need to add them, but they won&#39;t show up in</span>
                 <span class="c1"># the helptext so it doesn&#39;t matter which group.</span>
@@ -543,7 +549,8 @@
     <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
-    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
     <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">,</span>
@@ -554,7 +561,7 @@
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
@@ -563,7 +570,8 @@
             <span class="n">field</span><span class="p">,</span>
             <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
             <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-            <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+            <span class="n">intern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]),</span>
+            <span class="n">extern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]),</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">subparsers_attempt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="p">(</span>
@@ -596,14 +604,19 @@
                 <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span>
+                <span class="n">intern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
+                <span class="p">),</span>
+                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
+                    <span class="p">[</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]</span>
+                <span class="p">),</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
     <span class="k">return</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">(</span>
-        <span class="n">dest_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-        <span class="n">name_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+        <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+        <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
         <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
         <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
         <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
@@ -620,7 +633,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span>
-    <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
     <span class="n">options</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
@@ -632,7 +645,8 @@
         <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
         <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
-        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SubparsersSpecification</span><span class="p">]:</span>
         <span class="c1"># Union of classes should create subparsers.</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -687,7 +701,10 @@
         <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
             <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span>
-                <span class="n">prefix</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                <span class="s2">&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                <span class="k">else</span> <span class="n">extern_prefix</span><span class="p">,</span>
+                <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="n">option_unwrapped</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
                 <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
@@ -714,17 +731,20 @@
             <span class="c1"># This should never be triggered because union types are expanded when</span>
             <span class="c1"># a bad default value is provided.</span>
             <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> but no matching subcommand was found. A&quot;</span>
                 <span class="s2">&quot; type may be missing in the Union type declaration for&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Add subcommands for each option.</span>
         <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
             <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span>
-                <span class="n">prefix</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
+                <span class="s2">&quot;&quot;</span>
+                <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+                <span class="k">else</span> <span class="n">extern_prefix</span><span class="p">,</span>
+                <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">),</span>
             <span class="p">)</span>
 
             <span class="c1"># Get a subcommand config: either pulled from the type annotations or the</span>
@@ -755,15 +775,16 @@
                 <span class="n">description</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
-                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+                <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>
             <span class="n">subparser</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                 <span class="n">subparser</span><span class="p">,</span>
                 <span class="n">helptext_from_nested_class_field_name</span><span class="o">=</span><span class="p">{</span>
-                    <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">prefix</span><span class="p">,</span> <span class="n">k</span><span class="p">]):</span> <span class="n">v</span>
+                    <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">k</span><span class="p">]):</span> <span class="n">v</span>
                     <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">subparser</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                 <span class="p">},</span>
             <span class="p">)</span>
@@ -803,13 +824,13 @@
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">SubparsersSpecification</span><span class="p">(</span>
-            <span class="n">name</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">,</span>
             <span class="c1"># If we wanted, we could add information about the default instance</span>
             <span class="c1"># automatically, as is done for normal fields. But for now we just rely on</span>
             <span class="c1"># the user to include it in the docstring.</span>
             <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
             <span class="n">parser_from_name</span><span class="o">=</span><span class="n">parser_from_name</span><span class="p">,</span>
-            <span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span>
+            <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
             <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span>
             <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">options</span><span class="p">),</span>
@@ -829,7 +850,7 @@
 
         <span class="c1"># Add subparsers to every node in previous level of the tree.</span>
         <span class="n">argparse_subparsers</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
-            <span class="n">dest</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prefix</span><span class="p">),</span>
+            <span class="n">dest</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">),</span>
             <span class="n">description</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
             <span class="n">required</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
             <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>

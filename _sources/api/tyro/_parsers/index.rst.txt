@@ -48,12 +48,17 @@ Module Contents
 
       
 
-   .. py:attribute:: subparsers_from_prefix
+   .. py:attribute:: subparsers_from_intern_prefix
       :type: Dict[str, SubparsersSpecification]
 
       
 
-   .. py:attribute:: prefix
+   .. py:attribute:: intern_prefix
+      :type: str
+
+      
+
+   .. py:attribute:: extern_prefix
       :type: str
 
       
@@ -68,7 +73,7 @@ Module Contents
 
       
 
-   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._fields.PropagatingMissingType, tyro._fields.NonpropagatingMissingType], prefix: str, subcommand_prefix: str = '') -> ParserSpecification
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._fields.PropagatingMissingType, tyro._fields.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str = '') -> ParserSpecification
       :staticmethod:
 
       
@@ -85,7 +90,7 @@ Module Contents
       Create defined arguments and subparsers.
 
 
-.. py:function:: handle_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], prefix: str, subcommand_prefix: str) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
+.. py:function:: handle_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
 
    
    Determine what to do with a single field definition.
@@ -110,7 +115,7 @@ Module Contents
 
       
 
-   .. py:attribute:: prefix
+   .. py:attribute:: intern_prefix
       :type: str
 
       
@@ -130,7 +135,7 @@ Module Contents
 
       
 
-   .. py:method:: from_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], prefix: str) -> Optional[SubparsersSpecification]
+   .. py:method:: from_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str) -> Optional[SubparsersSpecification]
       :staticmethod:
 
 

@@ -18,7 +18,12 @@ Module Contents
 .. py:class:: FieldDefinition
 
 
-   .. py:attribute:: name
+   .. py:attribute:: intern_name
+      :type: str
+
+      
+
+   .. py:attribute:: extern_name
       :type: str
 
       

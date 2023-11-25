@@ -315,14 +315,16 @@
     <span class="n">arg_from_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">arg_from_prefixed_field_name</span><span class="p">[</span>
-            <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">dest_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+            <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">])</span>
         <span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
 
     <span class="n">any_arguments_provided</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
         <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
-        <span class="n">prefixed_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field_name_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+        <span class="n">prefixed_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">field_name_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
+        <span class="p">)</span>
 
         <span class="c1"># Resolve field type.</span>
         <span class="n">field_type</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span>
@@ -394,7 +396,7 @@
             <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Unions over dataclasses (subparsers). This is the only other option.</span>
-            <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_prefix</span><span class="p">[</span>
+            <span class="n">subparser_def</span> <span class="o">=</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">subparsers_from_intern_prefix</span><span class="p">[</span>
                 <span class="n">prefixed_field_name</span>
             <span class="p">]</span>
             <span class="n">subparser_dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">)</span>
