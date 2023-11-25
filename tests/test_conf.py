@@ -37,7 +37,7 @@ def test_omit_subcommand_prefix() -> None:
             args=[
                 "--x",
                 "1",
-                "bc:default-instance-http-server",
+                "default-instance-http-server",
                 "--y",
                 "5",
                 "--no-flag",
@@ -45,7 +45,7 @@ def test_omit_subcommand_prefix() -> None:
         )
         == tyro.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "bc:default-instance-http-server", "--y", "5"],
+            args=["--x", "1", "default-instance-http-server", "--y", "5"],
             default=DefaultInstanceSubparser(
                 x=1, bc=DefaultInstanceHTTPServer(y=3, flag=False)
             ),
@@ -55,11 +55,11 @@ def test_omit_subcommand_prefix() -> None:
     assert (
         tyro.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "bc:default-instance-http-server", "--y", "8"],
+            args=["--x", "1", "default-instance-http-server", "--y", "8"],
         )
         == tyro.cli(
             DefaultInstanceSubparser,
-            args=["--x", "1", "bc:default-instance-http-server", "--y", "8"],
+            args=["--x", "1", "default-instance-http-server", "--y", "8"],
             default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
@@ -616,7 +616,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         tyro.cli(
             tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
             args=[
-                "bc:default-instance-http-server",
+                "default-instance-http-server",
                 "--x",
                 "1",
                 "--y",
@@ -627,7 +627,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         == tyro.cli(
             tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
             args=[
-                "bc:default-instance-http-server",
+                "default-instance-http-server",
                 "--x",
                 "1",
                 "--y",
@@ -643,7 +643,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         tyro.cli(
             tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
             args=[
-                "bc:default-instance-http-server",
+                "default-instance-http-server",
                 "--x",
                 "1",
                 "--y",
@@ -653,7 +653,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         == tyro.cli(
             tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
             args=[
-                "bc:default-instance-http-server",
+                "default-instance-http-server",
                 "--x",
                 "1",
                 "--y",
@@ -696,7 +696,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
     assert tyro.cli(
         func,
         args=[
-            "parent.bc:http-server",
+            "http-server",
             "--parent.x",
             "1",
             # --y and --no-flag are in a subcommand with prefix omission.
@@ -708,7 +708,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() ->
     assert tyro.cli(
         func,
         args=[
-            "parent.bc:http-server",
+            "http-server",
             "--parent.x",
             "1",
             # --y is in a subcommand with prefix omission.

@@ -18,7 +18,6 @@ from typing import (
     Tuple,
     TypeAlias,
     TypeVar,
-    Union,
 )
 
 import pytest
@@ -232,7 +231,7 @@ def test_optional() -> None:
 
 
 def test_union_basic() -> None:
-    def main(x: Union[int, str]) -> Union[int, str]:
+    def main(x: int | str) -> int | str:
         return x
 
     assert tyro.cli(main, args=["--x", "5"]) == 5
@@ -241,7 +240,7 @@ def test_union_basic() -> None:
 
 
 def test_union_with_list() -> None:
-    def main(x: Union[int, str, List[bool]]) -> Any:
+    def main(x: int | str | List[bool]) -> Any:
         return x
 
     assert tyro.cli(main, args=["--x", "5"]) == 5
@@ -252,7 +251,7 @@ def test_union_with_list() -> None:
 
 
 def test_union_literal() -> None:
-    def main(x: Union[Literal[1, 2], Literal[3, 4, 5], str]) -> Union[int, str]:
+    def main(x: Literal[1, 2] | Literal[3, 4, 5] | str) -> int | str:
         return x
 
     assert tyro.cli(main, args=["--x", "5"]) == 5
@@ -555,7 +554,7 @@ def test_return_parser() -> None:
 
 def test_pathlike_custom_class() -> None:
     class CustomPath(pathlib.PurePosixPath):
-        def __new__(cls, *args: Union[str, os.PathLike]):
+        def __new__(cls, *args: str | os.PathLike):
             return super().__new__(cls, *args)
 
     def main(a: CustomPath) -> CustomPath:
@@ -708,7 +707,7 @@ def test_empty_container() -> None:
     @dataclasses.dataclass
     class A:
         x: Tuple[int, ...] = (1, 2, 3)
-        y: Union[int, str, List[bool]] = dataclasses.field(
+        y: int | str | List[bool] = dataclasses.field(
             default_factory=lambda: [False, False, True]
         )
 

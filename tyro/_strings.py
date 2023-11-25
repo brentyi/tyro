@@ -107,6 +107,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         if orig is not None and hasattr(orig, "__name__"):
             parts = [orig.__name__]  # type: ignore
             parts.extend(map(get_name, get_args(cls)))
+            parts = [hyphen_separated_from_camel_case(part) for part in parts]
             return get_delimeter().join(parts)
         elif hasattr(cls, "__name__"):
             return hyphen_separated_from_camel_case(cls.__name__)
