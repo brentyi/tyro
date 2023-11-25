@@ -13,7 +13,6 @@ from typing import (
     Dict,
     FrozenSet,
     List,
-    Optional,
     Set,
     Tuple,
     TypeVar,
@@ -186,7 +185,7 @@ MetadataType = TypeVar("MetadataType")
 
 
 def unwrap_annotated(
-    typ: TypeOrCallable, search_type: Optional[TypeForm[MetadataType]] = None
+    typ: TypeOrCallable, search_type: TypeForm[MetadataType] = Any  # type: ignore
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]:
     """Helper for parsing typing.Annotated types.
 
@@ -198,11 +197,11 @@ def unwrap_annotated(
     targets = tuple(
         x
         for x in getattr(typ, "__tyro_markers__", tuple())
-        if search_type is not None and isinstance(x, search_type)
+        if search_type is Any or isinstance(x, search_type)
     )
     assert isinstance(targets, tuple)
     if not hasattr(typ, "__metadata__"):
-        return typ, targets
+        return typ, targets  # type: ignore
 
     args = get_args(typ)
     assert len(args) >= 2
@@ -211,9 +210,9 @@ def unwrap_annotated(
     targets = tuple(
         x
         for x in targets + args[1:]
-        if search_type is not None and isinstance(x, search_type)
+        if search_type is Any or isinstance(x, search_type)
     )
-    return args[0], targets
+    return args[0], targets  # type: ignore
 
 
 def apply_type_from_typevar(

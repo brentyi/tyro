@@ -51,9 +51,6 @@ def subcommand(
     constructor: Optional[Union[Type, Callable]] = None,
     constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None,
 ) -> Any:
-    assert not (
-        constructor is not None and constructor_factory is not None
-    ), "`constructor` and `constructor_factory` cannot both be set."
     """Returns a metadata object for configuring subcommands with `typing.Annotated`.
     Useful for aesthetics.
 
@@ -99,6 +96,9 @@ def subcommand(
         constructor_factory: A function that returns a constructor type or function.
             Useful when the constructor isn't immediately available.
     """
+    assert not (
+        constructor is not None and constructor_factory is not None
+    ), "`constructor` and `constructor_factory` cannot both be set."
     return _SubcommandConfiguration(
         name,
         default,
@@ -167,7 +167,7 @@ def arg(
     ```
 
     Arguments:
-        name: A new name for the argument.
+        name: A new name for the argument in the CLI.
         metavar: Argument name in usage messages. The type is used by default.
         help: Helptext for this argument. The docstring is used by default.
         aliases: Aliases for this argument. All strings in the sequence should start
