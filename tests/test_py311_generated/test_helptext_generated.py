@@ -13,7 +13,6 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
-    Union,
     cast,
 )
 
@@ -413,11 +412,11 @@ def test_multiple_subparsers_helptext() -> None:
     @dataclasses.dataclass
     class MultipleSubparsers:
         # Field a description.
-        a: Union[Subcommand1, Subcommand2, Subcommand3]
+        a: Subcommand1 | Subcommand2 | Subcommand3
         # Field b description.
-        b: Union[Subcommand1, Subcommand2, Subcommand3]
+        b: Subcommand1 | Subcommand2 | Subcommand3
         # Field c description.
-        c: Union[Subcommand1, Subcommand2, Subcommand3] = dataclasses.field(
+        c: Subcommand1 | Subcommand2 | Subcommand3 = dataclasses.field(
             default_factory=Subcommand3
         )
 
@@ -461,7 +460,7 @@ def test_optional_helptext() -> None:
 
 
 def test_metavar_0() -> None:
-    def main(x: Union[Literal[0, 1, 2, 3], Tuple[int, int]]) -> None:
+    def main(x: Literal[0, 1, 2, 3] | Tuple[int, int]) -> None:
         pass
 
     helptext = get_helptext(main)
@@ -470,11 +469,7 @@ def test_metavar_0() -> None:
 
 def test_metavar_1() -> None:
     def main(
-        x: Union[
-            Literal[0, 1, 2, 3],
-            Literal["hey,there", "hello"],
-            List[int],
-        ]
+        x: Literal[0, 1, 2, 3] | Literal["hey,there", "hello"] | List[int]
     ) -> None:
         pass
 
@@ -487,7 +482,7 @@ def test_metavar_2() -> None:
     def main(
         x: Tuple[
             Literal[0, 1, 2, 3],
-            Union[int, str],
+            int | str,
         ]
     ) -> None:
         pass
@@ -497,12 +492,7 @@ def test_metavar_2() -> None:
 
 
 def test_metavar_3() -> None:
-    def main(
-        x: Union[
-            Literal[0, 1, 2, 3],
-            Union[Tuple[int, int], Tuple[str]],
-        ]
-    ) -> None:
+    def main(x: Literal[0, 1, 2, 3] | Tuple[int, int] | Tuple[str]) -> None:
         pass
 
     helptext = get_helptext(main)
@@ -511,11 +501,7 @@ def test_metavar_3() -> None:
 
 def test_metavar_4() -> None:
     def main(
-        x: Union[
-            Literal[0, 1, 2, 3],
-            Union[Tuple[int, int], Tuple[str, str, str]],
-            Literal[True],
-        ]
+        x: Literal[0, 1, 2, 3] | Tuple[int, int] | Tuple[str, str, str] | Literal[True]
     ) -> None:
         pass
 
@@ -524,9 +510,7 @@ def test_metavar_4() -> None:
 
 
 def test_metavar_5() -> None:
-    def main(
-        x: List[Union[Tuple[int, int], Tuple[str, str]]] = [(1, 1), (2, 2)]
-    ) -> None:
+    def main(x: List[Tuple[int, int] | Tuple[str, str]] = [(1, 1), (2, 2)]) -> None:
         pass
 
     helptext = get_helptext(main)
@@ -534,7 +518,7 @@ def test_metavar_5() -> None:
 
 
 def test_metavar_6() -> None:
-    def main(x: Dict[Union[Tuple[int, int], Tuple[str, str]], Tuple[int, int]]) -> dict:
+    def main(x: Dict[Tuple[int, int] | Tuple[str, str], Tuple[int, int]]) -> dict:
         return x
 
     helptext = get_helptext(main)
@@ -619,11 +603,11 @@ def test_multiple_subparsers_helptext_hyphens() -> None:
     @dataclasses.dataclass
     class MultipleSubparsers:
         # Field a description.
-        a: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        a: SubcommandOne | SubcommandTwo | SubcommandThree
         # Field b description.
-        b: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        b: SubcommandOne | SubcommandTwo | SubcommandThree
         # Field c description.
-        c: Union[SubcommandOne, SubcommandTwo, SubcommandThree] = dataclasses.field(
+        c: SubcommandOne | SubcommandTwo | SubcommandThree = dataclasses.field(
             default_factory=SubcommandThree
         )
 
@@ -667,11 +651,11 @@ def test_multiple_subparsers_helptext_underscores() -> None:
     @dataclasses.dataclass
     class MultipleSubparsers:
         # Field a description.
-        a: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        a: SubcommandOne | SubcommandTwo | SubcommandThree
         # Field b description.
-        b: Union[SubcommandOne, SubcommandTwo, SubcommandThree]
+        b: SubcommandOne | SubcommandTwo | SubcommandThree
         # Field c description.
-        c: Union[SubcommandOne, SubcommandTwo, SubcommandThree] = dataclasses.field(
+        c: SubcommandOne | SubcommandTwo | SubcommandThree = dataclasses.field(
             default_factory=SubcommandThree
         )
 

@@ -2,7 +2,7 @@ import contextlib
 import dataclasses
 import enum
 import io
-from typing import Annotated, Generic, List, Tuple, Type, TypeVar, Union
+from typing import Annotated, Generic, List, Tuple, Type, TypeVar
 
 import pytest
 import yaml
@@ -259,7 +259,7 @@ def test_generic_subparsers() -> None:
 
     @dataclasses.dataclass
     class Subparser(Generic[T1, T2]):
-        command: Union[T1, T2]
+        command: T1 | T2
 
     parsed_instance = tyro.cli(
         Subparser[CommandOne, CommandTwo],
@@ -298,7 +298,7 @@ def test_generic_subparsers_in_container() -> None:
 
     @dataclasses.dataclass
     class Subparser(Generic[T1, T2]):
-        command: Union[T1, T2]
+        command: T1 | T2
 
     parsed_instance = tyro.cli(
         Subparser[Command[int], Command[float]],
@@ -370,7 +370,6 @@ def test_generic_inherited_type_narrowing() -> None:
 
 def test_pculbertson() -> None:
     # https://github.com/brentyi/tyro/issues/7
-    from typing import Union
 
     @dataclasses.dataclass(frozen=True)
     class TypeA:
@@ -382,7 +381,7 @@ def test_pculbertson() -> None:
 
     @dataclasses.dataclass
     class Wrapper:
-        subclass: Union[TypeA, TypeB] = TypeA(1)
+        subclass: TypeA | TypeB = TypeA(1)
 
     wrapper1 = Wrapper()  # Create Wrapper object.
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))

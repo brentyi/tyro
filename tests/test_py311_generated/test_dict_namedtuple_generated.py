@@ -13,7 +13,6 @@ from typing import (
     Required,
     Tuple,
     TypedDict,
-    Union,
     cast,
 )
 
@@ -56,7 +55,7 @@ def test_dict_with_default() -> None:
 
 
 def test_tuple_in_dict() -> None:
-    def main(x: Dict[Union[Tuple[int, int], Tuple[str, str]], Tuple[int, int]]) -> dict:
+    def main(x: Dict[Tuple[int, int] | Tuple[str, str], Tuple[int, int]]) -> dict:
         return x
 
     assert tyro.cli(main, args="--x 1 1 2 2 3 3 4 4".split(" ")) == {

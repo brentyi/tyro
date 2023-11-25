@@ -56,14 +56,16 @@ def call_from_args(
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[
-            _strings.make_field_name([arg.dest_prefix, arg.field.name])
+            _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
         ] = arg
 
     any_arguments_provided = False
 
     for field in field_list:
         value: Any
-        prefixed_field_name = _strings.make_field_name([field_name_prefix, field.name])
+        prefixed_field_name = _strings.make_field_name(
+            [field_name_prefix, field.intern_name]
+        )
 
         # Resolve field type.
         field_type = field.type_or_callable
@@ -135,7 +137,7 @@ def call_from_args(
             consumed_keywords |= consumed_keywords_child
         else:
             # Unions over dataclasses (subparsers). This is the only other option.
-            subparser_def = parser_definition.subparsers_from_prefix[
+            subparser_def = parser_definition.subparsers_from_intern_prefix[
                 prefixed_field_name
             ]
             subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)

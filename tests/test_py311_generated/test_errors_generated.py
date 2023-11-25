@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Dict, List, Literal, Tuple, TypeVar, Union
+from typing import Dict, List, Literal, Tuple, TypeVar
 
 import pytest
 
@@ -35,7 +35,7 @@ def test_ambiguous_collection_2() -> None:
 
 
 def test_ambiguous_collection_3() -> None:
-    def main(x: List[Union[Tuple[int, int], Tuple[int, int, int]]]) -> None:
+    def main(x: List[Tuple[int, int] | Tuple[int, int, int]]) -> None:
         pass
 
     with pytest.raises(tyro.UnsupportedTypeAnnotationError):
@@ -193,7 +193,7 @@ def test_similar_arguments_subcommands() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))  # type: ignore
+        tyro.cli(ClassA | ClassB, args="--reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -218,7 +218,7 @@ def test_similar_arguments_subcommands_multiple() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--fjdkslaj --reward.trac".split(" "))  # type: ignore
+        tyro.cli(ClassA | ClassB, args="--fjdkslaj --reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -244,7 +244,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--rd.trac".split(" "))  # type: ignore
+        tyro.cli(ClassA | ClassB, args="--rd.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -270,7 +270,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))  # type: ignore
+        tyro.cli(ClassA | ClassB, args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -312,7 +312,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))  # type: ignore
+        tyro.cli(ClassA | ClassB, args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
     assert "Unrecognized argument" in error
@@ -376,9 +376,15 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         tyro.cli(  # type: ignore
-            Union[
-                ClassA, ClassB, ClassC, ClassD, ClassE, ClassF, ClassG, ClassH, ClassI
-            ],
+            ClassA
+            | ClassB
+            | ClassC
+            | ClassD
+            | ClassE
+            | ClassF
+            | ClassG
+            | ClassH
+            | ClassI,
             args="--track".split(" "),
         )
 
@@ -435,9 +441,15 @@ def test_similar_arguments_subcommands_overflow_same_startswith_multiple() -> No
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         tyro.cli(  # type: ignore
-            Union[
-                ClassA, ClassB, ClassC, ClassD, ClassE, ClassF, ClassG, ClassH, ClassI
-            ],
+            ClassA
+            | ClassB
+            | ClassC
+            | ClassD
+            | ClassE
+            | ClassF
+            | ClassG
+            | ClassH
+            | ClassI,
             args="--track --ffff".split(" "),
         )
 
@@ -542,11 +554,11 @@ def test_invalid_subcommand_default() -> None:
     class C:
         c: int
 
-    assert tyro.cli(Union[A, B], args="a --a 5".split(" ")) == A(5)  # type: ignore
-    assert tyro.cli(Union[A, B], args="b --b 5".split(" ")) == B(5)  # type: ignore
+    assert tyro.cli(A | B, args="a --a 5".split(" ")) == A(5)  # type: ignore
+    assert tyro.cli(A | B, args="b --b 5".split(" ")) == B(5)  # type: ignore
 
     with pytest.warns(UserWarning):
-        assert tyro.cli(Union[A, B], default=C(3), args=[]) == C(3)  # type: ignore
+        assert tyro.cli(A | B, default=C(3), args=[]) == C(3)  # type: ignore
 
     with pytest.warns(UserWarning):
-        assert tyro.cli(Union[A, B], default=C(3), args="b --b 5".split(" ")) == B(5)  # type: ignore
+        assert tyro.cli(A | B, default=C(3), args="b --b 5".split(" ")) == B(5)  # type: ignore

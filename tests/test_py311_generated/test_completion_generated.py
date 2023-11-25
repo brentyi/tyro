@@ -1,7 +1,6 @@
 import contextlib
 import dataclasses
 import io
-from typing import Union
 
 import pytest
 
@@ -26,7 +25,7 @@ class TypeB:
 
 @dataclasses.dataclass(frozen=True)
 class Wrapper:
-    supertype: Union[TypeA, TypeB] = TypeA()
+    supertype: TypeA | TypeB = TypeA()
 
 
 def test_bash():
