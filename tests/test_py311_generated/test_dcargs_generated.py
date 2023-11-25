@@ -18,7 +18,6 @@ from typing import (
     Tuple,
     TypeAlias,
     TypeVar,
-    Union,
 )
 
 import pytest

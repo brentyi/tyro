@@ -13,7 +13,6 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
-    Union,
     cast,
 )
 

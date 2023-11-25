@@ -10,7 +10,6 @@ Hopefully we can fix/improve this in the future!
 
 
 import dataclasses
-from typing import Union
 
 import pytest
 

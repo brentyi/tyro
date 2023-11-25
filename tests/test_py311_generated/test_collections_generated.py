@@ -14,7 +14,6 @@ from typing import (
     Sequence,
     Set,
     Tuple,
-    Union,
 )
 
 import pytest

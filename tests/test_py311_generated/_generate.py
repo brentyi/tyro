@@ -41,3 +41,4 @@ for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py
 
     subprocess.run(["isort", str(out_path)])
     subprocess.run(["black", str(out_path)])
+    subprocess.run(["ruff", "--fix", str(out_path)])

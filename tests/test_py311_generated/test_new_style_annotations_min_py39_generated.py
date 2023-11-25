@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal, Optional
 
 import pytest
 
