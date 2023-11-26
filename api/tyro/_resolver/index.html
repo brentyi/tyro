@@ -437,46 +437,10 @@ strings!)</p>
 <dt class="sig sig-object py" id="tyro._resolver.narrow_union_type">
 <span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_union_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#narrow_union_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.narrow_union_type" title="Link to this definition">#</a></dt>
 <dd><p>Narrow union types.</p>
-<p>This is a shim for failing more gracefully when we we’re given one of two errors:
-(A) A Union type that doesn’t match the default value.
-(B) An unsupported Union type, which mixes “nested” types (like dataclasses) with</p>
-<blockquote>
-<div><p>non-“nested” types (like strings).</p>
-</div></blockquote>
-<p>–
-For (A):</p>
-<p>We raise a warning, then add the type of the default value to the union.
-Loosely motivated by: <a class="reference external" href="https://github.com/brentyi/tyro/issues/20">https://github.com/brentyi/tyro/issues/20</a></p>
-<p>–
-For (B):</p>
-<p>When do we want to narrow Union types?</p>
-<blockquote>
-<div><dl class="simple">
-<dt>Unions over nested types: no.</dt><dd><p>typ = NestedA | NestedB
-=&gt; NestedA | NestedB can be converted to two subcommands.</p>
-</dd>
-<dt>Unions over nested and not nested types: no.</dt><dd><p>typ = int | str
-=&gt; int | str can be instantiated as a union.</p>
-</dd>
-</dl>
-<p>Unions over mixed nested / not nested types: if the default is a nested
-type, strip out the non-nested ones. If the default is a non-nested
-type, strip out the nested ones.</p>
-</div></blockquote>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">typ</span> <span class="o">=</span> <span class="n">NestedA</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default_instance</span> <span class="o">=</span> <span class="n">NestedA</span><span class="p">()</span>
-<span class="o">=&gt;</span> <span class="n">NestedA</span>
-
-<span class="n">typ</span> <span class="o">=</span> <span class="n">NestedA</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default_instance</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="o">=&gt;</span> <span class="nb">int</span>
-
-<span class="n">typ</span> <span class="o">=</span> <span class="n">NestedA</span> <span class="o">|</span> <span class="n">NestedB</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span> <span class="n">default_instance</span> <span class="o">=</span> <span class="n">NestedA</span><span class="p">()</span>
-<span class="o">=&gt;</span> <span class="n">NestedA</span>
-</pre></div>
-</div>
-<p>This is a hack to get around the fact that we don’t currently support
-mixing nested types (eg <code class="docutils literal notranslate"><span class="pre">SomeDataclass</span></code>) and non-nested ones (eg <code class="docutils literal notranslate"><span class="pre">int</span></code> or
-<code class="docutils literal notranslate"><span class="pre">int</span> <span class="pre">|</span> <span class="pre">str</span></code>) in unions. This should be supported in the future, but will
-likely require a big code refactor.</p>
+<p>This is a shim for failing more gracefully when we we’re given a Union type that
+doesn’t match the default value.</p>
+<p>In this case, we raise a warning, then add the type of the default value to the
+union. Loosely motivated by: <a class="reference external" href="https://github.com/brentyi/tyro/issues/20">https://github.com/brentyi/tyro/issues/20</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

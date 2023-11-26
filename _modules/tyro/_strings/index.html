@@ -387,9 +387,7 @@
         <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">hyphen_separated_from_camel_case</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Tried to interpret </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> as a subcommand, but could not infer name&quot;</span>
-            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">hyphen_separated_from_camel_case</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_from_typevar</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">get_name</span><span class="p">(</span><span class="bp">cls</span><span class="p">),</span> <span class="n">prefix_name</span>  <span class="c1"># type: ignore</span>

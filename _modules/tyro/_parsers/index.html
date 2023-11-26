@@ -326,6 +326,7 @@
         <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">subcommand_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ParserSpecification</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a parser definition from a callable or type.&quot;&quot;&quot;</span>
 
@@ -337,7 +338,9 @@
 
         <span class="c1"># Resolve the type of `f`, generate a field list.</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
-            <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span>
+            <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+            <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+            <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="c1"># Cycle detection.</span>
@@ -611,6 +614,7 @@
                     <span class="p">[</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]</span>
                 <span class="p">),</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
+                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="c1"># (3) Handle primitive or fixed types. These produce a single argument!</span>
@@ -685,10 +689,11 @@
                     <span class="p">)</span>
                 <span class="p">)</span>
 
-        <span class="c1"># Exit if we don&#39;t contain nested types.</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+        <span class="c1"># Exit if we don&#39;t contain any nested types.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">o</span><span class="p">),</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
+                <span class="n">o</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">none_proxy</span>
+                <span class="ow">and</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">o</span><span class="p">),</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options</span>
             <span class="p">]</span>
         <span class="p">):</span>
@@ -778,6 +783,7 @@
                 <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
                 <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
                 <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="p">)</span>
 
             <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>

@@ -297,7 +297,7 @@
 
     <span class="c1"># Resolve the type of `f`, generate a field list.</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
-        <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span>
+        <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">)</span>
 
     <span class="n">positional_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -484,14 +484,23 @@
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="nb">list</span> <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">is</span> <span class="n">Sequence</span> <span class="k">else</span> <span class="n">unwrapped_f</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="c1"># When tuples are used as nested structures (eg Tuple[SomeDataclass]), we</span>
-        <span class="c1"># use keyword arguments.</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Triggered when support_single_arg_types=True is used.</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">positional_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">unwrapped_f</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-        <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Triggered when support_single_arg_types=True is used.</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">field_name_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="c1"># Don&#39;t catch any errors for the &quot;root&quot; field. If main() in tyro.cli(main)</span>

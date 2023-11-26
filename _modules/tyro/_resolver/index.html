@@ -551,47 +551,12 @@
 <span class="k">def</span> <span class="nf">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Narrow union types.</span>
 
-<span class="sd">    This is a shim for failing more gracefully when we we&#39;re given one of two errors:</span>
-<span class="sd">    (A) A Union type that doesn&#39;t match the default value.</span>
-<span class="sd">    (B) An unsupported Union type, which mixes &quot;nested&quot; types (like dataclasses) with</span>
-<span class="sd">      non-&quot;nested&quot; types (like strings).</span>
+<span class="sd">    This is a shim for failing more gracefully when we we&#39;re given a Union type that</span>
+<span class="sd">    doesn&#39;t match the default value.</span>
 
-<span class="sd">    --</span>
-<span class="sd">    For (A):</span>
-
-<span class="sd">    We raise a warning, then add the type of the default value to the union.</span>
-<span class="sd">    Loosely motivated by: https://github.com/brentyi/tyro/issues/20</span>
-
-<span class="sd">    --</span>
-<span class="sd">    For (B):</span>
-
-<span class="sd">    When do we want to narrow Union types?</span>
-
-<span class="sd">      Unions over nested types: no.</span>
-<span class="sd">         typ = NestedA | NestedB</span>
-<span class="sd">         =&gt; NestedA | NestedB can be converted to two subcommands.</span>
-
-<span class="sd">      Unions over nested and not nested types: no.</span>
-<span class="sd">         typ = int | str</span>
-<span class="sd">         =&gt; int | str can be instantiated as a union.</span>
-
-<span class="sd">      Unions over mixed nested / not nested types: if the default is a nested</span>
-<span class="sd">      type, strip out the non-nested ones. If the default is a non-nested</span>
-<span class="sd">      type, strip out the nested ones.</span>
-
-<span class="sd">         typ = NestedA | int, default_instance = NestedA()</span>
-<span class="sd">         =&gt; NestedA</span>
-
-<span class="sd">         typ = NestedA | int, default_instance = 5</span>
-<span class="sd">         =&gt; int</span>
-
-<span class="sd">         typ = NestedA | NestedB | int, default_instance = NestedA()</span>
-<span class="sd">         =&gt; NestedA</span>
-
-<span class="sd">    This is a hack to get around the fact that we don&#39;t currently support</span>
-<span class="sd">    mixing nested types (eg `SomeDataclass`) and non-nested ones (eg `int` or</span>
-<span class="sd">    `int | str`) in unions. This should be supported in the future, but will</span>
-<span class="sd">    likely require a big code refactor.&quot;&quot;&quot;</span>
+<span class="sd">    In this case, we raise a warning, then add the type of the default value to the</span>
+<span class="sd">    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Union</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">typ</span>
 
@@ -611,35 +576,7 @@
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="k">pass</span>
 
-    <span class="c1"># (B)</span>
-    <span class="n">is_nested</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-        <span class="nb">map</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">option</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span>
-                <span class="n">option</span><span class="p">,</span>
-                <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
-            <span class="p">),</span>
-            <span class="n">options</span><span class="p">,</span>
-        <span class="p">)</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-        <span class="n">none_index</span> <span class="o">=</span> <span class="n">options</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>
-        <span class="n">is_nested_no_none</span> <span class="o">=</span> <span class="n">is_nested</span><span class="p">[:</span><span class="n">none_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">is_nested</span><span class="p">[</span><span class="n">none_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">is_nested_no_none</span> <span class="o">=</span> <span class="n">is_nested</span>
-
-    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">is_nested_no_none</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">is_nested_no_none</span><span class="p">):</span>
-        <span class="c1"># Either all types are nested or none of them are.</span>
-        <span class="k">return</span> <span class="n">typ</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">is_default_nested</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">),</span> <span class="n">default_instance</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-            <span class="nb">tuple</span><span class="p">(</span>
-                <span class="n">option</span>
-                <span class="k">for</span> <span class="n">option</span><span class="p">,</span> <span class="n">nested</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">),</span> <span class="n">is_nested</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">nested</span> <span class="ow">is</span> <span class="n">is_default_nested</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">out</span>  <span class="c1"># type: ignore</span></div>
+    <span class="k">return</span> <span class="n">typ</span></div>
 
 </pre></div>
         </article>
