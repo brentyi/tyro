@@ -238,11 +238,6 @@ def call_from_args(
             # Triggered when support_single_arg_types=True is used.
             assert len(kwargs) == 0
             assert len(positional_args) == 1
-            return positional_args[0], consumed_keywords  # type: ignore
-        if len(positional_args) > 0:
-            # Triggered when support_single_arg_types=True is used.
-            assert len(kwargs) == 0
-            assert len(positional_args) == 1
             return unwrapped_f(*positional_args), consumed_keywords  # type: ignore
         else:
             assert len(positional_args) == 0

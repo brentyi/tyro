@@ -487,3 +487,8 @@ def test_list_narrowing_direct() -> None:
         "four",
         5,
     ]
+
+
+def test_tuple_direct() -> None:
+    assert tyro.cli(tuple[int, ...], args="1 2".split(" ")) == (1, 2)
+    assert tyro.cli(tuple[int, int], args="1 2".split(" ")) == (1, 2)
