@@ -592,7 +592,10 @@ except ImportError:
 
 
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
-    return pydantic is not None and issubclass(cls, pydantic.BaseModel)
+    try:
+        return pydantic is not None and issubclass(cls, pydantic.BaseModel)
+    except TypeError:
+        return False
 
 
 def _field_list_from_pydantic(

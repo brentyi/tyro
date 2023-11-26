@@ -7,7 +7,7 @@ handling gets more complicated but should still be supported!
 
 
 import dataclasses
-from typing import Union
+from typing import Any, Dict, List, Tuple, Union
 
 import pytest
 
@@ -82,3 +82,17 @@ def test_subparser_strip_nested() -> None:
     assert tyro.cli(
         DefaultSubparser, args=["--x", "1", "bc:str", "five"]
     ) == DefaultSubparser(x=1, bc="five")
+
+
+def test_with_fancy_types() -> None:
+    @dataclasses.dataclass
+    class Args:
+        y: int
+
+    def main(x: Union[Tuple[int, ...], List[str], Args, Dict[str, int]]) -> Any:
+        return x
+
+    assert tyro.cli(main, args="x:tuple-int-ellipsis 1 2 3".split(" ")) == (1, 2, 3)
+    assert tyro.cli(main, args="x:list-str 1 2 3".split(" ")) == ["1", "2", "3"]
+    assert tyro.cli(main, args="x:args --x.y 5".split(" ")) == Args(5)
+    assert tyro.cli(main, args="x:dict-str-int 1 2 3 4".split(" ")) == {"1": 2, "3": 4}
