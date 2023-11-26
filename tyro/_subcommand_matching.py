@@ -73,7 +73,7 @@ class _TypeTree:
         """From an object instance, return a data structure representing the types in the object."""
         try:
             typ, _type_from_typevar, field_list = _fields.field_list_from_callable(
-                typ, default_instance=default_instance
+                typ, default_instance=default_instance, support_single_arg_types=False
             )
         except _instantiators.UnsupportedTypeAnnotationError:
             return _TypeTree(typ, {})

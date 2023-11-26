@@ -68,6 +68,7 @@ class ParserSpecification:
         intern_prefix: str,
         extern_prefix: str,
         subcommand_prefix: str = "",
+        support_single_arg_types: bool = False,
     ) -> ParserSpecification:
         """Create a parser definition from a callable or type."""
 
@@ -79,7 +80,9 @@ class ParserSpecification:
 
         # Resolve the type of `f`, generate a field list.
         f, type_from_typevar, field_list = _fields.field_list_from_callable(
-            f=f, default_instance=default_instance
+            f=f,
+            default_instance=default_instance,
+            support_single_arg_types=support_single_arg_types,
         )
 
         # Cycle detection.
@@ -343,6 +346,7 @@ def handle_field(
                     [extern_prefix, field.extern_name]
                 ),
                 subcommand_prefix=subcommand_prefix,
+                support_single_arg_types=False,
             )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
@@ -412,10 +416,11 @@ class SubparsersSpecification:
                     )
                 )
 
-        # Exit if we don't contain nested types.
-        if not all(
+        # Exit if we don't contain any nested types.
+        if not any(
             [
-                _fields.is_nested_type(cast(type, o), _fields.MISSING_NONPROP)
+                o is not none_proxy
+                and _fields.is_nested_type(cast(type, o), _fields.MISSING_NONPROP)
                 for o in options
             ]
         ):
@@ -505,6 +510,7 @@ class SubparsersSpecification:
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
                 subcommand_prefix=intern_prefix,
+                support_single_arg_types=True,
             )
 
             # Apply prefix to helptext in nested classes in subparsers.

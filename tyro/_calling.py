@@ -38,7 +38,7 @@ def call_from_args(
 
     # Resolve the type of `f`, generate a field list.
     f, type_from_typevar, field_list = _fields.field_list_from_callable(
-        f=f, default_instance=default_instance
+        f=f, default_instance=default_instance, support_single_arg_types=True
     )
 
     positional_args: List[Any] = []
@@ -225,14 +225,23 @@ def call_from_args(
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
 
     if unwrapped_f in (tuple, list, set):
-        assert len(positional_args) == 0
-        # When tuples are used as nested structures (eg Tuple[SomeDataclass]), we
-        # use keyword arguments.
-        assert len(positional_args) == 0
-        return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
+        if len(positional_args) > 0:
+            # Triggered when support_single_arg_types=True is used.
+            assert len(kwargs) == 0
+            assert len(positional_args) == 1
+            return positional_args[0], consumed_keywords  # type: ignore
+        else:
+            assert len(positional_args) == 0
+            return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
     elif unwrapped_f is dict:
-        assert len(positional_args) == 0
-        return kwargs, consumed_keywords  # type: ignore
+        if len(positional_args) > 0:
+            # Triggered when support_single_arg_types=True is used.
+            assert len(kwargs) == 0
+            assert len(positional_args) == 1
+            return unwrapped_f(*positional_args), consumed_keywords  # type: ignore
+        else:
+            assert len(positional_args) == 0
+            return kwargs, consumed_keywords  # type: ignore
     else:
         if field_name_prefix == "":
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
