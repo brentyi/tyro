@@ -736,3 +736,20 @@ def test_subparsers_wrapping2() -> None:
 
     help = get_helptext(Union[A, CheckoutCompletionn])  # type: ignore
     assert help.count("checkout-completionn") == 3
+
+
+def test_subparsers_wrapping3() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: int
+
+    @dataclasses.dataclass
+    class CmdCheckout012:
+        """Help message."""
+
+        y: int
+
+    help = get_helptext(Union[A, CmdCheckout012])  # type: ignore
+    assert help.count("cmd-checkout012") == 3

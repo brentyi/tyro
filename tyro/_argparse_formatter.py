@@ -1006,7 +1006,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             invocation = self.formatter._format_action_invocation(action)
             indent = self.formatter._current_indent
             help_position = min(
-                self.formatter._action_max_length + 4 + indent,
+                self.formatter._action_max_length + 4,
                 self.formatter._max_help_position,
             )
             if self.formatter._fixed_help_position:
