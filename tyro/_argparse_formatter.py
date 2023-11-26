@@ -1037,7 +1037,8 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
 
             if (
                 action.help
-                and len(_strings.strip_ansi_sequences(invocation)) < help_position - 1
+                and len(_strings.strip_ansi_sequences(invocation)) + indent
+                < help_position - 1
                 and not self.formatter._fixed_help_position
             ):
                 table = Table(show_header=False, box=None, padding=0)
@@ -1065,7 +1066,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         Padding(
                             # Unescape % signs, which need special handling in argparse.
                             helptext,
-                            pad=(0, 0, 0, help_position),
+                            pad=(0, 0, 0, help_position - indent),
                         )
                     )
 
