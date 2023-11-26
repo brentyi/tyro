@@ -62,7 +62,7 @@ class FieldDefinition:
     stripped."""
     default: Any
     helptext: Optional[str]
-    markers: FrozenSet[_markers._Marker]
+    markers: FrozenSet[Any]
     custom_constructor: bool
 
     argconf: _confstruct._ArgConfiguration
@@ -254,6 +254,7 @@ def is_nested_type(
 def field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
+    support_single_arg_types: bool,
 ) -> Tuple[
     Union[Callable, TypeForm[Any]], Dict[TypeVar, TypeForm], List[FieldDefinition]
 ]:
@@ -273,7 +274,30 @@ def field_list_from_callable(
     field_list = _try_field_list_from_callable(f, default_instance)
 
     if isinstance(field_list, UnsupportedNestedTypeMessage):
-        raise _instantiators.UnsupportedTypeAnnotationError(field_list.message)
+        if support_single_arg_types:
+            return (
+                f,
+                type_from_typevar,
+                [
+                    FieldDefinition(
+                        intern_name="value",
+                        extern_name="value",  # Doesn't matter.
+                        type_or_callable=f,
+                        default=default_instance,
+                        helptext="",
+                        custom_constructor=False,
+                        markers=frozenset(
+                            (_markers.Positional, _markers._PositionalCall)
+                        ),
+                        argconf=_confstruct._ArgConfiguration(
+                            None, None, None, None, None, None
+                        ),
+                        call_argname="",
+                    )
+                ],
+            )
+        else:
+            raise _instantiators.UnsupportedTypeAnnotationError(field_list.message)
 
     # Recursively apply markers.
     _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
@@ -352,7 +376,8 @@ def _try_field_list_from_callable(
         default_instance = found_subcommand_configs[0].default
 
     # Unwrap generics.
-    f, _ = _resolver.resolve_generic_types(f)
+    f, type_from_typevar = _resolver.resolve_generic_types(f)
+    f = _resolver.apply_type_from_typevar(f, type_from_typevar)
     f = _resolver.narrow_subtypes(f, default_instance)
     f = _resolver.narrow_collection_types(f, default_instance)
     f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))

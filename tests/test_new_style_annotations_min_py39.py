@@ -62,3 +62,8 @@ def test_super_nested() -> None:
     ]
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
+
+
+def test_tuple_direct() -> None:
+    assert tyro.cli(tuple[int, ...], args="1 2".split(" ")) == (1, 2)  # type: ignore
+    assert tyro.cli(tuple[int, int], args="1 2".split(" ")) == (1, 2)  # type: ignore

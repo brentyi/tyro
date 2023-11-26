@@ -112,9 +112,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         elif hasattr(cls, "__name__"):
             return hyphen_separated_from_camel_case(cls.__name__)
         else:
-            raise AssertionError(
-                f"Tried to interpret {cls} as a subcommand, but could not infer name"
-            )
+            return hyphen_separated_from_camel_case(str(cls))
 
     if len(type_from_typevar) == 0:
         return get_name(cls), prefix_name  # type: ignore

@@ -304,7 +304,7 @@ def _cli_impl(
             dataclasses.field(),
         )
         f = dataclasses.make_dataclass(
-            cls_name="",
+            cls_name="dummy",
             fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
             frozen=True,
         )
