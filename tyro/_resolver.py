@@ -265,47 +265,12 @@ def apply_type_from_typevar(
 def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
     """Narrow union types.
 
-    This is a shim for failing more gracefully when we we're given one of two errors:
-    (A) A Union type that doesn't match the default value.
-    (B) An unsupported Union type, which mixes "nested" types (like dataclasses) with
-      non-"nested" types (like strings).
+    This is a shim for failing more gracefully when we we're given a Union type that
+    doesn't match the default value.
 
-    --
-    For (A):
-
-    We raise a warning, then add the type of the default value to the union.
-    Loosely motivated by: https://github.com/brentyi/tyro/issues/20
-
-    --
-    For (B):
-
-    When do we want to narrow Union types?
-
-      Unions over nested types: no.
-         typ = NestedA | NestedB
-         => NestedA | NestedB can be converted to two subcommands.
-
-      Unions over nested and not nested types: no.
-         typ = int | str
-         => int | str can be instantiated as a union.
-
-      Unions over mixed nested / not nested types: if the default is a nested
-      type, strip out the non-nested ones. If the default is a non-nested
-      type, strip out the nested ones.
-
-         typ = NestedA | int, default_instance = NestedA()
-         => NestedA
-
-         typ = NestedA | int, default_instance = 5
-         => int
-
-         typ = NestedA | NestedB | int, default_instance = NestedA()
-         => NestedA
-
-    This is a hack to get around the fact that we don't currently support
-    mixing nested types (eg `SomeDataclass`) and non-nested ones (eg `int` or
-    `int | str`) in unions. This should be supported in the future, but will
-    likely require a big code refactor."""
+    In this case, we raise a warning, then add the type of the default value to the
+    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20
+    """
     if get_origin(typ) is not Union:
         return typ
 
@@ -325,32 +290,4 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     except TypeError:
         pass
 
-    # (B)
-    is_nested = tuple(
-        map(
-            lambda option: _fields.is_nested_type(
-                option,
-                _fields.MISSING_NONPROP,
-            ),
-            options,
-        )
-    )
-    if type(None) in options:
-        none_index = options.index(type(None))
-        is_nested_no_none = is_nested[:none_index] + is_nested[none_index + 1 :]
-    else:
-        is_nested_no_none = is_nested
-
-    if all(is_nested_no_none) or not any(is_nested_no_none):
-        # Either all types are nested or none of them are.
-        return typ
-    else:
-        is_default_nested = _fields.is_nested_type(type(default_instance), default_instance)  # type: ignore
-        out = Union.__getitem__(  # type: ignore
-            tuple(
-                option
-                for option, nested in zip(get_args(typ), is_nested)
-                if nested is is_default_nested
-            )
-        )
-        return out  # type: ignore
+    return typ

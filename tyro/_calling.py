@@ -38,7 +38,7 @@ def call_from_args(
 
     # Resolve the type of `f`, generate a field list.
     f, type_from_typevar, field_list = _fields.field_list_from_callable(
-        f=f, default_instance=default_instance
+        f=f, default_instance=default_instance, support_single_arg_types=True
     )
 
     positional_args: List[Any] = []

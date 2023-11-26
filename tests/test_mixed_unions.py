@@ -1,11 +1,8 @@
 """Tests for unsupported union types.
 
-Unions like `int | str` or `SomeDataclassA | SomeDataclassB` are generally OK (note that
-the latter will produce a pair of subcommands), but when we write things like
-`int | SomeDataclassA` handling gets more complicated; see docstring for
-`narrow_union_type()` in _resolvers.py.
-
-Hopefully we can fix/improve this in the future!
+Unions like `int | str` or `SomeDataclassA | SomeDataclassB` are OK (note that the latter
+will produce a pair of subcommands); when we write things like `int | SomeDataclassA`
+handling gets more complicated but should still be supported!
 """
 
 
@@ -78,10 +75,10 @@ def test_subparser_strip_nested() -> None:
         bc: Union[int, str, DefaultHTTPServer, DefaultSMTPServer] = 5
 
     assert (
-        tyro.cli(DefaultSubparser, args=["--x", "1", "--bc", "5"])
+        tyro.cli(DefaultSubparser, args=["--x", "1", "bc:int", "5"])
         == tyro.cli(DefaultSubparser, args=["--x", "1"])
         == DefaultSubparser(x=1, bc=5)
     )
     assert tyro.cli(
-        DefaultSubparser, args=["--x", "1", "--bc", "five"]
+        DefaultSubparser, args=["--x", "1", "bc:str", "five"]
     ) == DefaultSubparser(x=1, bc="five")
