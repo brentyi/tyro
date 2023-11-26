@@ -376,7 +376,8 @@ def _try_field_list_from_callable(
         default_instance = found_subcommand_configs[0].default
 
     # Unwrap generics.
-    f, _ = _resolver.resolve_generic_types(f)
+    f, type_from_typevar = _resolver.resolve_generic_types(f)
+    f = _resolver.apply_type_from_typevar(f, type_from_typevar)
     f = _resolver.narrow_subtypes(f, default_instance)
     f = _resolver.narrow_collection_types(f, default_instance)
     f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
@@ -592,10 +593,7 @@ except ImportError:
 
 
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
-    try:
-        return pydantic is not None and issubclass(cls, pydantic.BaseModel)
-    except TypeError:
-        return False
+    return pydantic is not None and issubclass(cls, pydantic.BaseModel)
 
 
 def _field_list_from_pydantic(
