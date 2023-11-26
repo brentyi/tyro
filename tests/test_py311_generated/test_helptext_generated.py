@@ -680,3 +680,71 @@ def test_multiple_subparsers_helptext_underscores() -> None:
     assert "--b.arg_x" in helptext
     assert "--b.no_arg_flag" in helptext
     assert "--b.arg_flag" in helptext
+
+
+def test_subparsers_wrapping() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: int
+
+    @dataclasses.dataclass
+    class CheckoutCompletion:
+        """Help message."""
+
+        y: int
+
+    help = get_helptext(A | CheckoutCompletion)  # type: ignore
+    assert help.count("checkout-completion") == 3
+
+
+def test_subparsers_wrapping1() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: int
+
+    @dataclasses.dataclass
+    class CheckoutCompletio:
+        """Help message."""
+
+        y: int
+
+    help = get_helptext(A | CheckoutCompletio)  # type: ignore
+    assert help.count("checkout-completio") == 3
+
+
+def test_subparsers_wrapping2() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: int
+
+    @dataclasses.dataclass
+    class CheckoutCompletionn:
+        """Help message."""
+
+        y: int
+
+    help = get_helptext(A | CheckoutCompletionn)  # type: ignore
+    assert help.count("checkout-completionn") == 3
+
+
+def test_subparsers_wrapping3() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: int
+
+    @dataclasses.dataclass
+    class CmdCheckout012:
+        """Help message."""
+
+        y: int
+
+    help = get_helptext(A | CmdCheckout012)  # type: ignore
+    assert help.count("cmd-checkout012") == 3
