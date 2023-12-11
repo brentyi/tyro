@@ -140,10 +140,10 @@ To get started, we recommend browsing the examples to the left.
 .. |build| image:: https://github.com/brentyi/tyro/workflows/build/badge.svg
    :alt: Build status icon
    :target: https://github.com/brentyi/tyro
-.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=main
+.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg
    :alt: Mypy status icon
    :target: https://github.com/brentyi/tyro
-.. |pyright| image:: https://github.com/brentyi/tyro/workflows/pyright/badge.svg?branch=main
+.. |pyright| image:: https://github.com/brentyi/tyro/workflows/pyright/badge.svg
    :alt: Mypy status icon
    :target: https://github.com/brentyi/tyro
 .. |ruff| image:: https://github.com/brentyi/tyro/workflows/ruff/badge.svg
