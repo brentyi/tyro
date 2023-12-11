@@ -348,13 +348,10 @@
         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
-    <span class="n">loader</span><span class="p">:</span> <span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span>
-    <span class="n">node</span><span class="p">:</span> <span class="n">yaml</span><span class="o">.</span><span class="n">Node</span>
-
     <span class="k">def</span> <span class="nf">make_dataclass_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
         <span class="k">return</span> <span class="k">lambda</span> <span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">typ</span><span class="p">(</span><span class="o">**</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">make_enum_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
+    <span class="k">def</span> <span class="nf">make_enum_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">]):</span>
         <span class="k">return</span> <span class="k">lambda</span> <span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">typ</span><span class="p">[</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_python_str</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span>
 
     <span class="k">for</span> <span class="n">typ</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">contained_types</span><span class="p">,</span> <span class="n">contained_type_names</span><span class="p">):</span>
@@ -394,10 +391,6 @@
         <span class="s2">&quot;Contained dataclass/enum names must all be unique, but got&quot;</span>
         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
-
-    <span class="n">dumper</span><span class="p">:</span> <span class="n">yaml</span><span class="o">.</span><span class="n">Dumper</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span>
-    <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span>
 
     <span class="k">def</span> <span class="nf">make_representer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">:</span> <span class="n">DataclassDumper</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">yaml</span><span class="o">.</span><span class="n">Node</span><span class="p">:</span>

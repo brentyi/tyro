@@ -68,7 +68,7 @@ Module Contents
    .. py:method:: __post_init__()
 
 
-   .. py:method:: make(name: str, type_or_callable: Union[tyro._typing.TypeForm[Any], Callable], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers._Marker, Ellipsis] = ())
+   .. py:method:: make(name: str, type_or_callable: Union[tyro._typing.TypeForm[Any], Callable], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = ())
       :staticmethod:
 
 
