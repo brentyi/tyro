@@ -42,7 +42,7 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
 
 def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
-    return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))
+    return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))  # type: ignore
 
 
 def resolve_generic_types(
@@ -94,7 +94,7 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
 
     assert dataclasses.is_dataclass(cls)
     fields = []
-    annotations = get_type_hints(cls, include_extras=True)
+    annotations = get_type_hints(cast(Callable, cls), include_extras=True)
     for field in getattr(cls, "__dataclass_fields__").values():
         # Avoid mutating original field.
         field = copy.copy(field)
@@ -193,7 +193,8 @@ MetadataType = TypeVar("MetadataType")
 
 
 def unwrap_annotated(
-    typ: TypeOrCallable, search_type: TypeForm[MetadataType] = Any  # type: ignore
+    typ: TypeOrCallable,
+    search_type: TypeForm[MetadataType] = Any,  # type: ignore
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]:
     """Helper for parsing typing.Annotated types.
 
@@ -256,7 +257,9 @@ def apply_type_from_typevar(
                 if isinstance(typ, new) or get_origin(typ) is new:  # type: ignore
                     typ = old.__getitem__(args)  # type: ignore
 
-        return typ.copy_with(tuple(apply_type_from_typevar(x, type_from_typevar) for x in args))  # type: ignore
+        return typ.copy_with(  # type: ignore
+            tuple(apply_type_from_typevar(x, type_from_typevar) for x in args)
+        )
 
     return typ
 

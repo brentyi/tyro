@@ -390,7 +390,7 @@ def docstring(app, what, name, obj, options, lines):
     md = "\n".join(lines)
     rst = m2r2.convert(md)
     lines.clear()
-    lines += rst.splitlines()
+    lines += rst.splitlines()  # type: ignore
 
 
 def setup(app):

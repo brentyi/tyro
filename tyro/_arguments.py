@@ -255,7 +255,12 @@ def _rule_handle_boolean_flags(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> LoweredArgumentDefinition:
-    if _resolver.apply_type_from_typevar(arg.field.type_or_callable, arg.type_from_typevar) is not bool:  # type: ignore
+    if (
+        _resolver.apply_type_from_typevar(
+            arg.field.type_or_callable, arg.type_from_typevar
+        )
+        is not bool
+    ):  # type: ignore
         return lowered
 
     if (

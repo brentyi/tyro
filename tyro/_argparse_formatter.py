@@ -66,9 +66,7 @@ def set_accent_color(accent_color: Optional[str]) -> None:
     THEME.helptext = Style(dim=True)
     THEME.helptext_required = Style(color="bright_red", bold=True)
     THEME.helptext_default = Style(
-        color="cyan"
-        if accent_color != "cyan"
-        else "magenta"
+        color="cyan" if accent_color != "cyan" else "magenta"
         # Another option: make default color match accent color. This is maybe more
         # visually consistent, but harder to read.
         # color=accent_color if accent_color is not None else "cyan",
@@ -139,7 +137,8 @@ def recursive_arg_search(
                 and callable(arg.lowered.action)
             ):
                 option_strings = arg.lowered.action(
-                    option_strings, dest=""  # dest should not matter.
+                    option_strings,
+                    dest="",  # dest should not matter.
                 ).option_strings
 
             arguments.append(
@@ -369,7 +368,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     # Manually track unused arguments to assist with error messages
                     # later.
                     if not self._parsing_known_args:
-                        global global_unrecognized_args
                         global_unrecognized_args.append(option_string)
                     # </new>
 
@@ -918,7 +916,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             return out
 
     @override
-    class _Section(object):
+    class _Section(object):  # type: ignore
         def __init__(self, formatter, parent, heading=None):
             self.formatter = formatter
             self.parent = parent

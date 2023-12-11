@@ -270,7 +270,11 @@ def _cli_impl(
     return_parser: bool,
     return_unknown_args: bool,
     **deprecated_kwargs,
-) -> Union[OutT, argparse.ArgumentParser, Tuple[OutT, List[str]],]:
+) -> Union[
+    OutT,
+    argparse.ArgumentParser,
+    Tuple[OutT, List[str]],
+]:
     """Helper for stitching the `tyro` pipeline together."""
     if "default_instance" in deprecated_kwargs:
         warnings.warn(

@@ -48,7 +48,7 @@ def test_super_nested():
                 Literal[3, 4],
                 tuple[int, int] | tuple[str, str],
             ]
-        ] = None
+        ] = None,
     ) -> Any:
         return x
 

@@ -7,6 +7,7 @@ import pytest
 from pydantic import BaseModel, Field
 
 import tyro
+import tyro._strings
 
 
 def test_pydantic() -> None:

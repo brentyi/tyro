@@ -393,9 +393,7 @@ class SubparsersSpecification:
         options = [
             (
                 # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy)
-                if o is type(None)
-                else o
+                cast(Callable, none_proxy) if o is type(None) else o
             )
             for o in options
         ]
@@ -551,9 +549,7 @@ class SubparsersSpecification:
         description = (
             # We use `None` instead of an empty string to prevent a line break from
             # being created where the description would be.
-            " ".join(description_parts)
-            if len(description_parts) > 0
-            else None
+            " ".join(description_parts) if len(description_parts) > 0 else None
         )
 
         return SubparsersSpecification(

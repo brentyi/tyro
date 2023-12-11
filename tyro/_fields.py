@@ -87,7 +87,7 @@ class FieldDefinition:
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
         *,
-        markers: Tuple[_markers._Marker, ...] = (),
+        markers: Tuple[_markers.Marker, ...] = (),
     ):
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated(
@@ -877,7 +877,7 @@ def _field_list_from_params(
     while not done:
         done = True
         if hasattr(f, "__wrapped__"):
-            f = f.__wrapped__
+            f = f.__wrapped__  # type: ignore
             done = False
         if isinstance(f, functools.partial):
             f = f.func
@@ -1022,8 +1022,7 @@ def _get_dataclass_field_default(
         # The only time this matters is when we our dataclass has a `__post_init__`
         # function that mutates the dataclass. We choose here to use the default values
         # before this method is called.
-        dataclasses.is_dataclass(field.type)
-        and field.default_factory is field.type
+        dataclasses.is_dataclass(field.type) and field.default_factory is field.type
     ):
         return field.default_factory()
 

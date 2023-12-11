@@ -94,13 +94,10 @@ def _make_loader(cls: Type[Any]) -> Type[yaml.Loader]:
         f" {contained_type_names}"
     )
 
-    loader: yaml.Loader
-    node: yaml.Node
-
     def make_dataclass_constructor(typ: Type[Any]):
         return lambda loader, node: typ(**loader.construct_mapping(node))
 
-    def make_enum_constructor(typ: Type[Any]):
+    def make_enum_constructor(typ: Type[enum.Enum]):
         return lambda loader, node: typ[loader.construct_python_str(node)]
 
     for typ, name in zip(contained_types, contained_type_names):
@@ -140,10 +137,6 @@ def _make_dumper(instance: Any) -> Type[yaml.Dumper]:
         "Contained dataclass/enum names must all be unique, but got"
         f" {contained_type_names}"
     )
-
-    dumper: yaml.Dumper
-    data: Any
-    field: dataclasses.Field
 
     def make_representer(name: str):
         def representer(dumper: DataclassDumper, data: Any) -> yaml.Node:

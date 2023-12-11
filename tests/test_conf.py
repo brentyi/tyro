@@ -501,7 +501,7 @@ def test_suppress_auto_fixed() -> None:
     class Struct:
         a: int = 5
 
-        def b(x):
+        def b(self, x):
             return 5
 
     def main(x: tyro.conf.SuppressFixed[Any] = Struct()):
