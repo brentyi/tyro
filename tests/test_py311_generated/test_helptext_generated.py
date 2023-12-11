@@ -16,8 +16,8 @@ from typing import (
     cast,
 )
 
-import torch.nn as nn
 from helptext_utils import get_helptext
+from torch import nn
 
 
 def test_helptext() -> None:
@@ -469,7 +469,7 @@ def test_metavar_0() -> None:
 
 def test_metavar_1() -> None:
     def main(
-        x: Literal[0, 1, 2, 3] | Literal["hey,there", "hello"] | List[int]
+        x: Literal[0, 1, 2, 3] | Literal["hey,there", "hello"] | List[int],
     ) -> None:
         pass
 
@@ -483,7 +483,7 @@ def test_metavar_2() -> None:
         x: Tuple[
             Literal[0, 1, 2, 3],
             int | str,
-        ]
+        ],
     ) -> None:
         pass
 
@@ -492,7 +492,9 @@ def test_metavar_2() -> None:
 
 
 def test_metavar_3() -> None:
-    def main(x: Literal[0, 1, 2, 3] | Tuple[int, int] | Tuple[str]) -> None:
+    def main(
+        x: Literal[0, 1, 2, 3] | Tuple[int, int] | Tuple[str],
+    ) -> None:
         pass
 
     helptext = get_helptext(main)
@@ -501,7 +503,7 @@ def test_metavar_3() -> None:
 
 def test_metavar_4() -> None:
     def main(
-        x: Literal[0, 1, 2, 3] | Tuple[int, int] | Tuple[str, str, str] | Literal[True]
+        x: Literal[0, 1, 2, 3] | Tuple[int, int] | Tuple[str, str, str] | Literal[True],
     ) -> None:
         pass
 
@@ -510,7 +512,9 @@ def test_metavar_4() -> None:
 
 
 def test_metavar_5() -> None:
-    def main(x: List[Tuple[int, int] | Tuple[str, str]] = [(1, 1), (2, 2)]) -> None:
+    def main(
+        x: List[Tuple[int, int] | Tuple[str, str]] = [(1, 1), (2, 2)],
+    ) -> None:
         pass
 
     helptext = get_helptext(main)

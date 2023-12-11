@@ -166,7 +166,7 @@ def test_dict_ok() -> None:
             "red": Color(255, 0, 0),
             "green": Color(0, 255, 0),
             "blue": Color(0, 0, 255),
-        }
+        },
     ) -> Any:
         return x
 
@@ -182,7 +182,7 @@ def test_dict_key_int() -> None:
             0: Color(255, 0, 0),
             1: Color(0, 255, 0),
             2: Color(0, 0, 255),
-        }
+        },
     ) -> Any:
         return x
 
@@ -201,7 +201,7 @@ def test_dict_key_enum() -> None:
             ColorType.RED: Color(255, 0, 0),
             ColorType.GREEN: Color(0, 255, 0),
             ColorType.BLUE: Color(0, 0, 255),
-        }
+        },
     ) -> Any:
         return x
 
@@ -218,7 +218,7 @@ def test_dict_nested() -> None:
             "red": (Color(255, 0, 0), 9),
             "green": (Color(0, 255, 0), 10),
             "blue": (Color(0, 0, 255), 12),
-        }
+        },
     ) -> Any:
         return x
 
@@ -263,7 +263,7 @@ def test_generic_in_tuple_with_default() -> None:
         x: Tuple[GenericColor[float], GenericColor[int]] = (
             GenericColor(0.5, 0.2, 0.3),
             GenericColor[int](25, 2, 3),  # The subscript should be optional.
-        )
+        ),
     ) -> Any:
         return x
 
@@ -290,7 +290,7 @@ def test_generic_in_variable_tuple_with_default() -> None:
         x: Tuple[GenericColor, ...] = (
             GenericColor[float](0.5, 0.2, 0.3),
             GenericColor[int](25, 2, 3),
-        )
+        ),
     ) -> Any:
         return x
 
@@ -317,16 +317,14 @@ def test_generic_in_dict_with_default() -> None:
         x: Dict[str, GenericColor] = {
             "float": GenericColor(0.5, 0.2, 0.3),
             "int": GenericColor[int](25, 2, 3),
-        }
+        },
     ) -> Any:
         return x
 
     assert tyro.cli(
         main,
         args="--x.float.g 0.1".split(" "),
-    )[
-        "float"
-    ] == GenericColor(0.5, 0.1, 0.3)
+    )["float"] == GenericColor(0.5, 0.1, 0.3)
     assert tyro.cli(
         main,
         args="--x.int.g 0".split(" "),
@@ -348,16 +346,14 @@ def test_generic_in_double_nested_dict_with_default() -> None:
                 "float": GenericColor(0.5, 0.2, 0.3),
                 "int": GenericColor[int](25, 2, 3),
             }
-        }
+        },
     ) -> Any:
         return x
 
     assert tyro.cli(
         main,
         args="--x.hello.float.g 0.1".split(" "),
-    )["hello"][
-        "float"
-    ] == GenericColor(0.5, 0.1, 0.3)
+    )["hello"]["float"] == GenericColor(0.5, 0.1, 0.3)
     assert tyro.cli(
         main,
         args="--x.hello.int.g 0".split(" "),
@@ -373,13 +369,11 @@ def test_double_nested_dict_with_inferred_type() -> None:
                 "a": Color(5, 2, 3),
                 "b": Color(25, 2, 3),
             }
-        }
+        },
     ) -> Any:
         return x
 
     assert tyro.cli(
         main,
         args="--x.hello.a.g 1".split(" "),
-    )["hello"][
-        "a"
-    ] == Color(5, 1, 3)
+    )["hello"]["a"] == Color(5, 1, 3)

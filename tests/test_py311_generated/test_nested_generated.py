@@ -1,14 +1,5 @@
 import dataclasses
-from typing import (
-    Annotated,
-    Any,
-    Generic,
-    Literal,
-    Mapping,
-    Optional,
-    Tuple,
-    TypeVar,
-)
+from typing import Annotated, Any, Generic, Literal, Mapping, Optional, Tuple, TypeVar
 
 import pytest
 from frozendict import frozendict  # type: ignore
@@ -288,7 +279,8 @@ def test_subparser_root() -> None:
         bc: HTTPServer | SMTPServer
 
     assert tyro.cli(
-        HTTPServer | SMTPServer, args=["http-server", "--y", "3"]  # type: ignore
+        HTTPServer | SMTPServer,
+        args=["http-server", "--y", "3"],  # type: ignore
     ) == HTTPServer(y=3)
 
 
@@ -411,7 +403,8 @@ def test_subparser_with_default_bad() -> None:
     # Should give us a bunch of warnings!
     with pytest.warns(UserWarning):
         assert tyro.cli(DefaultSubparser, args=["--x", "1"]) == DefaultSubparser(
-            1, 5  # type: ignore
+            1,
+            5,  # type: ignore
         )
 
 
@@ -904,7 +897,7 @@ def test_frozen_dict() -> None:
                 "num_epochs": 20,
                 "batch_size": 64,
             }
-        )
+        ),
     ):
         return x
 

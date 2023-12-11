@@ -394,7 +394,7 @@ def test_super_nested() -> None:
                     Tuple[int, int] | Tuple[str, str],
                 ]
             ]
-        ] = None
+        ] = None,
     ) -> Any:
         return x
 
@@ -425,7 +425,7 @@ def test_double_dict_no_annotation() -> None:
     def main(
         x: Dict[str, Any] = {
             "wow": {"int": 5, "str": "5"},
-        }
+        },
     ):
         return x
 

@@ -1,6 +1,6 @@
 # tyro
 
-|build| |nbsp| |mypy| |nbsp| |lint| |nbsp| |coverage| |nbsp| |versions|
+|build| |nbsp| |ruff| |nbsp| |mypy| |nbsp| |pyright| |nbsp| |coverage| |nbsp| |versions|
 
 :code:`tyro` is a tool for generating command-line interfaces and configuration
 objects in Python.
@@ -140,10 +140,13 @@ To get started, we recommend browsing the examples to the left.
 .. |build| image:: https://github.com/brentyi/tyro/workflows/build/badge.svg
    :alt: Build status icon
    :target: https://github.com/brentyi/tyro
-.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg?branch=main
+.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg
    :alt: Mypy status icon
    :target: https://github.com/brentyi/tyro
-.. |lint| image:: https://github.com/brentyi/tyro/workflows/lint/badge.svg
+.. |pyright| image:: https://github.com/brentyi/tyro/workflows/pyright/badge.svg
+   :alt: Mypy status icon
+   :target: https://github.com/brentyi/tyro
+.. |ruff| image:: https://github.com/brentyi/tyro/workflows/ruff/badge.svg
    :alt: Lint status icon
    :target: https://github.com/brentyi/tyro
 .. |coverage| image:: https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg

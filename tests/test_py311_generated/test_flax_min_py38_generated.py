@@ -1,4 +1,6 @@
 """Tests initializing flax modules directly via tyro."""
+from typing import cast
+
 import jax
 import pytest
 from flax import linen as nn
@@ -45,7 +47,7 @@ def test_ok():
 
     x = jnp.zeros((10, 4))
     params = network.init(jax.random.PRNGKey(0), x)
-    assert network.apply(params, x).shape == (10, 3)
+    assert cast(jax.Array, network.apply(params, x)).shape == (10, 3)
 
     helptext = get_helptext(Classifier)
     assert "parent" not in helptext

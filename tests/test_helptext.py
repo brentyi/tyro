@@ -5,7 +5,7 @@ import pathlib
 from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
-import torch.nn as nn
+from torch import nn
 from helptext_utils import get_helptext
 from typing_extensions import Annotated, Literal
 
@@ -463,7 +463,7 @@ def test_metavar_1() -> None:
             Literal[0, 1, 2, 3],
             Literal["hey,there", "hello"],
             List[int],
-        ]
+        ],
     ) -> None:
         pass
 
@@ -477,7 +477,7 @@ def test_metavar_2() -> None:
         x: Tuple[
             Literal[0, 1, 2, 3],
             Union[int, str],
-        ]
+        ],
     ) -> None:
         pass
 
@@ -490,7 +490,7 @@ def test_metavar_3() -> None:
         x: Union[
             Literal[0, 1, 2, 3],
             Union[Tuple[int, int], Tuple[str]],
-        ]
+        ],
     ) -> None:
         pass
 
@@ -504,7 +504,7 @@ def test_metavar_4() -> None:
             Literal[0, 1, 2, 3],
             Union[Tuple[int, int], Tuple[str, str, str]],
             Literal[True],
-        ]
+        ],
     ) -> None:
         pass
 
@@ -514,7 +514,7 @@ def test_metavar_4() -> None:
 
 def test_metavar_5() -> None:
     def main(
-        x: List[Union[Tuple[int, int], Tuple[str, str]]] = [(1, 1), (2, 2)]
+        x: List[Union[Tuple[int, int], Tuple[str, str]]] = [(1, 1), (2, 2)],
     ) -> None:
         pass
 

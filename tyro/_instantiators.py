@@ -178,7 +178,6 @@ def instantiator_from_type(
             # Note that other inputs should be caught by `choices` before the
             # instantiator runs.
             assert strings == ["None"]
-            return None
 
         return instantiator, InstantiatorMetadata(
             nargs=1,
@@ -682,7 +681,7 @@ def _instantiator_from_literal(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     markers: FrozenSet[_markers.Marker],
-) -> Tuple[Instantiator, InstantiatorMetadata]:
+) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
     choices = get_args(typ)
     str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)
     return (

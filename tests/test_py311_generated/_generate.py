@@ -39,6 +39,5 @@ for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py
     )
     out_path.write_text(content)
 
-    subprocess.run(["isort", str(out_path)])
-    subprocess.run(["black", str(out_path)])
-    subprocess.run(["ruff", "--fix", str(out_path)])
+    subprocess.run(["ruff", "format", str(out_path)], check=True)
+    subprocess.run(["ruff", "--fix", str(out_path)], check=True)

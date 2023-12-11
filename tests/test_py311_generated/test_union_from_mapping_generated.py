@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 import tyro
 
@@ -30,9 +30,10 @@ def test_union_from_mapping_in_function():
         "three": A(3),
     }
 
-    # Hack for mypy. Not needed for pyright.
-    ConfigUnion = A
-    ConfigUnion = tyro.extras.subcommand_type_from_defaults(base_configs)  # type: ignore
+    if TYPE_CHECKING:
+        ConfigUnion = A
+    else:
+        ConfigUnion = tyro.extras.subcommand_type_from_defaults(base_configs)
 
     def main(config: ConfigUnion, flag: bool = False) -> Optional[A]:
         if flag:
