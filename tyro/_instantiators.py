@@ -55,14 +55,7 @@ from typing import (
     overload,
 )
 
-from typing_extensions import (
-    Annotated,
-    Final,
-    Literal,
-    get_args,
-    get_origin,
-    get_type_hints,
-)
+from typing_extensions import Annotated, Final, Literal, get_args, get_origin
 
 from . import _resolver
 
@@ -128,7 +121,7 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
         # One day this should be fixed with `__text_signature__`.
         return True
 
-    type_annotations = get_type_hints(typ)
+    type_annotations = _resolver.get_type_hints_with_nicer_errors(typ)
     # Some checks we can do if the signature is available!
     for i, param in enumerate(signature.parameters.values()):
         annotation = type_annotations.get(param.name, param.annotation)

@@ -31,14 +31,7 @@ from typing import (
 
 import docstring_parser
 import typing_extensions
-from typing_extensions import (
-    NotRequired,
-    Required,
-    get_args,
-    get_origin,
-    get_type_hints,
-    is_typeddict,
-)
+from typing_extensions import NotRequired, Required, get_args, get_origin, is_typeddict
 
 from . import conf  # Avoid circular import.
 from . import (
@@ -460,7 +453,7 @@ def _field_list_from_typeddict(
     total = getattr(cls, "__total__", True)
     assert isinstance(total, bool)
     assert not valid_default_instance or isinstance(default_instance, dict)
-    for name, typ in get_type_hints(cls, include_extras=True).items():
+    for name, typ in _resolver.get_type_hints(cls, include_extras=True).items():
         typ_origin = get_origin(typ)
         if valid_default_instance and name in cast(dict, default_instance):
             default = cast(dict, default_instance)[name]
@@ -517,7 +510,7 @@ def _field_list_from_namedtuple(
     field_defaults = getattr(cls, "_field_defaults")
 
     # Note that _field_types is removed in Python 3.9.
-    for name, typ in get_type_hints(cls, include_extras=True).items():
+    for name, typ in _resolver.get_type_hints(cls, include_extras=True).items():
         # Get default, with priority for `default_instance`.
         default = field_defaults.get(name, MISSING_NONPROP)
         if hasattr(default_instance, name):
@@ -898,7 +891,7 @@ def _field_list_from_params(
 
     # This will throw a type error for torch.device, typing.Dict, etc.
     try:
-        hints = get_type_hints(f, include_extras=True)
+        hints = _resolver.get_type_hints(f, include_extras=True)
     except TypeError:
         return UnsupportedNestedTypeMessage(f"Could not get hints for {f}!")
 
