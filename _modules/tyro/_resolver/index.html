@@ -253,7 +253,6 @@
         <article role="main">
           <h1>Source code for tyro._resolver</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utilities for resolving types and forward references.&quot;&quot;&quot;</span>
-
 <span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
@@ -580,6 +579,40 @@
         <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">typ</span></div>
+
+
+
+<div class="viewcode-block" id="get_type_hints_with_nicer_errors">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.get_type_hints_with_nicer_errors">[docs]</a>
+<span class="k">def</span> <span class="nf">get_type_hints_with_nicer_errors</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">include_extras</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="n">common_message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">-----</span><span class="se">\n\n</span><span class="s2">Error calling typing.get_type_hints() on </span><span class="si">{</span><span class="n">obj</span><span class="si">}</span><span class="s2">! &quot;</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+            <span class="s2">&quot;unsupported operand type(s) for |&quot;</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
+            <span class="c1"># PEP 604. Requires Python 3.10.</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">common_message</span>
+                <span class="o">+</span> <span class="s2">&quot;You may be using a Union in the form of `X | Y`; to support Python versions that lower than 3.10, you need to use `typing.Union[X, Y]` instead of `X | Y` and `typing.Optional[X]` instead of `X | None`.&quot;</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">message</span> <span class="o">==</span> <span class="s2">&quot;&#39;type&#39; object is not subscriptable&quot;</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="c1"># PEP 585. Requires Python 3.9.</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="o">+</span> <span class="n">common_message</span>
+                <span class="o">+</span> <span class="s2">&quot;You may be using a standard collection as a generic, like `list[T]` or `tuple[T1, T2]`. To support Python versions lower than 3.9, you need to using `typing.List[T]` and `typing.Tuple[T1, T2]`.&quot;</span><span class="p">,</span>
+                <span class="o">*</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+            <span class="p">)</span>
+        <span class="k">raise</span> <span class="n">e</span></div>
 
 </pre></div>
         </article>
