@@ -300,7 +300,7 @@ def get_type_hints_with_nicer_errors(
 ) -> Dict[str, Any]:
     try:
         return get_type_hints(obj, include_extras=include_extras)
-    except TypeError as e:
+    except TypeError as e:  # pragma: no cover
         common_message = f"\n-----\n\nError calling typing.get_type_hints() on {obj}! "
         message = e.args[0]
         if message.startswith(
