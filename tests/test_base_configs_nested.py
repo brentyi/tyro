@@ -1,8 +1,8 @@
 from dataclasses import dataclass
-from typing import Callable, Tuple, TYPE_CHECKING
-from typing_extensions import Literal
+from typing import TYPE_CHECKING, Callable, Tuple
 
 from torch import nn
+from typing_extensions import Literal
 
 import tyro
 

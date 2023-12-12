@@ -5,8 +5,8 @@ import pathlib
 from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
-from torch import nn
 from helptext_utils import get_helptext
+from torch import nn
 from typing_extensions import Annotated, Literal
 
 
