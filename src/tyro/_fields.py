@@ -31,7 +31,14 @@ from typing import (
 
 import docstring_parser
 import typing_extensions
-from typing_extensions import NotRequired, Required, get_args, get_origin, is_typeddict
+from typing_extensions import (
+    Annotated,
+    NotRequired,
+    Required,
+    get_args,
+    get_origin,
+    is_typeddict,
+)
 
 from . import conf  # Avoid circular import.
 from . import (
@@ -624,12 +631,11 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=name,
-                    type_or_callable=pd_field.annotation,
-                    markers=tuple(
-                        meta
-                        for meta in pd_field.metadata
-                        if isinstance(meta, _markers._Marker)
-                    ),
+                    type_or_callable=Annotated.__class_getitem__(
+                        (pd_field.annotation,) + tuple(pd_field.metadata)
+                    )
+                    if len(pd_field.metadata) > 0
+                    else pd_field.annotation,
                     default=(
                         MISSING_NONPROP
                         if pd_field.is_required()

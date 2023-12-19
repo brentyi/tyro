@@ -45,6 +45,7 @@ from typing import (
     Hashable,
     Iterable,
     List,
+    NewType,
     Optional,
     Sequence,
     Set,
@@ -195,6 +196,12 @@ def instantiator_from_type(
     if container_out is not None:
         return container_out
 
+    # Unwrap NewType + set metavar based on NewType name.
+    metavar = getattr(typ, "__name__", "").upper()
+    if isinstance(typ, NewType):
+        metavar = typ.__qualname__.upper()  # type: ignore
+        typ = typ.__supertype__
+
     # Validate that typ is a `(arg: str) -> T` type converter, as expected by argparse.
     if typ in _builtin_set:
         pass
@@ -246,7 +253,7 @@ def instantiator_from_type(
     return instantiator_base_case, InstantiatorMetadata(
         nargs=1,
         metavar=(
-            typ.__name__.upper()
+            metavar
             if auto_choices is None
             else "{" + ",".join(map(str, auto_choices)) + "}"
         ),

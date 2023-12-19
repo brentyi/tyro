@@ -12,6 +12,7 @@ from typing import (
     Dict,
     FrozenSet,
     List,
+    NewType,
     Set,
     Tuple,
     TypeVar,
@@ -33,10 +34,11 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     # TODO: Annotated[] handling should be revisited...
     typ, _ = unwrap_annotated(typ)
     origin = get_origin(typ)
-    if origin is None:
-        return typ
-    else:
-        return origin
+
+    if origin is not None:
+        typ = origin
+
+    return typ
 
 
 def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
@@ -51,7 +53,7 @@ def resolve_generic_types(
     class, and a mapping from typevars to concrete types."""
 
     origin_cls = get_origin(cls)
-    annotations = ()
+    annotations: Tuple[Any, ...] = ()
     if origin_cls is Annotated:
         annotations = get_args(cls)[1:]
         cls = get_args(cls)[0]
@@ -145,6 +147,12 @@ def narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallabl
     individual arguments/fields. (if a field is annotated as Union[int, str], and a
     string default is passed in, we don't want to narrow the type to always be
     strings!)"""
+
+    # We'll unwrap NewType annotations here; this is needed before issubclass
+    # checks!
+    if isinstance(typ, NewType):
+        typ = typ.__supertype__
+
     try:
         potential_subclass = type(default_instance)
 
