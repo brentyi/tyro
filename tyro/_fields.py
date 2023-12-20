@@ -1053,7 +1053,7 @@ def _get_pydantic_field_default(
 
     # Try grabbing default, either from `default` or `default_factory`.
     # NOTE: The implementation is slightly different for Pydantic V1 and V2.
-    if pydantic_version < 2:
+    if pydantic_version < 2:  # pragma: no cover
         if not field.required:
             return field.get_default()
     else:
