@@ -107,3 +107,15 @@ def test_pydantic_positional_annotation() -> None:
 
     result = tyro.cli(AnnotatedAsPositional, args=["myname"])
     assert isinstance(result, AnnotatedAsPositional)
+
+
+def test_pydantic_default_instance() -> None:
+    class Inside(BaseModel):
+        x: int = 1
+
+    class Outside(BaseModel):
+        i: Inside = Inside(x=2)
+
+    assert tyro.cli(Outside, args=[]).i.x == 2, (
+        "Expected x value from the default instance",
+    )
