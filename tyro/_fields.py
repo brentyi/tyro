@@ -975,7 +975,7 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
 
 def _get_dataclass_field_default(
     field: dataclasses.Field, parent_default_instance: Any
-) -> Optional[Any]:
+) -> Any:
     """Helper for getting the default instance for a dataclass field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
     # as well.
