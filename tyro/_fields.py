@@ -621,6 +621,8 @@ def _field_list_from_pydantic(
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(cls, name)
 
+            default = _get_pydantic_v2_field_default(name, pd_field, default_instance)
+
             field_list.append(
                 FieldDefinition.make(
                     name=name,
@@ -630,11 +632,7 @@ def _field_list_from_pydantic(
                         for meta in pd_field.metadata
                         if isinstance(meta, _markers._Marker)
                     ),
-                    default=(
-                        MISSING_NONPROP
-                        if pd_field.is_required()
-                        else pd_field.get_default(call_default_factory=True)
-                    ),
+                    default=default,
                     helptext=helptext,
                 )
             )
@@ -1021,4 +1019,35 @@ def _get_dataclass_field_default(
 
     # Otherwise, no default. This is different from MISSING, because MISSING propagates
     # to children. We could revisit this design to make it clearer.
+    return MISSING_NONPROP
+
+
+def _get_pydantic_v2_field_default(
+    name: str,
+    field: Any,
+    parent_default_instance: DefaultInstance,
+) -> Any:
+    """Helper for getting the default instance for a Pydantic V2 field."""
+
+    # Try grabbing default from parent instance.
+    if (
+        parent_default_instance not in MISSING_SINGLETONS
+        and parent_default_instance is not None
+    ):
+        # Populate default from some parent, eg `default_instance` in `tyro.cli()`.
+        if hasattr(parent_default_instance, name):
+            return getattr(parent_default_instance, name)
+        else:
+            warnings.warn(
+                f"Could not find field {name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
+            )
+
+    # Try grabbing default, either from `default` or `default_factory`.
+    if not field.is_required():
+        return field.get_default(call_default_factory=True)
+
+    # Otherwise, no default.
     return MISSING_NONPROP
