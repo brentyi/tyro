@@ -604,13 +604,15 @@ def _field_list_from_pydantic(
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(cls, pd_field.name)
 
+            default = _get_pydantic_field_default(
+                pd_field.name, pd_field, default_instance, pydantic_version
+            )
+
             field_list.append(
                 FieldDefinition.make(
                     name=pd_field.name,
                     type_or_callable=pd_field.outer_type_,
-                    default=(
-                        MISSING_NONPROP if pd_field.required else pd_field.get_default()
-                    ),
+                    default=default,
                     helptext=helptext,
                 )
             )
@@ -621,7 +623,9 @@ def _field_list_from_pydantic(
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(cls, name)
 
-            default = _get_pydantic_v2_field_default(name, pd_field, default_instance)
+            default = _get_pydantic_field_default(
+                name, pd_field, default_instance, pydantic_version
+            )
 
             field_list.append(
                 FieldDefinition.make(
@@ -972,7 +976,7 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
 def _get_dataclass_field_default(
     field: dataclasses.Field, parent_default_instance: Any
 ) -> Optional[Any]:
-    """Helper for getting the default instance for a field."""
+    """Helper for getting the default instance for a dataclass field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
     # as well.
     if parent_default_instance is MISSING_PROP:
@@ -1013,7 +1017,8 @@ def _get_dataclass_field_default(
         # The only time this matters is when we our dataclass has a `__post_init__`
         # function that mutates the dataclass. We choose here to use the default values
         # before this method is called.
-        dataclasses.is_dataclass(field.type) and field.default_factory is field.type
+        dataclasses.is_dataclass(field.type)
+        and field.default_factory is field.type
     ):
         return field.default_factory()
 
@@ -1022,12 +1027,13 @@ def _get_dataclass_field_default(
     return MISSING_NONPROP
 
 
-def _get_pydantic_v2_field_default(
+def _get_pydantic_field_default(
     name: str,
     field: Any,
     parent_default_instance: DefaultInstance,
+    pydantic_version: int,
 ) -> Any:
-    """Helper for getting the default instance for a Pydantic V2 field."""
+    """Helper for getting the default instance for a Pydantic field."""
 
     # Try grabbing default from parent instance.
     if (
@@ -1046,8 +1052,13 @@ def _get_pydantic_v2_field_default(
             )
 
     # Try grabbing default, either from `default` or `default_factory`.
-    if not field.is_required():
-        return field.get_default(call_default_factory=True)
+    # NOTE: The implementation is slightly different for Pydantic V1 and V2.
+    if pydantic_version < 2:
+        if not field.required:
+            return field.get_default()
+    else:
+        if not field.is_required():
+            return field.get_default(call_default_factory=True)
 
     # Otherwise, no default.
     return MISSING_NONPROP
