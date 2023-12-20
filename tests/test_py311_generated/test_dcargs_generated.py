@@ -308,7 +308,6 @@ def test_literal() -> None:
         assert tyro.cli(A, args=["--x", "3"])
 
 
-# Hack for mypy. Not needed for pyright.
 Choices = int
 Choices = tyro.extras.literal_type_from_choices([0, 1, 2])  # type: ignore
 
@@ -316,7 +315,7 @@ Choices = tyro.extras.literal_type_from_choices([0, 1, 2])  # type: ignore
 def test_dynamic_literal() -> None:
     @dataclasses.dataclass
     class A:
-        x: Choices
+        x: Choices  # type: ignore
 
     assert tyro.cli(A, args=["--x", "1"]) == A(x=1)
     with pytest.raises(SystemExit):

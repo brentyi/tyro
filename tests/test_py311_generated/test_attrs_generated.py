@@ -5,10 +5,10 @@ from typing import cast
 
 import attr
 import pytest
+import tyro._strings
 from attrs import define, field
 
 import tyro
-import tyro._strings
 
 
 def test_attrs_basic() -> None:
