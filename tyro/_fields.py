@@ -593,14 +593,11 @@ except ImportError:
 
 
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
-    if pydantic is None:
-        return False
-    if issubclass(cls, pydantic.BaseModel):
+    if pydantic is not None and issubclass(cls, pydantic.BaseModel):
         return True
-    if pydantic_v1 is None:
-        return False
-    if issubclass(cls, pydantic_v1.BaseModel):
+    if pydantic_v1 is not None and issubclass(cls, pydantic_v1.BaseModel):
         return True
+    return False
 
 
 def _field_list_from_pydantic(
@@ -617,40 +614,43 @@ def _field_list_from_pydantic(
         # Pydantic 1.xx.
         # We do a conditional cast because the pydantic.v1 module won't
         # actually exist in legacy versions of pydantic.
-        cls_cast = cast(pydantic_v1.BaseModel, cls) if TYPE_CHECKING else cls
-        for pd_field in cls_cast.__fields__.values():
-            helptext = pd_field.field_info.description
+        if TYPE_CHECKING:
+            cls_cast = cast(pydantic_v1.BaseModel, cls)
+        else:
+            cls_cast = cls
+        for pd1_field in cls_cast.__fields__.values():
+            helptext = pd1_field.field_info.description
             if helptext is None:
-                helptext = _docstrings.get_field_docstring(cls, pd_field.name)
+                helptext = _docstrings.get_field_docstring(cls, pd1_field.name)
 
             default = _get_pydantic_v1_field_default(
-                pd_field.name, pd_field, default_instance
+                pd1_field.name, pd1_field, default_instance
             )
 
             field_list.append(
                 FieldDefinition.make(
-                    name=pd_field.name,
-                    type_or_callable=pd_field.outer_type_,
+                    name=pd1_field.name,
+                    type_or_callable=pd1_field.outer_type_,
                     default=default,
                     helptext=helptext,
                 )
             )
     else:
         # Pydantic 2.xx.
-        for name, pd_field in cast(pydantic.BaseModel, cls).model_fields.items():
-            helptext = pd_field.description
+        for name, pd2_field in cast(pydantic.BaseModel, cls).model_fields.items():
+            helptext = pd2_field.description
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(cls, name)
 
-            default = _get_pydantic_v2_field_default(name, pd_field, default_instance)
+            default = _get_pydantic_v2_field_default(name, pd2_field, default_instance)
 
             field_list.append(
                 FieldDefinition.make(
                     name=name,
-                    type_or_callable=pd_field.annotation,  # type: ignore
+                    type_or_callable=pd2_field.annotation,  # type: ignore
                     markers=tuple(
                         meta
-                        for meta in pd_field.metadata
+                        for meta in pd2_field.metadata
                         if isinstance(meta, _markers._Marker)
                     ),
                     default=default,
