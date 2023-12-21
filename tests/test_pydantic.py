@@ -5,7 +5,7 @@ from typing import cast
 
 import pytest
 import tyro._strings
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, v1
 
 import tyro
 
@@ -15,6 +15,25 @@ def test_pydantic() -> None:
         i: int
         s: str = "hello"
         f: float = Field(default_factory=lambda: 3.0)
+        p: pathlib.Path
+
+    # We can directly pass a dataclass to `tyro.cli()`:
+    assert tyro.cli(
+        ManyTypesA,
+        args=[
+            "--i",
+            "5",
+            "--p",
+            "~",
+        ],
+    ) == ManyTypesA(i=5, s="hello", f=3.0, p=pathlib.Path("~"))
+
+
+def test_pydantic_v1() -> None:
+    class ManyTypesA(v1.BaseModel):
+        i: int
+        s: str = "hello"
+        f: float = v1.Field(default_factory=lambda: 3.0)
         p: pathlib.Path
 
     # We can directly pass a dataclass to `tyro.cli()`:
@@ -130,6 +149,22 @@ def test_pydantic_nested_default_instance() -> None:
         i: Inside
 
     class Outside(BaseModel):
+        m: Middle = Middle(i=Inside(x=2))
+
+    assert tyro.cli(Outside, args=[]).m.i.x == 2, (
+        "Expected x value from the default instance",
+    )
+    assert tyro.cli(Outside, args=["--m.i.x", "3"]).m.i.x == 3
+
+
+def test_pydantic_v1_nested_default_instance() -> None:
+    class Inside(v1.BaseModel):
+        x: int = 1
+
+    class Middle(v1.BaseModel):
+        i: Inside
+
+    class Outside(v1.BaseModel):
         m: Middle = Middle(i=Inside(x=2))
 
     assert tyro.cli(Outside, args=[]).m.i.x == 2, (

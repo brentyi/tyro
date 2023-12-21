@@ -585,12 +585,22 @@ except ImportError:
     if not TYPE_CHECKING:
         pydantic = None  # type: ignore
 
-if TYPE_CHECKING:
-    import pydantic.v1
+try:
+    from pydantic import v1 as pydantic_v1
+except ImportError:
+    if not TYPE_CHECKING:
+        pydantic_v1 = None  # type: ignore
 
 
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
-    return pydantic is not None and issubclass(cls, pydantic.BaseModel)
+    if pydantic is None:
+        return False
+    if issubclass(cls, pydantic.BaseModel):
+        return True
+    if pydantic_v1 is None:
+        return False
+    if issubclass(cls, pydantic_v1.BaseModel):
+        return True
 
 
 def _field_list_from_pydantic(
@@ -601,11 +611,13 @@ def _field_list_from_pydantic(
     # Handle pydantic models.
     field_list = []
     pydantic_version = int(getattr(pydantic, "__version__", "1.0.0").partition(".")[0])
-    if pydantic_version < 2:  # pragma: no cover
+    if pydantic_version < 2 or (
+        pydantic_v1 is not None and issubclass(cls, pydantic_v1.BaseModel)
+    ):
         # Pydantic 1.xx.
         # We do a conditional cast because the pydantic.v1 module won't
         # actually exist in legacy versions of pydantic.
-        cls_cast = cast(pydantic.v1.BaseModel, cls) if TYPE_CHECKING else cls
+        cls_cast = cast(pydantic_v1.BaseModel, cls) if TYPE_CHECKING else cls
         for pd_field in cls_cast.__fields__.values():
             helptext = pd_field.field_info.description
             if helptext is None:
@@ -1033,7 +1045,7 @@ def _get_dataclass_field_default(
 
 def _get_pydantic_v1_field_default(
     name: str,
-    field: pydantic.v1.fields.ModelField,
+    field: pydantic_v1.fields.ModelField,
     parent_default_instance: DefaultInstance,
 ) -> Any:
     """Helper for getting the default instance for a Pydantic field."""
