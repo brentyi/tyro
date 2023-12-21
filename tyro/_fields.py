@@ -15,6 +15,7 @@ import sys
 import typing
 import warnings
 from typing import (
+    TYPE_CHECKING,
     Any,
     Callable,
     Dict,
@@ -578,15 +579,25 @@ def _field_list_from_dataclass(
 
 
 # Support attrs and pydantic if they're installed.
-
 try:
     import pydantic
 except ImportError:
-    pydantic = None  # type: ignore
+    if not TYPE_CHECKING:
+        pydantic = None  # type: ignore
+
+try:
+    from pydantic import v1 as pydantic_v1
+except ImportError:
+    if not TYPE_CHECKING:
+        pydantic_v1 = None  # type: ignore
 
 
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
-    return pydantic is not None and issubclass(cls, pydantic.BaseModel)
+    if pydantic is not None and issubclass(cls, pydantic.BaseModel):
+        return True
+    if pydantic_v1 is not None and issubclass(cls, pydantic_v1.BaseModel):
+        return True
+    return False
 
 
 def _field_list_from_pydantic(
@@ -597,44 +608,52 @@ def _field_list_from_pydantic(
     # Handle pydantic models.
     field_list = []
     pydantic_version = int(getattr(pydantic, "__version__", "1.0.0").partition(".")[0])
-    if pydantic_version < 2:  # pragma: no cover
+    if pydantic_version < 2 or (
+        pydantic_v1 is not None and issubclass(cls, pydantic_v1.BaseModel)
+    ):
         # Pydantic 1.xx.
-        for pd_field in cls.__fields__.values():  # type: ignore
-            helptext = pd_field.field_info.description
+        # We do a conditional cast because the pydantic.v1 module won't
+        # actually exist in legacy versions of pydantic.
+        if TYPE_CHECKING:
+            cls_cast = cast(pydantic_v1.BaseModel, cls)
+        else:
+            cls_cast = cls
+        for pd1_field in cls_cast.__fields__.values():
+            helptext = pd1_field.field_info.description
             if helptext is None:
-                helptext = _docstrings.get_field_docstring(cls, pd_field.name)
+                helptext = _docstrings.get_field_docstring(cls, pd1_field.name)
+
+            default = _get_pydantic_v1_field_default(
+                pd1_field.name, pd1_field, default_instance
+            )
 
             field_list.append(
                 FieldDefinition.make(
-                    name=pd_field.name,
-                    type_or_callable=pd_field.outer_type_,
-                    default=(
-                        MISSING_NONPROP if pd_field.required else pd_field.get_default()
-                    ),
+                    name=pd1_field.name,
+                    type_or_callable=pd1_field.outer_type_,
+                    default=default,
                     helptext=helptext,
                 )
             )
     else:
         # Pydantic 2.xx.
-        for name, pd_field in cls.model_fields.items():  # type: ignore
-            helptext = pd_field.description
+        for name, pd2_field in cast(pydantic.BaseModel, cls).model_fields.items():
+            helptext = pd2_field.description
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(cls, name)
+
+            default = _get_pydantic_v2_field_default(name, pd2_field, default_instance)
 
             field_list.append(
                 FieldDefinition.make(
                     name=name,
-                    type_or_callable=pd_field.annotation,
+                    type_or_callable=pd2_field.annotation,  # type: ignore
                     markers=tuple(
                         meta
-                        for meta in pd_field.metadata
+                        for meta in pd2_field.metadata
                         if isinstance(meta, _markers._Marker)
                     ),
-                    default=(
-                        MISSING_NONPROP
-                        if pd_field.is_required()
-                        else pd_field.get_default(call_default_factory=True)
-                    ),
+                    default=default,
                     helptext=helptext,
                 )
             )
@@ -973,8 +992,8 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
 
 def _get_dataclass_field_default(
     field: dataclasses.Field, parent_default_instance: Any
-) -> Optional[Any]:
-    """Helper for getting the default instance for a field."""
+) -> Any:
+    """Helper for getting the default instance for a dataclass field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
     # as well.
     if parent_default_instance is MISSING_PROP:
@@ -985,7 +1004,7 @@ def _get_dataclass_field_default(
         parent_default_instance not in MISSING_SINGLETONS
         and parent_default_instance is not None
     ):
-        # Populate default from some parent, eg `default_instance` in `tyro.cli()`.
+        # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, field.name):
             return getattr(parent_default_instance, field.name)
         else:
@@ -1021,4 +1040,64 @@ def _get_dataclass_field_default(
 
     # Otherwise, no default. This is different from MISSING, because MISSING propagates
     # to children. We could revisit this design to make it clearer.
+    return MISSING_NONPROP
+
+
+def _get_pydantic_v1_field_default(
+    name: str,
+    field: pydantic_v1.fields.ModelField,
+    parent_default_instance: DefaultInstance,
+) -> Any:
+    """Helper for getting the default instance for a Pydantic field."""
+
+    # Try grabbing default from parent instance.
+    if (
+        parent_default_instance not in MISSING_SINGLETONS
+        and parent_default_instance is not None
+    ):
+        # Populate default from some parent, eg `default=` in `tyro.cli()`.
+        if hasattr(parent_default_instance, name):
+            return getattr(parent_default_instance, name)
+        else:
+            warnings.warn(
+                f"Could not find field {name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
+            )
+
+    if not field.required:
+        return field.get_default()
+
+    # Otherwise, no default.
+    return MISSING_NONPROP
+
+
+def _get_pydantic_v2_field_default(
+    name: str,
+    field: pydantic.fields.FieldInfo,
+    parent_default_instance: DefaultInstance,
+) -> Any:
+    """Helper for getting the default instance for a Pydantic field."""
+
+    # Try grabbing default from parent instance.
+    if (
+        parent_default_instance not in MISSING_SINGLETONS
+        and parent_default_instance is not None
+    ):
+        # Populate default from some parent, eg `default=` in `tyro.cli()`.
+        if hasattr(parent_default_instance, name):
+            return getattr(parent_default_instance, name)
+        else:
+            warnings.warn(
+                f"Could not find field {name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
+            )
+
+    if not field.is_required():
+        return field.get_default(call_default_factory=True)
+
+    # Otherwise, no default.
     return MISSING_NONPROP
