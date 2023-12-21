@@ -606,7 +606,7 @@ def _field_list_from_pydantic(
         # We do a conditional cast because the pydantic.v1 module won't
         # actually exist in legacy versions of pydantic.
         cls_cast = cast(pydantic.v1.BaseModel, cls) if TYPE_CHECKING else cls
-        for pd_field in cls_cast.__fields__.values():  # type: ignore
+        for pd_field in cls_cast.__fields__.values():
             helptext = pd_field.field_info.description
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(cls, pd_field.name)
