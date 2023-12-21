@@ -180,6 +180,10 @@ Module Contents
 
    
 
+.. py:data:: pydantic_v1
+
+   
+
 .. py:data:: attr
 
    

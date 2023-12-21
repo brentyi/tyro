@@ -269,6 +269,7 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">TYPE_CHECKING</span><span class="p">,</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
     <span class="n">Dict</span><span class="p">,</span>
@@ -871,15 +872,25 @@
 
 
 <span class="c1"># Support attrs and pydantic if they&#39;re installed.</span>
-
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">pydantic</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">pydantic</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="n">pydantic</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
 
 
 <span class="k">def</span> <span class="nf">_is_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">pydantic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pydantic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">pydantic_v1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
 
 
 <span class="k">def</span> <span class="nf">_field_list_from_pydantic</span><span class="p">(</span>
@@ -890,44 +901,52 @@
     <span class="c1"># Handle pydantic models.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">pydantic_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">pydantic</span><span class="p">,</span> <span class="s2">&quot;__version__&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">pydantic_version</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">if</span> <span class="n">pydantic_version</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">pydantic_v1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">)</span>
+    <span class="p">):</span>
         <span class="c1"># Pydantic 1.xx.</span>
-        <span class="k">for</span> <span class="n">pd_field</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>  <span class="c1"># type: ignore</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span>
+        <span class="c1"># We do a conditional cast because the pydantic.v1 module won&#39;t</span>
+        <span class="c1"># actually exist in legacy versions of pydantic.</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="n">cls_cast</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">pydantic_v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cls_cast</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="k">for</span> <span class="n">pd1_field</span> <span class="ow">in</span> <span class="n">cls_cast</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">pd1_field</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span>
             <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v1_field_default</span><span class="p">(</span>
+                <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pd1_field</span><span class="p">,</span> <span class="n">default_instance</span>
+            <span class="p">)</span>
 
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">pd_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="n">type_or_callable</span><span class="o">=</span><span class="n">pd_field</span><span class="o">.</span><span class="n">outer_type_</span><span class="p">,</span>
-                    <span class="n">default</span><span class="o">=</span><span class="p">(</span>
-                        <span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">required</span> <span class="k">else</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
-                    <span class="p">),</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                    <span class="n">type_or_callable</span><span class="o">=</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">outer_type_</span><span class="p">,</span>
+                    <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Pydantic 2.xx.</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pd_field</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">model_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>  <span class="c1"># type: ignore</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">description</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pd2_field</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">description</span>
             <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+            <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v2_field_default</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pd2_field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                    <span class="n">type_or_callable</span><span class="o">=</span><span class="n">pd_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span>
+                    <span class="n">type_or_callable</span><span class="o">=</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
                     <span class="n">markers</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span>
                         <span class="n">meta</span>
-                        <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">metadata</span>
+                        <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span>
                         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
                     <span class="p">),</span>
-                    <span class="n">default</span><span class="o">=</span><span class="p">(</span>
-                        <span class="n">MISSING_NONPROP</span>
-                        <span class="k">if</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">is_required</span><span class="p">()</span>
-                        <span class="k">else</span> <span class="n">pd_field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="p">),</span>
+                    <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -1266,8 +1285,8 @@
 
 <span class="k">def</span> <span class="nf">_get_dataclass_field_default</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a field.&quot;&quot;&quot;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a dataclass field.&quot;&quot;&quot;</span>
     <span class="c1"># If the dataclass&#39;s parent is explicitly marked MISSING, mark this field as missing</span>
     <span class="c1"># as well.</span>
     <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span><span class="p">:</span>
@@ -1278,7 +1297,7 @@
         <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
         <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">):</span>
-        <span class="c1"># Populate default from some parent, eg `default_instance` in `tyro.cli()`.</span>
+        <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1314,6 +1333,66 @@
 
     <span class="c1"># Otherwise, no default. This is different from MISSING, because MISSING propagates</span>
     <span class="c1"># to children. We could revisit this design to make it clearer.</span>
+    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
+
+
+<span class="k">def</span> <span class="nf">_get_pydantic_v1_field_default</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">field</span><span class="p">:</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">ModelField</span><span class="p">,</span>
+    <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Try grabbing default from parent instance.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">parent_default_instance</span><span class="si">}</span><span class="s2">, which has&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+
+    <span class="c1"># Otherwise, no default.</span>
+    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
+
+
+<span class="k">def</span> <span class="nf">_get_pydantic_v2_field_default</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">field</span><span class="p">:</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">FieldInfo</span><span class="p">,</span>
+    <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Try grabbing default from parent instance.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="p">):</span>
+        <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">parent_default_instance</span><span class="si">}</span><span class="s2">, which has&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
+                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">is_required</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Otherwise, no default.</span>
     <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
 </pre></div>
         </article>
