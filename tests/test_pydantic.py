@@ -4,10 +4,10 @@ import pathlib
 from typing import cast
 
 import pytest
+import tyro._strings
 from pydantic import BaseModel, Field
 
 import tyro
-import tyro._strings
 
 
 def test_pydantic() -> None:
@@ -119,3 +119,20 @@ def test_pydantic_default_instance() -> None:
     assert tyro.cli(Outside, args=[]).i.x == 2, (
         "Expected x value from the default instance",
     )
+    assert tyro.cli(Outside, args=["--i.x", "3"]).i.x == 3
+
+
+def test_pydantic_nested_default_instance() -> None:
+    class Inside(BaseModel):
+        x: int = 1
+
+    class Middle(BaseModel):
+        i: Inside
+
+    class Outside(BaseModel):
+        m: Middle = Middle(i=Inside(x=2))
+
+    assert tyro.cli(Outside, args=[]).m.i.x == 2, (
+        "Expected x value from the default instance",
+    )
+    assert tyro.cli(Outside, args=["--m.i.x", "3"]).m.i.x == 3
