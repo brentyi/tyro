@@ -685,8 +685,19 @@ def _field_list_from_attrs(
     field_list = []
     for attr_field in attr.fields(cls):
         # Default handling.
+        name = attr_field.name
         default = attr_field.default
-        if default is attr.NOTHING:
+        if default_instance not in MISSING_SINGLETONS:
+            if hasattr(default_instance, name):
+                default = getattr(default_instance, name)
+            else:
+                warnings.warn(
+                    f"Could not find field {name} in default instance"
+                    f" {default_instance}, which has"
+                    f" type {type(default_instance)},",
+                    stacklevel=2,
+                )
+        elif default is attr.NOTHING:
             default = MISSING_NONPROP
         elif isinstance(default, attr.Factory):  # type: ignore
             default = default.factory()  # type: ignore
@@ -694,10 +705,10 @@ def _field_list_from_attrs(
         assert attr_field.type is not None
         field_list.append(
             FieldDefinition.make(
-                name=attr_field.name,
+                name=name,
                 type_or_callable=attr_field.type,
                 default=default,
-                helptext=_docstrings.get_field_docstring(cls, attr_field.name),
+                helptext=_docstrings.get_field_docstring(cls, name),
             )
         )
     return field_list
