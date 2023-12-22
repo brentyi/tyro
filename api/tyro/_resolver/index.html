@@ -350,9 +350,27 @@ unsuccessful.</p>
 </dl>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._resolver.TypeOrCallableOrNone">
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">TypeOrCallableOrNone</span></span><a class="headerlink" href="#tyro._resolver.TypeOrCallableOrNone" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._resolver.narrow_subtypes">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_subtypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#narrow_subtypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.narrow_subtypes" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="tyro._resolver.unwrap_newtype">
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_newtype</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallableOrNone</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeOrCallableOrNone</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#unwrap_newtype"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.unwrap_newtype" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>typ</strong> (<em>TypeOrCallableOrNone</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple[TypeOrCallableOrNone, Optional[str]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._resolver.unwrap_newtype_and_narrow_subtypes">
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_newtype_and_narrow_subtypes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#unwrap_newtype_and_narrow_subtypes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.unwrap_newtype_and_narrow_subtypes" title="Link to this definition">#</a></dt>
 <dd><p>Type narrowing: if we annotate as Animal but specify a default instance of Cat,
 we should parse as Cat.</p>
 <p>This should generally only be applied to fields used as nested structures, not
@@ -526,7 +544,9 @@ union. Loosely motivated by: <a class="reference external" href="https://github.
 <li><a class="reference internal" href="#tyro._resolver.resolved_fields"><code class="docutils literal notranslate"><span class="pre">resolved_fields()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.is_namedtuple"><code class="docutils literal notranslate"><span class="pre">is_namedtuple()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.type_from_typevar_constraints"><code class="docutils literal notranslate"><span class="pre">type_from_typevar_constraints()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._resolver.narrow_subtypes"><code class="docutils literal notranslate"><span class="pre">narrow_subtypes()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.TypeOrCallableOrNone"><code class="docutils literal notranslate"><span class="pre">TypeOrCallableOrNone</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.unwrap_newtype"><code class="docutils literal notranslate"><span class="pre">unwrap_newtype()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.unwrap_newtype_and_narrow_subtypes"><code class="docutils literal notranslate"><span class="pre">unwrap_newtype_and_narrow_subtypes()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.narrow_collection_types"><code class="docutils literal notranslate"><span class="pre">narrow_collection_types()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.MetadataType"><code class="docutils literal notranslate"><span class="pre">MetadataType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.unwrap_annotated"><code class="docutils literal notranslate"><span class="pre">unwrap_annotated()</span></code></a></li>

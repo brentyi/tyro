@@ -266,6 +266,7 @@
     <span class="n">Dict</span><span class="p">,</span>
     <span class="n">FrozenSet</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
+    <span class="n">Optional</span><span class="p">,</span>
     <span class="n">Set</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
     <span class="n">TypeVar</span><span class="p">,</span>
@@ -289,10 +290,11 @@
     <span class="c1"># TODO: Annotated[] handling should be revisited...</span>
     <span class="n">typ</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">typ</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">origin</span></div>
+
+    <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">origin</span>
+
+    <span class="k">return</span> <span class="n">typ</span></div>
 
 
 
@@ -312,12 +314,15 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;If the input is a class: no-op. If it&#39;s a generic alias: returns the origin</span>
 <span class="sd">    class, and a mapping from typevars to concrete types.&quot;&quot;&quot;</span>
 
-    <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-    <span class="n">annotations</span> <span class="o">=</span> <span class="p">()</span>
-    <span class="k">if</span> <span class="n">origin_cls</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
-        <span class="n">annotations</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="bp">cls</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="n">annotations</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+        <span class="c1"># ^We need this `if` statement for an obscure edge case: when `cls` is a</span>
+        <span class="c1"># function with `__tyro_markers__` set, we don&#39;t want/need to return</span>
+        <span class="c1"># Annotated[func, markers].</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+    <span class="c1"># We&#39;ll ignore NewType when getting the origin + args for generics.</span>
+    <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">if</span> <span class="p">(</span>
@@ -327,7 +332,7 @@
         <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="n">typevars</span> <span class="o">=</span> <span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span>
-        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevars</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevar_values</span><span class="p">)</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">origin_cls</span>
         <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">)))</span>
@@ -345,7 +350,9 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">type_from_typevar</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">annotations</span><span class="p">)),</span> <span class="n">type_from_typevar</span>  <span class="c1"># type: ignore</span></div>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+            <span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">annotations</span><span class="p">)</span>
+        <span class="p">),</span> <span class="n">type_from_typevar</span></div>
 
 
 
@@ -408,10 +415,36 @@
 
 
 
-<div class="viewcode-block" id="narrow_subtypes">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_subtypes">[docs]</a>
+<span class="n">TypeOrCallableOrNone</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallableOrNone&quot;</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="unwrap_newtype">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_newtype">[docs]</a>
+<span class="k">def</span> <span class="nf">unwrap_newtype</span><span class="p">(</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallableOrNone</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallableOrNone</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="c1"># We&#39;ll unwrap NewType annotations here; this is needed before issubclass</span>
+    <span class="c1"># checks!</span>
+    <span class="c1">#</span>
+    <span class="c1"># `isinstance(x, NewType)` doesn&#39;t work because NewType isn&#39;t a class until</span>
+    <span class="c1"># Python 3.10, so we instead do a duck typing-style check.</span>
+    <span class="n">return_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__supertype__&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">return_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">return_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__supertype__&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="n">return_name</span></div>
+
+
+
+<div class="viewcode-block" id="unwrap_newtype_and_narrow_subtypes">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_newtype_and_narrow_subtypes">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">narrow_subtypes</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
+    <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Type narrowing: if we annotate as Animal but specify a default instance of Cat,</span>
 <span class="sd">    we should parse as Cat.</span>
 
@@ -419,6 +452,10 @@
 <span class="sd">    individual arguments/fields. (if a field is annotated as Union[int, str], and a</span>
 <span class="sd">    string default is passed in, we don&#39;t want to narrow the type to always be</span>
 <span class="sd">    strings!)&quot;&quot;&quot;</span>
+
+    <span class="n">typ</span><span class="p">,</span> <span class="n">unused_name</span> <span class="o">=</span> <span class="n">unwrap_newtype</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">unused_name</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">potential_subclass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
 

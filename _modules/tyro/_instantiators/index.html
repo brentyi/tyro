@@ -463,6 +463,14 @@
     <span class="k">if</span> <span class="n">container_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">container_out</span>
 
+    <span class="c1"># Unwrap NewType + set metavar based on NewType name.</span>
+    <span class="c1"># `isinstance(x, NewType)` doesn&#39;t work because NewType isn&#39;t a class until</span>
+    <span class="c1"># Python 3.10, so we instead do a duck typing-style check.</span>
+    <span class="n">metavar</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">typ</span><span class="p">,</span> <span class="n">maybe_newtype_name</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">maybe_newtype_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="n">maybe_newtype_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
     <span class="c1"># Validate that typ is a `(arg: str) -&gt; T` type converter, as expected by argparse.</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_builtin_set</span><span class="p">:</span>
         <span class="k">pass</span>
@@ -514,7 +522,7 @@
     <span class="k">return</span> <span class="n">instantiator_base_case</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
         <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">metavar</span><span class="o">=</span><span class="p">(</span>
-            <span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+            <span class="n">metavar</span>
             <span class="k">if</span> <span class="n">auto_choices</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="k">else</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">auto_choices</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
         <span class="p">),</span>

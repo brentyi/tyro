@@ -8,7 +8,7 @@
 .. autoapi-nested-parse::
 
    
-   Abstractions for pulling out 'field' definitions, which specify inputs, types, and
+   Abstractions for pulling out 'field' definitions, which specify inputs, types, and # type: ignore
    defaults, from general callables.
 
 

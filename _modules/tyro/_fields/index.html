@@ -252,7 +252,7 @@
         </div>
         <article role="main">
           <h1>Source code for tyro._fields</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Abstractions for pulling out &#39;field&#39; definitions, which specify inputs, types, and</span>
+<span></span><span class="sd">&quot;&quot;&quot;Abstractions for pulling out &#39;field&#39; definitions, which specify inputs, types, and # type: ignore</span>
 <span class="sd">defaults, from general callables.&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
@@ -286,7 +286,14 @@
 
 <span class="kn">import</span> <span class="nn">docstring_parser</span>
 <span class="kn">import</span> <span class="nn">typing_extensions</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">NotRequired</span><span class="p">,</span> <span class="n">Required</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">is_typeddict</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Annotated</span><span class="p">,</span>
+    <span class="n">NotRequired</span><span class="p">,</span>
+    <span class="n">Required</span><span class="p">,</span>
+    <span class="n">get_args</span><span class="p">,</span>
+    <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">is_typeddict</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">conf</span>  <span class="c1"># Avoid circular import.</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
@@ -554,7 +561,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Resolve generic types.</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_subtypes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
     <span class="c1"># Try to generate field list.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
@@ -665,7 +672,7 @@
     <span class="c1"># Unwrap generics.</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_subtypes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="n">f_origin</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
 
@@ -940,12 +947,11 @@
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                    <span class="n">type_or_callable</span><span class="o">=</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
-                    <span class="n">markers</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span>
-                        <span class="n">meta</span>
-                        <span class="k">for</span> <span class="n">meta</span> <span class="ow">in</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span>
-                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meta</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
-                    <span class="p">),</span>
+                    <span class="n">type_or_callable</span><span class="o">=</span><span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                        <span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                    <span class="k">else</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -972,8 +978,19 @@
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">attr_field</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
         <span class="c1"># Default handling.</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">name</span>
         <span class="n">default</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">default</span>
-        <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">attr</span><span class="o">.</span><span class="n">NOTHING</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">default_instance</span><span class="si">}</span><span class="s2">, which has&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
+                    <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">attr</span><span class="o">.</span><span class="n">NOTHING</span><span class="p">:</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">default</span><span class="o">.</span><span class="n">factory</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
@@ -981,10 +998,10 @@
         <span class="k">assert</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">attr_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">attr_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-                <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">name</span><span class="p">),</span>
+                <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">field_list</span>

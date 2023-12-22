@@ -50,7 +50,14 @@ Module Contents
    Try to concretize a type from a TypeVar's bounds or constraints. Identity if
    unsuccessful.
 
-.. py:function:: narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
+.. py:data:: TypeOrCallableOrNone
+
+   
+
+.. py:function:: unwrap_newtype(typ: TypeOrCallableOrNone) -> Tuple[TypeOrCallableOrNone, Optional[str]]
+
+
+.. py:function:: unwrap_newtype_and_narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
    
    Type narrowing: if we annotate as Animal but specify a default instance of Cat,

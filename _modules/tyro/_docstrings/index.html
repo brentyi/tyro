@@ -373,7 +373,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_ClassTokenization</span><span class="p">]:</span>
     <span class="c1"># Search for token in this class + all parents.</span>
     <span class="n">found_field</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">classes_to_search</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">()</span>
+    <span class="n">classes_to_search</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__mro__</span>
     <span class="n">tokenization</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">search_cls</span> <span class="ow">in</span> <span class="n">classes_to_search</span><span class="p">:</span>
         <span class="c1"># Inherited generics seem challenging for now.</span>
