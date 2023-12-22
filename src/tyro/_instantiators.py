@@ -195,6 +195,14 @@ def instantiator_from_type(
     if container_out is not None:
         return container_out
 
+    # Unwrap NewType + set metavar based on NewType name.
+    # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
+    # Python 3.10, so we instead do a duck typing-style check.
+    metavar = getattr(typ, "__name__", "").upper()
+    typ, maybe_newtype_name = _resolver.unwrap_newtype(typ)
+    if maybe_newtype_name is not None:
+        metavar = maybe_newtype_name.upper()
+
     # Validate that typ is a `(arg: str) -> T` type converter, as expected by argparse.
     if typ in _builtin_set:
         pass
@@ -246,7 +254,7 @@ def instantiator_from_type(
     return instantiator_base_case, InstantiatorMetadata(
         nargs=1,
         metavar=(
-            typ.__name__.upper()
+            metavar
             if auto_choices is None
             else "{" + ",".join(map(str, auto_choices)) + "}"
         ),
