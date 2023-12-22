@@ -16,16 +16,19 @@ Usage:
 from __future__ import annotations
 
 import dataclasses
-from typing import Union
+from typing import NewType, Union
 
 import tyro
 
 
 @dataclasses.dataclass(frozen=True)
-class Checkout:
+class Checkout_:
     """Checkout a branch."""
 
     branch: str
+
+
+Checkout = NewType("Checkout", Checkout_)
 
 
 @dataclasses.dataclass(frozen=True)

@@ -4,10 +4,11 @@ import pathlib
 from typing import cast
 
 import pytest
-import tyro._strings
 from pydantic import BaseModel, Field, v1
+from typing_extensions import Annotated
 
 import tyro
+import tyro._strings
 
 
 def test_pydantic() -> None:
@@ -126,6 +127,14 @@ def test_pydantic_positional_annotation() -> None:
 
     result = tyro.cli(AnnotatedAsPositional, args=["myname"])
     assert isinstance(result, AnnotatedAsPositional)
+
+
+def test_pydantic_alias() -> None:
+    class AliasCfg(BaseModel):
+        alias: Annotated[str, tyro.conf.arg(aliases=["-a"])]
+
+    assert tyro.cli(AliasCfg, args=["--alias", "3"]) == AliasCfg(alias="3")
+    assert tyro.cli(AliasCfg, args=["-a", "3"]) == AliasCfg(alias="3")
 
 
 def test_pydantic_default_instance() -> None:

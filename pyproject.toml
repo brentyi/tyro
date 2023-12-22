@@ -54,11 +54,6 @@ dev = [
 [project.urls]
 "GitHub" = "https://github.com/brentyi/tyro"
 
-[tool.setuptools.packages.find]
-exclude = [
-    "tests*"
-]
-
 [tool.setuptools.package-data]
 tyro = ["py.typed"]
 

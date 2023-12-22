@@ -2,7 +2,7 @@ import contextlib
 import dataclasses
 import enum
 import io
-from typing import Annotated, Generic, List, Tuple, Type, TypeVar
+from typing import Annotated, Generic, List, NewType, Tuple, Type, TypeVar
 
 import pytest
 import yaml
@@ -27,6 +27,29 @@ def test_tuple_generic_variable() -> None:
     assert tyro.cli(
         TupleGenericVariable[int], args=["--xyz", "1", "2", "3"]
     ) == TupleGenericVariable((1, 2, 3))
+
+
+def test_tuple_generic_variable_newtype() -> None:
+    @dataclasses.dataclass
+    class TupleGenericVariable(Generic[ScalarType]):
+        xyz: Tuple[ScalarType, ...]
+
+    SpecialInt = NewType("SpecialInt", int)
+    assert tyro.cli(
+        TupleGenericVariable[SpecialInt], args=["--xyz", "1", "2", "3"]
+    ) == TupleGenericVariable((SpecialInt(1), SpecialInt(2), SpecialInt(3)))
+
+
+def test_tuple_generic_variable_more_newtype() -> None:
+    @dataclasses.dataclass
+    class TupleGenericVariable(Generic[ScalarType]):
+        xyz: Tuple[ScalarType, ...]
+
+    SpecialInt = NewType("SpecialInt", int)
+    SpecialTuple = NewType("SpecialTuple", TupleGenericVariable[SpecialInt])
+    assert tyro.cli(SpecialTuple, args=["--xyz", "1", "2", "3"]) == SpecialTuple(
+        TupleGenericVariable((SpecialInt(1), SpecialInt(2), SpecialInt(3)))
+    )
 
 
 def test_tuple_generic_helptext() -> None:

@@ -12,6 +12,7 @@ from typing import (
     Dict,
     FrozenSet,
     List,
+    Optional,
     Set,
     Tuple,
     TypeVar,
@@ -33,10 +34,11 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     # TODO: Annotated[] handling should be revisited...
     typ, _ = unwrap_annotated(typ)
     origin = get_origin(typ)
-    if origin is None:
-        return typ
-    else:
-        return origin
+
+    if origin is not None:
+        typ = origin
+
+    return typ
 
 
 def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
@@ -50,12 +52,15 @@ def resolve_generic_types(
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
 
-    origin_cls = get_origin(cls)
-    annotations = ()
-    if origin_cls is Annotated:
-        annotations = get_args(cls)[1:]
-        cls = get_args(cls)[0]
-        origin_cls = get_origin(cls)
+    annotations: Tuple[Any, ...] = ()
+    if get_origin(cls) is Annotated:
+        # ^We need this `if` statement for an obscure edge case: when `cls` is a
+        # function with `__tyro_markers__` set, we don't want/need to return
+        # Annotated[func, markers].
+        cls, annotations = unwrap_annotated(cls)
+
+    # We'll ignore NewType when getting the origin + args for generics.
+    origin_cls = get_origin(unwrap_newtype(cls)[0])
 
     type_from_typevar = {}
     if (
@@ -65,7 +70,7 @@ def resolve_generic_types(
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
         typevars = origin_cls.__parameters__
-        typevar_values = get_args(cls)
+        typevar_values = get_args(unwrap_newtype(cls)[0])
         assert len(typevars) == len(typevar_values)
         cls = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
@@ -83,7 +88,9 @@ def resolve_generic_types(
     if len(annotations) == 0:
         return cls, type_from_typevar
     else:
-        return Annotated.__class_getitem__((cls, *annotations)), type_from_typevar  # type: ignore
+        return Annotated.__class_getitem__(  # type: ignore
+            (cls, *annotations)
+        ), type_from_typevar
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -136,8 +143,31 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
     return typ
 
 
+TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
+
+
+def unwrap_newtype(
+    typ: TypeOrCallableOrNone,
+) -> Tuple[TypeOrCallableOrNone, Optional[str]]:
+    # We'll unwrap NewType annotations here; this is needed before issubclass
+    # checks!
+    #
+    # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
+    # Python 3.10, so we instead do a duck typing-style check.
+    return_name = None
+    while hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
+        if return_name is None:
+            return_name = getattr(typ, "__name__")
+        typ = getattr(typ, "__supertype__")
+
+    return typ, return_name
+
+
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
+def unwrap_newtype_and_narrow_subtypes(
+    typ: TypeOrCallable,
+    default_instance: Any,
+) -> TypeOrCallable:
     """Type narrowing: if we annotate as Animal but specify a default instance of Cat,
     we should parse as Cat.
 
@@ -145,6 +175,10 @@ def narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallabl
     individual arguments/fields. (if a field is annotated as Union[int, str], and a
     string default is passed in, we don't want to narrow the type to always be
     strings!)"""
+
+    typ, unused_name = unwrap_newtype(typ)
+    del unused_name
+
     try:
         potential_subclass = type(default_instance)
 
