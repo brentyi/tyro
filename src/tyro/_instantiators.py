@@ -45,7 +45,6 @@ from typing import (
     Hashable,
     Iterable,
     List,
-    NewType,
     Optional,
     Sequence,
     Set,

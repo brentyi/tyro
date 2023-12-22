@@ -208,7 +208,9 @@ def test_optional_nested_newtype() -> None:
             "--b.z",
             "3",
         ],
-    ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))  # type: ignore
+    ) == OptionalNested(
+        x=1, b=OptionalNestedChild(y=2, z=3)
+    )  # type: ignore
 
 
 def test_optional_nested_multiple() -> None:

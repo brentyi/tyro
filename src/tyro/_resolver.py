@@ -12,7 +12,6 @@ from typing import (
     Dict,
     FrozenSet,
     List,
-    NewType,
     Optional,
     Set,
     Tuple,

@@ -220,7 +220,9 @@ def call_from_args(
     # `tuple`.
     unwrapped_f = f
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
-    unwrapped_f = _resolver.unwrap_newtype_and_narrow_subtypes(unwrapped_f, default_instance)
+    unwrapped_f = _resolver.unwrap_newtype_and_narrow_subtypes(
+        unwrapped_f, default_instance
+    )
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
     unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
 

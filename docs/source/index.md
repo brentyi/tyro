@@ -137,16 +137,16 @@ To get started, we recommend browsing the examples to the left.
 
 
 
-.. |build| image:: https://github.com/brentyi/tyro/workflows/build/badge.svg
+.. |build| image:: https://github.com/brentyi/tyro/actions/workflows/build.yml/badge.svg
    :alt: Build status icon
    :target: https://github.com/brentyi/tyro
-.. |mypy| image:: https://github.com/brentyi/tyro/workflows/mypy/badge.svg
+.. |mypy| image:: https://github.com/brentyi/tyro/actions/workflows/mypy.yml/badge.svg
    :alt: Mypy status icon
    :target: https://github.com/brentyi/tyro
-.. |pyright| image:: https://github.com/brentyi/tyro/workflows/pyright/badge.svg
+.. |pyright| image:: https://github.com/brentyi/tyro/actions/workflows/pyright.yml/badge.svg
    :alt: Mypy status icon
    :target: https://github.com/brentyi/tyro
-.. |ruff| image:: https://github.com/brentyi/tyro/workflows/ruff/badge.svg
+.. |ruff| image:: https://github.com/brentyi/tyro/actions/workflows/ruff.yml/badge.svg
    :alt: Lint status icon
    :target: https://github.com/brentyi/tyro
 .. |coverage| image:: https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg

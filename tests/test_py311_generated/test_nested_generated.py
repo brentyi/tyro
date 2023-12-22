@@ -1,5 +1,14 @@
 import dataclasses
-from typing import Annotated, Any, Generic, Literal, Mapping, Optional, Tuple, TypeVar
+from typing import (
+    Annotated,
+    Any,
+    Generic,
+    Literal,
+    Mapping,
+    Optional,
+    Tuple,
+    TypeVar,
+)
 
 import pytest
 from frozendict import frozendict  # type: ignore

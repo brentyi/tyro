@@ -17,9 +17,9 @@ from typing import (
 )
 
 import pytest
+import tyro._strings
 
 import tyro
-import tyro._strings
 
 
 def test_basic_dict() -> None:
