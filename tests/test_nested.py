@@ -370,6 +370,56 @@ def test_subparser_with_default() -> None:
         tyro.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
 
 
+def test_subparser_with_default_and_newtype() -> None:
+    @dataclasses.dataclass
+    class DefaultHTTPServer_:
+        y: int
+
+    DefaultHTTPServer__ = NewType("DefaultHTTPServer__", DefaultHTTPServer_)
+    DefaultHTTPServer = NewType("DefaultHTTPServer", DefaultHTTPServer__)
+
+    def make_http_server(y: int) -> DefaultHTTPServer:
+        return DefaultHTTPServer(DefaultHTTPServer__(DefaultHTTPServer_(y)))
+
+    @dataclasses.dataclass
+    class DefaultSMTPServer:
+        z: int
+
+    @dataclasses.dataclass
+    class DefaultSubparser:
+        x: int
+        bc: Union[DefaultHTTPServer, DefaultSMTPServer] = dataclasses.field(
+            default_factory=lambda: make_http_server(5)
+        )
+
+    assert (
+        tyro.cli(
+            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "5"]
+        )
+        == tyro.cli(DefaultSubparser, args=["--x", "1"])
+        == DefaultSubparser(x=1, bc=make_http_server(y=5))
+    )
+    assert tyro.cli(
+        DefaultSubparser, args=["--x", "1", "bc:default-smtp-server", "--bc.z", "3"]
+    ) == DefaultSubparser(x=1, bc=DefaultSMTPServer(z=3))
+    assert (
+        tyro.cli(
+            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "8"]
+        )
+        == tyro.cli(
+            DefaultSubparser,
+            args=[],
+            default=DefaultSubparser(x=1, bc=make_http_server(y=8)),
+        )
+        == DefaultSubparser(x=1, bc=make_http_server(y=8))
+    )
+
+    with pytest.raises(SystemExit):
+        tyro.cli(DefaultSubparser, args=["--x", "1", "b", "--bc.z", "3"])
+    with pytest.raises(SystemExit):
+        tyro.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
+
+
 def test_subparser_with_default_alternate() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:

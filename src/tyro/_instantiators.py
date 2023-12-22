@@ -200,9 +200,9 @@ def instantiator_from_type(
     # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
     # Python 3.10, so we instead do a duck typing-style check.
     metavar = getattr(typ, "__name__", "").upper()
-    if hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
-        metavar = getattr(typ, "__name__", "").upper()
-        typ = getattr(typ, "__supertype__")
+    typ, maybe_newtype_name = _resolver.unwrap_newtype(typ)
+    if maybe_newtype_name is not None:
+        metavar = maybe_newtype_name.upper()
 
     # Validate that typ is a `(arg: str) -> T` type converter, as expected by argparse.
     if typ in _builtin_set:

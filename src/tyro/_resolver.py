@@ -13,6 +13,7 @@ from typing import (
     FrozenSet,
     List,
     NewType,
+    Optional,
     Set,
     Tuple,
     TypeVar,
@@ -138,6 +139,21 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
     return typ
 
 
+def unwrap_newtype(typ: TypeOrCallable) -> Tuple[TypeOrCallable, Optional[str]]:
+    # We'll unwrap NewType annotations here; this is needed before issubclass
+    # checks!
+    #
+    # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
+    # Python 3.10, so we instead do a duck typing-style check.
+    return_name = None
+    while hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
+        if return_name is None:
+            return_name = getattr(typ, "__name__")
+        typ = cast(TypeOrCallable, getattr(typ, "__supertype__"))
+
+    return typ, return_name
+
+
 @_unsafe_cache.unsafe_cache(maxsize=1024)
 def unwrap_newtype_and_narrow_subtypes(
     typ: TypeOrCallable,
@@ -151,13 +167,8 @@ def unwrap_newtype_and_narrow_subtypes(
     string default is passed in, we don't want to narrow the type to always be
     strings!)"""
 
-    # We'll unwrap NewType annotations here; this is needed before issubclass
-    # checks!
-    #
-    # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
-    # Python 3.10, so we instead do a duck typing-style check.
-    if hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
-        typ = cast(TypeOrCallable, getattr(typ, "__supertype__"))
+    typ, unused_name = unwrap_newtype(typ)
+    del unused_name
 
     try:
         potential_subclass = type(default_instance)
