@@ -1,5 +1,15 @@
 import dataclasses
-from typing import Annotated, Any, Generic, Literal, Mapping, Optional, Tuple, TypeVar
+from typing import (
+    Annotated,
+    Any,
+    Generic,
+    Literal,
+    Mapping,
+    NewType,
+    Optional,
+    Tuple,
+    TypeVar,
+)
 
 import pytest
 from frozendict import frozendict  # type: ignore
@@ -169,6 +179,49 @@ def test_optional_nested() -> None:
     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
 
 
+def test_optional_nested_newtype() -> None:
+    @dataclasses.dataclass
+    class OptionalNestedChild:
+        y: int
+        z: int
+
+    SpecialOptionalNestedChild = NewType(
+        "SpecialOptionalNestedChild", OptionalNestedChild
+    )
+
+    @dataclasses.dataclass
+    class OptionalNested:
+        x: int
+        b: Optional[SpecialOptionalNestedChild] = None
+
+    assert tyro.cli(OptionalNested, args=["--x", "1"]) == OptionalNested(x=1, b=None)
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            OptionalNested,
+            args=["--x", "1", "b:special-optional-nested-child", "--b.y", "3"],
+        )
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            OptionalNested,
+            args=["--x", "1", "b:special-optional-nested-child", "--b.z", "3"],
+        )
+
+    assert tyro.cli(
+        OptionalNested,
+        args=[
+            "--x",
+            "1",
+            "b:special-optional-nested-child",
+            "--b.y",
+            "2",
+            "--b.z",
+            "3",
+        ],
+    ) == OptionalNested(
+        x=1, b=SpecialOptionalNestedChild(OptionalNestedChild(y=2, z=3))
+    )
+
+
 def test_optional_nested_multiple() -> None:
     """Adapted from: https://github.com/brentyi/tyro/issues/60"""
 
@@ -320,6 +373,56 @@ def test_subparser_with_default() -> None:
             default=DefaultSubparser(x=1, bc=DefaultHTTPServer(y=8)),
         )
         == DefaultSubparser(x=1, bc=DefaultHTTPServer(y=8))
+    )
+
+    with pytest.raises(SystemExit):
+        tyro.cli(DefaultSubparser, args=["--x", "1", "b", "--bc.z", "3"])
+    with pytest.raises(SystemExit):
+        tyro.cli(DefaultSubparser, args=["--x", "1", "c", "--bc.y", "3"])
+
+
+def test_subparser_with_default_and_newtype() -> None:
+    @dataclasses.dataclass
+    class DefaultHTTPServer_:
+        y: int
+
+    DefaultHTTPServer__ = NewType("DefaultHTTPServer__", DefaultHTTPServer_)
+    DefaultHTTPServer = NewType("DefaultHTTPServer", DefaultHTTPServer__)
+
+    def make_http_server(y: int) -> DefaultHTTPServer:
+        return DefaultHTTPServer(DefaultHTTPServer__(DefaultHTTPServer_(y)))
+
+    @dataclasses.dataclass
+    class DefaultSMTPServer:
+        z: int
+
+    @dataclasses.dataclass
+    class DefaultSubparser:
+        x: int
+        bc: DefaultHTTPServer | DefaultSMTPServer = dataclasses.field(
+            default_factory=lambda: make_http_server(5)
+        )
+
+    assert (
+        tyro.cli(
+            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "5"]
+        )
+        == tyro.cli(DefaultSubparser, args=["--x", "1"])
+        == DefaultSubparser(x=1, bc=make_http_server(y=5))
+    )
+    assert tyro.cli(
+        DefaultSubparser, args=["--x", "1", "bc:default-smtp-server", "--bc.z", "3"]
+    ) == DefaultSubparser(x=1, bc=DefaultSMTPServer(z=3))
+    assert (
+        tyro.cli(
+            DefaultSubparser, args=["--x", "1", "bc:default-http-server", "--bc.y", "8"]
+        )
+        == tyro.cli(
+            DefaultSubparser,
+            args=[],
+            default=DefaultSubparser(x=1, bc=make_http_server(y=8)),
+        )
+        == DefaultSubparser(x=1, bc=make_http_server(y=8))
     )
 
     with pytest.raises(SystemExit):

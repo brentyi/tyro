@@ -52,12 +52,16 @@ def resolve_generic_types(
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
 
-    origin_cls = get_origin(cls)
-    annotations: Tuple[Any, ...] = ()
-    if origin_cls is Annotated:
-        annotations = get_args(cls)[1:]
-        cls = get_args(cls)[0]
-        origin_cls = get_origin(cls)
+    if get_origin(cls) is Annotated:
+        # ^We need this `if` statement for an obscure edge case: when `cls` is a
+        # function with `__tyro_markers__` set, we don't want/need to return
+        # Annotated[func, markers].
+        cls, annotations = unwrap_annotated(cls)
+    else:
+        annotations = ()
+
+    # We'll ignore NewType when getting the origin + args for generics.
+    origin_cls = get_origin(unwrap_newtype(cls)[0])
 
     type_from_typevar = {}
     if (
@@ -67,7 +71,7 @@ def resolve_generic_types(
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
         typevars = origin_cls.__parameters__
-        typevar_values = get_args(cls)
+        typevar_values = get_args(unwrap_newtype(cls)[0])
         assert len(typevars) == len(typevar_values)
         cls = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
@@ -85,7 +89,9 @@ def resolve_generic_types(
     if len(annotations) == 0:
         return cls, type_from_typevar
     else:
-        return Annotated.__class_getitem__((cls, *annotations)), type_from_typevar  # type: ignore
+        return Annotated.__class_getitem__(  # type: ignore
+            (cls, *annotations)
+        ), type_from_typevar
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -138,7 +144,12 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
     return typ
 
 
-def unwrap_newtype(typ: TypeOrCallable) -> Tuple[TypeOrCallable, Optional[str]]:
+TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
+
+
+def unwrap_newtype(
+    typ: TypeOrCallableOrNone,
+) -> Tuple[TypeOrCallableOrNone, Optional[str]]:
     # We'll unwrap NewType annotations here; this is needed before issubclass
     # checks!
     #
@@ -148,7 +159,7 @@ def unwrap_newtype(typ: TypeOrCallable) -> Tuple[TypeOrCallable, Optional[str]]:
     while hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
         if return_name is None:
             return_name = getattr(typ, "__name__")
-        typ = cast(TypeOrCallable, getattr(typ, "__supertype__"))
+        typ = getattr(typ, "__supertype__")
 
     return typ, return_name
 
