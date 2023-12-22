@@ -209,8 +209,8 @@ def test_optional_nested_newtype() -> None:
             "3",
         ],
     ) == OptionalNested(
-        x=1, b=OptionalNestedChild(y=2, z=3)
-    )  # type: ignore
+        x=1, b=SpecialOptionalNestedChild(OptionalNestedChild(y=2, z=3))
+    )
 
 
 def test_optional_nested_multiple() -> None:

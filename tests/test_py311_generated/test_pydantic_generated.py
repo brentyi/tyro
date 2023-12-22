@@ -4,10 +4,10 @@ import pathlib
 from typing import cast
 
 import pytest
-import tyro._strings
 from pydantic import BaseModel, Field
 
 import tyro
+import tyro._strings
 
 
 def test_pydantic() -> None:
