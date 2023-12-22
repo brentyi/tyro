@@ -213,7 +213,7 @@ texinfo_documents = [
 # -- Extension configuration --------------------------------------------------
 
 # -- Options for autoapi extension --------------------------------------------
-autoapi_dirs = ["../../tyro"]
+autoapi_dirs = ["../../src/tyro"]
 autoapi_root = "api"
 autoapi_options = [
     "members",

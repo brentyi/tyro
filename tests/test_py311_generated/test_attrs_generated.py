@@ -101,3 +101,27 @@ def test_attrs_next_gen_and_factory() -> None:
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
     assert "Documentation 3" in helptext
+
+
+def test_attrs_default_instance() -> None:
+    @attr.s
+    class ManyTypesB:
+        i: int = attr.ib()
+        s: str = attr.ib()
+        f: float = attr.ib(default=1.0)
+
+    assert tyro.cli(
+        ManyTypesB,
+        args=[
+            "--i",
+            "5",
+            "--s",
+            "5",
+        ],
+        default=ManyTypesB(i=5, s="5", f=2.0),
+    ) == ManyTypesB(i=5, s="5", f=2.0)
+    assert tyro.cli(
+        ManyTypesB,
+        args=["--i", "5"],
+        default=ManyTypesB(i=5, s="5", f=2.0),
+    ) == ManyTypesB(i=5, s="5", f=2.0)
