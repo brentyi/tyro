@@ -1,4 +1,4 @@
-"""Abstractions for pulling out 'field' definitions, which specify inputs, types, and
+"""Abstractions for pulling out 'field' definitions, which specify inputs, types, and # type: ignore
 defaults, from general callables."""
 from __future__ import annotations
 
@@ -268,7 +268,7 @@ def field_list_from_callable(
     """
     # Resolve generic types.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
-    f = _resolver.narrow_subtypes(f, default_instance)
+    f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
 
     # Try to generate field list.
     field_list = _try_field_list_from_callable(f, default_instance)
@@ -378,7 +378,7 @@ def _try_field_list_from_callable(
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.apply_type_from_typevar(f, type_from_typevar)
-    f = _resolver.narrow_subtypes(f, default_instance)
+    f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
     f = _resolver.narrow_collection_types(f, default_instance)
     f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
 
@@ -631,7 +631,7 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=name,
-                    type_or_callable=Annotated.__class_getitem__(
+                    type_or_callable=Annotated.__class_getitem__(  # type: ignore
                         (pd_field.annotation,) + tuple(pd_field.metadata)
                     )
                     if len(pd_field.metadata) > 0

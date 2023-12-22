@@ -139,7 +139,10 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
+def unwrap_newtype_and_narrow_subtypes(
+    typ: TypeOrCallable,
+    default_instance: Any,
+) -> TypeOrCallable:
     """Type narrowing: if we annotate as Animal but specify a default instance of Cat,
     we should parse as Cat.
 
@@ -150,8 +153,11 @@ def narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallabl
 
     # We'll unwrap NewType annotations here; this is needed before issubclass
     # checks!
-    if isinstance(typ, NewType):
-        typ = typ.__supertype__
+    #
+    # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
+    # Python 3.10, so we instead do a duck typing-style check.
+    if hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
+        typ = cast(TypeOrCallable, getattr(typ, "__supertype__"))
 
     try:
         potential_subclass = type(default_instance)

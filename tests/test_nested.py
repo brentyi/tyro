@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Generic, Mapping, Optional, Tuple, TypeVar, Union
+from typing import Any, Generic, Mapping, NewType, Optional, Tuple, TypeVar, Union
 
 import pytest
 from frozendict import frozendict  # type: ignore
@@ -168,6 +168,47 @@ def test_optional_nested() -> None:
         OptionalNested,
         args=["--x", "1", "b:optional-nested-child", "--b.y", "2", "--b.z", "3"],
     ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))
+
+
+def test_optional_nested_newtype() -> None:
+    @dataclasses.dataclass
+    class OptionalNestedChild:
+        y: int
+        z: int
+
+    SpecialOptionalNestedChild = NewType(
+        "SpecialOptionalNestedChild", OptionalNestedChild
+    )
+
+    @dataclasses.dataclass
+    class OptionalNested:
+        x: int
+        b: Optional[SpecialOptionalNestedChild] = None
+
+    assert tyro.cli(OptionalNested, args=["--x", "1"]) == OptionalNested(x=1, b=None)
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            OptionalNested,
+            args=["--x", "1", "b:special-optional-nested-child", "--b.y", "3"],
+        )
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            OptionalNested,
+            args=["--x", "1", "b:special-optional-nested-child", "--b.z", "3"],
+        )
+
+    assert tyro.cli(
+        OptionalNested,
+        args=[
+            "--x",
+            "1",
+            "b:special-optional-nested-child",
+            "--b.y",
+            "2",
+            "--b.z",
+            "3",
+        ],
+    ) == OptionalNested(x=1, b=OptionalNestedChild(y=2, z=3))  # type: ignore
 
 
 def test_optional_nested_multiple() -> None:

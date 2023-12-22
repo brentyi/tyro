@@ -109,8 +109,6 @@ def test_pydantic_positional_annotation() -> None:
     result = tyro.cli(AnnotatedAsPositional, args=["myname"])
     assert isinstance(result, AnnotatedAsPositional)
 
-    from typing import Annotated
-
 
 def test_pydantic_alias() -> None:
     class AliasCfg(BaseModel):
