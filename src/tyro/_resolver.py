@@ -52,13 +52,12 @@ def resolve_generic_types(
     """If the input is a class: no-op. If it's a generic alias: returns the origin
     class, and a mapping from typevars to concrete types."""
 
+    annotations: Tuple[Any, ...] = ()
     if get_origin(cls) is Annotated:
         # ^We need this `if` statement for an obscure edge case: when `cls` is a
         # function with `__tyro_markers__` set, we don't want/need to return
         # Annotated[func, markers].
         cls, annotations = unwrap_annotated(cls)
-    else:
-        annotations = ()
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(unwrap_newtype(cls)[0])
