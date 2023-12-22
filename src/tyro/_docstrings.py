@@ -117,7 +117,7 @@ def get_class_tokenization_with_field(
 ) -> Optional[_ClassTokenization]:
     # Search for token in this class + all parents.
     found_field: bool = False
-    classes_to_search = cls.mro()
+    classes_to_search = cls.__mro__
     tokenization = None
     for search_cls in classes_to_search:
         # Inherited generics seem challenging for now.
