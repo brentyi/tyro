@@ -1051,7 +1051,8 @@ def _get_dataclass_field_default(
         # The only time this matters is when we our dataclass has a `__post_init__`
         # function that mutates the dataclass. We choose here to use the default values
         # before this method is called.
-        dataclasses.is_dataclass(field.type) and field.default_factory is field.type
+        dataclasses.is_dataclass(field.type)
+        and field.default_factory is field.type
     ):
         return field.default_factory()
 

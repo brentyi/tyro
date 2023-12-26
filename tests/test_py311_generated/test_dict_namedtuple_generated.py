@@ -545,7 +545,7 @@ def test_nested_dict_annotations() -> None:
 def test_functional_typeddict():
     """Source: https://github.com/brentyi/tyro/issues/87"""
     NerfMLPHiddenLayers_0 = TypedDict(
-        "NerfMLPHiddenLayers0",
+        "NerfMLPHiddenLayers_0",
         {
             "hidden_layers.0": int,
             "hidden_layers.1": int,
@@ -558,7 +558,7 @@ def test_functional_typeddict():
         },
     )
     NerfMLPHiddenLayers_1 = TypedDict(
-        "NerfMLPHiddenLayers1",
+        "NerfMLPHiddenLayers_1",
         {
             "hidden_layers.0": NotRequired[int],
             "hidden_layers.1": NotRequired[int],
@@ -571,7 +571,7 @@ def test_functional_typeddict():
         },
     )
     NerfMLPHiddenLayers_2 = TypedDict(
-        "NerfMLPHiddenLayers2",
+        "NerfMLPHiddenLayers_2",
         {
             "hidden_layers.0": int,
             "hidden_layers.1": int,
@@ -597,7 +597,7 @@ def test_functional_typeddict():
 def test_functional_typeddict_with_default():
     """Source: https://github.com/brentyi/tyro/issues/87"""
     NerfMLPHiddenLayers_0 = TypedDict(
-        "NerfMLPHiddenLayers0",
+        "NerfMLPHiddenLayers_0",
         {
             "hidden_layers.0": int,
             "hidden_layers.1": int,
@@ -610,7 +610,7 @@ def test_functional_typeddict_with_default():
         },
     )
     NerfMLPHiddenLayers_1 = TypedDict(
-        "NerfMLPHiddenLayers1",
+        "NerfMLPHiddenLayers_1",
         {
             "hidden_layers.0": NotRequired[int],
             "hidden_layers.1": NotRequired[int],
@@ -623,7 +623,7 @@ def test_functional_typeddict_with_default():
         },
     )
     NerfMLPHiddenLayers_2 = TypedDict(
-        "NerfMLPHiddenLayers2",
+        "NerfMLPHiddenLayers_2",
         {
             "hidden_layers.0": int,
             "hidden_layers.1": int,

@@ -1,5 +1,6 @@
 import dataclasses
 import enum
+import json
 import os
 import pathlib
 from collections.abc import Callable
@@ -8,6 +9,8 @@ from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, ca
 from helptext_utils import get_helptext
 from torch import nn
 from typing_extensions import Annotated, Literal
+
+import tyro
 
 
 def test_helptext() -> None:
@@ -753,3 +756,101 @@ def test_subparsers_wrapping3() -> None:
 
     help = get_helptext(Union[A, CmdCheckout012])  # type: ignore
     assert help.count("cmd-checkout012") == 3
+
+
+def test_tuple_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: Tuple[str, str] = ("hello", "world")
+
+    help = get_helptext(A)
+    assert "STR STR" in help
+    assert "hello world" in help
+    assert "('hello', 'world')" not in help
+
+
+def test_argconf_constructor() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: Annotated[
+            Tuple[str, str], tyro.conf.arg(constructor=lambda x: ("a", "b"))
+        ] = ("hello", "world")
+
+    help = get_helptext(A)
+    assert "STR STR" not in help
+    # Unlike case above, should not be converted to 'hello world'.
+    assert "('hello', 'world')" in help  # JSON special case.
+
+
+def test_argconf_constructor_json_special_case() -> None:
+    @dataclasses.dataclass
+    class A:
+        """Help message."""
+
+        x: Annotated[
+            Tuple[str, str], tyro.conf.arg(constructor=json.loads, metavar="JSON")
+        ] = ("hello", "world")
+        y: Annotated[
+            Tuple[int, int], tyro.conf.arg(constructor=json.loads, metavar="JSON")
+        ] = (3, 5)
+
+    help = get_helptext(A)
+    assert "STR STR" not in help
+    assert "JSON" in help
+    assert '["hello", "world"]' in help  # JSON special case.
+    assert "[3, 5]" in help, help  # JSON special case.
+
+
+def test_optional_group() -> None:
+    def f(
+        x: Annotated[
+            Tuple[str, str], tyro.conf.arg(constructor=json.loads, metavar="JSON")
+        ] = ("hello", "world"),
+        y: int = 3,
+    ) -> int:
+        del x, y
+        return 5
+
+    help = get_helptext(f, default=3)
+    assert 'default if used: ["hello", "world"]' in help
+    assert "default if used: 3" in help
+
+
+def test_append_fixed() -> None:
+    def f(
+        x: tyro.conf.UseAppendAction[Tuple[str, str]],
+        y: int = 3,
+    ) -> int:
+        del x, y
+        return 5
+
+    help = get_helptext(f)
+    assert "repeatable" not in help, help
+
+
+def test_append_good() -> None:
+    def f(
+        x: tyro.conf.UseAppendAction[Tuple[str, ...]],
+        y: int = 3,
+    ) -> int:
+        del x, y
+        return 5
+
+    help = get_helptext(f)
+    assert "repeatable" in help, help
+
+
+def test_append_with_default() -> None:
+    def f(
+        x: tyro.conf.UseAppendAction[Tuple[str, ...]] = ("hello world", "hello"),
+        y: int = 3,
+    ) -> int:
+        del x, y
+        return 5
+
+    help = get_helptext(f)
+    assert "repeatable, appends to: 'hello world' hello" in help, help

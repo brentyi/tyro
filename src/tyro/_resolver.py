@@ -88,9 +88,10 @@ def resolve_generic_types(
     if len(annotations) == 0:
         return cls, type_from_typevar
     else:
-        return Annotated.__class_getitem__(  # type: ignore
-            (cls, *annotations)
-        ), type_from_typevar
+        return (
+            Annotated.__class_getitem__((cls, *annotations)),  # type: ignore
+            type_from_typevar,
+        )
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
