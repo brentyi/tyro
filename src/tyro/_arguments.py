@@ -7,6 +7,7 @@ import dataclasses
 import enum
 import functools
 import itertools
+import json
 import shlex
 from typing import (
     TYPE_CHECKING,
@@ -22,6 +23,7 @@ from typing import (
     Tuple,
     TypeVar,
     Union,
+    cast,
 )
 
 import rich.markup
@@ -428,36 +430,58 @@ def _rule_generate_helptext(
     if primary_help is not None and primary_help != "":
         help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
 
-    default = lowered.default
-    if lowered.is_fixed() or lowered.action == "append":
-        # Cases where we'll be missing the lowered default. Use field default instead.
-        assert default in _fields.MISSING_SINGLETONS or default is None
-        default = arg.field.default
-
     if not lowered.required:
+        # Get the default value.
+        # Note: lowered.default is the stringified version! See
+        # `_rule_convert_defaults_to_strings()`.
+        default = lowered.default
+        if lowered.is_fixed() or lowered.action == "append":
+            # Cases where we'll be missing the lowered default. Use field default instead.
+            assert default in _fields.MISSING_SINGLETONS or default is None
+            default = arg.field.default
+
+        # Get the default value label.
+        if arg.field.argconf.constructor_factory is not None:
+            default_label = (
+                str(default)
+                if arg.field.type_or_callable is not json.loads
+                else json.dumps(arg.field.default)
+            )
+        elif hasattr(default, "__iter__"):
+            # For tuple types, we might have default as (0, 1, 2, 3).
+            # For list types, we might have default as [0, 1, 2, 3].
+            # For set types, we might have default as {0, 1, 2, 3}.
+            #
+            # In all cases, we want to display (default: 0 1 2 3), for consistency with
+            # the format that argparse expects when we set nargs.
+            assert default is not None
+            default_label = " ".join(map(shlex.quote, map(str, default)))
+        else:
+            default_label = str(default)
+
         # Include default value in helptext. We intentionally don't use the % template
         # because the types of all arguments are set to strings, which will cause the
         # default to be casted to a string and introduce extra quotation marks.
         if lowered.instantiator is None:
             # Intentionally not quoted via shlex, since this can't actually be passed
             # in via the commandline.
-            default_text = f"(fixed to: {str(arg.field.default)})"
+            default_text = f"(fixed to: {default_label})"
         elif lowered.action == "append" and (
-            arg.field.default in _fields.MISSING_SINGLETONS
-            or len(arg.field.default) == 0
+            default in _fields.MISSING_SINGLETONS or len(cast(tuple, default)) == 0
         ):
             default_text = "(repeatable)"
-        elif lowered.action == "append" and len(arg.field.default) > 0:
+        elif lowered.action == "append" and len(cast(tuple, default)) > 0:
             assert default is not None  # Just for type checker.
-            default_parts = map(shlex.quote, map(str, default))
-            default_text = f"(repeatable, appends: {' '.join(default_parts)})"
-        elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
+            default_text = f"(repeatable, appends to: {default_label})"
+        elif default is _fields.EXCLUDE_FROM_CALL:
             default_text = "(unset by default)"
         elif (
             _markers._OPTIONAL_GROUP in arg.field.markers
             and default in _fields.MISSING_SINGLETONS
         ):
             # Argument in an optional group, but with no default. This is typically used
+            # Note: lowered.default is the stringified version! See
+            # `_rule_convert_defaults_to_strings()`.
             # when general (non-argument, non-dataclass) object arguments are given a
             # default, or when we use `tyro.conf.arg(constructor=...)`.
             #
@@ -466,22 +490,11 @@ def _rule_generate_helptext(
             # default should be passed in or none at all.
             default_text = "(optional)"
         elif _markers._OPTIONAL_GROUP in arg.field.markers:
-            # Argument in an optional group, but which also have a default.
-            assert default is not None  # Just for type checker.
-            default_parts = map(shlex.quote, map(str, default))
-            default_text = f"(default if used: {' '.join(default_parts)})"
-        elif lowered.nargs is not None and hasattr(default, "__iter__"):
-            # For tuple types, we might have default as (0, 1, 2, 3).
-            # For list types, we might have default as [0, 1, 2, 3].
-            # For set types, we might have default as {0, 1, 2, 3}.
-            #
-            # In all cases, we want to display (default: 0 1 2 3), for consistency with
-            # the format that argparse expects when we set nargs.
-            assert default is not None  # Just for type checker.
-            default_parts = map(shlex.quote, map(str, default))
-            default_text = f"(default: {' '.join(default_parts)})"
+            # Argument in an optional group, but which also has a default.
+            default_text = f"(default if used: {default_label})"
         else:
-            default_text = f"(default: {shlex.quote(str(default))})"
+            default_text = f"(default: {default_label})"
+
         help_parts.append(_rich_tag_if_enabled(default_text, "helptext_default"))
     else:
         help_parts.append(_rich_tag_if_enabled("(required)", "helptext_required"))
