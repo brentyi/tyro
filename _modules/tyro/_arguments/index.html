@@ -261,6 +261,7 @@
 <span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">shlex</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">TYPE_CHECKING</span><span class="p">,</span>
@@ -276,6 +277,7 @@
     <span class="n">Tuple</span><span class="p">,</span>
     <span class="n">TypeVar</span><span class="p">,</span>
     <span class="n">Union</span><span class="p">,</span>
+    <span class="n">cast</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">rich.markup</span>
@@ -700,36 +702,58 @@
     <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">primary_help</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">primary_help</span><span class="p">,</span> <span class="s2">&quot;helptext&quot;</span><span class="p">))</span>
 
-    <span class="n">default</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">default</span>
-    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span> <span class="ow">or</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
-        <span class="c1"># Cases where we&#39;ll be missing the lowered default. Use field default instead.</span>
-        <span class="k">assert</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span>
-        <span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+        <span class="c1"># Get the default value.</span>
+        <span class="c1"># Note: lowered.default is the stringified version! See</span>
+        <span class="c1"># `_rule_convert_defaults_to_strings()`.</span>
+        <span class="n">default</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">default</span>
+        <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span> <span class="ow">or</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
+            <span class="c1"># Cases where we&#39;ll be missing the lowered default. Use field default instead.</span>
+            <span class="k">assert</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
+
+        <span class="c1"># Get the default value label.</span>
+        <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">default_label</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span>
+                <span class="k">else</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
+            <span class="c1"># For tuple types, we might have default as (0, 1, 2, 3).</span>
+            <span class="c1"># For list types, we might have default as [0, 1, 2, 3].</span>
+            <span class="c1"># For set types, we might have default as {0, 1, 2, 3}.</span>
+            <span class="c1">#</span>
+            <span class="c1"># In all cases, we want to display (default: 0 1 2 3), for consistency with</span>
+            <span class="c1"># the format that argparse expects when we set nargs.</span>
+            <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="n">default_label</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">default_label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
+
         <span class="c1"># Include default value in helptext. We intentionally don&#39;t use the % template</span>
         <span class="c1"># because the types of all arguments are set to strings, which will cause the</span>
         <span class="c1"># default to be casted to a string and introduce extra quotation marks.</span>
         <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">instantiator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Intentionally not quoted via shlex, since this can&#39;t actually be passed</span>
             <span class="c1"># in via the commandline.</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(fixed to: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(fixed to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="p">(</span>
-            <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
-            <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+            <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="p">):</span>
             <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
-        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Just for type checker.</span>
-            <span class="n">default_parts</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(repeatable, appends: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">default_parts</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
-        <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
+            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(repeatable, appends to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">elif</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
             <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(unset by default)&quot;</span>
         <span class="k">elif</span> <span class="p">(</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
             <span class="ow">and</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
         <span class="p">):</span>
             <span class="c1"># Argument in an optional group, but with no default. This is typically used</span>
+            <span class="c1"># Note: lowered.default is the stringified version! See</span>
+            <span class="c1"># `_rule_convert_defaults_to_strings()`.</span>
             <span class="c1"># when general (non-argument, non-dataclass) object arguments are given a</span>
             <span class="c1"># default, or when we use `tyro.conf.arg(constructor=...)`.</span>
             <span class="c1">#</span>
@@ -738,22 +762,11 @@
             <span class="c1"># default should be passed in or none at all.</span>
             <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(optional)&quot;</span>
         <span class="k">elif</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-            <span class="c1"># Argument in an optional group, but which also have a default.</span>
-            <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Just for type checker.</span>
-            <span class="n">default_parts</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default if used: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">default_parts</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
-        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="s2">&quot;__iter__&quot;</span><span class="p">):</span>
-            <span class="c1"># For tuple types, we might have default as (0, 1, 2, 3).</span>
-            <span class="c1"># For list types, we might have default as [0, 1, 2, 3].</span>
-            <span class="c1"># For set types, we might have default as {0, 1, 2, 3}.</span>
-            <span class="c1">#</span>
-            <span class="c1"># In all cases, we want to display (default: 0 1 2 3), for consistency with</span>
-            <span class="c1"># the format that argparse expects when we set nargs.</span>
-            <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Just for type checker.</span>
-            <span class="n">default_parts</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">,</span> <span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">default_parts</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="c1"># Argument in an optional group, but which also has a default.</span>
+            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default if used: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">shlex</span><span class="o">.</span><span class="n">quote</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">))</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">default_text</span><span class="p">,</span> <span class="s2">&quot;helptext_default&quot;</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="s2">&quot;(required)&quot;</span><span class="p">,</span> <span class="s2">&quot;helptext_required&quot;</span><span class="p">))</span>

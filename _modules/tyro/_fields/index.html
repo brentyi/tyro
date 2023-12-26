@@ -1344,7 +1344,8 @@
         <span class="c1"># The only time this matters is when we our dataclass has a `__post_init__`</span>
         <span class="c1"># function that mutates the dataclass. We choose here to use the default values</span>
         <span class="c1"># before this method is called.</span>
-        <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span>
+        <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">()</span>
 

@@ -310,28 +310,32 @@
                           [--standard-dict.beta2 FLOAT]
 
 ╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help        show this help message and exit                          │
+│ -h, --help                                                                 │
+│     show this help message and exit                                        │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ typed-dict-a arguments ───────────────────────────────────────────────────╮
 │ --typed-dict-a.learning-rate FLOAT                                         │
-│                   (unset by default)                                       │
+│     (default: '&lt;tyro._fields.ExcludeFromCallType object at                 │
+│     0x7fc5e1c7b5b0&gt;')                                                      │
 │ --typed-dict-a.betas FLOAT FLOAT                                           │
-│                   (unset by default)                                       │
+│     (default: '&lt;tyro._fields.ExcludeFromCallType object at                 │
+│     0x7fc5e1c7b5b0&gt;')                                                      │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ typed-dict-b arguments ───────────────────────────────────────────────────╮
 │ --typed-dict-b.learning-rate FLOAT                                         │
-│                   NotRequired[] specifies that a particular key doesn't    │
-│                   need to exist. (unset by default)                        │
+│     NotRequired[] specifies that a particular key doesn't need to exist.   │
+│     (default: '&lt;tyro._fields.ExcludeFromCallType object at                 │
+│     0x7fc5e1c7b5b0&gt;')                                                      │
 │ --typed-dict-b.betas FLOAT FLOAT                                           │
-│                   (required)                                               │
+│     (required)                                                             │
 ╰────────────────────────────────────────────────────────────────────────────╯
 ╭─ standard-dict arguments ──────────────────────────────────────────────────╮
 │ --standard-dict.learning-rate FLOAT                                        │
-│                   (default: 0.0003)                                        │
+│     (default: 0.0003)                                                      │
 │ --standard-dict.beta1 FLOAT                                                │
-│                   (default: 0.9)                                           │
+│     (default: 0.9)                                                         │
 │ --standard-dict.beta2 FLOAT                                                │
-│                   (default: 0.999)                                         │
+│     (default: 0.999)                                                       │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">╭─ Unrecognized arguments ─────────────────────────────────────────────────────╮
@@ -339,27 +343,30 @@
 │ ──────────────────────────────────────────────────────────────────────────── │
 │ Perhaps you meant:                                                           │
 │     --typed-dict-a.learning-rate FLOAT                                       │
-│         (unset by default)                                                   │
+│         (default: '&lt;tyro._fields.ExcludeFromCallType object at               │
+│         0x7ff03d07b5b0&gt;')                                                    │
 │     --typed-dict-b.learning-rate FLOAT                                       │
 │         NotRequired[] specifies that a particular key doesn't need to exist. │
-│         (unset by default)                                                   │
+│         (default: '&lt;tyro._fields.ExcludeFromCallType object at               │
+│         0x7ff03d07b5b0&gt;')                                                    │
 │     --standard-dict.learning-rate FLOAT                                      │
 │         (default: 0.0003)                                                    │
 │ ──────────────────────────────────────────────────────────────────────────── │
 │ For full helptext, run 02_dictionaries.py --help                             │
 ╰──────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">╭─ Unrecognized arguments ─────────────────────────╮
-│ Unrecognized arguments: --typed-dict.betas       │
-│ ──────────────────────────────────────────────── │
-│ Perhaps you meant:                               │
-│     --typed-dict-a.betas FLOAT FLOAT             │
-│         (unset by default)                       │
-│     --typed-dict-b.betas FLOAT FLOAT             │
-│         (required)                               │
-│ ──────────────────────────────────────────────── │
-│ For full helptext, run 02_dictionaries.py --help │
-╰──────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">╭─ Unrecognized arguments ─────────────────────────────────────────────────────╮
+│ Unrecognized arguments: --typed-dict.betas                                   │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│ Perhaps you meant:                                                           │
+│     --typed-dict-a.betas FLOAT FLOAT                                         │
+│         (default: '&lt;tyro._fields.ExcludeFromCallType object at               │
+│         0x7f767807b5e0&gt;')                                                    │
+│     --typed-dict-b.betas FLOAT FLOAT                                         │
+│         (required)                                                           │
+│ ──────────────────────────────────────────────────────────────────────────── │
+│ For full helptext, run 02_dictionaries.py --help                             │
+╰──────────────────────────────────────────────────────────────────────────────╯</pre>
 </section>
 
         </article>
