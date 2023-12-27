@@ -473,7 +473,8 @@ def _rule_generate_helptext(
         elif lowered.action == "append" and len(cast(tuple, default)) > 0:
             assert default is not None  # Just for type checker.
             default_text = f"(repeatable, appends to: {default_label})"
-        elif default is _fields.EXCLUDE_FROM_CALL:
+        elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
+            # ^important to use arg.field.default and not the stringified default variable.
             default_text = "(unset by default)"
         elif (
             _markers._OPTIONAL_GROUP in arg.field.markers

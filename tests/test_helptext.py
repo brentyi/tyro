@@ -8,7 +8,7 @@ from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, ca
 
 from helptext_utils import get_helptext
 from torch import nn
-from typing_extensions import Annotated, Literal
+from typing_extensions import Annotated, Literal, NotRequired, TypedDict
 
 import tyro
 
@@ -854,3 +854,11 @@ def test_append_with_default() -> None:
 
     help = get_helptext(f)
     assert "repeatable, appends to: 'hello world' hello" in help, help
+
+
+def test_typeddict_exclude() -> None:
+    class Special(TypedDict):
+        x: NotRequired[int]
+
+    help = get_helptext(Special)
+    assert "unset by default" in help, help
