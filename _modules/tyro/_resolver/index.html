@@ -520,6 +520,7 @@
 <span class="sd">    - Annotated[int, 1], int =&gt; (int, (1,))</span>
 <span class="sd">    - Annotated[int, &quot;1&quot;], int =&gt; (int, ())</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check for __tyro_markers__ from @configure.</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
         <span class="n">x</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">())</span>
@@ -533,9 +534,16 @@
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
 
     <span class="c1"># Look through metadata for desired metadata type.</span>
-    <span class="n">targets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+    <span class="n">targets</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span>
         <span class="n">x</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">targets</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Check for __tyro_markers__ in unwrapped type.</span>
+    <span class="n">targets</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="n">x</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">targets</span>  <span class="c1"># type: ignore</span></div>

@@ -530,7 +530,11 @@
     <span class="n">return_parser</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">OutT</span><span class="p">,</span>
+    <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+<span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for stitching the `tyro` pipeline together.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;default_instance&quot;</span> <span class="ow">in</span> <span class="n">deprecated_kwargs</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
