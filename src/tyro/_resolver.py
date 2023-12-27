@@ -237,6 +237,7 @@ def unwrap_annotated(
     - Annotated[int, 1], int => (int, (1,))
     - Annotated[int, "1"], int => (int, ())
     """
+    # Check for __tyro_markers__ from @configure.
     targets = tuple(
         x
         for x in getattr(typ, "__tyro_markers__", tuple())
@@ -250,9 +251,16 @@ def unwrap_annotated(
     assert len(args) >= 2
 
     # Look through metadata for desired metadata type.
-    targets = tuple(
+    targets += tuple(
         x
         for x in targets + args[1:]
+        if search_type is Any or isinstance(x, search_type)
+    )
+
+    # Check for __tyro_markers__ in unwrapped type.
+    targets += tuple(
+        x
+        for x in getattr(args[0], "__tyro_markers__", tuple())
         if search_type is Any or isinstance(x, search_type)
     )
     return args[0], targets  # type: ignore

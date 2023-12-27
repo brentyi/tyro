@@ -73,10 +73,8 @@ class ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
-        consolidate_subcommand_args = (
-            _markers.ConsolidateSubcommandArgs
-            in _resolver.unwrap_annotated(f, _markers._Marker)[1]
-        )
+        markers = _resolver.unwrap_annotated(f, _markers._Marker)[1]
+        consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Resolve the type of `f`, generate a field list.
         f, type_from_typevar, field_list = _fields.field_list_from_callable(
@@ -84,6 +82,10 @@ class ParserSpecification:
             default_instance=default_instance,
             support_single_arg_types=support_single_arg_types,
         )
+        for i in range(len(field_list)):
+            field_list[i] = dataclasses.replace(
+                field_list[i], markers=field_list[i].markers | set(markers)
+            )
 
         # Cycle detection.
         #
@@ -393,9 +395,7 @@ class SubparsersSpecification:
         options = [
             (
                 # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy)
-                if o is type(None)
-                else o
+                cast(Callable, none_proxy) if o is type(None) else o
             )
             for o in options
         ]
@@ -551,9 +551,7 @@ class SubparsersSpecification:
         description = (
             # We use `None` instead of an empty string to prevent a line break from
             # being created where the description would be.
-            " ".join(description_parts)
-            if len(description_parts) > 0
-            else None
+            " ".join(description_parts) if len(description_parts) > 0 else None
         )
 
         return SubparsersSpecification(
