@@ -971,7 +971,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         len(column_parts),
                     ),
                 )
-                if column_count > 1:
+                if column_count > 1:  # pragma: no cover
                     column_width = self.formatter._width // column_count - 1
                     # Correct the line count for each panel using the known column
                     # width. This will account for word wrap.
