@@ -334,7 +334,7 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
 <hr class="docutils" />
 <kbd>python 03_config_systems/01_base_configs.py --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py [-h] {small,big}
 
-╭─ arguments ────────────────────────────────────────╮
+╭─ options ──────────────────────────────────────────╮
 │ -h, --help         show this help message and exit │
 ╰────────────────────────────────────────────────────╯
 ╭─ subcommands ──────────────────────────────────────╮
@@ -343,14 +343,9 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
 │     big                                            │
 ╰────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py small [-h] [--dataset {mnist,imagenet-50}]
-                                [--optimizer.learning-rate FLOAT]
-                                [--optimizer.betas FLOAT FLOAT]
-                                [--num-layers INT] [--units INT]
-                                [--batch-size INT] [--train-steps INT]
-                                [--seed INT] [--activation {fixed}]
+<kbd>python 03_config_systems/01_base_configs.py small --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py small [-h] [SMALL OPTIONS]
 
-╭─ arguments ────────────────────────────────────────────────────────────────╮
+╭─ options ──────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
 │ --dataset {mnist,imagenet-50}                                              │
 │                         Dataset to run experiment on. (default: mnist)     │
@@ -364,7 +359,7 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
 │                         commandline. (fixed to: &lt;class                     │
 │                         'torch.nn.modules.activation.ReLU'&gt;)               │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optimizer arguments ──────────────────────────────────────────────────────╮
+╭─ optimizer options ────────────────────────────────────────────────────────╮
 │ Optimizer parameters.                                                      │
 │ ────────────────────────────────────────────                               │
 │ --optimizer.learning-rate FLOAT                                            │
@@ -375,14 +370,9 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
 <hr class="docutils" />
 <kbd>python 03_config_systems/01_base_configs.py small --seed 94720</kbd><pre class="ansi-block literal-block">ExperimentConfig(dataset='mnist', optimizer=AdamOptimizer(learning_rate=0.001, betas=(0.9, 0.999)), num_layers=4, units=64, batch_size=2048, train_steps=30000, seed=94720, activation=&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</pre>
 <hr class="docutils" />
-<kbd>python 03_config_systems/01_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py big [-h] [--dataset {mnist,imagenet-50}]
-                              [--optimizer.learning-rate FLOAT]
-                              [--optimizer.betas FLOAT FLOAT]
-                              [--num-layers INT] [--units INT]
-                              [--batch-size INT] [--train-steps INT]
-                              [--seed INT] [--activation {fixed}]
+<kbd>python 03_config_systems/01_base_configs.py big --help</kbd><pre class="ansi-block literal-block">usage: 01_base_configs.py big [-h] [BIG OPTIONS]
 
-╭─ arguments ────────────────────────────────────────────────────────────────╮
+╭─ options ──────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
 │ --dataset {mnist,imagenet-50}                                              │
 │                         Dataset to run experiment on. (default:            │
@@ -397,7 +387,7 @@ use the CLI to either override (existing) or fill in (missing) values.</p>
 │                         commandline. (fixed to: &lt;class                     │
 │                         'torch.nn.modules.activation.GELU'&gt;)               │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ optimizer arguments ──────────────────────────────────────────────────────╮
+╭─ optimizer options ────────────────────────────────────────────────────────╮
 │ Optimizer parameters.                                                      │
 │ ────────────────────────────────────────────                               │
 │ --optimizer.learning-rate FLOAT                                            │

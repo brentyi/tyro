@@ -290,23 +290,18 @@ override values in them.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 03_config_systems/02_overriding_yaml.py --help</kbd><pre class="ansi-block literal-block">usage: 02_overriding_yaml.py [-h] [--exp-name STR]
-                             [--optimizer.learning-rate FLOAT]
-                             [--optimizer.type STR]
-                             [--training.batch-size INT]
-                             [--training.num-steps INT]
-                             [--training.checkpoint-steps [INT [INT ...]]]
+<kbd>python 03_config_systems/02_overriding_yaml.py --help</kbd><pre class="ansi-block literal-block">usage: 02_overriding_yaml.py [-h] [OPTIONS]
 
-╭─ arguments ─────────────────────────────────────────────╮
+╭─ options ───────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit │
 │ --exp-name STR          (default: test)                 │
 ╰─────────────────────────────────────────────────────────╯
-╭─ optimizer arguments ───────────────────────────────────╮
+╭─ optimizer options ─────────────────────────────────────╮
 │ --optimizer.learning-rate FLOAT                         │
 │                         (default: 0.0001)               │
 │ --optimizer.type STR    (default: adam)                 │
 ╰─────────────────────────────────────────────────────────╯
-╭─ training arguments ────────────────────────────────────╮
+╭─ training options ──────────────────────────────────────╮
 │ --training.batch-size INT                               │
 │                         (default: 32)                   │
 │ --training.num-steps INT                                │

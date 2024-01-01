@@ -301,31 +301,25 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --help</kbd><pre class="ansi-block literal-block">usage: 02_dictionaries.py [-h] [--typed-dict-a.learning-rate FLOAT]
-                          [--typed-dict-a.betas FLOAT FLOAT]
-                          [--typed-dict-b.learning-rate FLOAT]
-                          --typed-dict-b.betas FLOAT FLOAT
-                          [--standard-dict.learning-rate FLOAT]
-                          [--standard-dict.beta1 FLOAT]
-                          [--standard-dict.beta2 FLOAT]
+<kbd>python 04_additional/02_dictionaries.py --help</kbd><pre class="ansi-block literal-block">usage: 02_dictionaries.py [-h] [OPTIONS]
 
-╭─ arguments ────────────────────────────────────────────────────────────────╮
+╭─ options ──────────────────────────────────────────────────────────────────╮
 │ -h, --help        show this help message and exit                          │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ typed-dict-a arguments ───────────────────────────────────────────────────╮
+╭─ typed-dict-a options ─────────────────────────────────────────────────────╮
 │ --typed-dict-a.learning-rate FLOAT                                         │
 │                   (unset by default)                                       │
 │ --typed-dict-a.betas FLOAT FLOAT                                           │
 │                   (unset by default)                                       │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ typed-dict-b arguments ───────────────────────────────────────────────────╮
+╭─ typed-dict-b options ─────────────────────────────────────────────────────╮
 │ --typed-dict-b.learning-rate FLOAT                                         │
 │                   NotRequired[] specifies that a particular key doesn't    │
 │                   need to exist. (unset by default)                        │
 │ --typed-dict-b.betas FLOAT FLOAT                                           │
 │                   (required)                                               │
 ╰────────────────────────────────────────────────────────────────────────────╯
-╭─ standard-dict arguments ──────────────────────────────────────────────────╮
+╭─ standard-dict options ────────────────────────────────────────────────────╮
 │ --standard-dict.learning-rate FLOAT                                        │
 │                   (default: 0.0003)                                        │
 │ --standard-dict.beta1 FLOAT                                                │
@@ -334,8 +328,8 @@
 │                   (default: 0.999)                                         │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">╭─ Unrecognized arguments ─────────────────────────────────────────────────────╮
-│ Unrecognized arguments: --typed-dict.learning-rate                           │
+<kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">╭─ Unrecognized options ───────────────────────────────────────────────────────╮
+│ Unrecognized options: --typed-dict.learning-rate                             │
 │ ──────────────────────────────────────────────────────────────────────────── │
 │ Perhaps you meant:                                                           │
 │     --typed-dict-a.learning-rate FLOAT                                       │
@@ -349,8 +343,8 @@
 │ For full helptext, run 02_dictionaries.py --help                             │
 ╰──────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">╭─ Unrecognized arguments ─────────────────────────╮
-│ Unrecognized arguments: --typed-dict.betas       │
+<kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">╭─ Unrecognized options ───────────────────────────╮
+│ Unrecognized options: --typed-dict.betas         │
 │ ──────────────────────────────────────────────── │
 │ Perhaps you meant:                               │
 │     --typed-dict-a.betas FLOAT FLOAT             │

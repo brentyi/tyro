@@ -321,55 +321,42 @@ objects. This helps with modularity and grouping in larger projects.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 02_nesting/01_nesting.py --help</kbd><pre class="ansi-block literal-block">usage: 01_nesting.py [-h] --out-dir PATH
-                     [--config.optimizer.algorithm {ADAM,SGD}]
-                     [--config.optimizer.learning-rate FLOAT]
-                     [--config.optimizer.weight-decay FLOAT]
-                     [--config.batch-size INT] [--config.train-steps INT]
-                     [--config.seed INT]
-                     [--restore-checkpoint | --no-restore-checkpoint]
-                     [--checkpoint-interval INT]
+<kbd>python 02_nesting/01_nesting.py --help</kbd><pre class="ansi-block literal-block">usage: 01_nesting.py [-h] [OPTIONS]
+                     PATH [{ADAM,SGD}] [FLOAT] [FLOAT] [INT] [INT] [INT]
 
 Train a model.
 
-╭─ arguments ────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-│ --out-dir PATH          Where to save logs and checkpoints. (required)     │
+╭─ positional arguments ─────────────────────────────────────────────────────╮
+│ PATH                Where to save logs and checkpoints. (required)         │
+│ [{ADAM,SGD}]        Gradient-based optimizer to use. (default: ADAM)       │
+│ [FLOAT]             Learning rate to use. (default: 0.0003)                │
+│ [FLOAT]             Coefficient for L2 regularization. (default: 0.01)     │
+│ [INT]               Batch size. (default: 32)                              │
+│ [INT]               Total number of training steps. (default: 100000)      │
+│ [INT]               Random seed. This is helpful for making sure that our  │
+│                     experiments are all reproducible! (default: 0)         │
+╰────────────────────────────────────────────────────────────────────────────╯
+╭─ options ──────────────────────────────────────────────────────────────────╮
+│ -h, --help          show this help message and exit                        │
 │ --restore-checkpoint, --no-restore-checkpoint                              │
-│                         Set to restore an existing checkpoint. (default:   │
-│                         False)                                             │
+│                     Set to restore an existing checkpoint. (default:       │
+│                     False)                                                 │
 │ --checkpoint-interval INT                                                  │
-│                         Training steps between each checkpoint save.       │
-│                         (default: 1000)                                    │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ config.optimizer arguments ───────────────────────────────────────────────╮
-│ Various configurable options for our optimizer.                            │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ --config.optimizer.algorithm {ADAM,SGD}                                    │
-│                         Gradient-based optimizer to use. (default: ADAM)   │
-│ --config.optimizer.learning-rate FLOAT                                     │
-│                         Learning rate to use. (default: 0.0003)            │
-│ --config.optimizer.weight-decay FLOAT                                      │
-│                         Coefficient for L2 regularization. (default: 0.01) │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ config arguments ─────────────────────────────────────────────────────────╮
-│ Experiment configuration.                                                  │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ --config.batch-size INT                                                    │
-│                         Batch size. (default: 32)                          │
-│ --config.train-steps INT                                                   │
-│                         Total number of training steps. (default: 100000)  │
-│ --config.seed INT       Random seed. This is helpful for making sure that  │
-│                         our experiments are all reproducible! (default: 0) │
+│                     Training steps between each checkpoint save. (default: │
+│                     1000)                                                  │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/01_nesting.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=False, checkpoint_interval=1000
-
-config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)</pre>
+<kbd>python 02_nesting/01_nesting.py --out-dir . --config.optimizer.algorithm SGD</kbd><pre class="ansi-block literal-block">╭─ Unrecognized options ───────────────────────────────────────╮
+│ Unrecognized options: --out-dir --config.optimizer.algorithm │
+│ ──────────────────────────────────────────────────────────── │
+│ For full helptext, run 01_nesting.py --help                  │
+╰──────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/01_nesting.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">out_dir=PosixPath('.'), restore_checkpoint=True, checkpoint_interval=1000
-
-config=ExperimentConfig(optimizer=OptimizerConfig(algorithm=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003, weight_decay=0.01), batch_size=32, train_steps=100000, seed=0)</pre>
+<kbd>python 02_nesting/01_nesting.py --out-dir . --restore-checkpoint</kbd><pre class="ansi-block literal-block">╭─ Unrecognized options ──────────────────────╮
+│ Unrecognized options: --out-dir             │
+│ ─────────────────────────────────────────── │
+│ For full helptext, run 01_nesting.py --help │
+╰─────────────────────────────────────────────╯</pre>
 </section>
 
         </article>

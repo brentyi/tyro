@@ -310,40 +310,22 @@ parsing default values.</p>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 02_nesting/04_nesting_in_containers.py --help</kbd><pre class="ansi-block literal-block">usage: 04_nesting_in_containers.py [-h] --color-tuple.0.r INT
-                                   --color-tuple.0.g INT --color-tuple.0.b INT
-                                   --color-tuple.1.h INT --color-tuple.1.s INT
-                                   --color-tuple.1.l INT
-                                   [--color-tuple-alt.0.r INT]
-                                   [--color-tuple-alt.0.g INT]
-                                   [--color-tuple-alt.0.b INT]
-                                   [--color-tuple-alt.1.h INT]
-                                   [--color-tuple-alt.1.s INT]
-                                   [--color-tuple-alt.1.l INT]
-                                   [--color-map.red.r INT]
-                                   [--color-map.red.g INT]
-                                   [--color-map.red.b INT]
-                                   [--color-map.green.r INT]
-                                   [--color-map.green.g INT]
-                                   [--color-map.green.b INT]
-                                   [--color-map.blue.r INT]
-                                   [--color-map.blue.g INT]
-                                   [--color-map.blue.b INT]
+<kbd>python 02_nesting/04_nesting_in_containers.py --help</kbd><pre class="ansi-block literal-block">usage: 04_nesting_in_containers.py [-h] [OPTIONS]
 
-╭─ arguments ─────────────────────────────────────────────╮
+╭─ options ───────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit │
 ╰─────────────────────────────────────────────────────────╯
-╭─ color-tuple.0 arguments ───────────────────────────────╮
+╭─ color-tuple.0 options ─────────────────────────────────╮
 │ --color-tuple.0.r INT   (required)                      │
 │ --color-tuple.0.g INT   (required)                      │
 │ --color-tuple.0.b INT   (required)                      │
 ╰─────────────────────────────────────────────────────────╯
-╭─ color-tuple.1 arguments ───────────────────────────────╮
+╭─ color-tuple.1 options ─────────────────────────────────╮
 │ --color-tuple.1.h INT   (required)                      │
 │ --color-tuple.1.s INT   (required)                      │
 │ --color-tuple.1.l INT   (required)                      │
 ╰─────────────────────────────────────────────────────────╯
-╭─ color-tuple-alt.0 arguments ───────────────────────────╮
+╭─ color-tuple-alt.0 options ─────────────────────────────╮
 │ --color-tuple-alt.0.r INT                               │
 │                         (default: 255)                  │
 │ --color-tuple-alt.0.g INT                               │
@@ -351,7 +333,7 @@ parsing default values.</p>
 │ --color-tuple-alt.0.b INT                               │
 │                         (default: 0)                    │
 ╰─────────────────────────────────────────────────────────╯
-╭─ color-tuple-alt.1 arguments ───────────────────────────╮
+╭─ color-tuple-alt.1 options ─────────────────────────────╮
 │ --color-tuple-alt.1.h INT                               │
 │                         (default: 0)                    │
 │ --color-tuple-alt.1.s INT                               │
@@ -359,12 +341,12 @@ parsing default values.</p>
 │ --color-tuple-alt.1.l INT                               │
 │                         (default: 0)                    │
 ╰─────────────────────────────────────────────────────────╯
-╭─ color-map.red arguments ───────────────────────────────╮
+╭─ color-map.red options ─────────────────────────────────╮
 │ --color-map.red.r INT   (default: 255)                  │
 │ --color-map.red.g INT   (default: 0)                    │
 │ --color-map.red.b INT   (default: 0)                    │
 ╰─────────────────────────────────────────────────────────╯
-╭─ color-map.green arguments ─────────────────────────────╮
+╭─ color-map.green options ───────────────────────────────╮
 │ --color-map.green.r INT                                 │
 │                         (default: 0)                    │
 │ --color-map.green.g INT                                 │
@@ -372,7 +354,7 @@ parsing default values.</p>
 │ --color-map.green.b INT                                 │
 │                         (default: 0)                    │
 ╰─────────────────────────────────────────────────────────╯
-╭─ color-map.blue arguments ──────────────────────────────╮
+╭─ color-map.blue options ────────────────────────────────╮
 │ --color-map.blue.r INT  (default: 0)                    │
 │ --color-map.blue.g INT  (default: 0)                    │
 │ --color-map.blue.b INT  (default: 255)                  │
