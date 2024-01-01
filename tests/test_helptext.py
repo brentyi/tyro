@@ -413,12 +413,18 @@ def test_multiple_subparsers_helptext() -> None:
             default_factory=Subcommand3
         )
 
+        d: bool = False
+
     helptext = get_helptext(MultipleSubparsers)
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
     assert "Field b description." not in helptext
     assert "Field c description." not in helptext
+
+    # Not enough args for usage shortening to kick in.
+    assert "[OPTIONS]" not in helptext
+    assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
 
     helptext = get_helptext(
         MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
@@ -429,6 +435,80 @@ def test_multiple_subparsers_helptext() -> None:
     assert "Field b description." not in helptext
     assert "Field c description." in helptext
     assert "(default: c:subcommand3)" in helptext
+
+    # Not enough args for usage shortening to kick in.
+    assert "[OPTIONS]" not in helptext
+    assert "[B:SUBCOMMAND1 OPTIONS]" not in helptext
+    assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
+
+
+def test_multiple_subparsers_helptext_shortened_usage() -> None:
+    @dataclasses.dataclass
+    class Subcommand1:
+        """2% milk."""  # % symbol is prone to bugs in argparse.
+
+        a: int = 0
+        b: int = 0
+        c: int = 0
+        d: int = 0
+        e: int = 0
+
+    @dataclasses.dataclass
+    class Subcommand2:
+        a: int = 0
+        b: int = 0
+        c: int = 0
+        d: int = 0
+        e: int = 0
+
+    @dataclasses.dataclass
+    class Subcommand3:
+        a: int = 0
+        b: int = 0
+        c: int = 0
+        d: int = 0
+        e: int = 0
+
+    @dataclasses.dataclass
+    class MultipleSubparsers:
+        # Field a description.
+        a: Union[Subcommand1, Subcommand2, Subcommand3]
+        # Field b description.
+        b: Union[Subcommand1, Subcommand2, Subcommand3]
+        # Field c description.
+        c: Union[Subcommand1, Subcommand2, Subcommand3] = dataclasses.field(
+            default_factory=Subcommand3
+        )
+
+        d: bool = False
+        f: bool = False
+        g: bool = False
+        h: bool = False
+        i: bool = False
+
+    helptext = get_helptext(MultipleSubparsers)
+
+    assert "2% milk." in helptext
+    assert "Field a description." in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description." not in helptext
+
+    assert "[OPTIONS]" in helptext
+    assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
+
+    helptext = get_helptext(
+        MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
+    )
+
+    assert "2% milk." in helptext
+    assert "Field a description." not in helptext
+    assert "Field b description." not in helptext
+    assert "Field c description." in helptext
+    assert "(default: c:subcommand3)" in helptext
+
+    assert "[OPTIONS]" not in helptext
+    assert "[B:SUBCOMMAND1 OPTIONS]" in helptext
+    assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
 
 
 def test_optional_helptext() -> None:

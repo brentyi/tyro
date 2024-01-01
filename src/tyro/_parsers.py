@@ -221,14 +221,14 @@ class ParserSpecification:
         if subparser_group is not None:
             parser._action_groups.append(subparser_group)
 
-        # Break some API boundaries to rename the "optional arguments" => "arguments".
+        # Break some API boundaries to rename the "optional arguments" => "options".
         assert parser._action_groups[1].title in (
             # python <= 3.9
             "optional arguments",
             # python >= 3.10
             "options",
         )
-        parser._action_groups[1].title = "arguments"
+        parser._action_groups[1].title = "options"
 
         return leaves
 
@@ -240,7 +240,7 @@ class ParserSpecification:
 
         # Make argument groups.
         def format_group_name(prefix: str) -> str:
-            return (prefix + " arguments").strip()
+            return (prefix + " options").strip()
 
         group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
             "": parser._action_groups[1],
