@@ -171,10 +171,9 @@ def test_similar_arguments_basic() -> None:
         tyro.cli(Class, args="--reward.trac".split(" "))
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Perhaps you meant:" in error
 
-    # --reward.track should appear in both the usage string and as a similar argument.
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 1
 
@@ -197,7 +196,7 @@ def test_similar_arguments_subcommands() -> None:
         tyro.cli(Union[ClassA, ClassB], args="--reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Perhaps you meant:" in error
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 3
@@ -222,7 +221,7 @@ def test_similar_arguments_subcommands_multiple() -> None:
         tyro.cli(Union[ClassA, ClassB], args="--fjdkslaj --reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Arguments similar to --reward.trac" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--reward.trace INT") == 1
@@ -248,7 +247,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
         tyro.cli(Union[ClassA, ClassB], args="--rd.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Perhaps you meant:" in error
     assert error.count("--reward.track {True,False}") == 1
     assert error.count("--reward.trace INT") == 1
@@ -274,7 +273,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
         tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Perhaps you meant:" in error
     assert error.count("--reward.track {True,False}") == 1
     assert (
@@ -316,7 +315,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
         tyro.cli(Union[ClassA, ClassB], args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Perhaps you meant:" in error
     assert error.count("--reward.track") == 10
     assert "[...]" not in error
@@ -384,7 +383,7 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
         )
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Perhaps you meant:" in error
     assert error.count("--reward.track") == 1
     assert "[...]" in error
@@ -443,7 +442,7 @@ def test_similar_arguments_subcommands_overflow_same_startswith_multiple() -> No
         )
 
     error = target.getvalue()
-    assert "Unrecognized argument" in error
+    assert "Unrecognized option" in error
     assert "Arguments similar to --track" in error
     assert error.count("--rewar") == 1
     assert "rewarde" not in error

@@ -387,7 +387,9 @@ def test_subparser_with_default_and_newtype() -> None:
         y: int
 
     DefaultHTTPServer__ = NewType("DefaultHTTPServer__", DefaultHTTPServer_)
-    DefaultHTTPServer = NewType("DefaultHTTPServer", DefaultHTTPServer__)
+    DefaultHTTPServer = NewType("DefaultHTTPServer", DefaultHTTPServer__)  # type: ignore
+    # ^nesting NewType is not technically allowed and pyright will complain,
+    # but we should try to be robust to it anyways.
 
     def make_http_server(y: int) -> DefaultHTTPServer:
         return DefaultHTTPServer(DefaultHTTPServer__(DefaultHTTPServer_(y)))
@@ -526,7 +528,9 @@ def test_subparser_with_default_bad_alt() -> None:
         c: int
 
     with pytest.warns(UserWarning):
-        assert tyro.cli(A | B, default=C(3), args=["c", "--c", "2"]) == C(2)  # type: ignore
+        assert tyro.cli(
+            A | Annotated[B, None], default=C(3), args=["c", "--c", "2"]
+        ) == C(2)  # type: ignore
 
 
 def test_optional_subparser() -> None:

@@ -20,10 +20,11 @@ import dataclasses
 import difflib
 import itertools
 import re as _re
+import shlex
 import shutil
 import sys
 from gettext import gettext as _
-from typing import Any, Dict, Generator, List, NoReturn, Optional, Set, Tuple
+from typing import Any, Dict, Generator, Iterable, List, NoReturn, Optional, Set, Tuple
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
@@ -564,15 +565,15 @@ class TyroArgumentParser(argparse.ArgumentParser):
         extra_info: List[RenderableType] = []
         global global_unrecognized_args
         if len(global_unrecognized_args) == 0 and message.startswith(
-            "unrecognized arguments: "
+            "unrecognized options: "
         ):
             global_unrecognized_args = message.partition(":")[2].strip().split(" ")
 
         message_title = "Parsing error"
 
         if len(global_unrecognized_args) > 0:
-            message_title = "Unrecognized arguments"
-            message = f"Unrecognized arguments: {' '.join(global_unrecognized_args)}"
+            message_title = "Unrecognized options"
+            message = f"Unrecognized options: {' '.join(global_unrecognized_args)}"
             unrecognized_arguments = set(
                 arg
                 for arg in global_unrecognized_args
@@ -588,7 +589,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
             )
 
             if has_subcommands and same_exists:
-                message = f"Unrecognized or misplaced arguments: {' '.join(global_unrecognized_args)}"
+                message = f"Unrecognized or misplaced options: {' '.join(global_unrecognized_args)}"
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:
@@ -739,7 +740,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     prev_argument_help = arg_info.help
 
         elif message.startswith("the following arguments are required:"):
-            message_title = "Required arguments"
+            message_title = "Required options"
 
             info_from_required_arg: Dict[str, Optional[_ArgumentInfo]] = {}
             for arg in message.partition(":")[2].strip().split(", "):
@@ -970,7 +971,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         len(column_parts),
                     ),
                 )
-                if column_count > 1:
+                if column_count > 1:  # pragma: no cover
                     column_width = self.formatter._width // column_count - 1
                     # Correct the line count for each panel using the known column
                     # width. This will account for word wrap.
@@ -1289,7 +1290,30 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         return text
 
     @override
-    def _format_usage(self, usage, actions, groups, prefix) -> str:
+    def _format_usage(
+        self, usage, actions: Iterable[argparse.Action], groups, prefix
+    ) -> str:
+        assert isinstance(actions, list)
+        if len(actions) > 4:
+            new_actions = []
+            prog_parts = shlex.split(self._prog)
+            optional_args_action = argparse.Action(
+                [
+                    "OPTIONS"
+                    if len(prog_parts) == 1
+                    else prog_parts[-1].upper() + " OPTIONS"
+                ],
+                dest="",
+            )
+            for action in actions:
+                if action.dest == "help" or len(action.option_strings) == 0:
+                    new_actions.append(action)
+                elif (
+                    len(new_actions) == 0 or new_actions[-1] is not optional_args_action
+                ):
+                    new_actions.append(optional_args_action)
+            actions = new_actions
+
         # Format the usage label.
         if prefix is None:
             prefix = str_from_rich("[bold]usage[/bold]: ")
