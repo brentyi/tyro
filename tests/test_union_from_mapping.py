@@ -35,7 +35,7 @@ def test_union_from_mapping_in_function():
     else:
         ConfigUnion = tyro.extras.subcommand_type_from_defaults(base_configs)
 
-    def main(config: ConfigUnion, flag: bool = False) -> Optional[A]:
+    def main(config: ConfigUnion, flag: bool = False) -> Optional[A]:  # type: ignore
         if flag:
             return config
         return None

@@ -378,7 +378,9 @@ def test_subparser_with_default_and_newtype() -> None:
         y: int
 
     DefaultHTTPServer__ = NewType("DefaultHTTPServer__", DefaultHTTPServer_)
-    DefaultHTTPServer = NewType("DefaultHTTPServer", DefaultHTTPServer__)
+    DefaultHTTPServer = NewType("DefaultHTTPServer", DefaultHTTPServer__)  # type: ignore
+    # ^nesting NewType is not technically allowed and pyright will complain,
+    # but we should try to be robust to it anyways.
 
     def make_http_server(y: int) -> DefaultHTTPServer:
         return DefaultHTTPServer(DefaultHTTPServer__(DefaultHTTPServer_(y)))
