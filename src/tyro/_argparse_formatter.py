@@ -739,7 +739,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     prev_arg_option_strings = arg_info.option_strings
                     prev_argument_help = arg_info.help
 
-        elif message.startswith("the following options are required:"):
+        elif message.startswith("the following arguments are required:"):
             message_title = "Required options"
 
             info_from_required_arg: Dict[str, Optional[_ArgumentInfo]] = {}
