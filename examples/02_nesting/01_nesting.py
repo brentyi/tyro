@@ -52,7 +52,6 @@ class ExperimentConfig:
 def train(
     out_dir: pathlib.Path,
     config: ExperimentConfig,
-    /,
     restore_checkpoint: bool = False,
     checkpoint_interval: int = 1000,
 ) -> None:

@@ -1297,21 +1297,22 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         if len(actions) > 4:
             new_actions = []
             prog_parts = shlex.split(self._prog)
-            optional_args_action = argparse.Action(
-                [
-                    "OPTIONS"
-                    if len(prog_parts) == 1
-                    else prog_parts[-1].upper() + " OPTIONS"
-                ],
-                dest="",
-            )
+            added_options = False
             for action in actions:
                 if action.dest == "help" or len(action.option_strings) == 0:
                     new_actions.append(action)
-                elif (
-                    len(new_actions) == 0 or new_actions[-1] is not optional_args_action
-                ):
-                    new_actions.append(optional_args_action)
+                elif not added_options:
+                    added_options = True
+                    new_actions.append(
+                        argparse.Action(
+                            [
+                                "OPTIONS"
+                                if len(prog_parts) == 1
+                                else prog_parts[-1].upper() + " OPTIONS"
+                            ],
+                            dest="",
+                        )
+                    )
             actions = new_actions
 
         # Format the usage label.
