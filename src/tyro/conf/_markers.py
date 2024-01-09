@@ -32,6 +32,9 @@ _UnpackKwargsCall = Annotated[T, None]
 # Private marker.
 _OPTIONAL_GROUP = Annotated[T, None]
 
+# Private marker for root field.
+_ROOT_FIELD = Annotated[T, None]
+
 # TODO: the verb tenses here are inconsistent, naming could be revisited.
 # Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.
 
@@ -60,6 +63,10 @@ This simplifies CLI interfaces, but makes them less expressive.
 
 Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively
 applied to nested types."""
+
+AvoidNoneSubcommands = Annotated[T, None]
+"""Avoid creating None subcommands when a NoneType is present in a Union. Instead,
+a command can be set to None using --cmd:None"""
 
 ConsolidateSubcommandArgs = Annotated[T, None]
 """Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument

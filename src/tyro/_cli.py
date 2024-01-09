@@ -299,6 +299,7 @@ def _cli_impl(
         _fields.MISSING_NONPROP if default is None else default
     )
 
+    f = conf._markers._ROOT_FIELD[f] # type: ignore
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
     # For example: passing in f=int will result in a dataclass with a single field
     # typed as int.
@@ -309,7 +310,7 @@ def _cli_impl(
         )
         f = dataclasses.make_dataclass(
             cls_name="dummy",
-            fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
+            fields=[(_strings.dummy_field_name, conf._markers._ROOT_FIELD[cast(type, f)], dummy_field)],
             frozen=True,
         )
         default_instance_internal = f(default_instance_internal)  # type: ignore

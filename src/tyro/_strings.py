@@ -59,7 +59,10 @@ def make_field_name(parts: Sequence[str]) -> str:
     out: List[str] = []
     for p in _strip_dummy_field_names(parts):
         out.extend(map(replace_delimeter_in_part, p.split(".")))
-    return ".".join(out)
+    if not out or out[-1] != "None" or len(out) == 1:
+        return ".".join(out)
+    else:
+        return ":".join([".".join(out[:-1]), "None"])
 
 
 def make_subparser_dest(name: str) -> str:

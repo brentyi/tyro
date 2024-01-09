@@ -11,6 +11,7 @@ Features here are supported, but generally unnecessary and should be used sparin
 from ._confstruct import arg as arg
 from ._confstruct import subcommand as subcommand
 from ._markers import AvoidSubcommands as AvoidSubcommands
+from ._markers import AvoidNoneSubcommands as AvoidNoneSubcommands
 from ._markers import ConsolidateSubcommandArgs as ConsolidateSubcommandArgs
 from ._markers import Fixed as Fixed
 from ._markers import FlagConversionOff as FlagConversionOff

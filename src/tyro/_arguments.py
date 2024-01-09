@@ -67,6 +67,9 @@ class BooleanOptionalAction(argparse.Action):
         for option_string in option_strings:
             _option_strings.append(option_string)
 
+            if option_string.endswith(":None"):
+                continue
+
             if option_string.startswith("--"):
                 if "." not in option_string:
                     option_string = (
@@ -421,6 +424,11 @@ def _rule_generate_helptext(
     help_parts = []
 
     primary_help = arg.field.helptext
+    if arg.field.call_argname == "None":
+        if arg.extern_prefix:
+            primary_help = f"set {arg.extern_prefix} to None"
+        else:
+            primary_help = f"set options to None"
 
     if primary_help is None and _markers.Positional in arg.field.markers:
         primary_help = _strings.make_field_name(

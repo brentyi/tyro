@@ -31,7 +31,7 @@ from . import (
     _subcommand_matching,
 )
 from ._typing import TypeForm
-from .conf import _confstruct, _markers
+from .conf import _confstruct, _markers, AvoidNoneSubcommands
 
 T = TypeVar("T")
 
@@ -301,6 +301,9 @@ def handle_field(
             f"Field {field.intern_name} has an unbound TypeVar: {field.type_or_callable}."
         )
 
+    if any(p for p in parent_classes if _markers._ROOT_FIELD in _resolver.unwrap_annotated(p, _markers._Marker)[1]):
+        field = field.remove_markers((_markers._ROOT_FIELD,))
+
     if _markers.Fixed not in field.markers:
         # (1) Handle Unions over callables; these result in subparsers.
         subparsers_attempt = SubparsersSpecification.from_field(
@@ -384,6 +387,11 @@ class SubparsersSpecification:
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_or_callable)[0]
         if get_origin(typ) is not Union:
+            return None
+        elif (AvoidNoneSubcommands in field.markers
+              and _markers._ROOT_FIELD not in field.markers
+              and type(None) in get_args(typ)
+              and len(get_args(typ)) <= 2):
             return None
 
         # We don't use sets here to retain order of subcommands.
@@ -587,7 +595,12 @@ class SubparsersSpecification:
 
         subparser_tree_leaves: List[argparse.ArgumentParser] = []
         for name, subparser_def in self.parser_from_name.items():
-            helptext = subparser_def.description.replace("%", "%%")
+            if name == "None":
+                helptext = f"set subcommands to None"
+            elif name.endswith(":None"):
+                helptext = f"set {name.split(':')[0].lstrip('-')} to None"
+            else:
+                helptext = subparser_def.description.replace("%", "%%")
             if len(helptext) > 0:
                 # TODO: calling a private function here.
                 helptext = _arguments._rich_tag_if_enabled(helptext.strip(), "helptext")

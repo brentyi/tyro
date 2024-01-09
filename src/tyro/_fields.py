@@ -140,6 +140,12 @@ class FieldDefinition:
             markers=self.markers.union(markers),
         )
 
+    def remove_markers(self, markers: Tuple[Any, ...]) -> FieldDefinition:
+        return dataclasses.replace(
+            self,
+            markers=self.markers - set(markers),
+        )
+
     def is_positional(self) -> bool:
         """Returns True if the argument should be positional in the commandline."""
         return (
@@ -370,6 +376,9 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    root_field: bool = (
+        _markers._ROOT_FIELD in _resolver.unwrap_annotated(f, _markers._Marker)[1]
+    )
     f, found_subcommand_configs = _resolver.unwrap_annotated(
         f, conf._confstruct._SubcommandConfiguration
     )
@@ -382,6 +391,17 @@ def _try_field_list_from_callable(
     f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
     f = _resolver.narrow_collection_types(f, default_instance)
     f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
+
+    # For Union[T | None], try to evaluate as T with "added none field"
+    try_add_none_field = (
+        not root_field
+        and get_origin(f) in (Union, Optional)
+        and type(None) in get_args(f)
+        and len(get_args(f)) == 2
+    )
+
+    if try_add_none_field:
+        f = [o for o in get_args(f) if o is not type(None)][0] # type: ignore
 
     # If `f` is a type:
     #     1. Set cls to the type.
@@ -402,15 +422,29 @@ def _try_field_list_from_callable(
 
     # Try field generation from class inputs.
     if cls is not None:
-        for match, field_list_from_class in (
+        for is_match, field_list_from_class in (
             (is_typeddict, _field_list_from_typeddict),
             (_resolver.is_namedtuple, _field_list_from_namedtuple),
             (_resolver.is_dataclass, _field_list_from_dataclass),
             (_is_attrs, _field_list_from_attrs),
             (_is_pydantic, _field_list_from_pydantic),
         ):
-            if match(cls):
-                return field_list_from_class(cls, default_instance)
+            if is_match(cls):
+                fields = field_list_from_class(cls, default_instance)
+                if not isinstance(fields, UnsupportedNestedTypeMessage) and try_add_none_field:
+                    fields.append(FieldDefinition.make( # type: ignore
+                        name="None",
+                        type_or_callable=bool,
+                        default=False,
+                        helptext=None,
+                    ))
+                return fields
+
+    # Restore original type information if it was stripped off
+    if try_add_none_field:
+        f = Optional[f] # type: ignore
+        f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
+        cls = None
 
     # Standard container types. These are different because they can be nested structures
     # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
