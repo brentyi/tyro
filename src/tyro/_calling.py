@@ -288,6 +288,11 @@ def call_from_args(
         if field_name_prefix == "":
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
             # raises a ValueError, this shouldn't be caught.
+            if kwargs.get('None') is not None:
+                if kwargs.get('None'):
+                    kwargs = {}
+                else:
+                    del kwargs['None']
             return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
         else:
             # Try to catch ValueErrors raised by field constructors.

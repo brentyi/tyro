@@ -18,7 +18,7 @@ from typing import (
 )
 
 import shtab
-from typing_extensions import Literal
+from typing_extensions import Literal, get_args
 
 from . import (
     _argparse_formatter,
@@ -28,6 +28,7 @@ from . import (
     _parsers,
     _strings,
     _unsafe_cache,
+    _resolver,
     conf,
 )
 from ._typing import TypeForm
@@ -299,7 +300,16 @@ def _cli_impl(
         _fields.MISSING_NONPROP if default is None else default
     )
 
-    f = conf._markers._ROOT_FIELD[f] # type: ignore
+    typ, annotations = _resolver.unwrap_annotated(f, conf._markers._Marker)
+    if (
+        conf._markers.AvoidNoneSubcommands in annotations
+        and type(None) in get_args(typ)
+        and len(get_args(typ)) <= 2
+    ):
+        f = [o for o in get_args(typ) if o is not type(None)][0]
+        for annotate in annotations + (conf._markers._HAS_NONE_FIELD,):
+            f = annotate[f] # type: ignore
+
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
     # For example: passing in f=int will result in a dataclass with a single field
     # typed as int.
@@ -310,7 +320,7 @@ def _cli_impl(
         )
         f = dataclasses.make_dataclass(
             cls_name="dummy",
-            fields=[(_strings.dummy_field_name, conf._markers._ROOT_FIELD[cast(type, f)], dummy_field)],
+            fields=[(_strings.dummy_field_name, cast(type, f), dummy_field)],
             frozen=True,
         )
         default_instance_internal = f(default_instance_internal)  # type: ignore

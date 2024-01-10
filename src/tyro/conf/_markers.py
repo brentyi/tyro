@@ -32,8 +32,8 @@ _UnpackKwargsCall = Annotated[T, None]
 # Private marker.
 _OPTIONAL_GROUP = Annotated[T, None]
 
-# Private marker for root field.
-_ROOT_FIELD = Annotated[T, None]
+# Private marker for added None field.
+_HAS_NONE_FIELD = Annotated[T, None]
 
 # TODO: the verb tenses here are inconsistent, naming could be revisited.
 # Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.

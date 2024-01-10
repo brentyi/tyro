@@ -67,7 +67,7 @@ class BooleanOptionalAction(argparse.Action):
         for option_string in option_strings:
             _option_strings.append(option_string)
 
-            if option_string.endswith(":None"):
+            if option_string == "--None" or option_string.endswith(":None"):
                 continue
 
             if option_string.startswith("--"):

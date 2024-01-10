@@ -301,9 +301,6 @@ def handle_field(
             f"Field {field.intern_name} has an unbound TypeVar: {field.type_or_callable}."
         )
 
-    if any(p for p in parent_classes if _markers._ROOT_FIELD in _resolver.unwrap_annotated(p, _markers._Marker)[1]):
-        field = field.remove_markers((_markers._ROOT_FIELD,))
-
     if _markers.Fixed not in field.markers:
         # (1) Handle Unions over callables; these result in subparsers.
         subparsers_attempt = SubparsersSpecification.from_field(
@@ -314,7 +311,17 @@ def handle_field(
             extern_prefix=_strings.make_field_name([extern_prefix, field.extern_name]),
         )
         if subparsers_attempt is not None:
+            type_, annotations = _resolver.unwrap_annotated(field.type_or_callable)
             if (
+                _markers.AvoidNoneSubcommands in field.markers
+                and _markers._HAS_NONE_FIELD not in annotations
+                and type(None) in get_args(type_)
+                and len(get_args(type_)) <= 2
+            ):
+                # Don't make a subparser.
+                option = [o for o in get_args(type_) if o is not type(None)][0] # type: ignore
+                field = dataclasses.replace(field, type_or_callable=_markers._HAS_NONE_FIELD[option])
+            elif (
                 not subparsers_attempt.required
                 and _markers.AvoidSubcommands in field.markers
             ):
@@ -387,11 +394,6 @@ class SubparsersSpecification:
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_or_callable)[0]
         if get_origin(typ) is not Union:
-            return None
-        elif (AvoidNoneSubcommands in field.markers
-              and _markers._ROOT_FIELD not in field.markers
-              and type(None) in get_args(typ)
-              and len(get_args(typ)) <= 2):
             return None
 
         # We don't use sets here to retain order of subcommands.
