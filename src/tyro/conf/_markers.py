@@ -66,7 +66,7 @@ applied to nested types."""
 
 AvoidNoneSubcommands = Annotated[T, None]
 """Avoid creating None subcommands when a NoneType is present in a Union. Instead,
-a command can be set to None using --cmd:None"""
+a command can be set to None using `--cmd:None`."""
 
 ConsolidateSubcommandArgs = Annotated[T, None]
 """Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument

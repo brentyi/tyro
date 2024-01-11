@@ -311,17 +311,7 @@ def handle_field(
             extern_prefix=_strings.make_field_name([extern_prefix, field.extern_name]),
         )
         if subparsers_attempt is not None:
-            type_, annotations = _resolver.unwrap_annotated(field.type_or_callable)
             if (
-                _markers.AvoidNoneSubcommands in field.markers
-                and _markers._HAS_NONE_FIELD not in annotations
-                and type(None) in get_args(type_)
-                and len(get_args(type_)) <= 2
-            ):
-                # Don't make a subparser.
-                option = [o for o in get_args(type_) if o is not type(None)][0] # type: ignore
-                field = dataclasses.replace(field, type_or_callable=_markers._HAS_NONE_FIELD[option])
-            elif (
                 not subparsers_attempt.required
                 and _markers.AvoidSubcommands in field.markers
             ):

@@ -53,67 +53,6 @@ def call_from_args(
         ), f"{prefixed_field_name} not in {value_from_prefixed_field_name}"
         return value_from_prefixed_field_name[prefixed_field_name]
 
-    def parse_standard_arg(
-            prefixed_field_name: str,
-            field: _fields.FieldDefinition,
-            any_arguments_provided: bool,
-            value_from_prefixed_field_name: Dict[str, Any],
-            consumed_keywords: Set[str],
-            arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition],
-            get_value_from_arg: Callable[[str], Any]
-    ) -> Tuple[Any, bool]:
-        assert prefixed_field_name not in consumed_keywords
-
-        # Standard arguments.
-        arg = arg_from_prefixed_field_name[prefixed_field_name]
-        name_maybe_prefixed = prefixed_field_name
-        consumed_keywords.add(name_maybe_prefixed)
-        if not arg.lowered.is_fixed():
-            value = get_value_from_arg(name_maybe_prefixed)
-
-            if value in _fields.MISSING_SINGLETONS:
-                value = arg.field.default
-
-                # Consider a function with a positional sequence argument:
-                #
-                #     def f(x: tuple[int, ...], /)
-                #
-                # If we run this script with no arguments, we should interpret this
-                # as empty input for x. But the argparse default will be a MISSING
-                # value, and the field default will be inspect.Parameter.empty.
-                if (
-                    value in _fields.MISSING_SINGLETONS
-                    and field.is_positional_call()
-                    and arg.lowered.nargs in ("?", "*")
-                ):
-                    value = []
-            else:
-                any_arguments_provided = True
-                if arg.lowered.nargs == "?":
-                    # Special case for optional positional arguments: this is the
-                    # only time that arguments don't come back as a list.
-                    value = [value]
-
-                try:
-                    assert arg.lowered.instantiator is not None
-                    value = arg.lowered.instantiator(value)
-                except ValueError as e:
-                    raise InstantiationError(
-                        e.args[0],
-                        arg,
-                    )
-        else:
-            assert arg.field.default not in _fields.MISSING_SINGLETONS
-            value = arg.field.default
-            parsed_value = value_from_prefixed_field_name.get(prefixed_field_name)
-            if parsed_value not in _fields.MISSING_SINGLETONS:
-                raise InstantiationError(
-                    f"{arg.lowered.name_or_flag} was passed in, but"
-                    " is a fixed argument that cannot be parsed",
-                    arg,
-                )
-        return value, any_arguments_provided
-
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
         arg_from_prefixed_field_name[
@@ -131,15 +70,56 @@ def call_from_args(
         # Resolve field type.
         field_type = field.type_or_callable
         if prefixed_field_name in arg_from_prefixed_field_name:
-            value, any_arguments_provided = parse_standard_arg(
-                prefixed_field_name,
-                field,
-                any_arguments_provided,
-                value_from_prefixed_field_name,
-                consumed_keywords,
-                arg_from_prefixed_field_name,
-                get_value_from_arg
-            )
+            assert prefixed_field_name not in consumed_keywords
+
+            # Standard arguments.
+            arg = arg_from_prefixed_field_name[prefixed_field_name]
+            name_maybe_prefixed = prefixed_field_name
+            consumed_keywords.add(name_maybe_prefixed)
+            if not arg.lowered.is_fixed():
+                value = get_value_from_arg(name_maybe_prefixed)
+
+                if value in _fields.MISSING_SINGLETONS:
+                    value = arg.field.default
+
+                    # Consider a function with a positional sequence argument:
+                    #
+                    #     def f(x: tuple[int, ...], /)
+                    #
+                    # If we run this script with no arguments, we should interpret this
+                    # as empty input for x. But the argparse default will be a MISSING
+                    # value, and the field default will be inspect.Parameter.empty.
+                    if (
+                        value in _fields.MISSING_SINGLETONS
+                        and field.is_positional_call()
+                        and arg.lowered.nargs in ("?", "*")
+                    ):
+                        value = []
+                else:
+                    any_arguments_provided = True
+                    if arg.lowered.nargs == "?":
+                        # Special case for optional positional arguments: this is the
+                        # only time that arguments don't come back as a list.
+                        value = [value]
+
+                    try:
+                        assert arg.lowered.instantiator is not None
+                        value = arg.lowered.instantiator(value)
+                    except ValueError as e:
+                        raise InstantiationError(
+                            e.args[0],
+                            arg,
+                        )
+            else:
+                assert arg.field.default not in _fields.MISSING_SINGLETONS
+                value = arg.field.default
+                parsed_value = value_from_prefixed_field_name.get(prefixed_field_name)
+                if parsed_value not in _fields.MISSING_SINGLETONS:
+                    raise InstantiationError(
+                        f"{arg.lowered.name_or_flag} was passed in, but"
+                        " is a fixed argument that cannot be parsed",
+                        arg,
+                    )
         elif (
             prefixed_field_name
             in parser_definition.helptext_from_nested_class_field_name
@@ -213,25 +193,26 @@ def call_from_args(
         else:
             kwargs[field.call_argname] = value
 
-        if f"{prefixed_field_name}:None" in arg_from_prefixed_field_name:
-            value, any_arguments_provided = parse_standard_arg(
-                f"{prefixed_field_name}:None",
-                field,
-                any_arguments_provided,
-                value_from_prefixed_field_name,
-                consumed_keywords,
-                arg_from_prefixed_field_name,
-                get_value_from_arg
-            )
-            if value is True:
-                if kwargs[field.call_argname] != field.default:
-                    conflicts = "\n  --".join([kw for kw in consumed_keywords if kw.startswith(f"{prefixed_field_name}.")])
+    none_field = kwargs.get('None')
+    if none_field is not None:
+        del kwargs['None']
+        if none_field:
+            conflicts: list = []
+            field_name_prefix += ':' if field_name_prefix else ''
+            for field in field_list:
+                if field.call_argname != "None" and kwargs[field.call_argname] != field.default:
+                    if _resolver.unwrap_origin_strip_extras(field.type_or_callable) is not Union:
+                        conflicts.append(f'--{field_name_prefix}{field.call_argname}*')
+                    else:
+                        conflicts.append(f'{field_name_prefix}{field.call_argname}*')
+            if conflicts:
+                    conflicts = "\n  ".join(conflicts)
                     raise InstantiationError(
-                        f"--{field.call_argname}:None is mutually exclusive with --{field.call_argname}.* parameters. Found:\n"
-                        f"  --{conflicts}",
+                        f"--{field_name_prefix}None is mutually exclusive with below option(s):\n"
+                        f"  {conflicts}",
                         field_name_prefix,
                     )
-                kwargs[field.call_argname] = None
+            return None, consumed_keywords  # type: ignore
 
     # Logic for _markers._OPTIONAL_GROUP.
     is_missing_list = [
@@ -288,11 +269,6 @@ def call_from_args(
         if field_name_prefix == "":
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
             # raises a ValueError, this shouldn't be caught.
-            if kwargs.get('None') is not None:
-                if kwargs.get('None'):
-                    kwargs = {}
-                else:
-                    del kwargs['None']
             return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
         else:
             # Try to catch ValueErrors raised by field constructors.

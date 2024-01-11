@@ -370,14 +370,19 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    has_none_field: bool = (
-        _markers._HAS_NONE_FIELD in _resolver.unwrap_annotated(f, _markers._Marker)[1]
+    add_none_field: bool = (
+        _markers.AvoidNoneSubcommands in _resolver.unwrap_annotated(f, _markers._Marker)[1]
     )
+
     f, found_subcommand_configs = _resolver.unwrap_annotated(
         f, conf._confstruct._SubcommandConfiguration
     )
     if len(found_subcommand_configs) > 0:
         default_instance = found_subcommand_configs[0].default
+
+    if type(None) in get_args(f):
+        if add_none_field and len(get_args(f)) == 2:
+            f = [o for o in get_args(f) if o is not type(None)][0]
 
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
@@ -414,7 +419,18 @@ def _try_field_list_from_callable(
         ):
             if is_match(cls):
                 fields = field_list_from_class(cls, default_instance)
-                if not isinstance(fields, UnsupportedNestedTypeMessage) and has_none_field:
+                if not isinstance(fields, UnsupportedNestedTypeMessage) and add_none_field:
+                    for i in range(len(fields)):
+                        if type(None) in get_args(fields[i].type_or_callable):
+                            option = [o for o in get_args(fields[i].type_or_callable) if o is not type(None)][0] # type: ignore
+                            if len(get_args(fields[i].type_or_callable)) == 2:
+                                option = _markers.AvoidNoneSubcommands[option]
+                                fields[i] = dataclasses.replace(
+                                    fields[i],
+                                    type_or_callable=option,
+                                    default=dataclasses.MISSING if fields[i].default is None else fields[i].default
+                                )
+
                     fields.append(FieldDefinition.make( # type: ignore
                         name="None",
                         type_or_callable=bool,

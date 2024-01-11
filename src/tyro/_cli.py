@@ -307,7 +307,7 @@ def _cli_impl(
         and len(get_args(typ)) <= 2
     ):
         f = [o for o in get_args(typ) if o is not type(None)][0]
-        for annotate in annotations + (conf._markers._HAS_NONE_FIELD,):
+        for annotate in annotations:
             f = annotate[f] # type: ignore
 
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
