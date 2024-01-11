@@ -155,6 +155,7 @@ def call_from_args(
                 # default/default_factory set.
                 assert (
                     type(None) in get_args(field_type)
+                    or _markers.HideNoneSubcommands in _resolver.unwrap_annotated(field_type, _markers._Marker)[1]
                     or subparser_def.default_instance is not None
                 )
                 value = subparser_def.default_instance
@@ -197,22 +198,38 @@ def call_from_args(
     if none_field is not None:
         del kwargs['None']
         if none_field:
-            conflicts: list = []
+            conflicts = []
+            none_field_default = None
             field_name_prefix += ':' if field_name_prefix else ''
             for field in field_list:
-                if field.call_argname != "None" and kwargs[field.call_argname] != field.default:
+                if field.call_argname == "None":
+                    none_field_default = field.default
+                elif kwargs[field.call_argname] != field.default:
                     if _resolver.unwrap_origin_strip_extras(field.type_or_callable) is not Union:
                         conflicts.append(f'--{field_name_prefix}{field.call_argname}*')
                     else:
                         conflicts.append(f'{field_name_prefix}{field.call_argname}*')
-            if conflicts:
-                    conflicts = "\n  ".join(conflicts)
-                    raise InstantiationError(
-                        f"--{field_name_prefix}None is mutually exclusive with below option(s):\n"
-                        f"  {conflicts}",
-                        field_name_prefix,
-                    )
-            return None, consumed_keywords  # type: ignore
+
+            # Ensure we found the default None field value
+            assert isinstance(none_field_default, bool)
+
+            # If the default value for the None field is False, it means the user set the None flag
+            # to True at the CLI. Therefore, if conflicts are found the user also set options that
+            # were mutually exlusive with the None flag and we raise an error.
+            if none_field_default is False and conflicts:
+                num_conflicts = len(conflicts)
+                conflicts = "\n  ".join(conflicts)
+                raise InstantiationError(
+                    f"--{field_name_prefix}None is mutually exclusive with below option"
+                    f"{'s' if num_conflicts > 1 else ''}:\n"
+                    f"  {conflicts}",
+                    field_name_prefix,
+                )
+
+            # Either all default options were set with the None flag set to True, or the None flag
+            # default is false and is therefore ignored when new options are provided by the user.
+            if not conflicts or (none_field_default is False):
+                return None, consumed_keywords  # type: ignore
 
     # Logic for _markers._OPTIONAL_GROUP.
     is_missing_list = [

@@ -53,6 +53,8 @@ from . import (
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
+ADD_NONE_FIELD_ANNOTATION_STR = "tyro: add none field"
+
 
 @dataclasses.dataclass(frozen=True)
 class FieldDefinition:
@@ -370,19 +372,19 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    add_none_field: bool = (
+    hide_none_subcommand: bool = (
+        _markers.HideNoneSubcommands in _resolver.unwrap_annotated(f, _markers._Marker)[1]
+    )
+    avoid_none_subcommand: bool = (
         _markers.AvoidNoneSubcommands in _resolver.unwrap_annotated(f, _markers._Marker)[1]
     )
+    add_none_field: bool = ADD_NONE_FIELD_ANNOTATION_STR in get_args(f)
 
     f, found_subcommand_configs = _resolver.unwrap_annotated(
         f, conf._confstruct._SubcommandConfiguration
     )
     if len(found_subcommand_configs) > 0:
         default_instance = found_subcommand_configs[0].default
-
-    if type(None) in get_args(f):
-        if add_none_field and len(get_args(f)) == 2:
-            f = [o for o in get_args(f) if o is not type(None)][0]
 
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
@@ -419,24 +421,43 @@ def _try_field_list_from_callable(
         ):
             if is_match(cls):
                 fields = field_list_from_class(cls, default_instance)
-                if not isinstance(fields, UnsupportedNestedTypeMessage) and add_none_field:
+                if (
+                    not isinstance(fields, UnsupportedNestedTypeMessage)
+                    and (hide_none_subcommand or avoid_none_subcommand)
+                ):
                     for i in range(len(fields)):
                         if type(None) in get_args(fields[i].type_or_callable):
-                            option = [o for o in get_args(fields[i].type_or_callable) if o is not type(None)][0] # type: ignore
-                            if len(get_args(fields[i].type_or_callable)) == 2:
-                                option = _markers.AvoidNoneSubcommands[option]
-                                fields[i] = dataclasses.replace(
-                                    fields[i],
-                                    type_or_callable=option,
-                                    default=dataclasses.MISSING if fields[i].default is None else fields[i].default
-                                )
+                            option = tuple([ # type: ignore
+                                o for o in get_args(fields[i].type_or_callable)
+                                if o is not type(None)
+                            ])
+                            option = (
+                                Union[option] if len(option) > 1 # type: ignore
+                                else option[0]
+                            )
 
-                    fields.append(FieldDefinition.make( # type: ignore
-                        name="None",
-                        type_or_callable=bool,
-                        default=False,
-                        helptext=None,
-                    ))
+                            if hide_none_subcommand:
+                                option = _markers.HideNoneSubcommands[option]
+                            elif len(get_args(fields[i].type_or_callable)) == 2:
+                                option = _markers.AvoidNoneSubcommands[option]
+                            else:
+                                continue
+
+                            fields[i] = dataclasses.replace(
+                                fields[i],
+                                type_or_callable=Annotated[option, ADD_NONE_FIELD_ANNOTATION_STR]
+                            )
+
+                    if add_none_field:
+                        fields.append(FieldDefinition.make( # type: ignore
+                            name="None",
+                            type_or_callable=(
+                                bool if not hide_none_subcommand
+                                else _markers.Suppress[bool]
+                            ),
+                            default=default_instance is None,
+                            helptext=None,
+                        ))
                 return fields
 
     # Standard container types. These are different because they can be nested structures
