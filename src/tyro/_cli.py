@@ -312,7 +312,7 @@ def _cli_impl(
         f = [o for o in get_args(typ) if o is not type(None)][0]
         for annotate in annotations:
             f = annotate[f] # type: ignore
-        f = Annotated[f, _fields.ADD_NONE_FIELD_ANNOTATION_STR] # type: ignore
+        f = Annotated[f, _fields.ADD_NONE_FIELD_ANNOTATION_STR, conf._markers._OPTIONAL_GROUP] # type: ignore
 
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
     # For example: passing in f=int will result in a dataclass with a single field

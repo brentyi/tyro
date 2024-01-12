@@ -445,7 +445,7 @@ def _try_field_list_from_callable(
 
                             fields[i] = dataclasses.replace(
                                 fields[i],
-                                type_or_callable=Annotated[option, ADD_NONE_FIELD_ANNOTATION_STR]
+                                type_or_callable=Annotated[option, ADD_NONE_FIELD_ANNOTATION_STR, _markers._OPTIONAL_GROUP]
                             )
 
                     if add_none_field:
