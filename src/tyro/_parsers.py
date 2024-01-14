@@ -301,7 +301,7 @@ def handle_field(
             f"Field {field.intern_name} has an unbound TypeVar: {field.type_or_callable}."
         )
 
-    if _markers.Fixed not in field.markers:
+    if _markers.Fixed not in field.markers and _markers.Suppress not in field.markers:
         # (1) Handle Unions over callables; these result in subparsers.
         subparsers_attempt = SubparsersSpecification.from_field(
             field,

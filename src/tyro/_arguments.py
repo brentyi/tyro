@@ -119,7 +119,7 @@ class ArgumentDefinition:
         """Add a defined argument to a parser."""
 
         # Get keyword arguments, with None values removed.
-        kwargs = dataclasses.asdict(self.lowered)  # type: ignore
+        kwargs = dict(self.lowered.__dict__)  # type: ignore
         kwargs.pop("instantiator")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flag = kwargs.pop("name_or_flag")

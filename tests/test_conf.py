@@ -13,6 +13,27 @@ from typing_extensions import Annotated
 import tyro
 
 
+def test_suppress_subcommand() -> None:
+    @dataclasses.dataclass
+    class DefaultInstanceHTTPServer:
+        y: int = 0
+        flag: bool = True
+
+    @dataclasses.dataclass
+    class DefaultInstanceSMTPServer:
+        z: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSubparser:
+        x: int
+        # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        bc: tyro.conf.Suppress[
+            Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
+        ] = DefaultInstanceHTTPServer()
+
+    assert "bc" not in get_helptext(DefaultInstanceSubparser)
+
+
 def test_omit_subcommand_prefix() -> None:
     @dataclasses.dataclass
     class DefaultInstanceHTTPServer:
