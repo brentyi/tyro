@@ -29,7 +29,7 @@ def test_suppress_subcommand() -> None:
         # bc: Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
         bc: tyro.conf.Suppress[
             Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
-        ] = DefaultInstanceHTTPServer()
+        ] = dataclasses.field(default_factory=DefaultInstanceHTTPServer)
 
     assert "bc" not in get_helptext(DefaultInstanceSubparser)
 
@@ -514,6 +514,19 @@ def test_suppress_manual_fixed() -> None:
 
     helptext = get_helptext(main)
     assert "--x.a" in helptext
+    assert "--x.b" not in helptext
+
+
+def test_suppress_manual_fixed_one_arg_only() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        b: tyro.conf.SuppressFixed[tyro.conf.Fixed[str]] = "7"
+
+    def main(x: Any = Struct()):
+        pass
+
+    helptext = get_helptext(main)
+    assert "--x.a" not in helptext
     assert "--x.b" not in helptext
 
 
