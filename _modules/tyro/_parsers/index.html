@@ -569,7 +569,7 @@
             <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="si">}</span><span class="s2"> has an unbound TypeVar: </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">.&quot;</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
         <span class="c1"># (1) Handle Unions over callables; these result in subparsers.</span>
         <span class="n">subparsers_attempt</span> <span class="o">=</span> <span class="n">SubparsersSpecification</span><span class="o">.</span><span class="n">from_field</span><span class="p">(</span>
             <span class="n">field</span><span class="p">,</span>
