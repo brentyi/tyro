@@ -4,12 +4,33 @@ import dataclasses
 import io
 import json as json_
 import shlex
-from typing import Annotated, Any, Dict, Generic, List, Tuple, TypeVar
+from typing import Annotated, Any, Dict, Generic, List, Tuple, Type, TypeVar
 
 import pytest
 from helptext_utils import get_helptext
 
 import tyro
+
+
+def test_suppress_subcommand() -> None:
+    @dataclasses.dataclass
+    class DefaultInstanceHTTPServer:
+        y: int = 0
+        flag: bool = True
+
+    @dataclasses.dataclass
+    class DefaultInstanceSMTPServer:
+        z: int = 0
+
+    @dataclasses.dataclass
+    class DefaultInstanceSubparser:
+        x: int
+        # bc: DefaultInstanceHTTPServer| DefaultInstanceSMTPServer
+        bc: tyro.conf.Suppress[
+            DefaultInstanceHTTPServer | DefaultInstanceSMTPServer
+        ] = dataclasses.field(default_factory=DefaultInstanceHTTPServer)
+
+    assert "bc" not in get_helptext(DefaultInstanceSubparser)
 
 
 def test_omit_subcommand_prefix() -> None:
@@ -488,6 +509,19 @@ def test_suppress_manual_fixed() -> None:
 
     helptext = get_helptext(main)
     assert "--x.a" in helptext
+    assert "--x.b" not in helptext
+
+
+def test_suppress_manual_fixed_one_arg_only() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        b: tyro.conf.SuppressFixed[tyro.conf.Fixed[str]] = "7"
+
+    def main(x: Any = Struct()):
+        pass
+
+    helptext = get_helptext(main)
+    assert "--x.a" not in helptext
     assert "--x.b" not in helptext
 
 
@@ -1217,3 +1251,53 @@ def test_subcommand_constructor_mix() -> None:
     assert tyro.cli(t, args=["arg"]) == Arg()
     assert tyro.cli(t, args=["checkout-renamed", "--branch", "main"]) == "main"
     assert tyro.cli(t, args=["commit", "--message", "hi", "--all", "True"]) == "hi True"
+
+
+def test_merge() -> None:
+    """Test effect of tyro.conf.arg() on nested structures by approximating an
+    HfArgumentParser-style API."""
+
+    T = TypeVar("T")
+
+    # We could add a lot overloads here if we were doing this for real. :)
+    def instantiate_dataclasses(
+        classes: Tuple[Type[T], ...], args: List[str]
+    ) -> Tuple[T, ...]:
+        return tyro.cli(
+            tyro.conf.OmitArgPrefixes[
+                # Convert (type1, type2) into Tuple[type1, type2]
+                Tuple.__getitem__(  # type: ignore
+                    tuple(Annotated[c, tyro.conf.arg(name=c.__name__)] for c in classes)
+                )
+            ],
+            args=args,
+        )
+
+    @dataclasses.dataclass(frozen=True)
+    class OptimizerConfig:
+        lr: float = 1e-4
+        weight: int = 10
+
+    @dataclasses.dataclass(frozen=True)
+    class DatasetConfig:
+        batch_size: int = 1
+        shuffle: bool = False
+
+    assert instantiate_dataclasses(
+        (OptimizerConfig, DatasetConfig), args=["--lr", "1e-3"]
+    ) == (
+        OptimizerConfig(1e-3),
+        DatasetConfig(),
+    )
+    assert instantiate_dataclasses(
+        (OptimizerConfig, DatasetConfig), args=["--lr", "1e-3", "--shuffle"]
+    ) == (
+        OptimizerConfig(1e-3),
+        DatasetConfig(shuffle=True),
+    )
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        instantiate_dataclasses((OptimizerConfig, DatasetConfig), args=["--help"])
+    helptext = target.getvalue()
+    assert "OptimizerConfig options" in helptext
+    assert "DatasetConfig options" in helptext
