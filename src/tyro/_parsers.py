@@ -257,13 +257,13 @@ class ParserSpecification:
         for arg in self.args:
             if (
                 arg.lowered.help is not argparse.SUPPRESS
-                and arg.intern_prefix not in group_from_prefix
+                and arg.extern_prefix not in group_from_prefix
             ):
                 description = self.helptext_from_nested_class_field_name.get(
-                    arg.intern_prefix
+                    arg.extern_prefix
                 )
-                group_from_prefix[arg.intern_prefix] = parser.add_argument_group(
-                    format_group_name(arg.intern_prefix),
+                group_from_prefix[arg.extern_prefix] = parser.add_argument_group(
+                    format_group_name(arg.extern_prefix),
                     description=description,
                 )
 
@@ -273,8 +273,8 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            if arg.intern_prefix in group_from_prefix:
-                arg.add_argument(group_from_prefix[arg.intern_prefix])
+            if arg.extern_prefix in group_from_prefix:
+                arg.add_argument(group_from_prefix[arg.extern_prefix])
             else:
                 # Suppressed argument: still need to add them, but they won't show up in
                 # the helptext so it doesn't matter which group.

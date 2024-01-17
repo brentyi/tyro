@@ -341,8 +341,6 @@ def _rule_recursive_instantiator_from_type(
 
             return type(out)(arg.field.default) + out
 
-            return out
-
         return dataclasses.replace(
             lowered,
             instantiator=append_instantiator,

@@ -272,11 +272,12 @@ def apply_type_from_typevar(
     if typ in type_from_typevar:
         return type_from_typevar[typ]  # type: ignore
 
-    if len(get_args(typ)) > 0:
-        args = get_args(typ)
-        if get_origin(typ) is Annotated:
+    origin = get_origin(typ)
+    args = get_args(typ)
+    if len(args) > 0:
+        if origin is Annotated:
             args = args[:1]
-        if get_origin(typ) is collections.abc.Callable:
+        if origin is collections.abc.Callable:
             assert isinstance(args[0], list)
             args = tuple(args[0]) + args[1:]
 
@@ -296,7 +297,7 @@ def apply_type_from_typevar(
                 shim_table[types.UnionType] = Union  # type: ignore
 
             for new, old in shim_table.items():
-                if isinstance(typ, new) or get_origin(typ) is new:  # type: ignore
+                if isinstance(typ, new) or origin is new:  # type: ignore
                     typ = old.__getitem__(args)  # type: ignore
 
         return typ.copy_with(  # type: ignore

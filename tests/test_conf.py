@@ -4,7 +4,7 @@ import dataclasses
 import io
 import json as json_
 import shlex
-from typing import Any, Dict, Generic, List, Tuple, TypeVar, Union
+from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext
@@ -1258,3 +1258,53 @@ def test_subcommand_constructor_mix() -> None:
     assert tyro.cli(t, args=["arg"]) == Arg()
     assert tyro.cli(t, args=["checkout-renamed", "--branch", "main"]) == "main"
     assert tyro.cli(t, args=["commit", "--message", "hi", "--all", "True"]) == "hi True"
+
+
+def test_merge() -> None:
+    """Test effect of tyro.conf.arg() on nested structures by approximating an
+    HfArgumentParser-style API."""
+
+    T = TypeVar("T")
+
+    # We could add a lot overloads here if we were doing this for real. :)
+    def instantiate_dataclasses(
+        classes: Tuple[Type[T], ...], args: List[str]
+    ) -> Tuple[T, ...]:
+        return tyro.cli(
+            tyro.conf.OmitArgPrefixes[  # type: ignore
+                # Convert (type1, type2) into Tuple[type1, type2]
+                Tuple.__getitem__(  # type: ignore
+                    tuple(Annotated[c, tyro.conf.arg(name=c.__name__)] for c in classes)
+                )
+            ],
+            args=args,
+        )
+
+    @dataclasses.dataclass(frozen=True)
+    class OptimizerConfig:
+        lr: float = 1e-4
+        weight: int = 10
+
+    @dataclasses.dataclass(frozen=True)
+    class DatasetConfig:
+        batch_size: int = 1
+        shuffle: bool = False
+
+    assert instantiate_dataclasses(
+        (OptimizerConfig, DatasetConfig), args=["--lr", "1e-3"]
+    ) == (
+        OptimizerConfig(1e-3),
+        DatasetConfig(),
+    )
+    assert instantiate_dataclasses(
+        (OptimizerConfig, DatasetConfig), args=["--lr", "1e-3", "--shuffle"]
+    ) == (
+        OptimizerConfig(1e-3),
+        DatasetConfig(shuffle=True),
+    )
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        instantiate_dataclasses((OptimizerConfig, DatasetConfig), args=["--help"])
+    helptext = target.getvalue()
+    assert "OptimizerConfig options" in helptext
+    assert "DatasetConfig options" in helptext

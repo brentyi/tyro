@@ -41,12 +41,12 @@ dev = [
     "attrs>=21.4.0",
     "torch>=1.10.0",
     "pyright>=1.1.264",
-    "ruff>=0.1.7",
+    "ruff>=0.1.13",
     "mypy>=1.4.1",
     "numpy>=1.20.0",
     # As of 7/27/2023, flax install fails for Python 3.7 without pinning to an
     # old version. But doing so breaks other Python versions.
-    "flax>=0.6.9;python_version>='3.8'", 
+    "flax>=0.6.9;python_version>='3.8'",
     "pydantic>=2.5.2",
     "coverage[toml]>=6.5.0"
 ]
@@ -96,10 +96,11 @@ exclude_lines = [
     "except ImportError:",
 
     # or anything that's deprecated
-    "deprecated",
+    "deprecated"
 ]
 
 [tool.ruff]
+src = ["src"]  # Needed to recognize first-party import location in GitHub action.
 select = [
     "E",  # pycodestyle errors.
     "F",  # Pyflakes rules.
@@ -107,6 +108,7 @@ select = [
     "PLE",  # Pylint errors.
     "PLR",  # Pylint refactor recommendations.
     "PLW",  # Pylint warnings.
+    "I"  # Import sorting.
 ]
 ignore = [
     "E741", # Ambiguous variable name. (l, O, or I)
@@ -120,10 +122,5 @@ ignore = [
     "PLR0911",  # Too many return statements.
     "PLR0912",  # Too many branches.
     "PLW0603",  # Global statement updates are discouraged.
-    "PLW2901",  # For loop variable overwritten.
-]
-
-[tool.pytest.ini_options]
-pythonpath = [
-  "."
+    "PLW2901"  # For loop variable overwritten.
 ]
