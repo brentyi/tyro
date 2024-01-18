@@ -61,6 +61,13 @@ This simplifies CLI interfaces, but makes them less expressive.
 Can be used directly on union types, `AvoidSubcommands[Union[...]]`, or recursively
 applied to nested types."""
 
+HideNoneSubcommands = Annotated[T, None]
+"""Hide None subcommands when a NoneType is present in a Union."""
+
+AvoidNoneSubcommands = Annotated[T, None]
+"""Avoid creating None subcommands when a NoneType is present in a Union. Instead,
+a command can be set to None using `--cmd:None`."""
+
 ConsolidateSubcommandArgs = Annotated[T, None]
 """Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
 ordering, at the cost of support for optional subcommands.

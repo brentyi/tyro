@@ -200,7 +200,11 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     if final_token_on_line.token_type == tokenize.COMMENT:
         comment: str = final_token_on_line.content
         assert comment.startswith("#")
-        return _strings.remove_single_line_breaks(comment[1:].strip())
+        if comment.startswith("#:"):
+            return _strings.remove_single_line_breaks(comment[2:].strip())
+        else:
+            return _strings.remove_single_line_breaks(comment[1:].strip())
+
 
     # Check for comments that come before the field. This is intentionally written to
     # support comments covering multiple (grouped) fields, for example:
@@ -245,7 +249,10 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         ):
             (comment_token,) = actual_line_tokens
             assert comment_token.content.startswith("#")
-            comments.append(comment_token.content[1:].strip())
+            if comment_token.content.startswith("#:"):
+                comments.append(comment_token.content[2:].strip())
+            else:
+                comments.append(comment_token.content[1:].strip())
         elif len(comments) > 0:
             # Comments should be contiguous.
             break

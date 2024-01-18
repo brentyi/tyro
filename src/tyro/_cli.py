@@ -5,6 +5,7 @@ import pathlib
 import sys
 import warnings
 from typing import (
+    Annotated,
     Callable,
     Dict,
     List,
@@ -18,7 +19,7 @@ from typing import (
 )
 
 import shtab
-from typing_extensions import Literal
+from typing_extensions import Literal, get_args
 
 from . import (
     _argparse_formatter,
@@ -28,6 +29,7 @@ from . import (
     _parsers,
     _strings,
     _unsafe_cache,
+    _resolver,
     conf,
 )
 from ._typing import TypeForm
@@ -298,6 +300,19 @@ def _cli_impl(
     default_instance_internal: Union[_fields.NonpropagatingMissingType, OutT] = (
         _fields.MISSING_NONPROP if default is None else default
     )
+
+    typ, annotations = _resolver.unwrap_annotated(f, conf._markers._Marker)
+    if (
+        type(None) in get_args(typ)
+        and (
+            conf._markers.HideNoneSubcommands in annotations
+            or (len(get_args(typ)) == 2 and conf._markers.AvoidNoneSubcommands in annotations)
+        )
+    ):
+        f = [o for o in get_args(typ) if o is not type(None)][0]
+        for annotate in annotations:
+            f = annotate[f] # type: ignore
+        f = Annotated[f, _fields.ADD_NONE_FIELD_ANNOTATION_STR, conf._markers._OPTIONAL_GROUP] # type: ignore
 
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
     # For example: passing in f=int will result in a dataclass with a single field

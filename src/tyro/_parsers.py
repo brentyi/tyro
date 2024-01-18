@@ -31,7 +31,7 @@ from . import (
     _subcommand_matching,
 )
 from ._typing import TypeForm
-from .conf import _confstruct, _markers
+from .conf import _confstruct, _markers, AvoidNoneSubcommands
 
 T = TypeVar("T")
 
@@ -587,7 +587,12 @@ class SubparsersSpecification:
 
         subparser_tree_leaves: List[argparse.ArgumentParser] = []
         for name, subparser_def in self.parser_from_name.items():
-            helptext = subparser_def.description.replace("%", "%%")
+            if name == "None":
+                helptext = f"set subcommands to None"
+            elif name.endswith(":None"):
+                helptext = f"set {name.split(':')[0].lstrip('-')} to None"
+            else:
+                helptext = subparser_def.description.replace("%", "%%")
             if len(helptext) > 0:
                 # TODO: calling a private function here.
                 helptext = _arguments._rich_tag_if_enabled(helptext.strip(), "helptext")

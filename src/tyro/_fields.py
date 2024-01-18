@@ -53,6 +53,8 @@ from . import (
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
+ADD_NONE_FIELD_ANNOTATION_STR = "tyro: add none field"
+
 
 @dataclasses.dataclass(frozen=True)
 class FieldDefinition:
@@ -370,6 +372,14 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    hide_none_subcommand: bool = (
+        _markers.HideNoneSubcommands in _resolver.unwrap_annotated(f, _markers._Marker)[1]
+    )
+    avoid_none_subcommand: bool = (
+        _markers.AvoidNoneSubcommands in _resolver.unwrap_annotated(f, _markers._Marker)[1]
+    )
+    add_none_field: bool = ADD_NONE_FIELD_ANNOTATION_STR in get_args(f)
+
     f, found_subcommand_configs = _resolver.unwrap_annotated(
         f, conf._confstruct._SubcommandConfiguration
     )
@@ -402,15 +412,53 @@ def _try_field_list_from_callable(
 
     # Try field generation from class inputs.
     if cls is not None:
-        for match, field_list_from_class in (
+        for is_match, field_list_from_class in (
             (is_typeddict, _field_list_from_typeddict),
             (_resolver.is_namedtuple, _field_list_from_namedtuple),
             (_resolver.is_dataclass, _field_list_from_dataclass),
             (_is_attrs, _field_list_from_attrs),
             (_is_pydantic, _field_list_from_pydantic),
         ):
-            if match(cls):
-                return field_list_from_class(cls, default_instance)
+            if is_match(cls):
+                fields = field_list_from_class(cls, default_instance)
+                if (
+                    not isinstance(fields, UnsupportedNestedTypeMessage)
+                    and (hide_none_subcommand or avoid_none_subcommand)
+                ):
+                    for i in range(len(fields)):
+                        if type(None) in get_args(fields[i].type_or_callable):
+                            option = tuple([ # type: ignore
+                                o for o in get_args(fields[i].type_or_callable)
+                                if o is not type(None)
+                            ])
+                            option = (
+                                Union[option] if len(option) > 1 # type: ignore
+                                else option[0]
+                            )
+
+                            if hide_none_subcommand:
+                                option = _markers.HideNoneSubcommands[option]
+                            elif len(get_args(fields[i].type_or_callable)) == 2:
+                                option = _markers.AvoidNoneSubcommands[option]
+                            else:
+                                continue
+
+                            fields[i] = dataclasses.replace(
+                                fields[i],
+                                type_or_callable=Annotated[option, ADD_NONE_FIELD_ANNOTATION_STR, _markers._OPTIONAL_GROUP]
+                            )
+
+                    if add_none_field:
+                        fields.append(FieldDefinition.make( # type: ignore
+                            name="None",
+                            type_or_callable=(
+                                bool if not hide_none_subcommand
+                                else _markers.Suppress[bool]
+                            ),
+                            default=default_instance is None,
+                            helptext=None,
+                        ))
+                return fields
 
     # Standard container types. These are different because they can be nested structures
     # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
