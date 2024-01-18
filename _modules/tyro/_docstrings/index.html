@@ -459,7 +459,11 @@
     <span class="k">if</span> <span class="n">final_token_on_line</span><span class="o">.</span><span class="n">token_type</span> <span class="o">==</span> <span class="n">tokenize</span><span class="o">.</span><span class="n">COMMENT</span><span class="p">:</span>
         <span class="n">comment</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">final_token_on_line</span><span class="o">.</span><span class="n">content</span>
         <span class="k">assert</span> <span class="n">comment</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span><span class="n">comment</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">comment</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#:&quot;</span><span class="p">):</span>  <span class="c1"># Sphinx autodoc-style comment.</span>
+            <span class="c1"># https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#directive-autoattribute</span>
+            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span><span class="n">comment</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span><span class="n">comment</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
 
     <span class="c1"># Check for comments that come before the field. This is intentionally written to</span>
     <span class="c1"># support comments covering multiple (grouped) fields, for example:</span>
@@ -470,7 +474,16 @@
     <span class="c1">#     beta2: float</span>
     <span class="c1">#</span>
     <span class="c1"># In this case, &#39;Optimizer hyperparameters&#39; will be treated as the docstring for all</span>
-    <span class="c1"># 3 fields.</span>
+    <span class="c1"># 3 fields. There are tradeoffs we are making here.</span>
+    <span class="c1">#</span>
+    <span class="c1"># The exception this is Sphinx-style comments:</span>
+    <span class="c1">#</span>
+    <span class="c1">#     #: The learning rate.</span>
+    <span class="c1">#     learning_rate: float</span>
+    <span class="c1">#     beta1: float</span>
+    <span class="c1">#     beta2: float</span>
+    <span class="c1">#</span>
+    <span class="c1"># Where, by convention the comment only applies to the field that directly follows it.</span>
 
     <span class="c1"># Get first line of the class definition, excluding decorators. This logic is only</span>
     <span class="c1"># needed for Python &gt;= 3.9; in 3.8, we can simply use</span>
@@ -484,6 +497,8 @@
 
     <span class="n">comments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">current_actual_line</span> <span class="o">=</span> <span class="n">field_data</span><span class="o">.</span><span class="n">actual_line</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">directly_above_field</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">is_sphinx_doc_comment</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">while</span> <span class="n">current_actual_line</span> <span class="ow">in</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens_from_actual_line</span><span class="p">:</span>
         <span class="n">actual_line_tokens</span> <span class="o">=</span> <span class="n">tokenization</span><span class="o">.</span><span class="n">tokens_from_actual_line</span><span class="p">[</span><span class="n">current_actual_line</span><span class="p">]</span>
 
@@ -504,14 +519,22 @@
         <span class="p">):</span>
             <span class="p">(</span><span class="n">comment_token</span><span class="p">,)</span> <span class="o">=</span> <span class="n">actual_line_tokens</span>
             <span class="k">assert</span> <span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)</span>
-            <span class="n">comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+            <span class="k">if</span> <span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#:&quot;</span><span class="p">):</span>  <span class="c1"># Sphinx autodoc-style comment.</span>
+                <span class="c1"># https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#directive-autoattribute</span>
+                <span class="n">comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+                <span class="n">is_sphinx_doc_comment</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">comments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comment_token</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Comments should be contiguous.</span>
             <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># This comment is not directly above the current field.</span>
+            <span class="n">directly_above_field</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="n">current_actual_line</span> <span class="o">-=</span> <span class="mi">1</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">is_sphinx_doc_comment</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">directly_above_field</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">comments</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="kc">None</span></div>
