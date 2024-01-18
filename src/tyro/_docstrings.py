@@ -200,7 +200,11 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     if final_token_on_line.token_type == tokenize.COMMENT:
         comment: str = final_token_on_line.content
         assert comment.startswith("#")
-        return _strings.remove_single_line_breaks(comment[1:].strip())
+        if comment.startswith("#:"):  # Sphinx autodoc-style comment.
+            # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#directive-autoattribute
+            return _strings.remove_single_line_breaks(comment[2:].strip())
+        else:
+            return _strings.remove_single_line_breaks(comment[1:].strip())
 
     # Check for comments that come before the field. This is intentionally written to
     # support comments covering multiple (grouped) fields, for example:
@@ -211,7 +215,16 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     #     beta2: float
     #
     # In this case, 'Optimizer hyperparameters' will be treated as the docstring for all
-    # 3 fields.
+    # 3 fields. There are tradeoffs we are making here.
+    #
+    # The exception this is Sphinx-style comments:
+    #
+    #     #: The learning rate.
+    #     learning_rate: float
+    #     beta1: float
+    #     beta2: float
+    #
+    # Where, by convention the comment only applies to the field that directly follows it.
 
     # Get first line of the class definition, excluding decorators. This logic is only
     # needed for Python >= 3.9; in 3.8, we can simply use
@@ -225,6 +238,8 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
 
     comments: List[str] = []
     current_actual_line = field_data.actual_line - 1
+    directly_above_field = True
+    is_sphinx_doc_comment = False
     while current_actual_line in tokenization.tokens_from_actual_line:
         actual_line_tokens = tokenization.tokens_from_actual_line[current_actual_line]
 
@@ -245,14 +260,22 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
         ):
             (comment_token,) = actual_line_tokens
             assert comment_token.content.startswith("#")
-            comments.append(comment_token.content[1:].strip())
+            if comment_token.content.startswith("#:"):  # Sphinx autodoc-style comment.
+                # https://www.sphinx-doc.org/en/master/usage/extensions/autodoc.html#directive-autoattribute
+                comments.append(comment_token.content[2:].strip())
+                is_sphinx_doc_comment = True
+            else:
+                comments.append(comment_token.content[1:].strip())
         elif len(comments) > 0:
             # Comments should be contiguous.
             break
+        else:
+            # This comment is not directly above the current field.
+            directly_above_field = False
 
         current_actual_line -= 1
 
-    if len(comments) > 0:
+    if len(comments) > 0 and not (is_sphinx_doc_comment and not directly_above_field):
         return _strings.remove_single_line_breaks("\n".join(reversed(comments)))
 
     return None
