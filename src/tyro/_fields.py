@@ -32,7 +32,6 @@ from typing import (
 
 import docstring_parser
 import typing_extensions
-from pydantic.v1.fields import is_finalvar_with_default_val
 from typing_extensions import (
     Annotated,
     NotRequired,
@@ -475,7 +474,7 @@ def _field_list_from_typeddict(
         is_default_from_default_instance = False
         if valid_default_instance and name in cast(dict, default_instance):
             default = cast(dict, default_instance)[name]
-            ise_default_from_default_instance = True
+            is_default_from_default_instance = True
         elif typ_origin is Required and total is False:
             # Support total=False.
             default = MISSING_PROP
