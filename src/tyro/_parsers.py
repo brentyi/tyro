@@ -493,10 +493,28 @@ class SubparsersSpecification:
                 )
 
             # If names match, borrow subcommand default from field default.
-            if default_name == subcommand_name:
+            if default_name == subcommand_name and (
+                field.is_default_from_default_instance
+                or subcommand_config.default in _fields.MISSING_SINGLETONS
+            ):
                 subcommand_config = dataclasses.replace(
                     subcommand_config, default=field.default
                 )
+
+            # Strip the subcommand config from the option type.
+            option_origin, annotations = _resolver.unwrap_annotated(option)
+            annotations = tuple(
+                a
+                for a in annotations
+                if not isinstance(a, _confstruct._SubcommandConfiguration)
+            )
+            if len(annotations) == 0:
+                option = option_origin
+            else:
+                option = Annotated.__class_getitem__(  # type: ignore
+                    (option_origin,) + annotations
+                )
+
             subparser = ParserSpecification.from_callable_or_type(
                 (
                     # Recursively apply markers.
