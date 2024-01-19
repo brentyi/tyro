@@ -147,15 +147,7 @@ class ParserSpecification:
                         subparsers, nested_parser.subparsers
                     )
 
-                # Include nested strings.
-                for (
-                    k,
-                    v,
-                ) in nested_parser.helptext_from_intern_prefixed_field_name.items():
-                    helptext_from_intern_prefixed_field_name[
-                        _strings.make_field_name([field.intern_name, k])
-                    ] = v
-
+                # Helptext for this field; used as description for grouping arguments.
                 class_field_name = _strings.make_field_name([field.intern_name])
                 if field.helptext is not None:
                     helptext_from_intern_prefixed_field_name[
