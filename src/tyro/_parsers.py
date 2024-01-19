@@ -493,9 +493,9 @@ class SubparsersSpecification:
                 )
 
             # If names match, borrow subcommand default from field default.
-            if (
-                default_name == subcommand_name
-                and field.is_default_from_default_instance
+            if default_name == subcommand_name and (
+                field.is_default_from_default_instance
+                or subcommand_config.default in _fields.MISSING_SINGLETONS
             ):
                 subcommand_config = dataclasses.replace(
                     subcommand_config, default=field.default
