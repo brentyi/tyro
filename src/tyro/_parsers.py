@@ -502,7 +502,7 @@ class SubparsersSpecification:
                 )
 
             # Strip the subcommand config from the option type.
-            option_origin, annotations = _resolver.unwrap_annotated(option)
+            option_origin, annotations = _resolver.unwrap_annotated(option)  # type: ignore
             annotations = tuple(
                 a
                 for a in annotations
