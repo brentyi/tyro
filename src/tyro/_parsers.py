@@ -241,8 +241,6 @@ class ParserSpecification:
     def apply_args(
         self,
         parser: argparse.ArgumentParser,
-        intern_prefix: str = "",
-        extern_prefix: str = "",
         parent: Optional[ParserSpecification] = None,
     ) -> None:
         """Create defined arguments and subparsers."""
@@ -279,26 +277,12 @@ class ParserSpecification:
                     else None
                 )
                 group_from_prefix[arg.extern_prefix] = parser.add_argument_group(
-                    format_group_name(
-                        _strings.make_field_name([extern_prefix, arg.extern_prefix])
-                    ),
+                    format_group_name(arg.extern_prefix),
                     description=description,
                 )
 
         # Add each argument.
         for arg in self.args:
-            full_arg_intern_prefix = _strings.make_field_name(
-                [intern_prefix, arg.intern_prefix]
-            )
-            full_arg_extern_prefix = _strings.make_field_name(
-                [extern_prefix, arg.extern_prefix]
-            )
-            arg = dataclasses.replace(
-                arg,
-                intern_prefix=full_arg_intern_prefix,
-                extern_prefix=full_arg_extern_prefix,
-            )
-
             if arg.field.is_positional():
                 arg.add_argument(positional_group)
                 continue
@@ -312,12 +296,7 @@ class ParserSpecification:
                 arg.add_argument(group_from_prefix[""])
 
         for child in self.child_from_prefix.values():
-            child.apply_args(
-                parser,
-                intern_prefix=intern_prefix,
-                extern_prefix=extern_prefix,
-                parent=self,
-            )
+            child.apply_args(parser, parent=self)
 
 
 def handle_field(
@@ -433,9 +412,7 @@ class SubparsersSpecification:
         options = [
             (
                 # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy)
-                if o is type(None)
-                else o
+                cast(Callable, none_proxy) if o is type(None) else o
             )
             for o in options
         ]
@@ -609,9 +586,7 @@ class SubparsersSpecification:
         description = (
             # We use `None` instead of an empty string to prevent a line break from
             # being created where the description would be.
-            " ".join(description_parts)
-            if len(description_parts) > 0
-            else None
+            " ".join(description_parts) if len(description_parts) > 0 else None
         )
 
         return SubparsersSpecification(
