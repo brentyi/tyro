@@ -174,6 +174,9 @@ def recursive_arg_search(
                     + (1 if subparser_name in args else -0.001),
                 )
 
+        for child in parser_spec.child_from_prefix.values():
+            _recursive_arg_search(child, prog, subcommand_match_score)
+
     _recursive_arg_search(parser_spec, prog, 0)
 
     return arguments, has_subcommands, same_exists
