@@ -178,3 +178,35 @@ def test_base_configs_nested() -> None:
         ),
         DataConfig(2),
     )
+
+
+def test_pernicious_override():
+    """From: https://github.com/nerfstudio-project/nerfstudio/issues/2789
+
+    Situation where we:
+        - have a default value in the config class
+        - override that default value with a subcommand annotation
+        - override it again with a default instance
+    """
+    assert (
+        tyro.cli(
+            BaseConfig,
+            default=BaseConfig(
+                "test",
+                "test",
+                ExperimentConfig(
+                    dataset="mnist",
+                    optimizer=AdamOptimizer(),
+                    batch_size=2048,
+                    num_layers=4,
+                    units=64,
+                    train_steps=30_000,
+                    seed=0,
+                    activation=nn.ReLU,
+                ),
+                DataConfig(0),
+            ),
+            args="small small-data".split(" "),
+        ).data_config.test
+        == 0
+    )
