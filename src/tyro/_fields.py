@@ -377,12 +377,14 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    f, _ = _resolver.unwrap_annotated(f, conf._confstruct._SubcommandConfiguration)
-    # f, found_subcommand_configs = _resolver.unwrap_annotated(
-    #     f, conf._confstruct._SubcommandConfiguration
-    # )
-    # if len(found_subcommand_configs) > 0:
-    #     default_instance = found_subcommand_configs[0].default
+    # TODO: this is needed when field_list_from_callable() is called in _calling.py.
+    # It's basically duplicated from (completely separate!) logic in
+    # _parsers.py, which is risky and might caused edge cases.
+    f, found_subcommand_configs = _resolver.unwrap_annotated(
+        f, conf._confstruct._SubcommandConfiguration
+    )
+    if len(found_subcommand_configs) > 0:
+        default_instance = found_subcommand_configs[0].default
 
     # Unwrap generics.
     f, type_from_typevar = _resolver.resolve_generic_types(f)
@@ -532,7 +534,6 @@ def _field_list_from_namedtuple(
     for name, typ in _resolver.get_type_hints(cls, include_extras=True).items():
         # Get default, with priority for `default_instance`.
         default = field_defaults.get(name, MISSING_NONPROP)
-        is_default_from_default_instance = False
         if hasattr(default_instance, name):
             default = getattr(default_instance, name)
         if default_instance is MISSING_PROP:
@@ -543,7 +544,7 @@ def _field_list_from_namedtuple(
                 name=name,
                 type_or_callable=typ,
                 default=default,
-                is_default_from_default_instance=is_default_from_default_instance,
+                is_default_from_default_instance=True,
                 helptext=_docstrings.get_field_docstring(cls, name),
             )
         )
