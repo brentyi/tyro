@@ -775,7 +775,7 @@
                 <span class="p">)</span>
 
             <span class="c1"># Strip the subcommand config from the option type.</span>
-            <span class="n">option_origin</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+            <span class="n">option_origin</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
             <span class="n">annotations</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
                 <span class="n">a</span>
                 <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">annotations</span>
