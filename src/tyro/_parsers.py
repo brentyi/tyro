@@ -43,7 +43,9 @@ class ParserSpecification:
     f: Callable
     description: str
     args: List[_arguments.ArgumentDefinition]
-    helptext_from_nested_class_field_name: Dict[str, Optional[str]]
+    field_list: List[_fields.FieldDefinition]
+    child_from_prefix: Dict[str, ParserSpecification]
+    helptext_from_intern_prefixed_field_name: Dict[str, Optional[str]]
 
     # We have two mechanics for tracking subparser groups:
     # - A single subparser group, which is what gets added in the tree structure built
@@ -105,6 +107,8 @@ class ParserSpecification:
         args = []
         helptext_from_intern_prefixed_field_name: Dict[str, Optional[str]] = {}
 
+        child_from_prefix: Dict[str, ParserSpecification] = {}
+
         subparsers = None
         subparsers_from_prefix = {}
 
@@ -129,10 +133,10 @@ class ParserSpecification:
             elif isinstance(field_out, ParserSpecification):
                 # Handle nested parsers.
                 nested_parser = field_out
+                child_from_prefix[field_out.intern_prefix] = nested_parser
 
                 if nested_parser.has_required_args:
                     has_required_args = True
-                args.extend(nested_parser.args)
 
                 # Include nested subparsers.
                 if nested_parser.subparsers is not None:
@@ -147,7 +151,7 @@ class ParserSpecification:
                 for (
                     k,
                     v,
-                ) in nested_parser.helptext_from_nested_class_field_name.items():
+                ) in nested_parser.helptext_from_intern_prefixed_field_name.items():
                     helptext_from_intern_prefixed_field_name[
                         _strings.make_field_name([field.intern_name, k])
                     ] = v
@@ -185,7 +189,9 @@ class ParserSpecification:
                 else _docstrings.get_callable_description(f)
             ),
             args=args,
-            helptext_from_nested_class_field_name=helptext_from_intern_prefixed_field_name,
+            field_list=field_list,
+            child_from_prefix=child_from_prefix,
+            helptext_from_intern_prefixed_field_name=helptext_from_intern_prefixed_field_name,
             subparsers=subparsers,
             subparsers_from_intern_prefix=subparsers_from_prefix,
             intern_prefix=intern_prefix,
@@ -232,7 +238,13 @@ class ParserSpecification:
 
         return leaves
 
-    def apply_args(self, parser: argparse.ArgumentParser) -> None:
+    def apply_args(
+        self,
+        parser: argparse.ArgumentParser,
+        intern_prefix: str = "",
+        extern_prefix: str = "",
+        parent: Optional[ParserSpecification] = None,
+    ) -> None:
         """Create defined arguments and subparsers."""
 
         # Generate helptext.
@@ -259,16 +271,34 @@ class ParserSpecification:
                 arg.lowered.help is not argparse.SUPPRESS
                 and arg.extern_prefix not in group_from_prefix
             ):
-                description = self.helptext_from_nested_class_field_name.get(
-                    arg.extern_prefix
+                description = (
+                    parent.helptext_from_intern_prefixed_field_name.get(
+                        arg.intern_prefix
+                    )
+                    if parent is not None
+                    else None
                 )
                 group_from_prefix[arg.extern_prefix] = parser.add_argument_group(
-                    format_group_name(arg.extern_prefix),
+                    format_group_name(
+                        _strings.make_field_name([extern_prefix, arg.extern_prefix])
+                    ),
                     description=description,
                 )
 
         # Add each argument.
         for arg in self.args:
+            full_arg_intern_prefix = _strings.make_field_name(
+                [intern_prefix, arg.intern_prefix]
+            )
+            full_arg_extern_prefix = _strings.make_field_name(
+                [extern_prefix, arg.extern_prefix]
+            )
+            arg = dataclasses.replace(
+                arg,
+                intern_prefix=full_arg_intern_prefix,
+                extern_prefix=full_arg_extern_prefix,
+            )
+
             if arg.field.is_positional():
                 arg.add_argument(positional_group)
                 continue
@@ -280,6 +310,14 @@ class ParserSpecification:
                 # the helptext so it doesn't matter which group.
                 assert arg.lowered.help is argparse.SUPPRESS
                 arg.add_argument(group_from_prefix[""])
+
+        for child in self.child_from_prefix.values():
+            child.apply_args(
+                parser,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
+                parent=self,
+            )
 
 
 def handle_field(
@@ -395,7 +433,9 @@ class SubparsersSpecification:
         options = [
             (
                 # Cast seems unnecessary but needed in mypy... (1.4.1)
-                cast(Callable, none_proxy) if o is type(None) else o
+                cast(Callable, none_proxy)
+                if o is type(None)
+                else o
             )
             for o in options
         ]
@@ -534,9 +574,9 @@ class SubparsersSpecification:
             # Apply prefix to helptext in nested classes in subparsers.
             subparser = dataclasses.replace(
                 subparser,
-                helptext_from_nested_class_field_name={
+                helptext_from_intern_prefixed_field_name={
                     _strings.make_field_name([intern_prefix, k]): v
-                    for k, v in subparser.helptext_from_nested_class_field_name.items()
+                    for k, v in subparser.helptext_from_intern_prefixed_field_name.items()
                 },
             )
             parser_from_name[subcommand_name] = subparser
@@ -569,7 +609,9 @@ class SubparsersSpecification:
         description = (
             # We use `None` instead of an empty string to prevent a line break from
             # being created where the description would be.
-            " ".join(description_parts) if len(description_parts) > 0 else None
+            " ".join(description_parts)
+            if len(description_parts) > 0
+            else None
         )
 
         return SubparsersSpecification(

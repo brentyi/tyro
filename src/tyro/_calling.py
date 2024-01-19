@@ -36,11 +36,6 @@ def call_from_args(
 
     Returns the output of `f` and a set of used arguments."""
 
-    # Resolve the type of `f`, generate a field list.
-    f, type_from_typevar, field_list = _fields.field_list_from_callable(
-        f=f, default_instance=default_instance, support_single_arg_types=True
-    )
-
     positional_args: List[Any] = []
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
@@ -61,7 +56,7 @@ def call_from_args(
 
     any_arguments_provided = False
 
-    for field in field_list:
+    for field in parser_definition.field_list:
         value: Any
         prefixed_field_name = _strings.make_field_name(
             [field_name_prefix, field.intern_name]
@@ -120,16 +115,13 @@ def call_from_args(
                         " is a fixed argument that cannot be parsed",
                         arg,
                     )
-        elif (
-            prefixed_field_name
-            in parser_definition.helptext_from_nested_class_field_name
-        ):
+        elif prefixed_field_name in parser_definition.child_from_prefix:
             # Nested callable.
             if _resolver.unwrap_origin_strip_extras(field_type) is Union:
                 field_type = type(field.default)
             value, consumed_keywords_child = call_from_args(
                 field_type,
-                parser_definition,
+                parser_definition.child_from_prefix[prefixed_field_name],
                 field.default,
                 value_from_prefixed_field_name,
                 field_name_prefix=prefixed_field_name,

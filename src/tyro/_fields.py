@@ -41,6 +41,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -48,7 +49,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -377,16 +377,8 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    # TODO: this is needed when field_list_from_callable() is called in _calling.py.
-    # It's basically duplicated from (completely separate!) logic in
-    # _parsers.py, which is risky and might caused edge cases.
-    f, found_subcommand_configs = _resolver.unwrap_annotated(
-        f, conf._confstruct._SubcommandConfiguration
-    )
-    if len(found_subcommand_configs) > 0:
-        default_instance = found_subcommand_configs[0].default
-
     # Unwrap generics.
+    f = _resolver.unwrap_annotated(f)[0]
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.apply_type_from_typevar(f, type_from_typevar)
     f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)

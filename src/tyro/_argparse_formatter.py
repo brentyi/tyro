@@ -67,7 +67,9 @@ def set_accent_color(accent_color: Optional[str]) -> None:
     THEME.helptext = Style(dim=True)
     THEME.helptext_required = Style(color="bright_red", bold=True)
     THEME.helptext_default = Style(
-        color="cyan" if accent_color != "cyan" else "magenta"
+        color="cyan"
+        if accent_color != "cyan"
+        else "magenta"
         # Another option: make default color match accent color. This is maybe more
         # visually consistent, but harder to read.
         # color=accent_color if accent_color is not None else "cyan",
@@ -173,6 +175,9 @@ def recursive_arg_search(
                     subcommand_match_score=subcommand_match_score
                     + (1 if subparser_name in args else -0.001),
                 )
+
+        for child in parser_spec.child_from_prefix.values():
+            _recursive_arg_search(child, prog, subcommand_match_score)
 
     _recursive_arg_search(parser_spec, prog, 0)
 
