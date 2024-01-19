@@ -40,6 +40,11 @@ Module Contents
 
       
 
+   .. py:attribute:: is_default_from_default_instance
+      :type: bool
+
+      
+
    .. py:attribute:: helptext
       :type: Optional[str]
 
@@ -68,7 +73,7 @@ Module Contents
    .. py:method:: __post_init__()
 
 
-   .. py:method:: make(name: str, type_or_callable: Union[tyro._typing.TypeForm[Any], Callable], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = ())
+   .. py:method:: make(name: str, type_or_callable: Union[tyro._typing.TypeForm[Any], Callable], default: Any, is_default_from_default_instance: bool, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = ())
       :staticmethod:
 
 

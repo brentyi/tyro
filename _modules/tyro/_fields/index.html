@@ -318,6 +318,10 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Type or callable for this field. This should have all Annotated[] annotations</span>
 <span class="sd">    stripped.&quot;&quot;&quot;</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="c1"># We need to record whether defaults are from default instances to</span>
+    <span class="c1"># determine if they should override the default in</span>
+    <span class="c1"># tyro.conf.subcommand(default=...).</span>
+    <span class="n">is_default_from_default_instance</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
     <span class="n">custom_constructor</span><span class="p">:</span> <span class="nb">bool</span>
@@ -346,6 +350,7 @@
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">type_or_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span>
         <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+        <span class="n">is_default_from_default_instance</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">call_argname_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
@@ -386,6 +391,7 @@
             <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="k">else</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">(),</span>
             <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
             <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">inferred_markers</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
             <span class="n">custom_constructor</span><span class="o">=</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
@@ -577,6 +583,7 @@
                         <span class="n">extern_name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>  <span class="c1"># Doesn&#39;t matter.</span>
                         <span class="n">type_or_callable</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+                        <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                         <span class="n">custom_constructor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                         <span class="n">markers</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span>
@@ -663,6 +670,9 @@
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
+    <span class="c1"># TODO: this is needed when field_list_from_callable() is called in _calling.py.</span>
+    <span class="c1"># It&#39;s basically duplicated from (completely separate!) logic in</span>
+    <span class="c1"># _parsers.py, which is risky and might caused edge cases.</span>
     <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
     <span class="p">)</span>
@@ -756,8 +766,10 @@
     <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">valid_default_instance</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">):</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)[</span><span class="n">name</span><span class="p">]</span>
+            <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">elif</span> <span class="n">typ_origin</span> <span class="ow">is</span> <span class="n">Required</span> <span class="ow">and</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="c1"># Support total=False.</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
@@ -793,6 +805,7 @@
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -824,6 +837,7 @@
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -855,7 +869,9 @@
         <span class="k">if</span> <span class="n">is_flax_module</span> <span class="ow">and</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">):</span>
             <span class="k">continue</span>
 
-        <span class="n">default</span> <span class="o">=</span> <span class="n">_get_dataclass_field_default</span><span class="p">(</span><span class="n">dc_field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="n">default</span><span class="p">,</span> <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="n">_get_dataclass_field_default</span><span class="p">(</span>
+            <span class="n">dc_field</span><span class="p">,</span> <span class="n">default_instance</span>
+        <span class="p">)</span>
 
         <span class="c1"># Try to get helptext from field metadata. This is also intended to be</span>
         <span class="c1"># compatible with HuggingFace-style config objects.</span>
@@ -872,6 +888,7 @@
                 <span class="n">name</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -923,7 +940,7 @@
             <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-            <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v1_field_default</span><span class="p">(</span>
+            <span class="n">default</span><span class="p">,</span> <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="n">_get_pydantic_v1_field_default</span><span class="p">(</span>
                 <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pd1_field</span><span class="p">,</span> <span class="n">default_instance</span>
             <span class="p">)</span>
 
@@ -932,6 +949,7 @@
                     <span class="n">name</span><span class="o">=</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                     <span class="n">type_or_callable</span><span class="o">=</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">outer_type_</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                    <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -942,7 +960,9 @@
             <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
-            <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v2_field_default</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pd2_field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+            <span class="n">default</span><span class="p">,</span> <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="n">_get_pydantic_v2_field_default</span><span class="p">(</span>
+                <span class="n">name</span><span class="p">,</span> <span class="n">pd2_field</span><span class="p">,</span> <span class="n">default_instance</span>
+            <span class="p">)</span>
 
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
@@ -953,6 +973,7 @@
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
                     <span class="k">else</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                    <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
@@ -980,9 +1001,11 @@
         <span class="c1"># Default handling.</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">name</span>
         <span class="n">default</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">default</span>
+        <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
@@ -1001,6 +1024,7 @@
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">attr_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -1047,6 +1071,7 @@
                 <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                 <span class="c1"># This should really set the positional marker, but the CLI is more</span>
                 <span class="c1"># intuitive for mixed nested/non-nested types in tuples when we stick</span>
@@ -1132,6 +1157,7 @@
                 <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">contained_type</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default_i</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
@@ -1153,6 +1179,7 @@
                 <span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span> <span class="k">else</span> <span class="n">k</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">),</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="c1"># Dictionary specific key:</span>
                 <span class="n">call_argname_override</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
@@ -1277,6 +1304,7 @@
                 <span class="c1"># Note that param.annotation doesn&#39;t resolve forward references.</span>
                 <span class="n">type_or_callable</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
                 <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
             <span class="p">)</span>
@@ -1302,12 +1330,12 @@
 
 <span class="k">def</span> <span class="nf">_get_dataclass_field_default</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a dataclass field.&quot;&quot;&quot;</span>
     <span class="c1"># If the dataclass&#39;s parent is explicitly marked MISSING, mark this field as missing</span>
     <span class="c1"># as well.</span>
     <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">MISSING_PROP</span>
+        <span class="k">return</span> <span class="n">MISSING_PROP</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="c1"># Try grabbing default from parent instance.</span>
     <span class="k">if</span> <span class="p">(</span>
@@ -1316,7 +1344,7 @@
     <span class="p">):</span>
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
@@ -1332,7 +1360,7 @@
         <span class="c1"># _types_, not just instances.</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
             <span class="n">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">default</span>
+        <span class="k">return</span> <span class="n">default</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="c1"># Populate default from `dataclasses.field(default_factory=...)`.</span>
     <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
@@ -1346,18 +1374,18 @@
         <span class="c1"># before this method is called.</span>
         <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span>
     <span class="p">):</span>
-        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">(),</span> <span class="kc">False</span>
 
     <span class="c1"># Otherwise, no default. This is different from MISSING, because MISSING propagates</span>
     <span class="c1"># to children. We could revisit this design to make it clearer.</span>
-    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
+    <span class="k">return</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="kc">False</span>
 
 
 <span class="k">def</span> <span class="nf">_get_pydantic_v1_field_default</span><span class="p">(</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">ModelField</span><span class="p">,</span>
     <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
 
     <span class="c1"># Try grabbing default from parent instance.</span>
@@ -1367,7 +1395,7 @@
     <span class="p">):</span>
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
@@ -1377,17 +1405,17 @@
             <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(),</span> <span class="kc">False</span>
 
     <span class="c1"># Otherwise, no default.</span>
-    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
+    <span class="k">return</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="kc">False</span>
 
 
 <span class="k">def</span> <span class="nf">_get_pydantic_v2_field_default</span><span class="p">(</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">FieldInfo</span><span class="p">,</span>
     <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
 
     <span class="c1"># Try grabbing default from parent instance.</span>
@@ -1397,7 +1425,7 @@
     <span class="p">):</span>
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
@@ -1407,10 +1435,10 @@
             <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">is_required</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="kc">False</span>
 
     <span class="c1"># Otherwise, no default.</span>
-    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
+    <span class="k">return</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="kc">False</span>
 </pre></div>
         </article>
       </div>
