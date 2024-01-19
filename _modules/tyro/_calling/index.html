@@ -295,11 +295,6 @@
 
 <span class="sd">    Returns the output of `f` and a set of used arguments.&quot;&quot;&quot;</span>
 
-    <span class="c1"># Resolve the type of `f`, generate a field list.</span>
-    <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
-        <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span>
-    <span class="p">)</span>
-
     <span class="n">positional_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">consumed_keywords</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -320,7 +315,7 @@
 
     <span class="n">any_arguments_provided</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">field_list</span><span class="p">:</span>
         <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
         <span class="n">prefixed_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
             <span class="p">[</span><span class="n">field_name_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
@@ -379,16 +374,13 @@
                         <span class="s2">&quot; is a fixed argument that cannot be parsed&quot;</span><span class="p">,</span>
                         <span class="n">arg</span><span class="p">,</span>
                     <span class="p">)</span>
-        <span class="k">elif</span> <span class="p">(</span>
-            <span class="n">prefixed_field_name</span>
-            <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">helptext_from_nested_class_field_name</span>
-        <span class="p">):</span>
+        <span class="k">elif</span> <span class="n">prefixed_field_name</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="p">:</span>
             <span class="c1"># Nested callable.</span>
             <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">field_type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
                 <span class="n">field_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
             <span class="n">value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">call_from_args</span><span class="p">(</span>
                 <span class="n">field_type</span><span class="p">,</span>
-                <span class="n">parser_definition</span><span class="p">,</span>
+                <span class="n">parser_definition</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="p">[</span><span class="n">prefixed_field_name</span><span class="p">],</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
                 <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>

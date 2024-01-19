@@ -38,7 +38,17 @@ Module Contents
 
       
 
-   .. py:attribute:: helptext_from_nested_class_field_name
+   .. py:attribute:: field_list
+      :type: List[tyro._fields.FieldDefinition]
+
+      
+
+   .. py:attribute:: child_from_prefix
+      :type: Dict[str, ParserSpecification]
+
+      
+
+   .. py:attribute:: helptext_from_intern_prefixed_field_name
       :type: Dict[str, Optional[str]]
 
       
@@ -84,7 +94,7 @@ Module Contents
       
       Create defined arguments and subparsers.
 
-   .. py:method:: apply_args(parser: argparse.ArgumentParser) -> None
+   .. py:method:: apply_args(parser: argparse.ArgumentParser, parent: Optional[ParserSpecification] = None) -> None
 
       
       Create defined arguments and subparsers.
