@@ -521,9 +521,7 @@ def test_subparser_with_default_bad_alt() -> None:
     with pytest.warns(UserWarning):
         assert tyro.cli(
             Union[A, Annotated[B, None]], default=C(3), args=["c", "--c", "2"]
-        ) == C(
-            2
-        )  # type: ignore
+        ) == C(2)  # type: ignore
 
 
 def test_optional_subparser() -> None:
