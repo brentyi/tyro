@@ -377,8 +377,16 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    # Check for default instances in subcommand configs. This is needed for
+    # is_nested_type() when arguments are not valid without a default, and this
+    # default is specified in the subcommand config.
+    f, found_subcommand_configs = _resolver.unwrap_annotated(
+        f, conf._confstruct._SubcommandConfiguration
+    )
+    if len(found_subcommand_configs) > 0:
+        default_instance = found_subcommand_configs[0].default
+
     # Unwrap generics.
-    f = _resolver.unwrap_annotated(f)[0]
     f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.apply_type_from_typevar(f, type_from_typevar)
     f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)

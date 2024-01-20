@@ -226,6 +226,58 @@ def test_subparser_in_nested_with_metadata() -> None:
     ) == Parent(Nested1(Nested2(B(7))))
 
 
+def test_subparser_in_nested_with_metadata_suppressed() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class A:
+        a: tyro.conf.Suppress[int]
+
+    @dataclasses.dataclass
+    class B:
+        b: int
+        a: A = A(5)
+
+    @dataclasses.dataclass
+    class Nested2:
+        subcommand: Union[
+            Annotated[A, tyro.conf.subcommand("command-a", default=A(7))],
+            Annotated[B, tyro.conf.subcommand("command-b", default=B(9))],
+        ]
+
+    @dataclasses.dataclass
+    class Nested1:
+        nested2: Nested2
+
+    @dataclasses.dataclass
+    class Parent:
+        nested1: Nested1
+
+    assert tyro.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-a".split(" "),
+    ) == Parent(Nested1(Nested2(A(7))))
+    assert tyro.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(A(3))))
+
+    assert tyro.cli(
+        Parent,
+        args="nested1.nested2.subcommand:command-b".split(" "),
+    ) == Parent(Nested1(Nested2(B(9))))
+    assert tyro.cli(
+        Parent,
+        args=(
+            "nested1.nested2.subcommand:command-b --nested1.nested2.subcommand.b 7".split(
+                " "
+            )
+        ),
+    ) == Parent(Nested1(Nested2(B(7))))
+
+
 def test_subparser_in_nested_with_metadata_generic() -> None:
     @dataclasses.dataclass(frozen=True)
     class A:
