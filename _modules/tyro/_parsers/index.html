@@ -783,6 +783,21 @@
                     <span class="n">subcommand_config</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
                 <span class="p">)</span>
 
+            <span class="c1"># Strip the subcommand config from the option type.</span>
+            <span class="c1"># Relevant: https://github.com/brentyi/tyro/pull/117</span>
+            <span class="n">option_origin</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">annotations</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">a</span>
+                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">annotations</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">option</span> <span class="o">=</span> <span class="n">option_origin</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">option</span> <span class="o">=</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                    <span class="p">(</span><span class="n">option_origin</span><span class="p">,)</span> <span class="o">+</span> <span class="n">annotations</span>
+                <span class="p">)</span>
+
             <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="c1"># Recursively apply markers.</span>
