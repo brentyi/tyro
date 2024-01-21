@@ -48,6 +48,31 @@ def test_helptext() -> None:
     assert "Documentation 3 (default: 3)" in helptext
 
 
+def test_helptext_sphinx_autodoc_style() -> None:
+    @dataclasses.dataclass
+    class Helptext:
+        """This docstring should be printed as a description."""
+
+        x: int  #: Documentation 1
+
+        #:Documentation 2
+        y: Annotated[int, "ignored"]
+        z: int = 3
+
+    helptext = get_helptext(Helptext)
+    assert cast(str, helptext) in helptext
+    assert "x INT" in helptext
+    assert "y INT" in helptext
+    assert "z INT" in helptext
+    assert "Documentation 1 (required)" in helptext
+    assert ": Documentation 1" not in helptext
+    assert "Documentation 2 (required)" in helptext
+    assert ":Documentation 2" not in helptext
+
+    # :Documentation 2 should not be applied to `z`.
+    assert helptext.count("Documentation 2") == 1
+
+
 def test_helptext_from_class_docstring() -> None:
     @dataclasses.dataclass
     class Helptext2:
