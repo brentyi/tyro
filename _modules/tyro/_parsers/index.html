@@ -353,7 +353,7 @@
         <span class="c1"># superclass.</span>
         <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">parent_classes</span> <span class="ow">and</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Found a cyclic dataclass dependency with type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Found a cyclic dependency with type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># TODO: we are abusing the (minor) distinctions between types, classes, and</span>
