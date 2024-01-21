@@ -62,15 +62,16 @@ def resolve_generic_types(
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(unwrap_newtype(cls)[0])
-    type_from_typevar = {}
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
 
     # Support typing.Self.
+    # We'll do this by pretending that `Self` is a TypeVar...
     if hasattr(cls, "__self__"):
         self_type = getattr(cls, "__self__")
         if inspect.isclass(self_type):
-            type_from_typevar[Self] = self_type
+            type_from_typevar[cast(TypeVar, Self)] = self_type
         else:
-            type_from_typevar[Self] = self_type.__class__
+            type_from_typevar[cast(TypeVar, Self)] = self_type.__class__
 
     if (
         # Apply some heuristics for generic types. Should revisit this.
