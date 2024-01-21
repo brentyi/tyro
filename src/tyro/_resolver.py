@@ -2,6 +2,7 @@
 import collections.abc
 import copy
 import dataclasses
+import inspect
 import sys
 import types
 import warnings
@@ -20,7 +21,7 @@ from typing import (
     cast,
 )
 
-from typing_extensions import Annotated, get_args, get_origin, get_type_hints
+from typing_extensions import Annotated, Self, get_args, get_origin, get_type_hints
 
 from . import _fields, _unsafe_cache
 from ._typing import TypeForm
@@ -61,8 +62,16 @@ def resolve_generic_types(
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(unwrap_newtype(cls)[0])
-
     type_from_typevar = {}
+
+    # Support typing.Self.
+    if hasattr(cls, "__self__"):
+        self_type = getattr(cls, "__self__")
+        if inspect.isclass(self_type):
+            type_from_typevar[Self] = self_type
+        else:
+            type_from_typevar[Self] = self_type.__class__
+
     if (
         # Apply some heuristics for generic types. Should revisit this.
         origin_cls is not None
