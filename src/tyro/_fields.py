@@ -41,6 +41,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -48,7 +49,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -318,6 +318,9 @@ def field_list_from_callable(
         typ = _resolver.type_from_typevar_constraints(typ)
         typ = _resolver.narrow_collection_types(typ, field.default)
         typ = _resolver.narrow_union_type(typ, field.default)
+        typ = _resolver.unwrap_newtype_and_narrow_subtypes(
+            field.type_or_callable, field.default
+        )
 
         # Check that the default value matches the final resolved type.
         # There's some similar Union-specific logic for this in narrow_union_type(). We
