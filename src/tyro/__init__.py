@@ -11,3 +11,7 @@ from ._instantiators import (
 # Deprecated interface.
 if not TYPE_CHECKING:
     from ._deprecated import *  # noqa
+
+
+# TODO: this should be synchronized automatically with the pyproject.toml.
+__version__ = "0.7.1"
