@@ -397,8 +397,6 @@
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">subparser_dest</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
-                <span class="n">default_instance</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span>
-                <span class="c1"># assert default_instance is not None</span>
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
