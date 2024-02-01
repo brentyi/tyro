@@ -138,8 +138,6 @@ def call_from_args(
                 subparser_name = get_value_from_arg(subparser_dest)
             else:
                 assert subparser_def.default_instance not in _fields.MISSING_SINGLETONS
-                default_instance = subparser_def.default_instance
-                # assert default_instance is not None
                 subparser_name = None
 
             if subparser_name is None:
