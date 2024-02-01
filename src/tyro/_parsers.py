@@ -331,6 +331,13 @@ def handle_field(
 
         # (2) Handle nested callables.
         if _fields.is_nested_type(field.type_or_callable, field.default):
+            field = dataclasses.replace(
+                field,
+                type_or_callable=_resolver.unwrap_newtype_and_narrow_subtypes(
+                    field.type_or_callable,
+                    field.default,
+                ),
+            )
             return ParserSpecification.from_callable_or_type(
                 (
                     # Recursively apply marker types.

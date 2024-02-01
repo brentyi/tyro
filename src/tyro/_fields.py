@@ -318,9 +318,6 @@ def field_list_from_callable(
         typ = _resolver.type_from_typevar_constraints(typ)
         typ = _resolver.narrow_collection_types(typ, field.default)
         typ = _resolver.narrow_union_type(typ, field.default)
-        typ = _resolver.unwrap_newtype_and_narrow_subtypes(
-            field.type_or_callable, field.default
-        )
 
         # Check that the default value matches the final resolved type.
         # There's some similar Union-specific logic for this in narrow_union_type(). We
