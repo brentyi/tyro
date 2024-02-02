@@ -238,7 +238,7 @@ MetadataType = TypeVar("MetadataType")
 
 def unwrap_annotated(
     typ: TypeOrCallable,
-    search_type: TypeForm[MetadataType] = Any,  # type: ignore
+    search_type: TypeForm[MetadataType] = cast(TypeForm[Any], Any),
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]:
     """Helper for parsing typing.Annotated types.
 
