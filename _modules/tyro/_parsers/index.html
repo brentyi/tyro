@@ -501,9 +501,6 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create defined arguments and subparsers.&quot;&quot;&quot;</span>
 
-        <span class="c1"># Generate helptext.</span>
-        <span class="n">parser</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
-
         <span class="c1"># Make argument groups.</span>
         <span class="k">def</span> <span class="nf">format_group_name</span><span class="p">(</span><span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s2">&quot; options&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
