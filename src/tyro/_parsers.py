@@ -237,9 +237,6 @@ class ParserSpecification:
     ) -> None:
         """Create defined arguments and subparsers."""
 
-        # Generate helptext.
-        parser.description = self.description
-
         # Make argument groups.
         def format_group_name(prefix: str) -> str:
             return (prefix + " options").strip()
