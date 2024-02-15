@@ -68,14 +68,22 @@ Dictionary inputs can be specified using either a standard ``Dict[K, V]`` annota
 
 .. raw:: html
 
-        <kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd>
+        <kbd>python 04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4</kbd>
 
-.. program-output:: python ../../examples/04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4
+.. program-output:: python ../../examples/04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd>
+        <kbd>python 04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4 --typed-dict-b.betas 0.9 0.999</kbd>
 
-.. program-output:: python ../../examples/04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999
+.. program-output:: python ../../examples/04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4 --typed-dict-b.betas 0.9 0.999
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/02_dictionaries.py --typed-dict-b.betas 0.9 0.999</kbd>
+
+.. program-output:: python ../../examples/04_additional/02_dictionaries.py --typed-dict-b.betas 0.9 0.999

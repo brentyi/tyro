@@ -328,32 +328,23 @@
 │                   (default: 0.999)                                         │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">╭─ Unrecognized options ───────────────────────────────────────────────────────╮
-│ Unrecognized options: --typed-dict.learning-rate                             │
-│ ──────────────────────────────────────────────────────────────────────────── │
-│ Perhaps you meant:                                                           │
-│     --typed-dict-a.learning-rate FLOAT                                       │
-│         (unset by default)                                                   │
-│     --typed-dict-b.learning-rate FLOAT                                       │
-│         NotRequired[] specifies that a particular key doesn't need to exist. │
-│         (unset by default)                                                   │
-│     --standard-dict.learning-rate FLOAT                                      │
-│         (default: 0.0003)                                                    │
-│ ──────────────────────────────────────────────────────────────────────────── │
-│ For full helptext, run 02_dictionaries.py --help                             │
-╰──────────────────────────────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">╭─ Required options ─────────────────────────────────────────╮
+│ The following arguments are required: --typed-dict-b.betas │
+│ ────────────────────────────────────────────────────────── │
+│ Argument helptext:                                         │
+│     --typed-dict-b.betas FLOAT FLOAT                       │
+│         (required)                                         │
+│ ────────────────────────────────────────────────────────── │
+│ For full helptext, run 02_dictionaries.py --help           │
+╰────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">╭─ Unrecognized options ───────────────────────────╮
-│ Unrecognized options: --typed-dict.betas         │
-│ ──────────────────────────────────────────────── │
-│ Perhaps you meant:                               │
-│     --typed-dict-a.betas FLOAT FLOAT             │
-│         (unset by default)                       │
-│     --typed-dict-b.betas FLOAT FLOAT             │
-│         (required)                               │
-│ ──────────────────────────────────────────────── │
-│ For full helptext, run 02_dictionaries.py --help │
-╰──────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4 --typed-dict-b.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">Typed dict A: {'learning_rate': 0.0003}
+Typed dict B: {'betas': (0.9, 0.999)}
+Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}</pre>
+<hr class="docutils" />
+<kbd>python 04_additional/02_dictionaries.py --typed-dict-b.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">Typed dict A: {}
+Typed dict B: {'betas': (0.9, 0.999)}
+Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}</pre>
 </section>
 
         </article>
