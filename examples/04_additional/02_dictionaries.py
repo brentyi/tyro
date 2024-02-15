@@ -5,8 +5,9 @@ Dictionary inputs can be specified using either a standard `Dict[K, V]` annotati
 
 Usage:
 `python ./02_dictionaries.py --help`
-`python ./02_dictionaries.py --typed-dict.learning-rate 3e-4`
-`python ./02_dictionaries.py --typed-dict.betas 0.9 0.999`
+`python ./02_dictionaries.py --typed-dict-a.learning-rate 3e-4`
+`python ./02_dictionaries.py --typed-dict-a.learning-rate 3e-4 --typed-dict-b.betas 0.9 0.999`
+`python ./02_dictionaries.py --typed-dict-b.betas 0.9 0.999`
 """
 
 from typing import Dict, Tuple, TypedDict
