@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import io
 import pathlib
@@ -16,6 +18,7 @@ def test_pydantic() -> None:
         s: str = "hello"
         f: float = Field(default_factory=lambda: 3.0)
         p: pathlib.Path
+        ignored: float = Field(default_factory=lambda: 3.0, init_var=False)
 
     # We can directly pass a dataclass to `tyro.cli()`:
     assert tyro.cli(
@@ -141,7 +144,7 @@ def test_pydantic_default_instance() -> None:
         x: int = 1
 
     class Outside(BaseModel):
-        i: Inside = Inside(x=2)
+        i: "Inside" = Inside(x=2)
 
     assert tyro.cli(Outside, args=[]).i.x == 2, (
         "Expected x value from the default instance",
@@ -165,15 +168,20 @@ def test_pydantic_nested_default_instance() -> None:
     assert tyro.cli(Outside, args=["--m.i.x", "3"]).m.i.x == 3
 
 
+# Updating forward references in Pydantic v1 requires that these classes are global.
+
+
+class InsideV1(v1.BaseModel):
+    x: int = 1
+
+
+class MiddleV1(v1.BaseModel):
+    i: InsideV1
+
+
 def test_pydantic_v1_nested_default_instance() -> None:
-    class Inside(v1.BaseModel):
-        x: int = 1
-
-    class Middle(v1.BaseModel):
-        i: Inside
-
     class Outside(v1.BaseModel):
-        m: Middle = Middle(i=Inside(x=2))
+        m: MiddleV1 = MiddleV1(i=InsideV1(x=2))
 
     assert tyro.cli(Outside, args=[]).m.i.x == 2, (
         "Expected x value from the default instance",
