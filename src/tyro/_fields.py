@@ -41,6 +41,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -48,7 +49,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -702,7 +702,7 @@ def _field_list_from_attrs(
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert attr is not None
 
-    # Resolve forward annotations in-place, if any exist.
+    # Resolve forward references in-place, if any exist.
     attr.resolve_types(cls)
 
     # Handle attr classes.
