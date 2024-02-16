@@ -995,9 +995,16 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
     <span class="k">assert</span> <span class="n">attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
+    <span class="c1"># Resolve forward references in-place, if any exist.</span>
+    <span class="n">attr</span><span class="o">.</span><span class="n">resolve_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
     <span class="c1"># Handle attr classes.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">attr_field</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="c1"># Skip fields with init=False.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">init</span><span class="p">:</span>
+            <span class="k">continue</span>
+
         <span class="c1"># Default handling.</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">name</span>
         <span class="n">default</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">default</span>
