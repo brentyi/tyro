@@ -18,6 +18,7 @@ def test_pydantic() -> None:
         s: str = "hello"
         f: float = Field(default_factory=lambda: 3.0)
         p: pathlib.Path
+        ignored: float = Field(default_factory=lambda: 3.0, init_var=False)
 
     # We can directly pass a dataclass to `tyro.cli()`:
     assert tyro.cli(
