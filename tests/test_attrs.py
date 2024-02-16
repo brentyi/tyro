@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import io
 import pathlib
@@ -109,6 +111,7 @@ def test_attrs_default_instance() -> None:
         i: int = attr.ib()
         s: str = attr.ib()
         f: float = attr.ib(default=1.0)
+        k: float = attr.ib(default=1.0)
 
     assert tyro.cli(
         ManyTypesB,

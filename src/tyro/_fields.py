@@ -702,9 +702,16 @@ def _field_list_from_attrs(
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
     assert attr is not None
 
+    # Resolve forward annotations in-place, if any exist.
+    attr.resolve_types(cls)
+
     # Handle attr classes.
     field_list = []
     for attr_field in attr.fields(cls):
+        # Skip fields with init=False.
+        if not attr_field.init:
+            continue
+
         # Default handling.
         name = attr_field.name
         default = attr_field.default
