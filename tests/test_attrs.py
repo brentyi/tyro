@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import contextlib
 import io
 import pathlib
@@ -18,6 +20,7 @@ def test_attrs_basic() -> None:
         s: str = attr.ib()
         f: float = attr.ib()
         p: pathlib.Path = attr.ib()
+        ignored: int = attr.ib(default=3, init=False)
 
     # We can directly pass a dataclass to `tyro.cli()`:
     assert tyro.cli(
@@ -109,6 +112,7 @@ def test_attrs_default_instance() -> None:
         i: int = attr.ib()
         s: str = attr.ib()
         f: float = attr.ib(default=1.0)
+        k: float = attr.ib(default=1.0)
 
     assert tyro.cli(
         ManyTypesB,
