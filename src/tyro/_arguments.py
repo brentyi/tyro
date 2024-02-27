@@ -489,7 +489,7 @@ def _rule_generate_helptext(
             default_text = f"(fixed to: {default_label})"
         elif lowered.action == "count":
             # Repeatable argument.
-            default_text = f"(repeatable)"
+            default_text = "(repeatable)"
         elif lowered.action == "append" and (
             default in _fields.MISSING_SINGLETONS or len(cast(tuple, default)) == 0
         ):
