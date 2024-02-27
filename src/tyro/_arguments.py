@@ -131,9 +131,9 @@ class ArgumentDefinition:
         # directly be used. This helps reduce the likelihood of issues with converting
         # the field default to a string format, then back to the desired type.
         action = kwargs.get("action", None)
-        if action != "append":
+        if action not in {"append", "count"}:
             kwargs["default"] = _fields.MISSING_NONPROP
-        elif action == BooleanOptionalAction:
+        elif action in {BooleanOptionalAction, "count"}:
             pass
         else:
             kwargs["default"] = []
@@ -192,6 +192,7 @@ class ArgumentDefinition:
             _rule_handle_boolean_flags,
             _rule_recursive_instantiator_from_type,
             _rule_convert_defaults_to_strings,
+            _rule_counters,
             _rule_generate_helptext,
             _rule_set_name_or_flag_and_dest,
             _rule_positional_special_handling,
@@ -404,6 +405,28 @@ def _rich_tag_if_enabled(x: str, tag: str) -> str:
     return x if not USE_RICH else f"[{tag}]{x}[/{tag}]"
 
 
+def _rule_counters(
+    arg: ArgumentDefinition,
+    lowered: LoweredArgumentDefinition,
+) -> LoweredArgumentDefinition:
+    """Handle counters, like -vvv for level-3 verbosity."""
+    if (
+        _markers.UseCounterAction in arg.field.markers
+        and arg.field.type_or_callable is int
+        and not arg.field.is_positional()
+    ):
+        return dataclasses.replace(
+            lowered,
+            metavar=None,
+            nargs=None,
+            action="count",
+            default=0,
+            required=False,
+            instantiator=lambda x: x,  # argparse will directly give us an int!
+        )
+    return lowered
+
+
 def _rule_generate_helptext(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
@@ -464,6 +487,9 @@ def _rule_generate_helptext(
             # Intentionally not quoted via shlex, since this can't actually be passed
             # in via the commandline.
             default_text = f"(fixed to: {default_label})"
+        elif lowered.action == "count":
+            # Repeatable argument.
+            default_text = f"(repeatable)"
         elif lowered.action == "append" and (
             default in _fields.MISSING_SINGLETONS or len(cast(tuple, default)) == 0
         ):
