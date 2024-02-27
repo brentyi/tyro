@@ -123,6 +123,10 @@ Can be applied to all variable-length sequences (`List[T]`, `Sequence[T]`,
 `Tuple[T, ...]`, etc), including dictionaries without default values.
 """
 
+UseCounterAction = Annotated[T, None]
+"""Use "counter" actions for integer arguments. Example usage: `verbose: UseCounterAction[int]`."""
+
+
 CallableType = TypeVar("CallableType", bound=Callable)
 
 # Dynamically generate marker singletons.
