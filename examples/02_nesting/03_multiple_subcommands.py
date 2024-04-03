@@ -12,7 +12,7 @@ Usage:
 from __future__ import annotations
 
 import dataclasses
-from typing import Literal, Tuple, Union
+from typing import Literal
 
 import tyro
 
@@ -37,7 +37,7 @@ class ImageNet:
 @dataclasses.dataclass
 class Adam:
     learning_rate: float = 1e-3
-    betas: Tuple[float, float] = (0.9, 0.999)
+    betas: tuple[float, float] = (0.9, 0.999)
 
 
 @dataclasses.dataclass
@@ -50,8 +50,8 @@ class Sgd:
 
 @tyro.conf.configure(tyro.conf.ConsolidateSubcommandArgs)
 def train(
-    dataset: Union[Mnist, ImageNet] = Mnist(),
-    optimizer: Union[Adam, Sgd] = Adam(),
+    dataset: Mnist | ImageNet = Mnist(),
+    optimizer: Adam | Sgd = Adam(),
 ) -> None:
     """Example training script.
 

@@ -13,7 +13,7 @@ Example using ``tyro.cli()`` to instantiate tuple types.
         :linenos:
 
 
-        from typing import NamedTuple, Tuple
+        from typing import NamedTuple
 
         import tyro
 
@@ -30,10 +30,10 @@ Example using ``tyro.cli()`` to instantiate tuple types.
             This should show up in the helptext!"""
 
             # Tuple types can contain raw values.
-            color: Tuple[int, int, int] = (255, 0, 0)
+            color: tuple[int, int, int] = (255, 0, 0)
 
             # Tuple types can contain nested structures.
-            two_colors: Tuple[Color, Color] = (Color(255, 0, 0), Color(0, 255, 0))
+            two_colors: tuple[Color, Color] = (Color(255, 0, 0), Color(0, 255, 0))
 
 
         if __name__ == "__main__":

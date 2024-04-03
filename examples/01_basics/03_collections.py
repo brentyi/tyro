@@ -1,8 +1,8 @@
 """Multi-value Arguments
 
-Arguments of both fixed and variable lengths can be annotated with standard Python
-collection types: `typing.List[T]`, `typing.Tuple[T1, T2]`, etc. In Python >=3.9,
-`list[T]` and `tuple[T]` are also supported.
+Arguments of both fixed and variable lengths can be annotated with standard
+Python collection types. For Python 3.7 and 3.8, we can use either
+`from __future__ import annotations` or`typing.List[T]`, `typing.Tuple[T1, T2]`, etc.
 
 Usage:
 `python ./03_collections.py --help`
@@ -12,20 +12,19 @@ Usage:
 
 import dataclasses
 import pathlib
-from typing import Tuple
 
 import tyro
 
 
 @dataclasses.dataclass(frozen=True)
 class TrainConfig:
-    # Example of a variable-length tuple. `typing.List`, `typing.Sequence`,
-    # `typing.Set`, `typing.Dict`, etc are all supported as well.
-    dataset_sources: Tuple[pathlib.Path, ...]
+    # Example of a variable-length tuple. `list[T]`, `set[T]`,
+    # `dict[K, V]`, etc are supported as well.
+    dataset_sources: tuple[pathlib.Path, ...]
     """Paths to load training data from. This can be multiple!"""
 
     # Fixed-length tuples are also okay.
-    image_dimensions: Tuple[int, int] = (32, 32)
+    image_dimensions: tuple[int, int] = (32, 32)
     """Height and width of some image data."""
 
 
