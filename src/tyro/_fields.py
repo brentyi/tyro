@@ -613,12 +613,16 @@ try:
 except ImportError:
     if not TYPE_CHECKING:
         pydantic = None  # type: ignore
+    else:
+        import pydantic
 
 try:
     from pydantic import v1 as pydantic_v1
 except ImportError:
     if not TYPE_CHECKING:
         pydantic_v1 = None  # type: ignore
+    else:
+        from pydantic import v1 as pydantic_v1
 
 
 def _is_pydantic(cls: TypeForm[Any]) -> bool:

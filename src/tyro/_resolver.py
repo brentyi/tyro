@@ -376,7 +376,7 @@ def get_type_hints_with_backported_syntax(
 
             # Get global namespace for classes.
             if globalns is None and hasattr(globalns, "__init__"):
-                globalns = getattr(obj.__init__, "__globals__", None)
+                globalns = getattr(getattr(obj, "__init__"), "__globals__", None)
 
             out = {
                 k: eval_type_backport(ForwardRef(v), globalns=globalns, localns={})
