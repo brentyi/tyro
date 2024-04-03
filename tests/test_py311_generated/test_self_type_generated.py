@@ -27,8 +27,7 @@ class TestClass:
     #     return x
 
 
-class TestSubclass(TestClass):
-    ...
+class TestSubclass(TestClass): ...
 
 
 def test_method() -> None:

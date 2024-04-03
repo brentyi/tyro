@@ -1,4 +1,5 @@
 """Utilities for resolving types and forward references."""
+
 import collections.abc
 import copy
 import dataclasses
@@ -21,7 +22,14 @@ from typing import (
     cast,
 )
 
-from typing_extensions import Annotated, Self, get_args, get_origin, get_type_hints
+from typing_extensions import (
+    Annotated,
+    ForwardRef,
+    Self,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 from . import _fields, _unsafe_cache
 from ._typing import TypeForm
@@ -111,7 +119,9 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
 
     assert dataclasses.is_dataclass(cls)
     fields = []
-    annotations = get_type_hints(cast(Callable, cls), include_extras=True)
+    annotations = get_type_hints_with_backported_syntax(
+        cast(Callable, cls), include_extras=True
+    )
     for field in getattr(cls, "__dataclass_fields__").values():
         # Avoid mutating original field.
         field = copy.copy(field)
@@ -349,32 +359,30 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     return typ
 
 
-def get_type_hints_with_nicer_errors(
+def get_type_hints_with_backported_syntax(
     obj: Callable[..., Any], include_extras: bool = False
 ) -> Dict[str, Any]:
+    """Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)
+    and generics (list[str]) in older versions of Python."""
     try:
         return get_type_hints(obj, include_extras=include_extras)
     except TypeError as e:  # pragma: no cover
-        common_message = f"\n-----\n\nError calling typing.get_type_hints() on {obj}! "
-        message = e.args[0]
-        if message.startswith(
-            "unsupported operand type(s) for |"
-        ) and sys.version_info < (3, 10):
-            # PEP 604. Requires Python 3.10.
-            raise TypeError(
-                e.args[0]
-                + common_message
-                + "You may be using a Union in the form of `X | Y`; to support Python versions that lower than 3.10, you need to use `typing.Union[X, Y]` instead of `X | Y` and `typing.Optional[X]` instead of `X | None`.",
-                *e.args[1:],
-            )
-        elif message == "'type' object is not subscriptable" and (
-            sys.version_info < (3, 9)
-        ):
-            # PEP 585. Requires Python 3.9.
-            raise TypeError(
-                e.args[0]
-                + common_message
-                + "You may be using a standard collection as a generic, like `list[T]` or `tuple[T1, T2]`. To support Python versions lower than 3.9, you need to using `typing.List[T]` and `typing.Tuple[T1, T2]`.",
-                *e.args[1:],
-            )
+        # Resolve new type syntax using eval_type_backport.
+        try:
+            from eval_type_backport import eval_type_backport
+
+            # Get global namespace for functions.
+            globalns = getattr(obj, "__globals__", None)
+
+            # Get global namespace for classes.
+            if globalns is None and hasattr(globalns, "__init__"):
+                globalns = getattr(obj.__init__, "__globals__", None)
+
+            out = {
+                k: eval_type_backport(ForwardRef(v), globalns=globalns, localns={})
+                for k, v in getattr(obj, "__annotations__", {}).items()
+            }
+            return out
+        except ImportError:
+            pass
         raise e

@@ -8,6 +8,7 @@ Usage:
 `python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --help`
 `python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary`
 """
+
 from __future__ import annotations
 
 import dataclasses
