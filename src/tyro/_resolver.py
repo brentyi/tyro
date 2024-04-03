@@ -368,21 +368,22 @@ def get_type_hints_with_backported_syntax(
         return get_type_hints(obj, include_extras=include_extras)
     except TypeError as e:  # pragma: no cover
         # Resolve new type syntax using eval_type_backport.
-        try:
-            from eval_type_backport import eval_type_backport
+        if hasattr(obj, "__annotations__"):
+            try:
+                from eval_type_backport import eval_type_backport
 
-            # Get global namespace for functions.
-            globalns = getattr(obj, "__globals__", None)
+                # Get global namespace for functions.
+                globalns = getattr(obj, "__globals__", None)
 
-            # Get global namespace for classes.
-            if globalns is None and hasattr(globalns, "__init__"):
-                globalns = getattr(getattr(obj, "__init__"), "__globals__", None)
+                # Get global namespace for classes.
+                if globalns is None and hasattr(globalns, "__init__"):
+                    globalns = getattr(getattr(obj, "__init__"), "__globals__", None)
 
-            out = {
-                k: eval_type_backport(ForwardRef(v), globalns=globalns, localns={})
-                for k, v in getattr(obj, "__annotations__", {}).items()
-            }
-            return out
-        except ImportError:
-            pass
+                out = {
+                    k: eval_type_backport(ForwardRef(v), globalns=globalns, localns={})
+                    for k, v in getattr(obj, "__annotations__").items()
+                }
+                return out
+            except ImportError:
+                pass
         raise e
