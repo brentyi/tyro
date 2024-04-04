@@ -46,7 +46,7 @@ def test_tuple_generic_variable_newtype_container() -> None:
     class TupleGenericVariable(Generic[ScalarType]):
         xyz: Tuple[ScalarType, ...]
 
-    SpecialInt = NewType("SpecialInt", tuple[int])
+    SpecialInt = NewType("SpecialInt", Tuple[int])
     assert tyro.cli(
         TupleGenericVariable[SpecialInt], args=["--xyz", "1", "2", "3"]
     ) == TupleGenericVariable((SpecialInt((1,)), SpecialInt((2,)), SpecialInt((3,))))
