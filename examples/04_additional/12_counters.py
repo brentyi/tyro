@@ -8,6 +8,7 @@ Usage:
 `python ./12_counters.py --verbosity --verbosity`
 `python ./12_counters.py -vvv`
 """
+
 from typing_extensions import Annotated
 
 import tyro
