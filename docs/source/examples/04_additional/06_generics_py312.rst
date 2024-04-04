@@ -5,7 +5,8 @@ Generic Types (Python 3.12+ syntax)
 ==========================================
 
 
-Example of parsing for generic dataclasses.
+Example of parsing for generic dataclasses using syntax introduced in Python
+3.12. Note: this is not compatible with ``from __future__ import annotations``.
 
 
 
@@ -19,7 +20,7 @@ Example of parsing for generic dataclasses.
 
 
         @dataclasses.dataclass(frozen=True)
-        class Point3[ScalarType: int | float]:
+        class Point3[ScalarType: (int, float)]:
             x: ScalarType
             y: ScalarType
             z: ScalarType
