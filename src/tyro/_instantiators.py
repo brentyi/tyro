@@ -270,8 +270,7 @@ def _instantiator_from_type_inner(
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal["fixed_length"],
     markers: FrozenSet[_markers.Marker],
-) -> Tuple[Instantiator, InstantiatorMetadata]:
-    ...
+) -> Tuple[Instantiator, InstantiatorMetadata]: ...
 
 
 @overload
@@ -280,8 +279,7 @@ def _instantiator_from_type_inner(
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[False],
     markers: FrozenSet[_markers.Marker],
-) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
-    ...
+) -> Tuple[_StandardInstantiator, InstantiatorMetadata]: ...
 
 
 @overload
@@ -290,8 +288,7 @@ def _instantiator_from_type_inner(
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[True],
     markers: FrozenSet[_markers.Marker],
-) -> Tuple[Instantiator, InstantiatorMetadata]:
-    ...
+) -> Tuple[Instantiator, InstantiatorMetadata]: ...
 
 
 def _instantiator_from_type_inner(
