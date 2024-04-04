@@ -14,7 +14,7 @@ Usage:
 """
 
 from dataclasses import dataclass
-from typing import Callable, Literal, Tuple
+from typing import Callable, Literal
 
 from torch import nn
 
@@ -24,7 +24,7 @@ import tyro
 @dataclass(frozen=True)
 class AdamOptimizer:
     learning_rate: float = 1e-3
-    betas: Tuple[float, float] = (0.9, 0.999)
+    betas: tuple[float, float] = (0.9, 0.999)
 
 
 @dataclass(frozen=True)

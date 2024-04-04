@@ -17,7 +17,6 @@ parsing default values.
 
 
         import dataclasses
-        from typing import Dict, Tuple
 
         import tyro
 
@@ -43,16 +42,16 @@ parsing default values.
         @dataclasses.dataclass
         class Args:
             # Example of specifying nested structures via a fixed-length tuple.
-            color_tuple: Tuple[RGB, HSL]
+            color_tuple: tuple[RGB, HSL]
 
             # Examples of nested structures in variable-length containers. These need a default
             # provided for length inference; we don't currently support specifying dynamic
             # container lengths directly from the commandline.
-            color_tuple_alt: Tuple[Color, ...] = (
+            color_tuple_alt: tuple[Color, ...] = (
                 RGB(255, 0, 0),
                 HSL(0, 255, 0),
             )
-            color_map: Dict[str, RGB] = dataclasses.field(
+            color_map: dict[str, RGB] = dataclasses.field(
                 # We can't use mutable values as defaults directly.
                 default_factory={
                     "red": RGB(255, 0, 0),

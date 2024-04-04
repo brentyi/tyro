@@ -881,7 +881,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
         if self._action_max_length > self._max_help_position + 2:
             self._action_max_length = prev_max_length
 
-    def _split_lines(self, text, width):
+    def _split_lines(self, text, width):  # pragma: no cover
         text = self._whitespace_matcher.sub(" ", text).strip()
         # The textwrap module is used only for formatting help.
         # Delay its import for speeding up the common usage of argparse.
