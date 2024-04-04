@@ -4,6 +4,7 @@ import dataclasses
 import io
 import json as json_
 import shlex
+import sys
 from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
@@ -1360,3 +1361,26 @@ def test_merge() -> None:
     helptext = target.getvalue()
     assert "OptimizerConfig options" in helptext
     assert "DatasetConfig options" in helptext
+
+
+def test_counter_action() -> None:
+    def main(
+        verbosity: tyro.conf.UseCounterAction[int],
+        aliased_verbosity: Annotated[
+            tyro.conf.UseCounterAction[int], tyro.conf.arg(aliases=["-v"])
+        ],
+    ) -> Tuple[int, int]:
+        """Example showing how to use counter actions.
+        Args:
+            verbosity: Verbosity level.
+            aliased_verbosity: Same as above, but can also be specified with -v, -vv, -vvv, etc.
+        """
+        return verbosity, aliased_verbosity
+
+    assert tyro.cli(main, args=[]) == (0, 0)
+    assert tyro.cli(main, args="--verbosity --verbosity".split(" ")) == (2, 0)
+    assert tyro.cli(main, args="--verbosity --verbosity -v".split(" ")) == (2, 1)
+    if sys.version_info >= (3, 8):
+        # Doesn't work in Python 3.7 because of argparse limitations.
+        assert tyro.cli(main, args="--verbosity --verbosity -vv".split(" ")) == (2, 2)
+        assert tyro.cli(main, args="--verbosity --verbosity -vvv".split(" ")) == (2, 3)
