@@ -1380,6 +1380,7 @@ def test_counter_action() -> None:
     assert tyro.cli(main, args=[]) == (0, 0)
     assert tyro.cli(main, args="--verbosity --verbosity".split(" ")) == (2, 0)
     assert tyro.cli(main, args="--verbosity --verbosity -v".split(" ")) == (2, 1)
-    if sys.version_info >= (3, 8): # Doesn't work in Python 3.7 because of argparse limitations.
+    if sys.version_info >= (3, 8):
+        # Doesn't work in Python 3.7 because of argparse limitations.
         assert tyro.cli(main, args="--verbosity --verbosity -vv".split(" ")) == (2, 2)
         assert tyro.cli(main, args="--verbosity --verbosity -vvv".split(" ")) == (2, 3)
