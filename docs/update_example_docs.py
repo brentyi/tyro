@@ -49,7 +49,7 @@ class ExampleMetadata:
         return ExampleMetadata(
             index=index,
             index_with_zero=index_with_zero,
-            source=source[3:].partition('"""')[2].strip(),
+            source=source.partition('"""')[2].partition('"""')[2].strip(),
             title=title,
             usages=example_usages,
             description=description.strip(),
