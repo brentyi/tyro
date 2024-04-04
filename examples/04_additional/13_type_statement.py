@@ -1,3 +1,6 @@
+# mypy: ignore-errors
+#
+# PEP 695 isn't yet supported in mypy. (April 4, 2024)
 """Type aliases (Python 3.12+)
 
 In Python 3.12, the `type` statement is introduced to create type aliases.

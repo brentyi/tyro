@@ -64,7 +64,7 @@ tyro = ["py.typed"]
 profile = "black"
 
 [tool.mypy]
-python_version = "3.10"
+python_version = "3.12"
 ignore_missing_imports = true
 warn_unused_configs = true
 exclude = "^tests/test_py311_generated/.*"
