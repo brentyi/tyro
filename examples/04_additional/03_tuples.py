@@ -8,7 +8,7 @@ Usage:
 `python ./03_tuples.py --two-colors.1.r 127 --two-colors.1.g 0 --two-colors.1.b 0`
 """
 
-from typing import NamedTuple, Tuple
+from typing import NamedTuple
 
 import tyro
 
@@ -25,10 +25,10 @@ class TupleType(NamedTuple):
     This should show up in the helptext!"""
 
     # Tuple types can contain raw values.
-    color: Tuple[int, int, int] = (255, 0, 0)
+    color: tuple[int, int, int] = (255, 0, 0)
 
     # Tuple types can contain nested structures.
-    two_colors: Tuple[Color, Color] = (Color(255, 0, 0), Color(0, 255, 0))
+    two_colors: tuple[Color, Color] = (Color(255, 0, 0), Color(0, 255, 0))
 
 
 if __name__ == "__main__":

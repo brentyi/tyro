@@ -1,4 +1,5 @@
 """Core public API."""
+
 import argparse
 import dataclasses
 import pathlib
@@ -51,8 +52,7 @@ def cli(
     default: Optional[OutT] = None,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
-) -> OutT:
-    ...
+) -> OutT: ...
 
 
 @overload
@@ -65,8 +65,7 @@ def cli(
     default: Optional[OutT] = None,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
-) -> Tuple[OutT, List[str]]:
-    ...
+) -> Tuple[OutT, List[str]]: ...
 
 
 @overload
@@ -82,8 +81,7 @@ def cli(
     default: None = None,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
-) -> OutT:
-    ...
+) -> OutT: ...
 
 
 @overload
@@ -99,8 +97,7 @@ def cli(
     default: None = None,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
-) -> Tuple[OutT, List[str]]:
-    ...
+) -> Tuple[OutT, List[str]]: ...
 
 
 def cli(
@@ -213,8 +210,7 @@ def get_parser(
     description: Optional[str] = None,
     default: Optional[OutT] = None,
     use_underscores: bool = False,
-) -> argparse.ArgumentParser:
-    ...
+) -> argparse.ArgumentParser: ...
 
 
 @overload
@@ -225,8 +221,7 @@ def get_parser(
     description: Optional[str] = None,
     default: Optional[OutT] = None,
     use_underscores: bool = False,
-) -> argparse.ArgumentParser:
-    ...
+) -> argparse.ArgumentParser: ...
 
 
 def get_parser(

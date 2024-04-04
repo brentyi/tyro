@@ -8,6 +8,7 @@ Usage:
 `python ./08_pydantic.py --field1 hello`
 `python ./08_pydantic.py --field1 hello --field2 5`
 """
+
 from pydantic import BaseModel, Field
 
 import tyro

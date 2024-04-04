@@ -3,6 +3,7 @@
 Includes things like omegaconf.MISSING, attrs, etc, which mostly work but either likely
 have corner cases or just seem sketchy.
 """
+
 from typing import Tuple
 
 import omegaconf

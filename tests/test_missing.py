@@ -1,4 +1,5 @@
 """Tests for tyro.MISSING."""
+
 import contextlib
 import dataclasses
 import io

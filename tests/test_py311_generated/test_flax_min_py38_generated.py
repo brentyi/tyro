@@ -1,4 +1,5 @@
 """Tests initializing flax modules directly via tyro."""
+
 from typing import cast
 
 import jax

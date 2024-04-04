@@ -30,6 +30,7 @@ Some examples of type annotations and the desired instantiators:
         )
 ```
 """
+
 import collections.abc
 import dataclasses
 import enum
@@ -121,7 +122,7 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
         # One day this should be fixed with `__text_signature__`.
         return True
 
-    type_annotations = _resolver.get_type_hints_with_nicer_errors(typ)
+    type_annotations = _resolver.get_type_hints_with_backported_syntax(typ)
     # Some checks we can do if the signature is available!
     for i, param in enumerate(signature.parameters.values()):
         annotation = type_annotations.get(param.name, param.annotation)
@@ -269,8 +270,7 @@ def _instantiator_from_type_inner(
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal["fixed_length"],
     markers: FrozenSet[_markers.Marker],
-) -> Tuple[Instantiator, InstantiatorMetadata]:
-    ...
+) -> Tuple[Instantiator, InstantiatorMetadata]: ...
 
 
 @overload
@@ -279,8 +279,7 @@ def _instantiator_from_type_inner(
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[False],
     markers: FrozenSet[_markers.Marker],
-) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
-    ...
+) -> Tuple[_StandardInstantiator, InstantiatorMetadata]: ...
 
 
 @overload
@@ -289,8 +288,7 @@ def _instantiator_from_type_inner(
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[True],
     markers: FrozenSet[_markers.Marker],
-) -> Tuple[Instantiator, InstantiatorMetadata]:
-    ...
+) -> Tuple[Instantiator, InstantiatorMetadata]: ...
 
 
 def _instantiator_from_type_inner(
