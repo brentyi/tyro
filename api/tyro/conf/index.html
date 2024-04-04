@@ -204,6 +204,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -460,6 +461,17 @@ otherwise ambiguous annotations like <code class="docutils literal notranslate">
 <code class="docutils literal notranslate"><span class="pre">Tuple[T,</span> <span class="pre">...]</span></code>, etc), including dictionaries without default values.</p>
 </dd></dl>
 
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.UseCounterAction">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">UseCounterAction</span></span><a class="headerlink" href="#tyro.conf.UseCounterAction" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">verbose:</span> <span class="pre">UseCounterAction[int]</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Use “counter” actions for integer arguments. Example usage</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.conf.configure">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Marker</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_markers/#configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.configure" title="Link to this definition">#</a></dt>
@@ -566,6 +578,7 @@ apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf.Suppress"><code class="docutils literal notranslate"><span class="pre">Suppress</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.SuppressFixed"><code class="docutils literal notranslate"><span class="pre">SuppressFixed</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.UseAppendAction"><code class="docutils literal notranslate"><span class="pre">UseAppendAction</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf.UseCounterAction"><code class="docutils literal notranslate"><span class="pre">UseCounterAction</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.configure"><code class="docutils literal notranslate"><span class="pre">configure()</span></code></a></li>
 </ul>
 </li>

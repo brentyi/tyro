@@ -203,6 +203,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -396,9 +397,9 @@
         <span class="c1"># directly be used. This helps reduce the likelihood of issues with converting</span>
         <span class="c1"># the field default to a string format, then back to the desired type.</span>
         <span class="n">action</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;action&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">action</span> <span class="o">!=</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;append&quot;</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">}:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span>
-        <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="n">BooleanOptionalAction</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">action</span> <span class="ow">in</span> <span class="p">{</span><span class="n">BooleanOptionalAction</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">}:</span>
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -458,6 +459,7 @@
             <span class="n">_rule_handle_boolean_flags</span><span class="p">,</span>
             <span class="n">_rule_recursive_instantiator_from_type</span><span class="p">,</span>
             <span class="n">_rule_convert_defaults_to_strings</span><span class="p">,</span>
+            <span class="n">_rule_counters</span><span class="p">,</span>
             <span class="n">_rule_generate_helptext</span><span class="p">,</span>
             <span class="n">_rule_set_name_or_flag_and_dest</span><span class="p">,</span>
             <span class="n">_rule_positional_special_handling</span><span class="p">,</span>
@@ -677,6 +679,28 @@
     <span class="k">return</span> <span class="n">x</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">USE_RICH</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">[/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span>
 
 
+<span class="k">def</span> <span class="nf">_rule_counters</span><span class="p">(</span>
+    <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
+    <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoweredArgumentDefinition</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Handle counters, like -vvv for level-3 verbosity.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">_markers</span><span class="o">.</span><span class="n">UseCounterAction</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
+        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span> <span class="ow">is</span> <span class="nb">int</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
+    <span class="p">):</span>
+        <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">lowered</span><span class="p">,</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">nargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="s2">&quot;count&quot;</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">required</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">instantiator</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>  <span class="c1"># argparse will directly give us an int!</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">lowered</span>
+
+
 <span class="k">def</span> <span class="nf">_rule_generate_helptext</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
@@ -737,6 +761,9 @@
             <span class="c1"># Intentionally not quoted via shlex, since this can&#39;t actually be passed</span>
             <span class="c1"># in via the commandline.</span>
             <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(fixed to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
+            <span class="c1"># Repeatable argument.</span>
+            <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="p">):</span>

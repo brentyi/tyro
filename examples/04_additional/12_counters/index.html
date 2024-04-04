@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Base Configurations" href="../../03_config_systems/01_base_configs/" /><link rel="prev" title="Nesting in Containers" href="../04_nesting_in_containers/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Goals and alternatives" href="../../../goals_and_alternatives/" /><link rel="prev" title="Argument aliases" href="../11_aliases/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Subcommands from Functions - tyro</title>
+        <title>Counters - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
@@ -179,12 +179,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/07_unions/">Unions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../01_nesting/">Hierarchical Configs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../02_subcommands/">Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_multiple_subcommands/">Sequenced Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../04_nesting_in_containers/">Nesting in Containers</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Subcommands from Functions</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/01_nesting/">Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/02_subcommands/">Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../02_nesting/05_subcommands_func/">Subcommands from Functions</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
 <ul>
@@ -192,19 +192,19 @@
 <li class="toctree-l1"><a class="reference internal" href="../../03_config_systems/02_overriding_yaml/">Overriding YAML Configs</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Additional Features</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/01_positional_args/">Positional Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/02_dictionaries/">Overriding Dictionaries</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/03_tuples/">Tuples</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/04_classes/">Instantiating Classes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/07_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/08_pydantic/">Pydantic Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/09_attrs/">Attrs Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/10_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/11_aliases/">Argument aliases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../04_additional/12_counters/">Counters</a></li>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../01_positional_args/">Positional Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02_dictionaries/">Overriding Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_tuples/">Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_conf/">Configuration via typing.Annotated[]</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Attrs Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_aliases/">Argument aliases</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Counters</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -254,93 +254,54 @@
           </label>
         </div>
         <article role="main">
-          <section id="subcommands-from-functions">
-<h1>Subcommands from Functions<a class="headerlink" href="#subcommands-from-functions" title="Link to this heading">#</a></h1>
-<p><a class="reference internal" href="../../../api/tyro/extras/#tyro.extras.subcommand_cli_from_dict" title="tyro.extras.subcommand_cli_from_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.subcommand_cli_from_dict()</span></code></a> provides a shorthand that generates a
-subcommand CLI from a dictionary.</p>
-<p>For an input like:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">subcommand_cli_from_dict</span><span class="p">(</span>
-    <span class="p">{</span>
-        <span class="s2">&quot;checkout&quot;</span><span class="p">:</span> <span class="n">checkout</span><span class="p">,</span>
-        <span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="n">commit</span><span class="p">,</span>
-    <span class="p">}</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>This is internally accomplished by generating and calling:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">tyro</span>
-
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-    <span class="n">Union</span><span class="p">[</span>
-        <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">Any</span><span class="p">,</span>
-            <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;checkout&quot;</span><span class="p">,</span> <span class="n">constructor</span><span class="o">=</span><span class="n">checkout</span><span class="p">),</span>
-        <span class="p">],</span>
-        <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">Any</span><span class="p">,</span>
-            <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;commit&quot;</span><span class="p">,</span> <span class="n">constructor</span><span class="o">=</span><span class="n">commit</span><span class="p">),</span>
-        <span class="p">],</span>
-    <span class="p">]</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">tyro</span>
+          <section id="counters">
+<h1>Counters<a class="headerlink" href="#counters" title="Link to this heading">#</a></h1>
+<p>Repeatable ‘counter’ arguments can be specified via <a class="reference internal" href="../../../api/tyro/conf/#tyro.conf.UseCounterAction" title="tyro.conf.UseCounterAction"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.UseCounterAction</span></code></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
 <span class="linenos"> 2</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">checkout</span><span class="p">(</span><span class="n">branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check out a branch.&quot;&quot;&quot;</span>
-<span class="linenos"> 6</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">branch</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">10</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a commit.&quot;&quot;&quot;</span>
-<span class="linenos">11</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="nb">all</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">tyro.conf</span> <span class="kn">import</span> <span class="n">UseCounterAction</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span>
+<span class="linenos"> 7</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos"> 8</span>    <span class="n">verbosity</span><span class="p">:</span> <span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+<span class="linenos"> 9</span>    <span class="n">aliased_verbosity</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-v&quot;</span><span class="p">])],</span>
+<span class="linenos">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">11</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Example showing how to use counter actions.</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">15</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">subcommand_cli_from_dict</span><span class="p">(</span>
-<span class="linenos">16</span>        <span class="p">{</span>
-<span class="linenos">17</span>            <span class="s2">&quot;checkout&quot;</span><span class="p">:</span> <span class="n">checkout</span><span class="p">,</span>
-<span class="linenos">18</span>            <span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="n">commit</span><span class="p">,</span>
-<span class="linenos">19</span>        <span class="p">}</span>
-<span class="linenos">20</span>    <span class="p">)</span>
+<span class="linenos">13</span><span class="sd">    Args:</span>
+<span class="linenos">14</span><span class="sd">        verbosity: Verbosity level.</span>
+<span class="linenos">15</span><span class="sd">        aliased_verbosity: Same as above, but can also be specified with -v, -vv, -vvv, etc.</span>
+<span class="linenos">16</span><span class="sd">    &quot;&quot;&quot;</span>
+<span class="linenos">17</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Verbosity level:&quot;</span><span class="p">,</span> <span class="n">verbosity</span><span class="p">)</span>
+<span class="linenos">18</span>    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Verbosity level (aliased):&quot;</span><span class="p">,</span> <span class="n">aliased_verbosity</span><span class="p">)</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">22</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 02_nesting/05_subcommands_func.py --help</kbd><pre class="ansi-block literal-block">usage: 05_subcommands_func.py [-h] {checkout,commit}
+<kbd>python 04_additional/12_counters.py --help</kbd><pre class="ansi-block literal-block">usage: 12_counters.py [-h] [--verbosity] [--aliased-verbosity]
 
-╭─ options ───────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit │
-╰─────────────────────────────────────────────────────────╯
-╭─ subcommands ───────────────────────────────────────────╮
-│ {checkout,commit}                                       │
-│     checkout            Check out a branch.             │
-│     commit              Make a commit.                  │
-╰─────────────────────────────────────────────────────────╯</pre>
+Example showing how to use counter actions.
+
+╭─ options ──────────────────────────────────────────────────────────────────╮
+│ -h, --help         show this help message and exit                         │
+│ --verbosity        Verbosity level. (repeatable)                           │
+│ --aliased-verbosity, -v                                                    │
+│                    Same as above, but can also be specified with -v, -vv,  │
+│                    -vvv, etc. (repeatable)                                 │
+╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/05_subcommands_func.py commit --help</kbd><pre class="ansi-block literal-block">usage: 05_subcommands_func.py commit [-h] --message STR [--all | --no-all]
-
-Make a commit.
-
-╭─ options ──────────────────────────────────────────────╮
-│ -h, --help             show this help message and exit │
-│ --message STR          (required)                      │
-│ --all, --no-all        (default: False)                │
-╰────────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/12_counters.py --verbosity</kbd><pre class="ansi-block literal-block">Verbosity level: 1
+Verbosity level (aliased): 0</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/05_subcommands_func.py commit --message hello --all</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
+<kbd>python 04_additional/12_counters.py --verbosity --verbosity</kbd><pre class="ansi-block literal-block">Verbosity level: 2
+Verbosity level (aliased): 0</pre>
 <hr class="docutils" />
-<kbd>python 02_nesting/05_subcommands_func.py checkout --help</kbd><pre class="ansi-block literal-block">usage: 05_subcommands_func.py checkout [-h] --branch STR
-
-Check out a branch.
-
-╭─ options ───────────────────────────────────────────╮
-│ -h, --help          show this help message and exit │
-│ --branch STR        (required)                      │
-╰─────────────────────────────────────────────────────╯</pre>
-<hr class="docutils" />
-<kbd>python 02_nesting/05_subcommands_func.py checkout --branch main</kbd><pre class="ansi-block literal-block">branch='main'</pre>
+<kbd>python 04_additional/12_counters.py -vvv</kbd><pre class="ansi-block literal-block">Verbosity level: 0
+Verbosity level (aliased): 3</pre>
 </section>
 
         </article>
@@ -348,23 +309,23 @@ Check out a branch.
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../../03_config_systems/01_base_configs/">
+          <a class="next-page" href="../../../goals_and_alternatives/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Base Configurations</div>
+                <div class="title">Goals and alternatives</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../04_nesting_in_containers/">
+          <a class="prev-page" href="../11_aliases/">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Nesting in Containers</div>
+                <div class="title">Argument aliases</div>
                 
               </div>
             </a>

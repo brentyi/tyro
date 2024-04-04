@@ -216,6 +216,13 @@ Package Contents
    Can be applied to all variable-length sequences (\ ``List[T]``\ , ``Sequence[T]``\ ,
    ``Tuple[T, ...]``\ , etc), including dictionaries without default values.
 
+.. py:data:: UseCounterAction
+
+   
+   ``verbose: UseCounterAction[int]``.
+
+   :type: Use "counter" actions for integer arguments. Example usage
+
 .. py:function:: configure(*markers: Marker) -> Callable[[CallableType], CallableType]
 
    
