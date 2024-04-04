@@ -5,7 +5,6 @@ will produce a pair of subcommands); when we write things like `int | SomeDatacl
 handling gets more complicated but should still be supported!
 """
 
-
 import dataclasses
 from typing import Any, Dict, List, Tuple
 

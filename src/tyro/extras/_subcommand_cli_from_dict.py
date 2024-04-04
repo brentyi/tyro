@@ -16,8 +16,7 @@ def subcommand_cli_from_dict(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
-) -> T:
-    ...
+) -> T: ...
 
 
 # TODO: hack. We prefer the above signature, which Pyright understands, but as of 1.6.1
@@ -30,8 +29,7 @@ def subcommand_cli_from_dict(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
-) -> Any:
-    ...
+) -> Any: ...
 
 
 def subcommand_cli_from_dict(
