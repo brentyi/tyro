@@ -25,8 +25,7 @@ def subcommand(
     prefix_name: bool = True,
     constructor: None = None,
     constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None,
-) -> Any:
-    ...
+) -> Any: ...
 
 
 @overload
@@ -38,8 +37,7 @@ def subcommand(
     prefix_name: bool = True,
     constructor: Optional[Union[Type, Callable]] = None,
     constructor_factory: None = None,
-) -> Any:
-    ...
+) -> Any: ...
 
 
 def subcommand(
@@ -132,8 +130,7 @@ def arg(
     prefix_name: Optional[bool] = None,
     constructor: None = None,
     constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None,
-) -> Any:
-    ...
+) -> Any: ...
 
 
 @overload
@@ -146,8 +143,7 @@ def arg(
     prefix_name: Optional[bool] = None,
     constructor: Optional[Union[Type, Callable]] = None,
     constructor_factory: None = None,
-) -> Any:
-    ...
+) -> Any: ...
 
 
 def arg(

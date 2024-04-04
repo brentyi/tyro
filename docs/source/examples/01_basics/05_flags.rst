@@ -17,7 +17,6 @@ To turn off conversion, see :class:`tyro.conf.FlagConversionOff`.
 
 
         import dataclasses
-        from typing import Optional
 
         import tyro
 
@@ -28,7 +27,7 @@ To turn off conversion, see :class:`tyro.conf.FlagConversionOff`.
             boolean: bool
 
             # Optional boolean. Same as above, but can be omitted.
-            optional_boolean: Optional[bool] = None
+            optional_boolean: bool | None = None
 
             # Pass --flag-a in to set this value to True.
             flag_a: bool = False

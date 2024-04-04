@@ -14,7 +14,7 @@ Dictionary inputs can be specified using either a standard ``Dict[K, V]`` annota
         :linenos:
 
 
-        from typing import Dict, Tuple, TypedDict
+        from typing import TypedDict
 
         from typing_extensions import NotRequired
 
@@ -27,19 +27,19 @@ Dictionary inputs can be specified using either a standard ``Dict[K, V]`` annota
             total=False,
         ):
             learning_rate: float
-            betas: Tuple[float, float]
+            betas: tuple[float, float]
 
 
         class DictionarySchemaB(TypedDict):
             learning_rate: NotRequired[float]
             """NotRequired[] specifies that a particular key doesn't need to exist."""
-            betas: Tuple[float, float]
+            betas: tuple[float, float]
 
 
         def main(
             typed_dict_a: DictionarySchemaA,
             typed_dict_b: DictionarySchemaB,
-            standard_dict: Dict[str, float] = {
+            standard_dict: dict[str, float] = {
                 "learning_rate": 3e-4,
                 "beta1": 0.9,
                 "beta2": 0.999,

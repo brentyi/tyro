@@ -19,7 +19,6 @@ For configuring subcommands beyond what can be expressed with type annotations, 
         from __future__ import annotations
 
         import dataclasses
-        from typing import Union
 
         import tyro
 
@@ -39,12 +38,12 @@ For configuring subcommands beyond what can be expressed with type annotations, 
             all: bool = False
 
 
-        def main(cmd: Union[Checkout, Commit]) -> None:
+        def main(cmd: Checkout | Commit) -> None:
             print(cmd)
 
 
         if __name__ == "__main__":
-            # Note that we can also pass `Union[Checkout, Command]` directly into
+            # Note that we can also pass `Checkout | Command` directly into
             # `tyro.cli()`; this is understood by tyro and pyright, but unfortunately not by
             # mypy.
             tyro.cli(main)

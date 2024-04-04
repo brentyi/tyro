@@ -1,4 +1,5 @@
 """Type-safe, human-readable serialization helpers for dataclasses."""
+
 from __future__ import annotations
 
 import dataclasses

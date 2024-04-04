@@ -28,7 +28,8 @@ dependencies = [
     "backports.cached-property>=1.0.2; python_version<'3.8'",
     "colorama>=0.4.0; platform_system=='Windows'",
     "rich>=11.1.0",
-    "shtab>=1.5.6"
+    "shtab>=1.5.6",
+    "eval_type_backport>=0.1.3; python_version<'3.10'",
 ]
 
 [project.optional-dependencies]
@@ -48,7 +49,8 @@ dev = [
     # old version. But doing so breaks other Python versions.
     "flax>=0.6.9;python_version>='3.8'",
     "pydantic>=2.5.2",
-    "coverage[toml]>=6.5.0"
+    "coverage[toml]>=6.5.0",
+    "eval_type_backport>=0.1.3",
 ]
 
 [project.urls]
@@ -101,7 +103,7 @@ exclude_lines = [
 
 [tool.ruff]
 src = ["src"]  # Needed to recognize first-party import location in GitHub action.
-select = [
+lint.select = [
     "E",  # pycodestyle errors.
     "F",  # Pyflakes rules.
     "PLC",  # Pylint convention warnings.
@@ -110,7 +112,7 @@ select = [
     "PLW",  # Pylint warnings.
     "I"  # Import sorting.
 ]
-ignore = [
+lint.ignore = [
     "E741", # Ambiguous variable name. (l, O, or I)
     "E501",  # Line too long.
     "PLR2004",  # Magic value used in comparison.

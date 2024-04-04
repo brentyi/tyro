@@ -150,13 +150,13 @@ class ParserSpecification:
                 # Helptext for this field; used as description for grouping arguments.
                 class_field_name = _strings.make_field_name([field.intern_name])
                 if field.helptext is not None:
-                    helptext_from_intern_prefixed_field_name[
-                        class_field_name
-                    ] = field.helptext
+                    helptext_from_intern_prefixed_field_name[class_field_name] = (
+                        field.helptext
+                    )
                 else:
-                    helptext_from_intern_prefixed_field_name[
-                        class_field_name
-                    ] = _docstrings.get_callable_description(nested_parser.f)
+                    helptext_from_intern_prefixed_field_name[class_field_name] = (
+                        _docstrings.get_callable_description(nested_parser.f)
+                    )
 
                 # If arguments are in an optional group, it indicates that the default_instance
                 # will be used if none of the arguments are passed in.
