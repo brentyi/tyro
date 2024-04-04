@@ -741,7 +741,7 @@ def _field_list_from_attrs(
         elif isinstance(default, attr.Factory):  # type: ignore
             default = default.factory()  # type: ignore
 
-        assert attr_field.type is not None
+        assert attr_field.type is not None, attr_field
         field_list.append(
             FieldDefinition.make(
                 name=name,
