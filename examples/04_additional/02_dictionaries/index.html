@@ -257,7 +257,7 @@
 <h1>Overriding Dictionaries<a class="headerlink" href="#overriding-dictionaries" title="Link to this heading">#</a></h1>
 <p>Dictionary inputs can be specified using either a standard <code class="docutils literal notranslate"><span class="pre">Dict[K,</span> <span class="pre">V]</span></code> annotation, or a
 <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> subclass.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypedDict</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">NotRequired</span>
 <span class="linenos"> 4</span>
@@ -270,19 +270,19 @@
 <span class="linenos">11</span>    <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
 <span class="linenos">12</span><span class="p">):</span>
 <span class="linenos">13</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span>
-<span class="linenos">14</span>    <span class="n">betas</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+<span class="linenos">14</span>    <span class="n">betas</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span><span class="k">class</span> <span class="nc">DictionarySchemaB</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="linenos">18</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
 <span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;NotRequired[] specifies that a particular key doesn&#39;t need to exist.&quot;&quot;&quot;</span>
-<span class="linenos">20</span>    <span class="n">betas</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
+<span class="linenos">20</span>    <span class="n">betas</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="linenos">21</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
 <span class="linenos">24</span>    <span class="n">typed_dict_a</span><span class="p">:</span> <span class="n">DictionarySchemaA</span><span class="p">,</span>
 <span class="linenos">25</span>    <span class="n">typed_dict_b</span><span class="p">:</span> <span class="n">DictionarySchemaB</span><span class="p">,</span>
-<span class="linenos">26</span>    <span class="n">standard_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">26</span>    <span class="n">standard_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
 <span class="linenos">27</span>        <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">3e-4</span><span class="p">,</span>
 <span class="linenos">28</span>        <span class="s2">&quot;beta1&quot;</span><span class="p">:</span> <span class="mf">0.9</span><span class="p">,</span>
 <span class="linenos">29</span>        <span class="s2">&quot;beta2&quot;</span><span class="p">:</span> <span class="mf">0.999</span><span class="p">,</span>

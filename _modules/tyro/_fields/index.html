@@ -254,6 +254,7 @@
           <h1>Source code for tyro._fields</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Abstractions for pulling out &#39;field&#39; definitions, which specify inputs, types, and # type: ignore</span>
 <span class="sd">defaults, from general callables.&quot;&quot;&quot;</span>
+
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
@@ -764,7 +765,9 @@
     <span class="n">total</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__total__&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">valid_default_instance</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">):</span>
@@ -824,7 +827,9 @@
     <span class="n">field_defaults</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_field_defaults&quot;</span><span class="p">)</span>
 
     <span class="c1"># Note that _field_types is removed in Python 3.9.</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="c1"># Get default, with priority for `default_instance`.</span>
         <span class="n">default</span> <span class="o">=</span> <span class="n">field_defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
@@ -901,12 +906,16 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">pydantic</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">pydantic</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
 
 
 <span class="k">def</span> <span class="nf">_is_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1025,7 +1034,7 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">default</span><span class="o">.</span><span class="n">factory</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
 
-        <span class="k">assert</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">attr_field</span>
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -1254,7 +1263,7 @@
 
     <span class="c1"># This will throw a type error for torch.device, typing.Dict, etc.</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not get hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 

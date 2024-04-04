@@ -255,10 +255,10 @@
         <article role="main">
           <section id="unions">
 <h1>Unions<a class="headerlink" href="#unions" title="Link to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">typing.Union[]</span></code> can be used to expand inputs to multiple types.</p>
+<p><code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span> <span class="pre">Y</span></code> or <code class="docutils literal notranslate"><span class="pre">typing.Union[X,</span> <span class="pre">Y]</span></code> can be used to expand inputs to multiple types.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">enum</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="linenos"> 4</span>
 <span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 6</span>
@@ -272,19 +272,19 @@
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="linenos">15</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">16</span>    <span class="c1"># Unions can be used to specify multiple allowable types.</span>
-<span class="linenos">17</span>    <span class="n">union_over_types</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="linenos">18</span>    <span class="n">string_or_enum</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">],</span> <span class="n">Color</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
+<span class="linenos">17</span>    <span class="n">union_over_types</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">18</span>    <span class="n">string_or_enum</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Color</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span>    <span class="c1"># Unions also work over more complex nested types.</span>
-<span class="linenos">21</span>    <span class="n">union_over_tuples</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,)</span>
+<span class="linenos">21</span>    <span class="n">union_over_tuples</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,)</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span>    <span class="c1"># And can be nested in other types.</span>
-<span class="linenos">24</span>    <span class="n">tuple_of_string_or_enum</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">],</span> <span class="n">Color</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">24</span>    <span class="n">tuple_of_string_or_enum</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
 <span class="linenos">25</span>        <span class="s2">&quot;red&quot;</span><span class="p">,</span>
 <span class="linenos">26</span>        <span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span>
 <span class="linenos">27</span>    <span class="p">)</span>
 <span class="linenos">28</span>
-<span class="linenos">29</span>    <span class="c1"># Optional[T] is equivalent to Union[T, None].</span>
+<span class="linenos">29</span>    <span class="c1"># Optional[T] is equivalent to `T | None`.</span>
 <span class="linenos">30</span>    <span class="n">integer</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span>
@@ -309,7 +309,7 @@
 │ [{red,green,RED,GREEN,BLUE} ...]]                                          │
 │     And can be nested in other types. (default: red RED)                   │
 │ --integer {None,0,1,2,3}                                                   │
-│     Optional[T] is equivalent to Union[T, None]. (default: None)           │
+│     Optional[T] is equivalent to `T | None`. (default: None)               │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 </section>
 

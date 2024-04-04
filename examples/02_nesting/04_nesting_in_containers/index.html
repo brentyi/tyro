@@ -259,54 +259,53 @@
 <p>Note that lengths must be inferable, either via a fixed-length tuple annotation or by
 parsing default values.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Color</span><span class="p">:</span>
-<span class="linenos"> 8</span>    <span class="k">pass</span>
+<span class="linenos"> 6</span><span class="k">class</span> <span class="nc">Color</span><span class="p">:</span>
+<span class="linenos"> 7</span>    <span class="k">pass</span>
+<span class="linenos"> 8</span>
 <span class="linenos"> 9</span>
-<span class="linenos">10</span>
-<span class="linenos">11</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">12</span><span class="k">class</span> <span class="nc">RGB</span><span class="p">(</span><span class="n">Color</span><span class="p">):</span>
-<span class="linenos">13</span>    <span class="n">r</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos">14</span>    <span class="n">g</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos">15</span>    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">10</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="linenos">11</span><span class="k">class</span> <span class="nc">RGB</span><span class="p">(</span><span class="n">Color</span><span class="p">):</span>
+<span class="linenos">12</span>    <span class="n">r</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">13</span>    <span class="n">g</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">14</span>    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">15</span>
 <span class="linenos">16</span>
-<span class="linenos">17</span>
-<span class="linenos">18</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">19</span><span class="k">class</span> <span class="nc">HSL</span><span class="p">(</span><span class="n">Color</span><span class="p">):</span>
-<span class="linenos">20</span>    <span class="n">h</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos">21</span>    <span class="n">s</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos">22</span>    <span class="n">l</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">17</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="linenos">18</span><span class="k">class</span> <span class="nc">HSL</span><span class="p">(</span><span class="n">Color</span><span class="p">):</span>
+<span class="linenos">19</span>    <span class="n">h</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">20</span>    <span class="n">s</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">21</span>    <span class="n">l</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">22</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span>
-<span class="linenos">25</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">26</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos">27</span>    <span class="c1"># Example of specifying nested structures via a fixed-length tuple.</span>
-<span class="linenos">28</span>    <span class="n">color_tuple</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">RGB</span><span class="p">,</span> <span class="n">HSL</span><span class="p">]</span>
-<span class="linenos">29</span>
-<span class="linenos">30</span>    <span class="c1"># Examples of nested structures in variable-length containers. These need a default</span>
-<span class="linenos">31</span>    <span class="c1"># provided for length inference; we don&#39;t currently support specifying dynamic</span>
-<span class="linenos">32</span>    <span class="c1"># container lengths directly from the commandline.</span>
-<span class="linenos">33</span>    <span class="n">color_tuple_alt</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-<span class="linenos">34</span>        <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-<span class="linenos">35</span>        <span class="n">HSL</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-<span class="linenos">36</span>    <span class="p">)</span>
-<span class="linenos">37</span>    <span class="n">color_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
-<span class="linenos">38</span>        <span class="c1"># We can&#39;t use mutable values as defaults directly.</span>
-<span class="linenos">39</span>        <span class="n">default_factory</span><span class="o">=</span><span class="p">{</span>
-<span class="linenos">40</span>            <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-<span class="linenos">41</span>            <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-<span class="linenos">42</span>            <span class="s2">&quot;blue&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
-<span class="linenos">43</span>        <span class="p">}</span><span class="o">.</span><span class="n">copy</span>
-<span class="linenos">44</span>    <span class="p">)</span>
+<span class="linenos">24</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="linenos">25</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos">26</span>    <span class="c1"># Example of specifying nested structures via a fixed-length tuple.</span>
+<span class="linenos">27</span>    <span class="n">color_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">RGB</span><span class="p">,</span> <span class="n">HSL</span><span class="p">]</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="c1"># Examples of nested structures in variable-length containers. These need a default</span>
+<span class="linenos">30</span>    <span class="c1"># provided for length inference; we don&#39;t currently support specifying dynamic</span>
+<span class="linenos">31</span>    <span class="c1"># container lengths directly from the commandline.</span>
+<span class="linenos">32</span>    <span class="n">color_tuple_alt</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+<span class="linenos">33</span>        <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">34</span>        <span class="n">HSL</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">35</span>    <span class="p">)</span>
+<span class="linenos">36</span>    <span class="n">color_map</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
+<span class="linenos">37</span>        <span class="c1"># We can&#39;t use mutable values as defaults directly.</span>
+<span class="linenos">38</span>        <span class="n">default_factory</span><span class="o">=</span><span class="p">{</span>
+<span class="linenos">39</span>            <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">40</span>            <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+<span class="linenos">41</span>            <span class="s2">&quot;blue&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
+<span class="linenos">42</span>        <span class="p">}</span><span class="o">.</span><span class="n">copy</span>
+<span class="linenos">43</span>    <span class="p">)</span>
+<span class="linenos">44</span>
 <span class="linenos">45</span>
-<span class="linenos">46</span>
-<span class="linenos">47</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">48</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
-<span class="linenos">49</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">46</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">47</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
+<span class="linenos">48</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />

@@ -256,7 +256,7 @@
           <section id="tuples">
 <h1>Tuples<a class="headerlink" href="#tuples" title="Link to this heading">#</a></h1>
 <p>Example using <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code> to instantiate tuple types.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NamedTuple</span><span class="p">,</span> <span class="n">Tuple</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NamedTuple</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 4</span>
@@ -273,10 +273,10 @@
 <span class="linenos">15</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span>    <span class="c1"># Tuple types can contain raw values.</span>
-<span class="linenos">18</span>    <span class="n">color</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<span class="linenos">18</span>    <span class="n">color</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span>    <span class="c1"># Tuple types can contain nested structures.</span>
-<span class="linenos">21</span>    <span class="n">two_colors</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="n">Color</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Color</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Color</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+<span class="linenos">21</span>    <span class="n">two_colors</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Color</span><span class="p">,</span> <span class="n">Color</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Color</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">Color</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span>
 <span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

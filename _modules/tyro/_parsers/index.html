@@ -408,13 +408,13 @@
                 <span class="c1"># Helptext for this field; used as description for grouping arguments.</span>
                 <span class="n">class_field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span>
-                        <span class="n">class_field_name</span>
-                    <span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
+                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
+                    <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span>
-                        <span class="n">class_field_name</span>
-                    <span class="p">]</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
+                    <span class="n">helptext_from_intern_prefixed_field_name</span><span class="p">[</span><span class="n">class_field_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_callable_description</span><span class="p">(</span><span class="n">nested_parser</span><span class="o">.</span><span class="n">f</span><span class="p">)</span>
+                    <span class="p">)</span>
 
                 <span class="c1"># If arguments are in an optional group, it indicates that the default_instance</span>
                 <span class="c1"># will be used if none of the arguments are passed in.</span>
