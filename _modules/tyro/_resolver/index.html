@@ -197,13 +197,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -281,6 +283,7 @@
     <span class="n">Annotated</span><span class="p">,</span>
     <span class="n">ForwardRef</span><span class="p">,</span>
     <span class="n">Self</span><span class="p">,</span>
+    <span class="n">TypeAliasType</span><span class="p">,</span>
     <span class="n">get_args</span><span class="p">,</span>
     <span class="n">get_origin</span><span class="p">,</span>
     <span class="n">get_type_hints</span><span class="p">,</span>
@@ -332,7 +335,7 @@
         <span class="bp">cls</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
     <span class="c1"># We&#39;ll ignore NewType when getting the origin + args for generics.</span>
-    <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Support typing.Self.</span>
@@ -351,7 +354,7 @@
         <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="n">typevars</span> <span class="o">=</span> <span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span>
-        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevars</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevar_values</span><span class="p">)</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="n">origin_cls</span>
         <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">)))</span>
@@ -440,11 +443,15 @@
 <span class="n">TypeOrCallableOrNone</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallableOrNone&quot;</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="unwrap_newtype">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_newtype">[docs]</a>
-<span class="k">def</span> <span class="nf">unwrap_newtype</span><span class="p">(</span>
+<div class="viewcode-block" id="unwrap_newtype_and_aliases">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_newtype_and_aliases">[docs]</a>
+<span class="k">def</span> <span class="nf">unwrap_newtype_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallableOrNone</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallableOrNone</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="c1"># Handle type aliases, eg via the `type` statement in Python 3.12.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__value__</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
     <span class="c1"># We&#39;ll unwrap NewType annotations here; this is needed before issubclass</span>
     <span class="c1"># checks!</span>
     <span class="c1">#</span>
@@ -475,7 +482,7 @@
 <span class="sd">    string default is passed in, we don&#39;t want to narrow the type to always be</span>
 <span class="sd">    strings!)&quot;&quot;&quot;</span>
 
-    <span class="n">typ</span><span class="p">,</span> <span class="n">unused_name</span> <span class="o">=</span> <span class="n">unwrap_newtype</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="n">typ</span><span class="p">,</span> <span class="n">unused_name</span> <span class="o">=</span> <span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="k">del</span> <span class="n">unused_name</span>
 
     <span class="k">try</span><span class="p">:</span>

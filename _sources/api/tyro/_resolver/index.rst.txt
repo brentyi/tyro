@@ -54,7 +54,7 @@ Module Contents
 
    
 
-.. py:function:: unwrap_newtype(typ: TypeOrCallableOrNone) -> Tuple[TypeOrCallableOrNone, Optional[str]]
+.. py:function:: unwrap_newtype_and_aliases(typ: TypeOrCallableOrNone) -> Tuple[TypeOrCallableOrNone, Optional[str]]
 
 
 .. py:function:: unwrap_newtype_and_narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable

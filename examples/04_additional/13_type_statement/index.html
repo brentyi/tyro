@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Counters" href="../12_counters/" /><link rel="prev" title="Custom Constructors" href="../10_custom_constructors/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Goals and alternatives" href="../../../goals_and_alternatives/" /><link rel="prev" title="Counters" href="../12_counters/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Argument aliases - tyro</title>
+        <title>Type aliases (Python 3.12+) - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
@@ -198,13 +198,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../07_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Attrs Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../10_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Argument aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_aliases/">Argument aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../12_counters/">Counters</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Type aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -254,76 +256,55 @@
           </label>
         </div>
         <article role="main">
-          <section id="argument-aliases">
-<h1>Argument aliases<a class="headerlink" href="#argument-aliases" title="Link to this heading">#</a></h1>
-<p><a class="reference internal" href="../../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> can be used to attach aliases to arguments.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+          <section id="type-aliases-python-3-12">
+<h1>Type aliases (Python 3.12+)<a class="headerlink" href="#type-aliases-python-3-12" title="Link to this heading">#</a></h1>
+<p>In Python 3.12, the <code class="docutils literal notranslate"><span class="pre">type</span></code> statement is introduced to create type aliases.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="k">def</span> <span class="nf">checkout</span><span class="p">(</span>
-<span class="linenos"> 7</span>    <span class="n">branch</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-b&quot;</span><span class="p">])],</span>
-<span class="linenos"> 8</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check out a branch.&quot;&quot;&quot;</span>
-<span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">branch</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">11</span>
-<span class="linenos">12</span>
-<span class="linenos">13</span><span class="k">def</span> <span class="nf">commit</span><span class="p">(</span>
-<span class="linenos">14</span>    <span class="n">message</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-m&quot;</span><span class="p">])],</span>
-<span class="linenos">15</span>    <span class="nb">all</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-a&quot;</span><span class="p">])]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="linenos">16</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">17</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a commit.&quot;&quot;&quot;</span>
-<span class="linenos">18</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="nb">all</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos"> 5</span><span class="c1"># Lazily-evaluated type alias.</span>
+<span class="linenos"> 6</span><span class="nb">type</span> <span class="n">Field1Type</span> <span class="o">=</span> <span class="n">Inner</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span>
+<span class="linenos"> 9</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="linenos">10</span><span class="k">class</span> <span class="nc">Inner</span><span class="p">:</span>
+<span class="linenos">11</span>    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">12</span>    <span class="n">b</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="linenos">16</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos">17</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
+<span class="linenos">18</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">22</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">subcommand_cli_from_dict</span><span class="p">(</span>
-<span class="linenos">23</span>        <span class="p">{</span>
-<span class="linenos">24</span>            <span class="s2">&quot;checkout&quot;</span><span class="p">:</span> <span class="n">checkout</span><span class="p">,</span>
-<span class="linenos">25</span>            <span class="s2">&quot;commit&quot;</span><span class="p">:</span> <span class="n">commit</span><span class="p">,</span>
-<span class="linenos">26</span>        <span class="p">}</span>
-<span class="linenos">27</span>    <span class="p">)</span>
+<span class="linenos">20</span>    <span class="n">field1</span><span class="p">:</span> <span class="n">Field1Type</span>
+<span class="linenos">21</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A field.&quot;&quot;&quot;</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">24</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A numeric field, with a default value.&quot;&quot;&quot;</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">28</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
+<span class="linenos">29</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py [-h] {checkout,commit}
+<kbd>python 04_additional/13_type_statement.py --help</kbd><pre class="ansi-block literal-block">usage: 13_type_statement.py [-h] [--field2 INT] --field1.a INT --field1.b STR
 
-╭─ options ───────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit │
-╰─────────────────────────────────────────────────────────╯
-╭─ subcommands ───────────────────────────────────────────╮
-│ {checkout,commit}                                       │
-│     checkout            Check out a branch.             │
-│     commit              Make a commit.                  │
-╰─────────────────────────────────────────────────────────╯</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py commit --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py commit [-h] --message STR [--all | --no-all | -a]
+Description. This should show up in the helptext!
 
-Make a commit.
-
-╭─ options ───────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit │
-│ --message STR, -m STR   (required)                      │
-│ --all, --no-all, -a     (default: False)                │
-╰─────────────────────────────────────────────────────────╯</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py commit --message hello --all</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py commit -m hello -a</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py checkout --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py checkout [-h] --branch STR
-
-Check out a branch.
-
-╭─ options ───────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit │
-│ --branch STR, -b STR    (required)                      │
-╰─────────────────────────────────────────────────────────╯</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py checkout --branch main</kbd><pre class="ansi-block literal-block">branch='main'</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/11_aliases.py checkout -b main</kbd><pre class="ansi-block literal-block">branch='main'</pre>
+╭─ options ─────────────────────────────────────────────────────────────────╮
+│ -h, --help            show this help message and exit                     │
+│ --field2 INT          A numeric field, with a default value. (default: 3) │
+╰───────────────────────────────────────────────────────────────────────────╯
+╭─ field1 options ──────────────────────────────────────────────────────────╮
+│ A field.                                                                  │
+│ ────────────────────────────────                                          │
+│ --field1.a INT        (required)                                          │
+│ --field1.b STR        (required)                                          │
+╰───────────────────────────────────────────────────────────────────────────╯</pre>
 </section>
 
         </article>
@@ -331,23 +312,23 @@ Check out a branch.
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../12_counters/">
+          <a class="next-page" href="../../../goals_and_alternatives/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Counters</div>
+                <div class="title">Goals and alternatives</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../10_custom_constructors/">
+          <a class="prev-page" href="../12_counters/">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Custom Constructors</div>
+                <div class="title">Counters</div>
                 
               </div>
             </a>

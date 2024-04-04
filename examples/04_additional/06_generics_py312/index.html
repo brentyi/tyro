@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Argument aliases" href="../11_aliases/" /><link rel="prev" title="Attrs Integration" href="../09_attrs/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Configuration via typing.Annotated[]" href="../07_conf/" /><link rel="prev" title="Generic Types" href="../05_generics/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Custom Constructors - tyro</title>
+        <title>Generic Types (Python 3.12+ syntax) - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
@@ -198,13 +198,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../07_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Attrs Integration</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../11_aliases/">Argument aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../10_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_aliases/">Argument aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../12_counters/">Counters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../13_type_statement/">Type aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -254,71 +256,64 @@
           </label>
         </div>
         <article role="main">
-          <section id="custom-constructors">
-<h1>Custom Constructors<a class="headerlink" href="#custom-constructors" title="Link to this heading">#</a></h1>
-<p>For additional flexibility, <a class="reference internal" href="../../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> accepts a <code class="docutils literal notranslate"><span class="pre">constructor</span></code> argument,
-which makes it easier to load complex objects.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">json</span> <span class="k">as</span> <span class="nn">json_</span>
+          <section id="generic-types-python-3-12-syntax">
+<h1>Generic Types (Python 3.12+ syntax)<a class="headerlink" href="#generic-types-python-3-12-syntax" title="Link to this heading">#</a></h1>
+<p>Example of parsing for generic dataclasses using syntax introduced in Python
+3.12. Note: this is not compatible with <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">annotations</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 2</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">def</span> <span class="nf">dict_json_constructor</span><span class="p">(</span><span class="n">json</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct a dictionary from a JSON string. Raises a ValueError if the result is</span>
-<span class="linenos">10</span><span class="sd">    not a dictionary.&quot;&quot;&quot;</span>
-<span class="linenos">11</span>    <span class="n">out</span> <span class="o">=</span> <span class="n">json_</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">json</span><span class="p">)</span>
-<span class="linenos">12</span>    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-<span class="linenos">13</span>        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">json</span><span class="si">}</span><span class="s2"> is not a dictionary!&quot;</span><span class="p">)</span>
-<span class="linenos">14</span>    <span class="k">return</span> <span class="n">out</span>
-<span class="linenos">15</span>
-<span class="linenos">16</span>
-<span class="linenos">17</span><span class="c1"># A dictionary type, but `tyro` will expect a JSON string from the CLI.</span>
-<span class="linenos">18</span><span class="n">JsonDict</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">constructor</span><span class="o">=</span><span class="n">dict_json_constructor</span><span class="p">)]</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Point3</span><span class="p">[</span><span class="n">ScalarType</span><span class="p">:</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)]:</span>
+<span class="linenos"> 8</span>    <span class="n">x</span><span class="p">:</span> <span class="n">ScalarType</span>
+<span class="linenos"> 9</span>    <span class="n">y</span><span class="p">:</span> <span class="n">ScalarType</span>
+<span class="linenos">10</span>    <span class="n">z</span><span class="p">:</span> <span class="n">ScalarType</span>
+<span class="linenos">11</span>    <span class="n">frame_id</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span>
+<span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">15</span><span class="k">class</span> <span class="nc">Triangle</span><span class="p">:</span>
+<span class="linenos">16</span>    <span class="n">a</span><span class="p">:</span> <span class="n">Point3</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+<span class="linenos">17</span>    <span class="n">b</span><span class="p">:</span> <span class="n">Point3</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
+<span class="linenos">18</span>    <span class="n">c</span><span class="p">:</span> <span class="n">Point3</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
-<span class="linenos">22</span>    <span class="n">dict1</span><span class="p">:</span> <span class="n">JsonDict</span><span class="p">,</span>
-<span class="linenos">23</span>    <span class="n">dict2</span><span class="p">:</span> <span class="n">JsonDict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;default&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span>
-<span class="linenos">24</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">25</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dict1</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">26</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dict2</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">27</span>
-<span class="linenos">28</span>
-<span class="linenos">29</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">30</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+<span class="linenos">21</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">22</span><span class="k">class</span> <span class="nc">Args</span><span class="p">[</span><span class="n">ShapeType</span><span class="p">]:</span>
+<span class="linenos">23</span>    <span class="n">shape</span><span class="p">:</span> <span class="n">ShapeType</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span>
+<span class="linenos">26</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">27</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">[</span><span class="n">Triangle</span><span class="p">])</span>
+<span class="linenos">28</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/10_custom_constructors.py --help</kbd><pre class="ansi-block literal-block">usage: 10_custom_constructors.py [-h] --dict1.json STR [--dict2.json STR]
+<kbd>python 04_additional/06_generics_py312.py --help</kbd><pre class="ansi-block literal-block">usage: 06_generics_py312.py [-h] [OPTIONS]
 
-╭─ options ──────────────────────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit                    │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ dict1 options ────────────────────────────────────────────────────────────╮
-│ Construct a dictionary from a JSON string. Raises a ValueError if the      │
-│ result is                                                                  │
-│ not a dictionary.                                                          │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ --dict1.json STR        (required)                                         │
-╰────────────────────────────────────────────────────────────────────────────╯
-╭─ dict2 options ────────────────────────────────────────────────────────────╮
-│ Construct a dictionary from a JSON string. Raises a ValueError if the      │
-│ result is                                                                  │
-│ not a dictionary.                                                          │
-│                                                                            │
-│ Default: {'default': None}                                                 │
-│ ────────────────────────────────────────────────────────────────────────── │
-│ --dict2.json STR        (optional)                                         │
-╰────────────────────────────────────────────────────────────────────────────╯</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/10_custom_constructors.py --dict1.json '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">dict1={'hello': 'world'}
-dict2={'default': None}</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/10_custom_constructors.py --dict1.json '{"hello": "world"}`' --dict2.json '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">╭─ Value error ────────────────────────────────────────────────────────────────╮
-│ Error parsing dict1: Extra data: line 1 column 19 (char 18)                  │
-╰──────────────────────────────────────────────────────────────────────────────╯</pre>
+╭─ options ───────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit │
+╰─────────────────────────────────────────────────────────╯
+╭─ shape.a options ───────────────────────────────────────╮
+│ --shape.a.x FLOAT       (required)                      │
+│ --shape.a.y FLOAT       (required)                      │
+│ --shape.a.z FLOAT       (required)                      │
+│ --shape.a.frame-id STR  (required)                      │
+╰─────────────────────────────────────────────────────────╯
+╭─ shape.b options ───────────────────────────────────────╮
+│ --shape.b.x FLOAT       (required)                      │
+│ --shape.b.y FLOAT       (required)                      │
+│ --shape.b.z FLOAT       (required)                      │
+│ --shape.b.frame-id STR  (required)                      │
+╰─────────────────────────────────────────────────────────╯
+╭─ shape.c options ───────────────────────────────────────╮
+│ --shape.c.x FLOAT       (required)                      │
+│ --shape.c.y FLOAT       (required)                      │
+│ --shape.c.z FLOAT       (required)                      │
+│ --shape.c.frame-id STR  (required)                      │
+╰─────────────────────────────────────────────────────────╯</pre>
 </section>
 
         </article>
@@ -326,23 +321,23 @@ dict2={'default': None}</pre>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../11_aliases/">
+          <a class="next-page" href="../07_conf/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Argument aliases</div>
+                <div class="title">Configuration via typing.Annotated[]</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../09_attrs/">
+          <a class="prev-page" href="../05_generics/">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Attrs Integration</div>
+                <div class="title">Generic Types</div>
                 
               </div>
             </a>

@@ -197,13 +197,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -457,6 +459,14 @@
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">:</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span>
 
+    <span class="c1"># Unwrap NewType + set metavar based on NewType name.</span>
+    <span class="c1"># `isinstance(x, NewType)` doesn&#39;t work because NewType isn&#39;t a class until</span>
+    <span class="c1"># Python 3.10, so we instead do a duck typing-style check.</span>
+    <span class="n">metavar</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">typ</span><span class="p">,</span> <span class="n">maybe_newtype_name</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">maybe_newtype_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="n">maybe_newtype_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
     <span class="c1"># Address container types. If a matching container is found, this will recursively</span>
     <span class="c1"># call instantiator_from_type().</span>
     <span class="n">container_out</span> <span class="o">=</span> <span class="n">_instantiator_from_container_type</span><span class="p">(</span>
@@ -464,14 +474,6 @@
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">container_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">container_out</span>
-
-    <span class="c1"># Unwrap NewType + set metavar based on NewType name.</span>
-    <span class="c1"># `isinstance(x, NewType)` doesn&#39;t work because NewType isn&#39;t a class until</span>
-    <span class="c1"># Python 3.10, so we instead do a duck typing-style check.</span>
-    <span class="n">metavar</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-    <span class="n">typ</span><span class="p">,</span> <span class="n">maybe_newtype_name</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">maybe_newtype_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">metavar</span> <span class="o">=</span> <span class="n">maybe_newtype_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
     <span class="c1"># Validate that typ is a `(arg: str) -&gt; T` type converter, as expected by argparse.</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_builtin_set</span><span class="p">:</span>

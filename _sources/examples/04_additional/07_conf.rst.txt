@@ -52,14 +52,14 @@ Features here are supported, but generally unnecessary and should be used sparin
 
 .. raw:: html
 
-        <kbd>python 04_additional/06_conf.py --help</kbd>
+        <kbd>python 04_additional/07_conf.py --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/06_conf.py --help
+.. program-output:: python ../../examples/04_additional/07_conf.py --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/06_conf.py 5 --boolean True</kbd>
+        <kbd>python 04_additional/07_conf.py 5 --boolean True</kbd>
 
-.. program-output:: python ../../examples/04_additional/06_conf.py 5 --boolean True
+.. program-output:: python ../../examples/04_additional/07_conf.py 5 --boolean True

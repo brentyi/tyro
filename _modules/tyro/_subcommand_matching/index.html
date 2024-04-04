@@ -197,13 +197,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_conf/">Configuration via typing.Annotated[]</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -355,11 +357,11 @@
         <span class="c1"># Check against supertypes.</span>
         <span class="k">for</span> <span class="n">self_type</span> <span class="ow">in</span> <span class="n">self_types</span><span class="p">:</span>
             <span class="n">self_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">self_type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">self_type</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
+            <span class="n">self_type</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
             <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">super_type</span> <span class="ow">in</span> <span class="n">super_types</span><span class="p">:</span>
                 <span class="n">super_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">super_type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">self_type</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
+                <span class="n">self_type</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">self_type</span><span class="p">,</span> <span class="n">super_type</span><span class="p">):</span>
                     <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
