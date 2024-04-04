@@ -26,6 +26,7 @@ from typing_extensions import (
     Annotated,
     ForwardRef,
     Self,
+    TypeAliasType,
     get_args,
     get_origin,
     get_type_hints,
@@ -69,7 +70,7 @@ def resolve_generic_types(
         cls, annotations = unwrap_annotated(cls)
 
     # We'll ignore NewType when getting the origin + args for generics.
-    origin_cls = get_origin(unwrap_newtype(cls)[0])
+    origin_cls = get_origin(unwrap_newtype_and_aliases(cls)[0])
     type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
 
     # Support typing.Self.
@@ -88,7 +89,7 @@ def resolve_generic_types(
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
         typevars = origin_cls.__parameters__
-        typevar_values = get_args(unwrap_newtype(cls)[0])
+        typevar_values = get_args(unwrap_newtype_and_aliases(cls)[0])
         assert len(typevars) == len(typevar_values)
         cls = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
@@ -167,9 +168,13 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
 TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
 
 
-def unwrap_newtype(
+def unwrap_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
 ) -> Tuple[TypeOrCallableOrNone, Optional[str]]:
+    # Handle type aliases, eg via the `type` statement in Python 3.12.
+    if isinstance(typ, TypeAliasType):
+        return unwrap_newtype_and_aliases(typ.__value__)  # type: ignore
+
     # We'll unwrap NewType annotations here; this is needed before issubclass
     # checks!
     #
@@ -197,7 +202,7 @@ def unwrap_newtype_and_narrow_subtypes(
     string default is passed in, we don't want to narrow the type to always be
     strings!)"""
 
-    typ, unused_name = unwrap_newtype(typ)
+    typ, unused_name = unwrap_newtype_and_aliases(typ)
     del unused_name
 
     try:

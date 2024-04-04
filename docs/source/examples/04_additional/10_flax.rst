@@ -63,14 +63,14 @@ directly from ``tyro.cli``.
 
 .. raw:: html
 
-        <kbd>python 04_additional/07_flax.py --help</kbd>
+        <kbd>python 04_additional/10_flax.py --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/07_flax.py --help
+.. program-output:: python ../../examples/04_additional/10_flax.py --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/07_flax.py --model.layers 4</kbd>
+        <kbd>python 04_additional/10_flax.py --model.layers 4</kbd>
 
-.. program-output:: python ../../examples/04_additional/07_flax.py --model.layers 4
+.. program-output:: python ../../examples/04_additional/10_flax.py --model.layers 4
