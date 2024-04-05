@@ -7,7 +7,7 @@ name = "tyro"
 authors = [
     {name = "brentyi", email = "brentyi@berkeley.edu"},
 ]
-version = "0.8.1"  # TODO: currently needs to be synchronized manually with __init__.py.
+version = "0.8.2"  # TODO: currently needs to be synchronized manually with __init__.py.
 description = "Strongly typed, zero-effort CLI interfaces"
 readme = "README.md"
 license = { text="MIT" }
@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "docstring-parser>=0.14.1",
-    "typing-extensions>=4.3.0",
+    "typing-extensions>=4.7.0",
     "backports.cached-property>=1.0.2; python_version<'3.8'",
     "colorama>=0.4.0; platform_system=='Windows'",
     "rich>=11.1.0",
