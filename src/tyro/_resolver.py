@@ -237,13 +237,17 @@ def narrow_collection_types(
     typ: TypeOrCallable, default_instance: Any
 ) -> TypeOrCallable:
     """TypeForm narrowing for containers. Infers types of container contents."""
-    if hasattr(default_instance, "__len__") and len(default_instance) == 0:
-        return typ
     if typ is list and isinstance(default_instance, list):
+        if len(default_instance) == 0:
+            return typ
         typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
     elif typ is set and isinstance(default_instance, set):
+        if len(default_instance) == 0:
+            return typ
         typ = Set.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
     elif typ is tuple and isinstance(default_instance, tuple):
+        if len(default_instance) == 0:
+            return typ
         typ = Tuple.__getitem__(tuple(map(type, default_instance)))  # type: ignore
     return typ
 

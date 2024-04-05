@@ -329,9 +329,9 @@ def _cli_impl(
 
         if "=" in arg:
             arg, _, val = arg.partition("=")
-            fixed = "--" + arg[2:].replace(to_swap_delimeter, delimeter) + "=" + val
+            fixed = "--" + _strings.replace_delimeter_in_part(arg[2:]) + "=" + val
         else:
-            fixed = "--" + arg[2:].replace(to_swap_delimeter, delimeter)
+            fixed = "--" + _strings.replace_delimeter_in_part(arg[2:])
         if (
             return_unknown_args
             and fixed in modified_args
