@@ -13,6 +13,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Type,
     Union,
 )
 
@@ -465,6 +466,18 @@ def test_tuple_narrowing_empty_default() -> None:
         return x
 
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == ("0", "1", "2", "3")
+
+def test_narrowing_edge_case() -> None:
+    """https://github.com/brentyi/tyro/issues/136"""
+    @dataclasses.dataclass
+    class Config:
+        _target: Type = dataclasses.field(default_factory=lambda: MyClass)
+
+    class MyClass:
+        def __len__(self):
+            return 0
+
+    assert tyro.cli(Config, args=[]) == Config()
 
 
 def test_no_type_collections():
