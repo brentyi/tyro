@@ -467,8 +467,10 @@ def test_tuple_narrowing_empty_default() -> None:
 
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == ("0", "1", "2", "3")
 
+
 def test_narrowing_edge_case() -> None:
     """https://github.com/brentyi/tyro/issues/136"""
+
     @dataclasses.dataclass
     class Config:
         _target: Type = dataclasses.field(default_factory=lambda: MyClass)

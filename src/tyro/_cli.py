@@ -324,9 +324,6 @@ def _cli_impl(
         if not arg.startswith("--"):
             continue
 
-        delimeter = _strings.get_delimeter()
-        to_swap_delimeter = "-" if delimeter == "_" else "_"
-
         if "=" in arg:
             arg, _, val = arg.partition("=")
             fixed = "--" + _strings.replace_delimeter_in_part(arg[2:]) + "=" + val
