@@ -5,16 +5,13 @@ messages with ones that:
     - Use `rich` for formatting.
     - Can be themed with an accent color.
 
-This is largely built by fussing around in argparse implementation details, and is
-extremely chaotic as a result.
-
-TODO: the current implementation should be robust given our test coverage, but unideal
-long-term. We should just maintain our own fork of argparse.
+This is largely built by fussing around in argparse implementation details. It's
+chaotic as a result; for stability we mirror argparse at _argparse.py.
 """
 
 from __future__ import annotations
 
-import argparse
+import argparse as argparse_sys
 import contextlib
 import dataclasses
 import difflib
@@ -37,6 +34,7 @@ from rich.text import Text
 from rich.theme import Theme
 from typing_extensions import override
 
+from . import _argparse as argparse
 from . import _arguments, _strings, conf
 from ._parsers import ParserSpecification
 
@@ -269,7 +267,9 @@ class _ArgumentInfo:
 global_unrecognized_args: List[str] = []
 
 
-class TyroArgumentParser(argparse.ArgumentParser):
+# We inherit from both our local mirror of argparse and the upstream one.
+# Including the latter is purely for `isinstance()`-style checks.
+class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser):  # type: ignore
     _parser_specification: ParserSpecification
     _parsing_known_args: bool
     _args: List[str]
@@ -359,7 +359,7 @@ class TyroArgumentParser(argparse.ArgumentParser):
         def consume_optional(start_index):
             # get the optional identified at this index
             option_tuple = option_string_indices[start_index]
-            action, option_string, explicit_arg = option_tuple
+            action, option_string, sep, explicit_arg = option_tuple
 
             # identify additional optionals in the same arg string
             # (e.g. -xyz is the same as -x -y -z if no args are required)
@@ -374,7 +374,6 @@ class TyroArgumentParser(argparse.ArgumentParser):
                     if not self._parsing_known_args:
                         global_unrecognized_args.append(option_string)
                     # </new>
-
                     extras.append(arg_strings[start_index])
                     return start_index + 1
 
@@ -392,18 +391,27 @@ class TyroArgumentParser(argparse.ArgumentParser):
                         and option_string[1] not in chars
                         and explicit_arg != ""
                     ):
+                        if sep or explicit_arg[0] in chars:
+                            msg = _("ignored explicit argument %r")
+                            raise argparse.ArgumentError(action, msg % explicit_arg)
                         action_tuples.append((action, [], option_string))
                         char = option_string[0]
                         option_string = char + explicit_arg[0]
-                        new_explicit_arg = explicit_arg[1:] or None
                         optionals_map = self._option_string_actions
                         if option_string in optionals_map:
                             action = optionals_map[option_string]
-                            explicit_arg = new_explicit_arg
+                            explicit_arg = explicit_arg[1:]
+                            if not explicit_arg:
+                                sep = explicit_arg = None
+                            elif explicit_arg[0] == "=":
+                                sep = "="
+                                explicit_arg = explicit_arg[1:]
+                            else:
+                                sep = ""
                         else:
-                            msg = _("ignored explicit argument %r")
-                            raise argparse.ArgumentError(action, msg % explicit_arg)
-
+                            extras.append(char + explicit_arg)
+                            stop = start_index + 1
+                            break
                     # if the action expect exactly one argument, we've
                     # successfully matched the option; exit the loop
                     elif arg_count == 1:

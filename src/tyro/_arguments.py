@@ -3,7 +3,6 @@ argparse's `add_argument()`."""
 
 from __future__ import annotations
 
-import argparse
 import dataclasses
 import enum
 import functools
@@ -30,6 +29,7 @@ from typing import (
 import rich.markup
 import shtab
 
+from . import _argparse as argparse
 from . import _fields, _instantiators, _resolver, _strings
 from ._typing import TypeForm
 from .conf import _markers
@@ -48,7 +48,6 @@ else:
 _T = TypeVar("_T")
 
 
-# TODO: refactor!
 class BooleanOptionalAction(argparse.Action):
     """Adapted from https://github.com/python/cpython/pull/27672"""
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import argparse
 import dataclasses
 from typing import (
     Any,
@@ -20,6 +19,7 @@ from typing import (
 
 from typing_extensions import Annotated, get_args, get_origin
 
+from . import _argparse as argparse
 from . import (
     _argparse_formatter,
     _arguments,

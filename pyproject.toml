@@ -7,7 +7,7 @@ name = "tyro"
 authors = [
     {name = "brentyi", email = "brentyi@berkeley.edu"},
 ]
-version = "0.8.2"  # TODO: currently needs to be synchronized manually with __init__.py.
+version = "0.8.3"  # TODO: currently needs to be synchronized manually with __init__.py.
 description = "Strongly typed, zero-effort CLI interfaces"
 readme = "README.md"
 license = { text="MIT" }
@@ -67,7 +67,10 @@ profile = "black"
 python_version = "3.12"
 ignore_missing_imports = true
 warn_unused_configs = true
-exclude = "^tests/test_py311_generated/.*"
+exclude = ["^tests/test_py311_generated/.*", "_argparse\\.py"]
+
+[tool.coverage.run]
+omit = ["**/_argparse.py"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -127,3 +130,8 @@ lint.ignore = [
     "PLW0603",  # Global statement updates are discouraged.
     "PLW2901"  # For loop variable overwritten.
 ]
+extend-exclude = ["**/_argparse.py"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+ignore = ["**/_argparse.py"]

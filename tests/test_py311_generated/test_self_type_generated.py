@@ -7,7 +7,7 @@ import pytest
 import tyro
 
 
-class TestClass:
+class SomeClass:
     def __init__(self, a: int, b: int) -> None:
         self.a = a
         self.b = b
@@ -16,7 +16,7 @@ class TestClass:
         self.effect = x
 
     @classmethod
-    def method2(cls, x: Self) -> TestClass:
+    def method2(cls, x: Self) -> SomeClass:
         return x
 
     # Self is not valid in static methods.
@@ -27,65 +27,65 @@ class TestClass:
     #     return x
 
 
-class TestSubclass(TestClass): ...
+class SomeSubclass(SomeClass): ...
 
 
 def test_method() -> None:
-    x = TestClass(0, 0)
+    x = SomeClass(0, 0)
     with pytest.raises(SystemExit):
         tyro.cli(x.method1, args=[])
 
     assert tyro.cli(x.method1, args="--x.a 3 --x.b 3".split(" ")) is None
     assert x.effect.a == 3 and x.effect.b == 3
-    assert isinstance(x, TestClass)
+    assert isinstance(x, SomeClass)
 
 
 def test_classmethod() -> None:
-    x = TestClass(0, 0)
+    x = SomeClass(0, 0)
     with pytest.raises(SystemExit):
         tyro.cli(x.method2, args=[])
     with pytest.raises(SystemExit):
-        tyro.cli(TestClass.method2, args=[])
+        tyro.cli(SomeClass.method2, args=[])
 
     y = tyro.cli(x.method2, args="--x.a 3 --x.b 3".split(" "))
     assert y.a == 3
     assert y.b == 3
-    assert isinstance(y, TestClass)
+    assert isinstance(y, SomeClass)
 
-    y = tyro.cli(TestClass.method2, args="--x.a 3 --x.b 3".split(" "))
+    y = tyro.cli(SomeClass.method2, args="--x.a 3 --x.b 3".split(" "))
     assert y.a == 3
     assert y.b == 3
-    assert isinstance(y, TestClass)
+    assert isinstance(y, SomeClass)
 
 
 def test_subclass_method() -> None:
-    x = TestSubclass(0, 0)
+    x = SomeSubclass(0, 0)
     with pytest.raises(SystemExit):
         tyro.cli(x.method1, args=[])
 
     assert tyro.cli(x.method1, args="--x.a 3 --x.b 3".split(" ")) is None
     assert x.effect.a == 3 and x.effect.b == 3
-    assert isinstance(x, TestSubclass)
+    assert isinstance(x, SomeSubclass)
 
     y = tyro.cli(x.method2, args="--x.a 3 --x.b 3".split(" "))
     assert y.a == 3
     assert y.b == 3
-    assert isinstance(y, TestClass)
+    assert isinstance(y, SomeClass)
 
 
 def test_subclass_classmethod() -> None:
-    x = TestSubclass(0, 0)
+    x = SomeSubclass(0, 0)
     with pytest.raises(SystemExit):
         tyro.cli(x.method2, args=[])
     with pytest.raises(SystemExit):
-        tyro.cli(TestSubclass.method2, args=[])
+        tyro.cli(SomeSubclass.method2, args=[])
 
     y = tyro.cli(x.method2, args="--x.a 3 --x.b 3".split(" "))
     assert y.a == 3
     assert y.b == 3
-    assert isinstance(y, TestClass)
+    assert isinstance(y, SomeClass)
 
-    y = tyro.cli(TestSubclass.method2, args="--x.a 3 --x.b 3".split(" "))
+    y = tyro.cli(SomeSubclass.method2, args="--x.a 3 --x.b 3".split(" "))
     assert y.a == 3
     assert y.b == 3
-    assert isinstance(y, TestClass)
+    assert isinstance(y, SomeClass)
