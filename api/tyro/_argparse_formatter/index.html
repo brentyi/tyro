@@ -266,10 +266,8 @@ messages with ones that:</p>
 - Can be themed with an accent color.
 </pre></div>
 </div>
-<p>This is largely built by fussing around in argparse implementation details, and is
-extremely chaotic as a result.</p>
-<p>TODO: the current implementation should be robust given our test coverage, but unideal
-long-term. We should just maintain our own fork of argparse.</p>
+<p>This is largely built by fussing around in argparse implementation details. It’s
+chaotic as a result; for stability we mirror argparse at _argparse.py.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
 <dl class="py class">
@@ -425,7 +423,7 @@ wrapping usage text.</p></li>
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgumentParser">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroArgumentParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgumentParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgumentParser" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._argparse.ArgumentParser</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code></p>
 <p>Object for parsing command line strings into Python objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
@@ -470,7 +468,7 @@ should either exit or raise an exception.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgparseHelpFormatter">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroArgparseHelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgparseHelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgparseHelpFormatter" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">argparse.RawDescriptionHelpFormatter</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../_argparse/#tyro._argparse.RawDescriptionHelpFormatter" title="tyro._argparse.RawDescriptionHelpFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._argparse.RawDescriptionHelpFormatter</span></code></a></p>
 <p>Help message formatter which retains any formatting in descriptions.</p>
 <p>Only the name of this class is considered a public API. All the methods
 provided by the class are considered an implementation detail.

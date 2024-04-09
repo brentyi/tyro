@@ -1,0 +1,803 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
+
+    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+        <title>tyro._argparse - tyro</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/ansi.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #272822;
+  --color-code-foreground: #f8f8f2;
+  --color-code-background: #f4f4f4;
+  --color-code-foreground: #000;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../"><div class="brand">tyro</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo only-light" src="../../../_static/logo-light.svg" alt="Light Logo"/>
+    <img class="sidebar-logo only-dark" src="../../../_static/logo-dark.svg" alt="Dark Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">tyro</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search/" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Basics</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/01_functions/">Functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/02_dataclasses/">Dataclasses</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/03_collections/">Multi-value Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/05_flags/">Booleans and Flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/06_literals/">Choices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/01_basics/07_unions/">Unions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/01_nesting/">Hierarchical Configs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/02_subcommands/">Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/03_multiple_subcommands/">Sequenced Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/04_nesting_in_containers/">Nesting in Containers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/02_nesting/05_subcommands_func/">Subcommands from Functions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Config Management</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_config_systems/01_base_configs/">Base Configurations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/03_config_systems/02_overriding_yaml/">Overriding YAML Configs</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Additional Features</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/01_positional_args/">Positional Arguments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/02_dictionaries/">Overriding Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Notes</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../goals_and_alternatives/">Goals and alternatives</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../helptext_generation/">Helptext generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tab_completion/">Tab completion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../building_configuration_systems/">Building configuration systems</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="module-tyro._argparse">
+<span id="tyro-argparse"></span><h1><a class="reference internal" href="#module-tyro._argparse" title="tyro._argparse"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._argparse</span></code></a><a class="headerlink" href="#module-tyro._argparse" title="Link to this heading">#</a></h1>
+<p>Command-line parsing library</p>
+<p>This module is an optparse-inspired command-line parsing library that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">handles</span> <span class="n">both</span> <span class="n">optional</span> <span class="ow">and</span> <span class="n">positional</span> <span class="n">arguments</span>
+<span class="o">-</span> <span class="n">produces</span> <span class="n">highly</span> <span class="n">informative</span> <span class="n">usage</span> <span class="n">messages</span>
+<span class="o">-</span> <span class="n">supports</span> <span class="n">parsers</span> <span class="n">that</span> <span class="n">dispatch</span> <span class="n">to</span> <span class="n">sub</span><span class="o">-</span><span class="n">parsers</span>
+</pre></div>
+</div>
+<p>The following is a simple usage example that sums integers from the
+command-line and writes the result to a file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+    <span class="n">description</span><span class="o">=</span><span class="s1">&#39;sum the integers at the command line&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s1">&#39;integers&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;an integer to be summed&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span>
+    <span class="s1">&#39;--log&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">FileType</span><span class="p">(</span><span class="s1">&#39;w&#39;</span><span class="p">),</span>
+    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;the file where the sum should be written&#39;</span><span class="p">)</span>
+<span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+<span class="n">args</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">sum</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">integers</span><span class="p">))</span>
+<span class="n">args</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The module contains the following public classes:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">ArgumentParser</span> <span class="o">--</span> <span class="n">The</span> <span class="n">main</span> <span class="n">entry</span> <span class="n">point</span> <span class="k">for</span> <span class="n">command</span><span class="o">-</span><span class="n">line</span> <span class="n">parsing</span><span class="o">.</span> <span class="n">As</span> <span class="n">the</span>
+    <span class="n">example</span> <span class="n">above</span> <span class="n">shows</span><span class="p">,</span> <span class="n">the</span> <span class="n">add_argument</span><span class="p">()</span> <span class="n">method</span> <span class="ow">is</span> <span class="n">used</span> <span class="n">to</span> <span class="n">populate</span>
+    <span class="n">the</span> <span class="n">parser</span> <span class="k">with</span> <span class="n">actions</span> <span class="k">for</span> <span class="n">optional</span> <span class="ow">and</span> <span class="n">positional</span> <span class="n">arguments</span><span class="o">.</span> <span class="n">Then</span>
+    <span class="n">the</span> <span class="n">parse_args</span><span class="p">()</span> <span class="n">method</span> <span class="ow">is</span> <span class="n">invoked</span> <span class="n">to</span> <span class="n">convert</span> <span class="n">the</span> <span class="n">args</span> <span class="n">at</span> <span class="n">the</span>
+    <span class="n">command</span><span class="o">-</span><span class="n">line</span> <span class="n">into</span> <span class="n">an</span> <span class="nb">object</span> <span class="k">with</span> <span class="n">attributes</span><span class="o">.</span>
+
+<span class="o">-</span> <span class="n">ArgumentError</span> <span class="o">--</span> <span class="n">The</span> <span class="n">exception</span> <span class="n">raised</span> <span class="n">by</span> <span class="n">ArgumentParser</span> <span class="n">objects</span> <span class="n">when</span>
+    <span class="n">there</span> <span class="n">are</span> <span class="n">errors</span> <span class="k">with</span> <span class="n">the</span> <span class="n">parser</span><span class="s1">&#39;s actions. Errors raised while</span>
+    <span class="n">parsing</span> <span class="n">the</span> <span class="n">command</span><span class="o">-</span><span class="n">line</span> <span class="n">are</span> <span class="n">caught</span> <span class="n">by</span> <span class="n">ArgumentParser</span> <span class="ow">and</span> <span class="n">emitted</span>
+    <span class="k">as</span> <span class="n">command</span><span class="o">-</span><span class="n">line</span> <span class="n">messages</span><span class="o">.</span>
+
+<span class="o">-</span> <span class="n">FileType</span> <span class="o">--</span> <span class="n">A</span> <span class="n">factory</span> <span class="k">for</span> <span class="n">defining</span> <span class="n">types</span> <span class="n">of</span> <span class="n">files</span> <span class="n">to</span> <span class="n">be</span> <span class="n">created</span><span class="o">.</span> <span class="n">As</span> <span class="n">the</span>
+    <span class="n">example</span> <span class="n">above</span> <span class="n">shows</span><span class="p">,</span> <span class="n">instances</span> <span class="n">of</span> <span class="n">FileType</span> <span class="n">are</span> <span class="n">typically</span> <span class="n">passed</span> <span class="k">as</span>
+    <span class="n">the</span> <span class="nb">type</span><span class="o">=</span> <span class="n">argument</span> <span class="n">of</span> <span class="n">add_argument</span><span class="p">()</span> <span class="n">calls</span><span class="o">.</span>
+
+<span class="o">-</span> <span class="n">Action</span> <span class="o">--</span> <span class="n">The</span> <span class="n">base</span> <span class="k">class</span> <span class="nc">for</span> <span class="n">parser</span> <span class="n">actions</span><span class="o">.</span> <span class="n">Typically</span> <span class="n">actions</span> <span class="n">are</span>
+    <span class="n">selected</span> <span class="n">by</span> <span class="n">passing</span> <span class="n">strings</span> <span class="n">like</span> <span class="s1">&#39;store_true&#39;</span> <span class="ow">or</span> <span class="s1">&#39;append_const&#39;</span> <span class="n">to</span>
+    <span class="n">the</span> <span class="n">action</span><span class="o">=</span> <span class="n">argument</span> <span class="n">of</span> <span class="n">add_argument</span><span class="p">()</span><span class="o">.</span> <span class="n">However</span><span class="p">,</span> <span class="k">for</span> <span class="n">greater</span>
+    <span class="n">customization</span> <span class="n">of</span> <span class="n">ArgumentParser</span> <span class="n">actions</span><span class="p">,</span> <span class="n">subclasses</span> <span class="n">of</span> <span class="n">Action</span> <span class="n">may</span>
+    <span class="n">be</span> <span class="n">defined</span> <span class="ow">and</span> <span class="n">passed</span> <span class="k">as</span> <span class="n">the</span> <span class="n">action</span><span class="o">=</span> <span class="n">argument</span><span class="o">.</span>
+
+<span class="o">-</span> <span class="n">HelpFormatter</span><span class="p">,</span> <span class="n">RawDescriptionHelpFormatter</span><span class="p">,</span> <span class="n">RawTextHelpFormatter</span><span class="p">,</span>
+    <span class="n">ArgumentDefaultsHelpFormatter</span> <span class="o">--</span> <span class="n">Formatter</span> <span class="n">classes</span> <span class="n">which</span>
+    <span class="n">may</span> <span class="n">be</span> <span class="n">passed</span> <span class="k">as</span> <span class="n">the</span> <span class="n">formatter_class</span><span class="o">=</span> <span class="n">argument</span> <span class="n">to</span> <span class="n">the</span>
+    <span class="n">ArgumentParser</span> <span class="n">constructor</span><span class="o">.</span> <span class="n">HelpFormatter</span> <span class="ow">is</span> <span class="n">the</span> <span class="n">default</span><span class="p">,</span>
+    <span class="n">RawDescriptionHelpFormatter</span> <span class="ow">and</span> <span class="n">RawTextHelpFormatter</span> <span class="n">tell</span> <span class="n">the</span> <span class="n">parser</span>
+    <span class="ow">not</span> <span class="n">to</span> <span class="n">change</span> <span class="n">the</span> <span class="n">formatting</span> <span class="k">for</span> <span class="n">help</span> <span class="n">text</span><span class="p">,</span> <span class="ow">and</span>
+    <span class="n">ArgumentDefaultsHelpFormatter</span> <span class="n">adds</span> <span class="n">information</span> <span class="n">about</span> <span class="n">argument</span> <span class="n">defaults</span>
+    <span class="n">to</span> <span class="n">the</span> <span class="n">help</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>All other classes in this module are considered implementation details.
+(Also note that HelpFormatter and RawDescriptionHelpFormatter are only
+considered public as object names – the API of the formatter objects is
+still considered an implementation detail.)</p>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._argparse.SUPPRESS">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">SUPPRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'==SUPPRESS=='</span></em><a class="headerlink" href="#tyro._argparse.SUPPRESS" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._argparse.OPTIONAL">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">OPTIONAL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'?'</span></em><a class="headerlink" href="#tyro._argparse.OPTIONAL" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._argparse.ZERO_OR_MORE">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">ZERO_OR_MORE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'*'</span></em><a class="headerlink" href="#tyro._argparse.ZERO_OR_MORE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._argparse.ONE_OR_MORE">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">ONE_OR_MORE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'+'</span></em><a class="headerlink" href="#tyro._argparse.ONE_OR_MORE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._argparse.PARSER">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">PARSER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'A...'</span></em><a class="headerlink" href="#tyro._argparse.PARSER" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._argparse.REMAINDER">
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">REMAINDER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'...'</span></em><a class="headerlink" href="#tyro._argparse.REMAINDER" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">HelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_increment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_help_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Formatter for generating usage messages and argument help strings.</p>
+<p>Only the name of this class is considered a public API. All the methods
+provided by the class are considered an implementation detail.
+.. py:method:: start_section(heading)</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.end_section">
+<span class="sig-name descname"><span class="pre">end_section</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.end_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.end_section" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.add_text">
+<span class="sig-name descname"><span class="pre">add_text</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.add_text"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.add_text" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.add_usage">
+<span class="sig-name descname"><span class="pre">add_usage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">usage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">groups</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.add_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.add_usage" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.add_argument">
+<span class="sig-name descname"><span class="pre">add_argument</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">action</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.add_argument"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.add_argument" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.add_arguments">
+<span class="sig-name descname"><span class="pre">add_arguments</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">actions</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.add_arguments"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.add_arguments" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.format_help">
+<span class="sig-name descname"><span class="pre">format_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.format_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.format_help" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.RawDescriptionHelpFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">RawDescriptionHelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_increment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_help_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#RawDescriptionHelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.RawDescriptionHelpFormatter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tyro._argparse.HelpFormatter" title="tyro._argparse.HelpFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelpFormatter</span></code></a></p>
+<p>Help message formatter which retains any formatting in descriptions.</p>
+<p>Only the name of this class is considered a public API. All the methods
+provided by the class are considered an implementation detail.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.RawTextHelpFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">RawTextHelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_increment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_help_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#RawTextHelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.RawTextHelpFormatter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tyro._argparse.RawDescriptionHelpFormatter" title="tyro._argparse.RawDescriptionHelpFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RawDescriptionHelpFormatter</span></code></a></p>
+<p>Help message formatter which retains formatting of all help text.</p>
+<p>Only the name of this class is considered a public API. All the methods
+provided by the class are considered an implementation detail.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentDefaultsHelpFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">ArgumentDefaultsHelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_increment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_help_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentDefaultsHelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentDefaultsHelpFormatter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tyro._argparse.HelpFormatter" title="tyro._argparse.HelpFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelpFormatter</span></code></a></p>
+<p>Help message formatter which adds default values to argument help.</p>
+<p>Only the name of this class is considered a public API. All the methods
+provided by the class are considered an implementation detail.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.MetavarTypeHelpFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">MetavarTypeHelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indent_increment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_help_position</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">24</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#MetavarTypeHelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.MetavarTypeHelpFormatter" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tyro._argparse.HelpFormatter" title="tyro._argparse.HelpFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HelpFormatter</span></code></a></p>
+<p>Help message formatter which uses the argument ‘type’ as the default
+metavar value (instead of the argument ‘dest’)</p>
+<p>Only the name of this class is considered a public API. All the methods
+provided by the class are considered an implementation detail.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.Action">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">Action</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_strings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">const</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metavar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#Action"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.Action" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_AttributeHolder</span></code></p>
+<p>Information about how to convert command line strings to Python objects.</p>
+<p>Action objects are used by an ArgumentParser to represent the information
+needed to parse a single argument from one or more strings from the
+command line. The keyword arguments to the Action constructor are also
+all attributes of Action instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>which</strong> (<em>- option_strings -- A list</em><em> of </em><em>command-line option strings</em>) – should be associated with this action.</p></li>
+<li><p><strong>object</strong> (<em>- dest -- The name</em><em> of </em><em>the attribute to hold the created</em>) – </p></li>
+<li><p><strong>be</strong> (<em>- nargs -- The number</em><em> of </em><em>command-line arguments that should</em>) – consumed. By default, one argument will be consumed and a single
+value will be produced.  Other values include:</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="o">-</span> <span class="n">N</span> <span class="p">(</span><span class="n">an</span> <span class="n">integer</span><span class="p">)</span> <span class="n">consumes</span> <span class="n">N</span> <span class="n">arguments</span> <span class="p">(</span><span class="ow">and</span> <span class="n">produces</span> <span class="n">a</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="o">-</span> <span class="s1">&#39;?&#39;</span> <span class="n">consumes</span> <span class="n">zero</span> <span class="ow">or</span> <span class="n">one</span> <span class="n">arguments</span>
+    <span class="o">-</span> <span class="s1">&#39;*&#39;</span> <span class="n">consumes</span> <span class="n">zero</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">arguments</span> <span class="p">(</span><span class="ow">and</span> <span class="n">produces</span> <span class="n">a</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="o">-</span> <span class="s1">&#39;+&#39;</span> <span class="n">consumes</span> <span class="n">one</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">arguments</span> <span class="p">(</span><span class="ow">and</span> <span class="n">produces</span> <span class="n">a</span> <span class="nb">list</span><span class="p">)</span>
+<span class="n">Note</span> <span class="n">that</span> <span class="n">the</span> <span class="n">difference</span> <span class="n">between</span> <span class="n">the</span> <span class="n">default</span> <span class="ow">and</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span> <span class="ow">is</span> <span class="n">that</span>
+<span class="k">with</span> <span class="n">the</span> <span class="n">default</span><span class="p">,</span> <span class="n">a</span> <span class="n">single</span> <span class="n">value</span> <span class="n">will</span> <span class="n">be</span> <span class="n">produced</span><span class="p">,</span> <span class="k">while</span> <span class="k">with</span>
+<span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">containing</span> <span class="n">a</span> <span class="n">single</span> <span class="n">value</span> <span class="n">will</span> <span class="n">be</span> <span class="n">produced</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>the</strong> (<em>- metavar -- The name to be used for the option's argument with</em>) – option uses an action that takes no values.</p></li>
+<li><p><strong>specified.</strong> (<em>- default -- The value to be produced if the option is not</em>) – </p></li>
+<li><p><strong>and</strong> (<em>- type -- A callable that accepts a single string argument</em><em>,</em>) – returns the converted value.  The standard Python types str, int,
+float, and complex are useful examples of such callables.  If None,
+str is used.</p></li>
+<li><p><strong>None</strong><strong>,</strong> (<em>- choices -- A container</em><em> of </em><em>values that should be allowed. If not</em>) – after a command-line argument has been converted to the appropriate
+type, an exception will be raised if it is not a member of this
+collection.</p></li>
+<li><p><strong>the</strong> – command line. This is only meaningful for optional command-line
+arguments.</p></li>
+<li><p><strong>argument.</strong> (<em>- help -- The help string describing the</em>) – </p></li>
+<li><p><strong>the</strong> – help string. If None, the ‘dest’ value will be used as the name.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.Action.format_usage">
+<span class="sig-name descname"><span class="pre">format_usage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#Action.format_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.Action.format_usage" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.Action.__call__">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#Action.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.Action.__call__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.BooleanOptionalAction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">BooleanOptionalAction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_strings</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">_deprecated_default</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">_deprecated_default</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metavar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">_deprecated_default</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#BooleanOptionalAction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.BooleanOptionalAction" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#tyro._argparse.Action" title="tyro._argparse.Action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Action</span></code></a></p>
+<p>Information about how to convert command line strings to Python objects.</p>
+<p>Action objects are used by an ArgumentParser to represent the information
+needed to parse a single argument from one or more strings from the
+command line. The keyword arguments to the Action constructor are also
+all attributes of Action instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>which</strong> (<em>- option_strings -- A list</em><em> of </em><em>command-line option strings</em>) – should be associated with this action.</p></li>
+<li><p><strong>object</strong> (<em>- dest -- The name</em><em> of </em><em>the attribute to hold the created</em>) – </p></li>
+<li><p><strong>be</strong> (<em>- nargs -- The number</em><em> of </em><em>command-line arguments that should</em>) – consumed. By default, one argument will be consumed and a single
+value will be produced.  Other values include:</p></li>
+</ul>
+</dd>
+</dl>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="o">-</span> <span class="n">N</span> <span class="p">(</span><span class="n">an</span> <span class="n">integer</span><span class="p">)</span> <span class="n">consumes</span> <span class="n">N</span> <span class="n">arguments</span> <span class="p">(</span><span class="ow">and</span> <span class="n">produces</span> <span class="n">a</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="o">-</span> <span class="s1">&#39;?&#39;</span> <span class="n">consumes</span> <span class="n">zero</span> <span class="ow">or</span> <span class="n">one</span> <span class="n">arguments</span>
+    <span class="o">-</span> <span class="s1">&#39;*&#39;</span> <span class="n">consumes</span> <span class="n">zero</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">arguments</span> <span class="p">(</span><span class="ow">and</span> <span class="n">produces</span> <span class="n">a</span> <span class="nb">list</span><span class="p">)</span>
+    <span class="o">-</span> <span class="s1">&#39;+&#39;</span> <span class="n">consumes</span> <span class="n">one</span> <span class="ow">or</span> <span class="n">more</span> <span class="n">arguments</span> <span class="p">(</span><span class="ow">and</span> <span class="n">produces</span> <span class="n">a</span> <span class="nb">list</span><span class="p">)</span>
+<span class="n">Note</span> <span class="n">that</span> <span class="n">the</span> <span class="n">difference</span> <span class="n">between</span> <span class="n">the</span> <span class="n">default</span> <span class="ow">and</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span> <span class="ow">is</span> <span class="n">that</span>
+<span class="k">with</span> <span class="n">the</span> <span class="n">default</span><span class="p">,</span> <span class="n">a</span> <span class="n">single</span> <span class="n">value</span> <span class="n">will</span> <span class="n">be</span> <span class="n">produced</span><span class="p">,</span> <span class="k">while</span> <span class="k">with</span>
+<span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">a</span> <span class="nb">list</span> <span class="n">containing</span> <span class="n">a</span> <span class="n">single</span> <span class="n">value</span> <span class="n">will</span> <span class="n">be</span> <span class="n">produced</span><span class="o">.</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>the</strong> (<em>- metavar -- The name to be used for the option's argument with</em>) – option uses an action that takes no values.</p></li>
+<li><p><strong>specified.</strong> (<em>- default -- The value to be produced if the option is not</em>) – </p></li>
+<li><p><strong>and</strong> (<em>- type -- A callable that accepts a single string argument</em><em>,</em>) – returns the converted value.  The standard Python types str, int,
+float, and complex are useful examples of such callables.  If None,
+str is used.</p></li>
+<li><p><strong>None</strong><strong>,</strong> (<em>- choices -- A container</em><em> of </em><em>values that should be allowed. If not</em>) – after a command-line argument has been converted to the appropriate
+type, an exception will be raised if it is not a member of this
+collection.</p></li>
+<li><p><strong>the</strong> – command line. This is only meaningful for optional command-line
+arguments.</p></li>
+<li><p><strong>argument.</strong> (<em>- help -- The help string describing the</em>) – </p></li>
+<li><p><strong>the</strong> – help string. If None, the ‘dest’ value will be used as the name.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.BooleanOptionalAction.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#BooleanOptionalAction.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.BooleanOptionalAction.__call__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.BooleanOptionalAction.format_usage">
+<span class="sig-name descname"><span class="pre">format_usage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#BooleanOptionalAction.format_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.BooleanOptionalAction.format_usage" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.FileType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">FileType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'r'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#FileType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.FileType" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Factory for creating file object types</p>
+<p>Instances of FileType are typically passed as type= arguments to the
+ArgumentParser add_argument() method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>the</strong> (<em>- encoding -- The file's encoding. Accepts the same values as</em>) – same values as the builtin open() function.</p></li>
+<li><p><strong>as</strong> (<em>- bufsize -- The file's desired buffer size. Accepts the same values</em>) – the builtin open() function.</p></li>
+<li><p><strong>the</strong> – builtin open() function.</p></li>
+<li><p><strong>to</strong> (<em>- errors -- A string indicating how encoding and decoding errors are</em>) – be handled. Accepts the same value as the builtin open() function.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.FileType.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#FileType.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.FileType.__call__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.FileType.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#FileType.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.FileType.__repr__" title="Link to this definition">#</a></dt>
+<dd><p>Return repr(self).</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.Namespace">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">Namespace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#Namespace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.Namespace" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_AttributeHolder</span></code></p>
+<p>Simple object for storing attributes.</p>
+<p>Implements equality by attribute names and values, and provides a simple
+string representation.
+.. py:method:: __eq__(other)</p>
+<blockquote>
+<div><p>Return self==value.</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.Namespace.__contains__">
+<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#Namespace.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.Namespace.__contains__" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse.</span></span><span class="sig-name descname"><span class="pre">ArgumentParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epilog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">formatter_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">HelpFormatter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'-'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fromfile_prefix_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">argument_default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conflict_handler</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_help</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_abbrev</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exit_on_error</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_AttributeHolder</span></code>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">_ActionsContainer</span></code></p>
+<p>Object for parsing command line strings into Python objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>(</strong><strong>default</strong> (<em>- usage -- A usage message</em>) – <code class="docutils literal notranslate"><span class="pre">os.path.basename(sys.argv[0])</span></code>)</p></li>
+<li><p><strong>(</strong><strong>default</strong> – auto-generated from arguments)</p></li>
+<li><p><strong>does</strong> (<em>- description -- A description</em><em> of </em><em>what the program</em>) – </p></li>
+<li><p><strong>descriptions</strong> (<em>- epilog -- Text following the argument</em>) – </p></li>
+<li><p><strong>one</strong> (<em>- parents -- Parsers whose arguments should be copied into this</em>) – </p></li>
+<li><p><strong>messages</strong> (<em>- formatter_class -- HelpFormatter class for printing help</em>) – </p></li>
+<li><p><strong>arguments</strong> (<em>- argument_default -- The default value for all</em>) – </p></li>
+<li><p><strong>containing</strong> (<em>- fromfile_prefix_chars -- Characters that prefix files</em>) – additional arguments</p></li>
+<li><p><strong>arguments</strong> – </p></li>
+<li><p><strong>conflicts</strong> (<em>- conflict_handler -- String indicating how to handle</em>) – </p></li>
+<li><p><strong>option</strong> (<em>- add_help -- Add a -h/-help</em>) – </p></li>
+<li><p><strong>unambiguously</strong> (<em>- allow_abbrev -- Allow long options to be abbreviated</em>) – </p></li>
+<li><p><strong>with</strong> (<em>- exit_on_error -- Determines whether</em><em> or </em><em>not ArgumentParser exits</em>) – error info when an error occurs</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.add_subparsers">
+<span class="sig-name descname"><span class="pre">add_subparsers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.add_subparsers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.add_subparsers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.parse_args">
+<span class="sig-name descname"><span class="pre">parse_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.parse_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.parse_args" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.parse_known_args">
+<span class="sig-name descname"><span class="pre">parse_known_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.parse_known_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.parse_known_args" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.convert_arg_line_to_args">
+<span class="sig-name descname"><span class="pre">convert_arg_line_to_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg_line</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.convert_arg_line_to_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.convert_arg_line_to_args" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.parse_intermixed_args">
+<span class="sig-name descname"><span class="pre">parse_intermixed_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.parse_intermixed_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.parse_intermixed_args" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.parse_known_intermixed_args">
+<span class="sig-name descname"><span class="pre">parse_known_intermixed_args</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.parse_known_intermixed_args"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.parse_known_intermixed_args" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.format_usage">
+<span class="sig-name descname"><span class="pre">format_usage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.format_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.format_usage" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.format_help">
+<span class="sig-name descname"><span class="pre">format_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.format_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.format_help" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.print_usage">
+<span class="sig-name descname"><span class="pre">print_usage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.print_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.print_usage" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.print_help">
+<span class="sig-name descname"><span class="pre">print_help</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.print_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.print_help" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.exit">
+<span class="sig-name descname"><span class="pre">exit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.exit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.exit" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.ArgumentParser.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#ArgumentParser.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.ArgumentParser.error" title="Link to this definition">#</a></dt>
+<dd><p>error(message: string)</p>
+<p>Prints a usage message incorporating the message to stderr and
+exits.</p>
+<p>If you override this in a subclass, it should not return – it
+should either exit or raise an exception.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2022
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            <div class="icons">
+              <a class="muted-link " href="https://github.com/brentyi/tyro" aria-label="GitHub">
+            <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+            </svg>
+        </a>
+              
+            </div>
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._argparse</span></code></a><ul>
+<li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#tyro._argparse.SUPPRESS"><code class="docutils literal notranslate"><span class="pre">SUPPRESS</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.OPTIONAL"><code class="docutils literal notranslate"><span class="pre">OPTIONAL</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ZERO_OR_MORE"><code class="docutils literal notranslate"><span class="pre">ZERO_OR_MORE</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ONE_OR_MORE"><code class="docutils literal notranslate"><span class="pre">ONE_OR_MORE</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.PARSER"><code class="docutils literal notranslate"><span class="pre">PARSER</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.REMAINDER"><code class="docutils literal notranslate"><span class="pre">REMAINDER</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter"><code class="docutils literal notranslate"><span class="pre">HelpFormatter</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter.end_section"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.end_section()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter.add_text"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.add_text()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter.add_usage"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.add_usage()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter.add_argument"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.add_argument()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter.add_arguments"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.add_arguments()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter.format_help"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.format_help()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._argparse.RawDescriptionHelpFormatter"><code class="docutils literal notranslate"><span class="pre">RawDescriptionHelpFormatter</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.RawTextHelpFormatter"><code class="docutils literal notranslate"><span class="pre">RawTextHelpFormatter</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentDefaultsHelpFormatter"><code class="docutils literal notranslate"><span class="pre">ArgumentDefaultsHelpFormatter</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.MetavarTypeHelpFormatter"><code class="docutils literal notranslate"><span class="pre">MetavarTypeHelpFormatter</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.Action"><code class="docutils literal notranslate"><span class="pre">Action</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.Action.format_usage"><code class="docutils literal notranslate"><span class="pre">Action.format_usage()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.Action.__call__"><code class="docutils literal notranslate"><span class="pre">Action.__call__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._argparse.BooleanOptionalAction"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.BooleanOptionalAction.__call__"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction.__call__()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.BooleanOptionalAction.format_usage"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction.format_usage()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._argparse.FileType"><code class="docutils literal notranslate"><span class="pre">FileType</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.FileType.__call__"><code class="docutils literal notranslate"><span class="pre">FileType.__call__()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.FileType.__repr__"><code class="docutils literal notranslate"><span class="pre">FileType.__repr__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._argparse.Namespace"><code class="docutils literal notranslate"><span class="pre">Namespace</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.Namespace.__contains__"><code class="docutils literal notranslate"><span class="pre">Namespace.__contains__()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser"><code class="docutils literal notranslate"><span class="pre">ArgumentParser</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.add_subparsers"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.add_subparsers()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.parse_args"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.parse_args()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.parse_known_args"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.parse_known_args()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.convert_arg_line_to_args"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.convert_arg_line_to_args()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.parse_intermixed_args"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.parse_intermixed_args()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.parse_known_intermixed_args"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.parse_known_intermixed_args()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.format_usage"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.format_usage()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.format_help"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.format_help()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.print_usage"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.print_usage()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.print_help"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.print_help()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.exit"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.exit()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._argparse.ArgumentParser.error"><code class="docutils literal notranslate"><span class="pre">ArgumentParser.error()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=187304be"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    </body>
+</html>

@@ -92,8 +92,8 @@ Module Contents
              equivalent. If ``return_unknown_args`` is True, returns a tuple of the output of
              ``f(...)`` and a list of unknown arguments.
 
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None, use_underscores: bool = False) -> argparse.ArgumentParser
-                 get_parser(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None, use_underscores: bool = False) -> argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None, use_underscores: bool = False) -> tyro._argparse.ArgumentParser
+                 get_parser(f: Callable[Ellipsis, OutT], *, prog: Optional[str] = None, description: Optional[str] = None, default: Optional[OutT] = None, use_underscores: bool = False) -> tyro._argparse.ArgumentParser
 
    
    Get the ``argparse.ArgumentParser`` object generated under-the-hood by

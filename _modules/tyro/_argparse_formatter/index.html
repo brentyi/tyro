@@ -262,16 +262,13 @@
 <span class="sd">    - Use `rich` for formatting.</span>
 <span class="sd">    - Can be themed with an accent color.</span>
 
-<span class="sd">This is largely built by fussing around in argparse implementation details, and is</span>
-<span class="sd">extremely chaotic as a result.</span>
-
-<span class="sd">TODO: the current implementation should be robust given our test coverage, but unideal</span>
-<span class="sd">long-term. We should just maintain our own fork of argparse.</span>
+<span class="sd">This is largely built by fussing around in argparse implementation details. It&#39;s</span>
+<span class="sd">chaotic as a result; for stability we mirror argparse at _argparse.py.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">argparse</span> <span class="k">as</span> <span class="nn">argparse_sys</span>
 <span class="kn">import</span> <span class="nn">contextlib</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">difflib</span>
@@ -294,6 +291,7 @@
 <span class="kn">from</span> <span class="nn">rich.theme</span> <span class="kn">import</span> <span class="n">Theme</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">override</span>
 
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
 <span class="kn">from</span> <span class="nn">._parsers</span> <span class="kn">import</span> <span class="n">ParserSpecification</span>
 
@@ -547,9 +545,11 @@
 <span class="n">global_unrecognized_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
 
+<span class="c1"># We inherit from both our local mirror of argparse and the upstream one.</span>
+<span class="c1"># Including the latter is purely for `isinstance()`-style checks.</span>
 <div class="viewcode-block" id="TyroArgumentParser">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgumentParser">[docs]</a>
-<span class="k">class</span> <span class="nc">TyroArgumentParser</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">TyroArgumentParser</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">argparse_sys</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
     <span class="n">_parser_specification</span><span class="p">:</span> <span class="n">ParserSpecification</span>
     <span class="n">_parsing_known_args</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
@@ -639,7 +639,7 @@
         <span class="k">def</span> <span class="nf">consume_optional</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
             <span class="c1"># get the optional identified at this index</span>
             <span class="n">option_tuple</span> <span class="o">=</span> <span class="n">option_string_indices</span><span class="p">[</span><span class="n">start_index</span><span class="p">]</span>
-            <span class="n">action</span><span class="p">,</span> <span class="n">option_string</span><span class="p">,</span> <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">option_tuple</span>
+            <span class="n">action</span><span class="p">,</span> <span class="n">option_string</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">option_tuple</span>
 
             <span class="c1"># identify additional optionals in the same arg string</span>
             <span class="c1"># (e.g. -xyz is the same as -x -y -z if no args are required)</span>
@@ -654,7 +654,6 @@
                     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parsing_known_args</span><span class="p">:</span>
                         <span class="n">global_unrecognized_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
                     <span class="c1"># &lt;/new&gt;</span>
-
                     <span class="n">extras</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span><span class="p">])</span>
                     <span class="k">return</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
 
@@ -672,18 +671,27 @@
                         <span class="ow">and</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">chars</span>
                         <span class="ow">and</span> <span class="n">explicit_arg</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
                     <span class="p">):</span>
+                        <span class="k">if</span> <span class="n">sep</span> <span class="ow">or</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">chars</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;ignored explicit argument </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">explicit_arg</span><span class="p">)</span>
                         <span class="n">action_tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">action</span><span class="p">,</span> <span class="p">[],</span> <span class="n">option_string</span><span class="p">))</span>
                         <span class="n">char</span> <span class="o">=</span> <span class="n">option_string</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">option_string</span> <span class="o">=</span> <span class="n">char</span> <span class="o">+</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="n">new_explicit_arg</span> <span class="o">=</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="kc">None</span>
                         <span class="n">optionals_map</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_option_string_actions</span>
                         <span class="k">if</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="n">optionals_map</span><span class="p">:</span>
                             <span class="n">action</span> <span class="o">=</span> <span class="n">optionals_map</span><span class="p">[</span><span class="n">option_string</span><span class="p">]</span>
-                            <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">new_explicit_arg</span>
+                            <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">explicit_arg</span><span class="p">:</span>
+                                <span class="n">sep</span> <span class="o">=</span> <span class="n">explicit_arg</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">elif</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;=&quot;</span><span class="p">:</span>
+                                <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;=&quot;</span>
+                                <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">explicit_arg</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">sep</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">msg</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;ignored explicit argument </span><span class="si">%r</span><span class="s2">&quot;</span><span class="p">)</span>
-                            <span class="k">raise</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentError</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">explicit_arg</span><span class="p">)</span>
-
+                            <span class="n">extras</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">char</span> <span class="o">+</span> <span class="n">explicit_arg</span><span class="p">)</span>
+                            <span class="n">stop</span> <span class="o">=</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
+                            <span class="k">break</span>
                     <span class="c1"># if the action expect exactly one argument, we&#39;ve</span>
                     <span class="c1"># successfully matched the option; exit the loop</span>
                     <span class="k">elif</span> <span class="n">arg_count</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>

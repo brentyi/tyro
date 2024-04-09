@@ -19,10 +19,10 @@ Module Contents
 
    
 
-.. py:class:: BooleanOptionalAction(option_strings: Sequence[str], dest: str, default: _T | str | None = None, type: Callable[[str], _T] | argparse.FileType | None = None, choices: Iterable[_T] | None = None, required: bool = False, help: str | None = None, metavar: str | tuple[str, Ellipsis] | None = None)
+.. py:class:: BooleanOptionalAction(option_strings: Sequence[str], dest: str, default: _T | str | None = None, type: Callable[[str], _T] | tyro._argparse.FileType | None = None, choices: Iterable[_T] | None = None, required: bool = False, help: str | None = None, metavar: str | tuple[str, Ellipsis] | None = None)
 
 
-   Bases: :py:obj:`argparse.Action`
+   Bases: :py:obj:`tyro._argparse.Action`
 
    
    Adapted from https://github.com/python/cpython/pull/27672
@@ -69,7 +69,7 @@ Module Contents
 
       
 
-   .. py:method:: add_argument(parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]) -> None
+   .. py:method:: add_argument(parser: Union[tyro._argparse.ArgumentParser, tyro._argparse._ArgumentGroup]) -> None
 
       
       Add a defined argument to a parser.
