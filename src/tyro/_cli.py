@@ -1,6 +1,5 @@
 """Core public API."""
 
-import argparse
 import dataclasses
 import pathlib
 import sys
@@ -21,6 +20,7 @@ from typing import (
 import shtab
 from typing_extensions import Literal
 
+from . import _argparse as argparse
 from . import (
     _argparse_formatter,
     _arguments,
