@@ -17,8 +17,8 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install uv
+          uv pip install --system -e ".[dev]"
       - name: Test with mypy
         run: |
           mypy --install-types --non-interactive .
