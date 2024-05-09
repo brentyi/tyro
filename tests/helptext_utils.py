@@ -36,8 +36,10 @@ def get_helptext(
 
     # Completion scripts; just smoke test for now.
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
+        # `--tyro-print-completion` is deprecated! We should use `--tyro-write-completion` instead.
         tyro.cli(f, default=default, args=["--tyro-print-completion", "bash"])
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
+        # `--tyro-print-completion` is deprecated! We should use `--tyro-write-completion` instead.
         tyro.cli(f, default=default, args=["--tyro-print-completion", "zsh"])
     with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
         tyro.cli(

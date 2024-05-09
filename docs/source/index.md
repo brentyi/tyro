@@ -49,10 +49,6 @@ To get started, we recommend browsing the examples to the left.
    [flax.linen](https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html),
    and more.
 
-   Hate `tyro`? Just remove one line of code, and you're left with beautiful,
-   type-annotated, and documented vanilla Python that can be used with a range
-   of other configuration libraries.
-
 3. **Modularity.**
 
    `tyro` supports hierarchical configuration structures, which make it easy to
