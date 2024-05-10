@@ -1047,7 +1047,7 @@ def test_custom_constructor_3() -> None:
     ) == Config(x={"hello": "world"})
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Config, args="--x.json 5".split(" "))
 
     error = target.getvalue()
@@ -1102,7 +1102,7 @@ def test_custom_constructor_6() -> None:
 
     # --x.a and --x.b are required!
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Config, args="--x.c 5".split(" "))
     error = target.getvalue()
     assert "We're missing" in error
@@ -1136,7 +1136,7 @@ def test_custom_constructor_7() -> None:
 
     # --x.struct.a and --x.struct.b are required!
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Config, args="--x.struct.c 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
@@ -1170,7 +1170,7 @@ def test_custom_constructor_8() -> None:
 
     # --x.struct.a and --x.struct.b are required!
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Config, args="--x.struct.b 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
@@ -1214,7 +1214,7 @@ def test_alias() -> None:
 
     # --x.struct.a and --x.struct.b are required!
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Config, args="--x.struct.b 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
