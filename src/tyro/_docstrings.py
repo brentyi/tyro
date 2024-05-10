@@ -7,7 +7,7 @@ import inspect
 import io
 import itertools
 import tokenize
-from typing import Callable, Dict, Generic, Hashable, List, Optional, Type, TypeVar
+from typing import Callable, Dict, Generic, Hashable, List, Optional, Set, Type, TypeVar
 
 import docstring_parser
 from typing_extensions import get_origin, is_typeddict
@@ -281,7 +281,7 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     return None
 
 
-_callable_description_blocklist = set(
+_callable_description_blocklist: Set[Hashable] = set(
     filter(
         lambda x: isinstance(x, Hashable),  # type: ignore
         itertools.chain(__builtins__.values(), vars(collections.abc).values()),  # type: ignore
