@@ -11,15 +11,25 @@ import tyro._arguments
 import tyro._strings
 
 
-def get_helptext(
+def get_helptext_with_checks(
     f: Callable,
     args: List[str] = ["--help"],
     use_underscores: bool = False,
     default: Any = None,
 ) -> str:
+    """Get the helptext for a given tyro with input, while running various
+    checks along the way."""
+    # Should be empty.
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
-        tyro.cli(f, args=args, use_underscores=use_underscores, default=default)
+        tyro.cli(
+            f,
+            args=args,
+            use_underscores=use_underscores,
+            default=default,
+            enable_console_outputs=False,
+        )
+    assert target.getvalue() == ""
 
     # Check tyro.extras.get_parser().
     parser = tyro.extras.get_parser(f, use_underscores=use_underscores)
@@ -49,6 +59,11 @@ def get_helptext(
         tyro.cli(
             f, default=default, args=["--tyro-write-completion", "zsh", os.devnull]
         )
+
+    # Get the actual helptext.
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+        tyro.cli(f, args=args, use_underscores=use_underscores, default=default)
 
     # Check helptext with vs without formatting. This can help catch text wrapping bugs
     # caused by ANSI sequences.

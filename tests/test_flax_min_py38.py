@@ -5,7 +5,7 @@ from typing import cast
 import jax
 import pytest
 from flax import linen as nn
-from helptext_utils import get_helptext
+from helptext_utils import get_helptext_with_checks
 from jax import numpy as jnp
 
 import tyro
@@ -50,7 +50,7 @@ def test_ok():
     params = network.init(jax.random.PRNGKey(0), x)
     assert cast(jax.Array, network.apply(params, x)).shape == (10, 3)
 
-    helptext = get_helptext(Classifier)
+    helptext = get_helptext_with_checks(Classifier)
     assert "parent" not in helptext
     assert "name" not in helptext
 

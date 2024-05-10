@@ -19,7 +19,7 @@ from typing import (
     cast,
 )
 
-from helptext_utils import get_helptext
+from helptext_utils import get_helptext_with_checks
 from torch import nn
 
 import tyro
@@ -38,7 +38,7 @@ def test_helptext() -> None:
         z: int = 3
         """Documentation 3"""
 
-    helptext = get_helptext(Helptext)
+    helptext = get_helptext_with_checks(Helptext)
     assert cast(str, helptext) in helptext
     assert "x INT" in helptext
     assert "y INT" in helptext
@@ -59,7 +59,7 @@ def test_helptext_sphinx_autodoc_style() -> None:
         y: Annotated[int, "ignored"]
         z: int = 3
 
-    helptext = get_helptext(Helptext)
+    helptext = get_helptext_with_checks(Helptext)
     assert cast(str, helptext) in helptext
     assert "x INT" in helptext
     assert "y INT" in helptext
@@ -88,7 +88,7 @@ def test_helptext_from_class_docstring() -> None:
         y: Annotated[int, "ignored"]
         z: int = 3
 
-    helptext = get_helptext(Helptext2)
+    helptext = get_helptext_with_checks(Helptext2)
     assert "This docstring should be printed as a description" in helptext
     assert "Attributes" not in helptext
     assert "x INT" in helptext
@@ -114,7 +114,7 @@ def test_helptext_from_class_docstring_args() -> None:
         y: Annotated[int, "ignored"]
         z: int = 3
 
-    helptext = get_helptext(Helptext3)
+    helptext = get_helptext_with_checks(Helptext3)
     assert "This docstring should be printed as a description" in helptext
     assert "Args" not in helptext
     assert "x INT" in helptext
@@ -149,7 +149,7 @@ def test_helptext_inherited() -> None:
     class ChildClass(UnrelatedParentClass, ActualParentClass):
         pass
 
-    helptext = get_helptext(ChildClass)
+    helptext = get_helptext_with_checks(ChildClass)
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
 
@@ -179,7 +179,7 @@ def test_helptext_inherited_default_override() -> None:
         """Main function."""
         return x
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "Main function." in helptext
     assert "Documentation 1" in helptext
     assert "Documentation 2" in helptext
@@ -209,14 +209,14 @@ def test_helptext_nested() -> None:
     def main_no_docstring(a: Inner) -> None:
         """main_no_docstring."""
 
-    helptext = get_helptext(main_with_docstring)
+    helptext = get_helptext_with_checks(main_with_docstring)
     assert "Documented in function" in helptext and str(Inner.__doc__) not in helptext
     assert "main_with_docstring." in helptext
     assert "Args:" not in helptext
     assert "Args:" not in helptext
     assert "Hello world!" in helptext
 
-    helptext = get_helptext(main_no_docstring)
+    helptext = get_helptext_with_checks(main_no_docstring)
     assert "Something" in helptext
     assert "main_no_docstring." in helptext
     assert "Args:" not in helptext
@@ -235,7 +235,7 @@ def test_helptext_defaults() -> None:
         y: Color = Color.RED
         z: str = "%"
 
-    helptext = get_helptext(HelptextWithVariousDefaults)
+    helptext = get_helptext_with_checks(HelptextWithVariousDefaults)
     assert "show this help message and exit" in helptext
     assert "--x PATH" in helptext
     assert "(default: /some/path/to/a/file)" in helptext
@@ -260,7 +260,7 @@ def test_multiline_helptext() -> None:
         """Documentation 3
         Next line of documentation 3"""
 
-    helptext = get_helptext(HelptextMultiline)
+    helptext = get_helptext_with_checks(HelptextMultiline)
     assert "Documentation 1 (required)" in helptext
     assert "Documentation 2" in helptext
     assert "documentation 2" in helptext
@@ -276,7 +276,7 @@ def test_grouped_helptext() -> None:
         y: int
         z: int = 3
 
-    helptext = get_helptext(HelptextGrouped)
+    helptext = get_helptext_with_checks(HelptextGrouped)
     assert "Documentation 1 (required)" in helptext
     assert "Description of both y and z. (required)" in helptext
     assert "Description of both y and z. (default: 3)" in helptext
@@ -288,7 +288,7 @@ def test_none_default_value_helptext() -> None:
         x: Optional[int] = None
         """An optional variable."""
 
-    helptext = get_helptext(Config)
+    helptext = get_helptext_with_checks(Config)
     assert "--x {None}|INT" in helptext
     assert "An optional variable. (default: None)" in helptext
 
@@ -306,7 +306,7 @@ def test_helptext_hard_bool() -> None:
     # Note that the percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
 
-    helptext = get_helptext(HelptextHardString)
+    helptext = get_helptext_with_checks(HelptextHardString)
     assert "--x" in helptext
     assert "2% milk." in helptext
 
@@ -325,7 +325,7 @@ def test_helptext_with_inheritance() -> None:
     class Child(Parent):
         pass
 
-    helptext = get_helptext(Child)
+    helptext = get_helptext_with_checks(Child)
     assert "--x STR" in helptext
     assert "Helptext." in helptext
     assert "(default: 'This docstring" in helptext
@@ -350,7 +350,7 @@ def test_helptext_with_inheritance_overriden() -> None:
         """Helptext!"""
         # fmt: on
 
-    helptext = get_helptext(Child2)
+    helptext = get_helptext_with_checks(Child2)
     assert "--x STR" in helptext
     assert "Helptext! (default: 'This" in helptext
 
@@ -360,7 +360,7 @@ def test_tuple_helptext() -> None:
     class TupleHelptext:
         x: Tuple[int, str, float]
 
-    helptext = get_helptext(TupleHelptext)
+    helptext = get_helptext_with_checks(TupleHelptext)
     assert "--x INT STR FLOAT" in helptext
 
 
@@ -369,7 +369,7 @@ def test_tuple_helptext_defaults() -> None:
     class TupleHelptextDefaults:
         x: Tuple[int, str, str] = (5, "hello world", "hello")
 
-    helptext = get_helptext(TupleHelptextDefaults)
+    helptext = get_helptext_with_checks(TupleHelptextDefaults)
     assert "--x INT STR STR" in helptext
     assert "(default: 5 'hello world' hello)" in helptext
 
@@ -381,7 +381,7 @@ def test_generic_helptext() -> None:
     class GenericTupleHelptext(Generic[T]):
         x: T
 
-    helptext = get_helptext(GenericTupleHelptext[int])
+    helptext = get_helptext_with_checks(GenericTupleHelptext[int])
     assert "--x INT" in helptext
 
 
@@ -392,7 +392,7 @@ def test_generic_tuple_helptext() -> None:
     class GenericTupleHelptext(Generic[T]):
         x: Tuple[T, T, T]
 
-    helptext = get_helptext(GenericTupleHelptext[int])
+    helptext = get_helptext_with_checks(GenericTupleHelptext[int])
     assert "--x INT INT INT" in helptext
 
 
@@ -403,7 +403,7 @@ def test_generic_list_helptext() -> None:
     class GenericTupleHelptext(Generic[T]):
         x: List[T]
 
-    helptext = get_helptext(GenericTupleHelptext[int])
+    helptext = get_helptext_with_checks(GenericTupleHelptext[int])
     assert "--x [INT [INT ...]]" in helptext
 
 
@@ -413,7 +413,7 @@ def test_literal_helptext() -> None:
         x: Literal[1, 2, 3]
         """A number."""
 
-    helptext = get_helptext(LiteralHelptext)
+    helptext = get_helptext_with_checks(LiteralHelptext)
     assert "--x {1,2,3}" in helptext
     assert "A number. (required)" in helptext
 
@@ -424,7 +424,7 @@ def test_optional_literal_helptext() -> None:
         x: Optional[Literal[1, 2, 3]] = None
         """A number."""
 
-    helptext = get_helptext(OptionalLiteralHelptext)
+    helptext = get_helptext_with_checks(OptionalLiteralHelptext)
     assert "--x {None,1,2,3}" in helptext
     assert "A number. (default: None)" in helptext
 
@@ -457,7 +457,7 @@ def test_multiple_subparsers_helptext() -> None:
 
         d: bool = False
 
-    helptext = get_helptext(MultipleSubparsers)
+    helptext = get_helptext_with_checks(MultipleSubparsers)
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
@@ -468,7 +468,7 @@ def test_multiple_subparsers_helptext() -> None:
     assert "[OPTIONS]" not in helptext
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
 
-    helptext = get_helptext(
+    helptext = get_helptext_with_checks(
         MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
     )
 
@@ -528,7 +528,7 @@ def test_multiple_subparsers_helptext_shortened_usage() -> None:
         h: bool = False
         i: bool = False
 
-    helptext = get_helptext(MultipleSubparsers)
+    helptext = get_helptext_with_checks(MultipleSubparsers)
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
@@ -538,7 +538,7 @@ def test_multiple_subparsers_helptext_shortened_usage() -> None:
     assert "[OPTIONS]" in helptext
     assert "[B:SUBCOMMAND2 OPTIONS]" not in helptext
 
-    helptext = get_helptext(
+    helptext = get_helptext_with_checks(
         MultipleSubparsers, args=["a:subcommand1", "b:subcommand1", "--help"]
     )
 
@@ -566,7 +566,7 @@ def test_optional_helptext() -> None:
         z: Optional[int] = 3
         """Documentation 3"""
 
-    helptext = get_helptext(OptionalHelptext)
+    helptext = get_helptext_with_checks(OptionalHelptext)
     assert cast(str, cast(str, OptionalHelptext.__doc__)[:20]) in helptext
     assert "2% milk" in helptext
     assert "--x {None}|INT" in helptext
@@ -578,7 +578,7 @@ def test_metavar_0() -> None:
     def main(x: Literal[0, 1, 2, 3] | Tuple[int, int]) -> None:
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x {0,1,2,3}|{INT INT}" in helptext
 
 
@@ -589,7 +589,7 @@ def test_metavar_1() -> None:
         pass
 
     # The comma formatting is unfortunate, but matches argparse's default behavior.
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x {0,1,2,3,hey,there,hello}|{[INT [INT ...]]}" in helptext
 
 
@@ -602,7 +602,7 @@ def test_metavar_2() -> None:
     ) -> None:
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x {0,1,2,3} INT|STR" in helptext
 
 
@@ -612,7 +612,7 @@ def test_metavar_3() -> None:
     ) -> None:
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x {0,1,2,3}|{INT INT}|STR" in helptext
 
 
@@ -622,7 +622,7 @@ def test_metavar_4() -> None:
     ) -> None:
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x {0,1,2,3}|{INT INT}|{STR STR STR}|{True}" in helptext
 
 
@@ -632,7 +632,7 @@ def test_metavar_5() -> None:
     ) -> None:
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "[--x [{INT INT}|{STR STR} [{INT INT}|{STR STR} ...]]]" in helptext
 
 
@@ -640,7 +640,7 @@ def test_metavar_6() -> None:
     def main(x: Dict[Tuple[int, int] | Tuple[str, str], Tuple[int, int]]) -> dict:
         return x
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert (
         "--x [{INT INT}|{STR STR} INT INT [{INT INT}|{STR STR} INT INT ...]]"
         in helptext
@@ -658,7 +658,7 @@ def test_comment_in_subclass_list() -> None:
         # But this text should!
         b: int
 
-    helptext = get_helptext(Something)
+    helptext = get_helptext_with_checks(Something)
     assert "This text should not" not in helptext
     assert "But this text should!" in helptext
 
@@ -671,13 +671,13 @@ def test_unparsable() -> None:
     def main(x: Any = Struct()):
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x {fixed}" in helptext
 
     def main2(x: Callable = nn.ReLU):
         pass
 
-    helptext = get_helptext(main2)
+    helptext = get_helptext_with_checks(main2)
     assert "--x {fixed}" in helptext
     assert "(fixed to:" in helptext
     assert "torch" in helptext
@@ -687,7 +687,7 @@ def test_pathlike() -> None:
     def main(x: os.PathLike) -> None:
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x PATH " in helptext
 
 
@@ -699,7 +699,7 @@ def test_nested_bool() -> None:
     def main(child: Child) -> None:
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--child.x | --child.no-x" in helptext
 
 
@@ -730,14 +730,14 @@ def test_multiple_subparsers_helptext_hyphens() -> None:
             default_factory=SubcommandThree
         )
 
-    helptext = get_helptext(MultipleSubparsers)
+    helptext = get_helptext_with_checks(MultipleSubparsers)
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
     assert "Field b description." not in helptext
     assert "Field c description." not in helptext
 
-    helptext = get_helptext(
+    helptext = get_helptext_with_checks(
         MultipleSubparsers, args=["a:subcommand-one", "b:subcommand-one", "--help"]
     )
 
@@ -778,14 +778,14 @@ def test_multiple_subparsers_helptext_underscores() -> None:
             default_factory=SubcommandThree
         )
 
-    helptext = get_helptext(MultipleSubparsers, use_underscores=True)
+    helptext = get_helptext_with_checks(MultipleSubparsers, use_underscores=True)
 
     assert "2% milk." in helptext
     assert "Field a description." in helptext
     assert "Field b description." not in helptext
     assert "Field c description." not in helptext
 
-    helptext = get_helptext(
+    helptext = get_helptext_with_checks(
         MultipleSubparsers,
         args=["a:subcommand_one", "b:subcommand_one", "--help"],
         use_underscores=True,
@@ -814,7 +814,7 @@ def test_subparsers_wrapping() -> None:
 
         y: int
 
-    help = get_helptext(A | CheckoutCompletion)  # type: ignore
+    help = get_helptext_with_checks(A | CheckoutCompletion)  # type: ignore
     assert help.count("checkout-completion") == 3
 
 
@@ -831,7 +831,7 @@ def test_subparsers_wrapping1() -> None:
 
         y: int
 
-    help = get_helptext(A | CheckoutCompletio)  # type: ignore
+    help = get_helptext_with_checks(A | CheckoutCompletio)  # type: ignore
     assert help.count("checkout-completio") == 3
 
 
@@ -848,7 +848,7 @@ def test_subparsers_wrapping2() -> None:
 
         y: int
 
-    help = get_helptext(A | CheckoutCompletionn)  # type: ignore
+    help = get_helptext_with_checks(A | CheckoutCompletionn)  # type: ignore
     assert help.count("checkout-completionn") == 3
 
 
@@ -865,7 +865,7 @@ def test_subparsers_wrapping3() -> None:
 
         y: int
 
-    help = get_helptext(A | CmdCheckout012)  # type: ignore
+    help = get_helptext_with_checks(A | CmdCheckout012)  # type: ignore
     assert help.count("cmd-checkout012") == 3
 
 
@@ -876,7 +876,7 @@ def test_tuple_default() -> None:
 
         x: Tuple[str, str] = ("hello", "world")
 
-    help = get_helptext(A)
+    help = get_helptext_with_checks(A)
     assert "STR STR" in help
     assert "hello world" in help
     assert "('hello', 'world')" not in help
@@ -891,7 +891,7 @@ def test_argconf_constructor() -> None:
             Tuple[str, str], tyro.conf.arg(constructor=lambda x: ("a", "b"))
         ] = ("hello", "world")
 
-    help = get_helptext(A)
+    help = get_helptext_with_checks(A)
     assert "STR STR" not in help
     # Unlike case above, should not be converted to 'hello world'.
     assert "('hello', 'world')" in help  # JSON special case.
@@ -909,7 +909,7 @@ def test_argconf_constructor_json_special_case() -> None:
             Tuple[int, int], tyro.conf.arg(constructor=json.loads, metavar="JSON")
         ] = (3, 5)
 
-    help = get_helptext(A)
+    help = get_helptext_with_checks(A)
     assert "STR STR" not in help
     assert "JSON" in help
     assert '["hello", "world"]' in help  # JSON special case.
@@ -926,7 +926,7 @@ def test_optional_group() -> None:
         del x, y
         return 5
 
-    help = get_helptext(f, default=3)
+    help = get_helptext_with_checks(f, default=3)
     assert 'default if used: ["hello", "world"]' in help
     assert "default if used: 3" in help
 
@@ -939,7 +939,7 @@ def test_append_fixed() -> None:
         del x, y
         return 5
 
-    help = get_helptext(f)
+    help = get_helptext_with_checks(f)
     assert "repeatable" not in help, help
 
 
@@ -951,7 +951,7 @@ def test_append_good() -> None:
         del x, y
         return 5
 
-    help = get_helptext(f)
+    help = get_helptext_with_checks(f)
     assert "repeatable" in help, help
 
 
@@ -963,7 +963,7 @@ def test_append_with_default() -> None:
         del x, y
         return 5
 
-    help = get_helptext(f)
+    help = get_helptext_with_checks(f)
     assert "repeatable, appends to: 'hello world' hello" in help, help
 
 
@@ -971,5 +971,5 @@ def test_typeddict_exclude() -> None:
     class Special(TypedDict):
         x: NotRequired[int]
 
-    help = get_helptext(Special)
+    help = get_helptext_with_checks(Special)
     assert "unset by default" in help, help

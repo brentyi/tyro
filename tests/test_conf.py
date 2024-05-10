@@ -8,7 +8,7 @@ import sys
 from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
 import tyro
@@ -32,7 +32,7 @@ def test_suppress_subcommand() -> None:
             Union[DefaultInstanceHTTPServer, DefaultInstanceSMTPServer]
         ] = dataclasses.field(default_factory=DefaultInstanceHTTPServer)
 
-    assert "bc" not in get_helptext(DefaultInstanceSubparser)
+    assert "bc" not in get_helptext_with_checks(DefaultInstanceSubparser)
 
 
 def test_omit_subcommand_prefix() -> None:
@@ -414,19 +414,19 @@ def test_subparser_in_nested_with_metadata_default_matching() -> None:
     def main_one(x: Nested = Nested(default_one)) -> None:
         pass
 
-    assert "default: x.subcommand:one" in get_helptext(main_one)
+    assert "default: x.subcommand:one" in get_helptext_with_checks(main_one)
 
     # Match by value.
     def main_two(x: Nested = Nested(B(9))) -> None:
         pass
 
-    assert "default: x.subcommand:three" in get_helptext(main_two)
+    assert "default: x.subcommand:three" in get_helptext_with_checks(main_two)
 
     # Match by type.
     def main_three(x: Nested = Nested(B(15))) -> None:
         pass
 
-    assert "default: x.subcommand:one" in get_helptext(main_three)
+    assert "default: x.subcommand:one" in get_helptext_with_checks(main_three)
 
 
 def test_flag() -> None:
@@ -551,7 +551,7 @@ def test_suppressed() -> None:
     def main(x: Any = Struct()):
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x.a" in helptext
     assert "--x.b" not in helptext
 
@@ -565,7 +565,7 @@ def test_suppress_manual_fixed() -> None:
     def main(x: Any = Struct()):
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x.a" in helptext
     assert "--x.b" not in helptext
 
@@ -578,7 +578,7 @@ def test_suppress_manual_fixed_one_arg_only() -> None:
     def main(x: Any = Struct()):
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x.a" not in helptext
     assert "--x.b" not in helptext
 
@@ -594,7 +594,7 @@ def test_suppress_auto_fixed() -> None:
     def main(x: tyro.conf.SuppressFixed[Any] = Struct()):
         pass
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "--x.a" in helptext
     assert "--x.b" not in helptext
 
@@ -610,7 +610,7 @@ def test_argconf_help() -> None:
     def main(x: Any = Struct()) -> int:
         return x.a
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "Hello world" in helptext
     assert "INT" not in helptext
     assert "NUMBER" in helptext
@@ -636,7 +636,7 @@ def test_argconf_no_prefix_help() -> None:
     def main(x: Any = Struct()) -> int:
         return x.a
 
-    helptext = get_helptext(main)
+    helptext = get_helptext_with_checks(main)
     assert "Hello world" in helptext
     assert "INT" not in helptext
     assert "NUMBER" in helptext
@@ -1224,7 +1224,7 @@ def test_alias() -> None:
     assert "'a'" in error
     assert "'b'" not in error
 
-    assert "--x.struct.a INT, --all INT, -d INT" in get_helptext(Config)
+    assert "--x.struct.a INT, --all INT, -d INT" in get_helptext_with_checks(Config)
 
 
 def test_positional_alias() -> None:
