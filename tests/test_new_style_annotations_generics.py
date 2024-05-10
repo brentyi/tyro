@@ -1,8 +1,9 @@
 from __future__ import annotations  # Should enable support for all versions of Python.
 
-from typing import Any, Literal, Optional, Union
+from typing import Any, Optional, Union
 
 import pytest
+from typing_extensions import Literal
 
 import tyro
 
