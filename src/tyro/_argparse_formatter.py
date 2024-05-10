@@ -236,9 +236,9 @@ def ansi_context() -> Generator[None, None, None]:
 def str_from_rich(
     renderable: RenderableType, width: Optional[int] = None, soft_wrap: bool = False
 ) -> str:
-    console = Console(width=width, theme=THEME.as_rich_theme())
-    with console.capture() as out:
-        console.print(renderable, soft_wrap=soft_wrap)
+    dummy_console = Console(width=width, theme=THEME.as_rich_theme())
+    with dummy_console.capture() as out:
+        dummy_console.print(renderable, soft_wrap=soft_wrap)
     return out.get().rstrip("\n")
 
 
@@ -272,10 +272,20 @@ global_unrecognized_args: List[str] = []
 class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser):  # type: ignore
     _parser_specification: ParserSpecification
     _parsing_known_args: bool
+    _console_outputs: bool
     _args: List[str]
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
+
+    @override
+    def _print_message(self, message, file=None):
+        if message and self._console_outputs:
+            file = file or sys.stderr
+            try:
+                file.write(message)
+            except (AttributeError, OSError):  # pragma: no cover
+                pass
 
     @override
     def _parse_known_args(self, arg_strings, namespace):  # pragma: no cover
@@ -571,8 +581,6 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
         should either exit or raise an exception.
         """
 
-        console = Console(theme=THEME.as_rich_theme())
-
         extra_info: List[RenderableType] = []
         global global_unrecognized_args
         if len(global_unrecognized_args) == 0 and message.startswith(
@@ -827,20 +835,24 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                         )
                     )
 
-        console.print(
-            Panel(
-                Group(
-                    f"{message[0].upper() + message[1:]}" if len(message) > 0 else "",
-                    *extra_info,
-                    Rule(style=Style(color="red")),
-                    f"For full helptext, run [bold]{self.prog} --help[/bold]",
-                ),
-                title=f"[bold]{message_title}[/bold]",
-                title_align="left",
-                border_style=Style(color="bright_red"),
-                expand=False,
+        if self._console_outputs:
+            console = Console(theme=THEME.as_rich_theme(), stderr=True)
+            console.print(
+                Panel(
+                    Group(
+                        f"{message[0].upper() + message[1:]}"
+                        if len(message) > 0
+                        else "",
+                        *extra_info,
+                        Rule(style=Style(color="red")),
+                        f"For full helptext, run [bold]{self.prog} --help[/bold]",
+                    ),
+                    title=f"[bold]{message_title}[/bold]",
+                    title_align="left",
+                    border_style=Style(color="bright_red"),
+                    expand=False,
+                )
             )
-        )
         sys.exit(2)
 
 
@@ -943,8 +955,10 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 return self._tyro_format_nonroot()
 
         def _tyro_format_root(self):
-            console = Console(width=self.formatter._width, theme=THEME.as_rich_theme())
-            with console.capture() as capture:
+            dummy_console = Console(
+                width=self.formatter._width, theme=THEME.as_rich_theme()
+            )
+            with dummy_console.capture() as capture:
                 # Get rich renderables from items.
                 top_parts = []
                 column_parts = []
@@ -1008,8 +1022,8 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     width=column_width,
                 )
 
-                console.print(Group(*top_parts))
-                console.print(columns)
+                dummy_console.print(Group(*top_parts))
+                dummy_console.print(columns)
             return capture.get()
 
         def _format_action(self, action: argparse.Action):

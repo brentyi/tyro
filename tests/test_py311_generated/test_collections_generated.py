@@ -78,7 +78,7 @@ def test_positional_tuple_with_literal_and_default() -> None:
     assert tyro.cli(A, args=[]) == A(x=(1, 2))
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(A, args=["1", "2", "3", "4"])
     assert "invalid choice" in target.getvalue()
 

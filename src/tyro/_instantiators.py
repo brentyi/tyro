@@ -103,7 +103,7 @@ class UnsupportedTypeAnnotationError(Exception):
     """Exception raised when an unsupported type annotation is detected."""
 
 
-_builtin_set = set(
+_builtin_set: Set[Hashable] = set(
     filter(
         lambda x: isinstance(x, Hashable),  # type: ignore
         __builtins__.values(),  # type: ignore

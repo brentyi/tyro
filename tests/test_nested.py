@@ -3,7 +3,7 @@ from typing import Any, Generic, Mapping, NewType, Optional, Tuple, TypeVar, Uni
 
 import pytest
 from frozendict import frozendict  # type: ignore
-from helptext_utils import get_helptext
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Literal
 
 import tyro
@@ -1161,4 +1161,4 @@ def test_subcommand_by_type_tree() -> None:
         ] = A("hello")
 
     assert tyro.cli(Args, args=[]) == Args(A("hello"))
-    assert "default: inner:alt" in get_helptext(Args)
+    assert "default: inner:alt" in get_helptext_with_checks(Args)

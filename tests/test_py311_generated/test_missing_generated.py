@@ -15,7 +15,7 @@ def test_missing() -> None:
         return a, b, c
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(main, args=[])
     message = target.getvalue()
     assert "Required options" in message
