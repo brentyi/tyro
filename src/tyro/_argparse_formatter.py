@@ -272,7 +272,7 @@ global_unrecognized_args: List[str] = []
 class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser):  # type: ignore
     _parser_specification: ParserSpecification
     _parsing_known_args: bool
-    _enable_console_outputs: bool
+    _console_outputs: bool
     _args: List[str]
 
     def __init__(self, *args, **kwargs) -> None:
@@ -280,7 +280,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
     @override
     def _print_message(self, message, file=None):
-        if message and self._enable_console_outputs:
+        if message and self._console_outputs:
             file = file or sys.stderr
             try:
                 file.write(message)
@@ -835,7 +835,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                         )
                     )
 
-        if self._enable_console_outputs:
+        if self._console_outputs:
             console = Console(theme=THEME.as_rich_theme(), stderr=True)
             console.print(
                 Panel(

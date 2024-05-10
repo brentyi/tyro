@@ -52,7 +52,7 @@ def cli(
     default: Optional[OutT] = None,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
 ) -> OutT: ...
 
 
@@ -66,7 +66,7 @@ def cli(
     default: Optional[OutT] = None,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
 ) -> Tuple[OutT, List[str]]: ...
 
 
@@ -83,7 +83,7 @@ def cli(
     default: None = None,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
 ) -> OutT: ...
 
 
@@ -100,7 +100,7 @@ def cli(
     default: None = None,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
 ) -> Tuple[OutT, List[str]]: ...
 
 
@@ -113,7 +113,7 @@ def cli(
     default: Optional[OutT] = None,
     return_unknown_args: bool = False,
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
     **deprecated_kwargs,
 ) -> Union[OutT, Tuple[OutT, List[str]]]:
     """Call or instantiate `f`, with inputs populated from an automatically generated
@@ -176,10 +176,10 @@ def cli(
             equivalently when parsing happens. We default helptext to hyphens to follow
             the GNU style guide.
             https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
-        enable_console_outputs: If set to `False`, parsing errors and help messages will
-            be supressed. This can be useful for distributed settings, where
-            `tyro.cli()` is called from multiple workers but we only want console outputs
-            from the main one.
+        console_outputs: If set to `False`, parsing errors and help messages will be
+            supressed. This can be useful for distributed settings, where `tyro.cli()`
+            is called from multiple workers but we only want console outputs from the
+            main one.
 
     Returns:
         The output of `f(...)` or an instance `f`. If `f` is a class, the two are
@@ -201,7 +201,7 @@ def cli(
             return_parser=False,
             return_unknown_args=return_unknown_args,
             use_underscores=use_underscores,
-            enable_console_outputs=enable_console_outputs,
+            console_outputs=console_outputs,
             **deprecated_kwargs,
         )
 
@@ -222,7 +222,7 @@ def get_parser(
     description: Optional[str] = None,
     default: Optional[OutT] = None,
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
 ) -> argparse.ArgumentParser: ...
 
 
@@ -234,7 +234,7 @@ def get_parser(
     description: Optional[str] = None,
     default: Optional[OutT] = None,
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
 ) -> argparse.ArgumentParser: ...
 
 
@@ -247,7 +247,7 @@ def get_parser(
     description: Optional[str] = None,
     default: Optional[OutT] = None,
     use_underscores: bool = False,
-    enable_console_outputs: bool = True,
+    console_outputs: bool = True,
 ) -> argparse.ArgumentParser:
     """Get the `argparse.ArgumentParser` object generated under-the-hood by
     `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.
@@ -266,7 +266,7 @@ def get_parser(
                 return_parser=True,
                 return_unknown_args=False,
                 use_underscores=use_underscores,
-                enable_console_outputs=enable_console_outputs,
+                console_outputs=console_outputs,
             ),
         )
 
@@ -280,7 +280,7 @@ def _cli_impl(
     default: Optional[OutT],
     return_parser: bool,
     return_unknown_args: bool,
-    enable_console_outputs: bool,
+    console_outputs: bool,
     **deprecated_kwargs,
 ) -> Union[
     OutT,
@@ -403,7 +403,7 @@ def _cli_impl(
         )
         parser._parser_specification = parser_spec
         parser._parsing_known_args = return_unknown_args
-        parser._enable_console_outputs = enable_console_outputs
+        parser._console_outputs = console_outputs
         parser._args = args
         parser_spec.apply(parser)
 
@@ -480,7 +480,7 @@ def _cli_impl(
 
         from ._argparse_formatter import THEME
 
-        if enable_console_outputs:
+        if console_outputs:
             console = Console(theme=THEME.as_rich_theme(), stderr=True)
             console.print(
                 Panel(

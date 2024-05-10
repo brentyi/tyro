@@ -27,7 +27,7 @@ def get_helptext_with_checks(
             args=args,
             use_underscores=use_underscores,
             default=default,
-            enable_console_outputs=False,
+            console_outputs=False,
         )
     assert target.getvalue() == ""
 

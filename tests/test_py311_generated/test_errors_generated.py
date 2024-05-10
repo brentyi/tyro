@@ -188,7 +188,7 @@ def test_suppress_console_outputs() -> None:
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
-        tyro.cli(Class, args="--reward.trac".split(" "), enable_console_outputs=False)
+        tyro.cli(Class, args="--reward.trac".split(" "), console_outputs=False)
 
     error = target.getvalue()
     assert error == ""
