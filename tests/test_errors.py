@@ -178,6 +178,23 @@ def test_similar_arguments_basic() -> None:
     assert error.count("--help") == 1
 
 
+def test_suppress_console_outputs() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+
+    @dataclasses.dataclass
+    class Class:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Class, args="--reward.trac".split(" "), enable_console_outputs=False)
+
+    error = target.getvalue()
+    assert error == ""
+
+
 def test_similar_arguments_subcommands() -> None:
     @dataclasses.dataclass
     class RewardConfig:
