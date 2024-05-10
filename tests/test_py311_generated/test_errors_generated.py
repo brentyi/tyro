@@ -166,7 +166,7 @@ def test_similar_arguments_basic() -> None:
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Class, args="--reward.trac".split(" "))
 
     error = target.getvalue()
@@ -175,6 +175,23 @@ def test_similar_arguments_basic() -> None:
 
     assert error.count("--reward.track") == 1
     assert error.count("--help") == 1
+
+
+def test_suppress_console_outputs() -> None:
+    @dataclasses.dataclass
+    class RewardConfig:
+        track: bool
+
+    @dataclasses.dataclass
+    class Class:
+        reward: RewardConfig
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Class, args="--reward.trac".split(" "), console_outputs=False)
+
+    error = target.getvalue()
+    assert error == ""
 
 
 def test_similar_arguments_subcommands() -> None:
@@ -191,7 +208,7 @@ def test_similar_arguments_subcommands() -> None:
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(ClassA | ClassB, args="--reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
@@ -216,7 +233,7 @@ def test_similar_arguments_subcommands_multiple() -> None:
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(ClassA | ClassB, args="--fjdkslaj --reward.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
@@ -242,7 +259,7 @@ def test_similar_arguments_subcommands_multiple_contains_match() -> None:
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(ClassA | ClassB, args="--rd.trac".split(" "))  # type: ignore
 
     error = target.getvalue()
@@ -268,7 +285,7 @@ def test_similar_arguments_subcommands_multiple_contains_match_alt() -> None:
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(ClassA | ClassB, args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
@@ -310,7 +327,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(ClassA | ClassB, args="--track".split(" "))  # type: ignore
 
     error = target.getvalue()
@@ -321,7 +338,7 @@ def test_similar_arguments_subcommands_overflow_different() -> None:
     assert error.count("--help") == 21
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         # --tracked is intentionally between 0.8 ~ 0.9 similarity to track{i} for test
         # coverage.
         tyro.cli(RewardConfig, args="--tracked".split(" "))  # type: ignore
@@ -373,7 +390,7 @@ def test_similar_arguments_subcommands_overflow_same() -> None:
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(  # type: ignore
             ClassA
             | ClassB
@@ -438,7 +455,7 @@ def test_similar_arguments_subcommands_overflow_same_startswith_multiple() -> No
         reward: RewardConfig
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(  # type: ignore
             ClassA
             | ClassB
@@ -467,7 +484,7 @@ def test_similar_flag() -> None:
         flag: bool = False
 
     target = io.StringIO()
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(
             Args,
             args="--lag".split(" "),

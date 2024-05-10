@@ -13,7 +13,7 @@ from typing import (
 
 import pytest
 from frozendict import frozendict  # type: ignore
-from helptext_utils import get_helptext
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 
@@ -1170,4 +1170,4 @@ def test_subcommand_by_type_tree() -> None:
         )
 
     assert tyro.cli(Args, args=[]) == Args(A("hello"))
-    assert "default: inner:alt" in get_helptext(Args)
+    assert "default: inner:alt" in get_helptext_with_checks(Args)

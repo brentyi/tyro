@@ -25,6 +25,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Set,
     Tuple,
     TypeVar,
     Union,
@@ -361,7 +362,7 @@ DefaultInstance = Union[
     Any, PropagatingMissingType, NonpropagatingMissingType, ExcludeFromCallType
 ]
 
-_known_parsable_types = set(
+_known_parsable_types: Set[type] = set(
     filter(
         lambda x: isinstance(x, Hashable),  # type: ignore
         itertools.chain(
