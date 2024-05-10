@@ -284,7 +284,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
             file = file or sys.stderr
             try:
                 file.write(message)
-            except (AttributeError, OSError):
+            except (AttributeError, OSError):  # pragma: no cover
                 pass
 
     @override
