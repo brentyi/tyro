@@ -6,7 +6,7 @@
 <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Tuples" href="../03_tuples/" /><link rel="prev" title="Positional Arguments" href="../01_positional_args/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Overriding Dictionaries - tyro</title>
+        <title>Dictionaries and TypedDict - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
@@ -194,7 +194,7 @@
 <p class="caption" role="heading"><span class="caption-text">Additional Features</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_positional_args/">Positional Arguments</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Overriding Dictionaries</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Dictionaries and TypedDict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
@@ -207,6 +207,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../12_aliases/">Argument Aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../12_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -256,10 +257,12 @@
           </label>
         </div>
         <article role="main">
-          <section id="overriding-dictionaries">
-<h1>Overriding Dictionaries<a class="headerlink" href="#overriding-dictionaries" title="Link to this heading">#</a></h1>
-<p>Dictionary inputs can be specified using either a standard <code class="docutils literal notranslate"><span class="pre">Dict[K,</span> <span class="pre">V]</span></code> annotation, or a
-<code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> subclass.</p>
+          <section id="dictionaries-and-typeddict">
+<h1>Dictionaries and TypedDict<a class="headerlink" href="#dictionaries-and-typeddict" title="Link to this heading">#</a></h1>
+<p>Dictionary inputs can be specified using either a standard <code class="docutils literal notranslate"><span class="pre">Dict[K,</span> <span class="pre">V]</span></code>
+annotation, or a <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> subclass.</p>
+<p>For configuring <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code>, we also support <code class="docutils literal notranslate"><span class="pre">total={True/False}</span></code>,
+<code class="docutils literal notranslate"><span class="pre">typing.Required</span></code>, and <code class="docutils literal notranslate"><span class="pre">typing.NotRequired</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">NotRequired</span>
@@ -330,16 +333,6 @@
 │ --standard-dict.beta2 FLOAT                                                │
 │                   (default: 0.999)                                         │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
-<hr class="docutils" />
-<kbd>python 04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4</kbd><pre class="ansi-block literal-block">╭─ Required options ─────────────────────────────────────────╮
-│ The following arguments are required: --typed-dict-b.betas │
-│ ────────────────────────────────────────────────────────── │
-│ Argument helptext:                                         │
-│     --typed-dict-b.betas FLOAT FLOAT                       │
-│         (required)                                         │
-│ ────────────────────────────────────────────────────────── │
-│ For full helptext, run 02_dictionaries.py --help           │
-╰────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/02_dictionaries.py --typed-dict-a.learning-rate 3e-4 --typed-dict-b.betas 0.9 0.999</kbd><pre class="ansi-block literal-block">Typed dict A: {'learning_rate': 0.0003}
 Typed dict B: {'betas': (0.9, 0.999)}

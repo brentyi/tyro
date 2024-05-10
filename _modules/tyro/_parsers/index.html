@@ -193,7 +193,7 @@
 <p class="caption" role="heading"><span class="caption-text">Additional Features</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/01_positional_args/">Positional Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/02_dictionaries/">Overriding Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/02_dictionaries/">Dictionaries and TypedDict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
@@ -206,6 +206,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -908,6 +909,7 @@
             <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent_parser</span><span class="p">,</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">TyroArgumentParser</span><span class="p">)</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">_parsing_known_args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_parsing_known_args</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_parser_specification</span>
+            <span class="n">subparser</span><span class="o">.</span><span class="n">_console_outputs</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_console_outputs</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_args</span>
 
             <span class="n">subparser_tree_leaves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">subparser</span><span class="p">))</span>

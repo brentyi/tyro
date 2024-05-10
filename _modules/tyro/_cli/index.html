@@ -193,7 +193,7 @@
 <p class="caption" role="heading"><span class="caption-text">Additional Features</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/01_positional_args/">Positional Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/02_dictionaries/">Overriding Dictionaries</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/02_dictionaries/">Dictionaries and TypedDict</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
@@ -206,6 +206,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -309,6 +310,7 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -322,6 +324,7 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
 
 
@@ -332,12 +335,13 @@
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="c1"># Note that passing a default makes sense for things like dataclasses, but are not</span>
-    <span class="c1"># supported for general callables. These can, however, be specified in the signature</span>
-    <span class="c1"># of the callable itself.</span>
+    <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
+    <span class="c1"># supported for general callables. These can, however, be specified in the</span>
+    <span class="c1"># signature of the callable itself.</span>
     <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -348,12 +352,13 @@
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="c1"># Note that passing a default makes sense for things like dataclasses, but are not</span>
-    <span class="c1"># supported for general callables. These can, however, be specified in the signature</span>
-    <span class="c1"># of the callable itself.</span>
+    <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
+    <span class="c1"># supported for general callables. These can, however, be specified in the</span>
+    <span class="c1"># signature of the callable itself.</span>
     <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
 
 
@@ -368,12 +373,13 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Call or instantiate `f`, with inputs populated from an automatically generated</span>
 <span class="sd">    CLI interface.</span>
 
-<span class="sd">    `f` should have type-annotated inputs, and can be a function or type. Note that if</span>
+<span class="sd">    `f` should have type-annotated inputs, and can be a function or type. If</span>
 <span class="sd">    `f` is a type, `tyro.cli()` returns an instance.</span>
 
 <span class="sd">    The parser is generated by populating helptext from docstrings and types from</span>
@@ -418,16 +424,22 @@
 <span class="sd">        args: If set, parse arguments from a sequence of strings instead of the</span>
 <span class="sd">            commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.</span>
 <span class="sd">        default: An instance of `OutT` to use for default values; supported if `f` is a</span>
-<span class="sd">            type like a dataclass or dictionary, but not if `f` is a general callable like</span>
-<span class="sd">            a function or standard class. Helpful for merging CLI arguments with values</span>
-<span class="sd">            loaded from elsewhere. (for example, a config object loaded from a yaml file)</span>
+<span class="sd">            type like a dataclass or dictionary, but not if `f` is a general callable</span>
+<span class="sd">            like a function or standard class. Helpful for merging CLI arguments with</span>
+<span class="sd">            values loaded from elsewhere. (for example, a config object loaded from a</span>
+<span class="sd">            yaml file)</span>
 <span class="sd">        return_unknown_args: If True, return a tuple of the output of `f` and a list of</span>
 <span class="sd">            unknown arguments. Mirrors the unknown arguments returned from</span>
 <span class="sd">            `argparse.ArgumentParser.parse_known_args()`.</span>
 <span class="sd">        use_underscores: If True, use underscores as a word delimeter instead of hyphens.</span>
-<span class="sd">            This primarily impacts helptext; underscores and hyphens are treated equivalently</span>
-<span class="sd">            when parsing happens. We default helptext to hyphens to follow the GNU style guide.</span>
+<span class="sd">            This primarily impacts helptext; underscores and hyphens are treated</span>
+<span class="sd">            equivalently when parsing happens. We default helptext to hyphens to follow</span>
+<span class="sd">            the GNU style guide.</span>
 <span class="sd">            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html</span>
+<span class="sd">        console_outputs: If set to `False`, parsing errors and help messages will be</span>
+<span class="sd">            supressed. This can be useful for distributed settings, where `tyro.cli()`</span>
+<span class="sd">            is called from multiple workers but we only want console outputs from the</span>
+<span class="sd">            main one.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The output of `f(...)` or an instance `f`. If `f` is a class, the two are</span>
@@ -449,6 +461,7 @@
             <span class="n">return_parser</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">return_unknown_args</span><span class="o">=</span><span class="n">return_unknown_args</span><span class="p">,</span>
             <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
+            <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
             <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -470,6 +483,7 @@
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -481,6 +495,7 @@
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -489,12 +504,13 @@
 <span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="c1"># Note that we have no `args` argument, since this is only used when</span>
+    <span class="c1"># We have no `args` argument, since this is only used when</span>
     <span class="c1"># parser.parse_args() is called.</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the `argparse.ArgumentParser` object generated under-the-hood by</span>
 <span class="sd">    `tyro.cli()`. Useful for tools like `sphinx-argparse`, `argcomplete`, etc.</span>
@@ -513,6 +529,7 @@
                 <span class="n">return_parser</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                 <span class="n">return_unknown_args</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
+                <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span></div>
 
@@ -527,6 +544,7 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
     <span class="n">return_parser</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
     <span class="n">OutT</span><span class="p">,</span>
@@ -649,6 +667,7 @@
         <span class="p">)</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_parser_specification</span> <span class="o">=</span> <span class="n">parser_spec</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_parsing_known_args</span> <span class="o">=</span> <span class="n">return_unknown_args</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">_console_outputs</span> <span class="o">=</span> <span class="n">console_outputs</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">args</span>
         <span class="n">parser_spec</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
 
@@ -725,39 +744,40 @@
 
         <span class="kn">from</span> <span class="nn">._argparse_formatter</span> <span class="kn">import</span> <span class="n">THEME</span>
 
-        <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
-        <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
-            <span class="n">Panel</span><span class="p">(</span>
-                <span class="n">Group</span><span class="p">(</span>
-                    <span class="s2">&quot;[bright_red][bold]Error parsing&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="si">}</span><span class="s2">[/bold]:[/bright_red] </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
-                    <span class="o">*</span><span class="n">cast</span><span class="p">(</span>  <span class="c1"># Cast to appease mypy...</span>
-                        <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">],</span>
-                        <span class="p">(</span>
-                            <span class="p">[]</span>
-                            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span>
-                            <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="kc">None</span>
-                            <span class="k">else</span> <span class="p">[</span>
-                                <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
-                                <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
-                                <span class="n">Padding</span><span class="p">(</span>
-                                    <span class="n">Group</span><span class="p">(</span>
-                                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2"> [bold]</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">[/bold]&quot;</span><span class="p">,</span>
-                                        <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
+        <span class="k">if</span> <span class="n">console_outputs</span><span class="p">:</span>
+            <span class="n">console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">(),</span> <span class="n">stderr</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
+                <span class="n">Panel</span><span class="p">(</span>
+                    <span class="n">Group</span><span class="p">(</span>
+                        <span class="s2">&quot;[bright_red][bold]Error parsing&quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="si">}</span><span class="s2">[/bold]:[/bright_red] </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                        <span class="o">*</span><span class="n">cast</span><span class="p">(</span>  <span class="c1"># Cast to appease mypy...</span>
+                            <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">],</span>
+                            <span class="p">(</span>
+                                <span class="p">[]</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span>
+                                <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="kc">None</span>
+                                <span class="k">else</span> <span class="p">[</span>
+                                    <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                                    <span class="s2">&quot;Argument helptext:&quot;</span><span class="p">,</span>
+                                    <span class="n">Padding</span><span class="p">(</span>
+                                        <span class="n">Group</span><span class="p">(</span>
+                                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2"> [bold]</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">[/bold]&quot;</span><span class="p">,</span>
+                                            <span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span><span class="p">,</span>
+                                        <span class="p">),</span>
+                                        <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
                                     <span class="p">),</span>
-                                    <span class="n">pad</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>
-                                <span class="p">),</span>
-                                <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
-                                <span class="sa">f</span><span class="s2">&quot;For full helptext, see [bold]</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
-                            <span class="p">]</span>
+                                    <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
+                                    <span class="sa">f</span><span class="s2">&quot;For full helptext, see [bold]</span><span class="si">{</span><span class="n">parser</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
+                                <span class="p">]</span>
+                            <span class="p">),</span>
                         <span class="p">),</span>
                     <span class="p">),</span>
-                <span class="p">),</span>
-                <span class="n">title</span><span class="o">=</span><span class="s2">&quot;[bold]Value error[/bold]&quot;</span><span class="p">,</span>
-                <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
-                <span class="n">border_style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">),</span>
+                    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;[bold]Value error[/bold]&quot;</span><span class="p">,</span>
+                    <span class="n">title_align</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                    <span class="n">border_style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">),</span>
+                <span class="p">)</span>
             <span class="p">)</span>
-        <span class="p">)</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="o">-</span> <span class="n">consumed_keywords</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span>
