@@ -3,8 +3,8 @@
 The `console_outputs=` argument can be set to `False` to suppress helptext and
 error message printing.
 
-As an example, this is useful in PyTorch for distributed training scripts,
-where you only want to print the helptext from the main process:
+This is useful in PyTorch for distributed training scripts, where you only want
+to print the helptext from the main process:
 
 ```python
 # Hugging Face Accelerate.
