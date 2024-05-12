@@ -2,6 +2,7 @@ import dataclasses
 from typing import (
     Annotated,
     Any,
+    Final,
     Generic,
     Literal,
     Mapping,
@@ -42,6 +43,21 @@ def test_nested_annotated() -> None:
     class Nested:
         x: int
         b: Annotated[B, "this should be ignored"]
+
+    assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    with pytest.raises(SystemExit):
+        tyro.cli(Nested, args=["--x", "1"])
+
+
+def test_nested_final() -> None:
+    @dataclasses.dataclass
+    class B:
+        y: int
+
+    @dataclasses.dataclass
+    class Nested:
+        x: int
+        b: Final[B]
 
     assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):

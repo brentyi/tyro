@@ -4,7 +4,7 @@ from typing import Any, Generic, Mapping, NewType, Optional, Tuple, TypeVar, Uni
 import pytest
 from frozendict import frozendict  # type: ignore
 from helptext_utils import get_helptext_with_checks
-from typing_extensions import Annotated, Literal
+from typing_extensions import Annotated, Final, Literal
 
 import tyro
 
@@ -33,6 +33,21 @@ def test_nested_annotated() -> None:
     class Nested:
         x: int
         b: Annotated[B, "this should be ignored"]
+
+    assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
+    with pytest.raises(SystemExit):
+        tyro.cli(Nested, args=["--x", "1"])
+
+
+def test_nested_final() -> None:
+    @dataclasses.dataclass
+    class B:
+        y: int
+
+    @dataclasses.dataclass
+    class Nested:
+        x: int
+        b: Final[B]  # type: ignore
 
     assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):
