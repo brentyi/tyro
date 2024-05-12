@@ -56,7 +56,7 @@ from typing import (
     overload,
 )
 
-from typing_extensions import Annotated, Final, Literal, get_args, get_origin
+from typing_extensions import Annotated, Literal, get_args, get_origin
 
 from . import _resolver
 
@@ -196,6 +196,8 @@ def instantiator_from_type(
     if maybe_newtype_name is not None:
         metavar = maybe_newtype_name.upper()
 
+    typ, _ = _resolver.unwrap_annotated(typ)
+
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
     container_out = _instantiator_from_container_type(
@@ -203,6 +205,13 @@ def instantiator_from_type(
     )
     if container_out is not None:
         return container_out
+
+    # At this point: Annotated[] and containers like list[T] are all handled,
+    # any types with a non-None origin aren't supported.
+    if get_origin(typ) is not None:
+        raise UnsupportedTypeAnnotationError(  # pragma: no cover
+            f"Unsupported type {typ} with origin {get_origin(typ)}"
+        )
 
     # Validate that typ is a `(arg: str) -> T` type converter, as expected by argparse.
     if typ in _builtin_set:
@@ -319,7 +328,7 @@ def _instantiator_from_container_type(
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     markers: FrozenSet[_markers.Marker],
 ) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
-    """Attempt to create an instantiator from a container type. Returns `None` is no
+    """Attempt to create an instantiator from a container type. Returns `None` if no
     container type is found."""
 
     # Default generic types to strings.
@@ -333,13 +342,8 @@ def _instantiator_from_container_type(
         typ = Set[str]
 
     type_origin = get_origin(typ)
-    if type_origin is None:
+    if type_origin in (None, Annotated):
         return None
-
-    # Unwrap Annotated and Final types.
-    if type_origin in (Annotated, Final):
-        contained_type = get_args(typ)[0]
-        return instantiator_from_type(contained_type, type_from_typevar, markers)
 
     for make, matched_origins in {
         _instantiator_from_sequence: (
@@ -356,10 +360,7 @@ def _instantiator_from_container_type(
     }.items():
         if type_origin in matched_origins:
             return make(typ, type_from_typevar, markers)
-
-    raise UnsupportedTypeAnnotationError(  # pragma: no cover
-        f"Unsupported type {typ} with origin {type_origin}"
-    )
+    return None
 
 
 def _instantiator_from_tuple(

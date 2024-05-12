@@ -24,6 +24,7 @@ from typing import (
 
 from typing_extensions import (
     Annotated,
+    Final,
     ForwardRef,
     Self,
     TypeAliasType,
@@ -266,6 +267,19 @@ def unwrap_annotated(
     - Annotated[int, 1], int => (int, (1,))
     - Annotated[int, "1"], int => (int, ())
     """
+
+    # `Final` and `ReadOnly` types are ignored in tyro.
+    try:
+        # Can only import ReadOnly in typing_extensions>=4.9.0, which isn't
+        # supported by Python 3.7.
+        from typing_extensions import ReadOnly
+
+        while get_origin(typ) in (Final, ReadOnly):
+            typ = get_args(typ)[0]
+    except ImportError:  # pragma: no cover
+        while get_origin(typ) is Final:
+            typ = get_args(typ)[0]
+
     # Check for __tyro_markers__ from @configure.
     targets = tuple(
         x

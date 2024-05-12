@@ -3,9 +3,19 @@ of `typing_extensions`, and replace Union[A, B] types with A | B."""
 
 import pathlib
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 
-for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py"):
-    content = test_path.read_text().replace("typing_extensions", "typing")
+
+def generate_from_path(test_path: pathlib.Path) -> None:
+    content = test_path.read_text()
+    content = content.replace("typing_extensions", "typing")
+
+    if "ReadOnly" in content:
+        content = content.replace("ReadOnly,", "", 1)
+        content = content.replace(
+            "\nfrom typing import ",
+            "\nfrom typing_extensions import ReadOnly\nfrom typing import ",
+        )
 
     while "Union[" in content:
         new_content, _, b = content.partition("Union[")
@@ -42,3 +52,10 @@ for test_path in pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py
     subprocess.run(["isort", "--profile=black", str(out_path)], check=True)
     subprocess.run(["ruff", "format", str(out_path)], check=True)
     subprocess.run(["ruff", "check", "--fix", str(out_path)], check=True)
+
+
+with ThreadPoolExecutor(max_workers=8) as executor:
+    executor.map(
+        generate_from_path,
+        pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py"),
+    )
