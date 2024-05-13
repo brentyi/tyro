@@ -283,8 +283,8 @@ argument.</p>
 <dt class="sig sig-object py" id="tyro.conf._markers.Fixed">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><a class="headerlink" href="#tyro.conf._markers.Fixed" title="Link to this definition">#</a></dt>
 <dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code> from parsing it; a
-default value should be set instead. Note that fields with defaults that can’t be parsed
-will also be marked as fixed automatically.</p>
+default value should be set instead. Fields that can’t be parsed with defaults will also
+be marked as fixed automatically.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -328,14 +328,14 @@ the directly preceding subcommand. When we have two subcommands <code class="doc
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">x</span><span class="o">.</span><span class="n">py</span> <span class="p">{</span><span class="o">--</span><span class="n">root</span> <span class="n">options</span><span class="p">}</span> <span class="n">s1</span> <span class="p">{</span><span class="o">--</span><span class="n">s1</span> <span class="n">options</span><span class="p">}</span> <span class="n">s2</span> <span class="p">{</span><span class="o">--</span><span class="n">s2</span> <span class="n">options</span><span class="p">}</span>
 </pre></div>
 </div>
-<p>This can be frustrating because the resulting CLI is sensitive the exact positioning and
-ordering of options.</p>
+<p>This can be frustrating because the resulting CLI is sensitive to the positioning of
+options.</p>
 <p>To consolidate subcommands, we push arguments to the end, after all subcommands:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">x</span><span class="o">.</span><span class="n">py</span> <span class="n">s1</span> <span class="n">s2</span> <span class="p">{</span><span class="o">--</span><span class="n">root</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="ow">and</span> <span class="n">s2</span> <span class="n">options</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>This is more robust to reordering of options, ensuring that any new options can simply
-be placed at the end of the command&gt;</p>
+be placed at the end of the command.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -348,9 +348,9 @@ portion of the prefix.</p>
 </pre></div>
 </div>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">--cmd.arg</span></code> may be generated as a flag for each dataclass in the union.
-If subcommand prefixes are omitted, we would instead simply have <code class="docutils literal notranslate"><span class="pre">--arg</span></code>.</p>
+If subcommand prefixes are omitted, we would instead have <code class="docutils literal notranslate"><span class="pre">--arg</span></code>.</p>
 <p>By default, <code class="docutils literal notranslate"><span class="pre">cmd:nested-type-a</span></code> and <code class="docutils literal notranslate"><span class="pre">cmd:nested-type-b</span></code> may be generated as subcommand.
-If subcommand prefixes are omitted, we would instead simply have <code class="docutils literal notranslate"><span class="pre">nested-type-a</span></code> and
+If subcommand prefixes are omitted, we would instead have <code class="docutils literal notranslate"><span class="pre">nested-type-a</span></code> and
 <code class="docutils literal notranslate"><span class="pre">nested-type-b</span></code>.</p>
 </dd></dl>
 
@@ -370,12 +370,12 @@ instead simply have <code class="docutils literal notranslate"><span class="pre"
 <dt class="sig sig-object py" id="tyro.conf._markers.UseAppendAction">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">UseAppendAction</span></span><a class="headerlink" href="#tyro.conf._markers.UseAppendAction" title="Link to this definition">#</a></dt>
 <dd><p>Use “append” actions for variable-length arguments.</p>
-<p>Given an annotation like <code class="docutils literal notranslate"><span class="pre">x:</span> <span class="pre">List[int]</span></code>, this means that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></code> can be set via
+<p>Given an annotation like <code class="docutils literal notranslate"><span class="pre">x:</span> <span class="pre">list[int]</span></code>, this means that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></code> can be set via
 the CLI syntax <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">--x</span> <span class="pre">1</span> <span class="pre">--x</span> <span class="pre">2</span></code> instead of the default of <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">2</span></code>.</p>
 <p>The resulting syntax may be more user-friendly; for <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, it also enables support for
-otherwise ambiguous annotations like <code class="docutils literal notranslate"><span class="pre">List[List[int]]</span></code>.</p>
-<p>Can be applied to all variable-length sequences (<code class="docutils literal notranslate"><span class="pre">List[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Sequence[T]</span></code>,
-<code class="docutils literal notranslate"><span class="pre">Tuple[T,</span> <span class="pre">...]</span></code>, etc), including dictionaries without default values.</p>
+otherwise ambiguous annotations like <code class="docutils literal notranslate"><span class="pre">list[list[int]]</span></code>.</p>
+<p>Can be applied to all variable-length sequences (<code class="docutils literal notranslate"><span class="pre">list[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Sequence[T]</span></code>,
+<code class="docutils literal notranslate"><span class="pre">tuple[T,</span> <span class="pre">...]</span></code>, etc), including dictionaries without default values.</p>
 </dd></dl>
 
 <dl class="py data">
