@@ -10,7 +10,8 @@ from .. import _singleton
 # Note that all Annotated[T, None] values are just for static checkers. The real marker
 # singletons are instantiated dynamically below.
 #
-# An alias could ideally be made, but SpecialForm aliases are not well supported by static analysis tools.
+# An alias could ideally be made, but SpecialForm aliases aren't well supported by
+# type checkers.
 
 T = TypeVar("T")
 
@@ -37,8 +38,8 @@ _OPTIONAL_GROUP = Annotated[T, None]
 
 Fixed = Annotated[T, None]
 """A type `T` can be annotated as `Fixed[T]` to prevent `tyro.cli` from parsing it; a
-default value should be set instead. Note that fields with defaults that can't be parsed
-will also be marked as fixed automatically."""
+default value should be set instead. Fields that can't be parsed with defaults will also
+be marked as fixed automatically."""
 
 Suppress = Annotated[T, None]
 """A type `T` can be annotated as `Suppress[T]` to prevent `tyro.cli` from parsing it, and
@@ -71,8 +72,8 @@ the directly preceding subcommand. When we have two subcommands `s1` and `s2`:
 python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
 ```
 
-This can be frustrating because the resulting CLI is sensitive the exact positioning and
-ordering of options.
+This can be frustrating because the resulting CLI is sensitive to the positioning of
+options.
 
 To consolidate subcommands, we push arguments to the end, after all subcommands:
 ```
@@ -80,7 +81,7 @@ python x.py s1 s2 {--root, s1, and s2 options}
 ```
 
 This is more robust to reordering of options, ensuring that any new options can simply
-be placed at the end of the command>
+be placed at the end of the command.
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]
@@ -92,10 +93,10 @@ If we have a structure with the field:
     cmd: Union[NestedTypeA, NestedTypeB]
 
 By default, `--cmd.arg` may be generated as a flag for each dataclass in the union.
-If subcommand prefixes are omitted, we would instead simply have `--arg`.
+If subcommand prefixes are omitted, we would instead have `--arg`.
 
 By default, `cmd:nested-type-a` and `cmd:nested-type-b` may be generated as subcommand.
-If subcommand prefixes are omitted, we would instead simply have `nested-type-a` and
+If subcommand prefixes are omitted, we would instead have `nested-type-a` and
 `nested-type-b`.
 """
 
@@ -113,14 +114,14 @@ instead simply have `--arg`.
 UseAppendAction = Annotated[T, None]
 """Use "append" actions for variable-length arguments.
 
-Given an annotation like `x: List[int]`, this means that `x = [0, 1, 2]` can be set via
+Given an annotation like `x: list[int]`, this means that `x = [0, 1, 2]` can be set via
 the CLI syntax `--x 0 --x 1 --x 2` instead of the default of `--x 0 1 2`.
 
 The resulting syntax may be more user-friendly; for `tyro`, it also enables support for
-otherwise ambiguous annotations like `List[List[int]]`.
+otherwise ambiguous annotations like `list[list[int]]`.
 
-Can be applied to all variable-length sequences (`List[T]`, `Sequence[T]`,
-`Tuple[T, ...]`, etc), including dictionaries without default values.
+Can be applied to all variable-length sequences (`list[T]`, `Sequence[T]`,
+`tuple[T, ...]`, etc), including dictionaries without default values.
 """
 
 UseCounterAction = Annotated[T, None]
