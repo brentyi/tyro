@@ -38,10 +38,11 @@ Module Contents
 
    
 
-.. py:function:: call_from_args(f: Callable[Ellipsis, T], parser_definition: tyro._parsers.ParserSpecification, default_instance: Union[T, tyro._fields.NonpropagatingMissingType], value_from_prefixed_field_name: Dict[str, Any], field_name_prefix: str) -> Tuple[T, Set[str]]
+.. py:function:: callable_with_args(f: Callable[Ellipsis, T], parser_definition: tyro._parsers.ParserSpecification, default_instance: Union[T, tyro._fields.NonpropagatingMissingType], value_from_prefixed_field_name: Dict[str, Any], field_name_prefix: str) -> Tuple[Callable[[], T], Set[str]]
 
    
-   Call ``f`` with arguments specified by a dictionary of values from argparse.
+   Populate ``f`` with arguments specified by a dictionary of values from argparse.
 
-   Returns the output of ``f`` and a set of used arguments.
+   Returns a partialed version of ``f`` with arguments populated, and a set of
+   used arguments.
 

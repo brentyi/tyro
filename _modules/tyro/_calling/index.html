@@ -263,6 +263,7 @@
 
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span>
@@ -286,18 +287,19 @@
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="call_from_args">
-<a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.call_from_args">[docs]</a>
-<span class="k">def</span> <span class="nf">call_from_args</span><span class="p">(</span>
+<div class="viewcode-block" id="callable_with_args">
+<a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.callable_with_args">[docs]</a>
+<span class="k">def</span> <span class="nf">callable_with_args</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
     <span class="n">parser_definition</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">],</span>
     <span class="n">value_from_prefixed_field_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">field_name_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Call `f` with arguments specified by a dictionary of values from argparse.</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">T</span><span class="p">],</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate `f` with arguments specified by a dictionary of values from argparse.</span>
 
-<span class="sd">    Returns the output of `f` and a set of used arguments.&quot;&quot;&quot;</span>
+<span class="sd">    Returns a partialed version of `f` with arguments populated, and a set of</span>
+<span class="sd">    used arguments.&quot;&quot;&quot;</span>
 
     <span class="n">positional_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -382,13 +384,15 @@
             <span class="c1"># Nested callable.</span>
             <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">field_type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
                 <span class="n">field_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-            <span class="n">value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">call_from_args</span><span class="p">(</span>
+            <span class="n">get_value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">callable_with_args</span><span class="p">(</span>
                 <span class="n">field_type</span><span class="p">,</span>
                 <span class="n">parser_definition</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="p">[</span><span class="n">prefixed_field_name</span><span class="p">],</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
                 <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
                 <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>
             <span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">get_value</span><span class="p">()</span>
+            <span class="k">del</span> <span class="n">get_value</span>
             <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Unions over dataclasses (subparsers). This is the only other option.</span>
@@ -415,7 +419,7 @@
                 <span class="n">chosen_f</span> <span class="o">=</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">options</span><span class="p">[</span>
                     <span class="nb">list</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">subparser_name</span><span class="p">)</span>
                 <span class="p">]</span>
-                <span class="n">value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">call_from_args</span><span class="p">(</span>
+                <span class="n">get_value</span><span class="p">,</span> <span class="n">consumed_keywords_child</span> <span class="o">=</span> <span class="n">callable_with_args</span><span class="p">(</span>
                     <span class="n">chosen_f</span><span class="p">,</span>
                     <span class="n">subparser_def</span><span class="o">.</span><span class="n">parser_from_name</span><span class="p">[</span><span class="n">subparser_name</span><span class="p">],</span>
                     <span class="p">(</span>
@@ -426,6 +430,8 @@
                     <span class="n">value_from_prefixed_field_name</span><span class="p">,</span>
                     <span class="n">field_name_prefix</span><span class="o">=</span><span class="n">prefixed_field_name</span><span class="p">,</span>
                 <span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">get_value</span><span class="p">()</span>
+                <span class="k">del</span> <span class="n">get_value</span>
                 <span class="n">consumed_keywords</span> <span class="o">|=</span> <span class="n">consumed_keywords_child</span>
 
         <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
@@ -454,7 +460,7 @@
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">is_missing_list</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">any_arguments_provided</span><span class="p">:</span>
             <span class="c1"># No arguments were provided in this group.</span>
-            <span class="k">return</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
 
         <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;either all arguments must be provided or none of them.&quot;</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -484,35 +490,38 @@
             <span class="c1"># Triggered when support_single_arg_types=True is used.</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-            <span class="k">return</span> <span class="n">positional_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">positional_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">unwrapped_f</span> <span class="ow">is</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Triggered when support_single_arg_types=True is used.</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-            <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="o">*</span><span class="n">positional_args</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-            <span class="k">return</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">field_name_prefix</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
             <span class="c1"># Don&#39;t catch any errors for the &quot;root&quot; field. If main() in tyro.cli(main)</span>
             <span class="c1"># raises a ValueError, this shouldn&#39;t be caught.</span>
-            <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Try to catch ValueErrors raised by field constructors.</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
-            <span class="c1"># If unwrapped_f raises a ValueError, wrap the message with a more informative</span>
-            <span class="c1"># InstantiationError if possible.</span>
-            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
-                    <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-                    <span class="n">field_name_prefix</span><span class="p">,</span>
-                <span class="p">)</span></div>
+            <span class="k">def</span> <span class="nf">with_instantiation_error</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="c1"># If unwrapped_f raises a ValueError, wrap the message with a more informative</span>
+                <span class="c1"># InstantiationError if possible.</span>
+                <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
+                        <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">field_name_prefix</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">with_instantiation_error</span><span class="p">,</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span></div>
 
 </pre></div>
         </article>

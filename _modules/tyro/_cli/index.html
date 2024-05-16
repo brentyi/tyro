@@ -311,7 +311,8 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span>
+    <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
@@ -325,7 +326,8 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
@@ -342,7 +344,8 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span>
+    <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
@@ -359,7 +362,8 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="o">...</span>
 
 
 <div class="viewcode-block" id="cli">
@@ -469,9 +473,13 @@
     <span class="n">_unsafe_cache</span><span class="o">.</span><span class="n">clear_cache</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+        <span class="n">run_with_args_from_cli</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">run_with_args_from_cli</span><span class="p">(),</span> <span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">OutT</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span></div>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">Callable</span><span class="p">)</span>
+        <span class="n">run_with_args_from_cli</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">OutT</span><span class="p">],</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">run_with_args_from_cli</span><span class="p">()</span></div>
 
 
 
@@ -484,7 +492,8 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
@@ -496,7 +505,8 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
+    <span class="o">...</span>
 
 
 <div class="viewcode-block" id="get_parser">
@@ -549,7 +559,7 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
     <span class="n">OutT</span><span class="p">,</span>
     <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
-    <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">Tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">OutT</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
 <span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for stitching the `tyro` pipeline together.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;default_instance&quot;</span> <span class="ow">in</span> <span class="n">deprecated_kwargs</span><span class="p">:</span>
@@ -725,7 +735,7 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Attempt to call `f` using whatever was passed in.</span>
-        <span class="n">out</span><span class="p">,</span> <span class="n">consumed_keywords</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">call_from_args</span><span class="p">(</span>
+        <span class="n">get_out</span><span class="p">,</span> <span class="n">consumed_keywords</span> <span class="o">=</span> <span class="n">_calling</span><span class="o">.</span><span class="n">callable_with_args</span><span class="p">(</span>
             <span class="n">f</span><span class="p">,</span>
             <span class="n">parser_spec</span><span class="p">,</span>
             <span class="n">default_instance_internal</span><span class="p">,</span>
@@ -733,7 +743,11 @@
             <span class="n">field_name_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="p">)</span>
     <span class="k">except</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span><span class="p">)</span>
+        <span class="c1"># Print prettier errors.</span>
+        <span class="c1"># Note that this doesn&#39;t catch errors raised directly by get_out(),</span>
+        <span class="c1"># since that&#39;s called later! This is intentional, because we do less</span>
+        <span class="c1"># error handling for the root callable. Relevant: the</span>
+        <span class="c1"># `field_name_prefix == &quot;&quot;` condition in `callable_with_args()`!</span>
 
         <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
         <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
@@ -786,17 +800,18 @@
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dummy_wrapped</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">)</span>
+        <span class="n">get_wrapped_out</span> <span class="o">=</span> <span class="n">get_out</span>
+        <span class="n">get_out</span> <span class="o">=</span> <span class="k">lambda</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">get_wrapped_out</span><span class="p">(),</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">return_unknown_args</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_known_args()`&quot;</span>
         <span class="c1"># If we&#39;re parsed unknown args, we should return the original args, not</span>
         <span class="c1"># the fixed ones.</span>
         <span class="n">unknown_args</span> <span class="o">=</span> <span class="p">[</span><span class="n">modified_args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">unknown_args</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">out</span><span class="p">,</span> <span class="n">unknown_args</span>
+        <span class="k">return</span> <span class="n">get_out</span><span class="p">,</span> <span class="n">unknown_args</span>  <span class="c1"># type: ignore</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">unknown_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Should have parsed with `parse_args()`&quot;</span>
-        <span class="k">return</span> <span class="n">out</span>
+        <span class="k">return</span> <span class="n">get_out</span>  <span class="c1"># type: ignore</span>
 </pre></div>
         </article>
       </div>
