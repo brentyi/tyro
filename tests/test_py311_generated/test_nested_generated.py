@@ -57,7 +57,7 @@ def test_nested_final() -> None:
     @dataclasses.dataclass
     class Nested:
         x: int
-        b: Final[B]
+        b: Final[B]  # type: ignore
 
     assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):
