@@ -932,7 +932,7 @@ def _try_field_list_from_general_callable(
         # Return error message.
         return out
 
-    # If a default is provided: .
+    # If a default is provided: either all or none of the arguments must be passed in.
     if default_instance not in MISSING_SINGLETONS:
         for i, field in enumerate(out):
             out[i] = field.add_markers((_markers._OPTIONAL_GROUP,))

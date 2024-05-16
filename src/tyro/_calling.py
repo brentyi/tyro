@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import dataclasses
 import itertools
+from functools import partial
 from typing import Any, Callable, Dict, List, Sequence, Set, Tuple, TypeVar, Union
 
 from typing_extensions import get_args
@@ -25,16 +26,22 @@ class InstantiationError(Exception):
 T = TypeVar("T")
 
 
-def call_from_args(
+def callable_with_args(
     f: Callable[..., T],
     parser_definition: _parsers.ParserSpecification,
     default_instance: Union[T, _fields.NonpropagatingMissingType],
     value_from_prefixed_field_name: Dict[str, Any],
     field_name_prefix: str,
-) -> Tuple[T, Set[str]]:
-    """Call `f` with arguments specified by a dictionary of values from argparse.
+) -> Tuple[Callable[[], T], Set[str]]:
+    """Populate `f` with arguments specified by a dictionary of values from argparse.
 
-    Returns the output of `f` and a set of used arguments."""
+    Returns a partialed version of `f` with arguments populated, and a set of
+    used arguments.
+
+    We return a `Callable[[], OutT]` instead of `T` directly for aesthetic
+    reasons; it lets use reduce layers in stack traces for errors from
+    functions passed to `tyro`.
+    """
 
     positional_args: List[Any] = []
     kwargs: Dict[str, Any] = {}
@@ -119,13 +126,15 @@ def call_from_args(
             # Nested callable.
             if _resolver.unwrap_origin_strip_extras(field_type) is Union:
                 field_type = type(field.default)
-            value, consumed_keywords_child = call_from_args(
+            get_value, consumed_keywords_child = callable_with_args(
                 field_type,
                 parser_definition.child_from_prefix[prefixed_field_name],
                 field.default,
                 value_from_prefixed_field_name,
                 field_name_prefix=prefixed_field_name,
             )
+            value = get_value()
+            del get_value
             consumed_keywords |= consumed_keywords_child
         else:
             # Unions over dataclasses (subparsers). This is the only other option.
@@ -152,7 +161,7 @@ def call_from_args(
                 chosen_f = subparser_def.options[
                     list(subparser_def.parser_from_name.keys()).index(subparser_name)
                 ]
-                value, consumed_keywords_child = call_from_args(
+                get_value, consumed_keywords_child = callable_with_args(
                     chosen_f,
                     subparser_def.parser_from_name[subparser_name],
                     (
@@ -163,6 +172,8 @@ def call_from_args(
                     value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name,
                 )
+                value = get_value()
+                del get_value
                 consumed_keywords |= consumed_keywords_child
 
         if value is _fields.EXCLUDE_FROM_CALL:
@@ -191,7 +202,7 @@ def call_from_args(
     if any(is_missing_list):
         if not any_arguments_provided:
             # No arguments were provided in this group.
-            return default_instance, consumed_keywords  # type: ignore
+            return lambda: default_instance, consumed_keywords  # type: ignore
 
         message = "either all arguments must be provided or none of them."
         if len(kwargs) > 0:
@@ -221,32 +232,35 @@ def call_from_args(
             # Triggered when support_single_arg_types=True is used.
             assert len(kwargs) == 0
             assert len(positional_args) == 1
-            return positional_args[0], consumed_keywords  # type: ignore
+            return lambda: positional_args[0], consumed_keywords  # type: ignore
         else:
             assert len(positional_args) == 0
-            return unwrapped_f(kwargs.values()), consumed_keywords  # type: ignore
+            return partial(unwrapped_f, kwargs.values()), consumed_keywords  # type: ignore
     elif unwrapped_f is dict:
         if len(positional_args) > 0:
             # Triggered when support_single_arg_types=True is used.
             assert len(kwargs) == 0
             assert len(positional_args) == 1
-            return unwrapped_f(*positional_args), consumed_keywords  # type: ignore
+            return partial(unwrapped_f, *positional_args), consumed_keywords  # type: ignore
         else:
             assert len(positional_args) == 0
-            return kwargs, consumed_keywords  # type: ignore
+            return lambda: kwargs, consumed_keywords  # type: ignore
     else:
         if field_name_prefix == "":
             # Don't catch any errors for the "root" field. If main() in tyro.cli(main)
             # raises a ValueError, this shouldn't be caught.
-            return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
+            return partial(unwrapped_f, *positional_args, **kwargs), consumed_keywords  # type: ignore
         else:
             # Try to catch ValueErrors raised by field constructors.
-            try:
-                return unwrapped_f(*positional_args, **kwargs), consumed_keywords  # type: ignore
-            # If unwrapped_f raises a ValueError, wrap the message with a more informative
-            # InstantiationError if possible.
-            except ValueError as e:
-                raise InstantiationError(
-                    e.args[0],
-                    field_name_prefix,
-                )
+            def with_instantiation_error():
+                try:
+                    return unwrapped_f(*positional_args, **kwargs)
+                # If unwrapped_f raises a ValueError, wrap the message with a more informative
+                # InstantiationError if possible.
+                except ValueError as e:
+                    raise InstantiationError(
+                        e.args[0],
+                        field_name_prefix,
+                    )
+
+            return with_instantiation_error, consumed_keywords  # type: ignore

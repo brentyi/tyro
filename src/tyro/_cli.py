@@ -209,9 +209,12 @@ def cli(
     _unsafe_cache.clear_cache()
 
     if return_unknown_args:
-        return cast(Tuple[OutT, List[str]], output)
+        assert isinstance(output, tuple)
+        run_with_args_from_cli = output[0]
+        return run_with_args_from_cli(), output[1]
     else:
-        return cast(OutT, output)
+        run_with_args_from_cli = cast(Callable[[], OutT], output)
+        return run_with_args_from_cli()
 
 
 @overload
@@ -285,7 +288,7 @@ def _cli_impl(
 ) -> Union[
     OutT,
     argparse.ArgumentParser,
-    Tuple[OutT, List[str]],
+    Tuple[Callable[[], OutT], List[str]],
 ]:
     """Helper for stitching the `tyro` pipeline together."""
     if "default_instance" in deprecated_kwargs:
@@ -461,7 +464,7 @@ def _cli_impl(
 
     try:
         # Attempt to call `f` using whatever was passed in.
-        out, consumed_keywords = _calling.call_from_args(
+        get_out, consumed_keywords = _calling.callable_with_args(
             f,
             parser_spec,
             default_instance_internal,
@@ -469,7 +472,11 @@ def _cli_impl(
             field_name_prefix="",
         )
     except _calling.InstantiationError as e:
-        assert isinstance(e, _calling.InstantiationError)
+        # Print prettier errors.
+        # Note that this doesn't catch errors raised directly by get_out(),
+        # since that's called later! This is intentional, because we do less
+        # error handling for the root callable. Relevant: the
+        # `field_name_prefix == ""` condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
         from rich.console import Console, Group, RenderableType
@@ -522,14 +529,15 @@ def _cli_impl(
     )
 
     if dummy_wrapped:
-        out = getattr(out, _strings.dummy_field_name)
+        get_wrapped_out = get_out
+        get_out = lambda: getattr(get_wrapped_out(), _strings.dummy_field_name)  # noqa
 
     if return_unknown_args:
         assert unknown_args is not None, "Should have parsed with `parse_known_args()`"
         # If we're parsed unknown args, we should return the original args, not
         # the fixed ones.
         unknown_args = [modified_args.get(arg, arg) for arg in unknown_args]
-        return out, unknown_args
+        return get_out, unknown_args  # type: ignore
     else:
         assert unknown_args is None, "Should have parsed with `parse_args()`"
-        return out
+        return get_out  # type: ignore
