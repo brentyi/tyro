@@ -299,7 +299,12 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Populate `f` with arguments specified by a dictionary of values from argparse.</span>
 
 <span class="sd">    Returns a partialed version of `f` with arguments populated, and a set of</span>
-<span class="sd">    used arguments.&quot;&quot;&quot;</span>
+<span class="sd">    used arguments.</span>
+
+<span class="sd">    We return a `Callable[[], OutT]` instead of `T` directly for aesthetic</span>
+<span class="sd">    reasons; it lets use reduce layers in stack traces for errors from</span>
+<span class="sd">    functions passed to `tyro`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">positional_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>

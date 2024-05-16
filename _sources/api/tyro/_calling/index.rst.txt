@@ -46,3 +46,7 @@ Module Contents
    Returns a partialed version of ``f`` with arguments populated, and a set of
    used arguments.
 
+   We return a ``Callable[[], OutT]`` instead of ``T`` directly for aesthetic
+   reasons; it lets use reduce layers in stack traces for errors from
+   functions passed to ``tyro``.
+

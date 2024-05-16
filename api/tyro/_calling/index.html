@@ -295,6 +295,9 @@ the CLI are invalid.
 <dd><p>Populate <code class="docutils literal notranslate"><span class="pre">f</span></code> with arguments specified by a dictionary of values from argparse.</p>
 <p>Returns a partialed version of <code class="docutils literal notranslate"><span class="pre">f</span></code> with arguments populated, and a set of
 used arguments.</p>
+<p>We return a <code class="docutils literal notranslate"><span class="pre">Callable[[],</span> <span class="pre">OutT]</span></code> instead of <code class="docutils literal notranslate"><span class="pre">T</span></code> directly for aesthetic
+reasons; it lets use reduce layers in stack traces for errors from
+functions passed to <code class="docutils literal notranslate"><span class="pre">tyro</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
