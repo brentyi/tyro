@@ -57,9 +57,9 @@ For advanced users, it also supports:
 
 - **Subcommands**, as well as choosing between and overriding values in
   configuration objects.
-- **Completion script generation** for `bash`, `zsh`, and `tcsh`.
-- **Fine-grained configuration** via PEP 529 runtime annotations
-  (`tyro.conf.*`).
+- **Shell completion** for `bash`, `zsh`, and `tcsh`.
+- **Fine-grained configuration** via [PEP
+  593](https://peps.python.org/pep-0593/) annotations (`tyro.conf.*`).
 
 For examples and the API reference, see our
 [documentation](https://brentyi.github.io/tyro).
@@ -94,7 +94,7 @@ facilitating type safety and modularity for larger projects. Examples:
         />
       </a>
     </td>
-    <td>Library for distributed training of large language models in JAX.</td>
+    <td>Train very large language models in Jax.</td>
   </tr>
   <tr>
     <td>
@@ -106,7 +106,7 @@ facilitating type safety and modularity for larger projects. Examples:
         />
       </a>
     </td>
-    <td>Interface for processing composite Wavefront OBJ files for Mujoco.</td>
+    <td>Interface for processing OBJ files for Mujoco.</td>
   </tr>
   <tr>
     <td>
@@ -159,12 +159,24 @@ facilitating type safety and modularity for larger projects. Examples:
     </td>
     <td>Collection of tracked experiments for reinforcement learning.</td>
   </tr>
+  <tr>
+    <td>
+      <a href="https://github.com/vwxyzjn/cleanrl">
+        vwxyzjn/cleanrl
+        <br /><img
+          alt="GitHub star count"
+          src="https://img.shields.io/github/stars/vwxyzjn/cleanrl?style=social"
+        />
+      </a>
+    </td>
+    <td>Single-file implementation of deep RL algorithms.</td>
+  </tr>
 </table>
 
 ### Alternatives
 
-`tyro` bakes many opinions into its design decisions. If any of them don't make
-sense, feel free to file an issue!
+`tyro` is an opinionated library. If any design decisions don't make sense,
+feel free to file an issue!
 
 You might also consider one of many alternative libraries. Some that we
 particularly like:
