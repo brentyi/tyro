@@ -2,8 +2,7 @@
 
 ## Standard
 
-Installation is supported on Python >=3.7 via pip. This is typically all that's
-required.
+Installation is supported on Python >=3.7 via pip.
 
 ```bash
 pip install tyro
@@ -22,7 +21,4 @@ python -m pip install -e ".[dev]"
 
 # Run tests.
 pytest
-
-# Check types.
-mypy --install-types .
 ```

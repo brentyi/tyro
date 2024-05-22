@@ -1,7 +1,7 @@
 # Your first CLI
 
-For getting started with `tyro`, consider the simple `argparse`-based
-command-line interface:
+To get started with `tyro`, consider the simple `argparse`-based command-line
+interface:
 
 ```python
 """Sum two numbers from argparse."""
@@ -17,14 +17,13 @@ total = args.a + args.b
 print(total)
 ```
 
-This pattern is dramatically cleaner than manually parsing `sys.argv`, but has
-several issues: it lacks type checking and IDE support (consider: jumping to
-definitions, finding references, docstrings, refactoring and renaming tools),
-requires a significant amount of parsing-specific boilerplate, and becomes
-difficult to manage for larger projects.
+This is dramatically cleaner than manually parsing `sys.argv`, but has several
+issues: it requires a significant amount of parsing-specific boilerplate, lacks
+type checking and IDE support (consider: jumping to definitions, finding
+references, docstrings, refactoring and renaming tools), and becomes difficult
+to manage for larger projects.
 
-The basic goal of :func:`tyro.cli()` is to provide a wrapper for `argparse` that
-solves these issues.
+:func:`tyro.cli()` aims to solve these issues.
 
 **(1) Command-line interfaces from functions.**
 
@@ -57,8 +56,7 @@ tyro.cli(add)  # Returns `None`.
 
 **(2) Command-line interfaces from config objects.**
 
-A class in Python can be treated as a function that returns an instance. This
-makes it easy to populate explicit configuration structures:
+A class in Python can be treated as a function that returns an instance:
 
 ```python
 """Sum two numbers by instantiating a dataclass with tyro."""

@@ -23,8 +23,8 @@ For advanced users, it also supports:
 - **Subcommands**, as well as choosing between and overriding values in
   configuration objects.
 - **Completion script generation** for `bash`, `zsh`, and `tcsh`.
-- **Fine-grained configuration** via PEP 529 runtime annotations
-  (`tyro.conf.*`).
+- **Fine-grained configuration** via [PEP
+  593](https://peps.python.org/pep-0593/) annotations (`tyro.conf.*`).
 
 To get started, we recommend browsing the examples to the left.
 
@@ -120,7 +120,6 @@ To get started, we recommend browsing the examples to the left.
    goals_and_alternatives
    helptext_generation
    tab_completion
-   building_configuration_systems
 
 
 .. toctree::
