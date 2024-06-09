@@ -277,7 +277,6 @@
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
     <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">FrozenSet</span><span class="p">,</span>
     <span class="n">Hashable</span><span class="p">,</span>
     <span class="n">Iterable</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
@@ -315,7 +314,7 @@
 
 <div class="viewcode-block" id="FieldDefinition">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition">[docs]</a>
-<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span> <span class="nc">FieldDefinition</span><span class="p">:</span>
     <span class="n">intern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">extern_name</span><span class="p">:</span> <span class="nb">str</span>
@@ -328,7 +327,7 @@
     <span class="c1"># tyro.conf.subcommand(default=...).</span>
     <span class="n">is_default_from_default_instance</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
-    <span class="n">markers</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
     <span class="n">custom_constructor</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="n">argconf</span><span class="p">:</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span>
@@ -398,7 +397,7 @@
             <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
             <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
             <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
-            <span class="n">markers</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span><span class="n">inferred_markers</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
+            <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">inferred_markers</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
             <span class="n">custom_constructor</span><span class="o">=</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">argconf</span><span class="o">=</span><span class="n">argconf</span><span class="p">,</span>
             <span class="n">call_argname</span><span class="o">=</span><span class="n">call_argname_override</span>
@@ -591,9 +590,7 @@
                         <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                         <span class="n">custom_constructor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">markers</span><span class="o">=</span><span class="nb">frozenset</span><span class="p">(</span>
-                            <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
-                        <span class="p">),</span>
+                        <span class="n">markers</span><span class="o">=</span><span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">},</span>
                         <span class="n">argconf</span><span class="o">=</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span><span class="p">(</span>
                             <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
                         <span class="p">),</span>
@@ -710,15 +707,16 @@
 
     <span class="c1"># Try field generation from class inputs.</span>
     <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">match</span><span class="p">,</span> <span class="n">field_list_from_class</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">is_typeddict</span><span class="p">,</span> <span class="n">_field_list_from_typeddict</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">is_namedtuple</span><span class="p">,</span> <span class="n">_field_list_from_namedtuple</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">,</span> <span class="n">_field_list_from_dataclass</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">_is_attrs</span><span class="p">,</span> <span class="n">_field_list_from_attrs</span><span class="p">),</span>
-            <span class="p">(</span><span class="n">_is_pydantic</span><span class="p">,</span> <span class="n">_field_list_from_pydantic</span><span class="p">),</span>
-        <span class="p">):</span>
-            <span class="k">if</span> <span class="n">match</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">field_list_from_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_field_list_from_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_field_list_from_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_field_list_from_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_is_attrs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_field_list_from_attrs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_is_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">_field_list_from_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
     <span class="c1"># Standard container types. These are different because they can be nested structures</span>
     <span class="c1"># if they contain other nested types (eg Tuple[Struct, Struct]), or treated as</span>
@@ -904,26 +902,26 @@
     <span class="k">return</span> <span class="n">field_list</span>
 
 
-<span class="c1"># Support attrs and pydantic if they&#39;re installed.</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">pydantic</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">pydantic</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">pydantic</span>
-
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
-
-
 <span class="k">def</span> <span class="nf">_is_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">pydantic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="c1"># pydantic will already be imported if it&#39;s used.</span>
+    <span class="k">if</span> <span class="s2">&quot;pydantic&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="c1"># Jump through a bunch of hoops to minimize unnecessary imports.</span>
+    <span class="kn">import</span> <span class="nn">pydantic</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;pydantic.v1&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">pydantic_v1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">True</span>
@@ -933,7 +931,18 @@
 <span class="k">def</span> <span class="nf">_field_list_from_pydantic</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
-    <span class="k">assert</span> <span class="n">pydantic</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="kn">import</span> <span class="nn">pydantic</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&quot;pydantic.v1&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="c1"># Handle pydantic models.</span>
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -993,20 +1002,25 @@
     <span class="k">return</span> <span class="n">field_list</span>
 
 
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">attr</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">attr</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
-
-
 <span class="k">def</span> <span class="nf">_is_attrs</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">attr</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="c1"># attr will already be imported if it&#39;s used.</span>
+    <span class="k">if</span> <span class="s2">&quot;attr&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">attr</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="c1"># This is needed for the mock import test in</span>
+        <span class="c1"># test_missing_optional_packages.py to pass...</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">attr</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_field_list_from_attrs</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
-    <span class="k">assert</span> <span class="n">attr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="kn">import</span> <span class="nn">attr</span>
 
     <span class="c1"># Resolve forward references in-place, if any exist.</span>
     <span class="n">attr</span><span class="o">.</span><span class="n">resolve_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -1399,6 +1413,11 @@
     <span class="c1"># Otherwise, no default. This is different from MISSING, because MISSING propagates</span>
     <span class="c1"># to children. We could revisit this design to make it clearer.</span>
     <span class="k">return</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="kc">False</span>
+
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pydantic</span> <span class="k">as</span> <span class="nn">pydantic</span>
+    <span class="kn">import</span> <span class="nn">pydantic.v1</span> <span class="k">as</span> <span class="nn">pydantic_v1</span>
 
 
 <span class="k">def</span> <span class="nf">_get_pydantic_v1_field_default</span><span class="p">(</span>

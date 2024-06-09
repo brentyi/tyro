@@ -51,7 +51,7 @@ Module Contents
       
 
    .. py:attribute:: markers
-      :type: FrozenSet[Any]
+      :type: Set[Any]
 
       
 
@@ -178,18 +178,6 @@ Module Contents
              A list of field definitions.
 
 .. py:data:: DefaultInstance
-
-   
-
-.. py:data:: pydantic
-
-   
-
-.. py:data:: pydantic_v1
-
-   
-
-.. py:data:: attr
 
    
 

@@ -90,6 +90,10 @@ Module Contents
    * Annotated[int, 1], int => (int, (1,))
    * Annotated[int, "1"], int => (int, ())
 
+.. py:data:: STRIP_TYPES
+
+   
+
 .. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]]) -> TypeOrCallable
 
 
