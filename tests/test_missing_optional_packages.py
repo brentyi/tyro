@@ -1,4 +1,5 @@
 import builtins
+import dataclasses
 
 import pytest
 
@@ -17,7 +18,13 @@ def hide_optional_packages(monkeypatch):
 
 
 def test_missing_optional_packages(hide_optional_packages):
-    def main(x: int) -> int:
+    @dataclasses.dataclass
+    class Extra:
+        a: int = 3
+        b: str = "5"
+
+    def main(x: int, extra: Extra) -> int:
+        del extra
         return x
 
     import tyro

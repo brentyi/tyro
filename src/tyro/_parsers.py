@@ -85,9 +85,7 @@ class ParserSpecification:
             support_single_arg_types=support_single_arg_types,
         )
         for i in range(len(field_list)):
-            field_list[i] = dataclasses.replace(
-                field_list[i], markers=field_list[i].markers | set(markers)
-            )
+            field_list[i].markers |= set(markers)
 
         # Cycle detection.
         #
