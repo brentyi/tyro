@@ -55,7 +55,9 @@ def generate_from_path(test_path: pathlib.Path) -> None:
 
 
 with ThreadPoolExecutor(max_workers=8) as executor:
-    executor.map(
-        generate_from_path,
-        pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py"),
+    list(
+        executor.map(
+            generate_from_path,
+            pathlib.Path(__file__).absolute().parent.parent.glob("test_*.py"),
+        )
     )

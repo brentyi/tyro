@@ -20,7 +20,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    FrozenSet,
     Hashable,
     Iterable,
     List,
@@ -56,7 +55,7 @@ from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class FieldDefinition:
     intern_name: str
     extern_name: str
@@ -69,7 +68,7 @@ class FieldDefinition:
     # tyro.conf.subcommand(default=...).
     is_default_from_default_instance: bool
     helptext: Optional[str]
-    markers: FrozenSet[Any]
+    markers: Set[Any]
     custom_constructor: bool
 
     argconf: _confstruct._ArgConfiguration
@@ -134,7 +133,7 @@ class FieldDefinition:
             default=default,
             is_default_from_default_instance=is_default_from_default_instance,
             helptext=helptext,
-            markers=frozenset(inferred_markers).union(markers),
+            markers=set(inferred_markers).union(markers),
             custom_constructor=argconf.constructor_factory is not None,
             argconf=argconf,
             call_argname=call_argname_override
@@ -296,9 +295,7 @@ def field_list_from_callable(
                         is_default_from_default_instance=True,
                         helptext="",
                         custom_constructor=False,
-                        markers=frozenset(
-                            (_markers.Positional, _markers._PositionalCall)
-                        ),
+                        markers={_markers.Positional, _markers._PositionalCall},
                         argconf=_confstruct._ArgConfiguration(
                             None, None, None, None, None, None
                         ),
@@ -414,15 +411,16 @@ def _try_field_list_from_callable(
 
     # Try field generation from class inputs.
     if cls is not None:
-        for match, field_list_from_class in (
-            (is_typeddict, _field_list_from_typeddict),
-            (_resolver.is_namedtuple, _field_list_from_namedtuple),
-            (_resolver.is_dataclass, _field_list_from_dataclass),
-            (_is_attrs, _field_list_from_attrs),
-            (_is_pydantic, _field_list_from_pydantic),
-        ):
-            if match(cls):
-                return field_list_from_class(cls, default_instance)
+        if is_typeddict(cls):
+            return _field_list_from_typeddict(cls, default_instance)
+        if _resolver.is_namedtuple(cls):
+            return _field_list_from_namedtuple(cls, default_instance)
+        if _resolver.is_dataclass(cls):
+            return _field_list_from_dataclass(cls, default_instance)
+        if _is_attrs(cls):
+            return _field_list_from_attrs(cls, default_instance)
+        if _is_pydantic(cls):
+            return _field_list_from_pydantic(cls, default_instance)
 
     # Standard container types. These are different because they can be nested structures
     # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
@@ -608,26 +606,26 @@ def _field_list_from_dataclass(
     return field_list
 
 
-# Support attrs and pydantic if they're installed.
-try:
-    import pydantic
-except ImportError:
-    if not TYPE_CHECKING:
-        pydantic = None  # type: ignore
-    else:
-        import pydantic
-
-try:
-    from pydantic import v1 as pydantic_v1
-except ImportError:
-    if not TYPE_CHECKING:
-        pydantic_v1 = None  # type: ignore
-    else:
-        from pydantic import v1 as pydantic_v1
-
-
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
-    if pydantic is not None and issubclass(cls, pydantic.BaseModel):
+    # pydantic will already be imported if it's used.
+    if "pydantic" not in sys.modules.keys():
+        return False
+
+    # Jump through a bunch of hoops to minimize unnecessary imports.
+    import pydantic
+
+    try:
+        if "pydantic.v1" in sys.modules.keys():
+            from pydantic import v1 as pydantic_v1
+        else:
+            pydantic_v1 = None
+    except ImportError:
+        if TYPE_CHECKING:
+            from pydantic import v1 as pydantic_v1
+        else:
+            pydantic_v1 = None
+
+    if issubclass(cls, pydantic.BaseModel):
         return True
     if pydantic_v1 is not None and issubclass(cls, pydantic_v1.BaseModel):
         return True
@@ -637,7 +635,18 @@ def _is_pydantic(cls: TypeForm[Any]) -> bool:
 def _field_list_from_pydantic(
     cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    assert pydantic is not None
+    import pydantic
+
+    try:
+        if "pydantic.v1" in sys.modules.keys():
+            from pydantic import v1 as pydantic_v1
+        else:
+            pydantic_v1 = None
+    except ImportError:
+        if TYPE_CHECKING:
+            from pydantic import v1 as pydantic_v1
+        else:
+            pydantic_v1 = None
 
     # Handle pydantic models.
     field_list = []
@@ -697,20 +706,25 @@ def _field_list_from_pydantic(
     return field_list
 
 
-try:
-    import attr
-except ImportError:
-    attr = None  # type: ignore
-
-
 def _is_attrs(cls: TypeForm[Any]) -> bool:
-    return attr is not None and attr.has(cls)
+    # attr will already be imported if it's used.
+    if "attr" not in sys.modules.keys():
+        return False
+
+    try:
+        import attr
+    except ImportError:
+        # This is needed for the mock import test in
+        # test_missing_optional_packages.py to pass...
+        return False
+
+    return attr.has(cls)
 
 
 def _field_list_from_attrs(
     cls: TypeForm[Any], default_instance: DefaultInstance
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    assert attr is not None
+    import attr
 
     # Resolve forward references in-place, if any exist.
     attr.resolve_types(cls)
@@ -1103,6 +1117,11 @@ def _get_dataclass_field_default(
     # Otherwise, no default. This is different from MISSING, because MISSING propagates
     # to children. We could revisit this design to make it clearer.
     return MISSING_NONPROP, False
+
+
+if TYPE_CHECKING:
+    import pydantic as pydantic
+    import pydantic.v1 as pydantic_v1
 
 
 def _get_pydantic_v1_field_default(

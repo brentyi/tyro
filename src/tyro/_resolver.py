@@ -271,6 +271,19 @@ def unwrap_annotated(
 ) -> TypeOrCallable: ...
 
 
+# `Final` and `ReadOnly` types are ignored in tyro.
+try:
+    # Can only import ReadOnly in typing_extensions>=4.9.0, which isn't
+    # supported by Python 3.7.
+    from typing_extensions import ReadOnly
+
+    STRIP_TYPES = {Final, ReadOnly}
+except ImportError:
+    STRIP_TYPES = {
+        Final,
+    }
+
+
 def unwrap_annotated(
     typ: TypeOrCallable,
     search_type: Union[TypeForm[MetadataType], object, None] = None,
@@ -284,16 +297,8 @@ def unwrap_annotated(
     """
 
     # `Final` and `ReadOnly` types are ignored in tyro.
-    try:
-        # Can only import ReadOnly in typing_extensions>=4.9.0, which isn't
-        # supported by Python 3.7.
-        from typing_extensions import ReadOnly
-
-        while get_origin(typ) in (Final, ReadOnly):
-            typ = get_args(typ)[0]
-    except ImportError:  # pragma: no cover
-        while get_origin(typ) is Final:
-            typ = get_args(typ)[0]
+    while get_origin(typ) in STRIP_TYPES:
+        typ = get_args(typ)[0]
 
     # Don't search for any annotations.
     if search_type is None:
@@ -303,11 +308,14 @@ def unwrap_annotated(
             return get_args(typ)[0]
 
     # Check for __tyro_markers__ from @configure.
-    targets = tuple(
-        x
-        for x in getattr(typ, "__tyro_markers__", tuple())
-        if search_type is Any or isinstance(x, search_type)  # type: ignore
-    )
+    if search_type is Any:
+        targets = getattr(typ, "__tyro_markers__", tuple())
+    else:
+        targets = tuple(
+            x
+            for x in getattr(typ, "__tyro_markers__", tuple())
+            if isinstance(x, search_type)  # type: ignore
+        )
     assert isinstance(targets, tuple)
     if not hasattr(typ, "__metadata__"):
         return typ, targets  # type: ignore
