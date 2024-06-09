@@ -96,11 +96,11 @@ class _TypeTree:
 
         # Check against supertypes.
         for self_type in self_types:
-            self_type = _resolver.unwrap_annotated(self_type)[0]
+            self_type = _resolver.unwrap_annotated(self_type)
             self_type, _ = _resolver.unwrap_newtype_and_aliases(self_type)
             ok = False
             for super_type in super_types:
-                super_type = _resolver.unwrap_annotated(super_type)[0]
+                super_type = _resolver.unwrap_annotated(super_type)
                 self_type, _ = _resolver.unwrap_newtype_and_aliases(self_type)
                 if issubclass(self_type, super_type):
                     ok = True

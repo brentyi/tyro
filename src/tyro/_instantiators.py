@@ -91,7 +91,7 @@ class InstantiatorMetadata:
     # Unlike in vanilla argparse, our metavar is always a string. We handle
     # sequences, multiple arguments, etc, manually.
     metavar: str
-    choices: Optional[Set[str]]
+    choices: Optional[Tuple[str, ...]]
     action: Optional[Literal["append"]]
 
     def check_choices(self, strings: List[str]) -> None:
@@ -176,9 +176,7 @@ def instantiator_from_type(
         return instantiator, InstantiatorMetadata(
             nargs=1,
             metavar="{None}",
-            choices={
-                "None",
-            },
+            choices=("None",),
             action=None,
         )
 
@@ -196,7 +194,7 @@ def instantiator_from_type(
     if maybe_newtype_name is not None:
         metavar = maybe_newtype_name.upper()
 
-    typ, _ = _resolver.unwrap_annotated(typ)
+    typ = _resolver.unwrap_annotated(typ)
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
@@ -268,7 +266,7 @@ def instantiator_from_type(
             if auto_choices is None
             else "{" + ",".join(map(str, auto_choices)) + "}"
         ),
-        choices=None if auto_choices is None else set(auto_choices),
+        choices=None if auto_choices is None else auto_choices,
         action=None,
     )
 
@@ -691,7 +689,7 @@ def _instantiator_from_literal(
         InstantiatorMetadata(
             nargs=1,
             metavar="{" + ",".join(str_choices) + "}",
-            choices=set(str_choices),
+            choices=str_choices,
             action=None,
         ),
     )

@@ -154,44 +154,37 @@ def get_class_tokenization_with_field(
     return tokenization
 
 
+@functools.lru_cache(maxsize=1024)
+def parse_docstring_from_object(obj: object) -> Dict[str, str]:
+    return {
+        doc.arg_name: doc.description
+        for doc in docstring_parser.parse_from_object(obj).params
+        if doc.description is not None
+    }
+
+
 @_unsafe_cache.unsafe_cache(1024)
 def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
     """Get docstring for a field in a class."""
 
-    docstring = inspect.getdoc(cls)
-    if docstring is not None:
-        for param_doc in docstring_parser.parse(docstring).params:
-            if param_doc.arg_name == field_name:
-                return (
-                    _strings.remove_single_line_breaks(param_doc.description)
-                    if param_doc.description is not None
-                    else None
-                )
+    # NoneType will break docstring_parser.
+    if cls is type(None):
+        return None
 
+    # Try to parse using docstring_parser.
+    for cls_search in cls.__mro__:
+        if cls_search.__module__ == "builtins":
+            continue  # Skip `object`, `Callable`, `tuple`, etc.
+        docstring = parse_docstring_from_object(cls_search).get(field_name, None)
+        if docstring is not None:
+            return _strings.remove_single_line_breaks(docstring)
+
+    # If docstring_parser failed, let's try looking for comments.
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
         return None
 
     field_data = tokenization.field_data_from_name[field_name]
-
-    # Check for docstring-style comment. This should be on the next logical line.
-    logical_line = field_data.logical_line + 1
-    if (
-        logical_line in tokenization.tokens_from_logical_line
-        and len(tokenization.tokens_from_logical_line[logical_line]) >= 1
-    ):
-        first_token = tokenization.tokens_from_logical_line[logical_line][0]
-        first_token_content = first_token.content.strip()
-
-        # Found a docstring!
-        if (
-            first_token.token_type == tokenize.STRING
-            and first_token_content.startswith('"""')
-            and first_token_content.endswith('"""')
-        ):
-            return _strings.remove_single_line_breaks(
-                _strings.dedent(first_token_content[3:-3])
-            )
 
     # Check for comment on the same line as the field.
     final_token_on_line = tokenization.tokens_from_logical_line[

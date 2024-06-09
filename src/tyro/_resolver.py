@@ -20,6 +20,7 @@ from typing import (
     TypeVar,
     Union,
     cast,
+    overload,
 )
 
 from typing_extensions import (
@@ -43,7 +44,7 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,
     returns typ."""
     # TODO: Annotated[] handling should be revisited...
-    typ, _ = unwrap_annotated(typ)
+    typ = unwrap_annotated(typ)
     origin = get_origin(typ)
 
     if origin is not None:
@@ -68,7 +69,7 @@ def resolve_generic_types(
         # ^We need this `if` statement for an obscure edge case: when `cls` is a
         # function with `__tyro_markers__` set, we don't want/need to return
         # Annotated[func, markers].
-        cls, annotations = unwrap_annotated(cls)
+        cls, annotations = unwrap_annotated(cls, Any)
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(unwrap_newtype_and_aliases(cls)[0])
@@ -79,9 +80,9 @@ def resolve_generic_types(
     if hasattr(cls, "__self__"):
         self_type = getattr(cls, "__self__")
         if inspect.isclass(self_type):
-            type_from_typevar[cast(TypeVar, Self)] = self_type
+            type_from_typevar[cast(TypeVar, Self)] = self_type  # type: ignore
         else:
-            type_from_typevar[cast(TypeVar, Self)] = self_type.__class__
+            type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
 
     if (
         # Apply some heuristics for generic types. Should revisit this.
@@ -214,7 +215,7 @@ def unwrap_newtype_and_narrow_subtypes(
             # it doesn't really make sense to parse this case.
             return typ
 
-        superclass = unwrap_annotated(typ)[0]
+        superclass = unwrap_annotated(typ)
 
         # For Python 3.10.
         if get_origin(superclass) is Union:
@@ -256,10 +257,24 @@ def narrow_collection_types(
 MetadataType = TypeVar("MetadataType")
 
 
+@overload
 def unwrap_annotated(
     typ: TypeOrCallable,
-    search_type: TypeForm[MetadataType] = cast(TypeForm[Any], Any),
-) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]:
+    search_type: Union[TypeForm[MetadataType], object],
+) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]: ...
+
+
+@overload
+def unwrap_annotated(
+    typ: TypeOrCallable,
+    search_type: None = None,
+) -> TypeOrCallable: ...
+
+
+def unwrap_annotated(
+    typ: TypeOrCallable,
+    search_type: Union[TypeForm[MetadataType], object, None] = None,
+) -> Union[Tuple[TypeOrCallable, Tuple[MetadataType, ...]], TypeOrCallable]:
     """Helper for parsing typing.Annotated types.
 
     Examples:
@@ -280,11 +295,18 @@ def unwrap_annotated(
         while get_origin(typ) is Final:
             typ = get_args(typ)[0]
 
+    # Don't search for any annotations.
+    if search_type is None:
+        if not hasattr(typ, "__metadata__"):
+            return typ
+        else:
+            return get_args(typ)[0]
+
     # Check for __tyro_markers__ from @configure.
     targets = tuple(
         x
         for x in getattr(typ, "__tyro_markers__", tuple())
-        if search_type is Any or isinstance(x, search_type)
+        if search_type is Any or isinstance(x, search_type)  # type: ignore
     )
     assert isinstance(targets, tuple)
     if not hasattr(typ, "__metadata__"):
@@ -297,14 +319,14 @@ def unwrap_annotated(
     targets += tuple(
         x
         for x in targets + args[1:]
-        if search_type is Any or isinstance(x, search_type)
+        if search_type is Any or isinstance(x, search_type)  # type: ignore
     )
 
     # Check for __tyro_markers__ in unwrapped type.
     targets += tuple(
         x
         for x in getattr(args[0], "__tyro_markers__", tuple())
-        if search_type is Any or isinstance(x, search_type)
+        if search_type is Any or isinstance(x, search_type)  # type: ignore
     )
     return args[0], targets  # type: ignore
 

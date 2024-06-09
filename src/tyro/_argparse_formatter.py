@@ -279,6 +279,19 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
         super().__init__(*args, **kwargs)
 
     @override
+    def _check_value(self, action, value):
+        """We override _check_value to ignore sentinel values defined by tyro.
+
+        This solves a choices error raised by argparse in a very specific edge case:
+        literals in containers as positional arguments.
+        """
+        from ._fields import MISSING_SINGLETONS
+
+        if value in MISSING_SINGLETONS:
+            return
+        return super()._check_value(action, value)
+
+    @override
     def _print_message(self, message, file=None):
         if message and self._console_outputs:
             file = file or sys.stderr
