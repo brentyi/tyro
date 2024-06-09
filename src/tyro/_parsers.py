@@ -388,7 +388,7 @@ class SubparsersSpecification:
         extern_prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
-        typ = _resolver.unwrap_annotated(field.type_or_callable)[0]
+        typ = _resolver.unwrap_annotated(field.type_or_callable)
         if get_origin(typ) is not Union:
             return None
 
@@ -509,7 +509,7 @@ class SubparsersSpecification:
 
             # Strip the subcommand config from the option type.
             # Relevant: https://github.com/brentyi/tyro/pull/117
-            option_origin, annotations = _resolver.unwrap_annotated(option)  # type: ignore
+            option_origin, annotations = _resolver.unwrap_annotated(option, Any)  # type: ignore
             annotations = tuple(
                 a
                 for a in annotations

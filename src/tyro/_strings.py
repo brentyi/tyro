@@ -4,7 +4,7 @@ import contextlib
 import functools
 import re
 import textwrap
-from typing import Iterable, List, Sequence, Tuple, Type
+from typing import List, Sequence, Tuple, Type
 
 from typing_extensions import Literal, get_args, get_origin
 
@@ -12,10 +12,6 @@ from . import _resolver
 
 dummy_field_name = "__tyro_dummy_field__"
 DELIMETER: Literal["-", "_"] = "-"
-
-
-def _strip_dummy_field_names(parts: Iterable[str]) -> Iterable[str]:
-    return filter(lambda name: len(name) > 0 and name != dummy_field_name, parts)
 
 
 @contextlib.contextmanager
@@ -37,13 +33,8 @@ def get_delimeter() -> Literal["-", "_"]:
 def replace_delimeter_in_part(p: str) -> str:
     """Replace hyphens with underscores (or vice versa) except when at the start."""
     if get_delimeter() == "-":
-        num_underscore_prefix = 0
-        for i in range(len(p)):
-            if p[i] == "_":
-                num_underscore_prefix += 1
-            else:
-                break
-        p = "_" * num_underscore_prefix + (p[num_underscore_prefix:].replace("_", "-"))
+        stripped = p.lstrip("_")
+        p = p[: len(p) - len(stripped)] + stripped.replace("_", "-")
     else:
         p = p.replace("-", "_")
     return p
@@ -56,10 +47,12 @@ def make_field_name(parts: Sequence[str]) -> str:
     ('parents', '1', '_child_node') => 'parents.1._child-node'
     ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
     """
-    out: List[str] = []
-    for p in _strip_dummy_field_names(parts):
-        out.extend(map(replace_delimeter_in_part, p.split(".")))
-    return ".".join(out)
+    out = ".".join(parts)
+    return ".".join(
+        replace_delimeter_in_part(part)
+        for part in out.split(".")
+        if len(part) > 0 and part != dummy_field_name
+    )
 
 
 def make_subparser_dest(name: str) -> str:
