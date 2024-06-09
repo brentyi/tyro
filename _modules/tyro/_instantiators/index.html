@@ -350,7 +350,7 @@
     <span class="c1"># Unlike in vanilla argparse, our metavar is always a string. We handle</span>
     <span class="c1"># sequences, multiple arguments, etc, manually.</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+    <span class="n">choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span>
     <span class="n">action</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;append&quot;</span><span class="p">]]</span>
 
 <div class="viewcode-block" id="InstantiatorMetadata.check_choices">
@@ -447,9 +447,7 @@
         <span class="k">return</span> <span class="n">instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">{None}</span><span class="s2">&quot;</span><span class="p">,</span>
-            <span class="n">choices</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;None&quot;</span><span class="p">,</span>
-            <span class="p">},</span>
+            <span class="n">choices</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;None&quot;</span><span class="p">,),</span>
             <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">)</span>
 
@@ -467,7 +465,7 @@
     <span class="k">if</span> <span class="n">maybe_newtype_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">metavar</span> <span class="o">=</span> <span class="n">maybe_newtype_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-    <span class="n">typ</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="c1"># Address container types. If a matching container is found, this will recursively</span>
     <span class="c1"># call instantiator_from_type().</span>
@@ -539,7 +537,7 @@
             <span class="k">if</span> <span class="n">auto_choices</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="k">else</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">auto_choices</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
         <span class="p">),</span>
-        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">auto_choices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">set</span><span class="p">(</span><span class="n">auto_choices</span><span class="p">),</span>
+        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">auto_choices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">auto_choices</span><span class="p">,</span>
         <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -963,7 +961,7 @@
         <span class="n">InstantiatorMetadata</span><span class="p">(</span>
             <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">str_choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span><span class="p">,</span>
-            <span class="n">choices</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">str_choices</span><span class="p">),</span>
+            <span class="n">choices</span><span class="o">=</span><span class="n">str_choices</span><span class="p">,</span>
             <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="p">),</span>
     <span class="p">)</span>

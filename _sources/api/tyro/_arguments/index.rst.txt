@@ -117,7 +117,7 @@ Module Contents
       
 
    .. py:attribute:: choices
-      :type: Optional[Union[Set[str], List[str]]]
+      :type: Optional[Tuple[str, Ellipsis]]
 
       
 

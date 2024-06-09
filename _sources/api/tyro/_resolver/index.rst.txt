@@ -77,7 +77,8 @@ Module Contents
 
    
 
-.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType] = cast(TypeForm[Any], Any)) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: Union[tyro._typing.TypeForm[MetadataType], object]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+                 unwrap_annotated(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
 
    
    Helper for parsing typing.Annotated types.

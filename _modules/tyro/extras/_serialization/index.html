@@ -292,7 +292,7 @@
         <span class="k">else</span> <span class="n">_parent_contained_dataclasses</span>
     <span class="p">)</span>
 
-    <span class="bp">cls</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
     <span class="bp">cls</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
 
     <span class="n">contained_special_types</span> <span class="o">=</span> <span class="p">{</span><span class="bp">cls</span><span class="p">}</span>

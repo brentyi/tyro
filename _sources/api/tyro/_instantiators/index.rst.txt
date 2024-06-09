@@ -71,7 +71,7 @@ Module Contents
       
 
    .. py:attribute:: choices
-      :type: Optional[Set[str]]
+      :type: Optional[Tuple[str, Ellipsis]]
 
       
 

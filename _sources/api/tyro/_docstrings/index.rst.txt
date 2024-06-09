@@ -21,6 +21,9 @@ Module Contents
 .. py:function:: get_class_tokenization_with_field(cls: Type, field_name: str) -> Optional[_ClassTokenization]
 
 
+.. py:function:: parse_docstring_from_object(obj: object) -> Dict[str, str]
+
+
 .. py:function:: get_field_docstring(cls: Type, field_name: str) -> Optional[str]
 
    
