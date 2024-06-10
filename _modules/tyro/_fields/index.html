@@ -299,6 +299,7 @@
     <span class="n">is_typeddict</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">conf</span>  <span class="c1"># Avoid circular import.</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">_docstrings</span><span class="p">,</span>
     <span class="n">_instantiators</span><span class="p">,</span>
@@ -306,7 +307,6 @@
     <span class="n">_singleton</span><span class="p">,</span>
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">_unsafe_cache</span><span class="p">,</span>
-    <span class="n">conf</span><span class="p">,</span>  <span class="c1"># Avoid circular import.</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
@@ -905,10 +905,14 @@
 <span class="k">def</span> <span class="nf">_is_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="c1"># pydantic will already be imported if it&#39;s used.</span>
     <span class="k">if</span> <span class="s2">&quot;pydantic&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c1"># This is needed for the mock import test in</span>
+        <span class="c1"># test_missing_optional_packages.py to pass.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="c1"># Jump through a bunch of hoops to minimize unnecessary imports.</span>
-    <span class="kn">import</span> <span class="nn">pydantic</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">pydantic</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="s2">&quot;pydantic.v1&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -1011,7 +1015,7 @@
         <span class="kn">import</span> <span class="nn">attr</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="c1"># This is needed for the mock import test in</span>
-        <span class="c1"># test_missing_optional_packages.py to pass...</span>
+        <span class="c1"># test_missing_optional_packages.py to pass.</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">return</span> <span class="n">attr</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
