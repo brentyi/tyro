@@ -42,6 +42,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -49,7 +50,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -609,10 +609,14 @@ def _field_list_from_dataclass(
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
     # pydantic will already be imported if it's used.
     if "pydantic" not in sys.modules.keys():
+        # This is needed for the mock import test in
+        # test_missing_optional_packages.py to pass.
         return False
 
-    # Jump through a bunch of hoops to minimize unnecessary imports.
-    import pydantic
+    try:
+        import pydantic
+    except ImportError:
+        return False
 
     try:
         if "pydantic.v1" in sys.modules.keys():
@@ -715,7 +719,7 @@ def _is_attrs(cls: TypeForm[Any]) -> bool:
         import attr
     except ImportError:
         # This is needed for the mock import test in
-        # test_missing_optional_packages.py to pass...
+        # test_missing_optional_packages.py to pass.
         return False
 
     return attr.has(cls)
