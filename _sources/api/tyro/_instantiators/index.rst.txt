@@ -97,7 +97,7 @@ Module Contents
    
    Check if type is a string converter, i.e., (arg: Union[str, Any]) -> T.
 
-.. py:function:: instantiator_from_type(typ: Union[tyro._typing.TypeForm[Any], Callable], type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], markers: FrozenSet[tyro.conf._markers.Marker]) -> Tuple[Instantiator, InstantiatorMetadata]
+.. py:function:: instantiator_from_type(typ: Union[tyro._typing.TypeForm[Any], Callable], type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], markers: Set[tyro.conf._markers.Marker]) -> Tuple[Instantiator, InstantiatorMetadata]
 
    
    Recursive helper for parsing type annotations.
