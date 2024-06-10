@@ -42,7 +42,6 @@ from typing_extensions import (
     is_typeddict,
 )
 
-from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -50,6 +49,7 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
+    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -662,7 +662,7 @@ def _field_list_from_pydantic(
         # We do a conditional cast because the pydantic.v1 module won't
         # actually exist in legacy versions of pydantic.
         if TYPE_CHECKING:
-            cls_cast = cast(pydantic_v1.BaseModel, cls)
+            cls_cast = cast(pydantic_v1.BaseModel, cls)  # type: ignore
         else:
             cls_cast = cls
         for pd1_field in cls_cast.__fields__.values():

@@ -42,7 +42,6 @@ from typing import (
     Any,
     Callable,
     Dict,
-    FrozenSet,
     Hashable,
     Iterable,
     List,
@@ -151,7 +150,7 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
 def instantiator_from_type(
     typ: Union[TypeForm[Any], Callable],
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Recursive helper for parsing type annotations.
 
@@ -276,7 +275,7 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal["fixed_length"],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]: ...
 
 
@@ -285,7 +284,7 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[False],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[_StandardInstantiator, InstantiatorMetadata]: ...
 
 
@@ -294,7 +293,7 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal[True],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]: ...
 
 
@@ -302,7 +301,7 @@ def _instantiator_from_type_inner(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     allow_sequences: Literal["fixed_length", True, False],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Thin wrapper over instantiator_from_type, with some extra asserts for catching
     errors."""
@@ -324,7 +323,7 @@ def _instantiator_from_type_inner(
 def _instantiator_from_container_type(
     typ: TypeForm[Any],
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Optional[Tuple[Instantiator, InstantiatorMetadata]]:
     """Attempt to create an instantiator from a container type. Returns `None` if no
     container type is found."""
@@ -364,7 +363,7 @@ def _instantiator_from_container_type(
 def _instantiator_from_tuple(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     types = get_args(typ)
     typeset = set(types)  # Note that sets are unordered.
@@ -449,7 +448,7 @@ def _join_union_metavars(metavars: Iterable[str]) -> str:
 def _instantiator_from_union(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     options = list(get_args(typ))
     if NoneType in options:
@@ -526,7 +525,7 @@ def _instantiator_from_union(
 def _instantiator_from_dict(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     key_type, val_type = get_args(typ)
     key_instantiator, key_meta = _instantiator_from_type_inner(
@@ -608,7 +607,7 @@ def _instantiator_from_dict(
 def _instantiator_from_sequence(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[Instantiator, InstantiatorMetadata]:
     """Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc."""
     container_type = get_origin(typ)
@@ -678,7 +677,7 @@ def _instantiator_from_sequence(
 def _instantiator_from_literal(
     typ: TypeForm,
     type_from_typevar: Dict[TypeVar, TypeForm[Any]],
-    markers: FrozenSet[_markers.Marker],
+    markers: Set[_markers.Marker],
 ) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
     choices = get_args(typ)
     str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)
