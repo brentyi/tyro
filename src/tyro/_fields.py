@@ -622,7 +622,7 @@ def _is_pydantic(cls: TypeForm[Any]) -> bool:
         if "pydantic.v1" in sys.modules.keys():
             from pydantic import v1 as pydantic_v1
         else:
-            pydantic_v1 = None
+            pydantic_v1 = None  # type: ignore
     except ImportError:
         if TYPE_CHECKING:
             from pydantic import v1 as pydantic_v1
@@ -645,7 +645,7 @@ def _field_list_from_pydantic(
         if "pydantic.v1" in sys.modules.keys():
             from pydantic import v1 as pydantic_v1
         else:
-            pydantic_v1 = None
+            pydantic_v1 = None  # type: ignore
     except ImportError:
         if TYPE_CHECKING:
             from pydantic import v1 as pydantic_v1
