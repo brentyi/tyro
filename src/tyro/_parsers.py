@@ -416,7 +416,7 @@ class SubparsersSpecification:
                 options[i] = Annotated.__class_getitem__(  # type: ignore
                     (
                         found_subcommand_configs[0].constructor_factory(),
-                        *_resolver.unwrap_annotated(option, Any)[1],  # type: ignore
+                        *_resolver.unwrap_annotated(option, "all")[1],
                     )
                 )
 
@@ -507,7 +507,7 @@ class SubparsersSpecification:
 
             # Strip the subcommand config from the option type.
             # Relevant: https://github.com/brentyi/tyro/pull/117
-            option_origin, annotations = _resolver.unwrap_annotated(option, Any)  # type: ignore
+            option_origin, annotations = _resolver.unwrap_annotated(option, "all")
             annotations = tuple(
                 a
                 for a in annotations

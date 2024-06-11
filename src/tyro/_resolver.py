@@ -27,6 +27,7 @@ from typing_extensions import (
     Annotated,
     Final,
     ForwardRef,
+    Literal,
     Self,
     TypeAliasType,
     get_args,
@@ -69,7 +70,7 @@ def resolve_generic_types(
         # ^We need this `if` statement for an obscure edge case: when `cls` is a
         # function with `__tyro_markers__` set, we don't want/need to return
         # Annotated[func, markers].
-        cls, annotations = unwrap_annotated(cls, Any)
+        cls, annotations = unwrap_annotated(cls, "all")
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(unwrap_newtype_and_aliases(cls)[0])
@@ -254,14 +255,31 @@ def narrow_collection_types(
     return typ
 
 
+# `Final` and `ReadOnly` types are ignored in tyro.
+try:
+    # Can only import ReadOnly in typing_extensions>=4.9.0, which isn't
+    # supported by Python 3.7.
+    from typing_extensions import ReadOnly
+
+    STRIP_WRAPPER_TYPES = {Final, ReadOnly}
+except ImportError:
+    STRIP_WRAPPER_TYPES = {Final}
+
 MetadataType = TypeVar("MetadataType")
 
 
 @overload
 def unwrap_annotated(
     typ: TypeOrCallable,
-    search_type: Union[TypeForm[MetadataType], object],
+    search_type: TypeForm[MetadataType],
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]: ...
+
+
+@overload
+def unwrap_annotated(
+    typ: TypeOrCallable,
+    search_type: Literal["all"],
+) -> Tuple[TypeOrCallable, Tuple[Any, ...]]: ...
 
 
 @overload
@@ -271,22 +289,9 @@ def unwrap_annotated(
 ) -> TypeOrCallable: ...
 
 
-# `Final` and `ReadOnly` types are ignored in tyro.
-try:
-    # Can only import ReadOnly in typing_extensions>=4.9.0, which isn't
-    # supported by Python 3.7.
-    from typing_extensions import ReadOnly
-
-    STRIP_TYPES = {Final, ReadOnly}
-except ImportError:
-    STRIP_TYPES = {
-        Final,
-    }
-
-
 def unwrap_annotated(
     typ: TypeOrCallable,
-    search_type: Union[TypeForm[MetadataType], object, None] = None,
+    search_type: Union[TypeForm[MetadataType], Literal["all"], object, None] = None,
 ) -> Union[Tuple[TypeOrCallable, Tuple[MetadataType, ...]], TypeOrCallable]:
     """Helper for parsing typing.Annotated types.
 
@@ -297,7 +302,7 @@ def unwrap_annotated(
     """
 
     # `Final` and `ReadOnly` types are ignored in tyro.
-    while get_origin(typ) in STRIP_TYPES:
+    while get_origin(typ) in STRIP_WRAPPER_TYPES:
         typ = get_args(typ)[0]
 
     # Don't search for any annotations.
@@ -308,14 +313,18 @@ def unwrap_annotated(
             return get_args(typ)[0]
 
     # Check for __tyro_markers__ from @configure.
-    if search_type is Any:
-        targets = getattr(typ, "__tyro_markers__", tuple())
+    if hasattr(typ, "__tyro_markers__"):
+        if search_type == "all":
+            targets = getattr(typ, "__tyro_markers__")
+        else:
+            targets = tuple(
+                x
+                for x in getattr(typ, "__tyro_markers__")
+                if isinstance(x, search_type)  # type: ignore
+            )
     else:
-        targets = tuple(
-            x
-            for x in getattr(typ, "__tyro_markers__", tuple())
-            if isinstance(x, search_type)  # type: ignore
-        )
+        targets = ()
+
     assert isinstance(targets, tuple)
     if not hasattr(typ, "__metadata__"):
         return typ, targets  # type: ignore
@@ -327,15 +336,16 @@ def unwrap_annotated(
     targets += tuple(
         x
         for x in targets + args[1:]
-        if search_type is Any or isinstance(x, search_type)  # type: ignore
+        if search_type == "all" or isinstance(x, search_type)  # type: ignore
     )
 
     # Check for __tyro_markers__ in unwrapped type.
-    targets += tuple(
-        x
-        for x in getattr(args[0], "__tyro_markers__", tuple())
-        if search_type is Any or isinstance(x, search_type)  # type: ignore
-    )
+    if hasattr(args[0], "__tyro_markers__"):
+        targets += tuple(
+            x
+            for x in getattr(args[0], "__tyro_markers__")
+            if search_type == "all" or isinstance(x, search_type)  # type: ignore
+        )
     return args[0], targets  # type: ignore
 
 
