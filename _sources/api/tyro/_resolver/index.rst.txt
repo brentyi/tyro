@@ -73,11 +73,16 @@ Module Contents
    
    TypeForm narrowing for containers. Infers types of container contents.
 
+.. py:data:: STRIP_WRAPPER_TYPES
+
+   
+
 .. py:data:: MetadataType
 
    
 
-.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: Union[tyro._typing.TypeForm[MetadataType], object]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+                 unwrap_annotated(typ: TypeOrCallable, search_type: typing_extensions.Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
                  unwrap_annotated(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
 
    
@@ -89,10 +94,6 @@ Module Contents
    * int, int => (int, ())
    * Annotated[int, 1], int => (int, (1,))
    * Annotated[int, "1"], int => (int, ())
-
-.. py:data:: STRIP_TYPES
-
-   
 
 .. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]]) -> TypeOrCallable
 

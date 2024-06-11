@@ -284,6 +284,7 @@
     <span class="n">Annotated</span><span class="p">,</span>
     <span class="n">Final</span><span class="p">,</span>
     <span class="n">ForwardRef</span><span class="p">,</span>
+    <span class="n">Literal</span><span class="p">,</span>
     <span class="n">Self</span><span class="p">,</span>
     <span class="n">TypeAliasType</span><span class="p">,</span>
     <span class="n">get_args</span><span class="p">,</span>
@@ -334,7 +335,7 @@
         <span class="c1"># ^We need this `if` statement for an obscure edge case: when `cls` is a</span>
         <span class="c1"># function with `__tyro_markers__` set, we don&#39;t want/need to return</span>
         <span class="c1"># Annotated[func, markers].</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">Any</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
     <span class="c1"># We&#39;ll ignore NewType when getting the origin + args for generics.</span>
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
@@ -538,14 +539,31 @@
 
 
 
+<span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Can only import ReadOnly in typing_extensions&gt;=4.9.0, which isn&#39;t</span>
+    <span class="c1"># supported by Python 3.7.</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">ReadOnly</span>
+
+    <span class="n">STRIP_WRAPPER_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">,</span> <span class="n">ReadOnly</span><span class="p">}</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">STRIP_WRAPPER_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">}</span>
+
 <span class="n">MetadataType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;MetadataType&quot;</span><span class="p">)</span>
 
 
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
-    <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="nb">object</span><span class="p">],</span>
+    <span class="n">search_type</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
+
+
+<span class="nd">@overload</span>
+<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+    <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
+    <span class="n">search_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
@@ -555,24 +573,11 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span> <span class="o">...</span>
 
 
-<span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="c1"># Can only import ReadOnly in typing_extensions&gt;=4.9.0, which isn&#39;t</span>
-    <span class="c1"># supported by Python 3.7.</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">ReadOnly</span>
-
-    <span class="n">STRIP_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">,</span> <span class="n">ReadOnly</span><span class="p">}</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">STRIP_TYPES</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="n">Final</span><span class="p">,</span>
-    <span class="p">}</span>
-
-
 <div class="viewcode-block" id="unwrap_annotated">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">[docs]</a>
 <span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
-    <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">TypeOrCallable</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for parsing typing.Annotated types.</span>
 
@@ -583,7 +588,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
-    <span class="k">while</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">in</span> <span class="n">STRIP_TYPES</span><span class="p">:</span>
+    <span class="k">while</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">in</span> <span class="n">STRIP_WRAPPER_TYPES</span><span class="p">:</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Don&#39;t search for any annotations.</span>
@@ -594,14 +599,18 @@
             <span class="k">return</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="c1"># Check for __tyro_markers__ from @configure.</span>
-    <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="n">targets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">x</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">targets</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-            <span class="n">x</span>
-            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">())</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="p">)</span>
+        <span class="n">targets</span> <span class="o">=</span> <span class="p">()</span>
+
     <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__metadata__&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="n">targets</span>  <span class="c1"># type: ignore</span>
@@ -613,15 +622,16 @@
     <span class="n">targets</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span>
         <span class="n">x</span>
         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">targets</span> <span class="o">+</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
-        <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
     <span class="p">)</span>
 
     <span class="c1"># Check for __tyro_markers__ in unwrapped type.</span>
-    <span class="n">targets</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span>
-        <span class="n">x</span>
-        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">())</span>
-        <span class="k">if</span> <span class="n">search_type</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">):</span>
+        <span class="n">targets</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">x</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__tyro_markers__&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">search_type</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span>
     <span class="k">return</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">targets</span>  <span class="c1"># type: ignore</span></div>
 
 
