@@ -1184,7 +1184,7 @@ def test_custom_constructor_8() -> None:
 def test_custom_constructor_9() -> None:
     def commit(branch: str) -> int:
         """Commit"""
-        print(f"commit {branch=}")
+        print(f"commit branch={branch}")
         return 3
 
     assert (
