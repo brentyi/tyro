@@ -1118,12 +1118,12 @@ def _get_dataclass_field_default(
 
 if TYPE_CHECKING:
     import pydantic as pydantic
-    import pydantic.v1 as pydantic_v1
+    import pydantic.v1.fields as pydantic_v1_fields
 
 
 def _get_pydantic_v1_field_default(
     name: str,
-    field: pydantic_v1.fields.ModelField,
+    field: pydantic_v1_fields.ModelField,
     parent_default_instance: DefaultInstance,
 ) -> Tuple[Any, bool]:
     """Helper for getting the default instance for a Pydantic field."""
