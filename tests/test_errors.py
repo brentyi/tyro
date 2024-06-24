@@ -31,16 +31,25 @@ def test_ambiguous_collection_2() -> None:
     def main(x: Tuple[List[str], List[str]]) -> None:
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
+    assert "Unsupported type annotation for the field x" in e.value.args[0]
 
 
 def test_ambiguous_collection_3() -> None:
     def main(x: List[Union[Tuple[int, int], Tuple[int, int, int]]]) -> None:
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
+    assert "Unsupported type annotation for the field x" in e.value.args[0]
+
+
+def test_ambiguous_collection_4() -> None:
+    X = List[Union[Tuple[int, int], Tuple[int, int, int]]]
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError) as e:
+        tyro.cli(X, args=["--help"])
+    assert "Unsupported type annotation for the field" not in e.value.args[0]
 
 
 # Must be global.
