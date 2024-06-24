@@ -177,7 +177,9 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
             continue  # Skip `object`, `Callable`, `tuple`, etc.
         docstring = parse_docstring_from_object(cls_search).get(field_name, None)
         if docstring is not None:
-            return _strings.remove_single_line_breaks(docstring)
+            return _strings.dedent(
+                _strings.remove_single_line_breaks(docstring)
+            ).strip()
 
     # If docstring_parser failed, let's try looking for comments.
     tokenization = get_class_tokenization_with_field(cls, field_name)
