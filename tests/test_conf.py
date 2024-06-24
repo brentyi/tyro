@@ -1188,7 +1188,7 @@ def test_custom_constructor_9() -> None:
         return 3
 
     assert (
-        tyro.cli(
+        tyro.cli(  # type: ignore
             Annotated[Any, tyro.conf.arg(constructor=commit)],
             args="--branch 5".split(" "),
         )
