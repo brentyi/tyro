@@ -310,11 +310,20 @@ def _rule_recursive_instantiator_from_type(
         )
     except _instantiators.UnsupportedTypeAnnotationError as e:
         if arg.field.default in _fields.MISSING_SINGLETONS:
-            raise _instantiators.UnsupportedTypeAnnotationError(
-                "Unsupported type annotation for the field"
-                f" {_strings.make_field_name([arg.extern_prefix, arg.field.intern_name])}. To"
-                " suppress this error, assign the field a default value."
-            ) from e
+            field_name = _strings.make_field_name(
+                [arg.extern_prefix, arg.field.intern_name]
+            )
+            if field_name != "":
+                raise _instantiators.UnsupportedTypeAnnotationError(
+                    f"Unsupported type annotation for the field {field_name}; "
+                    f"{e.args[0]} "
+                    "To suppress this error, assign the field either a default value or a different type."
+                ) from e
+            else:
+                # If the field name is empty, it means we're raising an error
+                # for the direct input to `tyro.cli()`. We don't need to write
+                # out which specific field we're complaining about.
+                raise e
         else:
             # For fields with a default, we'll get by even if there's no instantiator
             # available.
