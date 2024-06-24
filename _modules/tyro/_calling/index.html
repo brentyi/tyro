@@ -482,6 +482,7 @@
     <span class="c1"># sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just</span>
     <span class="c1"># `tuple`.</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span>
         <span class="n">unwrapped_f</span><span class="p">,</span> <span class="n">default_instance</span>

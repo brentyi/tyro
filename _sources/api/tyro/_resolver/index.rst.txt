@@ -68,6 +68,13 @@ Module Contents
    string default is passed in, we don't want to narrow the type to always be
    strings!)
 
+.. py:function:: swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable
+
+   
+   Swap types using the ``constructor_factory`` attribute from
+   ``tyro.conf.arg`` and ``tyro.conf.subcommand``. Runtime annotations are
+   kept, but the type is swapped.
+
 .. py:function:: narrow_collection_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
    
