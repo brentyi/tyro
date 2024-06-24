@@ -87,6 +87,8 @@ def subcommand_cli_from_dict(
             when parsing happens. We default helptext to hyphens to follow the GNU style guide.
             https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
     """
+    # We need to form a union type, which requires at least two elements.
+    assert len(subcommands) >= 2, "At least two subcommands are required."
     return cli(
         Union.__getitem__(  # type: ignore
             tuple(

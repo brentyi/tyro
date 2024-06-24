@@ -243,16 +243,6 @@ def is_nested_type(
     TODO: we should come up with a better name than 'nested type', which is a little bit
     misleading."""
 
-    # Need to swap types.
-    _, argconfs = _resolver.unwrap_annotated(
-        typ, search_type=conf._confstruct._ArgConfiguration
-    )
-    _, subcommand_confs = _resolver.unwrap_annotated(
-        typ, search_type=conf._confstruct._SubcommandConfiguration
-    )
-    for union_conf in argconfs + subcommand_confs:
-        if union_conf.constructor_factory is not None:
-            typ = union_conf.constructor_factory()
     return not isinstance(
         _try_field_list_from_callable(typ, default_instance),
         UnsupportedNestedTypeMessage,
@@ -376,6 +366,9 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
+    # Apply constructor_factory override for type.
+    f = _resolver.swap_type_using_confstruct(f)
+
     # Check for default instances in subcommand configs. This is needed for
     # is_nested_type() when arguments are not valid without a default, and this
     # default is specified in the subcommand config.
