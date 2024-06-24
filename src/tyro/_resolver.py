@@ -35,7 +35,7 @@ from typing_extensions import (
     get_type_hints,
 )
 
-from . import _fields, _unsafe_cache
+from . import _fields, _unsafe_cache, conf
 from ._typing import TypeForm
 
 TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
@@ -233,6 +233,29 @@ def unwrap_newtype_and_narrow_subtypes(
         # code in it.
         pass
 
+    return typ
+
+
+def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
+    """Swap types using the `constructor_factory` attribute from
+    `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are
+    kept, but the type is swapped."""
+    # Need to swap types.
+    _, annotations = unwrap_annotated(typ, search_type="all")
+    for anno in reversed(annotations):
+        if (
+            isinstance(
+                anno,
+                (
+                    conf._confstruct._ArgConfiguration,
+                    conf._confstruct._SubcommandConfiguration,
+                ),
+            )
+            and anno.constructor_factory is not None
+        ):
+            return Annotated.__class_getitem__(  # type: ignore
+                (anno.constructor_factory(),) + annotations
+            )
     return typ
 
 

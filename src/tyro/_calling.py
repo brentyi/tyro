@@ -220,6 +220,7 @@ def callable_with_args(
     # sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just
     # `tuple`.
     unwrapped_f = f
+    unwrapped_f = _resolver.swap_type_using_confstruct(unwrapped_f)
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
     unwrapped_f = _resolver.unwrap_newtype_and_narrow_subtypes(
         unwrapped_f, default_instance

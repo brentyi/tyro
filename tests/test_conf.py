@@ -1181,6 +1181,21 @@ def test_custom_constructor_8() -> None:
     assert "'b'" not in error
 
 
+def test_custom_constructor_9() -> None:
+    def commit(branch: str) -> int:
+        """Commit"""
+        print(f"commit {branch=}")
+        return 3
+
+    assert (
+        tyro.cli(
+            Annotated[Any, tyro.conf.arg(constructor=commit)],
+            args="--branch 5".split(" "),
+        )
+        == 3
+    )
+
+
 def test_alias() -> None:
     """Arguments with aliases."""
 

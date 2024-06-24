@@ -67,6 +67,8 @@ def subcommand_type_from_defaults(
     Returns:
         A subcommand type, which can be passed to :func:`tyro.cli`.
     """
+    # We need to form a union type, which requires at least two elements.
+    assert len(defaults) >= 2, "At least two subcommands are required."
     return Union.__getitem__(  # type: ignore
         tuple(
             Annotated.__class_getitem__(  # type: ignore
