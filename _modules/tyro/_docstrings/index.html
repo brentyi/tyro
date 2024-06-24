@@ -442,7 +442,7 @@
             <span class="k">continue</span>  <span class="c1"># Skip `object`, `Callable`, `tuple`, etc.</span>
         <span class="n">docstring</span> <span class="o">=</span> <span class="n">parse_docstring_from_object</span><span class="p">(</span><span class="n">cls_search</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_strings</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span><span class="n">docstring</span><span class="p">))</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="c1"># If docstring_parser failed, let&#39;s try looking for comments.</span>
     <span class="n">tokenization</span> <span class="o">=</span> <span class="n">get_class_tokenization_with_field</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
