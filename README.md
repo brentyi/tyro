@@ -38,30 +38,54 @@
 
 <br />
 
-<strong><code>tyro</code></strong> is a tool for generating command-line
-interfaces and configuration objects in Python.
+<strong><code>tyro.cli()</code></strong> generates command-line interfaces via
+Python type introspection. We can define configurable scripts using functions:
 
-Our core API, `tyro.cli()`,
+```python
+"""A command-line interface defined using a function signature.
 
-- **Generates CLI interfaces** from Python type signatures.
-- **Populates helptext automatically** from defaults, annotations, and
-  docstrings.
-- **Understands nesting** of `dataclasses`, `pydantic`, and `attrs` structures.
-- **Prioritizes static analysis** for type checking and autocompletion with
-  tools like
-  [Pylance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance),
-  [Pyright](https://github.com/microsoft/pyright), and
-  [mypy](https://github.com/python/mypy).
+Usage: python script_name.py --foo INT [--bar STR]
+"""
 
-For advanced users, it also supports:
+import tyro
 
-- **Subcommands**, as well as choosing between and overriding values in
-  configuration objects.
-- **Shell completion** for `bash`, `zsh`, and `tcsh`.
-- **Fine-grained configuration** via [PEP
-  593](https://peps.python.org/pep-0593/) annotations (`tyro.conf.*`).
+def main(
+    foo: int,
+    bar: str = "default",
+) -> None:
+    ...  # Main body of a script.
 
-For examples and the API reference, see our
+if __name__ == "__main__":
+    # Generate a CLI and call `main` with its two arguments: `foo` and `bar`.
+    tyro.cli(main)
+```
+
+Or instantiate configuration objects defined using tools like `dataclasses`, `pydantic`, and `attrs`:
+
+```python
+"""A command-line interface defined using a class signature.
+
+Usage: python script_name.py --foo INT [--bar STR]
+"""
+
+from dataclasses import dataclass
+import tyro
+
+@dataclass
+class Config:
+    foo: int
+    bar: str = "default"
+
+if __name__ == "__main__":
+    # Generate a CLI and instantiate `Config` with its two arguments: `foo` and `bar`.
+    config = tyro.cli(Config)
+
+    # Rest of script.
+    assert isinstance(config, Config)  # Should pass.
+```
+
+Other features include helptext generation, nested structures, shell
+completion, and subcommands. For examples and the API reference, see our
 [documentation](https://brentyi.github.io/tyro).
 
 ### In the wild
