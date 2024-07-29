@@ -158,8 +158,16 @@ def arg(
 ) -> Any:
     """Returns a metadata object for fine-grained argument configuration with
     `typing.Annotated`. Should typically not be required.
+
+    We support using `arg()` at the root of arguments. For example:
     ```python
     x: Annotated[int, tyro.conf.arg(...)]
+    ```
+
+    Nesting `arg()` within other types is generally not supported:
+    ```python
+    # Not supported.
+    x: tuple[Annotated[int, tyro.conf.arg(...)], ...]
     ```
 
     Arguments:

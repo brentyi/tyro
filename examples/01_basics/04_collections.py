@@ -1,8 +1,9 @@
 """Multi-value Arguments
 
 Arguments of both fixed and variable lengths can be annotated with standard
-Python collection types. For Python 3.7 and 3.8, we can use either
-`from __future__ import annotations` or`typing.List[T]`, `typing.Tuple[T1, T2]`, etc.
+Python collection types. For Python 3.7 and 3.8, we can use either :code:`from
+__future__ import annotations` to support :code:`list[T]` and :code:`tuple[T]`,
+or the older API :code:`typing.List[T]` and :code:`typing.Tuple[T1, T2]`.
 
 Usage:
 `python ./03_collections.py --help`

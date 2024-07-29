@@ -5,7 +5,7 @@
 :code:`tyro` is a tool for generating command-line interfaces and configuration
 objects in Python.
 
-Our core API, `tyro.cli()`,
+Our core API, :func:`tyro.cli()`,
 
 - **Generates CLI interfaces** from a comprehensive set of Python type
   constructs.

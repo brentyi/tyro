@@ -4,12 +4,10 @@
 Booleans and Flags
 ==========================================
 
-
 Booleans can either be expected to be explicitly passed in, or, if given a default
 value, automatically converted to flags.
 
 To turn off conversion, see :class:`tyro.conf.FlagConversionOff`.
-
 
 
 .. code-block:: python

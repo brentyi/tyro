@@ -1,22 +1,15 @@
 """Choices
 
-`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices.
+:code:`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices.
 
 Usage:
 `python ./06_literals.py --help`
 """
 
 import dataclasses
-import enum
 from typing import Literal
 
 import tyro
-
-
-class Color(enum.Enum):
-    RED = enum.auto()
-    GREEN = enum.auto()
-    BLUE = enum.auto()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -25,11 +18,8 @@ class Args:
     # a set of strings.
     strings: Literal["red", "green"] = "red"
 
-    # Enums also work.
-    enums: Literal[Color.RED, Color.GREEN] = Color.RED
-
-    # Or mix them with other types!
-    mixed: Literal[Color.RED, Color.GREEN, "blue"] = "blue"
+    # Integers also work. (as well as booleans, enums, etc)
+    numbers: Literal[0, 1, 2] = 0
 
 
 if __name__ == "__main__":

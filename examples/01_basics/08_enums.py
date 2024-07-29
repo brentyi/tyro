@@ -1,6 +1,7 @@
 """Enums
 
-We can generate argument parsers from more advanced type annotations, like enums.
+In addition to literals, enums can also be used to provide a fixed set of
+choices.
 
 Usage:
 `python ./04_enums.py --help`

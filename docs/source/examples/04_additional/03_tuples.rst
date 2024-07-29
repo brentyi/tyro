@@ -4,9 +4,8 @@
 Tuples
 ==========================================
 
-
-Example using ``tyro.cli()`` to instantiate tuple types.
-
+Example using :func:`tyro.cli()` to instantiate tuple types. :code:`tuple`,
+:code:`typing.Tuple`, and :code:`NamedTuple` are all supported.
 
 
 .. code-block:: python

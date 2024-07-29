@@ -1,7 +1,7 @@
 """JAX/Flax Integration
 
-If you use [flax.linen](https://github.com/google/flax), modules can be instantiated
-directly from `tyro.cli`.
+If you use `flax.linen <https://github.com/google/flax>`_, modules can be instantiated
+directly from :func:`tyro.cli()`.
 
 Usage:
 `python ./07_flax.py --help`

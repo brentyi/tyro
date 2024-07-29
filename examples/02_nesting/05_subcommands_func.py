@@ -1,38 +1,10 @@
 """Subcommands from Functions
 
-:func:`tyro.extras.subcommand_cli_from_dict()` provides a shorthand that generates a
-subcommand CLI from a dictionary.
+We provide a shorthand for generating a subcommand CLI from a dictionary. This
+is a thin wrapper around :func:`tyro.cli()`'s more verbose, type-based API. If
+more generality is needed, the internal working are explained in the docs for
+:func:`tyro.extras.subcommand_cli_from_dict()`.
 
-For an input like:
-
-```python
-tyro.extras.subcommand_cli_from_dict(
-    {
-        "checkout": checkout,
-        "commit": commit,
-    }
-)
-```
-
-This is internally accomplished by generating and calling:
-
-```python
-from typing import Annotated, Any, Union
-import tyro
-
-tyro.cli(
-    Union[
-        Annotated[
-            Any,
-            tyro.conf.subcommand(name="checkout", constructor=checkout),
-        ],
-        Annotated[
-            Any,
-            tyro.conf.subcommand(name="commit", constructor=commit),
-        ],
-    ]
-)
-```
 
 Usage:
 `python ./05_subcommands_func.py --help`

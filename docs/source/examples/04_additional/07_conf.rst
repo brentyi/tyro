@@ -4,12 +4,10 @@
 Configuration via typing.Annotated[]
 ==========================================
 
-
 The :mod:`tyro.conf` module contains utilities that can be used to configure
 command-line interfaces beyond what is expressible via static type annotations.
 
 Features here are supported, but generally unnecessary and should be used sparingly.
-
 
 
 .. code-block:: python

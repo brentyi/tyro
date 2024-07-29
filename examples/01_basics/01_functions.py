@@ -1,7 +1,7 @@
 """Functions
 
-In the simplest case, `tyro.cli()` can be used to run a function with arguments
-populated from the CLI.
+In the simplest case, :func:`tyro.cli()` can be used to run a function with
+arguments populated from the CLI.
 
 Usage:
 `python ./01_functions.py --help`

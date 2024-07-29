@@ -3,7 +3,7 @@
 # PEP 695 isn't yet supported in mypy. (April 4, 2024)
 """Type Aliases (Python 3.12+)
 
-In Python 3.12, the `type` statement is introduced to create type aliases.
+In Python 3.12, the :code:`type` statement is introduced to create type aliases.
 
 Usage:
 `python ./13_type_statement.py --help`
