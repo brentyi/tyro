@@ -265,10 +265,11 @@ types.</p>
 <p class="admonition-title">Warning</p>
 <p>We advise against mutation of configuration objects from a dataclass’s
 <code class="code docutils literal notranslate"><span class="pre">__post_init__</span></code> method <a class="footnote-reference brackets" href="#f1" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>. In the example below,
-<code class="code docutils literal notranslate"><span class="pre">__post_init__</span></code> would be called for both the <code class="code docutils literal notranslate"><span class="pre">Args()</span></code> object
-provided as a default value and as an output from <a class="reference internal" href="../../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.
-Instead, we show below one example of how derived fields can be defined
-immutably.</p>
+<code class="code docutils literal notranslate"><span class="pre">__post_init__</span></code> would be called twice: once for the <code class="code docutils literal notranslate"><span class="pre">Args()</span></code>
+object provided as a default value and another time for the <code class="code docutils literal notranslate"><span class="pre">Args()</span></code>
+objected instantiated by <a class="reference internal" href="../../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>. This can cause confusing
+behavior! Instead, we show below one example of how derived fields can be
+defined immutably.</p>
 <aside class="footnote-list brackets">
 <aside class="footnote brackets" id="f1" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
