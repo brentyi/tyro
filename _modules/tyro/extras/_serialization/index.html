@@ -323,6 +323,7 @@
 
     <span class="c1"># Handle fields.</span>
     <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
         <span class="n">contained_special_types</span> <span class="o">|=</span> <span class="n">handle_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 
     <span class="c1"># Handle subclasses.</span>

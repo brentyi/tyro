@@ -884,6 +884,7 @@
         <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
+        <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
         <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">name</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
