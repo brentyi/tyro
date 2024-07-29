@@ -4,11 +4,9 @@
 Base Configurations
 ==========================================
 
-
-We can integrate ``tyro.cli()`` into common configuration patterns: here, we select
+We can integrate `tyro.cli()` into common configuration patterns: here, we select
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.
-
 
 
 .. code-block:: python

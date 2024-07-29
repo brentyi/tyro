@@ -172,11 +172,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,50 +259,38 @@
         <article role="main">
           <section id="choices">
 <h1>Choices<a class="headerlink" href="#choices" title="Link to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> can be used to restrict inputs to a fixed set of literal choices.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> can be used to restrict inputs to a fixed set of literal choices.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">enum</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
-<span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 5</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
-<span class="linenos"> 9</span>    <span class="n">RED</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-<span class="linenos">10</span>    <span class="n">GREEN</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-<span class="linenos">11</span>    <span class="n">BLUE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+<span class="linenos"> 7</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 9</span>    <span class="c1"># We can use Literal[] to restrict the set of allowable inputs, for example, over</span>
+<span class="linenos">10</span>    <span class="c1"># a set of strings.</span>
+<span class="linenos">11</span>    <span class="n">strings</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
 <span class="linenos">12</span>
-<span class="linenos">13</span>
-<span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos">15</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos">16</span>    <span class="c1"># We can use Literal[] to restrict the set of allowable inputs, for example, over</span>
-<span class="linenos">17</span>    <span class="c1"># a set of strings.</span>
-<span class="linenos">18</span>    <span class="n">strings</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
-<span class="linenos">19</span>
-<span class="linenos">20</span>    <span class="c1"># Enums also work.</span>
-<span class="linenos">21</span>    <span class="n">enums</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span> <span class="n">Color</span><span class="o">.</span><span class="n">GREEN</span><span class="p">]</span> <span class="o">=</span> <span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
-<span class="linenos">22</span>
-<span class="linenos">23</span>    <span class="c1"># Or mix them with other types!</span>
-<span class="linenos">24</span>    <span class="n">mixed</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="n">Color</span><span class="o">.</span><span class="n">RED</span><span class="p">,</span> <span class="n">Color</span><span class="o">.</span><span class="n">GREEN</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;blue&quot;</span>
-<span class="linenos">25</span>
-<span class="linenos">26</span>
-<span class="linenos">27</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">28</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
-<span class="linenos">29</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="linenos">13</span>    <span class="c1"># Integers also work. (as well as booleans, enums, etc)</span>
+<span class="linenos">14</span>    <span class="n">numbers</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">18</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
+<span class="linenos">19</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/06_literals.py --help</kbd><pre class="ansi-block literal-block">usage: 06_literals.py [-h] [--strings {red,green}] [--enums {RED,GREEN}]
-                      [--mixed {RED,GREEN,blue}]
+<kbd>python 01_basics/06_literals.py --help</kbd><pre class="ansi-block literal-block">usage: 06_literals.py [-h] [--strings {red,green}] [--numbers {0,1,2}]
 
 ╭─ options ──────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                    │
 │ --strings {red,green}   We can use Literal[] to restrict the set of        │
 │                         allowable inputs, for example, over a set of       │
 │                         strings. (default: red)                            │
-│ --enums {RED,GREEN}     Enums also work. (default: RED)                    │
-│ --mixed {RED,GREEN,blue}                                                   │
-│                         Or mix them with other types! (default: blue)      │
+│ --numbers {0,1,2}       Integers also work. (as well as booleans, enums,   │
+│                         etc) (default: 0)                                  │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 </section>
 

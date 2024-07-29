@@ -4,11 +4,9 @@
 Positional Arguments
 ==========================================
 
-
 Positional-only arguments in functions are converted to positional CLI arguments.
 
 For more general positional arguments, see :class:`tyro.conf.Positional`.
-
 
 
 .. code-block:: python

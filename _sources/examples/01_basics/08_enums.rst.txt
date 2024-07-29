@@ -4,9 +4,8 @@
 Enums
 ==========================================
 
-
-We can generate argument parsers from more advanced type annotations, like enums.
-
+In addition to literals, enums can also be used to provide a fixed set of
+choices.
 
 
 .. code-block:: python
@@ -42,22 +41,22 @@ We can generate argument parsers from more advanced type annotations, like enums
 
 .. raw:: html
 
-        <kbd>python 01_basics/04_enums.py --help</kbd>
+        <kbd>python 01_basics/08_enums.py --help</kbd>
 
-.. program-output:: python ../../examples/01_basics/04_enums.py --help
-
-------------
-
-.. raw:: html
-
-        <kbd>python 01_basics/04_enums.py --optimizer-type SGD</kbd>
-
-.. program-output:: python ../../examples/01_basics/04_enums.py --optimizer-type SGD
+.. program-output:: python ../../examples/01_basics/08_enums.py --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 01_basics/04_enums.py --optimizer-type ADAM --learning-rate 3e-4</kbd>
+        <kbd>python 01_basics/08_enums.py --optimizer-type SGD</kbd>
 
-.. program-output:: python ../../examples/01_basics/04_enums.py --optimizer-type ADAM --learning-rate 3e-4
+.. program-output:: python ../../examples/01_basics/08_enums.py --optimizer-type SGD
+
+------------
+
+.. raw:: html
+
+        <kbd>python 01_basics/08_enums.py --optimizer-type ADAM --learning-rate 3e-4</kbd>
+
+.. program-output:: python ../../examples/01_basics/08_enums.py --optimizer-type ADAM --learning-rate 3e-4

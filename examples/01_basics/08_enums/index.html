@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Booleans and Flags" href="../05_flags/" /><link rel="prev" title="Multi-value Arguments" href="../03_collections/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Hierarchical Configs" href="../../02_nesting/01_nesting/" /><link rel="prev" title="Unions" href="../07_unions/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Enums - tyro</title>
@@ -172,11 +172,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../07_unions/">Unions</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,7 +259,8 @@
         <article role="main">
           <section id="enums">
 <h1>Enums<a class="headerlink" href="#enums" title="Link to this heading">#</a></h1>
-<p>We can generate argument parsers from more advanced type annotations, like enums.</p>
+<p>In addition to literals, enums can also be used to provide a fixed set of
+choices.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">enum</span>
 <span class="linenos"> 3</span>
@@ -286,7 +288,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/04_enums.py --help</kbd><pre class="ansi-block literal-block">usage: 04_enums.py [-h] [--optimizer-type {ADAM,SGD}] [--learning-rate FLOAT]
+<kbd>python 01_basics/08_enums.py --help</kbd><pre class="ansi-block literal-block">usage: 08_enums.py [-h] [--optimizer-type {ADAM,SGD}] [--learning-rate FLOAT]
 
 ╭─ options ────────────────────────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit                  │
@@ -295,9 +297,9 @@
 │ --learning-rate FLOAT   Learning rate for optimizer. (default: 0.0001)   │
 ╰──────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/04_enums.py --optimizer-type SGD</kbd><pre class="ansi-block literal-block">TrainConfig(optimizer_type=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0001)</pre>
+<kbd>python 01_basics/08_enums.py --optimizer-type SGD</kbd><pre class="ansi-block literal-block">TrainConfig(optimizer_type=&lt;OptimizerType.SGD: 2&gt;, learning_rate=0.0001)</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/04_enums.py --optimizer-type ADAM --learning-rate 3e-4</kbd><pre class="ansi-block literal-block">TrainConfig(optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003)</pre>
+<kbd>python 01_basics/08_enums.py --optimizer-type ADAM --learning-rate 3e-4</kbd><pre class="ansi-block literal-block">TrainConfig(optimizer_type=&lt;OptimizerType.ADAM: 1&gt;, learning_rate=0.0003)</pre>
 </section>
 
         </article>
@@ -305,23 +307,23 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../05_flags/">
+          <a class="next-page" href="../../02_nesting/01_nesting/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Booleans and Flags</div>
+                <div class="title">Hierarchical Configs</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../03_collections/">
+          <a class="prev-page" href="../07_unions/">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Multi-value Arguments</div>
+                <div class="title">Unions</div>
                 
               </div>
             </a>

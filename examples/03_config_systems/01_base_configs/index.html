@@ -172,11 +172,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,7 +259,7 @@
         <article role="main">
           <section id="base-configurations">
 <h1>Base Configurations<a class="headerlink" href="#base-configurations" title="Link to this heading">#</a></h1>
-<p>We can integrate <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code> into common configuration patterns: here, we select
+<p>We can integrate <cite>tyro.cli()</cite> into common configuration patterns: here, we select
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>

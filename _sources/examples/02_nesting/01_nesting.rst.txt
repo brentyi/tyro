@@ -4,10 +4,8 @@
 Hierarchical Configs
 ==========================================
 
-
 Structures (typically dataclasses) can be nested to build hierarchical configuration
 objects. This helps with modularity and grouping in larger projects.
-
 
 
 .. code-block:: python

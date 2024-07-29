@@ -172,11 +172,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,8 +259,9 @@
         <article role="main">
           <section id="overriding-yaml-configs">
 <h1>Overriding YAML Configs<a class="headerlink" href="#overriding-yaml-configs" title="Link to this heading">#</a></h1>
-<p>If you have a library of existing YAML files that you want to use, <code class="docutils literal notranslate"><span class="pre">tyro</span></code> can be used to
-override values in them.</p>
+<p>If you have a library of existing YAML files that you want to use, <cite>tyro</cite> can
+be used to override values in them. This example uses a dictionary; we
+generally recommend dataset configs for new projects.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">yaml</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>

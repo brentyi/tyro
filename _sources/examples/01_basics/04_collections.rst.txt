@@ -4,11 +4,10 @@
 Multi-value Arguments
 ==========================================
 
-
 Arguments of both fixed and variable lengths can be annotated with standard
-Python collection types. For Python 3.7 and 3.8, we can use either
-``from __future__ import annotations`` or\ ``typing.List[T]``\ , ``typing.Tuple[T1, T2]``\ , etc.
-
+Python collection types. For Python 3.7 and 3.8, we can use either :code:`from
+__future__ import annotations` to support :code:`list[T]` and :code:`tuple[T]`,
+or the older API :code:`typing.List[T]` and :code:`typing.Tuple[T1, T2]`.
 
 
 .. code-block:: python
@@ -41,22 +40,22 @@ Python collection types. For Python 3.7 and 3.8, we can use either
 
 .. raw:: html
 
-        <kbd>python 01_basics/03_collections.py --help</kbd>
+        <kbd>python 01_basics/04_collections.py --help</kbd>
 
-.. program-output:: python ../../examples/01_basics/03_collections.py --help
-
-------------
-
-.. raw:: html
-
-        <kbd>python 01_basics/03_collections.py --dataset-sources ./data --image-dimensions 16 16</kbd>
-
-.. program-output:: python ../../examples/01_basics/03_collections.py --dataset-sources ./data --image-dimensions 16 16
+.. program-output:: python ../../examples/01_basics/04_collections.py --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 01_basics/03_collections.py --dataset-sources ./data</kbd>
+        <kbd>python 01_basics/04_collections.py --dataset-sources ./data --image-dimensions 16 16</kbd>
 
-.. program-output:: python ../../examples/01_basics/03_collections.py --dataset-sources ./data
+.. program-output:: python ../../examples/01_basics/04_collections.py --dataset-sources ./data --image-dimensions 16 16
+
+------------
+
+.. raw:: html
+
+        <kbd>python 01_basics/04_collections.py --dataset-sources ./data</kbd>
+
+.. program-output:: python ../../examples/01_basics/04_collections.py --dataset-sources ./data

@@ -172,11 +172,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,8 +259,31 @@
         <article role="main">
           <section id="custom-constructors">
 <h1>Custom Constructors<a class="headerlink" href="#custom-constructors" title="Link to this heading">#</a></h1>
-<p>For additional flexibility, <a class="reference internal" href="../../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> accepts a <code class="docutils literal notranslate"><span class="pre">constructor</span></code> argument,
-which makes it easier to load complex objects.</p>
+<p>For additional flexibility, <a class="reference internal" href="../../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> accepts a
+<code class="code docutils literal notranslate"><span class="pre">constructor</span></code> argument, which makes it easier to load complex objects.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Custom constructors are permitted wherever <a class="reference internal" href="../../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> is. This
+annotation corresponds to a single argument, so we expect that it is placed
+placed at the root of the field corresponding to that argument. For
+example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Great!</span>
+<span class="n">x</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">custom_constructor</span><span class="o">=...</span><span class="p">)]</span>
+</pre></div>
+</div>
+<p>However, nesting <a class="reference internal" href="../../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> within other types is generally
+not supported. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Not supported.</span>
+<span class="n">x</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">custom_constructor</span><span class="o">=...</span><span class="p">)],</span> <span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This example can be rewritten with a custom constructor that directly
+returns a tuple of integers:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Workaround for above.</span>
+<span class="n">x</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">custom_constructor</span><span class="o">=...</span><span class="p">)]</span>
+</pre></div>
+</div>
+</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">json</span> <span class="k">as</span> <span class="nn">json_</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>

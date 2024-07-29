@@ -4,9 +4,7 @@
 Counters
 ==========================================
 
-
 Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterAction`.
-
 
 
 .. code-block:: python

@@ -4,10 +4,35 @@
 Custom Constructors
 ==========================================
 
+For additional flexibility, :func:`tyro.conf.arg()` accepts a
+:code:`constructor` argument, which makes it easier to load complex objects.
 
-For additional flexibility, :func:`tyro.conf.arg()` accepts a ``constructor`` argument,
-which makes it easier to load complex objects.
+.. warning::
+    Custom constructors are permitted wherever :func:`tyro.conf.arg()` is. This
+    annotation corresponds to a single argument, so we expect that it is placed
+    placed at the root of the field corresponding to that argument. For
+    example:
 
+    .. code-block:: python
+
+        # Great!
+        x: Annotated[int, tyro.conf.arg(custom_constructor=...)]
+
+    However, nesting :func:`tyro.conf.arg()` within other types is generally
+    not supported. For example:
+
+    .. code-block:: python
+
+        # Not supported.
+        x: tuple[Annotated[int, tyro.conf.arg(custom_constructor=...)], ...]
+
+    This example can be rewritten with a custom constructor that directly
+    returns a tuple of integers:
+
+    .. code-block:: python
+
+        # Workaround for above.
+        x: Annotated[tuple[int, ...], tyro.conf.arg(custom_constructor=...)]
 
 
 .. code-block:: python

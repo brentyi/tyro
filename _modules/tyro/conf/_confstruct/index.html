@@ -171,11 +171,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/01_basics/08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -420,8 +421,16 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for fine-grained argument configuration with</span>
 <span class="sd">    `typing.Annotated`. Should typically not be required.</span>
+
+<span class="sd">    We support using `arg()` at the root of arguments. For example:</span>
 <span class="sd">    ```python</span>
 <span class="sd">    x: Annotated[int, tyro.conf.arg(...)]</span>
+<span class="sd">    ```</span>
+
+<span class="sd">    Nesting `arg()` within other types is generally not supported:</span>
+<span class="sd">    ```python</span>
+<span class="sd">    # Not supported.</span>
+<span class="sd">    x: tuple[Annotated[int, tyro.conf.arg(...)], ...]</span>
 <span class="sd">    ```</span>
 
 <span class="sd">    Arguments:</span>

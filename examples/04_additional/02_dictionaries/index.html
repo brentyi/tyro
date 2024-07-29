@@ -172,11 +172,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,10 +259,10 @@
         <article role="main">
           <section id="dictionaries-and-typeddict">
 <h1>Dictionaries and TypedDict<a class="headerlink" href="#dictionaries-and-typeddict" title="Link to this heading">#</a></h1>
-<p>Dictionary inputs can be specified using either a standard <code class="docutils literal notranslate"><span class="pre">Dict[K,</span> <span class="pre">V]</span></code>
-annotation, or a <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code> subclass.</p>
-<p>For configuring <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code>, we also support <code class="docutils literal notranslate"><span class="pre">total={True/False}</span></code>,
-<code class="docutils literal notranslate"><span class="pre">typing.Required</span></code>, and <code class="docutils literal notranslate"><span class="pre">typing.NotRequired</span></code>.</p>
+<p>Dictionary inputs can be specified using either a standard <cite>Dict[K, V]</cite>
+annotation, or a <code class="code docutils literal notranslate"><span class="pre">TypedDict</span></code> subclass.</p>
+<p>For configuring <code class="code docutils literal notranslate"><span class="pre">TypedDict</span></code>, we also support <code class="code docutils literal notranslate"><span class="pre">total={True/False}</span></code>,
+<code class="code docutils literal notranslate"><span class="pre">typing.Required</span></code>, and <code class="code docutils literal notranslate"><span class="pre">typing.NotRequired</span></code>. See the <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict">Python docs</a> for all <code class="code docutils literal notranslate"><span class="pre">TypedDict</span></code> features.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">NotRequired</span>

@@ -4,10 +4,8 @@
 Functions
 ==========================================
 
-
-In the simplest case, ``tyro.cli()`` can be used to run a function with arguments
-populated from the CLI.
-
+In the simplest case, :func:`tyro.cli()` can be used to run a function with
+arguments populated from the CLI.
 
 
 .. code-block:: python

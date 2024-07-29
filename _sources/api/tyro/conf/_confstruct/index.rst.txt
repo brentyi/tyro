@@ -64,9 +64,18 @@ Module Contents
    Returns a metadata object for fine-grained argument configuration with
    ``typing.Annotated``. Should typically not be required.
 
+   We support using ``arg()`` at the root of arguments. For example:
+
    .. code-block:: python
 
       x: Annotated[int, tyro.conf.arg(...)]
+
+   Nesting ``arg()`` within other types is generally not supported:
+
+   .. code-block:: python
+
+      # Not supported.
+      x: tuple[Annotated[int, tyro.conf.arg(...)], ...]
 
    :param name: A new name for the argument in the CLI.
    :param metavar: Argument name in usage messages. The type is used by default.

@@ -4,10 +4,8 @@
 Attrs Integration
 ==========================================
 
-
-In addition to standard dataclasses, ``tyro`` also supports
+In addition to standard dataclasses, :func:`tyro.cli()` also supports
 `attrs <https://www.attrs.org/>`_ classes.
-
 
 
 .. code-block:: python

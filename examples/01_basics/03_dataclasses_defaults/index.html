@@ -3,10 +3,10 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Enums" href="../04_enums/" /><link rel="prev" title="Dataclasses" href="../02_dataclasses/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Multi-value Arguments" href="../04_collections/" /><link rel="prev" title="Dataclasses" href="../02_dataclasses/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
-        <title>Multi-value Arguments - tyro</title>
+        <title>Dataclasses + Defaults - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
@@ -172,11 +172,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../04_enums/">Enums</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -256,50 +257,71 @@
           </label>
         </div>
         <article role="main">
-          <section id="multi-value-arguments">
-<h1>Multi-value Arguments<a class="headerlink" href="#multi-value-arguments" title="Link to this heading">#</a></h1>
-<p>Arguments of both fixed and variable lengths can be annotated with standard
-Python collection types. For Python 3.7 and 3.8, we can use either
-<code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">annotations</span></code> or<code class="docutils literal notranslate"><span class="pre">typing.List[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">typing.Tuple[T1,</span> <span class="pre">T2]</span></code>, etc.</p>
+          <section id="dataclasses-defaults">
+<h1>Dataclasses + Defaults<a class="headerlink" href="#dataclasses-defaults" title="Link to this heading">#</a></h1>
+<p>The <code class="code docutils literal notranslate"><span class="pre">default=</span></code> argument can be used to override default values in dataclass
+types.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We advise against mutation of configuration objects from a dataclass’s
+<code class="code docutils literal notranslate"><span class="pre">__post_init__</span></code> method[#f1]_. In the example below,
+<code class="code docutils literal notranslate"><span class="pre">__post_init__</span></code> would be called for both the <code class="code docutils literal notranslate"><span class="pre">Args()</span></code> object
+provided as a default value and as an output from <a class="reference internal" href="../../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.
+Instead, we show below one example of how derived fields can be defined
+immutably.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></span>
+<p>Official Python docs for <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code> can be found <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.__post_init__">here</a>.</p>
+</aside>
+</aside>
+</div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span>
+<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">TrainConfig</span><span class="p">:</span>
-<span class="linenos"> 9</span>    <span class="c1"># Example of a variable-length tuple. `list[T]`, `set[T]`,</span>
-<span class="linenos">10</span>    <span class="c1"># `dict[K, V]`, etc are supported as well.</span>
-<span class="linenos">11</span>    <span class="n">dataset_sources</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
-<span class="linenos">12</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Paths to load training data from. This can be multiple!&quot;&quot;&quot;</span>
+<span class="linenos"> 6</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
+<span class="linenos"> 9</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
+<span class="linenos">12</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A string field.&quot;&quot;&quot;</span>
 <span class="linenos">13</span>
-<span class="linenos">14</span>    <span class="c1"># Fixed-length tuples are also okay.</span>
-<span class="linenos">15</span>    <span class="n">image_dimensions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">)</span>
-<span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Height and width of some image data.&quot;&quot;&quot;</span>
-<span class="linenos">17</span>
-<span class="linenos">18</span>
-<span class="linenos">19</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">20</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">TrainConfig</span><span class="p">)</span>
-<span class="linenos">21</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">14</span>    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="linenos">15</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A numeric field, with a default value.&quot;&quot;&quot;</span>
+<span class="linenos">16</span>
+<span class="linenos">17</span>    <span class="nd">@property</span>
+<span class="linenos">18</span>    <span class="k">def</span> <span class="nf">derived_field</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">19</span>        <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">field1</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">field2</span><span class="p">)</span>
+<span class="linenos">20</span>
+<span class="linenos">21</span>
+<span class="linenos">22</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">23</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
+<span class="linenos">24</span>        <span class="n">Args</span><span class="p">,</span>
+<span class="linenos">25</span>        <span class="n">default</span><span class="o">=</span><span class="n">Args</span><span class="p">(</span>
+<span class="linenos">26</span>            <span class="n">field1</span><span class="o">=</span><span class="s2">&quot;default string&quot;</span><span class="p">,</span>
+<span class="linenos">27</span>            <span class="n">field2</span><span class="o">=</span><span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
+<span class="linenos">28</span>        <span class="p">),</span>
+<span class="linenos">29</span>    <span class="p">)</span>
+<span class="linenos">30</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">derived_field</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 01_basics/03_collections.py --help</kbd><pre class="ansi-block literal-block">usage: 03_collections.py [-h] --dataset-sources [PATH [PATH ...]]
-                         [--image-dimensions INT INT]
+<kbd>python 01_basics/03_dataclasses_defaults.py --help</kbd><pre class="ansi-block literal-block">usage: 03_dataclasses_defaults.py [-h] [--field1 STR] --field2 INT
 
-╭─ options ──────────────────────────────────────────────────────────────╮
-│ -h, --help                                                             │
-│     show this help message and exit                                    │
-│ --dataset-sources [PATH [PATH ...]]                                    │
-│     Paths to load training data from. This can be multiple! (required) │
-│ --image-dimensions INT INT                                             │
-│     Height and width of some image data. (default: 32 32)              │
-╰────────────────────────────────────────────────────────────────────────╯</pre>
+Description. This should show up in the helptext!
+
+╭─ options ─────────────────────────────────────────────────────────────╮
+│ -h, --help          show this help message and exit                   │
+│ --field1 STR        A string field. (default: 'default string')       │
+│ --field2 INT        A numeric field, with a default value. (required) │
+╰───────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/03_collections.py --dataset-sources ./data --image-dimensions 16 16</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(16, 16))</pre>
+<kbd>python 01_basics/03_dataclasses_defaults.py --field2 3</kbd><pre class="ansi-block literal-block">default string, default string, default string</pre>
 <hr class="docutils" />
-<kbd>python 01_basics/03_collections.py --dataset-sources ./data</kbd><pre class="ansi-block literal-block">TrainConfig(dataset_sources=(PosixPath('data'),), image_dimensions=(32, 32))</pre>
+<kbd>python 01_basics/03_dataclasses_defaults.py --field1 hello --field2 5</kbd><pre class="ansi-block literal-block">hello, hello, hello, hello, hello</pre>
 </section>
 
         </article>
@@ -307,12 +329,12 @@ Python collection types. For Python 3.7 and 3.8, we can use either
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../04_enums/">
+          <a class="next-page" href="../04_collections/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Enums</div>
+                <div class="title">Multi-value Arguments</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

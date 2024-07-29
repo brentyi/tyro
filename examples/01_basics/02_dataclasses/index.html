@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Multi-value Arguments" href="../03_collections/" /><link rel="prev" title="Functions" href="../01_functions/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Dataclasses + Defaults" href="../03_dataclasses_defaults/" /><link rel="prev" title="Functions" href="../01_functions/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Dataclasses - tyro</title>
@@ -172,11 +172,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_functions/">Functions</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,8 +259,7 @@
         <article role="main">
           <section id="dataclasses">
 <h1>Dataclasses<a class="headerlink" href="#dataclasses" title="Link to this heading">#</a></h1>
-<p>Common pattern: use <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code> to instantiate a dataclass. The outputted instance
-can be used as a typed alternative for an argparse namespace.</p>
+<p>Common pattern: use <a class="reference internal" href="../../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> to instantiate a dataclass.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">tyro</span>
@@ -303,12 +303,12 @@ Description. This should show up in the helptext!
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../03_collections/">
+          <a class="next-page" href="../03_dataclasses_defaults/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Multi-value Arguments</div>
+                <div class="title">Dataclasses + Defaults</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

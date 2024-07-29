@@ -3,7 +3,7 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Hierarchical Configs" href="../../02_nesting/01_nesting/" /><link rel="prev" title="Choices" href="../06_literals/" />
+<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Enums" href="../08_enums/" /><link rel="prev" title="Choices" href="../06_literals/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Unions - tyro</title>
@@ -172,11 +172,12 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../06_literals/">Choices</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,7 +259,8 @@
         <article role="main">
           <section id="unions">
 <h1>Unions<a class="headerlink" href="#unions" title="Link to this heading">#</a></h1>
-<p><code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span> <span class="pre">Y</span></code> or <code class="docutils literal notranslate"><span class="pre">typing.Union[X,</span> <span class="pre">Y]</span></code> can be used to expand inputs to multiple types.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span> <span class="pre">Y</span></code> or <code class="code docutils literal notranslate"><span class="pre">typing.Union[X,</span> <span class="pre">Y]</span></code> can be used to expand inputs to
+multiple types.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">enum</span>
 <span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
@@ -321,12 +323,12 @@
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../../02_nesting/01_nesting/">
+          <a class="next-page" href="../08_enums/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Hierarchical Configs</div>
+                <div class="title">Enums</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

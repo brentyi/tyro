@@ -172,11 +172,12 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/01_functions/">Functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/02_dataclasses/">Dataclasses</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_collections/">Multi-value Arguments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_enums/">Enums</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/03_dataclasses_defaults/">Dataclasses + Defaults</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/04_collections/">Multi-value Arguments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/05_flags/">Booleans and Flags</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/06_literals/">Choices</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../01_basics/07_unions/">Unions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../01_basics/08_enums/">Enums</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Hierarchies</span></p>
 <ul>
@@ -258,11 +259,11 @@
         <article role="main">
           <section id="cleaner-console-outputs-for-scripts-with-multiple-workers">
 <h1>Cleaner Console Outputs for Scripts with Multiple Workers<a class="headerlink" href="#cleaner-console-outputs-for-scripts-with-multiple-workers" title="Link to this heading">#</a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">console_outputs=</span></code> argument can be set to <code class="docutils literal notranslate"><span class="pre">False</span></code> to suppress helptext and
+<p>The <code class="code docutils literal notranslate"><span class="pre">console_outputs=</span></code> argument can be set to <code class="code docutils literal notranslate"><span class="pre">False</span></code> to suppress helptext and
 error message printing.</p>
 <p>This is useful in PyTorch for distributed training scripts, where you only want
 to print the helptext from the main process:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Hugging Face Accelerate.</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># HuggingFace Accelerate.</span>
 <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">,</span> <span class="n">console_outputs</span><span class="o">=</span><span class="n">accelerator</span><span class="o">.</span><span class="n">is_main_process</span><span class="p">)</span>
 
 <span class="c1"># PyTorch DDP.</span>
