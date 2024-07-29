@@ -28,10 +28,12 @@ def test_flag_default_false() -> None:
         default=A(False),
     ) == A(False)
 
+    # Type ignore can be removed once TypeForm lands.
+    # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
     assert tyro.cli(
         tyro.conf.FlagConversionOff[A],
         args=["--x", "True"],
-        default=A(False),
+        default=A(False),  # type: ignore
     ) == A(True)
 
 
@@ -60,8 +62,10 @@ def test_flag_default_true() -> None:
         default=A(True),
     ) == A(True)
 
+    # Type ignore can be removed once TypeForm lands.
+    # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
     assert tyro.cli(
         tyro.conf.FlagConversionOff[A],
         args=["--x", "True"],
-        default=A(False),
+        default=A(False),  # type: ignore
     ) == A(True)

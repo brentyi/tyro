@@ -331,14 +331,10 @@ def get_callable_description(f: Callable) -> str:
             return ""
 
     parsed_docstring = docstring_parser.parse(docstring)
-    return "\n".join(
-        list(
-            filter(
-                lambda x: x is not None,  # type: ignore
-                [
-                    parsed_docstring.short_description,
-                    parsed_docstring.long_description,
-                ],
-            )
-        )
-    )
+
+    parts: List[str] = []
+    if parsed_docstring.short_description is not None:
+        parts.append(parsed_docstring.short_description)
+    if parsed_docstring.long_description is not None:
+        parts.append(parsed_docstring.long_description)
+    return "\n".join(parts)

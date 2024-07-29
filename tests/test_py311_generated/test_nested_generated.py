@@ -1148,6 +1148,16 @@ def test_subcommand_dict_helper() -> None:
         """Make a commit."""
         return (message, all)
 
+    # If we only get one, we unfortunately can't form subcommands. This is
+    # because unions in Python require at least 2 types.
+    with pytest.raises(AssertionError):
+        tyro.extras.subcommand_cli_from_dict(
+            {
+                "commit": commit,
+            },
+            args="--message hello --all".split(" "),
+        )
+
     assert (
         tyro.extras.subcommand_cli_from_dict(
             {
