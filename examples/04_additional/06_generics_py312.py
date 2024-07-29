@@ -4,7 +4,10 @@
 """Generic Types (Python 3.12+ syntax)
 
 Example of parsing for generic dataclasses using syntax introduced in Python
-3.12. Note: this is not compatible with `from __future__ import annotations`.
+3.12 (`PEP 695 <https://peps.python.org/pep-0695/>`_).
+
+.. warning::
+    If used in conjunction with :code:`from __future__ import annotations`, the updated type parameter syntax requires Python 3.12.4 or newer. For technical details, see `this CPython PR <https://github.com/python/cpython/pull/118009>`_.
 
 Usage:
 `python ./05_generics.py --help`

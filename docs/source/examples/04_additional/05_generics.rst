@@ -4,9 +4,7 @@
 Generic Types
 ==========================================
 
-
 Example of parsing for generic dataclasses.
-
 
 
 .. code-block:: python

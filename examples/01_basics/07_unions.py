@@ -1,6 +1,7 @@
 """Unions
 
-`X | Y` or `typing.Union[X, Y]` can be used to expand inputs to multiple types.
+:code:`X | Y` or :code:`typing.Union[X, Y]` can be used to expand inputs to
+multiple types.
 
 Usage:
 `python ./07_unions.py --help`

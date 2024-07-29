@@ -1,7 +1,7 @@
 """Attrs Integration
 
-In addition to standard dataclasses, `tyro` also supports
-[attrs](https://www.attrs.org/) classes.
+In addition to standard dataclasses, :func:`tyro.cli()` also supports
+`attrs <https://www.attrs.org/>`_ classes.
 
 Usage:
 `python ./09_attrs.py --help`

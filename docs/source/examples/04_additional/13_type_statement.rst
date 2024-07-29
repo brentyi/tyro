@@ -4,9 +4,7 @@
 Type Aliases (Python 3.12+)
 ==========================================
 
-
-In Python 3.12, the ``type`` statement is introduced to create type aliases.
-
+In Python 3.12, the :code:`type` statement is introduced to create type aliases.
 
 
 .. code-block:: python

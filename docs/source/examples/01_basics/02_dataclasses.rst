@@ -4,10 +4,7 @@
 Dataclasses
 ==========================================
 
-
-Common pattern: use ``tyro.cli()`` to instantiate a dataclass. The outputted instance
-can be used as a typed alternative for an argparse namespace.
-
+Common pattern: use :func:`tyro.cli()` to instantiate a dataclass.
 
 
 .. code-block:: python

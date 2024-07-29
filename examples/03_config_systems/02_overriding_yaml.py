@@ -1,7 +1,8 @@
 """Overriding YAML Configs
 
-If you have a library of existing YAML files that you want to use, `tyro` can be used to
-override values in them.
+If you have a library of existing YAML files that you want to use, `tyro` can
+be used to override values in them. This example uses a dictionary; we
+generally recommend dataset configs for new projects.
 
 Usage:
 `python ./02_overriding_yaml.py --help`

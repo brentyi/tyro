@@ -8,8 +8,6 @@ import shlex
 import shutil
 from typing import Iterable
 
-import m2r2
-
 import tyro
 
 
@@ -120,7 +118,7 @@ def main(
                     f"{ex.title}",
                     "==========================================",
                     "",
-                    m2r2.convert(ex.description),
+                    ex.description,
                     "",
                     "",
                     ".. code-block:: python",

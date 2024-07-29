@@ -4,13 +4,11 @@
 Dictionaries and TypedDict
 ==========================================
 
+Dictionary inputs can be specified using either a standard `Dict[K, V]`
+annotation, or a :code:`TypedDict` subclass.
 
-Dictionary inputs can be specified using either a standard ``Dict[K, V]``
-annotation, or a ``TypedDict`` subclass.
-
-For configuring ``TypedDict``\ , we also support ``total={True/False}``\ ,
-``typing.Required``\ , and ``typing.NotRequired``.
-
+For configuring :code:`TypedDict`, we also support :code:`total={True/False}`,
+:code:`typing.Required`, and :code:`typing.NotRequired`. See the `Python docs <https://docs.python.org/3/library/typing.html#typing.TypedDict>`_ for all :code:`TypedDict` features.
 
 
 .. code-block:: python

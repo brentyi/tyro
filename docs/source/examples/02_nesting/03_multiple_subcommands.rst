@@ -4,9 +4,7 @@
 Sequenced Subcommands
 ==========================================
 
-
 Multiple unions over nested types are populated using a series of subcommands.
-
 
 
 .. code-block:: python

@@ -4,10 +4,8 @@
 Pydantic Integration
 ==========================================
 
-
-In addition to standard dataclasses, ``tyro`` also supports
+In addition to standard dataclasses, :func:`tyro.cli()` also supports
 `Pydantic <https://github.com/pydantic/pydantic>`_ models.
-
 
 
 .. code-block:: python
