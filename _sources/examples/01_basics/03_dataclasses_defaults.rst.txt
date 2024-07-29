@@ -10,7 +10,7 @@ types.
 
 .. warning::
     We advise against mutation of configuration objects from a dataclass's
-    :code:`__post_init__` method[#f1]_. In the example below,
+    :code:`__post_init__` method [#f1]_. In the example below,
     :code:`__post_init__` would be called for both the :code:`Args()` object
     provided as a default value and as an output from :func:`tyro.cli()`.
     Instead, we show below one example of how derived fields can be defined
