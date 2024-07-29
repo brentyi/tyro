@@ -65,6 +65,7 @@ def _get_contained_special_types_from_type(
 
     # Handle fields.
     for field in _resolver.resolved_fields(cls):  # type: ignore
+        assert not isinstance(field.type, str)
         contained_special_types |= handle_type(field.type)
 
     # Handle subclasses.

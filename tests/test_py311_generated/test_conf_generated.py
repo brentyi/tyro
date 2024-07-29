@@ -148,10 +148,12 @@ def test_avoid_subparser_with_default_recursive() -> None:
             DefaultInstanceSubparser,
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "5"],
         )
+        # Type ignore can be removed once TypeForm lands.
+        # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
             tyro.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "--bc.y", "5"],
-            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=3)),  # type: ignore
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=5))
     )
@@ -165,10 +167,12 @@ def test_avoid_subparser_with_default_recursive() -> None:
             tyro.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--x", "1", "bc:default-instance-http-server", "--bc.y", "8"],
         )
+        # Type ignore can be removed once TypeForm lands.
+        # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
             tyro.conf.AvoidSubcommands[DefaultInstanceSubparser],
             args=["--bc.y", "8"],
-            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),  # type: ignore
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )
@@ -439,10 +443,12 @@ def test_flag() -> None:
         default=A(False),
     ) == A(True)
 
+    # Type ignore can be removed once TypeForm lands.
+    # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
     assert tyro.cli(
         tyro.conf.FlagConversionOff[A],
         args=["--x", "True"],
-        default=A(False),
+        default=A(False),  # type: ignore
     ) == A(True)
 
 
@@ -460,10 +466,12 @@ def test_fixed() -> None:
     ) == A(True)
 
     with pytest.raises(SystemExit):
+        # Type ignore can be removed once TypeForm lands.
+        # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         assert tyro.cli(
             tyro.conf.FlagConversionOff[A],
             args=["--x", "True"],
-            default=A(False),
+            default=A(False),  # type: ignore
         ) == A(True)
 
 
@@ -480,11 +488,13 @@ def test_fixed_recursive() -> None:
         default=A(False),
     ) == A(True)
 
+    # Type ignore can be removed once TypeForm lands.
+    # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
     with pytest.raises(SystemExit):
         assert tyro.cli(
             tyro.conf.Fixed[tyro.conf.FlagConversionOff[A]],
             args=["--x", "True"],
-            default=A(False),
+            default=A(False),  # type: ignore
         ) == A(True)
 
 
@@ -708,6 +718,8 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
                 "--no-flag",
             ],
         )
+        # Type ignore can be removed once TypeForm lands.
+        # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
             tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
             args=[
@@ -717,7 +729,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
                 "--y",
                 "5",
             ],
-            default=DefaultInstanceSubparser(
+            default=DefaultInstanceSubparser(  # type: ignore
                 x=1, bc=DefaultInstanceHTTPServer(y=3, flag=False)
             ),
         )
@@ -734,6 +746,8 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
                 "8",
             ],
         )
+        # Type ignore can be removed once TypeForm lands.
+        # https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
         == tyro.cli(
             tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser],
             args=[
@@ -743,7 +757,7 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
                 "--y",
                 "8",
             ],
-            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),
+            default=DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=7)),  # type: ignore
         )
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )
@@ -1176,6 +1190,21 @@ def test_custom_constructor_8() -> None:
     assert "We're missing arguments" in error
     assert "'a'" in error
     assert "'b'" not in error
+
+
+def test_custom_constructor_9() -> None:
+    def commit(branch: str) -> int:
+        """Commit"""
+        print(f"commit branch={branch}")
+        return 3
+
+    assert (
+        tyro.cli(  # type: ignore
+            Annotated[Any, tyro.conf.arg(constructor=commit)],
+            args="--branch 5".split(" "),
+        )
+        == 3
+    )
 
 
 def test_alias() -> None:

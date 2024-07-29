@@ -587,6 +587,7 @@ def _field_list_from_dataclass(
         if helptext is None:
             helptext = _docstrings.get_field_docstring(cls, dc_field.name)
 
+        assert not isinstance(dc_field.type, str)
         field_list.append(
             FieldDefinition.make(
                 name=dc_field.name,
