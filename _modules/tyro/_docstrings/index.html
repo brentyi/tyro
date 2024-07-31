@@ -386,7 +386,7 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tokenization</span> <span class="o">=</span> <span class="n">_ClassTokenization</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">search_cls</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
             <span class="c1"># OSError is raised when we can&#39;t read the source code. This is</span>
             <span class="c1"># fine, we just assume there&#39;s no docstring. We can uncomment the</span>
             <span class="c1"># assert below for debugging.</span>
