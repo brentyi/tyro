@@ -387,13 +387,18 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">tokenization</span> <span class="o">=</span> <span class="n">_ClassTokenization</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">search_cls</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="k">assert</span> <span class="p">(</span>
-                <span class="c1"># Dynamic dataclasses will result in an OSError -- this is fine, we just assume</span>
-                <span class="c1"># there&#39;s no docstring.</span>
-                <span class="s2">&quot;could not find class definition&quot;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="c1"># Pydantic.</span>
-                <span class="ow">or</span> <span class="s2">&quot;source code not available&quot;</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="p">)</span>
+            <span class="c1"># OSError is raised when we can&#39;t read the source code. This is</span>
+            <span class="c1"># fine, we just assume there&#39;s no docstring. We can uncomment the</span>
+            <span class="c1"># assert below for debugging.</span>
+            <span class="c1">#</span>
+            <span class="c1"># assert (</span>
+            <span class="c1">#     # Dynamic dataclasses.</span>
+            <span class="c1">#     &quot;could not find class definition&quot; in e.args[0]</span>
+            <span class="c1">#     # Pydantic.</span>
+            <span class="c1">#     or &quot;source code not available&quot; in e.args[0]</span>
+            <span class="c1">#     # Third error that can be raised by inspect.py.</span>
+            <span class="c1">#     or &quot;could not get source code&quot; in e.args[0]</span>
+            <span class="c1"># )</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="c1"># Notebooks cause “___ is a built-in class” TypeError.</span>
