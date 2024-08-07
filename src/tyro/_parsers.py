@@ -350,7 +350,9 @@ def handle_field(
                 ),
                 extern_prefix=_strings.make_field_name(
                     [extern_prefix, field.extern_name]
-                ),
+                )
+                if field.argconf.prefix_name in (True, None)
+                else field.extern_name,
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
             )
