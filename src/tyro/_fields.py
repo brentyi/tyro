@@ -845,7 +845,10 @@ def _field_list_from_nontuple_sequence_checked(
     contained_type: Any
     if len(get_args(f)) == 0:
         # A raw collection type (list, tuple, etc) was passed in, but narrowing also failed.
-        assert default_instance in MISSING_SINGLETONS, f"{default_instance} {f}"
+        assert (
+            default_instance in MISSING_SINGLETONS
+            or len(cast(typing.Sequence, default_instance)) == 0
+        ), f"Default instance {default_instance} for type {f} was unexpected!"
         return UnsupportedNestedTypeMessage(
             f"Sequence type {f} needs either an explicit type or a"
             " default to infer from."
