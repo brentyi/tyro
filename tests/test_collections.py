@@ -447,6 +447,13 @@ def test_list_narrowing() -> None:
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", 5]
 
 
+def test_list_narrowing_empty() -> None:
+    def main(x: list = []) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", "5"]
+
+
 def test_set_narrowing() -> None:
     def main(x: set = {0, 1, 2, "hello"}) -> Any:
         return x
@@ -454,11 +461,25 @@ def test_set_narrowing() -> None:
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
 
 
+def test_set_narrowing_empty() -> None:
+    def main(x: set = set()) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", "5"}
+
+
 def test_tuple_narrowing() -> None:
     def main(x: tuple = (0, 1, 2, "hello")) -> Any:
         return x
 
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == (0, 1, 2, "3")
+
+
+def test_tuple_narrowing_empty() -> None:
+    def main(x: tuple = ()) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == ("0", "1", "2", "3")
 
 
 def test_tuple_narrowing_empty_default() -> None:
