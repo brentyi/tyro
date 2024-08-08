@@ -1207,6 +1207,44 @@ def test_custom_constructor_9() -> None:
     )
 
 
+def test_custom_constructor_10() -> None:
+    def commit(branch: str) -> int:
+        """Commit"""
+        print(f"commit branch={branch}")
+        return 3
+
+    def inner(x: Annotated[Any, tyro.conf.arg(constructor=commit)]) -> None:
+        return x
+
+    def inner_no_prefix(
+        x: Annotated[Any, tyro.conf.arg(constructor=commit, prefix_name=False)],
+    ) -> None:
+        return x
+
+    def outer(x: Annotated[Any, tyro.conf.arg(constructor=inner)]) -> None:
+        return x
+
+    def outer_no_prefix(
+        x: Annotated[Any, tyro.conf.arg(constructor=inner_no_prefix)],
+    ) -> None:
+        return x
+
+    assert (
+        tyro.cli(
+            outer,
+            args="--x.x.branch 5".split(" "),
+        )
+        == 3
+    )
+    assert (
+        tyro.cli(
+            outer_no_prefix,
+            args="--x.branch 5".split(" "),
+        )
+        == 3
+    )
+
+
 def test_alias() -> None:
     """Arguments with aliases."""
 
