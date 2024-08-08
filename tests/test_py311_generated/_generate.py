@@ -49,7 +49,6 @@ def generate_from_path(test_path: pathlib.Path) -> None:
     )
     out_path.write_text(content)
 
-    subprocess.run(["isort", "--profile=black", str(out_path)], check=True)
     subprocess.run(["ruff", "format", str(out_path)], check=True)
     subprocess.run(["ruff", "check", "--fix", str(out_path)], check=True)
 

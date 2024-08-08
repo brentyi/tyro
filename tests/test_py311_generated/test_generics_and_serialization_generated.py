@@ -436,20 +436,23 @@ def test_annotated() -> None:
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
 
 
+@dataclasses.dataclass
+class TypeA:
+    data: int
+
+
+@dataclasses.dataclass
+class TypeASubclass(TypeA):
+    pass
+
+
+@dataclasses.dataclass
+class Wrapper:
+    subclass: TypeA
+
+
 def test_superclass() -> None:
     # https://github.com/brentyi/tyro/issues/7
-
-    @dataclasses.dataclass
-    class TypeA:
-        data: int
-
-    @dataclasses.dataclass
-    class TypeASubclass(TypeA):
-        pass
-
-    @dataclasses.dataclass
-    class Wrapper:
-        subclass: TypeA
 
     wrapper1 = Wrapper(TypeASubclass(3))  # Create Wrapper object.
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
