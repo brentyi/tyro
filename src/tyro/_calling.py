@@ -226,7 +226,6 @@ def callable_with_args(
         unwrapped_f, default_instance
     )
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
-    unwrapped_f = list if unwrapped_f is Sequence else unwrapped_f  # type: ignore
 
     if unwrapped_f in (tuple, list, set):
         if len(positional_args) > 0:

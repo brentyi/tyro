@@ -155,6 +155,59 @@ def test_sequences() -> None:
         tyro.cli(A, args=[])
 
 
+def test_sequences_narrow() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Sequence = dataclasses.field(default_factory=lambda: [0])
+
+    assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[0])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
+
+
+def test_sequences_narrow_any() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Sequence[Any] = dataclasses.field(default_factory=lambda: [0])
+
+    assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[0])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
+
+
+def test_abc_sequences() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: collections.abc.Sequence[int]
+
+    assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=[])
+
+
+def test_abc_sequences_narrow() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: collections.abc.Sequence = dataclasses.field(default_factory=lambda: [0])
+
+    assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[0])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
+
+
+def test_abc_sequences_narrow_any() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: collections.abc.Sequence[Any] = dataclasses.field(
+            default_factory=lambda: [0]
+        )
+
+    assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[0])
+    assert tyro.cli(A, args=["--x"]) == A(x=[])
+
+
 def test_lists() -> None:
     @dataclasses.dataclass
     class A:
@@ -447,8 +500,22 @@ def test_list_narrowing() -> None:
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", 5]
 
 
+def test_list_narrowing_any() -> None:
+    def main(x: list[Any] = [0, 1, 2, "hello"]) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", 5]
+
+
 def test_list_narrowing_empty() -> None:
     def main(x: list = []) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", "5"]
+
+
+def test_list_narrowing_empty_any() -> None:
+    def main(x: list[Any] = []) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", "5"]
@@ -461,8 +528,22 @@ def test_set_narrowing() -> None:
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
 
 
+def test_set_narrowing_any() -> None:
+    def main(x: set[Any] = {0, 1, 2, "hello"}) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
+
+
 def test_set_narrowing_empty() -> None:
     def main(x: set = set()) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", "5"}
+
+
+def test_set_narrowing_any_empty() -> None:
+    def main(x: set[Any] = set()) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", "5"}
@@ -475,8 +556,22 @@ def test_tuple_narrowing() -> None:
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == (0, 1, 2, "3")
 
 
+def test_tuple_narrowing_any() -> None:
+    def main(x: tuple[Any, ...] = (0, 1, 2, "hello")) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == (0, 1, 2, "3")
+
+
 def test_tuple_narrowing_empty() -> None:
     def main(x: tuple = ()) -> Any:
+        return x
+
+    assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == ("0", "1", "2", "3")
+
+
+def test_tuple_narrowing_empty_any() -> None:
+    def main(x: tuple[Any, ...] = ()) -> Any:
         return x
 
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == ("0", "1", "2", "3")
