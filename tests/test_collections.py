@@ -1,8 +1,10 @@
 import collections
+import collections.abc
 import contextlib
 import dataclasses
 import enum
 import io
+import sys
 from typing import (
     Any,
     Deque,
@@ -175,15 +177,17 @@ def test_sequences_narrow_any() -> None:
     assert tyro.cli(A, args=["--x"]) == A(x=[])
 
 
-def test_abc_sequences() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: collections.abc.Sequence[int]
+if sys.version_info >= (3, 9):
 
-    assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    assert tyro.cli(A, args=["--x"]) == A(x=[])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=[])
+    def test_abc_sequences() -> None:
+        @dataclasses.dataclass
+        class A:
+            x: collections.abc.Sequence[int]
+
+        assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+        assert tyro.cli(A, args=["--x"]) == A(x=[])
+        with pytest.raises(SystemExit):
+            tyro.cli(A, args=[])
 
 
 def test_abc_sequences_narrow() -> None:
@@ -196,16 +200,18 @@ def test_abc_sequences_narrow() -> None:
     assert tyro.cli(A, args=["--x"]) == A(x=[])
 
 
-def test_abc_sequences_narrow_any() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: collections.abc.Sequence[Any] = dataclasses.field(
-            default_factory=lambda: [0]
-        )
+if sys.version_info >= (3, 9):
 
-    assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
-    assert tyro.cli(A, args=[]) == A(x=[0])
-    assert tyro.cli(A, args=["--x"]) == A(x=[])
+    def test_abc_sequences_narrow_any() -> None:
+        @dataclasses.dataclass
+        class A:
+            x: collections.abc.Sequence[Any] = dataclasses.field(
+                default_factory=lambda: [0]
+            )
+
+        assert tyro.cli(A, args=["--x", "1", "2", "3"]) == A(x=[1, 2, 3])
+        assert tyro.cli(A, args=[]) == A(x=[0])
+        assert tyro.cli(A, args=["--x"]) == A(x=[])
 
 
 def test_lists() -> None:
@@ -501,7 +507,7 @@ def test_list_narrowing() -> None:
 
 
 def test_list_narrowing_any() -> None:
-    def main(x: list[Any] = [0, 1, 2, "hello"]) -> Any:
+    def main(x: List[Any] = [0, 1, 2, "hello"]) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", 5]
@@ -515,7 +521,7 @@ def test_list_narrowing_empty() -> None:
 
 
 def test_list_narrowing_empty_any() -> None:
-    def main(x: list[Any] = []) -> Any:
+    def main(x: List[Any] = []) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == ["hi", "there", "5"]
@@ -529,7 +535,7 @@ def test_set_narrowing() -> None:
 
 
 def test_set_narrowing_any() -> None:
-    def main(x: set[Any] = {0, 1, 2, "hello"}) -> Any:
+    def main(x: Set[Any] = {0, 1, 2, "hello"}) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
@@ -543,7 +549,7 @@ def test_set_narrowing_empty() -> None:
 
 
 def test_set_narrowing_any_empty() -> None:
-    def main(x: set[Any] = set()) -> Any:
+    def main(x: Set[Any] = set()) -> Any:
         return x
 
     assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", "5"}
@@ -557,7 +563,7 @@ def test_tuple_narrowing() -> None:
 
 
 def test_tuple_narrowing_any() -> None:
-    def main(x: tuple[Any, ...] = (0, 1, 2, "hello")) -> Any:
+    def main(x: Tuple[Any, ...] = (0, 1, 2, "hello")) -> Any:
         return x
 
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == (0, 1, 2, "3")
@@ -571,7 +577,7 @@ def test_tuple_narrowing_empty() -> None:
 
 
 def test_tuple_narrowing_empty_any() -> None:
-    def main(x: tuple[Any, ...] = ()) -> Any:
+    def main(x: Tuple[Any, ...] = ()) -> Any:
         return x
 
     assert tyro.cli(main, args="--x 0 1 2 3".split(" ")) == ("0", "1", "2", "3")
