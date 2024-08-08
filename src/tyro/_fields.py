@@ -42,6 +42,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -49,7 +50,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -428,10 +428,11 @@ def _try_field_list_from_callable(
         dict,
     ):
         return _field_list_from_dict(f, default_instance)
-    elif f_origin in (list, set, typing.Sequence) or cls in (
+    elif f_origin in (list, set, typing.Sequence, collections.abc.Sequence) or cls in (
         list,
         set,
         typing.Sequence,
+        collections.abc.Sequence,
     ):
         return _field_list_from_nontuple_sequence_checked(f, default_instance)
 

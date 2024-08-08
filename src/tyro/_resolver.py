@@ -15,6 +15,7 @@ from typing import (
     FrozenSet,
     List,
     Optional,
+    Sequence,
     Set,
     Tuple,
     TypeVar,
@@ -263,15 +264,26 @@ def narrow_collection_types(
     typ: TypeOrCallable, default_instance: Any
 ) -> TypeOrCallable:
     """TypeForm narrowing for containers. Infers types of container contents."""
-    if typ is list and isinstance(default_instance, list):
+    args = get_args(typ)
+    origin = get_origin(typ)
+    if args == (Any,) or (origin is tuple and args == (Any, Ellipsis)):
+        typ = origin  # type: ignore
+
+    if typ in (list, Sequence, collections.abc.Sequence) and isinstance(
+        default_instance, list
+    ):
         if len(default_instance) == 0:
             return typ
         typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
-    elif typ is set and isinstance(default_instance, set):
+    elif typ in (set, Sequence, collections.abc.Sequence) and isinstance(
+        default_instance, set
+    ):
         if len(default_instance) == 0:
             return typ
         typ = Set.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
-    elif typ is tuple and isinstance(default_instance, tuple):
+    elif typ in (tuple, Sequence, collections.abc.Sequence) and isinstance(
+        default_instance, tuple
+    ):
         if len(default_instance) == 0:
             return typ
         typ = Tuple.__getitem__(tuple(map(type, default_instance)))  # type: ignore
@@ -406,9 +418,15 @@ def apply_type_from_typevar(
                 if isinstance(typ, new) or origin is new:  # type: ignore
                     typ = old.__getitem__(args)  # type: ignore
 
-        return typ.copy_with(  # type: ignore
-            tuple(apply_type_from_typevar(x, type_from_typevar) for x in args)
-        )
+        new_args = tuple(apply_type_from_typevar(x, type_from_typevar) for x in args)
+
+        # Standard generic aliases have a `copy_with()`!
+        if hasattr(typ, "copy_with"):
+            return typ.copy_with(new_args)  # type: ignore
+        else:
+            # `collections` types, like collections.abc.Sequence.
+            assert hasattr(origin, "__class_getitem__")
+            return origin.__class_getitem__(new_args)  # type: ignore
 
     return typ
 
