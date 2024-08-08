@@ -725,10 +725,11 @@
         <span class="nb">dict</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="n">_field_list_from_dict</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
+    <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
         <span class="nb">list</span><span class="p">,</span>
         <span class="nb">set</span><span class="p">,</span>
         <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+        <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">return</span> <span class="n">_field_list_from_nontuple_sequence_checked</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
@@ -1142,7 +1143,10 @@
     <span class="n">contained_type</span><span class="p">:</span> <span class="n">Any</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="c1"># A raw collection type (list, tuple, etc) was passed in, but narrowing also failed.</span>
-        <span class="k">assert</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">default_instance</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+            <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Default instance </span><span class="si">{</span><span class="n">default_instance</span><span class="si">}</span><span class="s2"> for type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> was unexpected!&quot;</span>
         <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Sequence type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> needs either an explicit type or a&quot;</span>
             <span class="s2">&quot; default to infer from.&quot;</span>
