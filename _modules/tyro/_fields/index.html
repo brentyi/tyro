@@ -1183,8 +1183,10 @@
         <span class="c1"># We use the broader error type to prevent it from being caught by</span>
         <span class="c1"># is_possibly_nested_type(). This is for sure a bad annotation!</span>
         <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-            <span class="s2">&quot;For variable-length sequences over nested types, we need a default value&quot;</span>
-            <span class="s2">&quot; to infer length from.&quot;</span>
+            <span class="s2">&quot;tyro currently only supports fixed-length sequences of nested types. For &quot;</span>
+            <span class="s2">&quot;variable-length sequences over nested types, we need a default value to &quot;</span>
+            <span class="s2">&quot;infer length from. You can also consider a custom constructor, see here &quot;</span>
+            <span class="s2">&quot;for an example: https://github.com/brentyi/tyro/issues/151&quot;</span>
         <span class="p">)</span>
 
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
