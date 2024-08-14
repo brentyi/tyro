@@ -1102,8 +1102,12 @@ def test_custom_constructor_5() -> None:
 
 
 def test_custom_constructor_6() -> None:
-    def make_float(a: tyro.conf.Positional[float], b: float, c: float = 3) -> float:
-        return a * b * c
+    def make_float(
+        a: tyro.conf.Positional[float],
+        b2: Annotated[float, tyro.conf.arg(name="b")],
+        c: float = 3,
+    ) -> float:
+        return a * b2 * c
 
     @dataclasses.dataclass
     class Config:
@@ -1122,7 +1126,9 @@ def test_custom_constructor_6() -> None:
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.cli(Config, args="--x.c 5".split(" "))
     error = target.getvalue()
-    assert "We're missing" in error
+    assert "either all arguments must be provided" in error
+    assert "or none of them" in error
+    assert "We're missing arguments" in error
 
 
 def test_custom_constructor_7() -> None:
@@ -1157,8 +1163,8 @@ def test_custom_constructor_7() -> None:
         tyro.cli(Config, args="--x.struct.c 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
-    assert "'b'" in error
-    assert "'a'" in error  # The 5 is parsed into `a`.
+    assert "'--x.struct.b'" in error
+    assert "'--x.struct.a'" in error  # The 5 is parsed into `a`.
 
 
 def test_custom_constructor_8() -> None:
@@ -1191,8 +1197,8 @@ def test_custom_constructor_8() -> None:
         tyro.cli(Config, args="--x.struct.b 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
-    assert "'a'" in error
-    assert "'b'" not in error
+    assert "'x.struct.a'" in error
+    assert "'--x.struct.b'" not in error
 
 
 def test_custom_constructor_9() -> None:
@@ -1288,8 +1294,8 @@ def test_alias() -> None:
         tyro.cli(Config, args="--x.struct.b 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
-    assert "'a'" in error
-    assert "'b'" not in error
+    assert "'--x.struct.a'" in error
+    assert "'--x.struct.b'" not in error
 
     assert "--x.struct.a INT, --all INT, -d INT" in get_helptext_with_checks(Config)
 

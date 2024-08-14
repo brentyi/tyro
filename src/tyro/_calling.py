@@ -206,11 +206,22 @@ def callable_with_args(
 
         message = "either all arguments must be provided or none of them."
         if len(kwargs) > 0:
-            missing_kwargs = [
-                k for k, v in kwargs.items() if v in _fields.MISSING_SINGLETONS
-            ]
-            if len(missing_kwargs):
-                message += f" We're missing arguments {missing_kwargs}."
+            missing_args: List[str] = []
+            for k, v in kwargs.items():
+                if v not in _fields.MISSING_SINGLETONS:
+                    break
+
+                # Argument is missing.
+                found = False
+                for arg in arg_from_prefixed_field_name.values():
+                    if arg.field.call_argname == k:
+                        missing_args.append(arg.lowered.name_or_flag)
+                        found = True
+                        break
+                assert found, "This is likely a bug in tyro."
+
+            if len(missing_args):
+                message += f" We're missing arguments {missing_args}."
         raise InstantiationError(
             message,
             field_name_prefix,
