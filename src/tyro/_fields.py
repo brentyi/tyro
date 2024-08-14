@@ -886,8 +886,10 @@ def _try_field_list_from_sequence_inner(
         # We use the broader error type to prevent it from being caught by
         # is_possibly_nested_type(). This is for sure a bad annotation!
         raise _instantiators.UnsupportedTypeAnnotationError(
-            "For variable-length sequences over nested types, we need a default value"
-            " to infer length from."
+            "tyro currently only supports fixed-length sequences of nested types. For "
+            "variable-length sequences over nested types, we need a default value to "
+            "infer length from. You can also consider a custom constructor, see here "
+            "for an example: https://github.com/brentyi/tyro/issues/151"
         )
 
     field_list = []
