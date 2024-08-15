@@ -201,8 +201,8 @@ EXCLUDE_FROM_CALL = ExcludeFromCallType()
 
 # Note that our "public" missing API will always be the propagating missing sentinel.
 MISSING: Any = MISSING_PROP
-"""Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
-`default_instance` for `tyro.cli()` as required."""
+"""Sentinel value to mark fields as missing. Can be used to mark fields passed
+in via `default=` for `tyro.cli()` as required."""
 
 
 MISSING_SINGLETONS = [
