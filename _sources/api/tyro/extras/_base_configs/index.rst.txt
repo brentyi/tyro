@@ -13,6 +13,50 @@ Module Contents
 
    
 
+.. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, args: Optional[Sequence[str]] = None) -> T
+
+   
+   Helper function for creating a CLI interface that allows us to choose
+   between default config objects (typically dataclasses) and override values
+   within it. Turns off subcommand creation for any union types within the
+   config object.
+
+   This is a lightweight wrapper over :func:`tyro.cli()`, with some default
+   arguments populated. Also see
+   :func:`tyro.extras.subcommand_type_from_defaults()`.
+
+   Example usage:
+
+   .. code-block:: python
+
+      import dataclasses
+
+      import tyro
+
+
+      @dataclasses.dataclass
+      class Config:
+          a: int
+          b: str
+
+
+      default_configs = {
+          "small": (
+              "Small config",
+              Config(1, "small"),
+          ),
+          "big": (
+              "Big config",
+              Config(100, "big"),
+          ),
+      }
+      config = tyro.extras.overridable_config_cli(default_configs)
+      print(config)
+
+   :param configs: A dictionary of config names mapped to a tuple of
+                   (description, config object).
+   :param args: Optional arguments to pass to the CLI.
+
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> tyro._typing.TypeForm[T]
 
    

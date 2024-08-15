@@ -290,6 +290,56 @@ flag.</p>
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="tyro.extras.overridable_config_cli">
+<span class="sig-prename descclassname"><span class="pre">tyro.extras.</span></span><span class="sig-name descname"><span class="pre">overridable_config_cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="reference internal" href="../../../_modules/tyro/extras/_base_configs/#overridable_config_cli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.overridable_config_cli" title="Link to this definition">#</a></dt>
+<dd><p>Helper function for creating a CLI interface that allows us to choose
+between default config objects (typically dataclasses) and override values
+within it. Turns off subcommand creation for any union types within the
+config object.</p>
+<p>This is a lightweight wrapper over <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, with some default
+arguments populated. Also see
+<a class="reference internal" href="#tyro.extras.subcommand_type_from_defaults" title="tyro.extras.subcommand_type_from_defaults"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.subcommand_type_from_defaults()</span></code></a>.</p>
+<p>Example usage:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dataclasses</span>
+
+<span class="kn">import</span> <span class="nn">tyro</span>
+
+
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">str</span>
+
+
+<span class="n">default_configs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;Small config&quot;</span><span class="p">,</span>
+        <span class="n">Config</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;small&quot;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="p">(</span>
+        <span class="s2">&quot;Big config&quot;</span><span class="p">,</span>
+        <span class="n">Config</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;big&quot;</span><span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">}</span>
+<span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">overridable_config_cli</span><span class="p">(</span><span class="n">default_configs</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>configs</strong> (<em>Mapping</em><em>[</em><em>str</em><em>, </em><em>Tuple</em><em>[</em><em>str</em><em>, </em><em>T</em><em>]</em><em>]</em>) – A dictionary of config names mapped to a tuple of
+(description, config object).</p></li>
+<li><p><strong>args</strong> (<em>Optional</em><em>[</em><em>Sequence</em><em>[</em><em>str</em><em>]</em><em>]</em>) – Optional arguments to pass to the CLI.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>T</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="tyro.extras.subcommand_type_from_defaults">
 <span class="sig-prename descclassname"><span class="pre">tyro.extras.</span></span><span class="sig-name descname"><span class="pre">subcommand_type_from_defaults</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">defaults</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">descriptions</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Mapping</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/extras/_base_configs/#subcommand_type_from_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.subcommand_type_from_defaults" title="Link to this definition">#</a></dt>
 <dd><p>Construct a Union type for defining subcommands that choose between defaults.</p>
@@ -560,6 +610,7 @@ when parsing happens. We default helptext to hyphens to follow the GNU style gui
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
 <li><a class="reference internal" href="#tyro.extras.set_accent_color"><code class="docutils literal notranslate"><span class="pre">set_accent_color()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.extras.get_parser"><code class="docutils literal notranslate"><span class="pre">get_parser()</span></code></a></li>
+<li><a class="reference internal" href="#tyro.extras.overridable_config_cli"><code class="docutils literal notranslate"><span class="pre">overridable_config_cli()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.extras.subcommand_type_from_defaults"><code class="docutils literal notranslate"><span class="pre">subcommand_type_from_defaults()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.extras.literal_type_from_choices"><code class="docutils literal notranslate"><span class="pre">literal_type_from_choices()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.extras.from_yaml"><code class="docutils literal notranslate"><span class="pre">from_yaml()</span></code></a></li>
