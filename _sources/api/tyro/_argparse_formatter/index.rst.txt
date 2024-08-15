@@ -114,8 +114,8 @@ Module Contents
 .. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
 
 
-.. py:data:: global_unrecognized_args
-   :type: List[str]
+.. py:data:: global_unrecognized_arg_and_prog
+   :type: List[Tuple[str, str]]
    :value: []
 
    

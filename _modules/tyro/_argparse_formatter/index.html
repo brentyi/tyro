@@ -543,7 +543,7 @@
 <span class="c1">#</span>
 <span class="c1"># Our current solution is to manually track unrecognized arguments in _parse_known_args,</span>
 <span class="c1"># and in error() override other errors when unrecognized arguments are present.</span>
-<span class="n">global_unrecognized_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="n">global_unrecognized_arg_and_prog</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
 
 <span class="c1"># We inherit from both our local mirror of argparse and the upstream one.</span>
@@ -590,8 +590,8 @@
         <span class="c1"># Reset the unused argument list in the root parser.</span>
         <span class="c1"># Subparsers will have spaces in self.prog.</span>
         <span class="k">if</span> <span class="s2">&quot; &quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="p">:</span>
-            <span class="k">global</span> <span class="n">global_unrecognized_args</span>
-            <span class="n">global_unrecognized_args</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">global</span> <span class="n">global_unrecognized_arg_and_prog</span>
+            <span class="n">global_unrecognized_arg_and_prog</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># &lt;/new&gt;</span>
 
         <span class="c1"># replace arg strings that are file references</span>
@@ -676,7 +676,9 @@
                     <span class="c1"># Manually track unused arguments to assist with error messages</span>
                     <span class="c1"># later.</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parsing_known_args</span><span class="p">:</span>
-                        <span class="n">global_unrecognized_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option_string</span><span class="p">)</span>
+                        <span class="n">global_unrecognized_arg_and_prog</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="p">(</span><span class="n">option_string</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="p">)</span>
+                        <span class="p">)</span>
                     <span class="c1"># &lt;/new&gt;</span>
                     <span class="n">extras</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg_strings</span><span class="p">[</span><span class="n">start_index</span><span class="p">])</span>
                     <span class="k">return</span> <span class="n">start_index</span> <span class="o">+</span> <span class="mi">1</span>
@@ -878,20 +880,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">extra_info</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">global</span> <span class="n">global_unrecognized_args</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
+        <span class="k">global</span> <span class="n">global_unrecognized_arg_and_prog</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_arg_and_prog</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">message</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span>
             <span class="s2">&quot;unrecognized options: &quot;</span>
         <span class="p">):</span>
-            <span class="n">global_unrecognized_args</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="n">global_unrecognized_arg_and_prog</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="p">(</span><span class="n">unknown_arg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">unknown_arg</span> <span class="ow">in</span> <span class="n">message</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+            <span class="p">]</span>
 
         <span class="n">message_title</span> <span class="o">=</span> <span class="s2">&quot;Parsing error&quot;</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">global_unrecognized_arg_and_prog</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">message_title</span> <span class="o">=</span> <span class="s2">&quot;Unrecognized options&quot;</span>
-            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized options: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized options: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">arg</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">_</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">global_unrecognized_arg_and_prog</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="n">unrecognized_arguments</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
                 <span class="n">arg</span>
-                <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">global_unrecognized_args</span>
+                <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">global_unrecognized_arg_and_prog</span>
                 <span class="c1"># If we pass in `--spell-chekc on`, we only want `spell-chekc` and not</span>
                 <span class="c1"># `on`.</span>
                 <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
@@ -904,7 +909,10 @@
             <span class="p">)</span>
 
             <span class="k">if</span> <span class="n">has_subcommands</span> <span class="ow">and</span> <span class="n">same_exists</span><span class="p">:</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Unrecognized or misplaced options: </span><span class="si">{</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">global_unrecognized_args</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s2">&quot;Unrecognized or misplaced options:</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+                <span class="k">for</span> <span class="n">arg</span><span class="p">,</span> <span class="n">prog</span> <span class="ow">in</span> <span class="n">global_unrecognized_arg_and_prog</span><span class="p">:</span>
+                    <span class="n">message</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2"> (applied to [green]</span><span class="si">{</span><span class="n">prog</span><span class="si">}</span><span class="s2">[/green])</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Note that arguments are applied to the directly preceding subcommand, so ordering matters.&quot;</span>
 
             <span class="c1"># Show similar arguments for keyword options.</span>
             <span class="k">for</span> <span class="n">unrecognized_argument</span> <span class="ow">in</span> <span class="n">unrecognized_arguments</span><span class="p">:</span>
