@@ -407,8 +407,11 @@
 <span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="o">*</span><span class="n">markers</span><span class="p">:</span> <span class="n">Marker</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">CallableType</span><span class="p">],</span> <span class="n">CallableType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator for applying configuration options.</span>
 
-<span class="sd">    Configuration markers are implemented via `typing.Annotated` and straightforward to</span>
-<span class="sd">    apply to types, for example:</span>
+<span class="sd">    Consider using the `config=` argument of `tyro.cli()` instead, which takes the same</span>
+<span class="sd">    config marker objects as inputs.</span>
+
+<span class="sd">    Configuration markers are implemented via `typing.Annotated` and straightforward</span>
+<span class="sd">    to apply to types, for example:</span>
 
 <span class="sd">    ```python</span>
 <span class="sd">    field: tyro.conf.FlagConversionOff[bool]</span>
