@@ -1,8 +1,11 @@
 """Base Configurations
 
-We can integrate `tyro.cli()` into common configuration patterns: here, we select
+We can integrate `tyro` into common configuration patterns: here, we select
 one of multiple possible base configurations, create a subcommand for each one, and then
 use the CLI to either override (existing) or fill in (missing) values.
+
+The helper function used here, :func:`tyro.extras.overridable_config_cli()`, is a
+lightweight wrapper over :func:`tyro.cli()`.
 
 
 Usage:
@@ -56,9 +59,10 @@ class ExperimentConfig:
 # Note that we could also define this library using separate YAML files (similar to
 # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
 # checking + IDE support.
-Configs = tyro.extras.subcommand_type_from_defaults(
-    {
-        "small": ExperimentConfig(
+default_configs = {
+    "small": (
+        "Small experiment.",
+        ExperimentConfig(
             dataset="mnist",
             optimizer=AdamOptimizer(),
             batch_size=2048,
@@ -68,7 +72,10 @@ Configs = tyro.extras.subcommand_type_from_defaults(
             seed=0,
             activation=nn.ReLU,
         ),
-        "big": ExperimentConfig(
+    ),
+    "big": (
+        "Big experiment.",
+        ExperimentConfig(
             dataset="imagenet-50",
             optimizer=AdamOptimizer(),
             batch_size=32,
@@ -78,9 +85,8 @@ Configs = tyro.extras.subcommand_type_from_defaults(
             seed=0,
             activation=nn.GELU,
         ),
-    }
-)
-
+    ),
+}
 if __name__ == "__main__":
-    config = tyro.cli(Configs)
+    config = tyro.extras.overridable_config_cli(default_configs)
     print(config)

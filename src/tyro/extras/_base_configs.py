@@ -1,11 +1,70 @@
-from typing import Mapping, TypeVar, Union
+from typing import Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
 from typing_extensions import Annotated
 
 from .._typing import TypeForm
-from ..conf import subcommand
 
 T = TypeVar("T")
+
+
+def overridable_config_cli(
+    configs: Mapping[str, Tuple[str, T]],
+    *,
+    args: Optional[Sequence[str]] = None,
+) -> T:
+    """Helper function for creating a CLI interface that allows us to choose
+    between default config objects (typically dataclasses) and override values
+    within it. Turns off subcommand creation for any union types within the
+    config object.
+
+    This is a lightweight wrapper over :func:`tyro.cli()`, with some default
+    arguments populated. Also see
+    :func:`tyro.extras.subcommand_type_from_defaults()`.
+
+
+    Example usage:
+    ```python
+    import dataclasses
+
+    import tyro
+
+
+    @dataclasses.dataclass
+    class Config:
+        a: int
+        b: str
+
+
+    default_configs = {
+        "small": (
+            "Small config",
+            Config(1, "small"),
+        ),
+        "big": (
+            "Big config",
+            Config(100, "big"),
+        ),
+    }
+    config = tyro.extras.overridable_config_cli(default_configs)
+    print(config)
+    ```
+
+    Args:
+        configs: A dictionary of config names mapped to a tuple of
+            (description, config object).
+        args: Optional arguments to pass to the CLI.
+    """
+    import tyro
+
+    return tyro.cli(
+        tyro.extras.subcommand_type_from_defaults(
+            defaults={k: v[1] for k, v in configs.items()},
+            descriptions={k: v[0] for k, v in configs.items()},
+        ),
+        # Don't create subcommands for union types within the config object.
+        config=(tyro.conf.AvoidSubcommands,),
+        args=args,
+    )
 
 
 def subcommand_type_from_defaults(
@@ -67,6 +126,8 @@ def subcommand_type_from_defaults(
     Returns:
         A subcommand type, which can be passed to :func:`tyro.cli`.
     """
+    import tyro
+
     # We need to form a union type, which requires at least two elements.
     assert len(defaults) >= 2, "At least two subcommands are required."
     return Union.__getitem__(  # type: ignore
@@ -74,7 +135,7 @@ def subcommand_type_from_defaults(
             Annotated.__class_getitem__(  # type: ignore
                 (
                     type(v),
-                    subcommand(
+                    tyro.conf.subcommand(
                         k,
                         default=v,
                         description=descriptions.get(k, ""),
