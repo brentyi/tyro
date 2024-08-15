@@ -53,6 +53,7 @@ def cli(
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[conf._markers.Marker]] = None,
 ) -> OutT: ...
 
 
@@ -67,6 +68,7 @@ def cli(
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[conf._markers.Marker]] = None,
 ) -> Tuple[OutT, List[str]]: ...
 
 
@@ -84,6 +86,7 @@ def cli(
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[conf._markers.Marker]] = None,
 ) -> OutT: ...
 
 
@@ -101,6 +104,7 @@ def cli(
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[conf._markers.Marker]] = None,
 ) -> Tuple[OutT, List[str]]: ...
 
 
@@ -114,6 +118,7 @@ def cli(
     return_unknown_args: bool = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[conf._markers.Marker]] = None,
     **deprecated_kwargs,
 ) -> Union[OutT, Tuple[OutT, List[str]]]:
     """Call or instantiate `f`, with inputs populated from an automatically generated
@@ -180,6 +185,10 @@ def cli(
             supressed. This can be useful for distributed settings, where `tyro.cli()`
             is called from multiple workers but we only want console outputs from the
             main one.
+        config: Sequence of config marker objects, from `tyro.conf`. As an
+            alternative to using them locally in annotations
+            (`tyro.conf.FlagConversionOff[bool]`), we can also pass in a sequence of
+            them here to apply globally.
 
     Returns:
         The output of `f(...)` or an instance `f`. If `f` is a class, the two are
@@ -190,6 +199,9 @@ def cli(
     # Make sure we start on a clean slate. Some tests may fail without this due to
     # memory address conflicts.
     _unsafe_cache.clear_cache()
+
+    if config is not None:
+        f = conf.configure(*config)(f)
 
     with _strings.delimeter_context("_" if use_underscores else "-"):
         output = _cli_impl(

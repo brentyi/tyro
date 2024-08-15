@@ -147,8 +147,11 @@ Marker = Any
 def configure(*markers: Marker) -> Callable[[CallableType], CallableType]:
     """Decorator for applying configuration options.
 
-    Configuration markers are implemented via `typing.Annotated` and straightforward to
-    apply to types, for example:
+    Consider using the `config=` argument of `tyro.cli()` instead, which takes the same
+    config marker objects as inputs.
+
+    Configuration markers are implemented via `typing.Annotated` and straightforward
+    to apply to types, for example:
 
     ```python
     field: tyro.conf.FlagConversionOff[bool]

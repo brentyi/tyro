@@ -48,7 +48,6 @@ class Sgd:
 # Train script.
 
 
-@tyro.conf.configure(tyro.conf.ConsolidateSubcommandArgs)
 def train(
     dataset: Mnist | ImageNet = Mnist(),
     optimizer: Adam | Sgd = Adam(),
@@ -67,4 +66,4 @@ def train(
 
 
 if __name__ == "__main__":
-    tyro.cli(train)
+    tyro.cli(train, config=(tyro.conf.ConsolidateSubcommandArgs,))
