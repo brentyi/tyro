@@ -264,7 +264,7 @@ class _ArgumentInfo:
 #
 # Our current solution is to manually track unrecognized arguments in _parse_known_args,
 # and in error() override other errors when unrecognized arguments are present.
-global_unrecognized_args: List[str] = []
+global_unrecognized_arg_and_prog: List[Tuple[str, str]] = []
 
 
 # We inherit from both our local mirror of argparse and the upstream one.
@@ -309,8 +309,8 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
         # Reset the unused argument list in the root parser.
         # Subparsers will have spaces in self.prog.
         if " " not in self.prog:
-            global global_unrecognized_args
-            global_unrecognized_args = []
+            global global_unrecognized_arg_and_prog
+            global_unrecognized_arg_and_prog = []
         # </new>
 
         # replace arg strings that are file references
@@ -395,7 +395,9 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     # Manually track unused arguments to assist with error messages
                     # later.
                     if not self._parsing_known_args:
-                        global_unrecognized_args.append(option_string)
+                        global_unrecognized_arg_and_prog.append(
+                            (option_string, self.prog)
+                        )
                     # </new>
                     extras.append(arg_strings[start_index])
                     return start_index + 1
@@ -595,20 +597,14 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
         """
 
         extra_info: List[RenderableType] = []
-        global global_unrecognized_args
-        if len(global_unrecognized_args) == 0 and message.startswith(
-            "unrecognized options: "
-        ):
-            global_unrecognized_args = message.partition(":")[2].strip().split(" ")
-
         message_title = "Parsing error"
 
-        if len(global_unrecognized_args) > 0:
+        if len(global_unrecognized_arg_and_prog) > 0:
             message_title = "Unrecognized options"
-            message = f"Unrecognized options: {' '.join(global_unrecognized_args)}"
+            message = f"Unrecognized options: {' '.join([arg for arg, _ in global_unrecognized_arg_and_prog])}"
             unrecognized_arguments = set(
                 arg
-                for arg in global_unrecognized_args
+                for arg, _ in global_unrecognized_arg_and_prog
                 # If we pass in `--spell-chekc on`, we only want `spell-chekc` and not
                 # `on`.
                 if arg.startswith("--")
@@ -621,7 +617,10 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
             )
 
             if has_subcommands and same_exists:
-                message = f"Unrecognized or misplaced options: {' '.join(global_unrecognized_args)}"
+                message = "Unrecognized or misplaced options:\n\n"
+                for arg, prog in global_unrecognized_arg_and_prog:
+                    message += f"  {arg} (applied to [green]{prog}[/green])\n"
+                message += "\nNote that arguments are applied to the directly preceding subcommand, so ordering matters."
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:
