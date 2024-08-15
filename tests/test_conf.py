@@ -453,6 +453,12 @@ def test_flag() -> None:
         args=["--x", "True"],
         default=A(False),  # type: ignore
     ) == A(True)
+    assert tyro.cli(
+        A,
+        args=["--x", "True"],
+        default=A(False),
+        config=(tyro.conf.FlagConversionOff,),
+    ) == A(True)
 
 
 def test_fixed() -> None:
@@ -475,6 +481,14 @@ def test_fixed() -> None:
             tyro.conf.FlagConversionOff[A],
             args=["--x", "True"],
             default=A(False),  # type: ignore
+        ) == A(True)
+
+    with pytest.raises(SystemExit):
+        assert tyro.cli(
+            A,
+            args=["--x", "True"],
+            default=A(False),  # type: ignore
+            config=(tyro.conf.FlagConversionOff,),
         ) == A(True)
 
 
