@@ -105,8 +105,8 @@ Package Contents
    :type: Any
 
    
-   Sentinel value to mark fields as missing. Can be used to mark fields passed in as a
-   ``default_instance`` for ``tyro.cli()`` as required.
+   Sentinel value to mark fields as missing. Can be used to mark fields passed
+   in via ``default=`` for ``tyro.cli()`` as required.
 
 .. py:exception:: UnsupportedTypeAnnotationError
 
