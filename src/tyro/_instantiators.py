@@ -225,6 +225,51 @@ def instantiator_from_type(
             " a valid type converter."
         )
 
+    # Use ISO 8601 standard for dates/times.
+    if typ in (datetime.datetime, datetime.date, datetime.time):
+
+        def instantiate(args: List[str]) -> Any:
+            (arg,) = args
+            try:
+                return typ.fromisoformat(arg)
+            except ValueError as e:
+                raise ValueError(
+                    f"`{typ.__name__}.fromisoformat('{arg}')` failed. Dates "
+                    "should be specified in ISO-8601 format: "
+                    "https://en.wikipedia.org/wiki/ISO_8601"
+                )
+
+        return (
+            instantiate,
+            InstantiatorMetadata(
+                nargs=1,
+                metavar={
+                    # Actually we take any ISO 8601 string here. So these
+                    # metavars are a bit incomplete.
+                    # datetime.datetime: "YYYY-MM-DD[THH:MM:SS]",
+                    # datetime.date: "YYYY-MM-DD",
+                    # datetime.time: "HH:MM[:SS]",
+                    #
+                    # More complete.
+                    datetime.datetime: "YYYY-MM-DD[THH:MM:[SS[…]]]",
+                    datetime.date: "YYYY-MM-DD",
+                    datetime.time: "HH:MM[:SS[…]]",
+                    #
+                    # Even more complete!
+                    # datetime.datetime: "YYYY-MM-DD[THH:MM[:SS[.fff]][±HH:MM|Z]]",
+                    # datetime.date: "YYYY-MM-DD",
+                    # datetime.time: "HH:MM[:SS[.fff]][±HH:MM|Z]",
+                    #
+                    # Not very informative but (1) precise and (2) succinct.
+                    # datetime.datetime: "ISO-DATETIME",
+                    # datetime.date: "ISO-DATE",
+                    # datetime.time: "ISO-TIME",
+                }[typ],
+                choices=None,
+                action=None,
+            ),
+        )
+
     # Special case `choices` for some types, as implemented in `instance_from_string()`.
     auto_choices: Optional[Tuple[str, ...]] = None
     if typ is bool:
@@ -256,7 +301,6 @@ def instantiator_from_type(
             return typ[string]  # type: ignore
         elif typ is bytes:
             return bytes(string, encoding="ascii")  # type: ignore
-        elif typ in (datetime.datetime, datetime.date, datetime.time):
             return typ.fromisoformat(string)  # type: ignore
         else:
             return typ(string)  # type: ignore

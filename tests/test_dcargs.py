@@ -817,3 +817,63 @@ def test_time_parsing_with_main():
     assert tyro.cli(main, args=["--dt", "14:30:00+05:30"]) == datetime.time(
         14, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=19800))
     )
+
+
+def test_datetime_parsing_harder_format():
+    def main(dt: datetime.datetime) -> datetime.datetime:
+        return dt
+
+    # Wrong separator '/'.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "2024/08/25"])
+
+    # Space instead of 'T'. This works!
+    assert tyro.cli(main, args=["--dt", "2024-08-25 14:30:00"]) == datetime.datetime(
+        2024, 8, 25, 14, 30, 0
+    )
+
+    # Missing seconds. This works!
+    assert tyro.cli(main, args=["--dt", "2024-08-25T14:30"]) == datetime.datetime(
+        2024, 8, 25, 14, 30, 0
+    )
+
+    # Too many microseconds digits.
+    assert tyro.cli(
+        main, args=["--dt", "2024-08-25T14:30:00.1234567"]
+    ) == datetime.datetime(2024, 8, 25, 14, 30, 0, 123456)
+
+
+def test_date_parsing_harder_format():
+    def main(dt: datetime.date) -> datetime.date:
+        return dt
+
+    # Wrong separator '/'.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "2024/08/25"])
+
+    # Day-Month-Year format instead of Year-Month-Day.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "25-08-2024"])
+
+    # No separators. Actually, this works!
+    assert tyro.cli(main, args=["--dt", "20240825"]) == datetime.date(2024, 8, 25)
+
+
+def test_time_parsing_harder_format():
+    def main(dt: datetime.time) -> datetime.time:
+        return dt
+
+    # Wrong separator '/'.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "14/30"])
+
+    # Missing seconds.
+    assert tyro.cli(main, args=["--dt", "14:30"]) == datetime.time(14, 30, 0)
+
+    # Invalid minute value.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "14:60:00"])
+
+    # Invalid hour value.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "25:00:00"])

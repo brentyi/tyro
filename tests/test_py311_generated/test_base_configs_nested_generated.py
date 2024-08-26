@@ -209,3 +209,23 @@ def test_pernicious_override():
         ).data_config.test
         == 0
     )
+
+
+def test_overridable_config_helper():
+    assert tyro.extras.overridable_config_cli(
+        {
+            "small-data": (
+                "Small data",
+                DataConfig(
+                    test=2221,
+                ),
+            ),
+            "big-data": (
+                "Big data",
+                DataConfig(
+                    test=2,
+                ),
+            ),
+        },
+        args=["small-data", "--test", "100"],
+    ) == DataConfig(100)
