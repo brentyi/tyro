@@ -1,12 +1,13 @@
 import builtins
 import dataclasses
+from typing import Any
 
 import pytest
 
 
 # https://stackoverflow.com/questions/60227582/making-a-python-test-think-an-installed-package-is-not-available
 @pytest.fixture
-def hide_optional_packages(monkeypatch):
+def hide_optional_packages(monkeypatch: Any) -> None:
     import_orig = builtins.__import__
 
     def mocked_import(name, *args, **kwargs):
@@ -17,7 +18,7 @@ def hide_optional_packages(monkeypatch):
     monkeypatch.setattr(builtins, "__import__", mocked_import)
 
 
-def test_missing_optional_packages(hide_optional_packages):
+def test_missing_optional_packages(hide_optional_packages: Any) -> None:
     @dataclasses.dataclass
     class Extra:
         a: int = 3

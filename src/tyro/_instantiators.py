@@ -232,7 +232,7 @@ def instantiator_from_type(
             (arg,) = args
             try:
                 return typ.fromisoformat(arg)
-            except ValueError as e:
+            except ValueError:
                 raise ValueError(
                     f"`{typ.__name__}.fromisoformat('{arg}')` failed. Dates "
                     "should be specified in ISO-8601 format: "
