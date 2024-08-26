@@ -1,6 +1,7 @@
 import argparse
 import copy
 import dataclasses
+import datetime
 import enum
 import os
 import pathlib
@@ -749,3 +750,103 @@ def test_unknown_args_with_consistent_duplicates_use_underscores() -> None:
     )
     assert a == A(a_b=[7], c_d=[7])
     assert unknown_args == ["--e-f", "--e-f", "--g_h", "--g_h"]
+
+
+def test_datetime_parsing() -> None:
+    assert tyro.cli(
+        datetime.datetime, args=["2024-08-25T14:30:00"]
+    ) == datetime.datetime(2024, 8, 25, 14, 30, 0)
+    assert tyro.cli(
+        datetime.datetime, args=["2024-08-25T14:30:00.123456"]
+    ) == datetime.datetime(2024, 8, 25, 14, 30, 0, 123456)
+    assert tyro.cli(
+        datetime.datetime, args=["2024-08-25T14:30:00+05:30"]
+    ) == datetime.datetime(
+        2024, 8, 25, 14, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=19800))
+    )
+
+
+def test_date_parsing() -> None:
+    assert tyro.cli(datetime.date, args=["2024-08-25"]) == datetime.date(2024, 8, 25)
+    assert tyro.cli(datetime.date, args=["1999-12-31"]) == datetime.date(1999, 12, 31)
+
+
+def test_time_parsing() -> None:
+    assert tyro.cli(datetime.time, args=["14:30:00"]) == datetime.time(14, 30, 0)
+    assert tyro.cli(datetime.time, args=["14:30:00.123456"]) == datetime.time(
+        14, 30, 0, 123456
+    )
+    assert tyro.cli(datetime.time, args=["14:30:00+05:30"]) == datetime.time(
+        14, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=19800))
+    )
+
+
+def test_datetime_parsing_with_main():
+    def main(dt: datetime.datetime) -> datetime.datetime:
+        return dt
+
+    assert tyro.cli(main, args=["--dt", "2024-08-25T14:30:00"]) == datetime.datetime(
+        2024, 8, 25, 14, 30, 0
+    )
+    assert tyro.cli(
+        main, args=["--dt", "2024-08-25T14:30:00.123456"]
+    ) == datetime.datetime(2024, 8, 25, 14, 30, 0, 123456)
+    assert tyro.cli(
+        main, args=["--dt", "2024-08-25T14:30:00+05:30"]
+    ) == datetime.datetime(
+        2024, 8, 25, 14, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=19800))
+    )
+
+
+def test_date_parsing_with_main():
+    def main(dt: datetime.date) -> datetime.date:
+        return dt
+
+    assert tyro.cli(main, args=["--dt", "2024-08-25"]) == datetime.date(2024, 8, 25)
+    assert tyro.cli(main, args=["--dt", "1999-12-31"]) == datetime.date(1999, 12, 31)
+
+
+def test_time_parsing_with_main():
+    def main(dt: datetime.time) -> datetime.time:
+        return dt
+
+    assert tyro.cli(main, args=["--dt", "14:30:00"]) == datetime.time(14, 30, 0)
+    assert tyro.cli(main, args=["--dt", "14:30:00.123456"]) == datetime.time(
+        14, 30, 0, 123456
+    )
+    assert tyro.cli(main, args=["--dt", "14:30:00+05:30"]) == datetime.time(
+        14, 30, tzinfo=datetime.timezone(datetime.timedelta(seconds=19800))
+    )
+
+
+def test_date_parsing_harder_format():
+    def main(dt: datetime.date) -> datetime.date:
+        return dt
+
+    # Wrong separator '/'.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "2024/08/25"])
+
+    # Day-Month-Year format instead of Year-Month-Day.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "25-08-2024"])
+
+
+def test_time_parsing_harder_format():
+    def main(dt: datetime.time) -> datetime.time:
+        return dt
+
+    # Wrong separator '/'.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "14/30"])
+
+    # Missing seconds.
+    assert tyro.cli(main, args=["--dt", "14:30"]) == datetime.time(14, 30, 0)
+
+    # Invalid minute value.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "14:60:00"])
+
+    # Invalid hour value.
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--dt", "25:00:00"])
