@@ -107,7 +107,7 @@ def callable_with_args(
                     try:
                         assert arg.lowered.instantiator is not None
                         value = arg.lowered.instantiator(value)
-                    except ValueError as e:
+                    except (ValueError, TypeError) as e:
                         raise InstantiationError(
                             e.args[0],
                             arg,
