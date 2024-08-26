@@ -291,6 +291,7 @@
 
 <span class="kn">import</span> <span class="nn">collections.abc</span>
 <span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">enum</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os</span>
@@ -496,6 +497,52 @@
             <span class="s2">&quot; a valid type converter.&quot;</span>
         <span class="p">)</span>
 
+    <span class="c1"># Use ISO 8601 standard for dates/times.</span>
+    <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">):</span>
+
+        <span class="k">def</span> <span class="nf">instantiate</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">arg</span><span class="p">,)</span> <span class="o">=</span> <span class="n">args</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Type ignore is unnecessary for pyright but needed for mypy.</span>
+                <span class="k">return</span> <span class="n">typ</span><span class="o">.</span><span class="n">fromisoformat</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.fromisoformat(&#39;</span><span class="si">{</span><span class="n">arg</span><span class="si">}</span><span class="s2">&#39;)` failed. Dates &quot;</span>
+                    <span class="s2">&quot;should be specified in ISO-8601 format: &quot;</span>
+                    <span class="s2">&quot;https://en.wikipedia.org/wiki/ISO_8601&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">instantiate</span><span class="p">,</span>
+            <span class="n">InstantiatorMetadata</span><span class="p">(</span>
+                <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                <span class="n">metavar</span><span class="o">=</span><span class="p">{</span>
+                    <span class="c1"># Actually we take any ISO 8601 string here. So these</span>
+                    <span class="c1"># metavars are a bit incomplete.</span>
+                    <span class="c1"># datetime.datetime: &quot;YYYY-MM-DD[THH:MM:SS]&quot;,</span>
+                    <span class="c1"># datetime.date: &quot;YYYY-MM-DD&quot;,</span>
+                    <span class="c1"># datetime.time: &quot;HH:MM[:SS]&quot;,</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># More complete.</span>
+                    <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">:</span> <span class="s2">&quot;YYYY-MM-DD[THH:MM:[SS[…]]]&quot;</span><span class="p">,</span>
+                    <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">:</span> <span class="s2">&quot;YYYY-MM-DD&quot;</span><span class="p">,</span>
+                    <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">:</span> <span class="s2">&quot;HH:MM[:SS[…]]&quot;</span><span class="p">,</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># Even more complete!</span>
+                    <span class="c1"># datetime.datetime: &quot;YYYY-MM-DD[THH:MM[:SS[.fff]][±HH:MM|Z]]&quot;,</span>
+                    <span class="c1"># datetime.date: &quot;YYYY-MM-DD&quot;,</span>
+                    <span class="c1"># datetime.time: &quot;HH:MM[:SS[.fff]][±HH:MM|Z]&quot;,</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># Not very informative but (1) precise and (2) succinct.</span>
+                    <span class="c1"># datetime.datetime: &quot;ISO-DATETIME&quot;,</span>
+                    <span class="c1"># datetime.date: &quot;ISO-DATE&quot;,</span>
+                    <span class="c1"># datetime.time: &quot;ISO-TIME&quot;,</span>
+                <span class="p">}[</span><span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">typ</span><span class="p">)],</span>  <span class="c1"># cast is for mypy, pyright works fine</span>
+                <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
     <span class="c1"># Special case `choices` for some types, as implemented in `instance_from_string()`.</span>
     <span class="n">auto_choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
@@ -528,6 +575,8 @@
         <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">bytes</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># We assume this base type can be called on a string to convert</span>
+            <span class="c1"># from a string, eg int(&quot;5&quot;), float(&quot;5.&quot;), Path(&quot;/home&quot;), etc.</span>
             <span class="k">return</span> <span class="n">typ</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
 
     <span class="k">return</span> <span class="n">instantiator_base_case</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
