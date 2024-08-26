@@ -265,7 +265,7 @@ def instantiator_from_type(
                     # datetime.datetime: "ISO-DATETIME",
                     # datetime.date: "ISO-DATE",
                     # datetime.time: "ISO-TIME",
-                }[typ],
+                }[cast(Any, typ)],  # cast is for mypy, pyright works fine
                 choices=None,
                 action=None,
             ),
