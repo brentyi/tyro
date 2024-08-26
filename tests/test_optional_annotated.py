@@ -1,7 +1,7 @@
 """Test adapted from @KolinGuo: https://github.com/brentyi/tyro/issues/156"""
 
 import dataclasses
-from typing import Optional
+from typing import Optional, Tuple
 
 from typing_extensions import Annotated
 
@@ -11,7 +11,7 @@ import tyro
 def detect_usb_device(
     vendor_id: Annotated[Optional[str], tyro.conf.arg(aliases=["--vid"])] = None,
     product_id: Annotated[Optional[str], tyro.conf.arg(aliases=["--pid"])] = "",
-) -> tuple[Optional[str], Optional[str]]:
+) -> Tuple[Optional[str], Optional[str]]:
     """
     Detect connected USB device by vendor_id + product_id.
 
