@@ -33,6 +33,7 @@ Some examples of type annotations and the desired instantiators:
 
 import collections.abc
 import dataclasses
+import datetime
 import enum
 import inspect
 import os
@@ -255,6 +256,8 @@ def instantiator_from_type(
             return typ[string]  # type: ignore
         elif typ is bytes:
             return bytes(string, encoding="ascii")  # type: ignore
+        elif typ in (datetime.datetime, datetime.date, datetime.time):
+            return typ.fromisoformat(string)  # type: ignore
         else:
             return typ(string)  # type: ignore
 
