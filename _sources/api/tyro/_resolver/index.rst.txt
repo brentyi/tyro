@@ -116,6 +116,10 @@ Module Contents
    In this case, we raise a warning, then add the type of the default value to the
    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20
 
+.. py:data:: NoneType
+
+   
+
 .. py:function:: get_type_hints_with_backported_syntax(obj: Callable[Ellipsis, Any], include_extras: bool = False) -> Dict[str, Any]
 
    

@@ -760,6 +760,9 @@
 
 
 
+<span class="n">NoneType</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="get_type_hints_with_backported_syntax">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.get_type_hints_with_backported_syntax">[docs]</a>
 <span class="k">def</span> <span class="nf">get_type_hints_with_backported_syntax</span><span class="p">(</span>
@@ -768,7 +771,39 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)</span>
 <span class="sd">    and generics (list[str]) in older versions of Python.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span><span class="p">)</span>
+
+        <span class="c1"># Workaround for:</span>
+        <span class="c1"># - https://github.com/brentyi/tyro/issues/156</span>
+        <span class="c1"># - https://github.com/python/cpython/issues/90353</span>
+        <span class="c1">#</span>
+        <span class="c1"># Which impacts Python 3.10 and earlier.</span>
+        <span class="c1">#</span>
+        <span class="c1"># It may be possible to remove this if this issue is resolved:</span>
+        <span class="c1"># - https://github.com/python/typing_extensions/issues/310</span>
+        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
+            <span class="c1"># If we see Optional[Annotated[T, ...]], we&#39;re going to flip to Annotated[Optional[T]]...</span>
+            <span class="c1">#</span>
+            <span class="c1"># It&#39;s unlikely but possible for this to have unintended side effects.</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="n">origin</span> <span class="ow">is</span> <span class="n">Union</span>
+                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+                    <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">NoneType</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="n">NoneType</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">non_none</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">NoneType</span> <span class="k">else</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">non_none</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+                        <span class="n">annotated_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">non_none</span><span class="p">)</span>
+                        <span class="n">out</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                            <span class="p">(</span>
+                                <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">((</span><span class="n">annotated_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)),</span>  <span class="c1"># type: ignore</span>
+                                <span class="o">*</span><span class="n">annotated_args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
+                            <span class="p">)</span>
+                        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
     <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="c1"># Resolve new type syntax using eval_type_backport.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">):</span>
