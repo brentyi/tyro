@@ -231,7 +231,8 @@ def instantiator_from_type(
         def instantiate(args: List[str]) -> Any:
             (arg,) = args
             try:
-                return typ.fromisoformat(arg)
+                # Type ignore is unnecessary for pyright but needed for mypy.
+                return typ.fromisoformat(arg)  # type: ignore
             except ValueError:
                 raise ValueError(
                     f"`{typ.__name__}.fromisoformat('{arg}')` failed. Dates "
