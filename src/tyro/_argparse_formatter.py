@@ -620,7 +620,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 message = "Unrecognized or misplaced options:\n\n"
                 for arg, prog in global_unrecognized_arg_and_prog:
                     message += f"  {arg} (applied to [green]{prog}[/green])\n"
-                message += "\nNote that arguments are applied to the directly preceding subcommand, so ordering matters."
+                message += "\nArguments are applied to the directly preceding subcommand, so ordering matters."
 
             # Show similar arguments for keyword options.
             for unrecognized_argument in unrecognized_arguments:
