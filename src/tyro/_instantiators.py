@@ -301,8 +301,9 @@ def instantiator_from_type(
             return typ[string]  # type: ignore
         elif typ is bytes:
             return bytes(string, encoding="ascii")  # type: ignore
-            return typ.fromisoformat(string)  # type: ignore
         else:
+            # We assume this base type can be called on a string to convert
+            # from a string, eg int("5"), float("5."), Path("/home"), etc.
             return typ(string)  # type: ignore
 
     return instantiator_base_case, InstantiatorMetadata(
