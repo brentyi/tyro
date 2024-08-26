@@ -255,27 +255,36 @@ def test_similar_arguments_subcommands_multiple() -> None:
 
 def test_similar_arguments_subcommands_multiple_contains_match() -> None:
     @dataclasses.dataclass
-    class RewardConfig:
+    class RewardConfigA:
         track: bool
         trace: int
 
     @dataclasses.dataclass
+    class RewardConfigB: ...
+
+    @dataclasses.dataclass
     class ClassA:
-        reward: RewardConfig
+        reward: RewardConfigA
 
     @dataclasses.dataclass
     class ClassB:
-        reward: RewardConfig
+        reward: RewardConfigB
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
-        tyro.cli(ClassA | ClassB, args="--rd.trac".split(" "))  # type: ignore
+        tyro.cli(
+            ClassA | ClassB,
+            args="class-b --reward.track True --reward.trace 7".split(" "),
+        )  # type: ignore
 
     error = target.getvalue()
-    assert "Unrecognized option" in error
-    assert "Perhaps you meant:" in error
-    assert error.count("--reward.track {True,False}") == 1
-    assert error.count("--reward.trace INT") == 1
+    assert "Unrecognized or misplaced" in error
+    assert (
+        "(applied to " in error and "class-b)" in error
+    )  # (applied to {root prog} class-b)
+    assert "Arguments similar to" in error
+    assert error.count("--reward.track {True,False}") == 2
+    assert error.count("--reward.trace INT") == 2
     assert error.count("--help") == 5  # 2 subcommands * 2 arguments + usage hint.
 
 

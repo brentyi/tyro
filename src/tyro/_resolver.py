@@ -463,13 +463,48 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     return typ
 
 
+NoneType = type(None)
+
+
 def get_type_hints_with_backported_syntax(
     obj: Callable[..., Any], include_extras: bool = False
 ) -> Dict[str, Any]:
     """Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)
     and generics (list[str]) in older versions of Python."""
     try:
-        return get_type_hints(obj, include_extras=include_extras)
+        out = get_type_hints(obj, include_extras=include_extras)
+
+        # Workaround for:
+        # - https://github.com/brentyi/tyro/issues/156
+        # - https://github.com/python/cpython/issues/90353
+        #
+        # Which impacts Python 3.10 and earlier.
+        #
+        # It may be possible to remove this if this issue is resolved:
+        # - https://github.com/python/typing_extensions/issues/310
+        if sys.version_info < (3, 11):
+            # If we see Optional[Annotated[T, ...]], we're going to flip to Annotated[Optional[T]]...
+            #
+            # It's unlikely but possible for this to have unintended side effects.
+            for k, v in out.items():
+                origin = get_origin(v)
+                args = get_args(v)
+                if (
+                    origin is Union
+                    and len(args) == 2
+                    and (args[0] is NoneType or args[1] is NoneType)
+                ):
+                    non_none = args[1] if args[0] is NoneType else args[0]
+                    if get_origin(non_none) is Annotated:
+                        annotated_args = get_args(non_none)
+                        out[k] = Annotated.__class_getitem__(  # type: ignore
+                            (
+                                Union.__getitem__((annotated_args[0], None)),  # type: ignore
+                                *annotated_args[1:],
+                            )
+                        )
+        return out
+
     except TypeError as e:  # pragma: no cover
         # Resolve new type syntax using eval_type_backport.
         if hasattr(obj, "__annotations__"):
