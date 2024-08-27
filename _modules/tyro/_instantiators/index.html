@@ -784,6 +784,7 @@
     <span class="c1"># right.</span>
     <span class="n">instantiators</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">metas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">choices</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">()</span>
     <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]]]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
@@ -792,6 +793,10 @@
         <span class="p">)</span>
         <span class="n">instantiators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
         <span class="n">metas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="n">choices</span> <span class="o">+</span> <span class="n">b</span><span class="o">.</span><span class="n">choices</span>
 
         <span class="k">if</span> <span class="n">t</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NoneType</span><span class="p">:</span>
             <span class="c1"># Enforce that `nargs` is the same for all child types, except for</span>
@@ -839,7 +844,7 @@
     <span class="k">return</span> <span class="n">union_instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
         <span class="n">nargs</span><span class="o">=</span><span class="n">nargs</span><span class="p">,</span>
         <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
-        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">choices</span><span class="p">)),</span>
         <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
 
