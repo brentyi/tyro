@@ -511,6 +511,7 @@ def _instantiator_from_union(
     # right.
     instantiators = []
     metas = []
+    choices: Tuple[str, ...] | None = ()
     nargs: Optional[Union[int, Literal["*"]]] = 1
     first = True
     for t in options:
@@ -519,6 +520,10 @@ def _instantiator_from_union(
         )
         instantiators.append(a)
         metas.append(b)
+        if b.choices is None:
+            choices = None
+        elif choices is not None:
+            choices = choices + b.choices
 
         if t is not NoneType:
             # Enforce that `nargs` is the same for all child types, except for
@@ -566,7 +571,7 @@ def _instantiator_from_union(
     return union_instantiator, InstantiatorMetadata(
         nargs=nargs,
         metavar=metavar,
-        choices=None,
+        choices=None if choices is None else tuple(set(choices)),
         action=None,
     )
 
