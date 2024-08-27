@@ -61,7 +61,6 @@ def test_completion_zsh():
         :param preset: device preset to use.
         :param frame: coordinate frame to use.
         """
-        print(f"{preset=} {frame=}")
 
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
