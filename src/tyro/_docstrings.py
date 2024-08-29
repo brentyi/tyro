@@ -1,5 +1,6 @@
 """Helpers for parsing docstrings. Used for helptext generation."""
 
+import builtins
 import collections.abc
 import dataclasses
 import functools
@@ -284,7 +285,10 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
 _callable_description_blocklist: Set[Hashable] = set(
     filter(
         lambda x: isinstance(x, Hashable),  # type: ignore
-        itertools.chain(__builtins__.values(), vars(collections.abc).values()),  # type: ignore
+        itertools.chain(
+            vars(builtins).values(),
+            vars(collections.abc).values(),
+        ),
     )
 )
 

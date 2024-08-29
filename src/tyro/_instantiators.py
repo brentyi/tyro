@@ -31,6 +31,7 @@ Some examples of type annotations and the desired instantiators:
 ```
 """
 
+import builtins
 import collections.abc
 import dataclasses
 import datetime
@@ -106,7 +107,7 @@ class UnsupportedTypeAnnotationError(Exception):
 _builtin_set: Set[Hashable] = set(
     filter(
         lambda x: isinstance(x, Hashable),  # type: ignore
-        __builtins__.values(),  # type: ignore
+        vars(builtins).values(),  # type: ignore
     )
 )
 
