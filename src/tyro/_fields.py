@@ -3,6 +3,7 @@ defaults, from general callables."""
 
 from __future__ import annotations
 
+import builtins
 import collections
 import collections.abc
 import dataclasses
@@ -353,7 +354,7 @@ _known_parsable_types: Set[type] = set(
     filter(
         lambda x: isinstance(x, Hashable),  # type: ignore
         itertools.chain(
-            __builtins__.values(),  # type: ignore
+            vars(builtins).values(),  # type: ignore
             vars(typing).values(),
             vars(typing_extensions).values(),
             vars(collections.abc).values(),
