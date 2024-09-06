@@ -307,6 +307,17 @@ def test_literal() -> None:
         assert tyro.cli(A, args=["--x", "3"])
 
 
+def test_literal_none() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Literal[0, 1, None, 2]
+
+    assert tyro.cli(A, args=["--x", "1"]) == A(x=1)
+    assert tyro.cli(A, args=["--x", "None"]) == A(x=None)
+    with pytest.raises(SystemExit):
+        assert tyro.cli(A, args=["--x", "3"])
+
+
 Choices = int
 Choices = tyro.extras.literal_type_from_choices([0, 1, 2])  # type: ignore
 
