@@ -38,8 +38,10 @@
 
 <br />
 
-<strong><code>tyro.cli()</code></strong> generates command-line interfaces via
-Python type introspection. We can define configurable scripts using functions:
+<strong><code>tyro.cli()</code></strong> is a tool for generating CLI
+interfaces.
+
+We can define configurable scripts using functions:
 
 ```python
 """A command-line interface defined using a function signature.
@@ -60,7 +62,7 @@ if __name__ == "__main__":
     tyro.cli(main)
 ```
 
-Or instantiate configuration objects defined using tools like `dataclasses`, `pydantic`, and `attrs`:
+Or instantiate config objects defined using tools like `dataclasses`, `pydantic`, and `attrs`:
 
 ```python
 """A command-line interface defined using a class signature.
@@ -84,8 +86,8 @@ if __name__ == "__main__":
     assert isinstance(config, Config)  # Should pass.
 ```
 
-Other features include helptext generation, nested structures, shell
-completion, and subcommands. For examples and the API reference, see our
+Other features include helptext generation, nested structures, subcommands, and
+shell completion. For examples and the API reference, see our
 [documentation](https://brentyi.github.io/tyro).
 
 ### In the wild
