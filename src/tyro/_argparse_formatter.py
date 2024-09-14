@@ -138,7 +138,7 @@ def recursive_arg_search(
                 option_strings = arg.lowered.action(
                     option_strings,
                     dest="",  # dest should not matter.
-                ).option_strings
+                ).option_strings  # type: ignore
 
             arguments.append(
                 _ArgumentInfo(
