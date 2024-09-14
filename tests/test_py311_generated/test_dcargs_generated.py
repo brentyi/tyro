@@ -299,6 +299,20 @@ def test_enum() -> None:
     assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
 
 
+def test_enum_alias() -> None:
+    class Color(enum.Enum):
+        RED = 1
+        ROUGE = 1
+
+    @dataclasses.dataclass
+    class A:
+        color: Color
+
+    assert tyro.cli(A, args=["--color", "RED"]) == A(color=Color.RED)
+    assert tyro.cli(A, args=["--color", "ROUGE"]) == A(color=Color.ROUGE)
+    assert tyro.cli(A, args=["--color", "ROUGE"]) == A(color=Color.RED)
+
+
 def test_literal() -> None:
     @dataclasses.dataclass
     class A:
