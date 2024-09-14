@@ -310,6 +310,7 @@ def test_enum_alias() -> None:
 
     assert tyro.cli(A, args=["--color", "RED"]) == A(color=Color.RED)
     assert tyro.cli(A, args=["--color", "ROUGE"]) == A(color=Color.ROUGE)
+    assert tyro.cli(A, args=["--color", "ROUGE"]) == A(color=Color.RED)
 
 
 def test_literal() -> None:
