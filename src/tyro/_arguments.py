@@ -442,7 +442,7 @@ def _rule_generate_helptext(
             [arg.extern_prefix, arg.field.intern_name]
         )
 
-    if primary_help is not None and primary_help != "":
+    if primary_help is not None:
         help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
 
     if not lowered.required:
@@ -520,7 +520,7 @@ def _rule_generate_helptext(
 
     # Note that the percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-    lowered.help = " ".join(help_parts).replace("%", "%%")
+    lowered.help = " ".join([p for p in help_parts if len(p) > 0]).replace("%", "%%")
     return
 
 
