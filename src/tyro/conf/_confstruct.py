@@ -115,6 +115,7 @@ class _ArgConfiguration:
     name: Optional[str]
     metavar: Optional[str]
     help: Optional[str]
+    help_behavior_hint: Optional[str]
     aliases: Optional[Tuple[str, ...]]
     prefix_name: Optional[bool]
     constructor_factory: Optional[Callable[[], Union[Type, Callable]]]
@@ -126,6 +127,7 @@ def arg(
     name: Optional[str] = None,
     metavar: Optional[str] = None,
     help: Optional[str] = None,
+    help_behavior_hint: Optional[str] = None,
     aliases: Optional[Sequence[str]] = None,
     prefix_name: Optional[bool] = None,
     constructor: None = None,
@@ -139,6 +141,7 @@ def arg(
     name: Optional[str] = None,
     metavar: Optional[str] = None,
     help: Optional[str] = None,
+    help_behavior_hint: Optional[str] = None,
     aliases: Optional[Sequence[str]] = None,
     prefix_name: Optional[bool] = None,
     constructor: Optional[Union[Type, Callable]] = None,
@@ -151,6 +154,7 @@ def arg(
     name: Optional[str] = None,
     metavar: Optional[str] = None,
     help: Optional[str] = None,
+    help_behavior_hint: Optional[str] = None,
     aliases: Optional[Sequence[str]] = None,
     prefix_name: Optional[bool] = None,
     constructor: Optional[Union[Type, Callable]] = None,
@@ -173,7 +177,10 @@ def arg(
     Arguments:
         name: A new name for the argument in the CLI.
         metavar: Argument name in usage messages. The type is used by default.
-        help: Helptext for this argument. The docstring is used by default.
+        help: Override helptext for this argument. The docstring is used by default.
+        help_behavior_hint: Override highlighted text that follows the helptext.
+            Typically used for behavior hints like the `(default: XXX)` or
+            `(optional)`.
         aliases: Aliases for this argument. All strings in the sequence should start
             with a hyphen (-). Aliases will _not_ currently be prefixed in a nested
             structure, and are not supported for positional arguments.
@@ -201,6 +208,7 @@ def arg(
         name=name,
         metavar=metavar,
         help=help,
+        help_behavior_hint=help_behavior_hint,
         aliases=tuple(aliases) if aliases is not None else None,
         prefix_name=prefix_name,
         constructor_factory=constructor_factory
