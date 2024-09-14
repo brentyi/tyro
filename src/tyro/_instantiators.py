@@ -277,7 +277,8 @@ def instantiator_from_type(
     if typ is bool:
         auto_choices = ("True", "False")
     elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
-        auto_choices = tuple(x.name for x in typ)
+        # Using `.__members__` dict to handle aliases correctly
+        auto_choices = tuple(typ.__members__.keys())
 
     def instantiator_base_case(strings: List[str]) -> Any:
         """Given a type and and a string from the command-line, reconstruct an object. Not
