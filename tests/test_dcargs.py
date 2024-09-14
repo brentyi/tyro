@@ -301,7 +301,7 @@ def test_enum_alias() -> None:
     class Color(enum.Enum):
         RED = 1
         ROUGE = 1
-    
+
     @dataclasses.dataclass
     class A:
         color: Color
