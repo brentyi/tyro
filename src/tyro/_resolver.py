@@ -287,7 +287,7 @@ def narrow_collection_types(
         if len(default_instance) == 0:
             return typ
         typ = Tuple.__getitem__(tuple(map(type, default_instance)))  # type: ignore
-    return typ
+    return cast(TypeOrCallable, typ)
 
 
 # `Final` and `ReadOnly` types are ignored in tyro.
