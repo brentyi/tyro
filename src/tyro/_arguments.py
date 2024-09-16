@@ -475,8 +475,13 @@ def _rule_generate_helptext(
             default_label = str(default)
 
         # Suffix helptext with some behavior hint, such as the default value of the argument.
-        if arg.field.argconf.help_behavior_hint is not None:
-            behavior_hint = arg.field.argconf.help_behavior_hint
+        help_behavior_hint = arg.field.argconf.help_behavior_hint
+        if help_behavior_hint is not None:
+            behavior_hint = (
+                help_behavior_hint(default_label)
+                if callable(help_behavior_hint)
+                else help_behavior_hint
+            )
         elif lowered.instantiator is None:
             # Intentionally not quoted via shlex, since this can't actually be passed
             # in via the commandline.

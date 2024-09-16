@@ -654,6 +654,37 @@ def test_argconf_help() -> None:
     assert tyro.cli(main, args=["--x.nice", "3"]) == 3
 
 
+def test_argconf_help_behavior_hint_lambda() -> None:
+    @dataclasses.dataclass
+    class Struct:
+        a: Annotated[
+            int,
+            tyro.conf.arg(
+                name="nice",
+                help="Hello world",
+                help_behavior_hint=lambda default: f"(default value: {default})",
+                metavar="NUMBER",
+            ),
+        ] = 5
+        b: tyro.conf.Suppress[str] = "7"
+
+    def main(x: Any = Struct()) -> int:
+        return x.a
+
+    helptext = get_helptext_with_checks(main)
+    assert "Hello world" in helptext
+    assert "INT" not in helptext
+    assert "NUMBER" in helptext
+    assert "(default value: 5)" in helptext
+    assert "(default: 5)" not in helptext
+    assert "--x.a" not in helptext
+    assert "--x.nice" in helptext
+    assert "--x.b" not in helptext
+
+    assert tyro.cli(main, args=[]) == 5
+    assert tyro.cli(main, args=["--x.nice", "3"]) == 3
+
+
 def test_argconf_no_prefix_help() -> None:
     @dataclasses.dataclass
     class Struct:

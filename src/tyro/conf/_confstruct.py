@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 import dataclasses
-from typing import Any, Callable, Optional, Sequence, Tuple, Type, Union, overload
+from typing import Any, Callable, Sequence, overload
 
 from .._fields import MISSING_NONPROP
 
 
 @dataclasses.dataclass(frozen=True)
 class _SubcommandConfiguration:
-    name: Optional[str]
+    name: str | None
     default: Any
-    description: Optional[str]
+    description: str | None
     prefix_name: bool
-    constructor_factory: Optional[Callable[[], Union[Type, Callable]]]
+    constructor_factory: Callable[[], type | Callable] | None
 
     def __hash__(self) -> int:
         return object.__hash__(self)
@@ -18,36 +20,36 @@ class _SubcommandConfiguration:
 
 @overload
 def subcommand(
-    name: Optional[str] = None,
+    name: str | None = None,
     *,
     default: Any = MISSING_NONPROP,
-    description: Optional[str] = None,
+    description: str | None = None,
     prefix_name: bool = True,
     constructor: None = None,
-    constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None,
+    constructor_factory: Callable[[], type | Callable] | None = None,
 ) -> Any: ...
 
 
 @overload
 def subcommand(
-    name: Optional[str] = None,
+    name: str | None = None,
     *,
     default: Any = MISSING_NONPROP,
-    description: Optional[str] = None,
+    description: str | None = None,
     prefix_name: bool = True,
-    constructor: Optional[Union[Type, Callable]] = None,
+    constructor: type | Callable | None = None,
     constructor_factory: None = None,
 ) -> Any: ...
 
 
 def subcommand(
-    name: Optional[str] = None,
+    name: str | None = None,
     *,
     default: Any = MISSING_NONPROP,
-    description: Optional[str] = None,
+    description: str | None = None,
     prefix_name: bool = True,
-    constructor: Optional[Union[Type, Callable]] = None,
-    constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None,
+    constructor: type | Callable | None = None,
+    constructor_factory: Callable[[], type | Callable] | None = None,
 ) -> Any:
     """Returns a metadata object for configuring subcommands with `typing.Annotated`.
     Useful for aesthetics.
@@ -110,55 +112,53 @@ def subcommand(
 
 @dataclasses.dataclass(frozen=True)
 class _ArgConfiguration:
-    # These are all optional by default in order to support multiple tyro.conf.arg()
-    # annotations. A None value means "don't overwrite the current value".
-    name: Optional[str]
-    metavar: Optional[str]
-    help: Optional[str]
-    help_behavior_hint: Optional[str]
-    aliases: Optional[Tuple[str, ...]]
-    prefix_name: Optional[bool]
-    constructor_factory: Optional[Callable[[], Union[Type, Callable]]]
+    name: str | None
+    metavar: str | None
+    help: str | None
+    help_behavior_hint: str | Callable[[str], str] | None
+    aliases: tuple[str, ...] | None
+    prefix_name: bool | None
+    constructor_factory: Callable[[], type | Callable] | None
 
 
 @overload
 def arg(
     *,
-    name: Optional[str] = None,
-    metavar: Optional[str] = None,
-    help: Optional[str] = None,
-    help_behavior_hint: Optional[str] = None,
-    aliases: Optional[Sequence[str]] = None,
-    prefix_name: Optional[bool] = None,
+    name: str | None = None,
+    metavar: str | None = None,
+    help: str | None = None,
+    help_behavior_hint: str | Callable[[str], str] | None = None,
+    aliases: Sequence[str] | None = None,
+    prefix_name: bool | None = None,
     constructor: None = None,
-    constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None,
+    constructor_factory: Callable[[], type | Callable] | None = None,
 ) -> Any: ...
 
 
 @overload
 def arg(
     *,
-    name: Optional[str] = None,
-    metavar: Optional[str] = None,
-    help: Optional[str] = None,
-    help_behavior_hint: Optional[str] = None,
-    aliases: Optional[Sequence[str]] = None,
-    prefix_name: Optional[bool] = None,
-    constructor: Optional[Union[Type, Callable]] = None,
+    name: str | None = None,
+    metavar: str | None = None,
+    help: str | None = None,
+    help_behavior_hint: str | Callable[[str], str] | None = None,
+    aliases: Sequence[str] | None = None,
+    prefix_name: bool | None = None,
+    constructor: type | Callable | None = None,
     constructor_factory: None = None,
 ) -> Any: ...
 
 
 def arg(
     *,
-    name: Optional[str] = None,
-    metavar: Optional[str] = None,
-    help: Optional[str] = None,
-    help_behavior_hint: Optional[str] = None,
-    aliases: Optional[Sequence[str]] = None,
-    prefix_name: Optional[bool] = None,
-    constructor: Optional[Union[Type, Callable]] = None,
-    constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None,
+    name: str | None = None,
+    metavar: str | None = None,
+    help: str | None = None,
+    help_behavior_hint: str | Callable[[str], str] | None = None,
+    aliases: Sequence[str] | None = None,
+    prefix_name: bool | None = None,
+    constructor: type | Callable | None = None,
+    constructor_factory: Callable[[], type | Callable] | None = None,
 ) -> Any:
     """Returns a metadata object for fine-grained argument configuration with
     `typing.Annotated`. Should typically not be required.
@@ -180,7 +180,8 @@ def arg(
         help: Override helptext for this argument. The docstring is used by default.
         help_behavior_hint: Override highlighted text that follows the helptext.
             Typically used for behavior hints like the `(default: XXX)` or
-            `(optional)`.
+            `(optional)`. Can either be a string or a lambda function whose
+            input is a formatted default value.
         aliases: Aliases for this argument. All strings in the sequence should start
             with a hyphen (-). Aliases will _not_ currently be prefixed in a nested
             structure, and are not supported for positional arguments.
