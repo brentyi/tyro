@@ -718,7 +718,7 @@
             <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]</span>
         <span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">primary_help</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">primary_help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">primary_help</span><span class="p">,</span> <span class="s2">&quot;helptext&quot;</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
@@ -750,26 +750,31 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">default_label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
 
-        <span class="c1"># Include default value in helptext. We intentionally don&#39;t use the % template</span>
-        <span class="c1"># because the types of all arguments are set to strings, which will cause the</span>
-        <span class="c1"># default to be casted to a string and introduce extra quotation marks.</span>
-        <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">instantiator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Suffix helptext with some behavior hint, such as the default value of the argument.</span>
+        <span class="n">help_behavior_hint</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">help_behavior_hint</span>
+        <span class="k">if</span> <span class="n">help_behavior_hint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">help_behavior_hint</span><span class="p">(</span><span class="n">default_label</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">help_behavior_hint</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">help_behavior_hint</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">instantiator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Intentionally not quoted via shlex, since this can&#39;t actually be passed</span>
             <span class="c1"># in via the commandline.</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(fixed to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(fixed to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span>
             <span class="c1"># Repeatable argument.</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span>
         <span class="p">):</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(repeatable)&quot;</span>
         <span class="k">elif</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">default</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>  <span class="c1"># Just for type checker.</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(repeatable, appends to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(repeatable, appends to: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">_fields</span><span class="o">.</span><span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
             <span class="c1"># ^important to use arg.field.default and not the stringified default variable.</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(unset by default)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(unset by default)&quot;</span>
         <span class="k">elif</span> <span class="p">(</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
             <span class="ow">and</span> <span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
@@ -783,20 +788,20 @@
             <span class="c1"># There are some usage details that aren&#39;t communicated right now in the</span>
             <span class="c1"># helptext. For example: all arguments within an optional group without a</span>
             <span class="c1"># default should be passed in or none at all.</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="s2">&quot;(optional)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="s2">&quot;(optional)&quot;</span>
         <span class="k">elif</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
             <span class="c1"># Argument in an optional group, but which also has a default.</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default if used: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default if used: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">default_text</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="n">behavior_hint</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="n">default_label</span><span class="si">}</span><span class="s2">)&quot;</span>
 
-        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">default_text</span><span class="p">,</span> <span class="s2">&quot;helptext_default&quot;</span><span class="p">))</span>
+        <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">behavior_hint</span><span class="p">,</span> <span class="s2">&quot;helptext_default&quot;</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">help_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_rich_tag_if_enabled</span><span class="p">(</span><span class="s2">&quot;(required)&quot;</span><span class="p">,</span> <span class="s2">&quot;helptext_required&quot;</span><span class="p">))</span>
 
     <span class="c1"># Note that the percent symbol needs some extra handling in argparse.</span>
     <span class="c1"># https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string</span>
-    <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">help_parts</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">help_parts</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="k">return</span>
 
 

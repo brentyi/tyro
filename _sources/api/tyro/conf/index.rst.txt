@@ -19,8 +19,8 @@
 Package Contents
 ----------------
 
-.. py:function:: arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, aliases: Optional[Sequence[str]] = None, prefix_name: Optional[bool] = None, constructor: None = None, constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None) -> Any
-                 arg(*, name: Optional[str] = None, metavar: Optional[str] = None, help: Optional[str] = None, aliases: Optional[Sequence[str]] = None, prefix_name: Optional[bool] = None, constructor: Optional[Union[Type, Callable]] = None, constructor_factory: None = None) -> Any
+.. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
+                 arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
 
    
    Returns a metadata object for fine-grained argument configuration with
@@ -41,7 +41,11 @@ Package Contents
 
    :param name: A new name for the argument in the CLI.
    :param metavar: Argument name in usage messages. The type is used by default.
-   :param help: Helptext for this argument. The docstring is used by default.
+   :param help: Override helptext for this argument. The docstring is used by default.
+   :param help_behavior_hint: Override highlighted text that follows the helptext.
+                              Typically used for behavior hints like the ``(default: XXX)`` or
+                              ``(optional)``. Can either be a string or a lambda function whose
+                              input is a formatted default value.
    :param aliases: Aliases for this argument. All strings in the sequence should start
                    with a hyphen (-). Aliases will *not* currently be prefixed in a nested
                    structure, and are not supported for positional arguments.
@@ -56,8 +60,8 @@ Package Contents
 
    :returns: Object to attach via ``typing.Annotated[]``.
 
-.. py:function:: subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Optional[Callable[[], Union[Type, Callable]]] = None) -> Any
-                 subcommand(name: Optional[str] = None, *, default: Any = MISSING_NONPROP, description: Optional[str] = None, prefix_name: bool = True, constructor: Optional[Union[Type, Callable]] = None, constructor_factory: None = None) -> Any
+.. py:function:: subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
+                 subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
 
    
    Returns a metadata object for configuring subcommands with ``typing.Annotated``.
