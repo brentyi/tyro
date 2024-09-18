@@ -105,6 +105,7 @@ class FieldDefinition:
             None,
             None,
             help=None,
+            help_behavior_hint=None,
             aliases=None,
             prefix_name=True,
             constructor_factory=None,
@@ -288,7 +289,7 @@ def field_list_from_callable(
                         custom_constructor=False,
                         markers={_markers.Positional, _markers._PositionalCall},
                         argconf=_confstruct._ArgConfiguration(
-                            None, None, None, None, None, None
+                            None, None, None, None, None, None, None
                         ),
                         call_argname="",
                     )

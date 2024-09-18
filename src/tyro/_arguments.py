@@ -442,7 +442,7 @@ def _rule_generate_helptext(
             [arg.extern_prefix, arg.field.intern_name]
         )
 
-    if primary_help is not None and primary_help != "":
+    if primary_help is not None:
         help_parts.append(_rich_tag_if_enabled(primary_help, "helptext"))
 
     if not lowered.required:
@@ -474,26 +474,31 @@ def _rule_generate_helptext(
         else:
             default_label = str(default)
 
-        # Include default value in helptext. We intentionally don't use the % template
-        # because the types of all arguments are set to strings, which will cause the
-        # default to be casted to a string and introduce extra quotation marks.
-        if lowered.instantiator is None:
+        # Suffix helptext with some behavior hint, such as the default value of the argument.
+        help_behavior_hint = arg.field.argconf.help_behavior_hint
+        if help_behavior_hint is not None:
+            behavior_hint = (
+                help_behavior_hint(default_label)
+                if callable(help_behavior_hint)
+                else help_behavior_hint
+            )
+        elif lowered.instantiator is None:
             # Intentionally not quoted via shlex, since this can't actually be passed
             # in via the commandline.
-            default_text = f"(fixed to: {default_label})"
+            behavior_hint = f"(fixed to: {default_label})"
         elif lowered.action == "count":
             # Repeatable argument.
-            default_text = "(repeatable)"
+            behavior_hint = "(repeatable)"
         elif lowered.action == "append" and (
             default in _fields.MISSING_SINGLETONS or len(cast(tuple, default)) == 0
         ):
-            default_text = "(repeatable)"
+            behavior_hint = "(repeatable)"
         elif lowered.action == "append" and len(cast(tuple, default)) > 0:
             assert default is not None  # Just for type checker.
-            default_text = f"(repeatable, appends to: {default_label})"
+            behavior_hint = f"(repeatable, appends to: {default_label})"
         elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
             # ^important to use arg.field.default and not the stringified default variable.
-            default_text = "(unset by default)"
+            behavior_hint = "(unset by default)"
         elif (
             _markers._OPTIONAL_GROUP in arg.field.markers
             and default in _fields.MISSING_SINGLETONS
@@ -507,20 +512,20 @@ def _rule_generate_helptext(
             # There are some usage details that aren't communicated right now in the
             # helptext. For example: all arguments within an optional group without a
             # default should be passed in or none at all.
-            default_text = "(optional)"
+            behavior_hint = "(optional)"
         elif _markers._OPTIONAL_GROUP in arg.field.markers:
             # Argument in an optional group, but which also has a default.
-            default_text = f"(default if used: {default_label})"
+            behavior_hint = f"(default if used: {default_label})"
         else:
-            default_text = f"(default: {default_label})"
+            behavior_hint = f"(default: {default_label})"
 
-        help_parts.append(_rich_tag_if_enabled(default_text, "helptext_default"))
+        help_parts.append(_rich_tag_if_enabled(behavior_hint, "helptext_default"))
     else:
         help_parts.append(_rich_tag_if_enabled("(required)", "helptext_required"))
 
     # Note that the percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
-    lowered.help = " ".join(help_parts).replace("%", "%%")
+    lowered.help = " ".join([p for p in help_parts if len(p) > 0]).replace("%", "%%")
     return
 
 
