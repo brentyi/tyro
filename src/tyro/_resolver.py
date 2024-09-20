@@ -18,6 +18,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -409,6 +410,7 @@ def apply_type_from_typevar(
                 dict: Dict,
                 set: Set,
                 frozenset: FrozenSet,
+                type: Type,
             }
             if hasattr(types, "UnionType"):  # type: ignore
                 # PEP 604. Requires Python 3.10.
