@@ -417,7 +417,7 @@ def apply_type_from_typevar(
                 shim_table[types.UnionType] = Union  # type: ignore
 
             for new, old in shim_table.items():
-                if isinstance(typ, new) or origin is new:  # type: ignore
+                if origin is new:  # type: ignore
                     typ = old.__getitem__(args)  # type: ignore
 
         new_args = tuple(apply_type_from_typevar(x, type_from_typevar) for x in args)
