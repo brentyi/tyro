@@ -66,6 +66,8 @@ def test_super_nested():
 
 
 def test_type():
+    """Test adapted from mirceamironenco: https://github.com/brentyi/tyro/issues/164"""
+
     class Thing: ...
 
     class SubThing(Thing): ...
