@@ -1,3 +1,4 @@
+import dataclasses
 from typing import Any, Literal
 
 import pytest
@@ -62,3 +63,17 @@ def test_super_nested():
     ]
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
+
+
+def test_type():
+    class Thing: ...
+
+    class SubThing(Thing): ...
+
+    @dataclasses.dataclass
+    class Config:
+        foo: int
+        barr: type[Thing] = dataclasses.field(default=SubThing)
+        bar: type[Thing] = dataclasses.field(default=SubThing)
+
+    assert tyro.cli(Config, args=["--foo", "5"]) == Config(5, SubThing, SubThing)
