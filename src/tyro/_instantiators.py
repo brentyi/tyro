@@ -51,6 +51,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -213,7 +214,11 @@ def instantiator_from_type(
         )
 
     # Validate that typ is a `(arg: str) -> T` type converter, as expected by argparse.
-    if typ in _builtin_set:
+    if typ in (type, Type):
+        raise UnsupportedTypeAnnotationError(
+            "We do not support populating `type` instances from the command-line"
+        )
+    elif typ in _builtin_set:
         pass
     elif not callable(typ):
         raise UnsupportedTypeAnnotationError(
@@ -222,7 +227,7 @@ def instantiator_from_type(
         )
     elif not is_type_string_converter(typ):
         raise UnsupportedTypeAnnotationError(
-            f"Expected {typ} to be an `(arg: str) -> T` type converter, but is not"
+            f"Expected type to be an `(arg: str) -> T` type converter, but {typ} is not"
             " a valid type converter."
         )
 

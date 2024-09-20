@@ -515,6 +515,18 @@ def test_fixed_recursive() -> None:
         ) == A(True)
 
 
+def test_type_with_no_conf_is_fixed() -> None:
+    """The `type` type doesn't make sense to parse via the CLI, and should be
+    fixed. See: https://github.com/brentyi/tyro/issues/164"""
+
+    @dataclasses.dataclass
+    class A:
+        x: type = int
+
+    assert tyro.cli(A, args=[]) == A()
+    assert "fixed" in get_helptext_with_checks(A)
+
+
 def test_suppressed_group() -> None:
     """Reproduction of https://github.com/nerfstudio-project/nerfstudio/issues/882."""
 
