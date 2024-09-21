@@ -462,7 +462,7 @@ def _rule_generate_helptext(
                 if arg.field.type_or_callable is not json.loads
                 else json.dumps(arg.field.default)
             )
-        elif hasattr(default, "__iter__"):
+        elif type(default) in (tuple, list, set):
             # For tuple types, we might have default as (0, 1, 2, 3).
             # For list types, we might have default as [0, 1, 2, 3].
             # For set types, we might have default as {0, 1, 2, 3}.

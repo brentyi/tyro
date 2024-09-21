@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Any, Literal
+from typing import Any, Literal, Type
 
 import pytest
 
@@ -79,3 +79,14 @@ def test_type():
         bar: type[Thing] = dataclasses.field(default=SubThing)
 
     assert tyro.cli(Config, args=["--foo", "5"]) == Config(5, SubThing, SubThing)
+
+
+def test_type_default_factory():
+    """Test adapted from mirceamironenco: https://github.com/brentyi/tyro/issues/164"""
+
+    @dataclasses.dataclass
+    class Config:
+        foo: int
+        bar: type[Type] = dataclasses.field(default_factory=lambda: Type)
+
+    assert tyro.cli(Config, args=["--foo", "5"]) == Config(5)
