@@ -297,6 +297,8 @@ def test_enum() -> None:
 
     assert tyro.cli(EnumClassA, args=["--color", "RED"]) == EnumClassA(color=Color.RED)
     assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
+    with pytest.raises(SystemExit):
+        assert tyro.cli(EnumClassA, args=["--color", "red"])
 
 
 def test_enum_alias() -> None:
@@ -311,6 +313,26 @@ def test_enum_alias() -> None:
     assert tyro.cli(A, args=["--color", "RED"]) == A(color=Color.RED)
     assert tyro.cli(A, args=["--color", "ROUGE"]) == A(color=Color.ROUGE)
     assert tyro.cli(A, args=["--color", "ROUGE"]) == A(color=Color.RED)
+
+
+def test_enum_values() -> None:
+    class Color(enum.StrEnum):
+        RED = enum.auto()
+        GREEN = enum.auto()
+        BLUE = enum.auto()
+
+    @dataclasses.dataclass
+    class EnumClassA:
+        color: Annotated[Color, tyro.conf.SelectFromEnumValues]
+
+    @dataclasses.dataclass
+    class EnumClassB:
+        color: Annotated[Color, tyro.conf.SelectFromEnumValues] = Color.GREEN
+
+    assert tyro.cli(EnumClassA, args=["--color", "red"]) == EnumClassA(color=Color.RED)
+    assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
+    with pytest.raises(SystemExit):
+        assert tyro.cli(EnumClassA, args=["--color", "RED"])
 
 
 def test_literal() -> None:
@@ -379,6 +401,29 @@ def test_literal_enum() -> None:
     assert tyro.cli(A, args=["--x", "GREEN"]) == A(x=Color.GREEN)
     with pytest.raises(SystemExit):
         assert tyro.cli(A, args=["--x", "BLUE"])
+    with pytest.raises(SystemExit):
+        assert tyro.cli(A, args=["--x", "red"])
+
+
+def test_literal_enum_values() -> None:
+    class Color(enum.StrEnum):
+        RED = enum.auto()
+        GREEN = enum.auto()
+        BLUE = enum.auto()
+
+    @dataclasses.dataclass
+    class A:
+        x: Annotated[
+            Literal[Color.RED, Color.GREEN],
+            tyro.conf.SelectFromEnumValues,
+        ]
+
+    assert tyro.cli(A, args=["--x", "red"]) == A(x=Color.RED)
+    assert tyro.cli(A, args=["--x", "green"]) == A(x=Color.GREEN)
+    with pytest.raises(SystemExit):
+        assert tyro.cli(A, args=["--x", "RED"])
+    with pytest.raises(SystemExit):
+        assert tyro.cli(A, args=["--x", "blue"])
 
 
 def test_optional_literal() -> None:

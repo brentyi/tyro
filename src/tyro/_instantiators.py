@@ -39,6 +39,7 @@ import enum
 import inspect
 import os
 import pathlib
+from abc import abstractmethod
 from collections import deque
 from typing import (
     Any,
@@ -58,7 +59,15 @@ from typing import (
     overload,
 )
 
-from typing_extensions import Annotated, Literal, get_args, get_origin
+from typing_extensions import (
+    Annotated,
+    Generic,
+    Literal,
+    Protocol,
+    get_args,
+    get_origin,
+    runtime_checkable,
+)
 
 from . import _resolver
 
@@ -83,6 +92,63 @@ _FlagInstantiator = Callable[[bool], bool]
 Instantiator = Union[_StandardInstantiator, _AppendNargsInstantiator, _FlagInstantiator]
 
 NoneType = type(None)
+T = TypeVar("T", bound=enum.Enum)
+
+
+@runtime_checkable
+class _AutoChoices(Protocol):
+    """Protocol for extraction of choices from various types."""
+
+    values: Tuple[str, ...]
+
+    def __str__(self) -> str:
+        return "{" + ",".join(map(str, self.values)) + "}"
+
+    @abstractmethod
+    def instantiate(self, string: str) -> Any:
+        """Returns instance of type corresponding to CLI argument."""
+        raise NotImplementedError
+
+
+class _AutoChoicesBoolean(_AutoChoices):
+    """Instatiator/presenter for boolean choices."""
+
+    def __init__(self):
+        self.values = ("True", "False")
+
+    def instantiate(self, string: str) -> bool:
+        """Converts CLI argument to boolean."""
+        return {"True": True, "False": False}[string]  # type: ignore
+
+
+class _AutoChoicesEnumNames(_AutoChoices, Generic[T]):
+    """Extractor/instantiator/presenter for choices from enum names."""
+
+    typ: Type[T]
+
+    def __init__(self, typ: Type[T]):
+        self.typ = typ
+        # Using `.__members__` dict to handle aliases correctly
+        self.values = tuple(typ.__members__.keys())
+
+    def instantiate(self, string: str) -> T:
+        """Converts CLI argument to appropriate enum."""
+        return self.typ[string]  # type: ignore
+
+
+class _AutoChoicesEnumValues(_AutoChoices, Generic[T]):
+    """Extractor/instantiator/presenter for choices from enum values."""
+
+    typ: Type[T]
+
+    def __init__(self, typ: Type[T]):
+        self.typ = typ
+        # Extract unique values.
+        self.values = tuple(member.value for member in typ)
+
+    def instantiate(self, string: str) -> T:
+        """Converts CLI argument to appropriate enum."""
+        return self.typ(string)
 
 
 @dataclasses.dataclass
@@ -278,12 +344,14 @@ def instantiator_from_type(
         )
 
     # Special case `choices` for some types, as implemented in `instance_from_string()`.
-    auto_choices: Optional[Tuple[str, ...]] = None
+    auto_choices: Optional[_AutoChoices] = None
     if typ is bool:
-        auto_choices = ("True", "False")
+        auto_choices = _AutoChoicesBoolean()
     elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
-        # Using `.__members__` dict to handle aliases correctly
-        auto_choices = tuple(typ.__members__.keys())
+        if _markers.SelectFromEnumValues in markers:
+            auto_choices = _AutoChoicesEnumValues(typ)
+        else:
+            auto_choices = _AutoChoicesEnumNames(typ)
 
     def instantiator_base_case(strings: List[str]) -> Any:
         """Given a type and and a string from the command-line, reconstruct an object. Not
@@ -303,10 +371,8 @@ def instantiator_from_type(
         """
         assert len(get_args(typ)) == 0, f"TypeForm {typ} cannot be instantiated."
         (string,) = strings
-        if typ is bool:
-            return {"True": True, "False": False}[string]  # type: ignore
-        elif isinstance(typ, type) and issubclass(typ, enum.Enum):
-            return typ[string]  # type: ignore
+        if inspect.isclass(typ) and isinstance(auto_choices, _AutoChoices):
+            return auto_choices.instantiate(string)
         elif typ is bytes:
             return bytes(string, encoding="ascii")  # type: ignore
         else:
@@ -316,12 +382,8 @@ def instantiator_from_type(
 
     return instantiator_base_case, InstantiatorMetadata(
         nargs=1,
-        metavar=(
-            metavar
-            if auto_choices is None
-            else "{" + ",".join(map(str, auto_choices)) + "}"
-        ),
-        choices=None if auto_choices is None else auto_choices,
+        metavar=metavar if auto_choices is None else str(auto_choices),
+        choices=None if auto_choices is None else auto_choices.values,
         action=None,
     )
 
@@ -741,7 +803,12 @@ def _instantiator_from_literal(
     markers: Set[_markers.Marker],
 ) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
     choices = get_args(typ)
-    str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)
+    str_choices = tuple(
+        (x.value if _markers.SelectFromEnumValues in markers else x.name)
+        if isinstance(x, enum.Enum)
+        else str(x)
+        for x in choices
+    )
     return (
         # Note that if string is not in str_choices, it will be caught from setting
         # `choices` below.
