@@ -13,7 +13,7 @@ Usage:
 from tyro.extras import app
 
 
-@app.command
+@app.command()
 def greet(name: str, loud: bool = False):
     """Greet someone."""
     greeting = f"Hello, {name}!"
@@ -22,7 +22,7 @@ def greet(name: str, loud: bool = False):
     print(greeting)
 
 
-@app.command
+@app.command()
 def add(a: int, b: int):
     """Add two numbers."""
     print(f"{a} + {b} = {a + b}")
