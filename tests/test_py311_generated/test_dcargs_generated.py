@@ -323,11 +323,11 @@ def test_enum_values() -> None:
 
     @dataclasses.dataclass
     class EnumClassA:
-        color: Annotated[Color, tyro.conf.SelectFromEnumValues]
+        color: Annotated[Color, tyro.conf.EnumChoicesFromValues]
 
     @dataclasses.dataclass
     class EnumClassB:
-        color: Annotated[Color, tyro.conf.SelectFromEnumValues] = Color.GREEN
+        color: Annotated[Color, tyro.conf.EnumChoicesFromValues] = Color.GREEN
 
     assert tyro.cli(EnumClassA, args=["--color", "red"]) == EnumClassA(color=Color.RED)
     assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
@@ -415,7 +415,7 @@ def test_literal_enum_values() -> None:
     class A:
         x: Annotated[
             Literal[Color.RED, Color.GREEN],
-            tyro.conf.SelectFromEnumValues,
+            tyro.conf.EnumChoicesFromValues,
         ]
 
     assert tyro.cli(A, args=["--x", "red"]) == A(x=Color.RED)
