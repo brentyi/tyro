@@ -287,8 +287,9 @@ def instantiator_from_type(
         autochoice_instantiate = lambda x: {"True": True, "False": False}[x]
     elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
         if _markers.EnumChoicesFromValues in markers:
-            choices = tuple(member.value for member in typ)
-            autochoice_instantiate = lambda x: typ(x)
+            value_from_str_choice = {str(member.value): member for member in typ}
+            choices = tuple(value_from_str_choice.keys())
+            autochoice_instantiate = lambda x: value_from_str_choice[x]
         else:
             choices = tuple(typ.__members__.keys())
             autochoice_instantiate = lambda x: typ[x]
