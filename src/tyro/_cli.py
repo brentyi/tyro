@@ -381,8 +381,14 @@ def _cli_impl(
     #
     # Note: --tyro-print-completion is deprecated! --tyro-write-completion is less prone
     # to errors from accidental logging, print statements, etc.
-    print_completion = len(args) >= 2 and args[0] == "--tyro-print-completion"
-    write_completion = len(args) >= 3 and args[0] == "--tyro-write-completion"
+    print_completion = False
+    write_completion = False
+    if len(args) >= 2:
+        # We replace underscores with hyphens to accomodate for `use_undercores`.
+        print_completion = args[0].replace("_", "-") == "--tyro-print-completion"
+        write_completion = (
+            len(args) >= 3 and args[0].replace("_", "-") == "--tyro-write-completion"
+        )
 
     # Note: setting USE_RICH must happen before the parser specification is generated.
     # TODO: revisit this. Ideally we should be able to eliminate the global state
@@ -442,7 +448,7 @@ def _cli_impl(
                 f" {completion_shell}"
             )
 
-            if write_completion:
+            if write_completion and completion_target_path != pathlib.Path("-"):
                 assert completion_target_path is not None
                 completion_target_path.write_text(
                     shtab.complete(
