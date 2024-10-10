@@ -645,8 +645,14 @@
     <span class="c1">#</span>
     <span class="c1"># Note: --tyro-print-completion is deprecated! --tyro-write-completion is less prone</span>
     <span class="c1"># to errors from accidental logging, print statements, etc.</span>
-    <span class="n">print_completion</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--tyro-print-completion&quot;</span>
-    <span class="n">write_completion</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;--tyro-write-completion&quot;</span>
+    <span class="n">print_completion</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">write_completion</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># We replace underscores with hyphens to accomodate for `use_undercores`.</span>
+        <span class="n">print_completion</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;--tyro-print-completion&quot;</span>
+        <span class="n">write_completion</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;--tyro-write-completion&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Note: setting USE_RICH must happen before the parser specification is generated.</span>
     <span class="c1"># TODO: revisit this. Ideally we should be able to eliminate the global state</span>
@@ -706,7 +712,7 @@
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">completion_shell</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">write_completion</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">write_completion</span> <span class="ow">and</span> <span class="n">completion_target_path</span> <span class="o">!=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
                 <span class="k">assert</span> <span class="n">completion_target_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="n">completion_target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span>
                     <span class="n">shtab</span><span class="o">.</span><span class="n">complete</span><span class="p">(</span>
