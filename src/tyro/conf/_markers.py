@@ -141,7 +141,7 @@ Example:
     @dataclasses.dataclass
     class Args:
         display_format: Annotated[
-            OutputFormats, tyro.conf.SelectFromEnumValues
+            OutputFormats, tyro.conf.EnumChoicesFromValues
         ] = OutputFormats.PRETTY
 ```
 
