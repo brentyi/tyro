@@ -26,4 +26,4 @@ def main(
 
 
 if __name__ == "__main__":
-    tyro.cli(main)
+    tyro.cli(main) #, use_underscores=True)
