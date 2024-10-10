@@ -127,6 +127,32 @@ Can be applied to all variable-length sequences (`list[T]`, `Sequence[T]`,
 UseCounterAction = Annotated[T, None]
 """Use "counter" actions for integer arguments. Example usage: `verbose: UseCounterAction[int]`."""
 
+EnumChoicesFromValues = Annotated[T, None]
+"""Populate choices from enum values rather than enum names.
+
+Example:
+```
+    class OutputFormats(enum.StrEnum):
+        JSON = enum.auto()
+        PRETTY = enum.auto()
+        RICH = enum.auto()
+        TOML = enum.auto()
+
+    @dataclasses.dataclass
+    class Args:
+        display_format: Annotated[
+            OutputFormats, tyro.conf.EnumChoicesFromValues
+        ] = OutputFormats.PRETTY
+```
+
+The above will result in `json`, `pretty`, `rich`, and `toml` (all lowercase) as choices,
+since the auto values for `StrEnum` (Python 3.11+) are lowercase transformations of the
+names. Without this marker, the choices would be `JSON`, `PRETTY`, `RICH`, and `TOML`.
+
+Enum aliases are not relevant when this marker is present. The first entry matching the
+chosen value will be selected.
+"""
+
 
 CallableType = TypeVar("CallableType", bound=Callable)
 

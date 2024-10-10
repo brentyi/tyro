@@ -83,6 +83,7 @@ _FlagInstantiator = Callable[[bool], bool]
 Instantiator = Union[_StandardInstantiator, _AppendNargsInstantiator, _FlagInstantiator]
 
 NoneType = type(None)
+T = TypeVar("T", bound=enum.Enum)
 
 
 @dataclasses.dataclass
@@ -277,13 +278,24 @@ def instantiator_from_type(
             ),
         )
 
-    # Special case `choices` for some types, as implemented in `instance_from_string()`.
-    auto_choices: Optional[Tuple[str, ...]] = None
+    # Special case `choices` for some types. Booleans accept {True,False},
+    # enums accept based on members.
+    choices: Union[None, Tuple[str, ...]] = None
+    autochoice_instantiate: Union[None, Callable[[str], Any]] = None
     if typ is bool:
-        auto_choices = ("True", "False")
+        choices = ("True", "False")
+        autochoice_instantiate = lambda x: {"True": True, "False": False}[x]
     elif inspect.isclass(typ) and issubclass(typ, enum.Enum):
-        # Using `.__members__` dict to handle aliases correctly
-        auto_choices = tuple(typ.__members__.keys())
+        if _markers.EnumChoicesFromValues in markers:
+            value_from_str_choice = {str(member.value): member for member in typ}
+            choices = tuple(value_from_str_choice.keys())
+            autochoice_instantiate = lambda x: value_from_str_choice[x]
+        else:
+            choices = tuple(typ.__members__.keys())
+            autochoice_instantiate = lambda x: typ[x]
+
+    if choices is not None:
+        metavar = "{" + ",".join(choices) + "}"
 
     def instantiator_base_case(strings: List[str]) -> Any:
         """Given a type and and a string from the command-line, reconstruct an object. Not
@@ -303,10 +315,8 @@ def instantiator_from_type(
         """
         assert len(get_args(typ)) == 0, f"TypeForm {typ} cannot be instantiated."
         (string,) = strings
-        if typ is bool:
-            return {"True": True, "False": False}[string]  # type: ignore
-        elif isinstance(typ, type) and issubclass(typ, enum.Enum):
-            return typ[string]  # type: ignore
+        if autochoice_instantiate is not None:
+            return autochoice_instantiate(string)
         elif typ is bytes:
             return bytes(string, encoding="ascii")  # type: ignore
         else:
@@ -316,12 +326,8 @@ def instantiator_from_type(
 
     return instantiator_base_case, InstantiatorMetadata(
         nargs=1,
-        metavar=(
-            metavar
-            if auto_choices is None
-            else "{" + ",".join(map(str, auto_choices)) + "}"
-        ),
-        choices=None if auto_choices is None else auto_choices,
+        metavar=metavar,
+        choices=choices,
         action=None,
     )
 
@@ -741,7 +747,12 @@ def _instantiator_from_literal(
     markers: Set[_markers.Marker],
 ) -> Tuple[_StandardInstantiator, InstantiatorMetadata]:
     choices = get_args(typ)
-    str_choices = tuple(x.name if isinstance(x, enum.Enum) else str(x) for x in choices)
+    str_choices = tuple(
+        (x.value if _markers.EnumChoicesFromValues in markers else x.name)
+        if isinstance(x, enum.Enum)
+        else str(x)
+        for x in choices
+    )
     return (
         # Note that if string is not in str_choices, it will be caught from setting
         # `choices` below.
