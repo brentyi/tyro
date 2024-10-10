@@ -13,11 +13,13 @@ decorator-based API for subcommands, which is inspired by `click
         :linenos:
 
 
-        from tyro.extras import app
+        from tyro.extras import SubcommandApp
+
+        app = SubcommandApp()
 
 
-        @app.command()
-        def greet(name: str, loud: bool = False):
+        @app.command
+        def greet(name: str, loud: bool = False) -> None:
             """Greet someone."""
             greeting = f"Hello, {name}!"
             if loud:
@@ -25,8 +27,8 @@ decorator-based API for subcommands, which is inspired by `click
             print(greeting)
 
 
-        @app.command()
-        def add(a: int, b: int):
+        @app.command(name="addition")
+        def add(a: int, b: int) -> None:
             """Add two numbers."""
             print(f"{a} + {b} = {a + b}")
 
@@ -38,22 +40,46 @@ decorator-based API for subcommands, which is inspired by `click
 
 .. raw:: html
 
-        <kbd>python 04_additional/15_decorator_subcommands.py greet Alice</kbd>
+        <kbd>python 04_additional/15_decorator_subcommands.py --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py greet Alice
-
-------------
-
-.. raw:: html
-
-        <kbd>python 04_additional/15_decorator_subcommands.py greet Bob --loud</kbd>
-
-.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py greet Bob --loud
+.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/15_decorator_subcommands.py add 5 3</kbd>
+        <kbd>python 04_additional/15_decorator_subcommands.py greet --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py add 5 3
+.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py greet --help
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/15_decorator_subcommands.py greet --name Alice</kbd>
+
+.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py greet --name Alice
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/15_decorator_subcommands.py greet --name Bob --loud</kbd>
+
+.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py greet --name Bob --loud
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/15_decorator_subcommands.py addition --help</kbd>
+
+.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py addition --help
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/15_decorator_subcommands.py addition --a 5 --b 3</kbd>
+
+.. program-output:: python ../../examples/04_additional/15_decorator_subcommands.py addition --a 5 --b 3
