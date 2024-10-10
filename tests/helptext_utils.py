@@ -44,21 +44,35 @@ def get_helptext_with_checks(
     unformatted_usage = parser.format_usage()
     assert tyro._strings.strip_ansi_sequences(unformatted_usage) == unformatted_usage
 
-    # Completion scripts; just smoke test for now.
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
-        # `--tyro-print-completion` is deprecated! We should use `--tyro-write-completion` instead.
-        tyro.cli(f, default=default, args=["--tyro-print-completion", "bash"])
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
-        # `--tyro-print-completion` is deprecated! We should use `--tyro-write-completion` instead.
-        tyro.cli(f, default=default, args=["--tyro-print-completion", "zsh"])
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
+    # Basic checks for completion scripts.
+    with pytest.raises(SystemExit):
         tyro.cli(
             f, default=default, args=["--tyro-write-completion", "bash", os.devnull]
         )
-    with pytest.raises(SystemExit), contextlib.redirect_stdout(open(os.devnull, "w")):
-        tyro.cli(
-            f, default=default, args=["--tyro-write-completion", "zsh", os.devnull]
-        )
+    for shell in ["bash", "zsh"]:
+        for command in ["--tyro-print-completion", "--tyro-write-completion"]:
+            target = io.StringIO()
+            with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+                if command == "--tyro-write-completion":
+                    tyro.cli(f, default=default, args=[command, shell, "-"])
+                else:
+                    # `--tyro-print-completion` is deprecated! We should use `--tyro-write-completion` instead.
+                    tyro.cli(f, default=default, args=[command, shell])
+            output = target.getvalue()
+            assert "shtab" in output
+
+    # Test with underscores
+    for shell in ["bash", "zsh"]:
+        target = io.StringIO()
+        with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
+            tyro.cli(
+                f,
+                default=default,
+                args=["--tyro_write_completion", shell, "-"],
+                use_underscores=True,
+            )
+        output = target.getvalue()
+        assert "shtab" in output
 
     # Get the actual helptext.
     target = io.StringIO()
