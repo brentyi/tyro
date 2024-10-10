@@ -385,6 +385,32 @@
 <span class="n">UseCounterAction</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Use &quot;counter&quot; actions for integer arguments. Example usage: `verbose: UseCounterAction[int]`.&quot;&quot;&quot;</span>
 
+<span class="n">EnumChoicesFromValues</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;Populate choices from enum values rather than enum names.</span>
+
+<span class="sd">Example:</span>
+<span class="sd">```</span>
+<span class="sd">    class OutputFormats(enum.StrEnum):</span>
+<span class="sd">        JSON = enum.auto()</span>
+<span class="sd">        PRETTY = enum.auto()</span>
+<span class="sd">        RICH = enum.auto()</span>
+<span class="sd">        TOML = enum.auto()</span>
+
+<span class="sd">    @dataclasses.dataclass</span>
+<span class="sd">    class Args:</span>
+<span class="sd">        display_format: Annotated[</span>
+<span class="sd">            OutputFormats, tyro.conf.EnumChoicesFromValues</span>
+<span class="sd">        ] = OutputFormats.PRETTY</span>
+<span class="sd">```</span>
+
+<span class="sd">The above will result in `json`, `pretty`, `rich`, and `toml` (all lowercase) as choices,</span>
+<span class="sd">since the auto values for `StrEnum` (Python 3.11+) are lowercase transformations of the</span>
+<span class="sd">names. Without this marker, the choices would be `JSON`, `PRETTY`, `RICH`, and `TOML`.</span>
+
+<span class="sd">Enum aliases are not relevant when this marker is present. The first entry matching the</span>
+<span class="sd">chosen value will be selected.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 
 <span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 

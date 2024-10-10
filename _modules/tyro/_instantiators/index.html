@@ -341,6 +341,7 @@
 <span class="n">Instantiator</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">_AppendNargsInstantiator</span><span class="p">,</span> <span class="n">_FlagInstantiator</span><span class="p">]</span>
 
 <span class="n">NoneType</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+<span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="InstantiatorMetadata">
@@ -549,13 +550,24 @@
             <span class="p">),</span>
         <span class="p">)</span>
 
-    <span class="c1"># Special case `choices` for some types, as implemented in `instance_from_string()`.</span>
-    <span class="n">auto_choices</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># Special case `choices` for some types. Booleans accept {True,False},</span>
+    <span class="c1"># enums accept based on members.</span>
+    <span class="n">choices</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">autochoice_instantiate</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="n">auto_choices</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">)</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">)</span>
+        <span class="n">autochoice_instantiate</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;True&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}[</span><span class="n">x</span><span class="p">]</span>
     <span class="k">elif</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
-        <span class="c1"># Using `.__members__` dict to handle aliases correctly</span>
-        <span class="n">auto_choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">EnumChoicesFromValues</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">:</span>
+            <span class="n">value_from_str_choice</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">value</span><span class="p">):</span> <span class="n">member</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="n">typ</span><span class="p">}</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">value_from_str_choice</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">autochoice_instantiate</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">value_from_str_choice</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__members__</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">autochoice_instantiate</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">typ</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">choices</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
 
     <span class="k">def</span> <span class="nf">instantiator_base_case</span><span class="p">(</span><span class="n">strings</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Given a type and and a string from the command-line, reconstruct an object. Not</span>
@@ -575,10 +587,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;TypeForm </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2"> cannot be instantiated.&quot;</span>
         <span class="p">(</span><span class="n">string</span><span class="p">,)</span> <span class="o">=</span> <span class="n">strings</span>
-        <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">bool</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;True&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;False&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}[</span><span class="n">string</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">typ</span><span class="p">[</span><span class="n">string</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="n">autochoice_instantiate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">autochoice_instantiate</span><span class="p">(</span><span class="n">string</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">typ</span> <span class="ow">is</span> <span class="nb">bytes</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;ascii&quot;</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
@@ -588,12 +598,8 @@
 
     <span class="k">return</span> <span class="n">instantiator_base_case</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">(</span>
         <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">metavar</span><span class="o">=</span><span class="p">(</span>
-            <span class="n">metavar</span>
-            <span class="k">if</span> <span class="n">auto_choices</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">auto_choices</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
-        <span class="p">),</span>
-        <span class="n">choices</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">auto_choices</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">auto_choices</span><span class="p">,</span>
+        <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
+        <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span>
         <span class="n">action</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -1014,7 +1020,12 @@
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">choices</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-    <span class="n">str_choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">choices</span><span class="p">)</span>
+    <span class="n">str_choices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">EnumChoicesFromValues</span> <span class="ow">in</span> <span class="n">markers</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span>
+        <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">choices</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="c1"># Note that if string is not in str_choices, it will be caught from setting</span>
         <span class="c1"># `choices` below.</span>

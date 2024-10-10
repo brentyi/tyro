@@ -392,6 +392,31 @@ be placed at the end of the command.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.EnumChoicesFromValues">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">EnumChoicesFromValues</span></span><a class="headerlink" href="#tyro.conf.EnumChoicesFromValues" title="Link to this definition">#</a></dt>
+<dd><p>Populate choices from enum values rather than enum names.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">OutputFormats</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">JSON</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">PRETTY</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">RICH</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">TOML</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+    <span class="n">display_format</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+        <span class="n">OutputFormats</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">EnumChoicesFromValues</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="n">OutputFormats</span><span class="o">.</span><span class="n">PRETTY</span>
+</pre></div>
+</div>
+<p>The above will result in <code class="docutils literal notranslate"><span class="pre">json</span></code>, <code class="docutils literal notranslate"><span class="pre">pretty</span></code>, <code class="docutils literal notranslate"><span class="pre">rich</span></code>, and <code class="docutils literal notranslate"><span class="pre">toml</span></code> (all lowercase) as choices,
+since the auto values for <code class="docutils literal notranslate"><span class="pre">StrEnum</span></code> (Python 3.11+) are lowercase transformations of the
+names. Without this marker, the choices would be <code class="docutils literal notranslate"><span class="pre">JSON</span></code>, <code class="docutils literal notranslate"><span class="pre">PRETTY</span></code>, <code class="docutils literal notranslate"><span class="pre">RICH</span></code>, and <code class="docutils literal notranslate"><span class="pre">TOML</span></code>.</p>
+<p>Enum aliases are not relevant when this marker is present. The first entry matching the
+chosen value will be selected.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.Fixed">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><a class="headerlink" href="#tyro.conf.Fixed" title="Link to this definition">#</a></dt>
 <dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code> to prevent <code class="docutils literal notranslate"><span class="pre">tyro.cli</span></code> from parsing it; a
@@ -584,6 +609,7 @@ to apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf.subcommand"><code class="docutils literal notranslate"><span class="pre">subcommand()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.AvoidSubcommands"><code class="docutils literal notranslate"><span class="pre">AvoidSubcommands</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.ConsolidateSubcommandArgs"><code class="docutils literal notranslate"><span class="pre">ConsolidateSubcommandArgs</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf.EnumChoicesFromValues"><code class="docutils literal notranslate"><span class="pre">EnumChoicesFromValues</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.Fixed"><code class="docutils literal notranslate"><span class="pre">Fixed</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.FlagConversionOff"><code class="docutils literal notranslate"><span class="pre">FlagConversionOff</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.OmitArgPrefixes"><code class="docutils literal notranslate"><span class="pre">OmitArgPrefixes</span></code></a></li>
