@@ -201,6 +201,75 @@ Package Contents
 
    :returns: YAML string.
 
+.. py:class:: SubcommandApp
+
+
+   
+   This module provides a decorator-based API for subcommands in ``tyro``\ , inspired by click.
+
+   Example:
+
+   .. code-block:: python
+
+      from tyro.extras import SubcommandApp
+
+      app = SubcommandApp()
+
+      @app.command
+      def greet(name: str, loud: bool = False):
+          '''Greet someone.'''
+          greeting = f"Hello, {name}!"
+          if loud:
+              greeting = greeting.upper()
+          print(greeting)
+
+      @app.command(name="addition")
+      def add(a: int, b: int):
+          '''Add two numbers.'''
+          print(f"{a} + {b} = {a + b}")
+
+      if __name__ == "__main__":
+          app.cli()
+
+   Usage:
+   ``python my_script.py greet Alice``
+   ``python my_script.py greet Bob --loud``
+   ``python my_script.py addition 5 3``
+   .. py:method:: command(func: CallableT) -> CallableT
+                  command(func: None = None, *, name: str | None = None) -> Callable[[CallableT], CallableT]
+
+      
+      A decorator to register a function as a subcommand.
+
+      This method is inspired by Click's @cli.command() decorator.
+      It adds the decorated function to the list of subcommands.
+
+      :param func: The function to register as a subcommand. If None, returns a
+                   function to use as a decorator.
+      :param name: The name of the subcommand. If None, the name of the function is used.
+
+   .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, sort_subcommands: bool = True) -> Any
+
+      
+      Run the command-line interface.
+
+      This method creates a CLI using tyro, with all subcommands registered using
+      :func:`command()`.
+
+      :param prog: The name of the program printed in helptext. Mirrors argument from
+                   ``argparse.ArgumentParser()``.
+      :param description: Description text for the parser, displayed when the --help flag is
+                          passed in. If not specified, the class docstring is used. Mirrors argument from
+                          ``argparse.ArgumentParser()``.
+      :param args: If set, parse arguments from a sequence of strings instead of the
+                   commandline. Mirrors argument from ``argparse.ArgumentParser.parse_args()``.
+      :param use_underscores: If True, use underscores as a word delimiter instead of hyphens.
+                              This primarily impacts helptext; underscores and hyphens are treated equivalently
+                              when parsing happens. We default helptext to hyphens to follow the GNU style guide.
+                              https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+      :param sort_subcommands: If True, sort the subcommands alphabetically by name.
+
+
 .. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False) -> T
                  subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False) -> Any
 

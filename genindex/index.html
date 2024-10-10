@@ -207,6 +207,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/12_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -387,6 +388,8 @@
 </li>
         <li><a href="../api/tyro/_calling/#tyro._calling.callable_with_args">callable_with_args() (in module tyro._calling)</a>
 </li>
+        <li><a href="../api/tyro/extras/_subcommand_app/#tyro.extras._subcommand_app.CallableT">CallableT (in module tyro.extras._subcommand_app)</a>
+</li>
         <li><a href="../api/tyro/_unsafe_cache/#tyro._unsafe_cache.CallableType">CallableType (in module tyro._unsafe_cache)</a>
 
         <ul>
@@ -403,14 +406,18 @@
           <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.choices">(tyro._instantiators.InstantiatorMetadata attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_unsafe_cache/#tyro._unsafe_cache.clear_cache">clear_cache() (in module tyro._unsafe_cache)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/#tyro.cli">cli() (in module tyro)</a>
 
         <ul>
           <li><a href="../api/tyro/_cli/#tyro._cli.cli">(in module tyro._cli)</a>
+</li>
+          <li><a href="../api/tyro/extras/_subcommand_app/#tyro.extras._subcommand_app.SubcommandApp.cli">(tyro.extras._subcommand_app.SubcommandApp method)</a>
+</li>
+          <li><a href="../api/tyro/extras/#tyro.extras.SubcommandApp.cli">(tyro.extras.SubcommandApp method)</a>
 </li>
         </ul></li>
         <li><a href="../api/tyro/conf/#tyro.conf.configure">configure() (in module tyro.conf)</a>
@@ -803,6 +810,8 @@
 </li>
           <li><a href="../api/tyro/extras/_serialization/#module-tyro.extras._serialization">tyro.extras._serialization</a>
 </li>
+          <li><a href="../api/tyro/extras/_subcommand_app/#module-tyro.extras._subcommand_app">tyro.extras._subcommand_app</a>
+</li>
           <li><a href="../api/tyro/extras/_subcommand_cli_from_dict/#module-tyro.extras._subcommand_cli_from_dict">tyro.extras._subcommand_cli_from_dict</a>
 </li>
         </ul></li>
@@ -998,12 +1007,18 @@
         </ul></li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.subcommand_prefix">subcommand_prefix (tyro._arguments.ArgumentDefinition attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/extras/#tyro.extras.subcommand_type_from_defaults">subcommand_type_from_defaults() (in module tyro.extras)</a>
 
         <ul>
           <li><a href="../api/tyro/extras/_base_configs/#tyro.extras._base_configs.subcommand_type_from_defaults">(in module tyro.extras._base_configs)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/tyro/extras/#tyro.extras.SubcommandApp">SubcommandApp (class in tyro.extras)</a>
+
+        <ul>
+          <li><a href="../api/tyro/extras/_subcommand_app/#tyro.extras._subcommand_app.SubcommandApp">(class in tyro.extras._subcommand_app)</a>
 </li>
         </ul></li>
         <li><a href="../api/tyro/_strings/#tyro._strings.subparser_name_from_type">subparser_name_from_type() (in module tyro._strings)</a>
@@ -1137,8 +1152,6 @@
           <li><a href="../api/tyro/_fields/#module-tyro._fields">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     tyro._instantiators
 
@@ -1146,6 +1159,8 @@
           <li><a href="../api/tyro/_instantiators/#module-tyro._instantiators">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     tyro._parsers
 
@@ -1242,6 +1257,13 @@
 
         <ul>
           <li><a href="../api/tyro/extras/_serialization/#module-tyro.extras._serialization">module</a>
+</li>
+        </ul></li>
+        <li>
+    tyro.extras._subcommand_app
+
+        <ul>
+          <li><a href="../api/tyro/extras/_subcommand_app/#module-tyro.extras._subcommand_app">module</a>
 </li>
         </ul></li>
         <li>

@@ -209,6 +209,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -496,6 +497,85 @@ future version of <code class="code docutils literal notranslate"><span class="p
 </dl>
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="tyro.extras.SubcommandApp">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.extras.</span></span><span class="sig-name descname"><span class="pre">SubcommandApp</span></span><a class="reference internal" href="../../../_modules/tyro/extras/_subcommand_app/#SubcommandApp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.SubcommandApp" title="Link to this definition">#</a></dt>
+<dd><p>This module provides a decorator-based API for subcommands in <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, inspired by click.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tyro.extras</span> <span class="kn">import</span> <span class="n">SubcommandApp</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span>
+<span class="k">def</span> <span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Greet someone.&#39;&#39;&#39;</span>
+    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
+    <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+        <span class="n">greeting</span> <span class="o">=</span> <span class="n">greeting</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;addition&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;Add two numbers.&#39;&#39;&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">cli</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Usage:
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">my_script.py</span> <span class="pre">greet</span> <span class="pre">Alice</span></code>
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">my_script.py</span> <span class="pre">greet</span> <span class="pre">Bob</span> <span class="pre">--loud</span></code>
+<code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">my_script.py</span> <span class="pre">addition</span> <span class="pre">5</span> <span class="pre">3</span></code>
+.. py:method:: command(func: CallableT) -&gt; CallableT</p>
+<blockquote>
+<div><blockquote>
+<div><p>command(func: None = None, <a href="#id1"><span class="problematic" id="id2">*</span></a>, name: str | None = None) -&gt; Callable[[CallableT], CallableT]</p>
+</div></blockquote>
+<p>A decorator to register a function as a subcommand.</p>
+<p>This method is inspired by Click’s &#64;cli.command() decorator.
+It adds the decorated function to the list of subcommands.</p>
+<dl class="field-list simple">
+<dt class="field-odd">param func<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The function to register as a subcommand. If None, returns a
+function to use as a decorator.</p>
+</dd>
+<dt class="field-even">param name<span class="colon">:</span></dt>
+<dd class="field-even"><p>The name of the subcommand. If None, the name of the function is used.</p>
+</dd>
+</dl>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro.extras.SubcommandApp.cli">
+<span class="sig-name descname"><span class="pre">cli</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_underscores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_subcommands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/tyro/extras/_subcommand_app/#SubcommandApp.cli"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.SubcommandApp.cli" title="Link to this definition">#</a></dt>
+<dd><p>Run the command-line interface.</p>
+<p>This method creates a CLI using tyro, with all subcommands registered using
+<code class="xref py py-func docutils literal notranslate"><span class="pre">command()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prog</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – The name of the program printed in helptext. Mirrors argument from
+<code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser()</span></code>.</p></li>
+<li><p><strong>description</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Description text for the parser, displayed when the –help flag is
+passed in. If not specified, the class docstring is used. Mirrors argument from
+<code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser()</span></code>.</p></li>
+<li><p><strong>args</strong> (<em>Optional</em><em>[</em><em>Sequence</em><em>[</em><em>str</em><em>]</em><em>]</em>) – If set, parse arguments from a sequence of strings instead of the
+commandline. Mirrors argument from <code class="docutils literal notranslate"><span class="pre">argparse.ArgumentParser.parse_args()</span></code>.</p></li>
+<li><p><strong>use_underscores</strong> (<em>bool</em>) – If True, use underscores as a word delimiter instead of hyphens.
+This primarily impacts helptext; underscores and hyphens are treated equivalently
+when parsing happens. We default helptext to hyphens to follow the GNU style guide.
+<a class="reference external" href="https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html">https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html</a></p></li>
+<li><p><strong>sort_subcommands</strong> (<em>bool</em>) – If True, sort the subcommands alphabetically by name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.extras.subcommand_cli_from_dict">
 <span class="sig-prename descclassname"><span class="pre">tyro.extras.</span></span><span class="sig-name descname"><span class="pre">subcommand_cli_from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subcommands</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_underscores</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">T</span></span></span><a class="reference internal" href="../../../_modules/tyro/extras/_subcommand_cli_from_dict/#subcommand_cli_from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.extras.subcommand_cli_from_dict" title="Link to this definition">#</a></dt>
@@ -615,6 +695,10 @@ when parsing happens. We default helptext to hyphens to follow the GNU style gui
 <li><a class="reference internal" href="#tyro.extras.literal_type_from_choices"><code class="docutils literal notranslate"><span class="pre">literal_type_from_choices()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.extras.from_yaml"><code class="docutils literal notranslate"><span class="pre">from_yaml()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.extras.to_yaml"><code class="docutils literal notranslate"><span class="pre">to_yaml()</span></code></a></li>
+<li><a class="reference internal" href="#tyro.extras.SubcommandApp"><code class="docutils literal notranslate"><span class="pre">SubcommandApp</span></code></a><ul>
+<li><a class="reference internal" href="#tyro.extras.SubcommandApp.cli"><code class="docutils literal notranslate"><span class="pre">SubcommandApp.cli()</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro.extras.subcommand_cli_from_dict"><code class="docutils literal notranslate"><span class="pre">subcommand_cli_from_dict()</span></code></a></li>
 </ul>
 </li>
