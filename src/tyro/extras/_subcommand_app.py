@@ -72,9 +72,6 @@ class SubcommandApp:
         """
 
         def inner(func: CallableT) -> CallableT:
-            if self._subcommands is None:
-                _subcommands = {}
-
             nonlocal name
             if name is None:
                 name = func.__name__

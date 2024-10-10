@@ -3,8 +3,10 @@ import pytest
 from tyro.extras import SubcommandApp
 
 app = SubcommandApp()
+app_just_one = SubcommandApp()
 
 
+@app_just_one.command
 @app.command
 def greet(name: str, loud: bool = False) -> None:
     """Greet someone."""
@@ -18,6 +20,17 @@ def greet(name: str, loud: bool = False) -> None:
 def add(a: int, b: int) -> None:
     """Add two numbers."""
     print(f"{a} + {b} = {a + b}")
+
+
+def test_app_just_one_cli(capsys):
+    # Test: `python my_script.py --help`
+    with pytest.raises(SystemExit):
+        app_just_one.cli(args=["--help"])
+    captured = capsys.readouterr()
+    assert "usage: " in captured.out
+    assert "greet" not in captured.out
+    assert "addition" not in captured.out
+    assert "--name" in captured.out
 
 
 def test_app_cli(capsys):
