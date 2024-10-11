@@ -91,6 +91,8 @@ class SubcommandApp:
         description: Optional[str] = None,
         args: Optional[Sequence[str]] = None,
         use_underscores: bool = False,
+        console_outputs: bool = True,
+        config: Optional[Sequence[Any]] = None,
         sort_subcommands: bool = False,
     ) -> Any:
         """Run the command-line interface.
@@ -110,6 +112,9 @@ class SubcommandApp:
                 This primarily impacts helptext; underscores and hyphens are treated equivalently
                 when parsing happens. We default helptext to hyphens to follow the GNU style guide.
                 https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+            console_outputs: If set to `False`, parsing errors and help messages will be
+                suppressed.
+            config: Sequence of config marker objects, from `tyro.conf`.
             sort_subcommands: If True, sort the subcommands alphabetically by name.
         """
         assert self._subcommands is not None
@@ -129,6 +134,8 @@ class SubcommandApp:
                 description=description,
                 args=args,
                 use_underscores=use_underscores,
+                console_outputs=console_outputs,
+                config=config,
             )
         else:
             return tyro.extras.subcommand_cli_from_dict(
@@ -137,4 +144,6 @@ class SubcommandApp:
                 description=description,
                 args=args,
                 use_underscores=use_underscores,
+                console_outputs=console_outputs,
+                config=config,
             )
