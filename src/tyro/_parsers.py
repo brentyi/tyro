@@ -79,13 +79,12 @@ class ParserSpecification:
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Resolve the type of `f`, generate a field list.
-        f, type_from_typevar, field_list = _fields.field_list_from_callable(
-            f=f,
-            default_instance=default_instance,
-            support_single_arg_types=support_single_arg_types,
-        )
-        for i in range(len(field_list)):
-            field_list[i].markers |= set(markers)
+        with _fields.FieldDefinition.marker_context(markers):
+            f, type_from_typevar, field_list = _fields.field_list_from_callable(
+                f=f,
+                default_instance=default_instance,
+                support_single_arg_types=support_single_arg_types,
+            )
 
         # Cycle detection.
         #
