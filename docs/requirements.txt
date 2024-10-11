@@ -5,3 +5,4 @@ sphinx-autoapi==3.0.0
 m2r2==0.3.3.post2
 git+https://github.com/brentyi/sphinxcontrib-programoutput.git
 git+https://github.com/brentyi/ansi.git
+sphinxcontrib-googleanalytics==0.4

@@ -54,6 +54,7 @@ extensions = [
     "m2r2",
     "sphinxcontrib.programoutput",
     "sphinxcontrib.ansi",
+    "sphinxcontrib.googleanalytics",
 ]
 programoutput_use_ansi = True
 html_ansi_stylesheet = "black-on-white.css"
@@ -211,6 +212,9 @@ texinfo_documents = [
 
 
 # -- Extension configuration --------------------------------------------------
+
+# -- Google analytics ID ------------------------------------------------------
+googleanalytics_id = "G-624W9VWZWK"
 
 # -- Options for autoapi extension --------------------------------------------
 autoapi_dirs = ["../../src/tyro"]
