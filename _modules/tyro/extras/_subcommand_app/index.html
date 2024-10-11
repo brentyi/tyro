@@ -363,6 +363,8 @@
         <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">sort_subcommands</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Run the command-line interface.</span>
@@ -382,6 +384,9 @@
 <span class="sd">                This primarily impacts helptext; underscores and hyphens are treated equivalently</span>
 <span class="sd">                when parsing happens. We default helptext to hyphens to follow the GNU style guide.</span>
 <span class="sd">                https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html</span>
+<span class="sd">            console_outputs: If set to `False`, parsing errors and help messages will be</span>
+<span class="sd">                suppressed.</span>
+<span class="sd">            config: Sequence of config marker objects, from `tyro.conf`.</span>
 <span class="sd">            sort_subcommands: If True, sort the subcommands alphabetically by name.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_subcommands</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -401,6 +406,8 @@
                 <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
                 <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
+                <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">subcommand_cli_from_dict</span><span class="p">(</span>
@@ -409,6 +416,8 @@
                 <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
                 <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
                 <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
+                <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
             <span class="p">)</span></div>
 </div>
 

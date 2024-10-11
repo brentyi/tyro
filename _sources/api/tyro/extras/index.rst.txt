@@ -248,7 +248,7 @@ Package Contents
                    function to use as a decorator.
       :param name: The name of the subcommand. If None, the name of the function is used.
 
-   .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, sort_subcommands: bool = False) -> Any
+   .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[Any]] = None, sort_subcommands: bool = False) -> Any
 
       
       Run the command-line interface.
@@ -267,11 +267,14 @@ Package Contents
                               This primarily impacts helptext; underscores and hyphens are treated equivalently
                               when parsing happens. We default helptext to hyphens to follow the GNU style guide.
                               https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+      :param console_outputs: If set to ``False``\ , parsing errors and help messages will be
+                              suppressed.
+      :param config: Sequence of config marker objects, from ``tyro.conf``.
       :param sort_subcommands: If True, sort the subcommands alphabetically by name.
 
 
-.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True) -> T
-                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True) -> Any
+.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None) -> T
+                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None) -> Any
 
    
    Generate a subcommand CLI from a dictionary of functions.
@@ -323,4 +326,5 @@ Package Contents
                            supressed. This can be useful for distributed settings, where ``tyro.cli()``
                            is called from multiple workers but we only want console outputs from the
                            main one.
+   :param config: Sequence of config marker objects, from ``tyro.conf``.
 

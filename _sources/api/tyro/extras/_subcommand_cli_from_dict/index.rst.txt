@@ -13,8 +13,8 @@ Module Contents
 
    
 
-.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True) -> T
-                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True) -> Any
+.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None) -> T
+                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None) -> Any
 
    
    Generate a subcommand CLI from a dictionary of functions.
@@ -66,4 +66,5 @@ Module Contents
                            supressed. This can be useful for distributed settings, where ``tyro.cli()``
                            is called from multiple workers but we only want console outputs from the
                            main one.
+   :param config: Sequence of config marker objects, from ``tyro.conf``.
 

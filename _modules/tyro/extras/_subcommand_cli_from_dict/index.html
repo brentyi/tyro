@@ -270,6 +270,8 @@
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
 
+<span class="kn">from</span> <span class="nn">tyro.conf._markers</span> <span class="kn">import</span> <span class="n">Marker</span>
+
 <span class="kn">from</span> <span class="nn">.._cli</span> <span class="kn">import</span> <span class="n">cli</span>
 <span class="kn">from</span> <span class="nn">..conf</span> <span class="kn">import</span> <span class="n">subcommand</span>
 
@@ -285,6 +287,7 @@
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -299,6 +302,7 @@
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -312,6 +316,7 @@
     <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a subcommand CLI from a dictionary of functions.</span>
 
@@ -363,6 +368,7 @@
 <span class="sd">            supressed. This can be useful for distributed settings, where `tyro.cli()`</span>
 <span class="sd">            is called from multiple workers but we only want console outputs from the</span>
 <span class="sd">            main one.</span>
+<span class="sd">        config: Sequence of config marker objects, from `tyro.conf`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># We need to form a union type, which requires at least two elements.</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">subcommands</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;At least two subcommands are required.&quot;</span>
@@ -385,7 +391,8 @@
         <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
         <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
         <span class="n">use_underscores</span><span class="o">=</span><span class="n">use_underscores</span><span class="p">,</span>
-        <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span>
+        <span class="n">console_outputs</span><span class="o">=</span><span class="n">console_outputs</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 </pre></div>
