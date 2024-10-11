@@ -90,6 +90,6 @@ For additional flexibility, :func:`tyro.conf.arg()` accepts a
 
 .. raw:: html
 
-        <kbd>python 04_additional/11_custom_constructors.py --dict1.json '{"hello": "world"}`' --dict2.json '{"hello": "world"}'</kbd>
+        <kbd>python 04_additional/11_custom_constructors.py --dict1.json '{"hello": "world"}' --dict2.json '{"hello": "world"}'</kbd>
 
-.. program-output:: python ../../examples/04_additional/11_custom_constructors.py --dict1.json '{"hello": "world"}`' --dict2.json '{"hello": "world"}'
+.. program-output:: python ../../examples/04_additional/11_custom_constructors.py --dict1.json '{"hello": "world"}' --dict2.json '{"hello": "world"}'

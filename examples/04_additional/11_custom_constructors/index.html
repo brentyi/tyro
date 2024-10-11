@@ -3,7 +3,16 @@
   <head><meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width,initial-scale=1"/>
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Argument Aliases" href="../12_aliases/" /><link rel="prev" title="JAX/Flax Integration" href="../10_flax/" />
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-624W9VWZWK"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-624W9VWZWK');
+    </script>
+    <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Argument Aliases" href="../12_aliases/" /><link rel="prev" title="JAX/Flax Integration" href="../10_flax/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Custom Constructors - tyro</title>
@@ -343,9 +352,8 @@ returns a tuple of integers:</p>
 <kbd>python 04_additional/11_custom_constructors.py --dict1.json '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">dict1={'hello': 'world'}
 dict2={'default': None}</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/11_custom_constructors.py --dict1.json '{"hello": "world"}`' --dict2.json '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">╭─ Value error ────────────────────────────────────────────────────────────────╮
-│ Error parsing dict1: Extra data: line 1 column 19 (char 18)                  │
-╰──────────────────────────────────────────────────────────────────────────────╯</pre>
+<kbd>python 04_additional/11_custom_constructors.py --dict1.json '{"hello": "world"}' --dict2.json '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">dict1={'hello': 'world'}
+dict2={'hello': 'world'}</pre>
 </section>
 
         </article>
