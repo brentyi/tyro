@@ -325,6 +325,18 @@ stripped.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="tyro._fields.FieldDefinition.marker_context">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">marker_context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.marker_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.marker_context" title="Link to this definition">#</a></dt>
+<dd><p>Context for setting markers on fields. All fields created within the
+context will have the specified markers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>markers</strong> (<em>Tuple</em><em>[</em><em>tyro.conf._markers.Marker</em><em>, </em><em>Ellipsis</em><em>]</em>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.make">
 <em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_or_callable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default_from_default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">helptext</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_argname_override</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.make" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
@@ -338,19 +350,6 @@ stripped.</p>
 <li><p><strong>call_argname_override</strong> (<em>Optional</em><em>[</em><em>Any</em><em>]</em>) – </p></li>
 <li><p><strong>markers</strong> (<em>Tuple</em><em>[</em><em>tyro.conf._markers.Marker</em><em>, </em><em>Ellipsis</em><em>]</em>) – </p></li>
 </ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="tyro._fields.FieldDefinition.add_markers">
-<span class="sig-name descname"><span class="pre">add_markers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition"><span class="pre">FieldDefinition</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.add_markers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.add_markers" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>markers</strong> (<em>Tuple</em><em>[</em><em>Any</em><em>, </em><em>Ellipsis</em><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#tyro._fields.FieldDefinition" title="tyro._fields.FieldDefinition">FieldDefinition</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -565,8 +564,8 @@ A list of field definitions.</p>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.argconf"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.argconf</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.call_argname"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.call_argname</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.__post_init__"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.__post_init__()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._fields.FieldDefinition.marker_context"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.marker_context()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.make"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.make()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._fields.FieldDefinition.add_markers"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.add_markers()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.is_positional"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.is_positional()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.is_positional_call"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.is_positional_call()</span></code></a></li>
 </ul>

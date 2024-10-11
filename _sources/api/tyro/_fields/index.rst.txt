@@ -73,11 +73,15 @@ Module Contents
    .. py:method:: __post_init__()
 
 
-   .. py:method:: make(name: str, type_or_callable: Union[tyro._typing.TypeForm[Any], Callable], default: Any, is_default_from_default_instance: bool, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = ())
+   .. py:method:: marker_context(markers: Tuple[tyro.conf._markers.Marker, Ellipsis])
       :staticmethod:
 
+      
+      Context for setting markers on fields. All fields created within the
+      context will have the specified markers.
 
-   .. py:method:: add_markers(markers: Tuple[Any, Ellipsis]) -> FieldDefinition
+   .. py:method:: make(name: str, type_or_callable: Union[tyro._typing.TypeForm[Any], Callable], default: Any, is_default_from_default_instance: bool, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = ())
+      :staticmethod:
 
 
    .. py:method:: is_positional() -> bool
