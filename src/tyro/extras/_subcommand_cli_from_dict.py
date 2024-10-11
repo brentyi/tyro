@@ -16,6 +16,7 @@ def subcommand_cli_from_dict(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
+    console_outputs: bool = True,
 ) -> T: ...
 
 
@@ -29,6 +30,7 @@ def subcommand_cli_from_dict(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
+    console_outputs: bool = True,
 ) -> Any: ...
 
 
@@ -39,6 +41,7 @@ def subcommand_cli_from_dict(
     description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
+    console_outputs: bool = True,
 ) -> Any:
     """Generate a subcommand CLI from a dictionary of functions.
 
@@ -86,6 +89,10 @@ def subcommand_cli_from_dict(
             This primarily impacts helptext; underscores and hyphens are treated equivalently
             when parsing happens. We default helptext to hyphens to follow the GNU style guide.
             https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+        console_outputs: If set to `False`, parsing errors and help messages will be
+            supressed. This can be useful for distributed settings, where `tyro.cli()`
+            is called from multiple workers but we only want console outputs from the
+            main one.
     """
     # We need to form a union type, which requires at least two elements.
     assert len(subcommands) >= 2, "At least two subcommands are required."
@@ -108,4 +115,5 @@ def subcommand_cli_from_dict(
         description=description,
         args=args,
         use_underscores=use_underscores,
+        console_outputs=console_outputs
     )
