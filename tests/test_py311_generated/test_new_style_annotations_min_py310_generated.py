@@ -6,12 +6,12 @@ import pytest
 import tyro
 
 
-def test_union_direct():
+def test_union_direct() -> None:
     assert tyro.cli(int | str, args=["5"]) == 5
     assert tyro.cli(int | str, args=["five"]) == "five"
 
 
-def test_union_basic():
+def test_union_basic() -> None:
     def main(x: int | str) -> int | str:
         return x
 
@@ -20,7 +20,7 @@ def test_union_basic():
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
-def test_union_with_list():
+def test_union_with_list() -> None:
     def main(x: int | str | list[bool]) -> Any:
         return x
 
@@ -31,7 +31,7 @@ def test_union_with_list():
     assert tyro.cli(main, args=["--x", "True", "False"]) == [True, False]
 
 
-def test_union_literal():
+def test_union_literal() -> None:
     def main(x: Literal[1, 2] | Literal[3, 4, 5] | str) -> int | str:
         return x
 
@@ -40,7 +40,7 @@ def test_union_literal():
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
-def test_super_nested():
+def test_super_nested() -> None:
     def main(
         x: None
         | list[
@@ -65,7 +65,7 @@ def test_super_nested():
         tyro.cli(main, args=["--help"])
 
 
-def test_type():
+def test_type() -> None:
     """Test adapted from mirceamironenco: https://github.com/brentyi/tyro/issues/164"""
 
     class Thing: ...
@@ -81,7 +81,7 @@ def test_type():
     assert tyro.cli(Config, args=["--foo", "5"]) == Config(5, SubThing, SubThing)
 
 
-def test_type_default_factory():
+def test_type_default_factory() -> None:
     """Test adapted from mirceamironenco: https://github.com/brentyi/tyro/issues/164"""
 
     @dataclasses.dataclass
