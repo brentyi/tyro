@@ -316,10 +316,10 @@ def test_enum_alias() -> None:
 
 
 def test_enum_values() -> None:
-    class Color(enum.StrEnum):
-        RED = enum.auto()
-        GREEN = enum.auto()
-        BLUE = enum.auto()
+    class Color(enum.Enum):
+        RED = "red"
+        GREEN = "green"
+        BLUE = "blue"
 
     @dataclasses.dataclass
     class EnumClassA:
@@ -331,6 +331,28 @@ def test_enum_values() -> None:
 
     assert tyro.cli(EnumClassA, args=["--color", "red"]) == EnumClassA(color=Color.RED)
     assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
+    with pytest.raises(SystemExit):
+        assert tyro.cli(EnumClassA, args=["--color", "RED"])
+
+
+def test_enum_values_ints() -> None:
+    class Color(enum.Enum):
+        RED = 0
+        GREEN = 1
+        BLUE = 2
+
+    @dataclasses.dataclass
+    class EnumClassA:
+        color: Annotated[Color, tyro.conf.EnumChoicesFromValues]
+
+    @dataclasses.dataclass
+    class EnumClassB:
+        color: Annotated[Color, tyro.conf.EnumChoicesFromValues] = Color.GREEN
+
+    assert tyro.cli(EnumClassA, args=["--color", "0"]) == EnumClassA(color=Color.RED)
+    assert tyro.cli(EnumClassB, args=[]) == EnumClassB()
+    with pytest.raises(SystemExit):
+        assert tyro.cli(EnumClassA, args=["--color", "red"])
     with pytest.raises(SystemExit):
         assert tyro.cli(EnumClassA, args=["--color", "RED"])
 
@@ -406,10 +428,10 @@ def test_literal_enum() -> None:
 
 
 def test_literal_enum_values() -> None:
-    class Color(enum.StrEnum):
-        RED = enum.auto()
-        GREEN = enum.auto()
-        BLUE = enum.auto()
+    class Color(enum.Enum):
+        RED = "red"
+        GREEN = "green"
+        BLUE = "blue"
 
     @dataclasses.dataclass
     class A:
