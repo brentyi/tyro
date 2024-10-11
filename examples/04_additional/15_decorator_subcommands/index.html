@@ -260,8 +260,8 @@
         <article role="main">
           <section id="decorator-based-subcommands">
 <h1>Decorator-based Subcommands<a class="headerlink" href="#decorator-based-subcommands" title="Link to this heading">#</a></h1>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.app.command()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.app.cli()</span></code> provide a
-decorator-based API for subcommands, which is inspired by <a class="reference external" href="https://click.palletsprojects.com/">click</a>.</p>
+<p><a class="reference internal" href="../../../api/tyro/extras/#tyro.extras.SubcommandApp" title="tyro.extras.SubcommandApp"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.SubcommandApp()</span></code></a> provides a decorator-based API for
+subcommands, which is inspired by <a class="reference external" href="https://click.palletsprojects.com/">click</a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">from</span> <span class="nn">tyro.extras</span> <span class="kn">import</span> <span class="n">SubcommandApp</span>
 <span class="linenos"> 2</span>
 <span class="linenos"> 3</span><span class="n">app</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
@@ -287,15 +287,15 @@ decorator-based API for subcommands, which is inspired by <a class="reference ex
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/15_decorator_subcommands.py --help</kbd><pre class="ansi-block literal-block">usage: 15_decorator_subcommands.py [-h] {addition,greet}
+<kbd>python 04_additional/15_decorator_subcommands.py --help</kbd><pre class="ansi-block literal-block">usage: 15_decorator_subcommands.py [-h] {greet,addition}
 
 ╭─ options ───────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit │
 ╰─────────────────────────────────────────────────────────╯
 ╭─ subcommands ───────────────────────────────────────────╮
-│ {addition,greet}                                        │
-│     addition            Add two numbers.                │
+│ {greet,addition}                                        │
 │     greet               Greet someone.                  │
+│     addition            Add two numbers.                │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/15_decorator_subcommands.py greet --help</kbd><pre class="ansi-block literal-block">usage: 15_decorator_subcommands.py greet [-h] --name STR [--loud | --no-loud]

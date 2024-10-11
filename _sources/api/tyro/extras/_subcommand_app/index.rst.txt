@@ -60,7 +60,7 @@ Module Contents
                    function to use as a decorator.
       :param name: The name of the subcommand. If None, the name of the function is used.
 
-   .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, sort_subcommands: bool = True) -> Any
+   .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, sort_subcommands: bool = False) -> Any
 
       
       Run the command-line interface.
