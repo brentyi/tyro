@@ -13,8 +13,8 @@ Module Contents
 
    
 
-.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False) -> T
-                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False) -> Any
+.. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True) -> T
+                 subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True) -> Any
 
    
    Generate a subcommand CLI from a dictionary of functions.
@@ -62,4 +62,8 @@ Module Contents
                            This primarily impacts helptext; underscores and hyphens are treated equivalently
                            when parsing happens. We default helptext to hyphens to follow the GNU style guide.
                            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+   :param console_outputs: If set to ``False``\ , parsing errors and help messages will be
+                           supressed. This can be useful for distributed settings, where ``tyro.cli()``
+                           is called from multiple workers but we only want console outputs from the
+                           main one.
 
