@@ -34,7 +34,7 @@ For additional flexibility, :func:`tyro.conf.arg()` accepts a
 Usage:
 `python ./10_custom_constructors.py --help`
 `python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}"`
-`python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}"`  --dict2.json "{\"hello\": \"world\"}"`
+`python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}" --dict2.json "{\"hello\": \"world\"}"`
 """
 
 import json as json_
