@@ -1,8 +1,7 @@
 """Decorator-based Subcommands
 
-:func:`tyro.extras.app.command()` and :func:`tyro.extras.app.cli()` provide a
-decorator-based API for subcommands, which is inspired by `click
-<https://click.palletsprojects.com/>`_.
+:func:`tyro.extras.SubcommandApp()` provides a decorator-based API for
+subcommands, which is inspired by `click <https://click.palletsprojects.com/>`_.
 
 Usage:
 `python my_script.py --help`

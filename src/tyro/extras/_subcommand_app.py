@@ -91,7 +91,7 @@ class SubcommandApp:
         description: Optional[str] = None,
         args: Optional[Sequence[str]] = None,
         use_underscores: bool = False,
-        sort_subcommands: bool = True,
+        sort_subcommands: bool = False,
     ) -> Any:
         """Run the command-line interface.
 
