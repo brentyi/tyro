@@ -214,9 +214,10 @@ def test_suppress_console_outputs_fromdict() -> None:
     target = io.StringIO()
     with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
         tyro.extras.subcommand_cli_from_dict(
-        {"foo": foo, "bar": bar},
-        args="foo --reward.trac".split(" "),
-        console_outputs=False)
+            {"foo": foo, "bar": bar},
+            args="foo --reward.trac".split(" "),
+            console_outputs=False,
+        )
 
     error = target.getvalue()
     assert error == ""
