@@ -25,7 +25,7 @@ def add(a: int, b: int) -> None:
 def test_app_just_one_cli(capsys):
     # Test: `python my_script.py --help`
     with pytest.raises(SystemExit):
-        app_just_one.cli(args=["--help"], sort_subcommands=False)
+        app_just_one.cli(args=["--help"])
     captured = capsys.readouterr()
     assert "usage: " in captured.out
     assert "greet" not in captured.out
@@ -44,13 +44,13 @@ def test_app_cli(capsys):
 
     # Test: `python my_script.py greet --help`
     with pytest.raises(SystemExit):
-        app.cli(args=["greet", "--help"])
+        app.cli(args=["greet", "--help"], sort_subcommands=False)
     captured = capsys.readouterr()
     assert "usage: " in captured.out
     assert "Greet someone." in captured.out
 
     # Test: `python my_script.py greet --name Alice`
-    app.cli(args=["greet", "--name", "Alice"])
+    app.cli(args=["greet", "--name", "Alice"], sort_subcommands=True)
     captured = capsys.readouterr()
     assert captured.out.strip() == "Hello, Alice!"
 

@@ -1,3 +1,5 @@
+"""Adapted from @mirceamironenco: https://github.com/brentyi/tyro/issues/170"""
+
 from dataclasses import dataclass
 
 import tyro
