@@ -6,6 +6,7 @@ from __future__ import annotations
 import builtins
 import collections
 import collections.abc
+import contextlib
 import dataclasses
 import enum
 import functools
@@ -55,6 +56,8 @@ from . import (
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
+_field_context_markers: List[Tuple[_markers.Marker, ...]] = []
+
 
 @dataclasses.dataclass
 class FieldDefinition:
@@ -83,8 +86,17 @@ class FieldDefinition:
             _markers.Fixed in self.markers or _markers.Suppress in self.markers
         ) and self.default in MISSING_SINGLETONS:
             raise _instantiators.UnsupportedTypeAnnotationError(
-                f"Field {self.intern_name} is missing a default value!"
+                f"Field {self.extern_name} is missing a default value!"
             )
+
+    @staticmethod
+    @contextlib.contextmanager
+    def marker_context(markers: Tuple[_markers.Marker, ...]):
+        """Context for setting markers on fields. All fields created within the
+        context will have the specified markers."""
+        _field_context_markers.append(markers)
+        yield
+        _field_context_markers.pop()
 
     @staticmethod
     def make(
@@ -126,7 +138,13 @@ class FieldDefinition:
         type_or_callable, inferred_markers = _resolver.unwrap_annotated(
             type_or_callable, _markers._Marker
         )
-        return FieldDefinition(
+        markers = inferred_markers + markers
+
+        # Include markers set via context manager.
+        for context_markers in _field_context_markers:
+            markers += context_markers
+
+        out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
             type_or_callable=type_or_callable
@@ -135,19 +153,14 @@ class FieldDefinition:
             default=default,
             is_default_from_default_instance=is_default_from_default_instance,
             helptext=helptext,
-            markers=set(inferred_markers).union(markers),
+            markers=set(markers),
             custom_constructor=argconf.constructor_factory is not None,
             argconf=argconf,
             call_argname=call_argname_override
             if call_argname_override is not None
             else name,
         )
-
-    def add_markers(self, markers: Tuple[Any, ...]) -> FieldDefinition:
-        return dataclasses.replace(
-            self,
-            markers=self.markers.union(markers),
-        )
+        return out
 
     def is_positional(self) -> bool:
         """Returns True if the argument should be positional in the commandline."""
@@ -271,7 +284,10 @@ def field_list_from_callable(
     f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
 
     # Try to generate field list.
-    field_list = _try_field_list_from_callable(f, default_instance)
+    # We recursively apply markers.
+    _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
+    with FieldDefinition.marker_context(parent_markers):
+        field_list = _try_field_list_from_callable(f, default_instance)
 
     if isinstance(field_list, UnsupportedNestedTypeMessage):
         if support_single_arg_types:
@@ -297,10 +313,6 @@ def field_list_from_callable(
             )
         else:
             raise _instantiators.UnsupportedTypeAnnotationError(field_list.message)
-
-    # Recursively apply markers.
-    _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
-    field_list = list(map(lambda field: field.add_markers(parent_markers), field_list))
 
     # Try to resolve types in our list of fields.
     def resolve(field: FieldDefinition) -> FieldDefinition:
@@ -947,17 +959,13 @@ def _try_field_list_from_general_callable(
         # Ignore self parameter.
         params = params[1:]
 
-    out = _field_list_from_params(f, cls, params)
-    if isinstance(out, UnsupportedNestedTypeMessage):
-        # Return error message.
-        return out
-
     # If a default is provided: either all or none of the arguments must be passed in.
+    markers = ()
     if default_instance not in MISSING_SINGLETONS:
-        for i, field in enumerate(out):
-            out[i] = field.add_markers((_markers._OPTIONAL_GROUP,))
+        markers = (_markers._OPTIONAL_GROUP,)
 
-    return out
+    with FieldDefinition.marker_context(markers):
+        return _field_list_from_params(f, cls, params)
 
 
 def _field_list_from_params(
