@@ -1,3 +1,7 @@
+# mypy: ignore-errors
+#
+# We can remove this ignore after: https://peps.python.org/pep-0747/
+
 import dataclasses
 from typing import Any, Literal, Type
 
