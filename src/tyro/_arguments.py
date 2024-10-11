@@ -533,31 +533,43 @@ def _rule_set_name_or_flag_and_dest(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
-    name_or_flag = _strings.make_field_name(
-        [arg.extern_prefix, arg.field.extern_name]
-        if arg.field.argconf.prefix_name
-        and _markers.OmitArgPrefixes not in arg.field.markers
-        else [arg.field.extern_name]
-    )
+    if lowered.help is argparse.SUPPRESS:
+        # Use standard name for suppressed arguments.
+        # Relevant: https://github.com/brentyi/tyro/issues/170
+        name_or_flag = _strings.make_field_name(
+            [arg.extern_prefix, arg.field.extern_name]
+        )
+    elif (
+        arg.field.argconf.prefix_name is False
+        or _markers.OmitArgPrefixes in arg.field.markers
+    ):
+        # Strip prefixes when the argument is suppressed.
+        # Still need to call make_field_name() because it converts underscores
+        # to hyphens, etc.
+        name_or_flag = _strings.make_field_name([arg.field.extern_name])
+    elif (
+        _markers.OmitSubcommandPrefixes in arg.field.markers
+        and arg.subcommand_prefix != ""
+    ):
+        # Strip subcommand prefixes, but keep following prefixes. Note that
+        # `extern_prefix` can start with the prefix corresponding to the parent
+        # subcommand, but end with other prefixes correspondeding to nested
+        # structures within the subcommand.
+        name_or_flag = _strings.make_field_name(
+            [arg.extern_prefix, arg.field.extern_name]
+        )
+        strip_prefix = arg.subcommand_prefix + "."
+        assert name_or_flag.startswith(strip_prefix), name_or_flag
+        name_or_flag = name_or_flag[len(strip_prefix) :]
+    else:
+        # Standard prefixed name.
+        name_or_flag = _strings.make_field_name(
+            [arg.extern_prefix, arg.field.extern_name]
+        )
 
     # Prefix keyword arguments with --.
     if not arg.field.is_positional():
         name_or_flag = "--" + name_or_flag
-
-    # Strip.
-    if (
-        # If OmitArgPrefixes was applied, then the subcommand prefix was already
-        # stripped. :)
-        _markers.OmitArgPrefixes not in arg.field.markers
-        and _markers.Positional not in arg.field.markers
-        and name_or_flag.startswith("--")
-        and arg.subcommand_prefix != ""
-    ):
-        # This will run even when unused because we want the assert.
-        strip_prefix = "--" + arg.subcommand_prefix + "."
-        if _markers.OmitSubcommandPrefixes in arg.field.markers:
-            assert name_or_flag.startswith(strip_prefix), name_or_flag
-            name_or_flag = "--" + name_or_flag[len(strip_prefix) :]
 
     lowered.name_or_flag = name_or_flag
     lowered.dest = _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
