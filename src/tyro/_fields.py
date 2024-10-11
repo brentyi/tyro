@@ -44,6 +44,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -51,7 +52,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -960,10 +960,9 @@ def _try_field_list_from_general_callable(
         params = params[1:]
 
     # If a default is provided: either all or none of the arguments must be passed in.
+    markers: Tuple[Any, ...] = ()
     if default_instance not in MISSING_SINGLETONS:
         markers = (_markers._OPTIONAL_GROUP,)
-    else:
-        markers = ()
 
     with FieldDefinition.marker_context(markers):
         return _field_list_from_params(f, cls, params)
