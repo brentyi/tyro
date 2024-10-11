@@ -86,7 +86,7 @@ class FieldDefinition:
             _markers.Fixed in self.markers or _markers.Suppress in self.markers
         ) and self.default in MISSING_SINGLETONS:
             raise _instantiators.UnsupportedTypeAnnotationError(
-                f"Field {self.extern_name} is missing a default value!"
+                f"Field {self.intern_name} is missing a default value!"
             )
 
     @staticmethod
