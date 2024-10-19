@@ -1,7 +1,4 @@
-# mypy: disable-error-code="call-overload,misc"
-#
-# Mypy errors from passing union types directly into tyro.cli() as Type[T]. We would
-# benefit from TypeForm[T]: https://github.com/python/mypy/issues/9773
+# mypy: ignore-errors
 """Tests adapted from https://github.com/brentyi/tyro/issues/89, which catches edge
 cases when combining nested tuple types, renamed arguments, and subcommands.
 

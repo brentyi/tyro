@@ -388,15 +388,17 @@ class TypeParamResolver:
                 assert isinstance(args[0], list)
                 args = tuple(args[0]) + args[1:]
 
-            new_args = []
+            new_args_list = []
             for x in args:
                 for type_from_typevar in reversed(TypeParamResolver.param_assignments):
                     if x in type_from_typevar:
                         x = type_from_typevar[x]
                         break
-                new_args.append(x)
+                new_args_list.append(x)
 
-            new_args = tuple(TypeParamResolver.concretize_type_params(x) for x in args)
+            new_args = tuple(
+                TypeParamResolver.concretize_type_params(x) for x in new_args_list
+            )
 
             # Apply shims to convert from types.UnionType to typing.Union, list to typing.List, etc.
             # This will let us call `copy_with()` next.
@@ -438,10 +440,8 @@ def standardize_builtin_generics(typ: TypeOrCallable) -> TypeOrCallable:
             # PEP 604. Requires Python 3.10.
             shim_table[types.UnionType] = Union  # type: ignore
 
-        for new, old in shim_table.items():
-            if origin is new:  # type: ignore
-                typ = old.__getitem__(args)  # type: ignore
-                continue
+        if origin in shim_table:  # type: ignore
+            typ = shim_table[origin].__getitem__(args)  # type: ignore
     return typ
 
 

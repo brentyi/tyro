@@ -129,6 +129,7 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
     # Some checks we can do if the signature is available!
     for i, param in enumerate(signature.parameters.values()):
         annotation = type_annotations.get(param.name, param.annotation)
+        annotation = _resolver.TypeParamResolver.concretize_type_params(annotation)
         if i == 0 and not (
             (get_origin(annotation) is Union and str in get_args(annotation))
             or annotation in (str, inspect.Parameter.empty)
