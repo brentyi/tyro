@@ -77,3 +77,16 @@ def test_pep695_generic_alias() -> None:
         arg: TT[bool]
 
     assert tyro.cli(Config, args=[]) == Config(arg=True)
+
+
+type Renamed[T] = Annotated[T, tyro.conf.arg(name="renamed")]
+
+
+def test_pep695_generic_alias_rename() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: Renamed[bool]
+
+    assert tyro.cli(Config, args=["--renamed", "True"]) == Config(arg=True)
