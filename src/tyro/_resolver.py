@@ -55,9 +55,6 @@ def unwrap_aliases(typ: TypeOrCallable) -> TypeOrCallable:
 def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,
     returns typ."""
-    if isinstance(typ, TypeAliasType):
-        return unwrap_origin_strip_extras(cast(Any, typ).__value__)
-
     typ = unwrap_annotated_and_aliases(typ)
     origin = get_origin(typ)
 
