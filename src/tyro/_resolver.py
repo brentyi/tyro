@@ -392,6 +392,17 @@ def unwrap_annotated_and_aliases(
 def apply_type_from_typevar(
     typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
 ) -> TypeOrCallable:
+    GenericAlias = getattr(types, "GenericAlias", None)
+    if (
+        GenericAlias is not None
+        and isinstance(typ, GenericAlias)
+        and len(getattr(typ, "__type_params__", ())) > 0
+    ):
+        type_from_typevar = type_from_typevar.copy()
+        for k, v in zip(typ.__type_params__, typ.__args__):  # type: ignore
+            type_from_typevar[k] = v  # type: ignore
+        typ = typ.__value__  # type: ignore
+
     if typ in type_from_typevar:
         return type_from_typevar[typ]  # type: ignore
 
@@ -405,7 +416,7 @@ def apply_type_from_typevar(
             args = tuple(args[0]) + args[1:]
 
         # Convert Python 3.9 and 3.10 types to their typing library equivalents, which
-        # support `.copy_with()`.
+        # support `.copy_with()`. This is not really the right place for this logic...
         if sys.version_info[:2] >= (3, 9):
             shim_table = {
                 # PEP 585. Requires Python 3.9.
@@ -434,7 +445,7 @@ def apply_type_from_typevar(
             assert hasattr(origin, "__class_getitem__")
             return origin.__class_getitem__(new_args)  # type: ignore
 
-    return typ
+    return typ  # type: ignore
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)

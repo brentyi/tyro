@@ -109,6 +109,9 @@ class FieldDefinition:
         *,
         markers: Tuple[_markers.Marker, ...] = (),
     ):
+        # Resolve generic aliases.
+        type_or_callable = _resolver.apply_type_from_typevar(type_or_callable, {})
+
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated_and_aliases(
             type_or_callable, _confstruct._ArgConfiguration
