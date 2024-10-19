@@ -28,7 +28,6 @@ from typing import (
     Optional,
     Set,
     Tuple,
-    TypeVar,
     Union,
     cast,
 )
@@ -64,6 +63,7 @@ class FieldDefinition:
     intern_name: str
     extern_name: str
     type_or_callable: Union[TypeForm[Any], Callable]
+    typevar_context: _resolver.TypeParamAssignmentContext
     """Type or callable for this field. This should have all Annotated[] annotations
     stripped."""
     default: Any
@@ -109,8 +109,19 @@ class FieldDefinition:
         *,
         markers: Tuple[_markers.Marker, ...] = (),
     ):
-        # Resolve generic aliases.
-        type_or_callable = _resolver.apply_type_from_typevar(type_or_callable, {})
+        # Resolve generics.
+        type_or_callable = _resolver.TypeParamResolver.concretize_type_params(
+            type_or_callable
+        )
+        typevar_context = _resolver.TypeParamResolver.get_assignment_context(
+            type_or_callable
+        )
+        type_or_callable = typevar_context.origin_type
+
+        # Narrow types.
+        type_or_callable = _resolver.type_from_typevar_constraints(type_or_callable)
+        type_or_callable = _resolver.narrow_collection_types(type_or_callable, default)
+        type_or_callable = _resolver.narrow_union_type(type_or_callable, default)
 
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated_and_aliases(
@@ -147,12 +158,39 @@ class FieldDefinition:
         for context_markers in _field_context_markers:
             markers += context_markers
 
+        # Check that the default value matches the final resolved type.
+        # There's some similar Union-specific logic for this in narrow_union_type(). We
+        # may be able to consolidate this.
+        if (
+            # Be relatively conservative: isinstance() can be checked on non-type
+            # types (like unions in Python >=3.10), but we'll only consider single types
+            # for now.
+            type(type_or_callable) is type
+            and not isinstance(default, type_or_callable)  # type: ignore
+            # If a custom constructor is set, type_or_callable may not be
+            # matched to the annotated type.
+            and argconf.constructor_factory is None
+            and default not in DEFAULT_SENTINEL_SINGLETONS
+            # The numeric tower in Python is wacky. This logic is non-critical, so
+            # we'll just skip it (+the complexity) for numbers.
+            and not isinstance(default, numbers.Number)
+        ):
+            # If the default value doesn't match the resolved type, we expand the
+            # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
+            warnings.warn(
+                f"The field {name} is annotated with type {type_or_callable}, "
+                f"but the default value {default} has type {type(default)}. "
+                f"We'll try to handle this gracefully, but it may cause unexpected behavior."
+            )
+            type_or_callable = Union[type_or_callable, type(default)]  # type: ignore
+
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
             type_or_callable=type_or_callable
             if argconf.constructor_factory is None
             else argconf.constructor_factory(),
+            typevar_context=typevar_context,
             default=default,
             is_default_from_default_instance=is_default_from_default_instance,
             helptext=helptext,
@@ -261,8 +299,9 @@ def is_nested_type(
     TODO: we should come up with a better name than 'nested type', which is a little bit
     misleading."""
 
+    list_or_error = _try_field_list_from_callable(typ, default_instance)
     return not isinstance(
-        _try_field_list_from_callable(typ, default_instance),
+        list_or_error,
         UnsupportedNestedTypeMessage,
     )
 
@@ -271,9 +310,7 @@ def field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
     support_single_arg_types: bool,
-) -> Tuple[
-    Union[Callable, TypeForm[Any]], Dict[TypeVar, TypeForm], List[FieldDefinition]
-]:
+) -> Tuple[Union[Callable, TypeForm[Any]], List[FieldDefinition]]:
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
 
@@ -283,7 +320,6 @@ def field_list_from_callable(
         A list of field definitions.
     """
     # Resolve generic types.
-    f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
 
     # Try to generate field list.
@@ -296,67 +332,21 @@ def field_list_from_callable(
         if support_single_arg_types:
             return (
                 f,
-                type_from_typevar,
                 [
-                    FieldDefinition(
-                        intern_name="value",
-                        extern_name="value",  # Doesn't matter.
+                    FieldDefinition.make(
+                        name="value",
                         type_or_callable=f,
                         default=default_instance,
                         is_default_from_default_instance=True,
                         helptext="",
-                        custom_constructor=False,
-                        markers={_markers.Positional, _markers._PositionalCall},
-                        argconf=_confstruct._ArgConfiguration(
-                            None, None, None, None, None, None, None
-                        ),
-                        call_argname="",
+                        markers=(_markers.Positional, _markers._PositionalCall),
                     )
                 ],
             )
         else:
             raise _instantiators.UnsupportedTypeAnnotationError(field_list.message)
 
-    # Try to resolve types in our list of fields.
-    def resolve(field: FieldDefinition) -> FieldDefinition:
-        typ = field.type_or_callable
-        typ = _resolver.apply_type_from_typevar(typ, type_from_typevar)
-        typ = _resolver.type_from_typevar_constraints(typ)
-        typ = _resolver.narrow_collection_types(typ, field.default)
-        typ = _resolver.narrow_union_type(typ, field.default)
-
-        # Check that the default value matches the final resolved type.
-        # There's some similar Union-specific logic for this in narrow_union_type(). We
-        # may be able to consolidate this.
-        if (
-            # Be relatively conservative: isinstance() can be checked on non-type
-            # types (like unions in Python >=3.10), but we'll only consider single types
-            # for now.
-            type(typ) is type
-            and not isinstance(field.default, typ)  # type: ignore
-            # If a custom constructor is set, field.type_or_callable may not be
-            # matched to the annotated type.
-            and not field.custom_constructor
-            and field.default not in DEFAULT_SENTINEL_SINGLETONS
-            # The numeric tower in Python is wacky. This logic is non-critical, so
-            # we'll just skip it (+the complexity) for numbers.
-            and not isinstance(field.default, numbers.Number)
-        ):
-            # If the default value doesn't match the resolved type, we expand the
-            # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
-            warnings.warn(
-                f"The field {field.intern_name} is annotated with type {field.type_or_callable}, "
-                f"but the default value {field.default} has type {type(field.default)}. "
-                f"We'll try to handle this gracefully, but it may cause unexpected behavior."
-            )
-            typ = Union[typ, type(field.default)]  # type: ignore
-
-        field = dataclasses.replace(field, type_or_callable=typ)
-        return field
-
-    field_list = list(map(resolve, field_list))
-
-    return f, type_from_typevar, field_list
+    return f, field_list
 
 
 # Implementation details below.
@@ -383,91 +373,99 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    # Apply constructor_factory override for type.
-    f = _resolver.swap_type_using_confstruct(f)
+    # Resolve generic types.
+    resolve_context = _resolver.TypeParamResolver.get_assignment_context(f)
+    with resolve_context:
+        f = resolve_context.origin_type
 
-    # Check for default instances in subcommand configs. This is needed for
-    # is_nested_type() when arguments are not valid without a default, and this
-    # default is specified in the subcommand config.
-    f, found_subcommand_configs = _resolver.unwrap_annotated_and_aliases(
-        f, conf._confstruct._SubcommandConfiguration
-    )
-    if len(found_subcommand_configs) > 0:
-        default_instance = found_subcommand_configs[0].default
+        # Apply constructor_factory override for type.
+        f = _resolver.swap_type_using_confstruct(f)
 
-    # Unwrap generics.
-    f, type_from_typevar = _resolver.resolve_generic_types(f)
-    f = _resolver.apply_type_from_typevar(f, type_from_typevar)
-    f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
-    f = _resolver.narrow_collection_types(f, default_instance)
-    f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
-
-    # If `f` is a type:
-    #     1. Set cls to the type.
-    #     2. Consider `f` to be `cls.__init__`.
-    cls: Optional[TypeForm[Any]] = None
-    if inspect.isclass(f):
-        cls = f
-        if hasattr(cls, "__init__") and cls.__init__ is not object.__init__:
-            f = cls.__init__  # type: ignore
-        elif hasattr(cls, "__new__") and cls.__new__ is not object.__new__:
-            f = cls.__new__
-        else:
-            return UnsupportedNestedTypeMessage(
-                f"Cannot instantiate class {cls} with no unique __init__ or __new__"
-                " method."
-            )
-        f_origin = cls  # type: ignore
-
-    # Try field generation from class inputs.
-    if cls is not None:
-        if is_typeddict(cls):
-            return _field_list_from_typeddict(cls, default_instance)
-        if _resolver.is_namedtuple(cls):
-            return _field_list_from_namedtuple(cls, default_instance)
-        if _resolver.is_dataclass(cls):
-            return _field_list_from_dataclass(cls, default_instance)
-        if _is_attrs(cls):
-            return _field_list_from_attrs(cls, default_instance)
-        if _is_pydantic(cls):
-            return _field_list_from_pydantic(cls, default_instance)
-
-    # Standard container types. These are different because they can be nested structures
-    # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
-    # single arguments otherwise (eg Tuple[int, int]).
-    #
-    # Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will
-    # be populated if we annotate as just `tuple`.
-    if f_origin is tuple or cls is tuple:
-        return _field_list_from_tuple(f, default_instance)
-    elif f_origin in (collections.abc.Mapping, dict) or cls in (
-        collections.abc.Mapping,
-        dict,
-    ):
-        return _field_list_from_dict(f, default_instance)
-    elif f_origin in (list, set, typing.Sequence, collections.abc.Sequence) or cls in (
-        list,
-        set,
-        typing.Sequence,
-        collections.abc.Sequence,
-    ):
-        return _field_list_from_nontuple_sequence_checked(f, default_instance)
-
-    # General cases.
-    if (
-        cls is not None and cls in _known_parsable_types
-    ) or _resolver.unwrap_origin_strip_extras(f) in _known_parsable_types:
-        return UnsupportedNestedTypeMessage(f"{f} should be parsed directly!")
-    elif (
-        cls is not None
-        and issubclass(_resolver.unwrap_origin_strip_extras(cls), os.PathLike)
-        and _instantiators.is_type_string_converter(cls)
-    ):
-        return UnsupportedNestedTypeMessage(
-            f"PathLike {cls} should be parsed directly!"
+        # Check for default instances in subcommand configs. This is needed for
+        # is_nested_type() when arguments are not valid without a default, and this
+        # default is specified in the subcommand config.
+        f, found_subcommand_configs = _resolver.unwrap_annotated_and_aliases(
+            f, conf._confstruct._SubcommandConfiguration
         )
-    else:
-        return _try_field_list_from_general_callable(f, cls, default_instance)
+        if len(found_subcommand_configs) > 0:
+            default_instance = found_subcommand_configs[0].default
+
+        # Unwrap generics.
+        f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
+        f = _resolver.narrow_collection_types(f, default_instance)
+        f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
+
+        # If `f` is a type:
+        #     1. Set cls to the type.
+        #     2. Consider `f` to be `cls.__init__`.
+        cls: Optional[TypeForm[Any]] = None
+        if inspect.isclass(f):
+            cls = f
+            if hasattr(cls, "__init__") and cls.__init__ is not object.__init__:
+                f = cls.__init__  # type: ignore
+            elif hasattr(cls, "__new__") and cls.__new__ is not object.__new__:
+                f = cls.__new__
+            else:
+                return UnsupportedNestedTypeMessage(
+                    f"Cannot instantiate class {cls} with no unique __init__ or __new__"
+                    " method."
+                )
+            f_origin = cls  # type: ignore
+
+        # Try field generation from class inputs.
+        if cls is not None:
+            if is_typeddict(cls):
+                return _field_list_from_typeddict(cls, default_instance)
+            if _resolver.is_namedtuple(cls):
+                return _field_list_from_namedtuple(cls, default_instance)
+            if _resolver.is_dataclass(cls):
+                return _field_list_from_dataclass(cls, default_instance)
+            if _is_attrs(cls):
+                return _field_list_from_attrs(cls, default_instance)
+            if _is_pydantic(cls):
+                return _field_list_from_pydantic(cls, default_instance)
+
+        # Standard container types. These are different because they can be nested structures
+        # if they contain other nested types (eg Tuple[Struct, Struct]), or treated as
+        # single arguments otherwise (eg Tuple[int, int]).
+        #
+        # Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will
+        # be populated if we annotate as just `tuple`.
+        if f_origin is tuple or cls is tuple:
+            return _field_list_from_tuple(f, default_instance)
+        elif f_origin in (collections.abc.Mapping, dict) or cls in (
+            collections.abc.Mapping,
+            dict,
+        ):
+            return _field_list_from_dict(f, default_instance)
+        elif f_origin in (
+            list,
+            set,
+            typing.Sequence,
+            collections.abc.Sequence,
+        ) or cls in (
+            list,
+            set,
+            typing.Sequence,
+            collections.abc.Sequence,
+        ):
+            return _field_list_from_nontuple_sequence_checked(f, default_instance)
+
+        # General cases.
+        if (
+            cls is not None and cls in _known_parsable_types
+        ) or _resolver.unwrap_origin_strip_extras(f) in _known_parsable_types:
+            return UnsupportedNestedTypeMessage(f"{f} should be parsed directly!")
+        elif (
+            cls is not None
+            and issubclass(_resolver.unwrap_origin_strip_extras(cls), os.PathLike)
+            and _instantiators.is_type_string_converter(cls)
+        ):
+            return UnsupportedNestedTypeMessage(
+                f"PathLike {cls} should be parsed directly!"
+            )
+        else:
+            return _try_field_list_from_general_callable(f, cls, default_instance)
 
 
 def _field_list_from_typeddict(

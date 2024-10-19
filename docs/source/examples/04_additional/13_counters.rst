@@ -38,30 +38,30 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
 
 .. raw:: html
 
-        <kbd>python 04_additional/12_counters.py --help</kbd>
+        <kbd>python 04_additional/13_counters.py --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/12_counters.py --help
-
-------------
-
-.. raw:: html
-
-        <kbd>python 04_additional/12_counters.py --verbosity</kbd>
-
-.. program-output:: python ../../examples/04_additional/12_counters.py --verbosity
+.. program-output:: python ../../examples/04_additional/13_counters.py --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/12_counters.py --verbosity --verbosity</kbd>
+        <kbd>python 04_additional/13_counters.py --verbosity</kbd>
 
-.. program-output:: python ../../examples/04_additional/12_counters.py --verbosity --verbosity
+.. program-output:: python ../../examples/04_additional/13_counters.py --verbosity
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/12_counters.py -vvv</kbd>
+        <kbd>python 04_additional/13_counters.py --verbosity --verbosity</kbd>
 
-.. program-output:: python ../../examples/04_additional/12_counters.py -vvv
+.. program-output:: python ../../examples/04_additional/13_counters.py --verbosity --verbosity
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/13_counters.py -vvv</kbd>
+
+.. program-output:: python ../../examples/04_additional/13_counters.py -vvv
