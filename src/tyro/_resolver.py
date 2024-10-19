@@ -45,10 +45,19 @@ from ._typing import TypeForm
 TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
 
 
+def unwrap_aliases(typ: TypeOrCallable) -> TypeOrCallable:
+    """Unwrap type aliases."""
+    if isinstance(typ, TypeAliasType):
+        return unwrap_aliases(cast(Any, typ.__value__))
+    return typ
+
+
 def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,
     returns typ."""
-    # TODO: Annotated[] handling should be revisited...
+    if isinstance(typ, TypeAliasType):
+        return unwrap_origin_strip_extras(cast(Any, typ).__value__)
+
     typ = unwrap_annotated_and_aliases(typ)
     origin = get_origin(typ)
 
@@ -346,6 +355,8 @@ class TypeParamResolver:
     @staticmethod
     def concretize_type_params(typ: TypeOrCallable) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
+        typ = unwrap_aliases(typ)
+
         GenericAlias = getattr(types, "GenericAlias", None)
         if (
             GenericAlias is not None
