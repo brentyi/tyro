@@ -128,7 +128,8 @@ def test_case6() -> None:
     assert o == (Arg(verbose=False), Commit(Path("./path.txt")))
 
 
-type PositionalPath = tyro.conf.Positional[Path]
+# https://github.com/microsoft/pyright/issues/9261
+type PositionalPath = tyro.conf.Positional[Path]  # type: ignore
 
 
 def test_case7() -> None:
