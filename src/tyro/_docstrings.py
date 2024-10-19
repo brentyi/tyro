@@ -301,6 +301,7 @@ def get_callable_description(f: Callable) -> str:
     the fields of the class if a docstring is not specified; this helper will ignore
     these docstrings."""
 
+    f, _ = _resolver.resolve_generic_types(f)
     f = _resolver.unwrap_origin_strip_extras(f)
     if f in _callable_description_blocklist:
         return ""

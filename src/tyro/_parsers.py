@@ -80,11 +80,14 @@ class ParserSpecification:
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(markers):
-            f, field_list = _fields.field_list_from_callable(
-                f=f,
-                default_instance=default_instance,
-                support_single_arg_types=support_single_arg_types,
-            )
+            context = _resolver.TypeParamResolver.get_assignment_context(f)
+            with context:
+                f = context.origin_type
+                f, field_list = _fields.field_list_from_callable(
+                    f=f,
+                    default_instance=default_instance,
+                    support_single_arg_types=support_single_arg_types,
+                )
 
         # Cycle detection.
         #
@@ -110,13 +113,14 @@ class ParserSpecification:
         subparsers_from_prefix = {}
 
         for field in field_list:
-            field_out = handle_field(
-                field,
-                parent_classes=parent_classes,
-                intern_prefix=intern_prefix,
-                extern_prefix=extern_prefix,
-                subcommand_prefix=subcommand_prefix,
-            )
+            with field.typevar_context:
+                field_out = handle_field(
+                    field,
+                    parent_classes=parent_classes,
+                    intern_prefix=intern_prefix,
+                    extern_prefix=extern_prefix,
+                    subcommand_prefix=subcommand_prefix,
+                )
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
                 args.append(field_out)

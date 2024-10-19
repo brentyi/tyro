@@ -12,7 +12,6 @@ from typing import (
     TYPE_CHECKING,
     Any,
     Callable,
-    Dict,
     Iterable,
     Mapping,
     Optional,
@@ -27,8 +26,7 @@ import rich.markup
 import shtab
 
 from . import _argparse as argparse
-from . import _fields, _instantiators, _resolver, _strings
-from ._typing import TypeForm
+from . import _fields, _instantiators, _strings
 from .conf import _markers
 
 if TYPE_CHECKING:

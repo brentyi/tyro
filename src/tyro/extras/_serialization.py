@@ -36,6 +36,7 @@ def _get_contained_special_types_from_type(
     )
 
     cls = _resolver.unwrap_annotated_and_aliases(cls)
+    cls, type_from_typevar = _resolver.resolve_generic_types(cls)
 
     contained_special_types = {cls}
 
@@ -54,6 +55,13 @@ def _get_contained_special_types_from_type(
 
         # Handle Union, Annotated, List, etc. No-op when there are no args.
         return functools.reduce(set.union, map(handle_type, get_args(typ)), set())
+
+    # Handle generics.
+    for typ in type_from_typevar.values():
+        contained_special_types |= handle_type(typ)
+
+    if cls in parent_contained_dataclasses:
+        return contained_special_types
 
     # Handle fields.
     for field in _resolver.resolved_fields(cls):  # type: ignore
