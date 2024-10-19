@@ -317,7 +317,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
 <span class="sd">    returns typ.&quot;&quot;&quot;</span>
     <span class="c1"># TODO: Annotated[] handling should be revisited...</span>
-    <span class="n">typ</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="n">typ</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -348,7 +348,7 @@
         <span class="c1"># ^We need this `if` statement for an obscure edge case: when `cls` is a</span>
         <span class="c1"># function with `__tyro_markers__` set, we don&#39;t want/need to return</span>
         <span class="c1"># Annotated[func, markers].</span>
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
     <span class="c1"># We&#39;ll ignore NewType when getting the origin + args for generics.</span>
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="bp">cls</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
@@ -509,7 +509,7 @@
             <span class="c1"># it doesn&#39;t really make sense to parse this case.</span>
             <span class="k">return</span> <span class="n">typ</span>
 
-        <span class="n">superclass</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="n">superclass</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
         <span class="c1"># For Python 3.10.</span>
         <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">superclass</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
@@ -537,7 +537,7 @@
 <span class="sd">    `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are</span>
 <span class="sd">    kept, but the type is swapped.&quot;&quot;&quot;</span>
     <span class="c1"># Need to swap types.</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">anno</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">annotations</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span>
@@ -603,29 +603,29 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span> <span class="o">...</span>
 
 
-<div class="viewcode-block" id="unwrap_annotated">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">[docs]</a>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<div class="viewcode-block" id="unwrap_annotated_and_aliases">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated_and_aliases">[docs]</a>
+<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">TypeOrCallable</span><span class="p">]:</span>
@@ -636,6 +636,10 @@
 <span class="sd">    - Annotated[int, 1], int =&gt; (int, (1,))</span>
 <span class="sd">    - Annotated[int, &quot;1&quot;], int =&gt; (int, ())</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Unwrap aliases defined using Python 3.12&#39;s `type` syntax.</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__value__</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>
 
     <span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
     <span class="k">while</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">in</span> <span class="n">STRIP_WRAPPER_TYPES</span><span class="p">:</span>

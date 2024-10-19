@@ -388,7 +388,7 @@
         <span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
     <span class="p">):</span>
         <span class="c1"># Try to extract argconf overrides from type.</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span>
             <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span>
         <span class="p">)</span>
         <span class="n">argconf</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span><span class="p">(</span>
@@ -413,7 +413,7 @@
             <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">helptext</span> <span class="o">=</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span>
 
-        <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">inferred_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+        <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">inferred_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span>
             <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span>
         <span class="p">)</span>
         <span class="n">markers</span> <span class="o">=</span> <span class="n">inferred_markers</span> <span class="o">+</span> <span class="n">markers</span>
@@ -591,7 +591,7 @@
 
     <span class="c1"># Try to generate field list.</span>
     <span class="c1"># We recursively apply markers.</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">parent_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">parent_markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
     <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">parent_markers</span><span class="p">):</span>
         <span class="n">field_list</span> <span class="o">=</span> <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
@@ -693,7 +693,7 @@
     <span class="c1"># Check for default instances in subcommand configs. This is needed for</span>
     <span class="c1"># is_nested_type() when arguments are not valid without a default, and this</span>
     <span class="c1"># default is specified in the subcommand config.</span>
-    <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+    <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span>
         <span class="n">f</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

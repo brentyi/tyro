@@ -88,9 +88,9 @@ Module Contents
 
    
 
-.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
-                 unwrap_annotated(typ: TypeOrCallable, search_type: typing_extensions.Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
-                 unwrap_annotated(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
+.. py:function:: unwrap_annotated_and_aliases(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+                 unwrap_annotated_and_aliases(typ: TypeOrCallable, search_type: typing_extensions.Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
+                 unwrap_annotated_and_aliases(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
 
    
    Helper for parsing typing.Annotated types.
