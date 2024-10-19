@@ -3,10 +3,10 @@
 Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterAction`.
 
 Usage:
-`python ./12_counters.py --help`
-`python ./12_counters.py --verbosity`
-`python ./12_counters.py --verbosity --verbosity`
-`python ./12_counters.py -vvv`
+`python ./13_counters.py --help`
+`python ./13_counters.py --verbosity`
+`python ./13_counters.py --verbosity --verbosity`
+`python ./13_counters.py -vvv`
 """
 
 from typing_extensions import Annotated
