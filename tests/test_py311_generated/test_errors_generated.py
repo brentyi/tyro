@@ -203,6 +203,25 @@ def test_suppress_console_outputs() -> None:
     assert error == ""
 
 
+def test_suppress_console_outputs_fromdict() -> None:
+    def foo(track: bool) -> None:
+        print(track)
+
+    def bar(track: bool) -> None:
+        print(track)
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.extras.subcommand_cli_from_dict(
+            {"foo": foo, "bar": bar},
+            args="foo --reward.trac".split(" "),
+            console_outputs=False,
+        )
+
+    error = target.getvalue()
+    assert error == ""
+
+
 def test_similar_arguments_subcommands() -> None:
     @dataclasses.dataclass
     class RewardConfig:
