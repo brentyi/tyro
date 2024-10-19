@@ -392,12 +392,14 @@ def unwrap_annotated_and_aliases(
 def apply_type_from_typevar(
     typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
 ) -> TypeOrCallable:
+    GenericAlias = getattr(types, "GenericAlias", None)
     if (
-        isinstance(typ, types.GenericAlias)
+        GenericAlias is not None
+        and isinstance(typ, GenericAlias)
         and len(getattr(typ, "__type_params__", ())) > 0
     ):
         type_from_typevar = type_from_typevar.copy()
-        for k, v in zip(typ.__type_params__, typ.__args__):
+        for k, v in zip(typ.__type_params__, typ.__args__):  # type: ignore
             type_from_typevar[k] = v  # type: ignore
         typ = typ.__value__  # type: ignore
 
