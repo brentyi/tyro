@@ -451,7 +451,8 @@ class TypeParamAssignmentContext:
         origin_type: TypeOrCallable,
         type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     ):
-        self.origin_type = origin_type
+        # `Any` is needed for mypy...
+        self.origin_type: Any = origin_type
         self.type_from_typevar = type_from_typevar
 
     def __enter__(self):
