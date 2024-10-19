@@ -443,7 +443,7 @@ def apply_type_from_typevar(
             assert hasattr(origin, "__class_getitem__")
             return origin.__class_getitem__(new_args)  # type: ignore
 
-    return typ
+    return typ  # type: ignore
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
