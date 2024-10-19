@@ -387,6 +387,9 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
     <span class="p">):</span>
+        <span class="c1"># Resolve generic aliases.</span>
+        <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="p">{})</span>
+
         <span class="c1"># Try to extract argconf overrides from type.</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span>
             <span class="n">type_or_callable</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span>
