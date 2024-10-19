@@ -44,6 +44,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -51,7 +52,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -109,6 +109,9 @@ class FieldDefinition:
         *,
         markers: Tuple[_markers.Marker, ...] = (),
     ):
+        # Resolve generic aliases.
+        type_or_callable = _resolver.apply_type_from_typevar(type_or_callable, {})
+
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated_and_aliases(
             type_or_callable, _confstruct._ArgConfiguration
