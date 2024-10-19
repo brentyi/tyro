@@ -2,6 +2,8 @@ from typing import Any, Callable, Dict, Optional, Sequence, TypeVar, Union, over
 
 from typing_extensions import Annotated
 
+from tyro.conf._markers import Marker
+
 from .._cli import cli
 from ..conf import subcommand
 
@@ -17,6 +19,7 @@ def subcommand_cli_from_dict(
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[Marker]] = None,
 ) -> T: ...
 
 
@@ -31,6 +34,7 @@ def subcommand_cli_from_dict(
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[Marker]] = None,
 ) -> Any: ...
 
 
@@ -42,6 +46,7 @@ def subcommand_cli_from_dict(
     args: Optional[Sequence[str]] = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: Optional[Sequence[Marker]] = None,
 ) -> Any:
     """Generate a subcommand CLI from a dictionary of functions.
 
@@ -93,6 +98,7 @@ def subcommand_cli_from_dict(
             supressed. This can be useful for distributed settings, where `tyro.cli()`
             is called from multiple workers but we only want console outputs from the
             main one.
+        config: Sequence of config marker objects, from `tyro.conf`.
     """
     # We need to form a union type, which requires at least two elements.
     assert len(subcommands) >= 2, "At least two subcommands are required."
@@ -116,4 +122,5 @@ def subcommand_cli_from_dict(
         args=args,
         use_underscores=use_underscores,
         console_outputs=console_outputs,
+        config=config,
     )
