@@ -115,5 +115,5 @@ def subcommand_cli_from_dict(
         description=description,
         args=args,
         use_underscores=use_underscores,
-        console_outputs=console_outputs
+        console_outputs=console_outputs,
     )

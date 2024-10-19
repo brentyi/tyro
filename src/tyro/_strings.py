@@ -80,7 +80,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     from .conf import _confstruct  # Prevent circular imports
 
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
-    cls, found_subcommand_configs = _resolver.unwrap_annotated(
+    cls, found_subcommand_configs = _resolver.unwrap_annotated_and_aliases(
         cls, _confstruct._SubcommandConfiguration
     )
 

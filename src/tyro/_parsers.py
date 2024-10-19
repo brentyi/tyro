@@ -75,7 +75,7 @@ class ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
-        markers = _resolver.unwrap_annotated(f, _markers._Marker)[1]
+        markers = _resolver.unwrap_annotated_and_aliases(f, _markers._Marker)[1]
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Resolve the type of `f`, generate a field list.
@@ -387,7 +387,7 @@ class SubparsersSpecification:
         extern_prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
-        typ = _resolver.unwrap_annotated(field.type_or_callable)
+        typ = _resolver.unwrap_annotated_and_aliases(field.type_or_callable)
         if get_origin(typ) is not Union:
             return None
 
@@ -407,7 +407,7 @@ class SubparsersSpecification:
 
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         for i, option in enumerate(options):
-            _, found_subcommand_configs = _resolver.unwrap_annotated(
+            _, found_subcommand_configs = _resolver.unwrap_annotated_and_aliases(
                 option, _confstruct._SubcommandConfiguration
             )
             if (
@@ -417,7 +417,7 @@ class SubparsersSpecification:
                 options[i] = Annotated.__class_getitem__(  # type: ignore
                     (
                         found_subcommand_configs[0].constructor_factory(),
-                        *_resolver.unwrap_annotated(option, "all")[1],
+                        *_resolver.unwrap_annotated_and_aliases(option, "all")[1],
                     )
                 )
 
@@ -443,8 +443,10 @@ class SubparsersSpecification:
                 else extern_prefix,
                 type(None) if option is none_proxy else cast(type, option),
             )
-            option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfiguration
+            option_unwrapped, found_subcommand_configs = (
+                _resolver.unwrap_annotated_and_aliases(
+                    option, _confstruct._SubcommandConfiguration
+                )
             )
             if len(found_subcommand_configs) != 0:
                 # Explicitly annotated default.
@@ -508,7 +510,9 @@ class SubparsersSpecification:
 
             # Strip the subcommand config from the option type.
             # Relevant: https://github.com/brentyi/tyro/pull/117
-            option_origin, annotations = _resolver.unwrap_annotated(option, "all")
+            option_origin, annotations = _resolver.unwrap_annotated_and_aliases(
+                option, "all"
+            )
             annotations = tuple(
                 a
                 for a in annotations
