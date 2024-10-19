@@ -44,6 +44,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -51,7 +52,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -109,9 +109,6 @@ class FieldDefinition:
         *,
         markers: Tuple[_markers.Marker, ...] = (),
     ):
-        # Resolve generic aliases.
-        type_or_callable = _resolver.apply_type_from_typevar(type_or_callable, {})
-
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated_and_aliases(
             type_or_callable, _confstruct._ArgConfiguration
@@ -146,6 +143,38 @@ class FieldDefinition:
         # Include markers set via context manager.
         for context_markers in _field_context_markers:
             markers += context_markers
+
+        # Type resolution.
+        type_or_callable = _resolver.type_from_typevar_constraints(type_or_callable)
+        type_or_callable = _resolver.narrow_collection_types(type_or_callable, default)
+        type_or_callable = _resolver.narrow_union_type(type_or_callable, default)
+        type_or_callable = _resolver.apply_type_shims(type_or_callable)
+
+        # Check that the default value matches the final resolved type.
+        # There's some similar Union-specific logic for this in narrow_union_type(). We
+        # may be able to consolidate this.
+        if (
+            # Be relatively conservative: isinstance() can be checked on non-type
+            # types (like unions in Python >=3.10), but we'll only consider single types
+            # for now.
+            type(type_or_callable) is type
+            and not isinstance(default, type_or_callable)  # type: ignore
+            # If a custom constructor is set, type_or_callable may not be
+            # matched to the annotated type.
+            and argconf.constructor_factory is None
+            and default not in DEFAULT_SENTINEL_SINGLETONS
+            # The numeric tower in Python is wacky. This logic is non-critical, so
+            # we'll just skip it (+the complexity) for numbers.
+            and not isinstance(default, numbers.Number)
+        ):
+            # If the default value doesn't match the resolved type, we expand the
+            # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
+            warnings.warn(
+                f"The field {name} is annotated with type {type_or_callable}, "
+                f"but the default value {default} has type {type(default)}. "
+                f"We'll try to handle this gracefully, but it may cause unexpected behavior."
+            )
+            type_or_callable = Union[type_or_callable, type(default)]  # type: ignore
 
         out = FieldDefinition(
             intern_name=name,
@@ -271,9 +300,7 @@ def field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
     support_single_arg_types: bool,
-) -> Tuple[
-    Union[Callable, TypeForm[Any]], Dict[TypeVar, TypeForm], List[FieldDefinition]
-]:
+) -> Tuple[Union[Callable, TypeForm[Any]], List[FieldDefinition]]:
     """Generate a list of generic 'field' objects corresponding to the inputs of some
     annotated callable.
 
@@ -283,7 +310,6 @@ def field_list_from_callable(
         A list of field definitions.
     """
     # Resolve generic types.
-    f, type_from_typevar = _resolver.resolve_generic_types(f)
     f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
 
     # Try to generate field list.
@@ -296,7 +322,6 @@ def field_list_from_callable(
         if support_single_arg_types:
             return (
                 f,
-                type_from_typevar,
                 [
                     FieldDefinition(
                         intern_name="value",
@@ -317,46 +342,7 @@ def field_list_from_callable(
         else:
             raise _instantiators.UnsupportedTypeAnnotationError(field_list.message)
 
-    # Try to resolve types in our list of fields.
-    def resolve(field: FieldDefinition) -> FieldDefinition:
-        typ = field.type_or_callable
-        typ = _resolver.apply_type_from_typevar(typ, type_from_typevar)
-        typ = _resolver.type_from_typevar_constraints(typ)
-        typ = _resolver.narrow_collection_types(typ, field.default)
-        typ = _resolver.narrow_union_type(typ, field.default)
-
-        # Check that the default value matches the final resolved type.
-        # There's some similar Union-specific logic for this in narrow_union_type(). We
-        # may be able to consolidate this.
-        if (
-            # Be relatively conservative: isinstance() can be checked on non-type
-            # types (like unions in Python >=3.10), but we'll only consider single types
-            # for now.
-            type(typ) is type
-            and not isinstance(field.default, typ)  # type: ignore
-            # If a custom constructor is set, field.type_or_callable may not be
-            # matched to the annotated type.
-            and not field.custom_constructor
-            and field.default not in DEFAULT_SENTINEL_SINGLETONS
-            # The numeric tower in Python is wacky. This logic is non-critical, so
-            # we'll just skip it (+the complexity) for numbers.
-            and not isinstance(field.default, numbers.Number)
-        ):
-            # If the default value doesn't match the resolved type, we expand the
-            # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
-            warnings.warn(
-                f"The field {field.intern_name} is annotated with type {field.type_or_callable}, "
-                f"but the default value {field.default} has type {type(field.default)}. "
-                f"We'll try to handle this gracefully, but it may cause unexpected behavior."
-            )
-            typ = Union[typ, type(field.default)]  # type: ignore
-
-        field = dataclasses.replace(field, type_or_callable=typ)
-        return field
-
-    field_list = list(map(resolve, field_list))
-
-    return f, type_from_typevar, field_list
+    return f, field_list
 
 
 # Implementation details below.
@@ -396,8 +382,6 @@ def _try_field_list_from_callable(
         default_instance = found_subcommand_configs[0].default
 
     # Unwrap generics.
-    f, type_from_typevar = _resolver.resolve_generic_types(f)
-    f = _resolver.apply_type_from_typevar(f, type_from_typevar)
     f = _resolver.unwrap_newtype_and_narrow_subtypes(f, default_instance)
     f = _resolver.narrow_collection_types(f, default_instance)
     f_origin = _resolver.unwrap_origin_strip_extras(cast(TypeForm, f))
@@ -445,7 +429,12 @@ def _try_field_list_from_callable(
         dict,
     ):
         return _field_list_from_dict(f, default_instance)
-    elif f_origin in (list, set, typing.Sequence, collections.abc.Sequence) or cls in (
+    elif f_origin in (
+        list,
+        set,
+        typing.Sequence,
+        collections.abc.Sequence,
+    ) or cls in (
         list,
         set,
         typing.Sequence,

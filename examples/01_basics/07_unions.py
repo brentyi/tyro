@@ -23,7 +23,7 @@ class Color(enum.Enum):
 @dataclasses.dataclass(frozen=True)
 class Args:
     # Unions can be used to specify multiple allowable types.
-    union_over_types: int | str = 0
+    union_over_types: int | str
     string_or_enum: Literal["red", "green"] | Color = "red"
 
     # Unions also work over more complex nested types.

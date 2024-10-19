@@ -108,7 +108,6 @@ class ArgumentDefinition:
     extern_prefix: str  # User-facing prefix.
     subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
-    type_from_typevar: Dict[TypeVar, TypeForm[Any]]
 
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
@@ -254,12 +253,7 @@ def _rule_handle_boolean_flags(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
-    if (
-        _resolver.apply_type_from_typevar(
-            arg.field.type_or_callable, arg.type_from_typevar
-        )
-        is not bool
-    ):
+    if arg.field.type_or_callable is not bool:
         return
 
     if (
@@ -305,7 +299,6 @@ def _rule_recursive_instantiator_from_type(
     try:
         instantiator, metadata = _instantiators.instantiator_from_type(
             arg.field.type_or_callable,
-            arg.type_from_typevar,
             arg.field.markers,
         )
     except _instantiators.UnsupportedTypeAnnotationError as e:

@@ -1,6 +1,7 @@
 """Utilities for resolving types and forward references."""
 
 import collections.abc
+import contextlib
 import copy
 import dataclasses
 import inspect
@@ -59,63 +60,6 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
 def is_dataclass(cls: Union[TypeForm, Callable]) -> bool:
     """Same as `dataclasses.is_dataclass`, but also handles generic aliases."""
     return dataclasses.is_dataclass(unwrap_origin_strip_extras(cls))  # type: ignore
-
-
-def resolve_generic_types(
-    cls: TypeOrCallable,
-) -> Tuple[TypeOrCallable, Dict[TypeVar, TypeForm[Any]]]:
-    """If the input is a class: no-op. If it's a generic alias: returns the origin
-    class, and a mapping from typevars to concrete types."""
-
-    annotations: Tuple[Any, ...] = ()
-    if get_origin(cls) is Annotated:
-        # ^We need this `if` statement for an obscure edge case: when `cls` is a
-        # function with `__tyro_markers__` set, we don't want/need to return
-        # Annotated[func, markers].
-        cls, annotations = unwrap_annotated_and_aliases(cls, "all")
-
-    # We'll ignore NewType when getting the origin + args for generics.
-    origin_cls = get_origin(unwrap_newtype_and_aliases(cls)[0])
-    type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
-
-    # Support typing.Self.
-    # We'll do this by pretending that `Self` is a TypeVar...
-    if hasattr(cls, "__self__"):
-        self_type = getattr(cls, "__self__")
-        if inspect.isclass(self_type):
-            type_from_typevar[cast(TypeVar, Self)] = self_type  # type: ignore
-        else:
-            type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
-
-    if (
-        # Apply some heuristics for generic types. Should revisit this.
-        origin_cls is not None
-        and hasattr(origin_cls, "__parameters__")
-        and hasattr(origin_cls.__parameters__, "__len__")
-    ):
-        typevars = origin_cls.__parameters__
-        typevar_values = get_args(unwrap_newtype_and_aliases(cls)[0])
-        assert len(typevars) == len(typevar_values)
-        cls = origin_cls
-        type_from_typevar.update(dict(zip(typevars, typevar_values)))
-
-    if hasattr(cls, "__orig_bases__"):
-        bases = getattr(cls, "__orig_bases__")
-        for base in bases:
-            origin_base = unwrap_origin_strip_extras(base)
-            if origin_base is base or not hasattr(origin_base, "__parameters__"):
-                continue
-            typevars = origin_base.__parameters__
-            typevar_values = get_args(base)
-            type_from_typevar.update(dict(zip(typevars, typevar_values)))
-
-    if len(annotations) == 0:
-        return cls, type_from_typevar
-    else:
-        return (
-            Annotated.__class_getitem__((cls, *annotations)),  # type: ignore
-            type_from_typevar,
-        )
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -389,63 +333,122 @@ def unwrap_annotated_and_aliases(
     return args[0], targets  # type: ignore
 
 
-def apply_type_from_typevar(
-    typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, TypeForm[Any]]
-) -> TypeOrCallable:
-    GenericAlias = getattr(types, "GenericAlias", None)
-    if (
-        GenericAlias is not None
-        and isinstance(typ, GenericAlias)
-        and len(getattr(typ, "__type_params__", ())) > 0
-    ):
-        type_from_typevar = type_from_typevar.copy()
-        for k, v in zip(typ.__type_params__, typ.__args__):  # type: ignore
-            type_from_typevar[k] = v  # type: ignore
-        typ = typ.__value__  # type: ignore
+class TypeParameterResolver:
+    param_assignments: List[Dict[TypeVar, TypeForm[Any]]] = []
 
-    if typ in type_from_typevar:
-        return type_from_typevar[typ]  # type: ignore
+    @classmethod
+    @contextlib.contextmanager
+    def resolve_context(cls, typ: TypeOrCallable):
+        """Context manager for resolving type parameters."""
 
-    origin = get_origin(typ)
-    args = get_args(typ)
-    if len(args) > 0:
-        if origin is Annotated:
-            args = args[:1]
-        if origin is collections.abc.Callable:
-            assert isinstance(args[0], list)
-            args = tuple(args[0]) + args[1:]
+        annotations: Tuple[Any, ...] = ()
+        if get_origin(typ) is Annotated:
+            # ^We need this if statement for an obscure edge case: when `typ` is a
+            # function with `__tyro_markers__` set, we don't want/need to return
+            # Annotated[func, markers].
+            typ, annotations = unwrap_annotated_and_aliases(typ, "all")
 
-        # Convert Python 3.9 and 3.10 types to their typing library equivalents, which
-        # support `.copy_with()`. This is not really the right place for this logic...
-        if sys.version_info[:2] >= (3, 9):
-            shim_table = {
-                # PEP 585. Requires Python 3.9.
-                tuple: Tuple,
-                list: List,
-                dict: Dict,
-                set: Set,
-                frozenset: FrozenSet,
-                type: Type,
-            }
-            if hasattr(types, "UnionType"):  # type: ignore
-                # PEP 604. Requires Python 3.10.
-                shim_table[types.UnionType] = Union  # type: ignore
+        # We'll ignore NewType when getting the origin + args for generics.
+        origin_cls = get_origin(unwrap_newtype_and_aliases(typ)[0])
+        type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
 
-            for new, old in shim_table.items():
-                if origin is new:  # type: ignore
-                    typ = old.__getitem__(args)  # type: ignore
+        # Support typing.Self.
+        # We'll do this by pretending that `Self` is a TypeVar...
+        if hasattr(typ, "__self__"):
+            self_type = getattr(typ, "__self__")
+            if inspect.isclass(self_type):
+                type_from_typevar[cast(TypeVar, Self)] = self_type  # type: ignore
+            else:
+                type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
 
-        new_args = tuple(apply_type_from_typevar(x, type_from_typevar) for x in args)
+        if (
+            # Apply some heuristics for generic types. Should revisit this.
+            origin_cls is not None
+            and hasattr(origin_cls, "__parameters__")
+            and hasattr(origin_cls.__parameters__, "__len__")
+        ):
+            typevars = origin_cls.__parameters__
+            typevar_values = get_args(unwrap_newtype_and_aliases(typ)[0])
+            assert len(typevars) == len(typevar_values)
+            typ = origin_cls
+            type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
-        # Standard generic aliases have a `copy_with()`!
-        if hasattr(typ, "copy_with"):
-            return typ.copy_with(new_args)  # type: ignore
-        else:
-            # `collections` types, like collections.abc.Sequence.
-            assert hasattr(origin, "__class_getitem__")
-            return origin.__class_getitem__(new_args)  # type: ignore
+        if hasattr(typ, "__orig_bases__"):
+            bases = getattr(typ, "__orig_bases__")
+            for base in bases:
+                origin_base = unwrap_origin_strip_extras(base)
+                if origin_base is base or not hasattr(origin_base, "__parameters__"):
+                    continue
+                typevars = origin_base.__parameters__
+                typevar_values = get_args(base)
+                type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
-    return typ  # type: ignore
+        GenericAlias = getattr(types, "GenericAlias", None)
+        if (
+            GenericAlias is not None
+            and isinstance(typ, GenericAlias)
+            and len(getattr(typ, "__type_params__", ())) > 0
+        ):
+            for k, v in zip(typ.__type_params__, typ.__args__):  # type: ignore
+                type_from_typevar[k] = v  # type: ignore
+            typ = typ.__value__  # type: ignore
+
+        cls.param_assignments.append(type_from_typevar)
+
+        # Apply the TypeVar assignments.
+        typ = TypeParameterResolver.apply_param_assignments(typ)
+        assert type(typ) is not list
+        yield (
+            typ
+            if len(annotations) == 0
+            else Annotated.__class_getitem__(  # type: ignore
+                (
+                    typ,
+                    *annotations,
+                )
+            )
+        )
+
+        cls.param_assignments.pop()
+
+    @staticmethod
+    def apply_param_assignments(typ: TypeOrCallable) -> TypeOrCallable:
+        for type_from_typevar in reversed(TypeParameterResolver.param_assignments):
+            if typ in type_from_typevar:
+                return type_from_typevar[typ]  # type: ignore
+
+        origin = get_origin(typ)
+        args = get_args(typ)
+        if len(args) > 0:
+            if origin is Annotated:
+                args = args[:1]
+            if origin is collections.abc.Callable:
+                assert isinstance(args[0], list)
+                args = tuple(args[0]) + args[1:]
+
+            new_args = []
+            for x in args:
+                for type_from_typevar in reversed(
+                    TypeParameterResolver.param_assignments
+                ):
+                    if x in type_from_typevar:
+                        x = type_from_typevar[x]
+                        break
+                new_args.append(x)
+
+            new_args = tuple(
+                TypeParameterResolver.apply_param_assignments(x) for x in args
+            )
+
+            # Standard generic aliases have a `copy_with()`!
+            if hasattr(typ, "copy_with"):
+                return typ.copy_with(new_args)  # type: ignore
+            else:
+                # `collections` types, like collections.abc.Sequence.
+                assert hasattr(origin, "__class_getitem__")
+                return origin.__class_getitem__(new_args)  # type: ignore
+
+        return typ  # type: ignore
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
@@ -481,6 +484,94 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
 
 
 NoneType = type(None)
+
+
+def resolve_generic_types(
+    cls: TypeOrCallable,
+) -> Tuple[TypeOrCallable, Dict[TypeVar, TypeForm[Any]]]:
+    """If the input is a class: no-op. If it's a generic alias: returns the origin
+    class, and a mapping from typevars to concrete types."""
+
+    annotations: Tuple[Any, ...] = ()
+    if get_origin(cls) is Annotated:
+        # ^We need this `if` statement for an obscure edge case: when `cls` is a
+        # function with `__tyro_markers__` set, we don't want/need to return
+        # Annotated[func, markers].
+        cls, annotations = unwrap_annotated_and_aliases(cls, "all")
+
+    # We'll ignore NewType when getting the origin + args for generics.
+    origin_cls = get_origin(unwrap_newtype_and_aliases(cls)[0])
+    type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
+
+    # Support typing.Self.
+    # We'll do this by pretending that `Self` is a TypeVar...
+    if hasattr(cls, "__self__"):
+        self_type = getattr(cls, "__self__")
+        if inspect.isclass(self_type):
+            type_from_typevar[cast(TypeVar, Self)] = self_type  # type: ignore
+        else:
+            type_from_typevar[cast(TypeVar, Self)] = self_type.__class__  # type: ignore
+
+    if (
+        # Apply some heuristics for generic types. Should revisit this.
+        origin_cls is not None
+        and hasattr(origin_cls, "__parameters__")
+        and hasattr(origin_cls.__parameters__, "__len__")
+    ):
+        typevars = origin_cls.__parameters__
+        typevar_values = get_args(unwrap_newtype_and_aliases(cls)[0])
+        assert len(typevars) == len(typevar_values)
+        cls = origin_cls
+        type_from_typevar.update(dict(zip(typevars, typevar_values)))
+
+    if hasattr(cls, "__orig_bases__"):
+        bases = getattr(cls, "__orig_bases__")
+        for base in bases:
+            origin_base = unwrap_origin_strip_extras(base)
+            if origin_base is base or not hasattr(origin_base, "__parameters__"):
+                continue
+            typevars = origin_base.__parameters__
+            typevar_values = get_args(base)
+            type_from_typevar.update(dict(zip(typevars, typevar_values)))
+
+    if len(annotations) == 0:
+        return cls, type_from_typevar
+    else:
+        return (
+            Annotated.__class_getitem__((cls, *annotations)),  # type: ignore
+            type_from_typevar,
+        )
+
+
+def apply_type_shims(typ: TypeOrCallable) -> TypeOrCallable:
+    """Apply shims to types to support older Python versions."""
+    origin = get_origin(typ)
+    args = get_args(typ)
+
+    if origin is None or len(args) == 0:
+        return typ
+
+    # Convert Python 3.9 and 3.10 types to their typing library equivalents, which
+    # support `.copy_with()`. This is not really the right place for this logic...
+    if sys.version_info[:2] >= (3, 9):
+        shim_table = {
+            # PEP 585. Requires Python 3.9.
+            tuple: Tuple,
+            list: List,
+            dict: Dict,
+            set: Set,
+            frozenset: FrozenSet,
+            type: Type,
+        }
+        if hasattr(types, "UnionType"):  # type: ignore
+            # PEP 604. Requires Python 3.10.
+            shim_table[types.UnionType] = Union  # type: ignore
+
+        for new, old in shim_table.items():
+            if origin is new:  # type: ignore
+                typ = old.__getitem__(args)  # type: ignore
+                continue
+    return typ
 
 
 def get_type_hints_with_backported_syntax(

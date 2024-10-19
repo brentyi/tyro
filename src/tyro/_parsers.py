@@ -80,7 +80,7 @@ class ParserSpecification:
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(markers):
-            f, type_from_typevar, field_list = _fields.field_list_from_callable(
+            f, field_list = _fields.field_list_from_callable(
                 f=f,
                 default_instance=default_instance,
                 support_single_arg_types=support_single_arg_types,
@@ -112,7 +112,6 @@ class ParserSpecification:
         for field in field_list:
             field_out = handle_field(
                 field,
-                type_from_typevar=type_from_typevar,
                 parent_classes=parent_classes,
                 intern_prefix=intern_prefix,
                 extern_prefix=extern_prefix,
@@ -287,7 +286,6 @@ class ParserSpecification:
 
 def handle_field(
     field: _fields.FieldDefinition,
-    type_from_typevar: Dict[TypeVar, TypeForm[Any]],
     parent_classes: Set[Type[Any]],
     intern_prefix: str,
     extern_prefix: str,
@@ -308,7 +306,6 @@ def handle_field(
         # (1) Handle Unions over callables; these result in subparsers.
         subparsers_attempt = SubparsersSpecification.from_field(
             field,
-            type_from_typevar=type_from_typevar,
             parent_classes=parent_classes,
             intern_prefix=_strings.make_field_name([intern_prefix, field.intern_name]),
             extern_prefix=_strings.make_field_name([extern_prefix, field.extern_name]),
@@ -362,7 +359,6 @@ def handle_field(
         extern_prefix=extern_prefix,
         subcommand_prefix=subcommand_prefix,
         field=field,
-        type_from_typevar=type_from_typevar,
     )
 
 
@@ -381,7 +377,6 @@ class SubparsersSpecification:
     @staticmethod
     def from_field(
         field: _fields.FieldDefinition,
-        type_from_typevar: Dict[TypeVar, TypeForm[Any]],
         parent_classes: Set[Type[Any]],
         intern_prefix: str,
         extern_prefix: str,
@@ -393,10 +388,7 @@ class SubparsersSpecification:
 
         # We don't use sets here to retain order of subcommands.
         options: List[Union[type, Callable]]
-        options = [
-            _resolver.apply_type_from_typevar(typ, type_from_typevar)
-            for typ in get_args(typ)
-        ]
+        options = [typ for typ in get_args(typ)]
         options = [
             (
                 # Cast seems unnecessary but needed in mypy... (1.4.1)
