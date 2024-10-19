@@ -214,10 +214,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -287,6 +287,8 @@
 
 <span class="kn">import</span> <span class="nn">shtab</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+<span class="kn">from</span> <span class="nn">tyro._resolver</span> <span class="kn">import</span> <span class="n">TypeParamResolver</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
@@ -590,104 +592,109 @@
             <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="c1"># Internally, we distinguish between two concepts:</span>
-    <span class="c1"># - &quot;default&quot;, which is used for individual arguments.</span>
-    <span class="c1"># - &quot;default_instance&quot;, which is used for _fields_ (which may be broken down into</span>
-    <span class="c1">#   one or many arguments, depending on various factors).</span>
-    <span class="c1">#</span>
-    <span class="c1"># This could be revisited.</span>
-    <span class="n">default_instance_internal</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default</span>
-    <span class="p">)</span>
+    <span class="n">resolve_context</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">resolve_context</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">resolve_context</span><span class="o">.</span><span class="n">origin_type</span>
 
-    <span class="c1"># We wrap our type with a dummy dataclass if it can&#39;t be treated as a nested type.</span>
-    <span class="c1"># For example: passing in f=int will result in a dataclass with a single field</span>
-    <span class="c1"># typed as int.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
-        <span class="n">dummy_field</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
-            <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span>
-            <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(),</span>
+        <span class="c1"># Internally, we distinguish between two concepts:</span>
+        <span class="c1"># - &quot;default&quot;, which is used for individual arguments.</span>
+        <span class="c1"># - &quot;default_instance&quot;, which is used for _fields_ (which may be broken down into</span>
+        <span class="c1">#   one or many arguments, depending on various factors).</span>
+        <span class="c1">#</span>
+        <span class="c1"># This could be revisited.</span>
+        <span class="n">default_instance_internal</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default</span>
         <span class="p">)</span>
-        <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">make_dataclass</span><span class="p">(</span>
-            <span class="n">cls_name</span><span class="o">=</span><span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
-            <span class="n">fields</span><span class="o">=</span><span class="p">[(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">dummy_field</span><span class="p">)],</span>
-            <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="p">)</span>
-        <span class="n">default_instance_internal</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">default_instance_internal</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1"># Read and fix arguments. If the user passes in --field_name instead of</span>
-    <span class="c1"># --field-name, correct for them.</span>
-    <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-
-    <span class="c1"># Fix arguments. This will modify all option-style arguments replacing</span>
-    <span class="c1"># underscores with hyphens, or vice versa if use_underscores=True.</span>
-    <span class="c1"># If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.</span>
-    <span class="n">modified_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
-            <span class="k">continue</span>
-
-        <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
-            <span class="n">arg</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
-            <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">replace_delimeter_in_part</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">val</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">replace_delimeter_in_part</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">return_unknown_args</span>
-            <span class="ow">and</span> <span class="n">fixed</span> <span class="ow">in</span> <span class="n">modified_args</span>
-            <span class="ow">and</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">!=</span> <span class="n">arg</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-                <span class="s2">&quot;Ambiguous arguments: &quot;</span> <span class="o">+</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; and &quot;</span> <span class="o">+</span> <span class="n">arg</span>
+        <span class="c1"># We wrap our type with a dummy dataclass if it can&#39;t be treated as a nested type.</span>
+        <span class="c1"># For example: passing in f=int will result in a dataclass with a single field</span>
+        <span class="c1"># typed as int.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
+            <span class="n">dummy_field</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
+                <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span>
+                <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(),</span>
             <span class="p">)</span>
-        <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
-        <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">make_dataclass</span><span class="p">(</span>
+                <span class="n">cls_name</span><span class="o">=</span><span class="s2">&quot;dummy&quot;</span><span class="p">,</span>
+                <span class="n">fields</span><span class="o">=</span><span class="p">[(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">dummy_field</span><span class="p">)],</span>
+                <span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="n">default_instance_internal</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">default_instance_internal</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dummy_wrapped</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1"># If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn</span>
-    <span class="c1"># formatting tags, and get the shell we want to generate a completion script for</span>
-    <span class="c1"># (bash/zsh/tcsh).</span>
-    <span class="c1">#</span>
-    <span class="c1"># shtab also offers an add_argument_to() functions that fulfills a similar goal, but</span>
-    <span class="c1"># manual parsing of argv is convenient for turning off formatting.</span>
-    <span class="c1">#</span>
-    <span class="c1"># Note: --tyro-print-completion is deprecated! --tyro-write-completion is less prone</span>
-    <span class="c1"># to errors from accidental logging, print statements, etc.</span>
-    <span class="n">print_completion</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">write_completion</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="c1"># We replace underscores with hyphens to accomodate for `use_undercores`.</span>
-        <span class="n">print_completion</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;--tyro-print-completion&quot;</span>
-        <span class="n">write_completion</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;--tyro-write-completion&quot;</span>
+        <span class="c1"># Read and fix arguments. If the user passes in --field_name instead of</span>
+        <span class="c1"># --field-name, correct for them.</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="c1"># Fix arguments. This will modify all option-style arguments replacing</span>
+        <span class="c1"># underscores with hyphens, or vice versa if use_underscores=True.</span>
+        <span class="c1"># If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.</span>
+        <span class="n">modified_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="s2">&quot;=&quot;</span> <span class="ow">in</span> <span class="n">arg</span><span class="p">:</span>
+                <span class="n">arg</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">)</span>
+                <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">replace_delimeter_in_part</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span> <span class="o">+</span> <span class="s2">&quot;=&quot;</span> <span class="o">+</span> <span class="n">val</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fixed</span> <span class="o">=</span> <span class="s2">&quot;--&quot;</span> <span class="o">+</span> <span class="n">_strings</span><span class="o">.</span><span class="n">replace_delimeter_in_part</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">return_unknown_args</span>
+                <span class="ow">and</span> <span class="n">fixed</span> <span class="ow">in</span> <span class="n">modified_args</span>
+                <span class="ow">and</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">!=</span> <span class="n">arg</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Ambiguous arguments: &quot;</span> <span class="o">+</span> <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; and &quot;</span> <span class="o">+</span> <span class="n">arg</span>
+                <span class="p">)</span>
+            <span class="n">modified_args</span><span class="p">[</span><span class="n">fixed</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg</span>
+            <span class="n">args</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">fixed</span>
+
+        <span class="c1"># If we pass in the --tyro-print-completion or --tyro-write-completion flags: turn</span>
+        <span class="c1"># formatting tags, and get the shell we want to generate a completion script for</span>
+        <span class="c1"># (bash/zsh/tcsh).</span>
+        <span class="c1">#</span>
+        <span class="c1"># shtab also offers an add_argument_to() functions that fulfills a similar goal, but</span>
+        <span class="c1"># manual parsing of argv is convenient for turning off formatting.</span>
+        <span class="c1">#</span>
+        <span class="c1"># Note: --tyro-print-completion is deprecated! --tyro-write-completion is less prone</span>
+        <span class="c1"># to errors from accidental logging, print statements, etc.</span>
+        <span class="n">print_completion</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">write_completion</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="c1"># We replace underscores with hyphens to accomodate for `use_undercores`.</span>
+            <span class="n">print_completion</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;--tyro-print-completion&quot;</span>
+            <span class="n">write_completion</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span>
+                <span class="ow">and</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;--tyro-write-completion&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Note: setting USE_RICH must happen before the parser specification is generated.</span>
+        <span class="c1"># TODO: revisit this. Ideally we should be able to eliminate the global state</span>
+        <span class="c1"># changes.</span>
+        <span class="n">completion_shell</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">completion_target_path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span><span class="p">:</span>
+            <span class="n">completion_shell</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">write_completion</span><span class="p">:</span>
+            <span class="n">completion_target_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span> <span class="ow">or</span> <span class="n">return_parser</span><span class="p">:</span>
+            <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
+        <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
+            <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
+            <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+            <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
+            <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
         <span class="p">)</span>
-
-    <span class="c1"># Note: setting USE_RICH must happen before the parser specification is generated.</span>
-    <span class="c1"># TODO: revisit this. Ideally we should be able to eliminate the global state</span>
-    <span class="c1"># changes.</span>
-    <span class="n">completion_shell</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">completion_target_path</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span><span class="p">:</span>
-        <span class="n">completion_shell</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="k">if</span> <span class="n">write_completion</span><span class="p">:</span>
-        <span class="n">completion_target_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-    <span class="k">if</span> <span class="n">print_completion</span> <span class="ow">or</span> <span class="n">write_completion</span> <span class="ow">or</span> <span class="n">return_parser</span><span class="p">:</span>
-        <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">_arguments</span><span class="o">.</span><span class="n">USE_RICH</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="c1"># Map a callable to the relevant CLI arguments + subparsers.</span>
-    <span class="n">parser_spec</span> <span class="o">=</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">,</span>
-        <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
-        <span class="n">parent_classes</span><span class="o">=</span><span class="nb">set</span><span class="p">(),</span>  <span class="c1"># Used for recursive calls.</span>
-        <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance_internal</span><span class="p">,</span>  <span class="c1"># Overrides for default values.</span>
-        <span class="n">intern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-        <span class="n">extern_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-        <span class="n">subcommand_prefix</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="c1"># Used for recursive calls.</span>
-    <span class="p">)</span>
 
     <span class="c1"># Generate parser!</span>
     <span class="k">with</span> <span class="n">_argparse_formatter</span><span class="o">.</span><span class="n">ansi_context</span><span class="p">():</span>

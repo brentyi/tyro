@@ -64,11 +64,6 @@ Module Contents
 
       
 
-   .. py:attribute:: type_from_typevar
-      :type: Dict[TypeVar, tyro._typing.TypeForm[Any]]
-
-      
-
    .. py:method:: add_argument(parser: Union[tyro._argparse.ArgumentParser, tyro._argparse._ArgumentGroup]) -> None
 
       

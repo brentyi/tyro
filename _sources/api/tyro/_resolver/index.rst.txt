@@ -18,6 +18,11 @@ Module Contents
 
    
 
+.. py:function:: unwrap_aliases(typ: TypeOrCallable) -> TypeOrCallable
+
+   
+   Unwrap type aliases.
+
 .. py:function:: unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable
 
    
@@ -28,12 +33,6 @@ Module Contents
 
    
    Same as ``dataclasses.is_dataclass``\ , but also handles generic aliases.
-
-.. py:function:: resolve_generic_types(cls: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, tyro._typing.TypeForm[Any]]]
-
-   
-   If the input is a class: no-op. If it's a generic alias: returns the origin
-   class, and a mapping from typevars to concrete types.
 
 .. py:function:: resolved_fields(cls: tyro._typing.TypeForm) -> List[dataclasses.Field]
 
@@ -102,7 +101,42 @@ Module Contents
    * Annotated[int, 1], int => (int, (1,))
    * Annotated[int, "1"], int => (int, ())
 
-.. py:function:: apply_type_from_typevar(typ: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]]) -> TypeOrCallable
+.. py:class:: TypeParamResolver
+
+
+   .. py:attribute:: param_assignments
+      :type: List[Dict[TypeVar, tyro._typing.TypeForm[Any]]]
+      :value: []
+
+      
+
+   .. py:method:: get_assignment_context(typ: TypeOrCallable) -> TypeParamAssignmentContext
+      :classmethod:
+
+      
+      Context manager for resolving type parameters.
+
+   .. py:method:: concretize_type_params(typ: TypeOrCallable) -> TypeOrCallable
+      :staticmethod:
+
+      
+      Apply type parameter assignments based on the current context.
+
+
+.. py:function:: standardize_builtin_generics(typ: TypeOrCallable) -> TypeOrCallable
+
+   
+   Apply shims to convert ``types.UnionType`` to ``typing.Union``\ , ``list`` to
+   ``typing.List``\ , etc.
+
+.. py:class:: TypeParamAssignmentContext(origin_type: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]])
+
+
+   .. py:method:: __enter__()
+
+
+   .. py:method:: __exit__(exc_type, exc_value, traceback)
+
 
 
 .. py:function:: narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
@@ -119,6 +153,12 @@ Module Contents
 .. py:data:: NoneType
 
    
+
+.. py:function:: resolve_generic_types(typ: TypeOrCallable) -> Tuple[TypeOrCallable, Dict[TypeVar, tyro._typing.TypeForm[Any]]]
+
+   
+   If the input is a class: no-op. If it's a generic alias: returns the origin
+   class, and a mapping from typevars to concrete types.
 
 .. py:function:: get_type_hints_with_backported_syntax(obj: Callable[Ellipsis, Any], include_extras: bool = False) -> Dict[str, Any]
 

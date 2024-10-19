@@ -100,7 +100,7 @@ Module Contents
       Create defined arguments and subparsers.
 
 
-.. py:function:: handle_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
+.. py:function:: handle_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
 
    
    Determine what to do with a single field definition.
@@ -145,7 +145,7 @@ Module Contents
 
       
 
-   .. py:method:: from_field(field: tyro._fields.FieldDefinition, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]], parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str) -> Optional[SubparsersSpecification]
+   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str) -> Optional[SubparsersSpecification]
       :staticmethod:
 
 

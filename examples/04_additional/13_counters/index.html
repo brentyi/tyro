@@ -12,7 +12,7 @@
         gtag('js', new Date());
         gtag('config', 'G-624W9VWZWK');
     </script>
-    <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Type Aliases (Python 3.12+)" href="../13_type_statement/" /><link rel="prev" title="Argument Aliases" href="../12_aliases/" />
+    <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Cleaner Console Outputs for Scripts with Multiple Workers" href="../14_suppress_console_outputs/" /><link rel="prev" title="Argument Aliases" href="../12_aliases/" />
 
     <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
         <title>Counters - tyro</title>
@@ -216,9 +216,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../11_custom_constructors/">Custom Constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../12_aliases/">Argument Aliases</a></li>
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Counters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../13_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../15_decorator_subcommands/">Decorator-based Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../16_type_statement/">Type Aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -295,7 +295,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/12_counters.py --help</kbd><pre class="ansi-block literal-block">usage: 12_counters.py [-h] [--verbosity] [--aliased-verbosity]
+<kbd>python 04_additional/13_counters.py --help</kbd><pre class="ansi-block literal-block">usage: 13_counters.py [-h] [--verbosity] [--aliased-verbosity]
 
 Example showing how to use counter actions.
 
@@ -307,13 +307,13 @@ Example showing how to use counter actions.
 │                    -vvv, etc. (repeatable)                                 │
 ╰────────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/12_counters.py --verbosity</kbd><pre class="ansi-block literal-block">Verbosity level: 1
+<kbd>python 04_additional/13_counters.py --verbosity</kbd><pre class="ansi-block literal-block">Verbosity level: 1
 Verbosity level (aliased): 0</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/12_counters.py --verbosity --verbosity</kbd><pre class="ansi-block literal-block">Verbosity level: 2
+<kbd>python 04_additional/13_counters.py --verbosity --verbosity</kbd><pre class="ansi-block literal-block">Verbosity level: 2
 Verbosity level (aliased): 0</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/12_counters.py -vvv</kbd><pre class="ansi-block literal-block">Verbosity level: 0
+<kbd>python 04_additional/13_counters.py -vvv</kbd><pre class="ansi-block literal-block">Verbosity level: 0
 Verbosity level (aliased): 3</pre>
 </section>
 
@@ -322,12 +322,12 @@ Verbosity level (aliased): 3</pre>
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../13_type_statement/">
+          <a class="next-page" href="../14_suppress_console_outputs/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Type Aliases (Python 3.12+)</div>
+                <div class="title">Cleaner Console Outputs for Scripts with Multiple Workers</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>

@@ -214,10 +214,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -296,7 +296,6 @@
     <span class="n">Optional</span><span class="p">,</span>
     <span class="n">Set</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
-    <span class="n">TypeVar</span><span class="p">,</span>
     <span class="n">Union</span><span class="p">,</span>
     <span class="n">cast</span><span class="p">,</span>
 <span class="p">)</span>
@@ -334,6 +333,7 @@
     <span class="n">intern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">extern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">type_or_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">]</span>
+    <span class="n">typevar_context</span><span class="p">:</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamAssignmentContext</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Type or callable for this field. This should have all Annotated[] annotations</span>
 <span class="sd">    stripped.&quot;&quot;&quot;</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
@@ -387,8 +387,19 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
     <span class="p">):</span>
-        <span class="c1"># Resolve generic aliases.</span>
-        <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="c1"># Resolve generics.</span>
+        <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span>
+            <span class="n">type_or_callable</span>
+        <span class="p">)</span>
+        <span class="n">typevar_context</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span>
+            <span class="n">type_or_callable</span>
+        <span class="p">)</span>
+        <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">typevar_context</span><span class="o">.</span><span class="n">origin_type</span>
+
+        <span class="c1"># Narrow types.</span>
+        <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">type_from_typevar_constraints</span><span class="p">(</span><span class="n">type_or_callable</span><span class="p">)</span>
+        <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_union_type</span><span class="p">(</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
 
         <span class="c1"># Try to extract argconf overrides from type.</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span>
@@ -425,12 +436,39 @@
         <span class="k">for</span> <span class="n">context_markers</span> <span class="ow">in</span> <span class="n">_field_context_markers</span><span class="p">:</span>
             <span class="n">markers</span> <span class="o">+=</span> <span class="n">context_markers</span>
 
+        <span class="c1"># Check that the default value matches the final resolved type.</span>
+        <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
+        <span class="c1"># may be able to consolidate this.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="c1"># Be relatively conservative: isinstance() can be checked on non-type</span>
+            <span class="c1"># types (like unions in Python &gt;=3.10), but we&#39;ll only consider single types</span>
+            <span class="c1"># for now.</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">type_or_callable</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">type_or_callable</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="c1"># If a custom constructor is set, type_or_callable may not be</span>
+            <span class="c1"># matched to the annotated type.</span>
+            <span class="ow">and</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
+            <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
+            <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
+            <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is annotated with type </span><span class="si">{</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;but the default value </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2"> has type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
+            <span class="p">)</span>
+            <span class="n">type_or_callable</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
+
         <span class="n">out</span> <span class="o">=</span> <span class="n">FieldDefinition</span><span class="p">(</span>
             <span class="n">intern_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">extern_name</span><span class="o">=</span><span class="n">name</span> <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">argconf</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">type_or_callable</span><span class="o">=</span><span class="n">type_or_callable</span>
             <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
             <span class="k">else</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">(),</span>
+            <span class="n">typevar_context</span><span class="o">=</span><span class="n">typevar_context</span><span class="p">,</span>
             <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
             <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
             <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
@@ -564,8 +602,9 @@
 <span class="sd">    TODO: we should come up with a better name than &#39;nested type&#39;, which is a little bit</span>
 <span class="sd">    misleading.&quot;&quot;&quot;</span>
 
+    <span class="n">list_or_error</span> <span class="o">=</span> <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-        <span class="n">_try_field_list_from_callable</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">),</span>
+        <span class="n">list_or_error</span><span class="p">,</span>
         <span class="n">UnsupportedNestedTypeMessage</span><span class="p">,</span>
     <span class="p">)</span></div>
 
@@ -577,9 +616,7 @@
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
     <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span>
-    <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]</span>
-<span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span> <span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a list of generic &#39;field&#39; objects corresponding to the inputs of some</span>
 <span class="sd">    annotated callable.</span>
 
@@ -589,7 +626,6 @@
 <span class="sd">        A list of field definitions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Resolve generic types.</span>
-    <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
     <span class="c1"># Try to generate field list.</span>
@@ -602,67 +638,21 @@
         <span class="k">if</span> <span class="n">support_single_arg_types</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span>
                 <span class="n">f</span><span class="p">,</span>
-                <span class="n">type_from_typevar</span><span class="p">,</span>
                 <span class="p">[</span>
-                    <span class="n">FieldDefinition</span><span class="p">(</span>
-                        <span class="n">intern_name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>
-                        <span class="n">extern_name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>  <span class="c1"># Doesn&#39;t matter.</span>
+                    <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>
                         <span class="n">type_or_callable</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
                         <span class="n">default</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
                         <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                         <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
-                        <span class="n">custom_constructor</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                        <span class="n">markers</span><span class="o">=</span><span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">},</span>
-                        <span class="n">argconf</span><span class="o">=</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfiguration</span><span class="p">(</span>
-                            <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
-                        <span class="p">),</span>
-                        <span class="n">call_argname</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="n">markers</span><span class="o">=</span><span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">),</span>
                     <span class="p">)</span>
                 <span class="p">],</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="n">field_list</span><span class="o">.</span><span class="n">message</span><span class="p">)</span>
 
-    <span class="c1"># Try to resolve types in our list of fields.</span>
-    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="n">FieldDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-
-        <span class="c1"># Check that the default value matches the final resolved type.</span>
-        <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
-        <span class="c1"># may be able to consolidate this.</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="c1"># Be relatively conservative: isinstance() can be checked on non-type</span>
-            <span class="c1"># types (like unions in Python &gt;=3.10), but we&#39;ll only consider single types</span>
-            <span class="c1"># for now.</span>
-            <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="c1"># If a custom constructor is set, field.type_or_callable may not be</span>
-            <span class="c1"># matched to the annotated type.</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">custom_constructor</span>
-            <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
-            <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
-            <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
-            <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="si">}</span><span class="s2"> is annotated with type </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="si">}</span><span class="s2">, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;but the default value </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2"> has type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
-
-        <span class="n">field</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">type_or_callable</span><span class="o">=</span><span class="n">typ</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">field</span>
-
-    <span class="n">field_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">resolve</span><span class="p">,</span> <span class="n">field_list</span><span class="p">))</span>
-
-    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">field_list</span></div>
+    <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span></div>
 
 
 
@@ -690,91 +680,99 @@
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">DefaultInstance</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">],</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">]:</span>
-    <span class="c1"># Apply constructor_factory override for type.</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="c1"># Resolve generic types.</span>
+    <span class="n">resolve_context</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">resolve_context</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">resolve_context</span><span class="o">.</span><span class="n">origin_type</span>
 
-    <span class="c1"># Check for default instances in subcommand configs. This is needed for</span>
-    <span class="c1"># is_nested_type() when arguments are not valid without a default, and this</span>
-    <span class="c1"># default is specified in the subcommand config.</span>
-    <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span>
-        <span class="n">f</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
-    <span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">default_instance</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
+        <span class="c1"># Apply constructor_factory override for type.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-    <span class="c1"># Unwrap generics.</span>
-    <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-    <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-    <span class="n">f_origin</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
-
-    <span class="c1"># If `f` is a type:</span>
-    <span class="c1">#     1. Set cls to the type.</span>
-    <span class="c1">#     2. Consider `f` to be `cls.__init__`.</span>
-    <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
-        <span class="bp">cls</span> <span class="o">=</span> <span class="n">f</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
-        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__new__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot instantiate class </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> with no unique __init__ or __new__&quot;</span>
-                <span class="s2">&quot; method.&quot;</span>
-            <span class="p">)</span>
-        <span class="n">f_origin</span> <span class="o">=</span> <span class="bp">cls</span>  <span class="c1"># type: ignore</span>
-
-    <span class="c1"># Try field generation from class inputs.</span>
-    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_field_list_from_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_field_list_from_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_field_list_from_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_is_attrs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_field_list_from_attrs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">_is_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">_field_list_from_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-
-    <span class="c1"># Standard container types. These are different because they can be nested structures</span>
-    <span class="c1"># if they contain other nested types (eg Tuple[Struct, Struct]), or treated as</span>
-    <span class="c1"># single arguments otherwise (eg Tuple[int, int]).</span>
-    <span class="c1">#</span>
-    <span class="c1"># Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will</span>
-    <span class="c1"># be populated if we annotate as just `tuple`.</span>
-    <span class="k">if</span> <span class="n">f_origin</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_field_list_from_tuple</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
-        <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
-        <span class="nb">dict</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="n">_field_list_from_dict</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
-        <span class="nb">list</span><span class="p">,</span>
-        <span class="nb">set</span><span class="p">,</span>
-        <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
-        <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="n">_field_list_from_nontuple_sequence_checked</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-
-    <span class="c1"># General cases.</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">_known_parsable_types</span>
-    <span class="p">)</span> <span class="ow">or</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_known_parsable_types</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="p">(</span>
-        <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="bp">cls</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span>
-        <span class="ow">and</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">is_type_string_converter</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;PathLike </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span>
+        <span class="c1"># Check for default instances in subcommand configs. This is needed for</span>
+        <span class="c1"># is_nested_type() when arguments are not valid without a default, and this</span>
+        <span class="c1"># default is specified in the subcommand config.</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span>
         <span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_try_field_list_from_general_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">default_instance</span> <span class="o">=</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
+
+        <span class="c1"># Unwrap generics.</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="n">f_origin</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">f</span><span class="p">))</span>
+
+        <span class="c1"># If `f` is a type:</span>
+        <span class="c1">#     1. Set cls to the type.</span>
+        <span class="c1">#     2. Consider `f` to be `cls.__init__`.</span>
+        <span class="bp">cls</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">f</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__new__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot instantiate class </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> with no unique __init__ or __new__&quot;</span>
+                    <span class="s2">&quot; method.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">f_origin</span> <span class="o">=</span> <span class="bp">cls</span>  <span class="c1"># type: ignore</span>
+
+        <span class="c1"># Try field generation from class inputs.</span>
+        <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">is_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">_field_list_from_typeddict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">_field_list_from_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">_field_list_from_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_is_attrs</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">_field_list_from_attrs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">_is_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">_field_list_from_pydantic</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+        <span class="c1"># Standard container types. These are different because they can be nested structures</span>
+        <span class="c1"># if they contain other nested types (eg Tuple[Struct, Struct]), or treated as</span>
+        <span class="c1"># single arguments otherwise (eg Tuple[int, int]).</span>
+        <span class="c1">#</span>
+        <span class="c1"># Note that f_origin will be populated if we annotate as `Tuple[..]`, and cls will</span>
+        <span class="c1"># be populated if we annotate as just `tuple`.</span>
+        <span class="k">if</span> <span class="n">f_origin</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_field_list_from_tuple</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">,</span>
+            <span class="nb">dict</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">_field_list_from_dict</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">f_origin</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="nb">list</span><span class="p">,</span>
+            <span class="nb">set</span><span class="p">,</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="nb">list</span><span class="p">,</span>
+            <span class="nb">set</span><span class="p">,</span>
+            <span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+            <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">_field_list_from_nontuple_sequence_checked</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+
+        <span class="c1"># General cases.</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">_known_parsable_types</span>
+        <span class="p">)</span> <span class="ow">or</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="ow">in</span> <span class="n">_known_parsable_types</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="p">(</span>
+            <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="bp">cls</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">is_type_string_converter</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">UnsupportedNestedTypeMessage</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;PathLike </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> should be parsed directly!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">_try_field_list_from_general_callable</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_field_list_from_typeddict</span><span class="p">(</span>

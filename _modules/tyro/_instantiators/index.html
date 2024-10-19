@@ -214,10 +214,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -408,10 +408,7 @@
     <span class="c1"># Some checks we can do if the signature is available!</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
         <span class="n">annotation</span> <span class="o">=</span> <span class="n">type_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
-
-        <span class="c1"># Hack: apply_type_from_typevar applies shims, like UnionType =&gt; Union</span>
-        <span class="c1"># conversion.</span>
-        <span class="n">annotation</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="n">annotation</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
             <span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span> <span class="ow">and</span> <span class="nb">str</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">))</span>
             <span class="ow">or</span> <span class="n">annotation</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">)</span>
@@ -435,7 +432,6 @@
 <a class="viewcode-back" href="../../../api/tyro/_instantiators/#tyro._instantiators.instantiator_from_type">[docs]</a>
 <span class="k">def</span> <span class="nf">instantiator_from_type</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Recursive helper for parsing type annotations.</span>
@@ -483,9 +479,7 @@
 
     <span class="c1"># Address container types. If a matching container is found, this will recursively</span>
     <span class="c1"># call instantiator_from_type().</span>
-    <span class="n">container_out</span> <span class="o">=</span> <span class="n">_instantiator_from_container_type</span><span class="p">(</span>
-        <span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">typ</span><span class="p">),</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span>
-    <span class="p">)</span>
+    <span class="n">container_out</span> <span class="o">=</span> <span class="n">_instantiator_from_container_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">typ</span><span class="p">),</span> <span class="n">markers</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">container_out</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">container_out</span>
 
@@ -618,7 +612,6 @@
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">_instantiator_from_type_inner</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span> <span class="o">...</span>
@@ -627,7 +620,6 @@
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">_instantiator_from_type_inner</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span> <span class="o">...</span>
@@ -636,7 +628,6 @@
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">_instantiator_from_type_inner</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span> <span class="o">...</span>
@@ -644,13 +635,12 @@
 
 <span class="k">def</span> <span class="nf">_instantiator_from_type_inner</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">allow_sequences</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Thin wrapper over instantiator_from_type, with some extra asserts for catching</span>
 <span class="sd">    errors.&quot;&quot;&quot;</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">instantiator_from_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">instantiator_from_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">out</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
         <span class="c1"># We currently only use allow_sequences=False for options in Literal types,</span>
         <span class="c1"># which are evaluated using `type()`. It should not be possible to hit this</span>
@@ -667,7 +657,6 @@
 
 <span class="k">def</span> <span class="nf">_instantiator_from_container_type</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Attempt to create an instantiator from a container type. Returns `None` if no</span>
@@ -701,13 +690,12 @@
         <span class="n">_instantiator_from_literal</span><span class="p">:</span> <span class="p">(</span><span class="n">Literal</span><span class="p">,</span> <span class="n">LiteralAlternate</span><span class="p">),</span>
     <span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">type_origin</span> <span class="ow">in</span> <span class="n">matched_origins</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">make</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">make</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">None</span>
 
 
 <span class="k">def</span> <span class="nf">_instantiator_from_tuple</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">types</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -718,7 +706,7 @@
         <span class="c1"># Ellipsis: variable argument counts. When an ellipsis is used, tuples must</span>
         <span class="c1"># contain only one type.</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typeset_no_ellipsis</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">_instantiator_from_sequence</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_instantiator_from_sequence</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">markers</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
         <span class="n">instantiators</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -726,7 +714,7 @@
         <span class="n">nargs</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
             <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-                <span class="n">t</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
+                <span class="n">t</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
             <span class="p">)</span>
             <span class="n">instantiators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
             <span class="n">metas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
@@ -792,7 +780,6 @@
 
 <span class="k">def</span> <span class="nf">_instantiator_from_union</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
@@ -811,9 +798,7 @@
     <span class="n">nargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]]]</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-            <span class="n">t</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
-        <span class="p">)</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">)</span>
         <span class="n">instantiators</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
         <span class="n">metas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -874,18 +859,16 @@
 
 <span class="k">def</span> <span class="nf">_instantiator_from_dict</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">key_type</span><span class="p">,</span> <span class="n">val_type</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">key_instantiator</span><span class="p">,</span> <span class="n">key_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-        <span class="n">key_type</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
+        <span class="n">key_type</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">:</span>
         <span class="n">val_instantiator</span><span class="p">,</span> <span class="n">val_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
             <span class="n">val_type</span><span class="p">,</span>
-            <span class="n">type_from_typevar</span><span class="p">,</span>
             <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
         <span class="p">)</span>
@@ -908,7 +891,7 @@
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">val_instantiator</span><span class="p">,</span> <span class="n">val_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
-            <span class="n">val_type</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
+            <span class="n">val_type</span><span class="p">,</span> <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span> <span class="n">markers</span><span class="o">=</span><span class="n">markers</span>
         <span class="p">)</span>
         <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_meta</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="n">key_nargs</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">key_meta</span><span class="o">.</span><span class="n">nargs</span><span class="p">)</span>  <span class="c1"># Casts needed for mypy but not pyright!</span>
@@ -956,7 +939,6 @@
 
 <span class="k">def</span> <span class="nf">_instantiator_from_sequence</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Instantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiator for variable-length sequences: list, sets, Tuple[T, ...], etc.&quot;&quot;&quot;</span>
@@ -974,7 +956,6 @@
     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">:</span>
         <span class="n">make</span><span class="p">,</span> <span class="n">inner_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
             <span class="n">contained_type</span><span class="p">,</span>
-            <span class="n">type_from_typevar</span><span class="p">,</span>
             <span class="n">allow_sequences</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
         <span class="p">)</span>
@@ -992,7 +973,6 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">make</span><span class="p">,</span> <span class="n">inner_meta</span> <span class="o">=</span> <span class="n">_instantiator_from_type_inner</span><span class="p">(</span>
             <span class="n">contained_type</span><span class="p">,</span>
-            <span class="n">type_from_typevar</span><span class="p">,</span>
             <span class="n">allow_sequences</span><span class="o">=</span><span class="s2">&quot;fixed_length&quot;</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
         <span class="p">)</span>
@@ -1026,7 +1006,6 @@
 
 <span class="k">def</span> <span class="nf">_instantiator_from_literal</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_StandardInstantiator</span><span class="p">,</span> <span class="n">InstantiatorMetadata</span><span class="p">]:</span>
     <span class="n">choices</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>

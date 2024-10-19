@@ -214,10 +214,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_counters/">Counters</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -352,11 +352,14 @@
 
         <span class="c1"># Resolve the type of `f`, generate a field list.</span>
         <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">markers</span><span class="p">):</span>
-            <span class="n">f</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
-                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
-                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">with</span> <span class="n">context</span><span class="p">:</span>
+                <span class="n">f</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">origin_type</span>
+                <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
+                    <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+                    <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+                    <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
+                <span class="p">)</span>
 
         <span class="c1"># Cycle detection.</span>
         <span class="c1">#</span>
@@ -382,14 +385,14 @@
         <span class="n">subparsers_from_prefix</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
-            <span class="n">field_out</span> <span class="o">=</span> <span class="n">handle_field</span><span class="p">(</span>
-                <span class="n">field</span><span class="p">,</span>
-                <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
-                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
-                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
-                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">with</span> <span class="n">field</span><span class="o">.</span><span class="n">typevar_context</span><span class="p">:</span>
+                <span class="n">field_out</span> <span class="o">=</span> <span class="n">handle_field</span><span class="p">(</span>
+                    <span class="n">field</span><span class="p">,</span>
+                    <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+                    <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                    <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                    <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
                 <span class="c1"># Handle single arguments.</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field_out</span><span class="p">)</span>
@@ -569,7 +572,6 @@
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.handle_field">[docs]</a>
 <span class="k">def</span> <span class="nf">handle_field</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
-    <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -590,7 +592,6 @@
         <span class="c1"># (1) Handle Unions over callables; these result in subparsers.</span>
         <span class="n">subparsers_attempt</span> <span class="o">=</span> <span class="n">SubparsersSpecification</span><span class="o">.</span><span class="n">from_field</span><span class="p">(</span>
             <span class="n">field</span><span class="p">,</span>
-            <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
             <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
             <span class="n">intern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">]),</span>
             <span class="n">extern_prefix</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]),</span>
@@ -644,7 +645,6 @@
         <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
         <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
         <span class="n">field</span><span class="o">=</span><span class="n">field</span><span class="p">,</span>
-        <span class="n">type_from_typevar</span><span class="o">=</span><span class="n">type_from_typevar</span><span class="p">,</span>
     <span class="p">)</span></div>
 
 
@@ -668,7 +668,6 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_field</span><span class="p">(</span>
         <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
-        <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">extern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -680,10 +679,7 @@
 
         <span class="c1"># We don&#39;t use sets here to retain order of subcommands.</span>
         <span class="n">options</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]]</span>
-        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">_resolver</span><span class="o">.</span><span class="n">apply_type_from_typevar</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-        <span class="p">]</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="p">[</span><span class="n">typ</span> <span class="k">for</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)]</span>
         <span class="n">options</span> <span class="o">=</span> <span class="p">[</span>
             <span class="p">(</span>
                 <span class="c1"># Cast seems unnecessary but needed in mypy... (1.4.1)</span>
