@@ -6,7 +6,7 @@
 In Python 3.12, the :code:`type` statement is introduced to create type aliases.
 
 Usage:
-`python ./13_type_statement.py --help`
+`python ./16_type_statement.py --help`
 """
 
 import dataclasses
