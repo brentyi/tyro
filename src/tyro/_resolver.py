@@ -389,7 +389,7 @@ class TypeParamResolver:
 
             # Apply shims to convert from types.UnionType to typing.Union, list to typing.List, etc.
             # This will let us call `copy_with()` next.
-            typ = apply_generic_resolution_shims(typ)
+            typ = standardize_builtin_generics(typ)
 
             # Standard generic aliases have a `copy_with()`!
             if hasattr(typ, "copy_with"):
@@ -402,8 +402,9 @@ class TypeParamResolver:
         return typ  # type: ignore
 
 
-def apply_generic_resolution_shims(typ: TypeOrCallable) -> TypeOrCallable:
-    """Apply shims to types to support older Python versions."""
+def standardize_builtin_generics(typ: TypeOrCallable) -> TypeOrCallable:
+    """Apply shims to convert `types.UnionType` to `typing.Union`, `list` to
+    `typing.List`, etc."""
     origin = get_origin(typ)
     args = get_args(typ)
 
@@ -496,6 +497,10 @@ def resolve_generic_types(
         # function with `__tyro_markers__` set, we don't want/need to return
         # Annotated[func, markers].
         typ, annotations = unwrap_annotated_and_aliases(typ, "all")
+
+    # Apply shims to convert from types.UnionType to typing.Union, list to
+    # typing.List, etc.
+    typ = standardize_builtin_generics(typ)
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(unwrap_newtype_and_aliases(typ)[0])
