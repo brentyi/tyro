@@ -197,7 +197,7 @@ def instantiator_from_type(
     if maybe_newtype_name is not None:
         metavar = maybe_newtype_name.upper()
 
-    typ = _resolver.unwrap_annotated(typ)
+    typ = _resolver.unwrap_annotated_and_aliases(typ)
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().

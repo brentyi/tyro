@@ -110,7 +110,7 @@ class FieldDefinition:
         markers: Tuple[_markers.Marker, ...] = (),
     ):
         # Try to extract argconf overrides from type.
-        _, argconfs = _resolver.unwrap_annotated(
+        _, argconfs = _resolver.unwrap_annotated_and_aliases(
             type_or_callable, _confstruct._ArgConfiguration
         )
         argconf = _confstruct._ArgConfiguration(
@@ -135,7 +135,7 @@ class FieldDefinition:
             if argconf.help is not None:
                 helptext = argconf.help
 
-        type_or_callable, inferred_markers = _resolver.unwrap_annotated(
+        type_or_callable, inferred_markers = _resolver.unwrap_annotated_and_aliases(
             type_or_callable, _markers._Marker
         )
         markers = inferred_markers + markers
@@ -285,7 +285,7 @@ def field_list_from_callable(
 
     # Try to generate field list.
     # We recursively apply markers.
-    _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
+    _, parent_markers = _resolver.unwrap_annotated_and_aliases(f, _markers._Marker)
     with FieldDefinition.marker_context(parent_markers):
         field_list = _try_field_list_from_callable(f, default_instance)
 
@@ -386,7 +386,7 @@ def _try_field_list_from_callable(
     # Check for default instances in subcommand configs. This is needed for
     # is_nested_type() when arguments are not valid without a default, and this
     # default is specified in the subcommand config.
-    f, found_subcommand_configs = _resolver.unwrap_annotated(
+    f, found_subcommand_configs = _resolver.unwrap_annotated_and_aliases(
         f, conf._confstruct._SubcommandConfiguration
     )
     if len(found_subcommand_configs) > 0:
