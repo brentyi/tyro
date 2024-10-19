@@ -47,7 +47,7 @@ def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,
     returns typ."""
     # TODO: Annotated[] handling should be revisited...
-    typ = unwrap_annotated(typ)
+    typ = unwrap_annotated_and_aliases(typ)
     origin = get_origin(typ)
 
     if origin is not None:
@@ -72,7 +72,7 @@ def resolve_generic_types(
         # ^We need this `if` statement for an obscure edge case: when `cls` is a
         # function with `__tyro_markers__` set, we don't want/need to return
         # Annotated[func, markers].
-        cls, annotations = unwrap_annotated(cls, "all")
+        cls, annotations = unwrap_annotated_and_aliases(cls, "all")
 
     # We'll ignore NewType when getting the origin + args for generics.
     origin_cls = get_origin(unwrap_newtype_and_aliases(cls)[0])
@@ -218,7 +218,7 @@ def unwrap_newtype_and_narrow_subtypes(
             # it doesn't really make sense to parse this case.
             return typ
 
-        superclass = unwrap_annotated(typ)
+        superclass = unwrap_annotated_and_aliases(typ)
 
         # For Python 3.10.
         if get_origin(superclass) is Union:
@@ -243,7 +243,7 @@ def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
     `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are
     kept, but the type is swapped."""
     # Need to swap types.
-    _, annotations = unwrap_annotated(typ, search_type="all")
+    _, annotations = unwrap_annotated_and_aliases(typ, search_type="all")
     for anno in reversed(annotations):
         if (
             isinstance(
@@ -305,27 +305,27 @@ MetadataType = TypeVar("MetadataType")
 
 
 @overload
-def unwrap_annotated(
+def unwrap_annotated_and_aliases(
     typ: TypeOrCallable,
     search_type: TypeForm[MetadataType],
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]: ...
 
 
 @overload
-def unwrap_annotated(
+def unwrap_annotated_and_aliases(
     typ: TypeOrCallable,
     search_type: Literal["all"],
 ) -> Tuple[TypeOrCallable, Tuple[Any, ...]]: ...
 
 
 @overload
-def unwrap_annotated(
+def unwrap_annotated_and_aliases(
     typ: TypeOrCallable,
     search_type: None = None,
 ) -> TypeOrCallable: ...
 
 
-def unwrap_annotated(
+def unwrap_annotated_and_aliases(
     typ: TypeOrCallable,
     search_type: Union[TypeForm[MetadataType], Literal["all"], object, None] = None,
 ) -> Union[Tuple[TypeOrCallable, Tuple[MetadataType, ...]], TypeOrCallable]:
@@ -336,6 +336,10 @@ def unwrap_annotated(
     - Annotated[int, 1], int => (int, (1,))
     - Annotated[int, "1"], int => (int, ())
     """
+
+    # Unwrap aliases defined using Python 3.12's `type` syntax.
+    if isinstance(typ, TypeAliasType):
+        return unwrap_annotated_and_aliases(typ.__value__, search_type)
 
     # `Final` and `ReadOnly` types are ignored in tyro.
     while get_origin(typ) in STRIP_WRAPPER_TYPES:

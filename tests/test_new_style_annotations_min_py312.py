@@ -2,6 +2,7 @@
 #
 # PEP 695 isn't yet supported in mypy. (April 4, 2024)
 from dataclasses import dataclass
+from typing import Annotated
 
 import tyro
 
@@ -52,3 +53,14 @@ def test_generic_with_type_statement_2():
     assert tyro.cli(Container[Y], args="--a.a 1 --a.b 2".split(" ")) == Container(
         Inner(1, 2)
     )
+
+
+type AnnotatedBasic = Annotated[int, tyro.conf.arg(name="basic")]
+
+
+def test_annotated_alias():
+    @dataclass(frozen=True)
+    class Container:
+        a: AnnotatedBasic
+
+    assert tyro.cli(Container, args="--basic 1".split(" ")) == Container(1)
