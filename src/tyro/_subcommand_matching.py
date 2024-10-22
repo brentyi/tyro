@@ -119,9 +119,9 @@ class _TypeTree:
                 return False
 
         for child_name, child in self.children.items():
-            if child_name not in supertype.children:
-                return False
-            if not child.is_subtype_of(supertype.children[child_name]):
+            if child_name not in supertype.children or not child.is_subtype_of(
+                supertype.children[child_name]
+            ):
                 return False
 
         return True
