@@ -90,10 +90,10 @@ class ParserSpecification:
         #
         # Note that 'parent' here refers to in the nesting hierarchy, not the
         # superclass.
-        # if f in parent_classes and f is not dict:
-        #     raise _instantiators.UnsupportedTypeAnnotationError(
-        #         f"Found a cyclic dependency with type {f}."
-        #     )
+        if f in parent_classes and f is not dict:
+            raise _instantiators.UnsupportedTypeAnnotationError(
+                f"Found a cyclic dependency with type {f}."
+            )
 
         # TODO: we are abusing the (minor) distinctions between types, classes, and
         # callables throughout the code. This is mostly for legacy reasons, could be
