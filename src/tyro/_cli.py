@@ -407,6 +407,7 @@ def _cli_impl(
     # Map a callable to the relevant CLI arguments + subparsers.
     parser_spec = _parsers.ParserSpecification.from_callable_or_type(
         f,
+        markers=set(),
         description=description,
         parent_classes=set(),  # Used for recursive calls.
         default_instance=default_instance_internal,  # Overrides for default values.

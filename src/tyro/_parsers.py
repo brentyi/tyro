@@ -63,6 +63,7 @@ class ParserSpecification:
     @staticmethod
     def from_callable_or_type(
         f: Callable[..., T],
+        markers: Set[_markers._Marker],
         description: Optional[str],
         parent_classes: Set[Type[Any]],
         default_instance: Union[
@@ -76,19 +77,11 @@ class ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
-        markers = _resolver.unwrap_annotated(f, _markers._Marker)[1]
-        consolidate_subcommand_args = (
-            _markers.ConsolidateSubcommandArgs in markers
-            or any(
-                map(
-                    lambda x: _markers.ConsolidateSubcommandArgs in x,
-                    global_context_markers,
-                )
-            )
-        )
+        markers.update(_resolver.unwrap_annotated(f, _markers._Marker)[1])
+        consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Resolve the type of `f`, generate a field list.
-        with _fields.FieldDefinition.marker_context(markers):
+        with _fields.FieldDefinition.marker_context(tuple(markers)):
             f, field_list = _fields.field_list_from_callable(
                 f=f,
                 default_instance=default_instance,
@@ -338,23 +331,23 @@ def handle_field(
                     field.default,
                 ),
             )
-            with _fields.FieldDefinition.marker_context(tuple(field.markers)):
-                return ParserSpecification.from_callable_or_type(
-                    field.type_or_callable,
-                    description=None,
-                    parent_classes=parent_classes,
-                    default_instance=field.default,
-                    intern_prefix=_strings.make_field_name(
-                        [intern_prefix, field.intern_name]
-                    ),
-                    extern_prefix=_strings.make_field_name(
-                        [extern_prefix, field.extern_name]
-                    )
-                    if field.argconf.prefix_name in (True, None)
-                    else field.extern_name,
-                    subcommand_prefix=subcommand_prefix,
-                    support_single_arg_types=False,
+            return ParserSpecification.from_callable_or_type(
+                field.type_or_callable,
+                markers=field.markers,
+                description=None,
+                parent_classes=parent_classes,
+                default_instance=field.default,
+                intern_prefix=_strings.make_field_name(
+                    [intern_prefix, field.intern_name]
+                ),
+                extern_prefix=_strings.make_field_name(
+                    [extern_prefix, field.extern_name]
                 )
+                if field.argconf.prefix_name in (True, None)
+                else field.extern_name,
+                subcommand_prefix=subcommand_prefix,
+                support_single_arg_types=False,
+            )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
     return _arguments.ArgumentDefinition(
@@ -521,6 +514,7 @@ class SubparsersSpecification:
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
                     option,
+                    markers=field.markers,
                     description=subcommand_config.description,
                     parent_classes=parent_classes,
                     default_instance=subcommand_config.default,
