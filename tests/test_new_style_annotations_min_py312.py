@@ -4,6 +4,8 @@
 from dataclasses import dataclass
 from typing import Annotated
 
+import pytest
+
 import tyro
 
 
@@ -128,3 +130,17 @@ def test_pep695_generic_alias_rename_three_times() -> None:
         arg: Annotated[SomeUnionRenamed, tyro.conf.arg(name="renamed_override")]
 
     assert tyro.cli(Config, args=["--renamed-override", "True"]) == Config(arg=True)
+
+
+type RecursiveList[T] = T | list[RecursiveList[T]]
+
+
+def test_pep695_recursive_types() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: RecursiveList[str]
+
+    with pytest.raises(RecursionError):
+        tyro.cli(Config, args=["--arg", "True"])
