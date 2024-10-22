@@ -15,6 +15,12 @@
 Module Contents
 ---------------
 
+.. py:data:: global_context_markers
+   :type: List[Tuple[tyro.conf._markers.Marker, Ellipsis]]
+   :value: []
+
+   
+
 .. py:class:: FieldDefinition
 
 
@@ -32,13 +38,6 @@ Module Contents
       :type: Union[tyro._typing.TypeForm[Any], Callable]
 
       
-
-   .. py:attribute:: typevar_context
-      :type: tyro._resolver.TypeParamAssignmentContext
-
-      
-      Type or callable for this field. This should have all Annotated[] annotations
-      stripped.
 
    .. py:attribute:: default
       :type: Any

@@ -83,7 +83,7 @@ Module Contents
 
       
 
-   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], description: Optional[str], parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._fields.PropagatingMissingType, tyro._fields.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str = '', support_single_arg_types: bool = False) -> ParserSpecification
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: Optional[str], parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._fields.PropagatingMissingType, tyro._fields.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str = '', support_single_arg_types: bool = False) -> ParserSpecification
       :staticmethod:
 
       

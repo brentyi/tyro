@@ -286,14 +286,11 @@
     <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a subcommand mapping and a default, return which subcommand the default</span>
-<span class="sd">    corresponds to.&quot;&quot;&quot;</span>
+<span class="sd">    corresponds to.</span>
 
-    <span class="c1"># It&#39;s really hard to concretize a generic type at runtime, so we just...</span>
-    <span class="c1"># don&#39;t. :-)</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">),</span> <span class="s2">&quot;__parameters__&quot;</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-            <span class="s2">&quot;Default values for generic subparsers are not supported.&quot;</span>
-        <span class="p">)</span>
+<span class="sd">    TOOD: this function is based on heuristics. While it should be robust to</span>
+<span class="sd">    most real-world scenarios, there&#39;s room for improvement for generic types.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Get default subcommand name: by default hash.</span>
     <span class="n">default_hash</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
@@ -320,10 +317,17 @@
             <span class="k">return</span> <span class="n">subcommand_name</span>
 
     <span class="c1"># Get default subcommand name: by annotated type tree.</span>
-    <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">subcommand_type</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">typetree</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span>
-            <span class="n">_TypeTree</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">subcommand_type</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
-        <span class="p">):</span>
+    <span class="n">typetree_from_name</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">subcommand_name</span><span class="p">:</span> <span class="n">_TypeTree</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">subcommand_type</span><span class="p">,</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">subcommand_type</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+    <span class="k">for</span> <span class="n">subcommand_name</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c1"># Equality check for type tree.</span>
+        <span class="k">if</span> <span class="n">typetree</span> <span class="o">==</span> <span class="n">typetree_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="n">subcommand_name</span>
+    <span class="k">for</span> <span class="n">subcommand_name</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c1"># Leaky subtype check.</span>
+        <span class="k">if</span> <span class="n">typetree</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span><span class="n">typetree_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]):</span>
             <span class="k">return</span> <span class="n">subcommand_name</span>
 
     <span class="c1"># Failed. This should never happen, we&#39;ll raise an error outside of this function if</span>
@@ -343,15 +347,18 @@
         <span class="n">default_instance</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">DefaultInstance</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_TypeTree</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;From an object instance, return a data structure representing the types in the object.&quot;&quot;&quot;</span>
+
+        <span class="n">typ_unwrap</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">typ</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
                 <span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span>
             <span class="p">)</span>
         <span class="k">except</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">_TypeTree</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="p">{})</span>
+            <span class="k">return</span> <span class="n">_TypeTree</span><span class="p">(</span><span class="n">typ_unwrap</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="k">return</span> <span class="n">_TypeTree</span><span class="p">(</span>
-            <span class="n">typ</span><span class="p">,</span>
+            <span class="n">typ_unwrap</span><span class="p">,</span>
             <span class="p">{</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">:</span> <span class="n">_TypeTree</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span>
@@ -359,6 +366,8 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">is_subtype_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">supertype</span><span class="p">:</span> <span class="n">_TypeTree</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Best-effort subcommand matching.&quot;&quot;&quot;</span>
+
         <span class="c1"># Generalize to unions.</span>
         <span class="k">def</span> <span class="nf">_get_type_options</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">_typing</span><span class="o">.</span><span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_typing</span><span class="o">.</span><span class="n">TypeForm</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
             <span class="k">return</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span> <span class="k">else</span> <span class="p">(</span><span class="n">typ</span><span class="p">,)</span>
@@ -366,15 +375,25 @@
         <span class="n">self_types</span> <span class="o">=</span> <span class="n">_get_type_options</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">typ</span><span class="p">)</span>
         <span class="n">super_types</span> <span class="o">=</span> <span class="n">_get_type_options</span><span class="p">(</span><span class="n">supertype</span><span class="o">.</span><span class="n">typ</span><span class="p">)</span>
 
-        <span class="c1"># Check against supertypes.</span>
+        <span class="c1"># Check against supertypes. TODO: the heuristics below could be more</span>
+        <span class="c1"># principled. We should revisit.</span>
         <span class="k">for</span> <span class="n">self_type</span> <span class="ow">in</span> <span class="n">self_types</span><span class="p">:</span>
             <span class="n">self_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
             <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">super_type</span> <span class="ow">in</span> <span class="n">super_types</span><span class="p">:</span>
                 <span class="n">super_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">super_type</span><span class="p">)</span>
-                <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">self_type</span><span class="p">,</span> <span class="n">super_type</span><span class="p">):</span>
-                    <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">self_type</span><span class="p">,</span> <span class="n">super_type</span><span class="p">):</span>
+                        <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                    <span class="k">pass</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">child_name</span><span class="p">,</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">child_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supertype</span><span class="o">.</span><span class="n">children</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">child</span><span class="o">.</span><span class="n">is_subtype_of</span><span class="p">(</span>
+                <span class="n">supertype</span><span class="o">.</span><span class="n">children</span><span class="p">[</span><span class="n">child_name</span><span class="p">]</span>
+            <span class="p">):</span>
                 <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="kc">True</span>

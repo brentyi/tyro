@@ -274,6 +274,11 @@
 defaults, from general callables.</p>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro._fields.global_context_markers">
+<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">global_context_markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#tyro._fields.global_context_markers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">FieldDefinition</span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition" title="Link to this definition">#</a></dt>
@@ -291,13 +296,6 @@ defaults, from general callables.</p>
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.type_or_callable">
 <span class="sig-name descname"><span class="pre">type_or_callable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></em><a class="headerlink" href="#tyro._fields.FieldDefinition.type_or_callable" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="tyro._fields.FieldDefinition.typevar_context">
-<span class="sig-name descname"><span class="pre">typevar_context</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../_resolver/#tyro._resolver.TypeParamAssignmentContext" title="tyro._resolver.TypeParamAssignmentContext"><span class="pre">tyro._resolver.TypeParamAssignmentContext</span></a></em><a class="headerlink" href="#tyro._fields.FieldDefinition.typevar_context" title="Link to this definition">#</a></dt>
-<dd><p>Type or callable for this field. This should have all Annotated[] annotations
-stripped.</p>
-</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.default">
@@ -567,11 +565,11 @@ A list of field definitions.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._fields</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
+<li><a class="reference internal" href="#tyro._fields.global_context_markers"><code class="docutils literal notranslate"><span class="pre">global_context_markers</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition"><code class="docutils literal notranslate"><span class="pre">FieldDefinition</span></code></a><ul>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.intern_name"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.intern_name</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.extern_name"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.extern_name</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.type_or_callable"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.type_or_callable</span></code></a></li>
-<li><a class="reference internal" href="#tyro._fields.FieldDefinition.typevar_context"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.typevar_context</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.default"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.default</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.is_default_from_default_instance"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.is_default_from_default_instance</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.helptext"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.helptext</span></code></a></li>

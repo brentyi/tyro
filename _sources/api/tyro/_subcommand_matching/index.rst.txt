@@ -15,3 +15,6 @@ Module Contents
    Given a subcommand mapping and a default, return which subcommand the default
    corresponds to.
 
+   TOOD: this function is based on heuristics. While it should be robust to
+   most real-world scenarios, there's room for improvement for generic types.
+

@@ -335,6 +335,7 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
+        <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">],</span>
         <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
@@ -348,19 +349,16 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a parser definition from a callable or type.&quot;&quot;&quot;</span>
 
         <span class="c1"># Consolidate subcommand types.</span>
-        <span class="n">markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">markers</span> <span class="o">=</span> <span class="n">markers</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">consolidate_subcommand_args</span> <span class="o">=</span> <span class="n">_markers</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span> <span class="ow">in</span> <span class="n">markers</span>
 
         <span class="c1"># Resolve the type of `f`, generate a field list.</span>
-        <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">markers</span><span class="p">):</span>
-            <span class="n">context</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-            <span class="k">with</span> <span class="n">context</span><span class="p">:</span>
-                <span class="n">f</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">origin_type</span>
-                <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
-                    <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-                    <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
-                    <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
-                <span class="p">)</span>
+        <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
+                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
+            <span class="p">)</span>
 
         <span class="c1"># Cycle detection.</span>
         <span class="c1">#</span>
@@ -386,14 +384,13 @@
         <span class="n">subparsers_from_prefix</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">field</span><span class="o">.</span><span class="n">typevar_context</span><span class="p">:</span>
-                <span class="n">field_out</span> <span class="o">=</span> <span class="n">handle_field</span><span class="p">(</span>
-                    <span class="n">field</span><span class="p">,</span>
-                    <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                    <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
-                    <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
-                    <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="n">field_out</span> <span class="o">=</span> <span class="n">handle_field</span><span class="p">(</span>
+                <span class="n">field</span><span class="p">,</span>
+                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+                <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">subcommand_prefix</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_out</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">):</span>
                 <span class="c1"># Handle single arguments.</span>
                 <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field_out</span><span class="p">)</span>
@@ -617,14 +614,8 @@
                 <span class="p">),</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="c1"># Recursively apply marker types.</span>
-                    <span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
-                    <span class="k">else</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-                        <span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
-                    <span class="p">)</span>
-                <span class="p">),</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">type_or_callable</span><span class="p">,</span>
+                <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
                 <span class="n">description</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                 <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
                 <span class="n">default_instance</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
@@ -746,16 +737,18 @@
             <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">default_name</span> <span class="o">=</span> <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
-                <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">subcommand_config_from_name</span><span class="p">,</span> <span class="n">subcommand_type_from_name</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                <span class="n">subcommand_config_from_name</span><span class="p">,</span>
+                <span class="n">subcommand_type_from_name</span><span class="p">,</span>
             <span class="p">)</span>
 
-            <span class="c1"># This should never be triggered because union types are expanded when</span>
-            <span class="c1"># a bad default value is provided.</span>
             <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
                 <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2"> but no matching subcommand was found. A&quot;</span>
                 <span class="s2">&quot; type may be missing in the Union type declaration for&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; `</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">`, which currently expects </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">. &quot;</span>
+                <span class="s2">&quot;The types may also be too complex for tyro&#39;s subcommand matcher; support &quot;</span>
+                <span class="s2">&quot;is particularly limited for custom generic types.&quot;</span>
             <span class="p">)</span>
 
         <span class="c1"># Add subcommands for each option.</span>
@@ -805,21 +798,18 @@
                     <span class="p">(</span><span class="n">option_origin</span><span class="p">,)</span> <span class="o">+</span> <span class="n">annotations</span>
                 <span class="p">)</span>
 
-            <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                <span class="p">(</span>
-                    <span class="c1"># Recursively apply markers.</span>
-                    <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">option</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
-                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                    <span class="k">else</span> <span class="n">option</span>
-                <span class="p">),</span>
-                <span class="n">description</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-                <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
-                <span class="n">default_instance</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
-                <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
-                <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
-                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="p">)</span>
+            <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)):</span>
+                <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
+                    <span class="n">option</span><span class="p">,</span>
+                    <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
+                    <span class="n">description</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                    <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>
+                    <span class="n">default_instance</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                    <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                    <span class="n">extern_prefix</span><span class="o">=</span><span class="n">extern_prefix</span><span class="p">,</span>
+                    <span class="n">subcommand_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
+                    <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="c1"># Apply prefix to helptext in nested classes in subparsers.</span>
             <span class="n">subparser</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
