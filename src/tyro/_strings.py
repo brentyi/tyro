@@ -122,9 +122,12 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
 
     return (
         get_delimeter().join(
-            map(
-                lambda x: _subparser_name_from_type(x)[0],
-                [cls] + list(type_from_typevar.values()),
+            [get_name(cls)]
+            + list(
+                map(
+                    lambda x: _subparser_name_from_type(x)[0],
+                    list(type_from_typevar.values()),
+                )
             )
         ),
         prefix_name,
