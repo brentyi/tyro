@@ -76,7 +76,7 @@ class ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
-        markers.update(_resolver.unwrap_annotated(f, _markers._Marker)[1])
+        markers = markers | set(_resolver.unwrap_annotated(f, _markers._Marker)[1])
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Resolve the type of `f`, generate a field list.
