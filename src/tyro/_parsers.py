@@ -30,7 +30,6 @@ from . import (
     _strings,
     _subcommand_matching,
 )
-from ._fields import global_context_markers
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 

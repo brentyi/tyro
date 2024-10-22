@@ -43,7 +43,6 @@ from typing_extensions import (
     is_typeddict,
 )
 
-from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -51,6 +50,7 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
+    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
