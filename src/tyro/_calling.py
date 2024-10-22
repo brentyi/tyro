@@ -233,9 +233,7 @@ def callable_with_args(
     unwrapped_f = f
     unwrapped_f = _resolver.swap_type_using_confstruct(unwrapped_f)
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
-    unwrapped_f = _resolver.unwrap_newtype_and_narrow_subtypes(
-        unwrapped_f, default_instance
-    )
+    unwrapped_f = _resolver.narrow_subtypes(unwrapped_f, default_instance)
     unwrapped_f = _resolver.unwrap_origin_strip_extras(unwrapped_f)
 
     if unwrapped_f in (tuple, list, set):

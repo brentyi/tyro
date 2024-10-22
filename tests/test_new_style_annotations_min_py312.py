@@ -2,9 +2,12 @@
 #
 # PEP 695 isn't yet supported in mypy. (April 4, 2024)
 from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, Any, NewType
+
+import pytest
 
 import tyro
+from tyro.conf._markers import OmitArgPrefixes
 
 
 def test_simple_generic():
@@ -90,3 +93,111 @@ def test_pep695_generic_alias_rename() -> None:
         arg: Renamed[bool]
 
     assert tyro.cli(Config, args=["--renamed", "True"]) == Config(arg=True)
+
+
+def test_pep695_generic_alias_rename_override() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: Annotated[Renamed[bool], tyro.conf.arg(name="renamed2")]
+
+    assert tyro.cli(Config, args=["--renamed2", "True"]) == Config(arg=True)
+
+
+type RenamedTwice[T] = Renamed[Renamed[T]]
+
+
+def test_pep695_generic_alias_rename_twice() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: RenamedTwice[bool]
+
+    assert tyro.cli(Config, args=["--renamed", "True"]) == Config(arg=True)
+
+
+type SomeUnion = bool | int
+type RenamedThreeTimes[T] = Renamed[Renamed[Renamed[T]]]
+type SomeUnionRenamed = RenamedThreeTimes[SomeUnion]
+
+
+def test_pep695_generic_alias_rename_three_times() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: Annotated[SomeUnionRenamed, tyro.conf.arg(name="renamed_override")]
+
+    assert tyro.cli(Config, args=["--renamed-override", "True"]) == Config(arg=True)
+
+
+type RecursiveList[T] = T | list[RecursiveList[T]]
+
+
+def test_pep695_recursive_types() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: RecursiveList[str]
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(Config, args=["--arg", "True"])
+
+
+def test_pep695_recursive_types_custom_constructor() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: Annotated[RecursiveList[str], tyro.conf.arg(constructor=str)]
+
+    assert tyro.cli(Config, args=["--arg", "True"]) == Config(arg="True")
+
+
+type UnprefixedSubcommandPair[T1, T2, T3] = (
+    Annotated[OmitArgPrefixes[T1], tyro.conf.subcommand(prefix_name=False)]  # type: ignore
+    | Annotated[T2, tyro.conf.subcommand(prefix_name=False)]  # type: ignore
+    | Annotated[T3, tyro.conf.subcommand(prefix_name=True)]
+)
+type IntContainer = Inner[int]
+type IntContainerIntermediate = Inner[int]
+type IntContainer2 = IntContainerIntermediate
+type StrContainer = Inner[str]
+
+
+def test_pep695_alias_subcommand() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: UnprefixedSubcommandPair[IntContainer, IntContainer2, StrContainer]
+
+    assert tyro.cli(Config, args=["int-container", "--a", "3", "--b", "5"]) == Config(
+        Inner(3, 5)
+    )
+    assert tyro.cli(
+        Config, args=["int-container2", "--arg.a", "3", "--arg.b", "5"]
+    ) == Config(Inner(3, 5))
+    assert tyro.cli(
+        Config, args=["arg:str-container", "--arg.a", "3", "--arg.b", "5"]
+    ) == Config(Inner("3", "5"))
+
+
+type Int0 = int
+Int1 = NewType("Int1", Int0)
+type Int2 = Int1
+Int3 = NewType("Int3", Int2)
+type Int4 = Int3
+Int5 = NewType("Int5", Int4)
+type Int6 = Int5
+Int7 = NewType("Int7", Int6)
+
+
+def test_pep695_new_type_alias() -> None:
+    def main(arg: list[Int7], /) -> Any:
+        return arg
+
+    assert tyro.cli(main, args=["1", "2"]) == [1, 2]
