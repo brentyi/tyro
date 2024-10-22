@@ -70,6 +70,7 @@ To get started, we recommend browsing the examples to the left.
 
    installation
    your_first_cli
+   supported_types
 
 .. toctree::
    :caption: Basics

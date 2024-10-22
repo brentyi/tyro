@@ -42,6 +42,10 @@ from . import _fields, _unsafe_cache, conf
 from ._typing import TypeForm
 
 UnionType = getattr(types, "UnionType", Union)
+"""Same as types.UnionType, but points to typing.Union for older versions of
+Python. types.UnionType was added in Python 3.10, and is created when the `X |
+Y` syntax is used for unions."""
+
 TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
 
 
