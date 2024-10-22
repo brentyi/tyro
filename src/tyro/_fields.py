@@ -43,6 +43,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -50,7 +51,6 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -112,9 +112,14 @@ class FieldDefinition:
         )
 
         # Narrow types.
-        type_or_callable = _resolver.type_from_typevar_constraints(type_or_callable)
-        type_or_callable = _resolver.narrow_collection_types(type_or_callable, default)
-        type_or_callable = _resolver.narrow_union_type(type_or_callable, default)
+        if type_or_callable is Any and default not in MISSING_SINGLETONS:
+            type_or_callable = type(default)
+        else:
+            type_or_callable = _resolver.type_from_typevar_constraints(type_or_callable)
+            type_or_callable = _resolver.narrow_collection_types(
+                type_or_callable, default
+            )
+            type_or_callable = _resolver.narrow_union_type(type_or_callable, default)
 
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated(
