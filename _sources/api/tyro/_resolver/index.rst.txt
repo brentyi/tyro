@@ -14,14 +14,29 @@
 Module Contents
 ---------------
 
+.. py:data:: UnionType
+
+   
+   Same as types.UnionType, but points to typing.Union for older versions of
+   Python. types.UnionType was added in Python 3.10, and is created when the ``X |
+   Y`` syntax is used for unions.
+
 .. py:data:: TypeOrCallable
 
    
 
-.. py:function:: unwrap_aliases(typ: TypeOrCallable) -> TypeOrCallable
+.. py:class:: TyroTypeAliasBreadCrumb
+
 
    
-   Unwrap type aliases.
+   A breadcrumb we can leave behind to track names of type aliases and
+   ``NewType`` types. We can use type alias names to auto-populate
+   subcommands.
+   .. py:attribute:: name
+      :type: str
+
+      
+
 
 .. py:function:: unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable
 
@@ -53,10 +68,10 @@ Module Contents
 
    
 
-.. py:function:: unwrap_newtype_and_aliases(typ: TypeOrCallableOrNone) -> Tuple[TypeOrCallableOrNone, Optional[str]]
+.. py:function:: resolve_newtype_and_aliases(typ: TypeOrCallableOrNone) -> TypeOrCallableOrNone
 
 
-.. py:function:: unwrap_newtype_and_narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
+.. py:function:: narrow_subtypes(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
    
    Type narrowing: if we annotate as Animal but specify a default instance of Cat,
@@ -87,9 +102,9 @@ Module Contents
 
    
 
-.. py:function:: unwrap_annotated_and_aliases(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
-                 unwrap_annotated_and_aliases(typ: TypeOrCallable, search_type: typing_extensions.Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
-                 unwrap_annotated_and_aliases(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
+.. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
+                 unwrap_annotated(typ: TypeOrCallable, search_type: typing_extensions.Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
+                 unwrap_annotated(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
 
    
    Helper for parsing typing.Annotated types.
@@ -116,7 +131,7 @@ Module Contents
       
       Context manager for resolving type parameters.
 
-   .. py:method:: concretize_type_params(typ: TypeOrCallable) -> TypeOrCallable
+   .. py:method:: concretize_type_params(typ: TypeOrCallable, seen: set[Any] | None = None) -> TypeOrCallable
       :staticmethod:
 
       

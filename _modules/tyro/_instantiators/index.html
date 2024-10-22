@@ -175,6 +175,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">Supported types</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -405,12 +406,16 @@
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="n">type_annotations</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
     <span class="c1"># Some checks we can do if the signature is available!</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">signature</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
         <span class="n">annotation</span> <span class="o">=</span> <span class="n">type_annotations</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">annotation</span><span class="p">)</span>
         <span class="n">annotation</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-            <span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span> <span class="ow">and</span> <span class="nb">str</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">))</span>
+            <span class="p">(</span>
+                <span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Union</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">UnionType</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="nb">str</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+            <span class="p">)</span>
             <span class="ow">or</span> <span class="n">annotation</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">empty</span><span class="p">)</span>
         <span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -471,11 +476,11 @@
     <span class="c1"># `isinstance(x, NewType)` doesn&#39;t work because NewType isn&#39;t a class until</span>
     <span class="c1"># Python 3.10, so we instead do a duck typing-style check.</span>
     <span class="n">metavar</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-    <span class="n">typ</span><span class="p">,</span> <span class="n">maybe_newtype_name</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">maybe_newtype_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">metavar</span> <span class="o">=</span> <span class="n">maybe_newtype_name</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-
-    <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="n">typ</span><span class="p">,</span> <span class="n">type_alias_breadcrumbs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+        <span class="n">typ</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TyroTypeAliasBreadCrumb</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_alias_breadcrumbs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">metavar</span> <span class="o">=</span> <span class="n">type_alias_breadcrumbs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
 
     <span class="c1"># Address container types. If a matching container is found, this will recursively</span>
     <span class="c1"># call instantiator_from_type().</span>
@@ -686,7 +691,7 @@
         <span class="p">),</span>
         <span class="n">_instantiator_from_tuple</span><span class="p">:</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,),</span>
         <span class="n">_instantiator_from_dict</span><span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">),</span>
-        <span class="n">_instantiator_from_union</span><span class="p">:</span> <span class="p">(</span><span class="n">Union</span><span class="p">,),</span>
+        <span class="n">_instantiator_from_union</span><span class="p">:</span> <span class="p">(</span><span class="n">Union</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">UnionType</span><span class="p">),</span>
         <span class="n">_instantiator_from_literal</span><span class="p">:</span> <span class="p">(</span><span class="n">Literal</span><span class="p">,</span> <span class="n">LiteralAlternate</span><span class="p">),</span>
     <span class="p">}</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">type_origin</span> <span class="ow">in</span> <span class="n">matched_origins</span><span class="p">:</span>

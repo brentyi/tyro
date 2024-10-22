@@ -174,6 +174,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../supported_types/">Supported types</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -856,10 +857,12 @@
         </ul></li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_collection_types">narrow_collection_types() (in module tyro._resolver)</a>
 </li>
-        <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_union_type">narrow_union_type() (in module tyro._resolver)</a>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_subtypes">narrow_subtypes() (in module tyro._resolver)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_union_type">narrow_union_type() (in module tyro._resolver)</a>
+</li>
         <li><a href="../api/tyro/_parsers/#tyro._parsers.none_proxy">none_proxy() (in module tyro._parsers)</a>
 </li>
         <li><a href="../api/tyro/_instantiators/#tyro._instantiators.NoneType">NoneType (in module tyro._instantiators)</a>
@@ -985,6 +988,8 @@
 </li>
         </ul></li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.resolve_generic_types">resolve_generic_types() (in module tyro._resolver)</a>
+</li>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.resolve_newtype_and_aliases">resolve_newtype_and_aliases() (in module tyro._resolver)</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.resolved_fields">resolved_fields() (in module tyro._resolver)</a>
 </li>
@@ -1175,8 +1180,6 @@
           <li><a href="../api/tyro/_fields/#module-tyro._fields">module</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     tyro._instantiators
 
@@ -1184,6 +1187,8 @@
           <li><a href="../api/tyro/_instantiators/#module-tyro._instantiators">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     tyro._parsers
 
@@ -1302,6 +1307,8 @@
 </li>
         <li><a href="../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme">TyroTheme (class in tyro._argparse_formatter)</a>
 </li>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.TyroTypeAliasBreadCrumb">TyroTypeAliasBreadCrumb (class in tyro._resolver)</a>
+</li>
     </ul></td>
   </tr></table>
 </section>
@@ -1310,6 +1317,8 @@
   <h2>U</h2>
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.UnionType">UnionType (in module tyro._resolver)</a>
+</li>
         <li><a href="../api/tyro/_unsafe_cache/#tyro._unsafe_cache.unsafe_cache">unsafe_cache() (in module tyro._unsafe_cache)</a>
 </li>
         <li><a href="../api/tyro/_unsafe_cache/#tyro._unsafe_cache.unsafe_hash">unsafe_hash() (in module tyro._unsafe_cache)</a>
@@ -1318,16 +1327,10 @@
 </li>
         <li><a href="../api/tyro/#tyro.UnsupportedTypeAnnotationError">UnsupportedTypeAnnotationError</a>, <a href="../api/tyro/_instantiators/#tyro._instantiators.UnsupportedTypeAnnotationError">[1]</a>
 </li>
-        <li><a href="../api/tyro/_resolver/#tyro._resolver.unwrap_aliases">unwrap_aliases() (in module tyro._resolver)</a>
-</li>
-        <li><a href="../api/tyro/_resolver/#tyro._resolver.unwrap_annotated_and_aliases">unwrap_annotated_and_aliases() (in module tyro._resolver)</a>
-</li>
-        <li><a href="../api/tyro/_resolver/#tyro._resolver.unwrap_newtype_and_aliases">unwrap_newtype_and_aliases() (in module tyro._resolver)</a>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">unwrap_annotated() (in module tyro._resolver)</a>
 </li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="../api/tyro/_resolver/#tyro._resolver.unwrap_newtype_and_narrow_subtypes">unwrap_newtype_and_narrow_subtypes() (in module tyro._resolver)</a>
-</li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.unwrap_origin_strip_extras">unwrap_origin_strip_extras() (in module tyro._resolver)</a>
 </li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.USE_RICH">USE_RICH (in module tyro._arguments)</a>

@@ -175,6 +175,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">Supported types</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -506,9 +507,7 @@
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">f</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
-    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span>
-        <span class="n">unwrapped_f</span><span class="p">,</span> <span class="n">default_instance</span>
-    <span class="p">)</span>
+    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_subtypes</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
     <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>

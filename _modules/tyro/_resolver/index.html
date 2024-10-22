@@ -175,6 +175,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">Supported types</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -284,7 +285,6 @@
     <span class="n">Dict</span><span class="p">,</span>
     <span class="n">FrozenSet</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
     <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">Set</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
@@ -310,16 +310,23 @@
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 
+<span class="n">UnionType</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
+<span class="sd">&quot;&quot;&quot;Same as types.UnionType, but points to typing.Union for older versions of</span>
+<span class="sd">Python. types.UnionType was added in Python 3.10, and is created when the `X |</span>
+<span class="sd">Y` syntax is used for unions.&quot;&quot;&quot;</span>
+
 <span class="n">TypeOrCallable</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallable&quot;</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="unwrap_aliases">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_aliases">[docs]</a>
-<span class="k">def</span> <span class="nf">unwrap_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unwrap type aliases.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">unwrap_aliases</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">typ</span><span class="o">.</span><span class="n">__value__</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">typ</span></div>
+<div class="viewcode-block" id="TyroTypeAliasBreadCrumb">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TyroTypeAliasBreadCrumb">[docs]</a>
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">TyroTypeAliasBreadCrumb</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A breadcrumb we can leave behind to track names of type aliases and</span>
+<span class="sd">    `NewType` types. We can use type alias names to auto-populate</span>
+<span class="sd">    subcommands.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span></div>
 
 
 
@@ -328,7 +335,7 @@
 <span class="k">def</span> <span class="nf">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
 <span class="sd">    returns typ.&quot;&quot;&quot;</span>
-    <span class="n">typ</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+    <span class="n">typ</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -410,14 +417,19 @@
 <span class="n">TypeOrCallableOrNone</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;TypeOrCallableOrNone&quot;</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="unwrap_newtype_and_aliases">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_newtype_and_aliases">[docs]</a>
-<span class="k">def</span> <span class="nf">unwrap_newtype_and_aliases</span><span class="p">(</span>
+<div class="viewcode-block" id="resolve_newtype_and_aliases">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolve_newtype_and_aliases">[docs]</a>
+<span class="k">def</span> <span class="nf">resolve_newtype_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallableOrNone</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallableOrNone</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallableOrNone</span><span class="p">:</span>
     <span class="c1"># Handle type aliases, eg via the `type` statement in Python 3.12.</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__value__</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__value__</span><span class="p">)),</span>
+                <span class="n">TyroTypeAliasBreadCrumb</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="c1"># We&#39;ll unwrap NewType annotations here; this is needed before issubclass</span>
     <span class="c1"># checks!</span>
@@ -428,16 +440,19 @@
     <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__supertype__&quot;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">return_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">return_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__name__&quot;</span><span class="p">)</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__supertype__&quot;</span><span class="p">)</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__supertype__&quot;</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">typ</span><span class="p">,</span> <span class="n">return_name</span></div>
+    <span class="k">if</span> <span class="n">return_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">typ</span><span class="p">,</span> <span class="n">TyroTypeAliasBreadCrumb</span><span class="p">(</span><span class="n">return_name</span><span class="p">)))</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeOrCallableOrNone</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span></div>
 
 
 
-<div class="viewcode-block" id="unwrap_newtype_and_narrow_subtypes">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_newtype_and_narrow_subtypes">[docs]</a>
+<div class="viewcode-block" id="narrow_subtypes">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_subtypes">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">unwrap_newtype_and_narrow_subtypes</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">narrow_subtypes</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
@@ -449,8 +464,7 @@
 <span class="sd">    string default is passed in, we don&#39;t want to narrow the type to always be</span>
 <span class="sd">    strings!)&quot;&quot;&quot;</span>
 
-    <span class="n">typ</span><span class="p">,</span> <span class="n">unused_name</span> <span class="o">=</span> <span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-    <span class="k">del</span> <span class="n">unused_name</span>
+    <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">potential_subclass</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
@@ -460,7 +474,7 @@
             <span class="c1"># it doesn&#39;t really make sense to parse this case.</span>
             <span class="k">return</span> <span class="n">typ</span>
 
-        <span class="n">superclass</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="n">superclass</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
         <span class="c1"># For Python 3.10.</span>
         <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">superclass</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span><span class="p">:</span>
@@ -488,7 +502,7 @@
 <span class="sd">    `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are</span>
 <span class="sd">    kept, but the type is swapped.&quot;&quot;&quot;</span>
     <span class="c1"># Need to swap types.</span>
-    <span class="n">_</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">anno</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">annotations</span><span class="p">):</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span>
@@ -554,29 +568,29 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
+<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span> <span class="o">...</span>
 
 
-<div class="viewcode-block" id="unwrap_annotated_and_aliases">
-<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated_and_aliases">[docs]</a>
-<span class="k">def</span> <span class="nf">unwrap_annotated_and_aliases</span><span class="p">(</span>
+<div class="viewcode-block" id="unwrap_annotated">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">[docs]</a>
+<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">TypeOrCallable</span><span class="p">]:</span>
@@ -589,8 +603,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Unwrap aliases defined using Python 3.12&#39;s `type` syntax.</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__value__</span><span class="p">,</span> <span class="n">search_type</span><span class="p">)</span>
+    <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
     <span class="k">while</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">in</span> <span class="n">STRIP_WRAPPER_TYPES</span><span class="p">:</span>
@@ -658,29 +671,42 @@
 <div class="viewcode-block" id="TypeParamResolver.concretize_type_params">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamResolver.concretize_type_params">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">concretize_type_params</span><span class="p">(</span>
+        <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply type parameter assignments based on the current context.&quot;&quot;&quot;</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">unwrap_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="n">seen</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">seen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+            <span class="c1"># Found a cycle. We don&#39;t (currently) support recursive types.</span>
+            <span class="k">return</span> <span class="n">typ</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">GenericAlias</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;GenericAlias&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span>
+        <span class="k">while</span> <span class="p">(</span>
             <span class="n">GenericAlias</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">GenericAlias</span><span class="p">)</span>
             <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;__type_params__&quot;</span><span class="p">,</span> <span class="p">()))</span> <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="p">):</span>
-            <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__type_params__</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)):</span>  <span class="c1"># type: ignore</span>
-                <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>  <span class="c1"># type: ignore</span>
+                <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span>
+                    <span class="n">v</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span>
+                <span class="p">)</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">typ</span><span class="o">.</span><span class="n">__value__</span>  <span class="c1"># type: ignore</span>
 
-            <span class="k">with</span> <span class="n">TypeParamAssignmentContext</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">type_from_typevar</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span></div>
+            <span class="k">with</span> <span class="n">TypeParamAssignmentContext</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">)</span></div>
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">type_from_typevar</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
@@ -703,7 +729,8 @@
                 <span class="n">new_args_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 
             <span class="n">new_args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
-                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_args_list</span>
+                <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">seen</span><span class="o">=</span><span class="n">seen</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">new_args_list</span>
             <span class="p">)</span>
 
             <span class="c1"># Apply shims to convert from types.UnionType to typing.Union, list to typing.List, etc.</span>
@@ -744,10 +771,8 @@
             <span class="nb">set</span><span class="p">:</span> <span class="n">Set</span><span class="p">,</span>
             <span class="nb">frozenset</span><span class="p">:</span> <span class="n">FrozenSet</span><span class="p">,</span>
             <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span>
+            <span class="n">UnionType</span><span class="p">:</span> <span class="n">Union</span><span class="p">,</span>
         <span class="p">}</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
-            <span class="c1"># PEP 604. Requires Python 3.10.</span>
-            <span class="n">shim_table</span><span class="p">[</span><span class="n">types</span><span class="o">.</span><span class="n">UnionType</span><span class="p">]</span> <span class="o">=</span> <span class="n">Union</span>  <span class="c1"># type: ignore</span>
 
         <span class="k">if</span> <span class="n">origin</span> <span class="ow">in</span> <span class="n">shim_table</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">shim_table</span><span class="p">[</span><span class="n">origin</span><span class="p">]</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
@@ -832,14 +857,14 @@
         <span class="c1"># ^We need this `if` statement for an obscure edge case: when `cls` is a</span>
         <span class="c1"># function with `__tyro_markers__` set, we don&#39;t want/need to return</span>
         <span class="c1"># Annotated[func, markers].</span>
-        <span class="n">typ</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
+        <span class="n">typ</span><span class="p">,</span> <span class="n">annotations</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span>
 
     <span class="c1"># Apply shims to convert from types.UnionType to typing.Union, list to</span>
     <span class="c1"># typing.List, etc.</span>
     <span class="n">typ</span> <span class="o">=</span> <span class="n">standardize_builtin_generics</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
     <span class="c1"># We&#39;ll ignore NewType when getting the origin + args for generics.</span>
-    <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
     <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Support typing.Self.</span>
@@ -858,7 +883,7 @@
         <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span><span class="p">,</span> <span class="s2">&quot;__len__&quot;</span><span class="p">)</span>
     <span class="p">):</span>
         <span class="n">typevars</span> <span class="o">=</span> <span class="n">origin_cls</span><span class="o">.</span><span class="n">__parameters__</span>
-        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">typevar_values</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="p">))</span>
         <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevars</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">typevar_values</span><span class="p">)</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">origin_cls</span>
         <span class="n">type_from_typevar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">typevars</span><span class="p">,</span> <span class="n">typevar_values</span><span class="p">)))</span>

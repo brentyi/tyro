@@ -175,6 +175,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">Supported types</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -367,12 +368,10 @@
 
         <span class="c1"># Check against supertypes.</span>
         <span class="k">for</span> <span class="n">self_type</span> <span class="ow">in</span> <span class="n">self_types</span><span class="p">:</span>
-            <span class="n">self_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
-            <span class="n">self_type</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
+            <span class="n">self_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
             <span class="n">ok</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">super_type</span> <span class="ow">in</span> <span class="n">super_types</span><span class="p">:</span>
-                <span class="n">super_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated_and_aliases</span><span class="p">(</span><span class="n">super_type</span><span class="p">)</span>
-                <span class="n">self_type</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_newtype_and_aliases</span><span class="p">(</span><span class="n">self_type</span><span class="p">)</span>
+                <span class="n">super_type</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">super_type</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">self_type</span><span class="p">,</span> <span class="n">super_type</span><span class="p">):</span>
                     <span class="n">ok</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
