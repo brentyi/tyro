@@ -354,21 +354,22 @@ class TypeParamResolver:
         """Apply type parameter assignments based on the current context."""
         typ = unwrap_aliases(typ)
 
+        type_from_typevar = {}
         GenericAlias = getattr(types, "GenericAlias", None)
-        if (
+        while (
             GenericAlias is not None
             and isinstance(typ, GenericAlias)
             and len(getattr(typ, "__type_params__", ())) > 0
         ):
-            type_from_typevar = {}
             for k, v in zip(typ.__type_params__, get_args(typ)):  # type: ignore
-                type_from_typevar[k] = v  # type: ignore
+                type_from_typevar[k] = TypeParamResolver.concretize_type_params(v)
             typ = typ.__value__  # type: ignore
 
+        if len(type_from_typevar) == 0:
+            return TypeParamResolver._concretize_type_params(typ)
+        else:
             with TypeParamAssignmentContext(typ, type_from_typevar):
                 return TypeParamResolver._concretize_type_params(typ)
-        else:
-            return TypeParamResolver._concretize_type_params(typ)
 
     @staticmethod
     def _concretize_type_params(typ: TypeOrCallable) -> TypeOrCallable:

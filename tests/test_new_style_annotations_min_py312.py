@@ -90,3 +90,41 @@ def test_pep695_generic_alias_rename() -> None:
         arg: Renamed[bool]
 
     assert tyro.cli(Config, args=["--renamed", "True"]) == Config(arg=True)
+
+
+def test_pep695_generic_alias_rename_override() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: Annotated[Renamed[bool], tyro.conf.arg(name="renamed2")]
+
+    assert tyro.cli(Config, args=["--renamed2", "True"]) == Config(arg=True)
+
+
+type RenamedTwice[T] = Renamed[Renamed[T]]
+
+
+def test_pep695_generic_alias_rename_twice() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: RenamedTwice[bool]
+
+    assert tyro.cli(Config, args=["--renamed", "True"]) == Config(arg=True)
+
+
+type SomeUnion = bool | int
+type RenamedThreeTimes[T] = Renamed[Renamed[Renamed[T]]]
+type SomeUnionRenamed = RenamedThreeTimes[SomeUnion]
+
+
+def test_pep695_generic_alias_rename_three_times() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: Annotated[SomeUnionRenamed, tyro.conf.arg(name="renamed_override")]
+
+    assert tyro.cli(Config, args=["--renamed-override", "True"]) == Config(arg=True)
