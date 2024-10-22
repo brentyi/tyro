@@ -459,13 +459,13 @@ class SubparsersSpecification:
                 subcommand_type_from_name,
             )
 
-            # This should never be triggered because union types are expanded when
-            # a bad default value is provided.
             assert default_name is not None, (
                 f"`{extern_prefix}` was provided a default value of type"
                 f" {type(field.default)} but no matching subcommand was found. A"
                 " type may be missing in the Union type declaration for"
-                f" `{extern_prefix}`, which currently expects {options}."
+                f" `{extern_prefix}`, which currently expects {options}. "
+                "The types may also be too complex for tyro's subcommand matcher; support "
+                "is particularly limited for custom generic types."
             )
 
         # Add subcommands for each option.

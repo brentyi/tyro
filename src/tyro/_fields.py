@@ -43,7 +43,6 @@ from typing_extensions import (
     is_typeddict,
 )
 
-from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -51,6 +50,7 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
+    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -115,6 +115,9 @@ class FieldDefinition:
         if type_or_callable is Any and default not in MISSING_SINGLETONS:
             type_or_callable = type(default)
         else:
+            # TypeVar constraints are already applied in
+            # TypeParamResolver.concretize_type_params(), but that won't be
+            # called for functions.
             type_or_callable = _resolver.type_from_typevar_constraints(type_or_callable)
             type_or_callable = _resolver.narrow_collection_types(
                 type_or_callable, default

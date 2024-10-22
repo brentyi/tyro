@@ -567,7 +567,7 @@ def resolve_generic_types(
         hasattr(typ, "__parameters__") and hasattr(typ.__parameters__, "__len__")  # type: ignore
     ):
         typevars = typ.__parameters__  # type: ignore
-        typevar_values = (Any,) * len(typevars)
+        typevar_values = [type_from_typevar_constraints(x) for x in typevars]
         assert len(typevars) == len(typevar_values)
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
