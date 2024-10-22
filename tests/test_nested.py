@@ -323,6 +323,44 @@ def test_subparser() -> None:
         tyro.cli(Subparser, args=["--x", "1", "bc:smtp-server", "--bc.y", "3"])
 
 
+def test_subparser_newtype() -> None:
+    @dataclasses.dataclass
+    class HTTPServer:
+        y: int
+
+    @dataclasses.dataclass
+    class SMTPServer:
+        z: int
+
+    HTTPServer1 = NewType("HTTPServer1", HTTPServer)
+    HTTPServer2 = NewType("HTTPServer2", HTTPServer)
+
+    @dataclasses.dataclass
+    class Subparser:
+        x: int
+        bc: Union[HTTPServer1, HTTPServer2, SMTPServer]
+
+    assert tyro.cli(
+        Subparser, args=["--x", "1", "bc:http-server1", "--bc.y", "3"]
+    ) == Subparser(x=1, bc=HTTPServer1(HTTPServer(y=3)))
+    assert tyro.cli(
+        Subparser, args=["--x", "1", "bc:http-server2", "--bc.y", "3"]
+    ) == Subparser(x=1, bc=HTTPServer2(HTTPServer(y=3)))
+    assert tyro.cli(
+        Subparser, args=["--x", "1", "bc:smtp-server", "--bc.z", "3"]
+    ) == Subparser(x=1, bc=SMTPServer(z=3))
+
+    with pytest.raises(SystemExit):
+        # Missing subcommand.
+        tyro.cli(Subparser, args=["--x", "1"])
+    with pytest.raises(SystemExit):
+        # Wrong field.
+        tyro.cli(Subparser, args=["--x", "1", "bc:http-server1", "--bc.z", "3"])
+    with pytest.raises(SystemExit):
+        # Wrong field.
+        tyro.cli(Subparser, args=["--x", "1", "bc:smtp-server", "--bc.y", "3"])
+
+
 def test_subparser_root() -> None:
     @dataclasses.dataclass
     class HTTPServer:

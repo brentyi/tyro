@@ -80,11 +80,14 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     from .conf import _confstruct  # Prevent circular imports
 
     cls, type_from_typevar = _resolver.resolve_generic_types(cls)
-    cls, found_subcommand_configs = _resolver.unwrap_annotated_and_aliases(
+    _, type_alias_breadcrumbs = _resolver.unwrap_annotated(
+        cls, _resolver.TyroTypeAliasBreadCrumb
+    )
+    cls, found_subcommand_configs = _resolver.unwrap_annotated(
         cls, _confstruct._SubcommandConfiguration
     )
 
-    # Subparser name from `tyro.metadata.subcommand()`.
+    # Subparser name from `tyro.conf.subcommand()`.
     found_name = None
     prefix_name = True
     if len(found_subcommand_configs) > 0:
@@ -93,6 +96,13 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
 
     if found_name is not None:
         return found_name, prefix_name
+
+    # Subparser name from type alias. This is lower priority thant he name from
+    # `tyro.conf.subcommand()`.
+    if len(type_alias_breadcrumbs) > 0:
+        return hyphen_separated_from_camel_case(
+            type_alias_breadcrumbs[0].name
+        ), prefix_name
 
     # Subparser name from class name.
     def get_name(cls: Type) -> str:

@@ -4,7 +4,10 @@
 from dataclasses import dataclass
 from typing import Annotated
 
+import pytest
+
 import tyro
+from tyro.conf._markers import OmitArgPrefixes
 
 
 def test_simple_generic():
@@ -128,3 +131,55 @@ def test_pep695_generic_alias_rename_three_times() -> None:
         arg: Annotated[SomeUnionRenamed, tyro.conf.arg(name="renamed_override")]
 
     assert tyro.cli(Config, args=["--renamed-override", "True"]) == Config(arg=True)
+
+
+type RecursiveList[T] = T | list[RecursiveList[T]]
+
+
+def test_pep695_recursive_types() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: RecursiveList[str]
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(Config, args=["--arg", "True"])
+
+
+def test_pep695_recursive_types_custom_constructor() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: Annotated[RecursiveList[str], tyro.conf.arg(constructor=str)]
+
+    assert tyro.cli(Config, args=["--arg", "True"]) == Config(arg="True")
+
+
+type UnprefixedSubcommandPair[T1, T2, T3] = (
+    Annotated[OmitArgPrefixes[T1], tyro.conf.subcommand(prefix_name=False)]  # type: ignore
+    | Annotated[T2, tyro.conf.subcommand(prefix_name=False)]  # type: ignore
+    | Annotated[T3, tyro.conf.subcommand(prefix_name=True)]
+)
+type IntContainer = Inner[int]
+type IntContainer2 = Inner[int]
+type StrContainer = Inner[str]
+
+
+def test_pep695_alias_subcommand() -> None:
+    """Adapted from: https://github.com/brentyi/tyro/issues/177"""
+
+    @dataclass(frozen=True)
+    class Config:
+        arg: UnprefixedSubcommandPair[IntContainer, IntContainer2, StrContainer]
+
+    assert tyro.cli(Config, args=["int-container", "--a", "3", "--b", "5"]) == Config(
+        Inner(3, 5)
+    )
+    assert tyro.cli(
+        Config, args=["int-container2", "--arg.a", "3", "--arg.b", "5"]
+    ) == Config(Inner(3, 5))
+    assert tyro.cli(
+        Config, args=["arg:str-container", "--arg.a", "3", "--arg.b", "5"]
+    ) == Config(Inner("3", "5"))

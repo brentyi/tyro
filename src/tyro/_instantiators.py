@@ -126,12 +126,16 @@ def is_type_string_converter(typ: Union[Callable, TypeForm[Any]]) -> bool:
         return True
 
     type_annotations = _resolver.get_type_hints_with_backported_syntax(typ)
+
     # Some checks we can do if the signature is available!
     for i, param in enumerate(signature.parameters.values()):
         annotation = type_annotations.get(param.name, param.annotation)
         annotation = _resolver.TypeParamResolver.concretize_type_params(annotation)
         if i == 0 and not (
-            (get_origin(annotation) is Union and str in get_args(annotation))
+            (
+                get_origin(annotation) in (Union, _resolver.UnionType)
+                and str in get_args(annotation)
+            )
             or annotation in (str, inspect.Parameter.empty)
         ):
             return False
@@ -189,11 +193,11 @@ def instantiator_from_type(
     # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
     # Python 3.10, so we instead do a duck typing-style check.
     metavar = getattr(typ, "__name__", "").upper()
-    typ, maybe_newtype_name = _resolver.unwrap_newtype_and_aliases(typ)
-    if maybe_newtype_name is not None:
-        metavar = maybe_newtype_name.upper()
-
-    typ = _resolver.unwrap_annotated_and_aliases(typ)
+    typ, breadcrumbs = _resolver.unwrap_annotated(
+        typ, _resolver.TyroTypeAliasBreadCrumb
+    )
+    if len(breadcrumbs) > 0:
+        metavar = breadcrumbs[0].name
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
@@ -403,7 +407,7 @@ def _instantiator_from_container_type(
         ),
         _instantiator_from_tuple: (tuple,),
         _instantiator_from_dict: (dict, collections.abc.Mapping),
-        _instantiator_from_union: (Union,),
+        _instantiator_from_union: (Union, _resolver.UnionType),
         _instantiator_from_literal: (Literal, LiteralAlternate),
     }.items():
         if type_origin in matched_origins:
