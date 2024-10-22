@@ -16,7 +16,6 @@ from typing import (
     Dict,
     FrozenSet,
     List,
-    Optional,
     Sequence,
     Set,
     Tuple,
@@ -42,20 +41,27 @@ from typing_extensions import (
 from . import _fields, _unsafe_cache, conf
 from ._typing import TypeForm
 
+UnionType = getattr(types, "UnionType", Union)
+"""Same as types.UnionType, but points to typing.Union for older versions of
+Python. types.UnionType was added in Python 3.10, and is created when the `X |
+Y` syntax is used for unions."""
+
 TypeOrCallable = TypeVar("TypeOrCallable", TypeForm[Any], Callable)
 
 
-def unwrap_aliases(typ: TypeOrCallable) -> TypeOrCallable:
-    """Unwrap type aliases."""
-    if isinstance(typ, TypeAliasType):
-        return unwrap_aliases(cast(Any, typ.__value__))
-    return typ
+@dataclasses.dataclass(frozen=True)
+class TyroTypeAliasBreadCrumb:
+    """A breadcrumb we can leave behind to track names of type aliases and
+    `NewType` types. We can use type alias names to auto-populate
+    subcommands."""
+
+    name: str
 
 
 def unwrap_origin_strip_extras(typ: TypeOrCallable) -> TypeOrCallable:
     """Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,
     returns typ."""
-    typ = unwrap_annotated_and_aliases(typ)
+    typ = unwrap_annotated(typ)
     origin = get_origin(typ)
 
     if origin is not None:
@@ -124,12 +130,17 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
 TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
 
 
-def unwrap_newtype_and_aliases(
+def resolve_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
-) -> Tuple[TypeOrCallableOrNone, Optional[str]]:
+) -> TypeOrCallableOrNone:
     # Handle type aliases, eg via the `type` statement in Python 3.12.
     if isinstance(typ, TypeAliasType):
-        return unwrap_newtype_and_aliases(typ.__value__)  # type: ignore
+        return Annotated.__class_getitem__(
+            (
+                cast(Any, resolve_newtype_and_aliases(typ.__value__)),
+                TyroTypeAliasBreadCrumb(typ.__name__),
+            )
+        )
 
     # We'll unwrap NewType annotations here; this is needed before issubclass
     # checks!
@@ -140,13 +151,16 @@ def unwrap_newtype_and_aliases(
     while hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
         if return_name is None:
             return_name = getattr(typ, "__name__")
-        typ = getattr(typ, "__supertype__")
+        typ = resolve_newtype_and_aliases(getattr(typ, "__supertype__"))
 
-    return typ, return_name
+    if return_name is not None:
+        typ = Annotated.__class_getitem__((typ, TyroTypeAliasBreadCrumb(return_name)))  # type: ignore
+
+    return cast(TypeOrCallableOrNone, typ)
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def unwrap_newtype_and_narrow_subtypes(
+def narrow_subtypes(
     typ: TypeOrCallable,
     default_instance: Any,
 ) -> TypeOrCallable:
@@ -158,8 +172,7 @@ def unwrap_newtype_and_narrow_subtypes(
     string default is passed in, we don't want to narrow the type to always be
     strings!)"""
 
-    typ, unused_name = unwrap_newtype_and_aliases(typ)
-    del unused_name
+    typ = resolve_newtype_and_aliases(typ)
 
     try:
         potential_subclass = type(default_instance)
@@ -169,7 +182,7 @@ def unwrap_newtype_and_narrow_subtypes(
             # it doesn't really make sense to parse this case.
             return typ
 
-        superclass = unwrap_annotated_and_aliases(typ)
+        superclass = unwrap_annotated(typ)
 
         # For Python 3.10.
         if get_origin(superclass) is Union:
@@ -194,7 +207,7 @@ def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
     `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are
     kept, but the type is swapped."""
     # Need to swap types.
-    _, annotations = unwrap_annotated_and_aliases(typ, search_type="all")
+    _, annotations = unwrap_annotated(typ, search_type="all")
     for anno in reversed(annotations):
         if (
             isinstance(
@@ -256,27 +269,27 @@ MetadataType = TypeVar("MetadataType")
 
 
 @overload
-def unwrap_annotated_and_aliases(
+def unwrap_annotated(
     typ: TypeOrCallable,
     search_type: TypeForm[MetadataType],
 ) -> Tuple[TypeOrCallable, Tuple[MetadataType, ...]]: ...
 
 
 @overload
-def unwrap_annotated_and_aliases(
+def unwrap_annotated(
     typ: TypeOrCallable,
     search_type: Literal["all"],
 ) -> Tuple[TypeOrCallable, Tuple[Any, ...]]: ...
 
 
 @overload
-def unwrap_annotated_and_aliases(
+def unwrap_annotated(
     typ: TypeOrCallable,
     search_type: None = None,
 ) -> TypeOrCallable: ...
 
 
-def unwrap_annotated_and_aliases(
+def unwrap_annotated(
     typ: TypeOrCallable,
     search_type: Union[TypeForm[MetadataType], Literal["all"], object, None] = None,
 ) -> Union[Tuple[TypeOrCallable, Tuple[MetadataType, ...]], TypeOrCallable]:
@@ -289,8 +302,7 @@ def unwrap_annotated_and_aliases(
     """
 
     # Unwrap aliases defined using Python 3.12's `type` syntax.
-    if isinstance(typ, TypeAliasType):
-        return unwrap_annotated_and_aliases(typ.__value__, search_type)
+    typ = resolve_newtype_and_aliases(typ)
 
     # `Final` and `ReadOnly` types are ignored in tyro.
     while get_origin(typ) in STRIP_WRAPPER_TYPES:
@@ -350,28 +362,41 @@ class TypeParamResolver:
         return TypeParamAssignmentContext(typ, type_from_typevar)
 
     @staticmethod
-    def concretize_type_params(typ: TypeOrCallable) -> TypeOrCallable:
+    def concretize_type_params(
+        typ: TypeOrCallable, seen: set[Any] | None = None
+    ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
-        typ = unwrap_aliases(typ)
 
+        if seen is None:
+            seen = set()
+        elif seen is not None and typ in seen:
+            # Found a cycle. We don't (currently) support recursive types.
+            return typ
+        else:
+            seen.add(typ)
+
+        typ = resolve_newtype_and_aliases(typ)
+        type_from_typevar = {}
         GenericAlias = getattr(types, "GenericAlias", None)
-        if (
+        while (
             GenericAlias is not None
             and isinstance(typ, GenericAlias)
             and len(getattr(typ, "__type_params__", ())) > 0
         ):
-            type_from_typevar = {}
             for k, v in zip(typ.__type_params__, get_args(typ)):  # type: ignore
-                type_from_typevar[k] = v  # type: ignore
+                type_from_typevar[k] = TypeParamResolver.concretize_type_params(
+                    v, seen=seen
+                )
             typ = typ.__value__  # type: ignore
 
-            with TypeParamAssignmentContext(typ, type_from_typevar):
-                return TypeParamResolver._concretize_type_params(typ)
+        if len(type_from_typevar) == 0:
+            return TypeParamResolver._concretize_type_params(typ, seen=seen)
         else:
-            return TypeParamResolver._concretize_type_params(typ)
+            with TypeParamAssignmentContext(typ, type_from_typevar):
+                return TypeParamResolver._concretize_type_params(typ, seen=seen)
 
     @staticmethod
-    def _concretize_type_params(typ: TypeOrCallable) -> TypeOrCallable:
+    def _concretize_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
             if typ in type_from_typevar:
                 return type_from_typevar[typ]  # type: ignore
@@ -394,7 +419,8 @@ class TypeParamResolver:
                 new_args_list.append(x)
 
             new_args = tuple(
-                TypeParamResolver.concretize_type_params(x) for x in new_args_list
+                TypeParamResolver.concretize_type_params(x, seen=seen)
+                for x in new_args_list
             )
 
             # Apply shims to convert from types.UnionType to typing.Union, list to typing.List, etc.
@@ -432,10 +458,8 @@ def standardize_builtin_generics(typ: TypeOrCallable) -> TypeOrCallable:
             set: Set,
             frozenset: FrozenSet,
             type: Type,
+            UnionType: Union,
         }
-        if hasattr(types, "UnionType"):  # type: ignore
-            # PEP 604. Requires Python 3.10.
-            shim_table[types.UnionType] = Union  # type: ignore
 
         if origin in shim_table:  # type: ignore
             typ = shim_table[origin].__getitem__(args)  # type: ignore
@@ -505,14 +529,14 @@ def resolve_generic_types(
         # ^We need this `if` statement for an obscure edge case: when `cls` is a
         # function with `__tyro_markers__` set, we don't want/need to return
         # Annotated[func, markers].
-        typ, annotations = unwrap_annotated_and_aliases(typ, "all")
+        typ, annotations = unwrap_annotated(typ, "all")
 
     # Apply shims to convert from types.UnionType to typing.Union, list to
     # typing.List, etc.
     typ = standardize_builtin_generics(typ)
 
     # We'll ignore NewType when getting the origin + args for generics.
-    origin_cls = get_origin(unwrap_newtype_and_aliases(typ)[0])
+    origin_cls = get_origin(resolve_newtype_and_aliases(typ))
     type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
 
     # Support typing.Self.
@@ -531,7 +555,7 @@ def resolve_generic_types(
         and hasattr(origin_cls.__parameters__, "__len__")
     ):
         typevars = origin_cls.__parameters__
-        typevar_values = get_args(unwrap_newtype_and_aliases(typ)[0])
+        typevar_values = get_args(resolve_newtype_and_aliases(typ))
         assert len(typevars) == len(typevar_values)
         typ = origin_cls
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
