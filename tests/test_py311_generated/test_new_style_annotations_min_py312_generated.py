@@ -201,3 +201,67 @@ def test_pep695_new_type_alias() -> None:
         return arg
 
     assert tyro.cli(main, args=["1", "2"]) == [1, 2]
+
+
+def test_generic_config():
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: Inner[T]
+
+    assert tyro.cli(
+        Container[bool],
+        args="--a.a True --a.b False".split(" "),
+        config=(tyro.conf.FlagConversionOff,),
+    ) == Container(Inner(True, False))
+
+
+def test_generic_config_subcommand():
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[str]],
+        args="a:container-bool --a.a True".split(" "),
+        default=Container(Container(a="30")),
+        config=(tyro.conf.FlagConversionOff,),
+    ) == Container(Container(True))
+    assert False
+
+
+# def test_generic_config_subcommand2():
+#     @dataclass(frozen=True)
+#     class Container[T]:
+#         a: tyro.conf.OmitSubcommandPrefixes[T]
+#
+#     assert tyro.cli(
+#         Container[Container[bool] | Container[str]],
+#         args="container-bool --a True".split(" "),
+#     ) == Container(Container(True))
+#
+#
+# def test_generic_config_subcommand3():
+#     @dataclass(frozen=True)
+#     class Container[T]:
+#         a: T
+#
+#     assert tyro.cli(
+#         Container[Container[bool] | Container[str]],
+#         args="container-bool --a True".split(" "),
+#         config=(tyro.conf.OmitSubcommandPrefixes,),
+#     ) == Container(Container(True))
+
+
+# def test_generic_union_subcommand():
+#     @dataclass(frozen=True)
+#     class Container[T]:
+#         a: T
+#         b: T
+#
+#     assert tyro.cli(
+#         Container[Container[int | str] | Container[str | int]],
+#         args="a:container-int-str --a 3 --b 3 b:container-str-int --a 3 --b 3".split(
+#             " "
+#         ),
+#         config=(tyro.conf.OmitArgPrefixes,),
+#     ) == Container(Container(3, 3), Container("3", "3"))

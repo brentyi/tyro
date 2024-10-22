@@ -63,9 +63,6 @@ class FieldDefinition:
     intern_name: str
     extern_name: str
     type_or_callable: Union[TypeForm[Any], Callable]
-    typevar_context: _resolver.TypeParamAssignmentContext
-    """Type or callable for this field. This should have all Annotated[] annotations
-    stripped."""
     default: Any
     # We need to record whether defaults are from default instances to
     # determine if they should override the default in
@@ -113,10 +110,6 @@ class FieldDefinition:
         type_or_callable = _resolver.TypeParamResolver.concretize_type_params(
             type_or_callable
         )
-        typevar_context = _resolver.TypeParamResolver.get_assignment_context(
-            type_or_callable
-        )
-        type_or_callable = typevar_context.origin_type
 
         # Narrow types.
         type_or_callable = _resolver.type_from_typevar_constraints(type_or_callable)
@@ -190,7 +183,7 @@ class FieldDefinition:
             type_or_callable=type_or_callable
             if argconf.constructor_factory is None
             else argconf.constructor_factory(),
-            typevar_context=typevar_context,
+            # typevar_context=typevar_context,
             default=default,
             is_default_from_default_instance=is_default_from_default_instance,
             helptext=helptext,
@@ -373,14 +366,11 @@ def _try_field_list_from_callable(
     f: Union[Callable, TypeForm[Any]],
     default_instance: DefaultInstance,
 ) -> Union[List[FieldDefinition], UnsupportedNestedTypeMessage]:
-    # Resolve generic types.
-    resolve_context = _resolver.TypeParamResolver.get_assignment_context(f)
-    with resolve_context:
-        f = resolve_context.origin_type
-
-        # Apply constructor_factory override for type.
-        f = _resolver.swap_type_using_confstruct(f)
-
+    # Apply constructor_factory override for type.
+    f = _resolver.swap_type_using_confstruct(f)
+    typevar_context = _resolver.TypeParamResolver.get_assignment_context(f)
+    f = typevar_context.origin_type
+    with typevar_context:
         # Check for default instances in subcommand configs. This is needed for
         # is_nested_type() when arguments are not valid without a default, and this
         # default is specified in the subcommand config.

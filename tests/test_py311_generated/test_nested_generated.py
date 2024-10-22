@@ -990,11 +990,11 @@ def test_generic_subparsers() -> None:
     assert tyro.cli(main, args="x:a-float --x.x 3.2".split(" ")) == A(3.2)
     assert tyro.cli(main, args="x:a-int --x.x 3".split(" ")) == A(3)
 
-    def main_with_default(x: A[int] | A[float] = A(5)) -> Any:
+    def main_with_default(x: A[str] | A[int] = A(5)) -> Any:
         return x
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
-        tyro.cli(main_with_default, args=[])
+    assert tyro.cli(main_with_default, args=[]) == A(5)
+    assert tyro.cli(main_with_default, args=["x:a-str", "--x.x", "3"]) == A("3")
 
 
 def test_generic_inherited() -> None:

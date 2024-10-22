@@ -80,23 +80,20 @@ class ParserSpecification:
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(markers):
-            context = _resolver.TypeParamResolver.get_assignment_context(f)
-            with context:
-                f = context.origin_type
-                f, field_list = _fields.field_list_from_callable(
-                    f=f,
-                    default_instance=default_instance,
-                    support_single_arg_types=support_single_arg_types,
-                )
+            f, field_list = _fields.field_list_from_callable(
+                f=f,
+                default_instance=default_instance,
+                support_single_arg_types=support_single_arg_types,
+            )
 
         # Cycle detection.
         #
         # Note that 'parent' here refers to in the nesting hierarchy, not the
         # superclass.
-        if f in parent_classes and f is not dict:
-            raise _instantiators.UnsupportedTypeAnnotationError(
-                f"Found a cyclic dependency with type {f}."
-            )
+        # if f in parent_classes and f is not dict:
+        #     raise _instantiators.UnsupportedTypeAnnotationError(
+        #         f"Found a cyclic dependency with type {f}."
+        #     )
 
         # TODO: we are abusing the (minor) distinctions between types, classes, and
         # callables throughout the code. This is mostly for legacy reasons, could be
@@ -113,14 +110,13 @@ class ParserSpecification:
         subparsers_from_prefix = {}
 
         for field in field_list:
-            with field.typevar_context:
-                field_out = handle_field(
-                    field,
-                    parent_classes=parent_classes,
-                    intern_prefix=intern_prefix,
-                    extern_prefix=extern_prefix,
-                    subcommand_prefix=subcommand_prefix,
-                )
+            field_out = handle_field(
+                field,
+                parent_classes=parent_classes,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
+                subcommand_prefix=subcommand_prefix,
+            )
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
                 args.append(field_out)
@@ -458,7 +454,9 @@ class SubparsersSpecification:
             default_name = None
         else:
             default_name = _subcommand_matching.match_subcommand(
-                field.default, subcommand_config_from_name, subcommand_type_from_name
+                field.default,
+                subcommand_config_from_name,
+                subcommand_type_from_name,
             )
 
             # This should never be triggered because union types are expanded when
