@@ -2,7 +2,7 @@
 #
 # PEP 695 isn't yet supported in mypy. (April 4, 2024)
 from dataclasses import dataclass
-from typing import Annotated, Any, NewType
+from typing import Annotated, Any, Literal, NewType
 
 import pytest
 
@@ -201,3 +201,94 @@ def test_pep695_new_type_alias() -> None:
         return arg
 
     assert tyro.cli(main, args=["1", "2"]) == [1, 2]
+
+
+def test_generic_config():
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: Inner[T]
+
+    assert tyro.cli(
+        Container[bool],
+        args="--a.a True --a.b False".split(" "),
+        config=(tyro.conf.FlagConversionOff,),
+    ) == Container(Inner(True, False))
+
+
+def test_generic_config_subcommand():
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[str]],
+        args="a:container-bool --a.a True".split(" "),
+        default=Container(Container(a="30")),
+        config=(tyro.conf.FlagConversionOff,),
+    ) == Container(Container(True))
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[str]],
+        args=[],
+        default=Container(Container(a="30")),
+        config=(tyro.conf.FlagConversionOff,),
+    ) == Container(Container("30"))
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[str]],
+        args=[],
+        default=Container(Container(a=False)),
+        config=(tyro.conf.FlagConversionOff,),
+    ) == Container(Container(False))
+
+
+def test_generic_config_subcommand2():
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: tyro.conf.OmitSubcommandPrefixes[T]
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[str]],
+        args="container-bool --a True".split(" "),
+    ) == Container(Container(True))
+
+
+def test_generic_config_subcommand3():
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[str]],
+        args=[],
+        default=Container(Container(a=True)),
+        config=(tyro.conf.OmitSubcommandPrefixes,),
+    ) == Container(Container(True))
+
+
+def test_generic_config_subcommand4():
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[Literal["1", "2"]]],
+        args="container-literal-1-2 --a 2".split(" "),
+        config=(tyro.conf.OmitSubcommandPrefixes,),
+    ) == Container(Container("2"))
+
+    assert tyro.cli(
+        Container[Container[bool] | Container[Literal["1", "2"]]],
+        args=[],
+        default=Container(Container(a=True)),
+        config=(tyro.conf.OmitSubcommandPrefixes,),
+    ) == Container(Container(True))
+
+    # This case is currently too hard for tyro's subcommand matcher.
+    with pytest.raises(AssertionError):
+        tyro.cli(
+            Container[Container[bool] | Container[Literal["1", "2"]]],
+            args=[],
+            default=Container(Container(a="1")),
+            config=(tyro.conf.OmitSubcommandPrefixes,),
+        )

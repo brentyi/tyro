@@ -62,6 +62,7 @@ class ParserSpecification:
     @staticmethod
     def from_callable_or_type(
         f: Callable[..., T],
+        markers: Set[_markers._Marker],
         description: Optional[str],
         parent_classes: Set[Type[Any]],
         default_instance: Union[
@@ -75,19 +76,16 @@ class ParserSpecification:
         """Create a parser definition from a callable or type."""
 
         # Consolidate subcommand types.
-        markers = _resolver.unwrap_annotated(f, _markers._Marker)[1]
+        markers = markers | set(_resolver.unwrap_annotated(f, _markers._Marker)[1])
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
         # Resolve the type of `f`, generate a field list.
-        with _fields.FieldDefinition.marker_context(markers):
-            context = _resolver.TypeParamResolver.get_assignment_context(f)
-            with context:
-                f = context.origin_type
-                f, field_list = _fields.field_list_from_callable(
-                    f=f,
-                    default_instance=default_instance,
-                    support_single_arg_types=support_single_arg_types,
-                )
+        with _fields.FieldDefinition.marker_context(tuple(markers)):
+            f, field_list = _fields.field_list_from_callable(
+                f=f,
+                default_instance=default_instance,
+                support_single_arg_types=support_single_arg_types,
+            )
 
         # Cycle detection.
         #
@@ -113,14 +111,13 @@ class ParserSpecification:
         subparsers_from_prefix = {}
 
         for field in field_list:
-            with field.typevar_context:
-                field_out = handle_field(
-                    field,
-                    parent_classes=parent_classes,
-                    intern_prefix=intern_prefix,
-                    extern_prefix=extern_prefix,
-                    subcommand_prefix=subcommand_prefix,
-                )
+            field_out = handle_field(
+                field,
+                parent_classes=parent_classes,
+                intern_prefix=intern_prefix,
+                extern_prefix=extern_prefix,
+                subcommand_prefix=subcommand_prefix,
+            )
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
                 args.append(field_out)
@@ -334,14 +331,8 @@ def handle_field(
                 ),
             )
             return ParserSpecification.from_callable_or_type(
-                (
-                    # Recursively apply marker types.
-                    field.type_or_callable
-                    if len(field.markers) == 0
-                    else Annotated.__class_getitem__(  # type: ignore
-                        (field.type_or_callable,) + tuple(field.markers)
-                    )
-                ),
+                field.type_or_callable,
+                markers=field.markers,
                 description=None,
                 parent_classes=parent_classes,
                 default_instance=field.default,
@@ -458,16 +449,18 @@ class SubparsersSpecification:
             default_name = None
         else:
             default_name = _subcommand_matching.match_subcommand(
-                field.default, subcommand_config_from_name, subcommand_type_from_name
+                field.default,
+                subcommand_config_from_name,
+                subcommand_type_from_name,
             )
 
-            # This should never be triggered because union types are expanded when
-            # a bad default value is provided.
             assert default_name is not None, (
                 f"`{extern_prefix}` was provided a default value of type"
                 f" {type(field.default)} but no matching subcommand was found. A"
                 " type may be missing in the Union type declaration for"
-                f" `{extern_prefix}`, which currently expects {options}."
+                f" `{extern_prefix}`, which currently expects {options}. "
+                "The types may also be too complex for tyro's subcommand matcher; support "
+                "is particularly limited for custom generic types."
             )
 
         # Add subcommands for each option.
@@ -517,21 +510,18 @@ class SubparsersSpecification:
                     (option_origin,) + annotations
                 )
 
-            subparser = ParserSpecification.from_callable_or_type(
-                (
-                    # Recursively apply markers.
-                    Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
-                    if len(field.markers) > 0
-                    else option
-                ),
-                description=subcommand_config.description,
-                parent_classes=parent_classes,
-                default_instance=subcommand_config.default,
-                intern_prefix=intern_prefix,
-                extern_prefix=extern_prefix,
-                subcommand_prefix=intern_prefix,
-                support_single_arg_types=True,
-            )
+            with _fields.FieldDefinition.marker_context(tuple(field.markers)):
+                subparser = ParserSpecification.from_callable_or_type(
+                    option,
+                    markers=field.markers,
+                    description=subcommand_config.description,
+                    parent_classes=parent_classes,
+                    default_instance=subcommand_config.default,
+                    intern_prefix=intern_prefix,
+                    extern_prefix=extern_prefix,
+                    subcommand_prefix=intern_prefix,
+                    support_single_arg_types=True,
+                )
 
             # Apply prefix to helptext in nested classes in subparsers.
             subparser = dataclasses.replace(

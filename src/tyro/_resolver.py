@@ -124,6 +124,8 @@ def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
         elif len(typ.__constraints__) > 0:
             # Try to infer type from TypeVar constraints.
             return Union.__getitem__(typ.__constraints__)  # type: ignore
+        else:
+            return Any
     return typ
 
 
@@ -534,9 +536,10 @@ def resolve_generic_types(
     # Apply shims to convert from types.UnionType to typing.Union, list to
     # typing.List, etc.
     typ = standardize_builtin_generics(typ)
+    typ = resolve_newtype_and_aliases(typ)
 
     # We'll ignore NewType when getting the origin + args for generics.
-    origin_cls = get_origin(resolve_newtype_and_aliases(typ))
+    origin_cls = get_origin(typ)
     type_from_typevar: Dict[TypeVar, TypeForm[Any]] = {}
 
     # Support typing.Self.
@@ -558,6 +561,14 @@ def resolve_generic_types(
         typevar_values = get_args(resolve_newtype_and_aliases(typ))
         assert len(typevars) == len(typevar_values)
         typ = origin_cls
+        type_from_typevar.update(dict(zip(typevars, typevar_values)))
+    elif (
+        # Apply some heuristics for generic types. Should revisit this.
+        hasattr(typ, "__parameters__") and hasattr(typ.__parameters__, "__len__")  # type: ignore
+    ):
+        typevars = typ.__parameters__  # type: ignore
+        typevar_values = tuple(type_from_typevar_constraints(x) for x in typevars)
+        assert len(typevars) == len(typevar_values)
         type_from_typevar.update(dict(zip(typevars, typevar_values)))
 
     if hasattr(typ, "__orig_bases__"):
