@@ -2,7 +2,7 @@
 #
 # PEP 695 isn't yet supported in mypy. (April 4, 2024)
 from dataclasses import dataclass
-from typing import Annotated
+from typing import Annotated, Any, NewType
 
 import pytest
 
@@ -163,7 +163,8 @@ type UnprefixedSubcommandPair[T1, T2, T3] = (
     | Annotated[T3, tyro.conf.subcommand(prefix_name=True)]
 )
 type IntContainer = Inner[int]
-type IntContainer2 = Inner[int]
+type IntContainerIntermediate = Inner[int]
+type IntContainer2 = IntContainerIntermediate
 type StrContainer = Inner[str]
 
 
@@ -183,3 +184,20 @@ def test_pep695_alias_subcommand() -> None:
     assert tyro.cli(
         Config, args=["arg:str-container", "--arg.a", "3", "--arg.b", "5"]
     ) == Config(Inner("3", "5"))
+
+
+type Int0 = int
+Int1 = NewType("Int1", Int0)
+type Int2 = Int1
+Int3 = NewType("Int3", Int2)
+type Int4 = Int3
+Int5 = NewType("Int5", Int4)
+type Int6 = Int5
+Int7 = NewType("Int7", Int6)
+
+
+def test_pep695_new_type_alias() -> None:
+    def main(arg: list[Int7], /) -> Any:
+        return arg
+
+    assert tyro.cli(main, args=["1", "2"]) == [1, 2]

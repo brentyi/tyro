@@ -137,7 +137,7 @@ def resolve_newtype_and_aliases(
     if isinstance(typ, TypeAliasType):
         return Annotated.__class_getitem__(
             (
-                resolve_newtype_and_aliases(cast(Any, typ.__value__)),
+                cast(Any, resolve_newtype_and_aliases(typ.__value__)),
                 TyroTypeAliasBreadCrumb(typ.__name__),
             )
         )
@@ -151,7 +151,7 @@ def resolve_newtype_and_aliases(
     while hasattr(typ, "__name__") and hasattr(typ, "__supertype__"):
         if return_name is None:
             return_name = getattr(typ, "__name__")
-        typ = getattr(typ, "__supertype__")
+        typ = resolve_newtype_and_aliases(getattr(typ, "__supertype__"))
 
     if return_name is not None:
         typ = Annotated.__class_getitem__((typ, TyroTypeAliasBreadCrumb(return_name)))  # type: ignore

@@ -193,11 +193,11 @@ def instantiator_from_type(
     # `isinstance(x, NewType)` doesn't work because NewType isn't a class until
     # Python 3.10, so we instead do a duck typing-style check.
     metavar = getattr(typ, "__name__", "").upper()
-    typ, breadcrumbs = _resolver.unwrap_annotated(
+    typ, type_alias_breadcrumbs = _resolver.unwrap_annotated(
         typ, _resolver.TyroTypeAliasBreadCrumb
     )
-    if len(breadcrumbs) > 0:
-        metavar = breadcrumbs[0].name
+    if len(type_alias_breadcrumbs) > 0:
+        metavar = type_alias_breadcrumbs[-1].name
 
     # Address container types. If a matching container is found, this will recursively
     # call instantiator_from_type().
