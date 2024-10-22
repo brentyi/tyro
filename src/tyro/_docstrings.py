@@ -317,7 +317,7 @@ def get_callable_description(f: Callable) -> str:
             import pydantic
         except ImportError:
             # Needed for mock import test.
-            pydantic = None
+            pydantic = None  # type: ignore
     else:
         pydantic = None  # type: ignore
 
