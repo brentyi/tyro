@@ -7,6 +7,7 @@ import functools
 import inspect
 import io
 import itertools
+import sys
 import tokenize
 from typing import Callable, Dict, Generic, Hashable, List, Optional, Set, Type, TypeVar
 
@@ -311,9 +312,13 @@ def get_callable_description(f: Callable) -> str:
     if isinstance(f, functools.partial):
         f = f.func
 
-    try:
-        import pydantic
-    except ImportError:
+    if "pydantic" in sys.modules.keys():
+        try:
+            import pydantic
+        except ImportError:
+            # Needed for mock import test.
+            pydantic = None
+    else:
         pydantic = None  # type: ignore
 
     # Note inspect.getdoc() causes some corner cases with TypedDicts.

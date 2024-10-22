@@ -615,7 +615,7 @@ def _field_list_from_dataclass(
 
 def _is_pydantic(cls: TypeForm[Any]) -> bool:
     # pydantic will already be imported if it's used.
-    if "pydantic" not in sys.modules.keys():
+    if "pydantic" not in sys.modules.keys():  # pragma: no cover
         # This is needed for the mock import test in
         # test_missing_optional_packages.py to pass.
         return False
@@ -623,6 +623,8 @@ def _is_pydantic(cls: TypeForm[Any]) -> bool:
     try:
         import pydantic
     except ImportError:
+        # This is needed for the mock import test in
+        # test_missing_optional_packages.py to pass.
         return False
 
     try:
@@ -719,7 +721,7 @@ def _field_list_from_pydantic(
 
 def _is_attrs(cls: TypeForm[Any]) -> bool:
     # attr will already be imported if it's used.
-    if "attr" not in sys.modules.keys():
+    if "attr" not in sys.modules.keys():  # pragma: no cover
         return False
 
     try:
