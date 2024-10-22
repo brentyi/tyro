@@ -191,7 +191,6 @@ class FieldDefinition:
             type_or_callable=type_or_callable
             if argconf.constructor_factory is None
             else argconf.constructor_factory(),
-            # typevar_context=typevar_context,
             default=default,
             is_default_from_default_instance=is_default_from_default_instance,
             helptext=helptext,
