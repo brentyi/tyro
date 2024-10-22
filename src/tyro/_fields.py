@@ -43,6 +43,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from . import conf  # Avoid circular import.
 from . import (
     _docstrings,
     _instantiators,
@@ -50,12 +51,11 @@ from . import (
     _singleton,
     _strings,
     _unsafe_cache,
-    conf,  # Avoid circular import.
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
-_field_context_markers: List[Tuple[_markers.Marker, ...]] = []
+global_context_markers: List[Tuple[_markers.Marker, ...]] = []
 
 
 @dataclasses.dataclass
@@ -91,9 +91,9 @@ class FieldDefinition:
     def marker_context(markers: Tuple[_markers.Marker, ...]):
         """Context for setting markers on fields. All fields created within the
         context will have the specified markers."""
-        _field_context_markers.append(markers)
+        global_context_markers.append(markers)
         yield
-        _field_context_markers.pop()
+        global_context_markers.pop()
 
     @staticmethod
     def make(
@@ -156,7 +156,7 @@ class FieldDefinition:
         markers = inferred_markers + markers
 
         # Include markers set via context manager.
-        for context_markers in _field_context_markers:
+        for context_markers in global_context_markers:
             markers += context_markers
 
         # Check that the default value matches the final resolved type.

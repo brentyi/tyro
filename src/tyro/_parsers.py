@@ -30,6 +30,7 @@ from . import (
     _strings,
     _subcommand_matching,
 )
+from ._fields import global_context_markers
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 
@@ -76,7 +77,15 @@ class ParserSpecification:
 
         # Consolidate subcommand types.
         markers = _resolver.unwrap_annotated(f, _markers._Marker)[1]
-        consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
+        consolidate_subcommand_args = (
+            _markers.ConsolidateSubcommandArgs in markers
+            or any(
+                map(
+                    lambda x: _markers.ConsolidateSubcommandArgs in x,
+                    global_context_markers,
+                )
+            )
+        )
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(markers):
@@ -329,29 +338,23 @@ def handle_field(
                     field.default,
                 ),
             )
-            return ParserSpecification.from_callable_or_type(
-                (
-                    # Recursively apply marker types.
-                    field.type_or_callable
-                    if len(field.markers) == 0
-                    else Annotated.__class_getitem__(  # type: ignore
-                        (field.type_or_callable,) + tuple(field.markers)
+            with _fields.FieldDefinition.marker_context(tuple(field.markers)):
+                return ParserSpecification.from_callable_or_type(
+                    field.type_or_callable,
+                    description=None,
+                    parent_classes=parent_classes,
+                    default_instance=field.default,
+                    intern_prefix=_strings.make_field_name(
+                        [intern_prefix, field.intern_name]
+                    ),
+                    extern_prefix=_strings.make_field_name(
+                        [extern_prefix, field.extern_name]
                     )
-                ),
-                description=None,
-                parent_classes=parent_classes,
-                default_instance=field.default,
-                intern_prefix=_strings.make_field_name(
-                    [intern_prefix, field.intern_name]
-                ),
-                extern_prefix=_strings.make_field_name(
-                    [extern_prefix, field.extern_name]
+                    if field.argconf.prefix_name in (True, None)
+                    else field.extern_name,
+                    subcommand_prefix=subcommand_prefix,
+                    support_single_arg_types=False,
                 )
-                if field.argconf.prefix_name in (True, None)
-                else field.extern_name,
-                subcommand_prefix=subcommand_prefix,
-                support_single_arg_types=False,
-            )
 
     # (3) Handle primitive or fixed types. These produce a single argument!
     return _arguments.ArgumentDefinition(
@@ -515,21 +518,17 @@ class SubparsersSpecification:
                     (option_origin,) + annotations
                 )
 
-            subparser = ParserSpecification.from_callable_or_type(
-                (
-                    # Recursively apply markers.
-                    Annotated.__class_getitem__((option,) + tuple(field.markers))  # type: ignore
-                    if len(field.markers) > 0
-                    else option
-                ),
-                description=subcommand_config.description,
-                parent_classes=parent_classes,
-                default_instance=subcommand_config.default,
-                intern_prefix=intern_prefix,
-                extern_prefix=extern_prefix,
-                subcommand_prefix=intern_prefix,
-                support_single_arg_types=True,
-            )
+            with _fields.FieldDefinition.marker_context(tuple(field.markers)):
+                subparser = ParserSpecification.from_callable_or_type(
+                    option,
+                    description=subcommand_config.description,
+                    parent_classes=parent_classes,
+                    default_instance=subcommand_config.default,
+                    intern_prefix=intern_prefix,
+                    extern_prefix=extern_prefix,
+                    subcommand_prefix=intern_prefix,
+                    support_single_arg_types=True,
+                )
 
             # Apply prefix to helptext in nested classes in subparsers.
             subparser = dataclasses.replace(
