@@ -1492,8 +1492,8 @@ def test_merge() -> None:
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         instantiate_dataclasses((OptimizerConfig, DatasetConfig), args=["--help"])
     helptext = target.getvalue()
-    assert "OptimizerConfig options" in helptext
-    assert "DatasetConfig options" in helptext
+    assert "OptimizerConfig options" not in helptext
+    assert "DatasetConfig options" not in helptext
 
 
 def test_counter_action() -> None:

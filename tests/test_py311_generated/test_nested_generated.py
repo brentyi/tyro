@@ -28,10 +28,16 @@ def test_nested() -> None:
     class Nested:
         x: int
         b: B
+        """Helptext for b"""
 
     assert tyro.cli(Nested, args=["--x", "1", "--b.y", "3"]) == Nested(x=1, b=B(y=3))
     with pytest.raises(SystemExit):
         tyro.cli(Nested, args=["--x", "1"])
+
+    def main(x: Nested):
+        return x
+
+    assert "Helptext for b" in get_helptext_with_checks(main)
 
 
 def test_nested_annotated() -> None:
