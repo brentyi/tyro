@@ -145,7 +145,9 @@ class ParserSpecification:
                     )
 
                 # Helptext for this field; used as description for grouping arguments.
-                class_field_name = _strings.make_field_name([field.intern_name])
+                class_field_name = _strings.make_field_name(
+                    [intern_prefix, field.intern_name]
+                )
                 if field.helptext is not None:
                     helptext_from_intern_prefixed_field_name[class_field_name] = (
                         field.helptext
@@ -235,10 +237,20 @@ class ParserSpecification:
         """Create defined arguments and subparsers."""
 
         # Make argument groups.
-        def format_group_name(prefix: str) -> str:
-            return (prefix + " options").strip()
+        def format_group_name(group_name: str) -> str:
+            return (group_name + " options").strip()
 
-        group_from_prefix: Dict[str, argparse._ArgumentGroup] = {
+        def group_name_from_arg(arg: _arguments.ArgumentDefinition) -> str:
+            prefix = arg.lowered.name_or_flag
+            if prefix.startswith("--"):
+                prefix = prefix[2:]
+            if "." in prefix:
+                prefix = prefix.rpartition(".")[0]
+            else:
+                prefix = ""
+            return prefix
+
+        group_from_group_name: Dict[str, argparse._ArgumentGroup] = {
             "": parser._action_groups[1],
             **{
                 cast(str, group.title).partition(" ")[0]: group
@@ -251,9 +263,10 @@ class ParserSpecification:
         # Add each argument group. Note that groups with only suppressed arguments won't
         # be added.
         for arg in self.args:
+            group_name = group_name_from_arg(arg)
             if (
                 arg.lowered.help is not argparse.SUPPRESS
-                and arg.extern_prefix not in group_from_prefix
+                and group_name not in group_from_group_name
             ):
                 description = (
                     parent.helptext_from_intern_prefixed_field_name.get(
@@ -262,24 +275,23 @@ class ParserSpecification:
                     if parent is not None
                     else None
                 )
-                group_from_prefix[arg.extern_prefix] = parser.add_argument_group(
-                    format_group_name(arg.extern_prefix),
+                group_from_group_name[group_name] = parser.add_argument_group(
+                    format_group_name(group_name),
                     description=description,
                 )
 
-        # Add each argument.
-        for arg in self.args:
+            # Add each argument.
             if arg.field.is_positional():
                 arg.add_argument(positional_group)
                 continue
 
-            if arg.extern_prefix in group_from_prefix:
-                arg.add_argument(group_from_prefix[arg.extern_prefix])
+            if group_name in group_from_group_name:
+                arg.add_argument(group_from_group_name[group_name])
             else:
                 # Suppressed argument: still need to add them, but they won't show up in
                 # the helptext so it doesn't matter which group.
                 assert arg.lowered.help is argparse.SUPPRESS
-                arg.add_argument(group_from_prefix[""])
+                arg.add_argument(group_from_group_name[""])
 
         for child in self.child_from_prefix.values():
             child.apply_args(parser, parent=self)
