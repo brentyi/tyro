@@ -674,6 +674,10 @@ def _field_list_from_pydantic(
             cls_cast = cast(pydantic_v1.BaseModel, cls)  # type: ignore
         else:
             cls_cast = cls
+
+        hints = _resolver.get_type_hints_with_backported_syntax(
+            cls, include_extras=True
+        )
         for pd1_field in cls_cast.__fields__.values():
             helptext = pd1_field.field_info.description
             if helptext is None:
@@ -686,7 +690,7 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=pd1_field.name,
-                    type_or_callable=pd1_field.outer_type_,
+                    type_or_callable=hints[pd1_field.name],
                     default=default,
                     is_default_from_default_instance=is_default_from_default_instance,
                     helptext=helptext,
