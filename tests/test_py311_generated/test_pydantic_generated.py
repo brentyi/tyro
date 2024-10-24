@@ -6,6 +6,7 @@ import pathlib
 from typing import Annotated, cast
 
 import pytest
+from helptext_utils import get_helptext_with_checks
 from pydantic import BaseModel, Field, v1
 
 import tyro
@@ -49,6 +50,32 @@ def test_pydantic_v1() -> None:
             "~",
         ],
     ) == ManyTypesA(i=5, s="hello", f=3.0, p=pathlib.Path("~"))
+
+
+def test_pydantic_v1_conf() -> None:
+    class ManyTypesA(v1.BaseModel):
+        i: int
+        """This is a docstring."""
+        s: tyro.conf.Suppress[str] = "hello"
+        f: float = v1.Field(default_factory=lambda: 3.0)
+
+    class ManyTypesB(ManyTypesA):
+        p: pathlib.Path
+
+    # We can directly pass a dataclass to `tyro.cli()`:
+    assert tyro.cli(
+        ManyTypesB,
+        args=[
+            "--i",
+            "5",
+            "--p",
+            "~",
+        ],
+    ) == ManyTypesB(i=5, s="hello", f=3.0, p=pathlib.Path("~"))
+    helptext = get_helptext_with_checks(ManyTypesB)
+    assert "--s" not in helptext
+    assert "--i" in helptext
+    assert "This is a docstring" in helptext
 
 
 def test_pydantic_helptext() -> None:
