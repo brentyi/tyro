@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import pathlib
+import sys
 from typing import cast
 
 import pytest
@@ -80,7 +81,8 @@ def test_pydantic_v1_conf() -> None:
     # This doesn't work when combining older versions of Python with older
     # versions of pydantic. The root cause may be in the docstring_parser
     # dependency.
-    # assert "This is a docstring" in helptext
+    if sys.version_info >= (3, 10):
+        assert "This is a docstring" in helptext
 
 
 def test_pydantic_helptext() -> None:
