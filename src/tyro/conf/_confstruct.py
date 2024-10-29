@@ -106,9 +106,9 @@ def subcommand(
         default,
         description,
         prefix_name,
-        constructor_factory=constructor_factory
-        if constructor is None
-        else lambda: constructor,
+        constructor_factory=(
+            constructor_factory if constructor is None else lambda: constructor
+        ),
     )
 
 
@@ -214,7 +214,7 @@ def arg(
         help_behavior_hint=help_behavior_hint,
         aliases=tuple(aliases) if aliases is not None else None,
         prefix_name=prefix_name,
-        constructor_factory=constructor_factory
-        if constructor is None
-        else lambda: constructor,
+        constructor_factory=(
+            constructor_factory if constructor is None else lambda: constructor
+        ),
     )

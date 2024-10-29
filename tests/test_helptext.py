@@ -904,12 +904,14 @@ def test_argconf_constructor_json_special_case() -> None:
         x: Annotated[
             # NOTE: this style of JSON construction is/will be deprecated.
             # Avoid.
-            Tuple[str, str], tyro.conf.arg(constructor=json.loads, metavar="JSON")
+            Tuple[str, str],
+            tyro.conf.arg(constructor=json.loads, metavar="JSON"),
         ] = ("hello", "world")
         y: Annotated[
             # NOTE: this style of JSON construction is/will be deprecated.
             # Avoid.
-            Tuple[int, int], tyro.conf.arg(constructor=json.loads, metavar="JSON")
+            Tuple[int, int],
+            tyro.conf.arg(constructor=json.loads, metavar="JSON"),
         ] = (3, 5)
 
     help = get_helptext_with_checks(A)
@@ -924,7 +926,8 @@ def test_optional_group() -> None:
         x: Annotated[
             # NOTE: this style of JSON construction is/will be deprecated.
             # Avoid.
-            Tuple[str, str], tyro.conf.arg(constructor=json.loads, metavar="JSON")
+            Tuple[str, str],
+            tyro.conf.arg(constructor=json.loads, metavar="JSON"),
         ] = ("hello", "world"),
         y: int = 3,
     ) -> int:

@@ -100,9 +100,10 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
     # Subparser name from type alias. This is lower priority thant he name from
     # `tyro.conf.subcommand()`.
     if len(type_alias_breadcrumbs) > 0:
-        return hyphen_separated_from_camel_case(
-            type_alias_breadcrumbs[-1].name
-        ), prefix_name
+        return (
+            hyphen_separated_from_camel_case(type_alias_breadcrumbs[-1].name),
+            prefix_name,
+        )
 
     # Subparser name from class name.
     def get_name(cls: Type) -> str:

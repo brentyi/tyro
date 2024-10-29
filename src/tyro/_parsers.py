@@ -351,11 +351,11 @@ def handle_field(
                 intern_prefix=_strings.make_field_name(
                     [intern_prefix, field.intern_name]
                 ),
-                extern_prefix=_strings.make_field_name(
-                    [extern_prefix, field.extern_name]
-                )
-                if field.argconf.prefix_name in (True, None)
-                else field.extern_name,
+                extern_prefix=(
+                    _strings.make_field_name([extern_prefix, field.extern_name])
+                    if field.argconf.prefix_name in (True, None)
+                    else field.extern_name
+                ),
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
             )
@@ -435,9 +435,11 @@ class SubparsersSpecification:
         subcommand_type_from_name: Dict[str, type] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                ""
-                if _markers.OmitSubcommandPrefixes in field.markers
-                else extern_prefix,
+                (
+                    ""
+                    if _markers.OmitSubcommandPrefixes in field.markers
+                    else extern_prefix
+                ),
                 type(None) if option is none_proxy else cast(type, option),
             )
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -477,9 +479,11 @@ class SubparsersSpecification:
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                ""
-                if _markers.OmitSubcommandPrefixes in field.markers
-                else extern_prefix,
+                (
+                    ""
+                    if _markers.OmitSubcommandPrefixes in field.markers
+                    else extern_prefix
+                ),
                 type(None) if option is none_proxy else cast(type, option),
             )
 

@@ -177,18 +177,20 @@ class FieldDefinition:
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
-            type_or_callable=static_type
-            if argconf.constructor_factory is None
-            else argconf.constructor_factory(),
+            type_or_callable=(
+                static_type
+                if argconf.constructor_factory is None
+                else argconf.constructor_factory()
+            ),
             default=default,
             is_default_from_default_instance=is_default_from_default_instance,
             helptext=helptext,
             markers=set(markers),
             custom_constructor=argconf.constructor_factory is not None,
             argconf=argconf,
-            call_argname=call_argname_override
-            if call_argname_override is not None
-            else name,
+            call_argname=(
+                call_argname_override if call_argname_override is not None else name
+            ),
         )
         return out
 
@@ -701,11 +703,13 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=name,
-                    static_type=Annotated.__class_getitem__(  # type: ignore
-                        (pd2_field.annotation,) + tuple(pd2_field.metadata)
-                    )
-                    if len(pd2_field.metadata) > 0
-                    else pd2_field.annotation,
+                    static_type=(
+                        Annotated.__class_getitem__(  # type: ignore
+                            (pd2_field.annotation,) + tuple(pd2_field.metadata)
+                        )
+                        if len(pd2_field.metadata) > 0
+                        else pd2_field.annotation
+                    ),
                     default=default,
                     is_default_from_default_instance=is_default_from_default_instance,
                     helptext=helptext,

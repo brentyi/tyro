@@ -161,9 +161,11 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar=type_info.type.__name__.upper(),
-            instance_from_str=lambda args: bytes(args[0], encoding="ascii")
-            if type_info.type is bytes
-            else type_info.type(args[0]),
+            instance_from_str=lambda args: (
+                bytes(args[0], encoding="ascii")
+                if type_info.type is bytes
+                else type_info.type(args[0])
+            ),
             is_instance=lambda x: isinstance(x, type_info.type),
             str_from_instance=lambda instance: [str(instance)],
         )
@@ -235,16 +237,20 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar="{" + ",".join(choices) + "}",
-            instance_from_str=lambda args: next(
-                iter(member for member in cast_type if str(member.value) == args[0])
-            )
-            if _markers.EnumChoicesFromValues in type_info.markers
-            else cast_type[args[0]],
+            instance_from_str=lambda args: (
+                next(
+                    iter(member for member in cast_type if str(member.value) == args[0])
+                )
+                if _markers.EnumChoicesFromValues in type_info.markers
+                else cast_type[args[0]]
+            ),
             is_instance=lambda x: isinstance(x, cast_type),
             str_from_instance=lambda instance: [
-                str(instance.value)
-                if _markers.EnumChoicesFromValues in type_info.markers
-                else instance.name
+                (
+                    str(instance.value)
+                    if _markers.EnumChoicesFromValues in type_info.markers
+                    else instance.name
+                )
             ],
             choices=choices,
         )
@@ -502,15 +508,20 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
 
             def str_from_instance(instance: dict) -> list[str]:
                 out = []
-                for key, value in instance.items():
-                    out.extend(key_spec.str_from_instance(key))
-                    out.extend(val_spec.str_from_instance(value))
+                assert (
+                    len(instance) == 0
+                ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
+                # for key, value in instance.items():
+                #     out.extend(key_spec.str_from_instance(key))
+                #     out.extend(val_spec.str_from_instance(value))
                 return out
 
             return PrimitiveConstructorSpec(
-                nargs=key_spec.nargs + val_spec.nargs
-                if isinstance(val_spec.nargs, int)
-                else "*",
+                nargs=(
+                    key_spec.nargs + val_spec.nargs
+                    if isinstance(val_spec.nargs, int)
+                    else "*"
+                ),
                 metavar=pair_metavar,
                 instance_from_str=instance_from_str,
                 is_instance=lambda x: isinstance(x, dict)
@@ -548,9 +559,12 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
 
             def str_from_instance(instance: dict) -> list[str]:
                 out = []
-                for key, value in instance.items():
-                    out.extend(key_spec.str_from_instance(key))
-                    out.extend(val_spec.str_from_instance(value))
+                assert (
+                    len(instance) == 0
+                ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
+                # for key, value in instance.items():
+                #     out.extend(key_spec.str_from_instance(key))
+                #     out.extend(val_spec.str_from_instance(value))
                 return out
 
             return PrimitiveConstructorSpec(
@@ -571,9 +585,15 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
     def literal_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         choices = get_args(type_info.type)
         str_choices = tuple(
-            (x.value if _markers.EnumChoicesFromValues in type_info.markers else x.name)
-            if isinstance(x, enum.Enum)
-            else str(x)
+            (
+                (
+                    x.value
+                    if _markers.EnumChoicesFromValues in type_info.markers
+                    else x.name
+                )
+                if isinstance(x, enum.Enum)
+                else str(x)
+            )
             for x in choices
         )
         return PrimitiveConstructorSpec(
@@ -666,7 +686,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             for option_spec in option_specs:
                 if option_spec.is_instance(instance):
                     return option_spec.str_from_instance(instance)
-            raise ValueError(f"instance {instance} is not in {options}")
+            assert False, f"could not match default value {instance} with any types in union {options}"
 
         return PrimitiveConstructorSpec(
             nargs=nargs,

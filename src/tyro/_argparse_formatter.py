@@ -852,9 +852,11 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
             console.print(
                 Panel(
                     Group(
-                        f"{message[0].upper() + message[1:]}"
-                        if len(message) > 0
-                        else "",
+                        (
+                            f"{message[0].upper() + message[1:]}"
+                            if len(message) > 0
+                            else ""
+                        ),
                         *extra_info,
                         Rule(style=Style(color="red")),
                         f"For full helptext, run [bold]{self.prog} --help[/bold]",
@@ -1343,9 +1345,11 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     new_actions.append(
                         argparse.Action(
                             [
-                                "OPTIONS"
-                                if len(prog_parts) == 1
-                                else prog_parts[-1].upper() + " OPTIONS"
+                                (
+                                    "OPTIONS"
+                                    if len(prog_parts) == 1
+                                    else prog_parts[-1].upper() + " OPTIONS"
+                                )
                             ],
                             dest="",
                         )

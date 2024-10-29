@@ -52,6 +52,24 @@ def test_ambiguous_collection_4() -> None:
     assert "Unsupported type annotation for the field" not in e.value.args[0]
 
 
+def test_ambiguous_collection_5() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Dict[List[int], str]
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(A, args=["--x", "0", "1"])
+
+
+def test_ambiguous_collection_6() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Dict[str, List[int]]
+
+    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+        tyro.cli(A, args=["--x", "0", "1"])
+
+
 # Must be global.
 @dataclasses.dataclass
 class _CycleDataclass:
