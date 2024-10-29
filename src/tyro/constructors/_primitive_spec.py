@@ -57,16 +57,14 @@ def get_active_primitive_registry() -> PrimitiveConstructorRegistry:
 
 
 @dataclasses.dataclass(frozen=True)
-class TypeInfo:
-    static_type: TypeForm
-    """Field type, with all runtime annotations (typing.Annotated) stripped."""
-    static_type_origin: TypeForm | None
+class PrimitiveTypeInfo:
+    type: TypeForm
+    """Field type, with runtime annotations (typing.Annotated) stripped."""
+    type_origin: TypeForm | None
     """The output of get_origin() on the static type."""
     markers: set[_markers.Marker]
     """Set of tyro markers used to configure this field."""
-    annotations: tuple[Any, ...]
-    """All runtime annotations not included in `markers`."""
-    source_registry: PrimitiveConstructorRegistry
+    constructor_registry: PrimitiveConstructorRegistry
     """The registry used to look up constructor specifications for this type."""
 
     @staticmethod
@@ -74,20 +72,15 @@ class TypeInfo:
         raw_annotation: TypeForm,
         parent_markers: set[_markers.Marker],
         source_registry: PrimitiveConstructorRegistry,
-    ) -> TypeInfo:
-        static_type, all_annotations = _resolver.unwrap_annotated(
-            raw_annotation, search_type="all"
+    ) -> PrimitiveTypeInfo:
+        typ, extra_markers = _resolver.unwrap_annotated(
+            raw_annotation, search_type=_markers._Marker
         )
-        markers = set(a for a in all_annotations if isinstance(a, _markers._Marker))
-        annotations = tuple(
-            a for a in all_annotations if not isinstance(a, _markers._Marker)
-        )
-        return TypeInfo(
-            static_type=static_type,
-            static_type_origin=get_origin(static_type),
-            markers=markers | parent_markers,
-            annotations=annotations,
-            source_registry=source_registry,
+        return PrimitiveTypeInfo(
+            type=typ,
+            type_origin=get_origin(typ),
+            markers=parent_markers | set(extra_markers),
+            constructor_registry=source_registry,
         )
 
 
@@ -102,7 +95,7 @@ class PrimitiveConstructorSpec(Generic[T]):
     _action: Literal["append"] | None = None
 
 
-SpecFactory = Callable[[TypeInfo], PrimitiveConstructorSpec]
+SpecFactory = Callable[[PrimitiveTypeInfo], PrimitiveConstructorSpec]
 
 
 class PrimitiveConstructorRegistry:
@@ -111,7 +104,7 @@ class PrimitiveConstructorRegistry:
         self._rules: list[
             tuple[
                 # Matching function.
-                Callable[[TypeInfo], bool],
+                Callable[[PrimitiveTypeInfo], bool],
                 # Spec factory.
                 SpecFactory,
             ]
@@ -121,7 +114,7 @@ class PrimitiveConstructorRegistry:
         _apply_default_rules(self)
 
     def define_rule(
-        self, matcher_fn: Callable[[TypeInfo], bool]
+        self, matcher_fn: Callable[[PrimitiveTypeInfo], bool]
     ) -> Callable[[SpecFactory], SpecFactory]:
         def decorator(spec_factory: SpecFactory) -> SpecFactory:
             self._rules.append((matcher_fn, spec_factory))
@@ -129,14 +122,14 @@ class PrimitiveConstructorRegistry:
 
         return decorator
 
-    def get_spec(self, type_info: TypeInfo) -> PrimitiveConstructorSpec:
+    def get_spec(self, type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         """Get a constructor specification for a given type."""
         for matcher_fn, spec_factory in self._rules:
             if matcher_fn(type_info):
                 return spec_factory(type_info)
 
         raise UnsupportedTypeAnnotationError(
-            f"Unsupported type annotation: {type_info.static_type}"
+            f"Unsupported type annotation: {type_info.type}"
         )
 
     def __enter__(self) -> PrimitiveConstructorRegistry:
@@ -153,8 +146,8 @@ class PrimitiveConstructorRegistry:
 def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
     """Apply default rules to the registry."""
 
-    @registry.define_rule(lambda type_info: type_info.static_type is Any)
-    def any_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
+    @registry.define_rule(lambda type_info: type_info.type is Any)
+    def any_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         raise UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
 
     # HACK: this is for code that uses `tyro.conf.arg(constructor=json.loads)`.
@@ -163,33 +156,33 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
     # on the behavior so we'll do our best not to break it.
     vanilla_types = (int, str, float, bytes, json.loads)
 
-    @registry.define_rule(lambda type_info: type_info.static_type in vanilla_types)
-    def basics_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
+    @registry.define_rule(lambda type_info: type_info.type in vanilla_types)
+    def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         return PrimitiveConstructorSpec(
             nargs=1,
-            metavar=type_info.static_type.__name__.upper(),
+            metavar=type_info.type.__name__.upper(),
             instance_from_str=lambda args: bytes(args[0], encoding="ascii")
-            if type_info.static_type is bytes
-            else type_info.static_type(args[0]),
-            is_instance=lambda x: isinstance(x, type_info.static_type),
+            if type_info.type is bytes
+            else type_info.type(args[0]),
+            is_instance=lambda x: isinstance(x, type_info.type),
             str_from_instance=lambda instance: [str(instance)],
         )
 
     if "torch" in sys.modules.keys():
         import torch
 
-        @registry.define_rule(lambda type_info: type_info.static_type is torch.device)
-        def basics_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
+        @registry.define_rule(lambda type_info: type_info.type is torch.device)
+        def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
             return PrimitiveConstructorSpec(
                 nargs=1,
-                metavar=type_info.static_type.__name__.upper(),
+                metavar=type_info.type.__name__.upper(),
                 instance_from_str=lambda args: torch.device(args[0]),
-                is_instance=lambda x: isinstance(x, type_info.static_type),
+                is_instance=lambda x: isinstance(x, type_info.type),
                 str_from_instance=lambda instance: [str(instance)],
             )
 
-    @registry.define_rule(lambda type_info: type_info.static_type is bool)
-    def bool_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
+    @registry.define_rule(lambda type_info: type_info.type is bool)
+    def bool_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         del type_info
         return PrimitiveConstructorSpec(
             nargs=1,
@@ -200,8 +193,8 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             str_from_instance=lambda instance: ["True" if instance else "False"],
         )
 
-    @registry.define_rule(lambda type_info: type_info.static_type is type(None))
-    def nonetype_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
+    @registry.define_rule(lambda type_info: type_info.type is type(None))
+    def nonetype_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         del type_info
         return PrimitiveConstructorSpec(
             nargs=1,
@@ -213,31 +206,31 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         )
 
     @registry.define_rule(
-        lambda type_info: type_info.static_type in (os.PathLike, pathlib.Path)
+        lambda type_info: type_info.type in (os.PathLike, pathlib.Path)
         or (
-            inspect.isclass(type_info.static_type)
-            and issubclass(type_info.static_type, pathlib.PurePath)
+            inspect.isclass(type_info.type)
+            and issubclass(type_info.type, pathlib.PurePath)
         )
     )
-    def path_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
+    def path_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         return PrimitiveConstructorSpec(
             nargs=1,
-            metavar=type_info.static_type.__name__.upper(),
+            metavar=type_info.type.__name__.upper(),
             instance_from_str=lambda args: pathlib.Path(args[0]),
             is_instance=lambda x: hasattr(x, "__fspath__"),
             str_from_instance=lambda instance: [str(instance)],
         )
 
     @registry.define_rule(
-        lambda type_info: inspect.isclass(type_info.static_type)
-        and issubclass(type_info.static_type, enum.Enum)
+        lambda type_info: inspect.isclass(type_info.type)
+        and issubclass(type_info.type, enum.Enum)
     )
-    def enum_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
-        cast_type = cast(Type[enum.Enum], type_info.static_type)
+    def enum_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
+        cast_type = cast(Type[enum.Enum], type_info.type)
         if _markers.EnumChoicesFromValues in type_info.markers:
             choices = tuple(str(m.value) for m in cast_type)
         else:
-            choices = tuple(type_info.static_type.__members__.keys())
+            choices = tuple(type_info.type.__members__.keys())
 
         return PrimitiveConstructorSpec(
             nargs=1,
@@ -257,30 +250,30 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         )
 
     @registry.define_rule(
-        lambda type_info: type_info.static_type
+        lambda type_info: type_info.type
         in (datetime.datetime, datetime.date, datetime.time)
     )
-    def datetime_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
+    def datetime_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         return PrimitiveConstructorSpec(
             nargs=1,
             metavar={
                 datetime.datetime: "YYYY-MM-DD[THH:MM:[SS[…]]]",
                 datetime.date: "YYYY-MM-DD",
                 datetime.time: "HH:MM[:SS[…]]",
-            }[type_info.static_type],
+            }[type_info.type],
             instance_from_str=lambda args: cast(
                 Union[
                     Type[datetime.datetime], Type[datetime.date], Type[datetime.time]
                 ],
-                type_info.static_type,
+                type_info.type,
             ).fromisoformat(args[0]),
-            is_instance=lambda x: isinstance(x, type_info.static_type),
+            is_instance=lambda x: isinstance(x, type_info.type),
             str_from_instance=lambda instance: [instance.isoformat()],
         )
 
-    @registry.define_rule(lambda type_info: type_info.static_type_origin is tuple)
-    def tuple_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
-        types = get_args(type_info.static_type)
+    @registry.define_rule(lambda type_info: type_info.type_origin is tuple)
+    def tuple_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
+        types = get_args(type_info.type)
         typeset = set(types)  # Note that sets are unordered.
         typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
 
@@ -293,18 +286,16 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         inner_specs = []
         total_nargs = 0
         for contained_type in types:
-            spec = type_info.source_registry.get_spec(
-                TypeInfo.make(
-                    contained_type, type_info.markers, type_info.source_registry
+            spec = type_info.constructor_registry.get_spec(
+                PrimitiveTypeInfo.make(
+                    contained_type, type_info.markers, type_info.constructor_registry
                 )
             )
             if isinstance(spec.nargs, int):
                 total_nargs += spec.nargs
             else:
                 raise UnsupportedTypeAnnotationError(
-                    f"Tuple contains a variable-length sequence {contained_type}, which causes ambiguity when nested."
-                    " For nesting variable-length sequences (example: List[List[int]]),"
-                    " `tyro.conf.UseAppendAction` can help resolve ambiguities."
+                    f"Tuples containing a variable-length sequences ({contained_type}) are not supported."
                 )
 
             inner_specs.append(spec)
@@ -344,7 +335,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         )
 
     @registry.define_rule(
-        lambda type_info: type_info.static_type
+        lambda type_info: type_info.type
         in (
             dict,
             Dict,
@@ -358,8 +349,8 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             Set,
         )
     )
-    def vague_container_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
-        typ = type_info.static_type
+    def vague_container_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
+        typ = type_info.type
         if typ in (dict, Dict):
             typ = Dict[str, str]
         elif typ in (tuple, Tuple):
@@ -368,16 +359,16 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             typ = List[str]
         elif typ in (set, Set):
             typ = Set[str]
-        return type_info.source_registry.get_spec(
-            TypeInfo.make(
+        return type_info.constructor_registry.get_spec(
+            PrimitiveTypeInfo.make(
                 typ,
                 parent_markers=type_info.markers,
-                source_registry=type_info.source_registry,
+                source_registry=type_info.constructor_registry,
             )
         )
 
     @registry.define_rule(
-        lambda type_info: type_info.static_type_origin
+        lambda type_info: type_info.type_origin
         in (
             collections.abc.Sequence,
             frozenset,
@@ -386,23 +377,23 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             collections.deque,
         )
     )
-    def sequence_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
-        container_type = type_info.static_type_origin
+    def sequence_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
+        container_type = type_info.type_origin
         assert container_type is not None
         if container_type is collections.abc.Sequence:
             container_type = list
 
         if container_type is tuple:
-            (contained_type, ell) = get_args(type_info.static_type)
+            (contained_type, ell) = get_args(type_info.type)
             assert ell == Ellipsis
         else:
-            (contained_type,) = get_args(type_info.static_type)
+            (contained_type,) = get_args(type_info.type)
 
-        inner_spec = type_info.source_registry.get_spec(
-            TypeInfo.make(
+        inner_spec = type_info.constructor_registry.get_spec(
+            PrimitiveTypeInfo.make(
                 raw_annotation=contained_type,
                 parent_markers=type_info.markers - {_markers.UseAppendAction},
-                source_registry=type_info.source_registry,
+                source_registry=type_info.constructor_registry,
             )
         )
         if _markers.UseAppendAction in type_info.markers:
@@ -418,9 +409,9 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
                 nargs=inner_spec.nargs,
                 metavar=inner_spec.metavar,
                 choices=inner_spec.choices,
-                instance_from_str=lambda args: cast(
-                    Callable, type_info.static_type_origin
-                )(inner_spec.instance_from_str(a) for a in cast(List[List[str]], args)),
+                instance_from_str=lambda args: cast(Callable, type_info.type_origin)(
+                    inner_spec.instance_from_str(a) for a in cast(List[List[str]], args)
+                ),
                 is_instance=lambda x: isinstance(x, container_type)
                 and all(inner_spec.is_instance(i) for i in x),
                 str_from_instance=str_from_instance_append,
@@ -469,23 +460,22 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         )
 
     @registry.define_rule(
-        lambda type_info: type_info.static_type_origin
-        in (dict, collections.abc.Mapping)
+        lambda type_info: type_info.type_origin in (dict, collections.abc.Mapping)
     )
-    def dict_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
-        key_type, val_type = get_args(type_info.static_type)
-        key_spec = type_info.source_registry.get_spec(
-            TypeInfo.make(
+    def dict_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
+        key_type, val_type = get_args(type_info.type)
+        key_spec = type_info.constructor_registry.get_spec(
+            PrimitiveTypeInfo.make(
                 raw_annotation=key_type,
                 parent_markers=type_info.markers,
-                source_registry=type_info.source_registry,
+                source_registry=type_info.constructor_registry,
             )
         )
-        val_spec = type_info.source_registry.get_spec(
-            TypeInfo.make(
+        val_spec = type_info.constructor_registry.get_spec(
+            PrimitiveTypeInfo.make(
                 raw_annotation=val_type,
                 parent_markers=type_info.markers - {_markers.UseAppendAction},
-                source_registry=type_info.source_registry,
+                source_registry=type_info.constructor_registry,
             )
         )
         pair_metavar = f"{key_spec.metavar} {val_spec.metavar}"
@@ -576,10 +566,10 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             )
 
     @registry.define_rule(
-        lambda type_info: type_info.static_type_origin in (Literal, LiteralAlternate)
+        lambda type_info: type_info.type_origin in (Literal, LiteralAlternate)
     )
-    def literal_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
-        choices = get_args(type_info.static_type)
+    def literal_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
+        choices = get_args(type_info.type)
         str_choices = tuple(
             (x.value if _markers.EnumChoicesFromValues in type_info.markers else x.name)
             if isinstance(x, enum.Enum)
@@ -596,10 +586,10 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         )
 
     @registry.define_rule(
-        lambda type_info: type_info.static_type_origin in (Union, _resolver.UnionType)
+        lambda type_info: type_info.type_origin in (Union, _resolver.UnionType)
     )
-    def union_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
-        options = list(get_args(type_info.static_type))
+    def union_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
+        options = list(get_args(type_info.type))
         if type(None) in options:
             # Move `None` types to the beginning.
             # If we have `Optional[str]`, we want this to be parsed as
@@ -614,11 +604,11 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         nargs: int | Literal["*"] = 1
         first = True
         for t in options:
-            option_spec = type_info.source_registry.get_spec(
-                TypeInfo.make(
+            option_spec = type_info.constructor_registry.get_spec(
+                PrimitiveTypeInfo.make(
                     raw_annotation=t,
                     parent_markers=type_info.markers,
-                    source_registry=type_info.source_registry,
+                    source_registry=type_info.constructor_registry,
                 )
             )
             if option_spec.choices is None:

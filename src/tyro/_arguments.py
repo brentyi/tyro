@@ -26,7 +26,7 @@ from . import _argparse as argparse
 from . import _fields, _strings
 from .conf import _markers
 from .constructors._primitive_spec import (
-    TypeInfo,
+    PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
     get_active_primitive_registry,
 )
@@ -187,7 +187,7 @@ class ArgumentDefinition:
         # much faster than a functional approach.
         lowered = LoweredArgumentDefinition()
         _rule_handle_boolean_flags(self, lowered)
-        _rule_recursive_instantiator_from_type(self, lowered)
+        _rule_apply_primitive_specs(self, lowered)
         _rule_counters(self, lowered)
         _rule_generate_helptext(self, lowered)
         _rule_set_name_or_flag_and_dest(self, lowered)
@@ -257,7 +257,7 @@ def _rule_handle_boolean_flags(
     )
 
 
-def _rule_recursive_instantiator_from_type(
+def _rule_apply_primitive_specs(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
@@ -280,7 +280,7 @@ def _rule_recursive_instantiator_from_type(
     try:
         registry = get_active_primitive_registry()
         spec = registry.get_spec(
-            TypeInfo.make(
+            PrimitiveTypeInfo.make(
                 cast(type, arg.field.type_or_callable),
                 arg.field.markers,
                 source_registry=registry,

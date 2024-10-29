@@ -98,36 +98,28 @@ class FieldDefinition:
     @staticmethod
     def make(
         name: str,
-        type_or_callable: Union[TypeForm[Any], Callable],
+        static_type: Union[TypeForm[Any], Callable],
         default: Any,
         is_default_from_default_instance: bool,
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
-        *,
-        markers: Tuple[_markers.Marker, ...] = (),
     ):
         # Resolve generics.
-        type_or_callable = _resolver.TypeParamResolver.concretize_type_params(
-            type_or_callable
-        )
+        static_type = _resolver.TypeParamResolver.concretize_type_params(static_type)
 
         # Narrow types.
-        if type_or_callable is Any and default not in MISSING_SINGLETONS:
-            type_or_callable = type(default)
+        if static_type is Any and default not in MISSING_SINGLETONS:
+            static_type = type(default)
         else:
             # TypeVar constraints are already applied in
             # TypeParamResolver.concretize_type_params(), but that won't be
             # called for functions.
-            type_or_callable = _resolver.type_from_typevar_constraints(type_or_callable)
-            type_or_callable = _resolver.narrow_collection_types(
-                type_or_callable, default
-            )
-            type_or_callable = _resolver.narrow_union_type(type_or_callable, default)
+            static_type = _resolver.type_from_typevar_constraints(static_type)
+            static_type = _resolver.narrow_collection_types(static_type, default)
+            static_type = _resolver.narrow_union_type(static_type, default)
 
         # Try to extract argconf overrides from type.
-        _, argconfs = _resolver.unwrap_annotated(
-            type_or_callable, _confstruct._ArgConfig
-        )
+        _, argconfs = _resolver.unwrap_annotated(static_type, _confstruct._ArgConfig)
         argconf = _confstruct._ArgConfig(
             None,
             None,
@@ -150,10 +142,7 @@ class FieldDefinition:
             if argconf.help is not None:
                 helptext = argconf.help
 
-        type_or_callable, inferred_markers = _resolver.unwrap_annotated(
-            type_or_callable, _markers._Marker
-        )
-        markers = inferred_markers + markers
+        static_type, markers = _resolver.unwrap_annotated(static_type, _markers._Marker)
 
         # Include markers set via context manager.
         for context_markers in global_context_markers:
@@ -166,9 +155,9 @@ class FieldDefinition:
             # Be relatively conservative: isinstance() can be checked on non-type
             # types (like unions in Python >=3.10), but we'll only consider single types
             # for now.
-            type(type_or_callable) is type
-            and not isinstance(default, type_or_callable)  # type: ignore
-            # If a custom constructor is set, type_or_callable may not be
+            type(static_type) is type
+            and not isinstance(default, static_type)  # type: ignore
+            # If a custom constructor is set, static_type may not be
             # matched to the annotated type.
             and argconf.constructor_factory is None
             and default not in DEFAULT_SENTINEL_SINGLETONS
@@ -179,16 +168,16 @@ class FieldDefinition:
             # If the default value doesn't match the resolved type, we expand the
             # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
             warnings.warn(
-                f"The field {name} is annotated with type {type_or_callable}, "
+                f"The field {name} is annotated with type {static_type}, "
                 f"but the default value {default} has type {type(default)}. "
                 f"We'll try to handle this gracefully, but it may cause unexpected behavior."
             )
-            type_or_callable = Union[type_or_callable, type(default)]  # type: ignore
+            static_type = Union[static_type, type(default)]  # type: ignore
 
         out = FieldDefinition(
             intern_name=name,
             extern_name=name if argconf.name is None else argconf.name,
-            type_or_callable=type_or_callable
+            type_or_callable=static_type
             if argconf.constructor_factory is None
             else argconf.constructor_factory(),
             default=default,
@@ -330,19 +319,21 @@ def field_list_from_callable(
 
     if isinstance(field_list, UnsupportedNestedTypeMessage):
         if support_single_arg_types:
-            return (
-                f,
-                [
-                    FieldDefinition.make(
-                        name="value",
-                        type_or_callable=f,
-                        default=default_instance,
-                        is_default_from_default_instance=True,
-                        helptext="",
-                        markers=(_markers.Positional, _markers._PositionalCall),
-                    )
-                ],
-            )
+            with FieldDefinition.marker_context(
+                (_markers.Positional, _markers._PositionalCall)
+            ):
+                return (
+                    f,
+                    [
+                        FieldDefinition.make(
+                            name="value",
+                            static_type=f,
+                            default=default_instance,
+                            is_default_from_default_instance=True,
+                            helptext="",
+                        )
+                    ],
+                )
         else:
             raise UnsupportedTypeAnnotationError(field_list.message)
 
@@ -518,7 +509,7 @@ def _field_list_from_typeddict(
         field_list.append(
             FieldDefinition.make(
                 name=name,
-                type_or_callable=typ,
+                static_type=typ,
                 default=default,
                 is_default_from_default_instance=is_default_from_default_instance,
                 helptext=_docstrings.get_field_docstring(cls, name),
@@ -552,7 +543,7 @@ def _field_list_from_namedtuple(
         field_list.append(
             FieldDefinition.make(
                 name=name,
-                type_or_callable=typ,
+                static_type=typ,
                 default=default,
                 is_default_from_default_instance=True,
                 helptext=_docstrings.get_field_docstring(cls, name),
@@ -604,7 +595,7 @@ def _field_list_from_dataclass(
         field_list.append(
             FieldDefinition.make(
                 name=dc_field.name,
-                type_or_callable=dc_field.type,
+                static_type=dc_field.type,
                 default=default,
                 is_default_from_default_instance=is_default_from_default_instance,
                 helptext=helptext,
@@ -690,7 +681,7 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=pd1_field.name,
-                    type_or_callable=hints[pd1_field.name],
+                    static_type=hints[pd1_field.name],
                     default=default,
                     is_default_from_default_instance=is_default_from_default_instance,
                     helptext=helptext,
@@ -710,7 +701,7 @@ def _field_list_from_pydantic(
             field_list.append(
                 FieldDefinition.make(
                     name=name,
-                    type_or_callable=Annotated.__class_getitem__(  # type: ignore
+                    static_type=Annotated.__class_getitem__(  # type: ignore
                         (pd2_field.annotation,) + tuple(pd2_field.metadata)
                     )
                     if len(pd2_field.metadata) > 0
@@ -777,7 +768,7 @@ def _field_list_from_attrs(
         field_list.append(
             FieldDefinition.make(
                 name=name,
-                type_or_callable=attr_field.type,
+                static_type=attr_field.type,
                 default=default,
                 is_default_from_default_instance=is_default_from_default_instance,
                 helptext=_docstrings.get_field_docstring(cls, name),
@@ -824,7 +815,7 @@ def _field_list_from_tuple(
                 # argument, but in practice the brackets are annoying because they
                 # require escaping.
                 name=str(i),
-                type_or_callable=child,
+                static_type=child,
                 default=default_i,
                 is_default_from_default_instance=True,
                 helptext="",
@@ -915,7 +906,7 @@ def _try_field_list_from_sequence_inner(
         field_list.append(
             FieldDefinition.make(
                 name=str(i),
-                type_or_callable=contained_type,
+                static_type=contained_type,
                 default=default_i,
                 is_default_from_default_instance=True,
                 helptext="",
@@ -937,7 +928,7 @@ def _field_list_from_dict(
         field_list.append(
             FieldDefinition.make(
                 name=str(k) if not isinstance(k, enum.Enum) else k.name,
-                type_or_callable=type(v),
+                static_type=type(v),
                 default=v,
                 is_default_from_default_instance=True,
                 helptext=None,
@@ -1054,17 +1045,17 @@ def _field_list_from_params(
             typ = Dict.__getitem__((str, typ))  # type: ignore
             default = {}
 
-        field_list.append(
-            FieldDefinition.make(
-                name=param.name,
-                # Note that param.annotation doesn't resolve forward references.
-                type_or_callable=typ,
-                default=default,
-                is_default_from_default_instance=False,
-                helptext=helptext,
-                markers=markers,
+        with FieldDefinition.marker_context(markers):
+            field_list.append(
+                FieldDefinition.make(
+                    name=param.name,
+                    # Note that param.annotation doesn't resolve forward references.
+                    static_type=typ,
+                    default=default,
+                    is_default_from_default_instance=False,
+                    helptext=helptext,
+                )
             )
-        )
 
     return field_list
 
