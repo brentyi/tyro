@@ -6,6 +6,7 @@ import dataclasses
 import datetime
 import enum
 import inspect
+import json
 import os
 import pathlib
 import sys
@@ -105,7 +106,7 @@ SpecFactory = Callable[[TypeInfo], PrimitiveConstructorSpec]
 
 
 class PrimitiveConstructorRegistry:
-    def __init__(self):
+    def __init__(self) -> None:
         self._old_registry: PrimitiveConstructorRegistry | None = None
         self._rules: list[
             tuple[
@@ -156,16 +157,11 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
     def any_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
         raise UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
 
-    if "json" in sys.modules.keys():
-        # HACK: this is for code that uses `tyro.conf.arg(constructor=json.loads)`.
-        # We're going to deprecate this syntax (the constructor= argument in
-        # tyro.conf.arg), but there is code that lives in the wild that relies
-        # on the behavior so we'll do our best not to break it.
-        import json
-
-        vanilla_types = (int, str, float, bytes, json.loads)
-    else:
-        vanilla_types = (int, str, float, bytes)
+    # HACK: this is for code that uses `tyro.conf.arg(constructor=json.loads)`.
+    # We're going to deprecate this syntax (the constructor= argument in
+    # tyro.conf.arg), but there is code that lives in the wild that relies
+    # on the behavior so we'll do our best not to break it.
+    vanilla_types = (int, str, float, bytes, json.loads)
 
     @registry.define_rule(lambda type_info: type_info.static_type in vanilla_types)
     def basics_rule(type_info: TypeInfo) -> PrimitiveConstructorSpec:
@@ -411,7 +407,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         )
         if _markers.UseAppendAction in type_info.markers:
 
-            def str_from_instance(instance: Sequence) -> list[str]:
+            def str_from_instance_append(instance: Sequence) -> list[str]:
                 # TODO: this is not quite right.
                 out = []
                 for i in instance:
@@ -427,7 +423,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
                 )(inner_spec.instance_from_str(a) for a in cast(List[List[str]], args)),
                 is_instance=lambda x: isinstance(x, container_type)
                 and all(inner_spec.is_instance(i) for i in x),
-                str_from_instance=str_from_instance,
+                str_from_instance=str_from_instance_append,
                 _action="append",
             )
 
@@ -506,6 +502,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
                 args_cast = cast(List[List[str]], args)
 
                 key_nargs = key_spec.nargs
+                assert isinstance(key_nargs, int)
                 out = {}
                 for s in args_cast:
                     out[key_spec.instance_from_str(s[:key_nargs])] = (
@@ -614,7 +611,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
         # right.
         option_specs = []
         choices: tuple[str, ...] | None = ()
-        nargs: None | int | Literal["*"] = 1
+        nargs: int | Literal["*"] = 1
         first = True
         for t in options:
             option_spec = type_info.source_registry.get_spec(
