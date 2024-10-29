@@ -21,7 +21,7 @@ import tyro
 class TrainConfig:
     # Example of a variable-length tuple. `list[T]`, `set[T]`,
     # `dict[K, V]`, etc are supported as well.
-    dataset_sources: tuple[pathlib.Path, ...]
+    dataset_sources: tyro.conf.UseAppendAction[tuple[pathlib.Path, ...]]
     """Paths to load training data from. This can be multiple!"""
 
     # Fixed-length tuples are also okay.

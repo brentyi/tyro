@@ -688,7 +688,7 @@ def test_pathlike() -> None:
         pass
 
     helptext = get_helptext_with_checks(main)
-    assert "--x PATH " in helptext
+    assert "--x PATHLIKE " in helptext
 
 
 def test_nested_bool() -> None:
@@ -903,9 +903,13 @@ def test_argconf_constructor_json_special_case() -> None:
         """Help message."""
 
         x: Annotated[
+            # NOTE: this style of JSON construction is/will be deprecated.
+            # Avoid.
             Tuple[str, str], tyro.conf.arg(constructor=json.loads, metavar="JSON")
         ] = ("hello", "world")
         y: Annotated[
+            # NOTE: this style of JSON construction is/will be deprecated.
+            # Avoid.
             Tuple[int, int], tyro.conf.arg(constructor=json.loads, metavar="JSON")
         ] = (3, 5)
 
@@ -919,6 +923,8 @@ def test_argconf_constructor_json_special_case() -> None:
 def test_optional_group() -> None:
     def f(
         x: Annotated[
+            # NOTE: this style of JSON construction is/will be deprecated.
+            # Avoid.
             Tuple[str, str], tyro.conf.arg(constructor=json.loads, metavar="JSON")
         ] = ("hello", "world"),
         y: int = 3,

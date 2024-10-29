@@ -329,7 +329,7 @@ def _cli_impl(
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
     # For example: passing in f=int will result in a dataclass with a single field
     # typed as int.
-    if not _fields.is_nested_type(cast(type, f), default_instance_internal):
+    if not _fields.is_struct_type(cast(type, f), default_instance_internal):
         dummy_field = cast(
             dataclasses.Field,
             dataclasses.field(),

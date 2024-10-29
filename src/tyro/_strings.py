@@ -4,7 +4,7 @@ import contextlib
 import functools
 import re
 import textwrap
-from typing import List, Sequence, Tuple, Type
+from typing import Iterable, List, Sequence, Tuple, Type
 
 from typing_extensions import Literal, get_args, get_origin
 
@@ -84,7 +84,7 @@ def _subparser_name_from_type(cls: Type) -> Tuple[str, bool]:
         cls, _resolver.TyroTypeAliasBreadCrumb
     )
     cls, found_subcommand_configs = _resolver.unwrap_annotated(
-        cls, _confstruct._SubcommandConfiguration
+        cls, _confstruct._SubcommandConfig
     )
 
     # Subparser name from `tyro.conf.subcommand()`.
@@ -164,6 +164,42 @@ def multi_metavar_from_single(single: str) -> str:
         return f"[{single} [...]]"
     else:
         return f"[{single} [{single} ...]]"
+
+
+def join_union_metavars(metavars: Iterable[str]) -> str:
+    """Metavar generation helper for unions. Could be revisited.
+
+    Examples:
+        None, INT => NONE|INT
+        {0,1,2}, {3,4} => {0,1,2,3,4}
+        {0,1,2}, {3,4}, STR => {0,1,2,3,4}|STR
+        {None}, INT [INT ...] => {None}|{INT [INT ...]}
+        STR, INT [INT ...] => STR|{INT [INT ...]}
+        STR, INT INT => STR|{INT INT}
+
+    The curly brackets are unfortunately overloaded but alternatives all interfere with
+    argparse internals.
+    """
+    metavars = tuple(metavars)
+    merged_metavars = [metavars[0]]
+    for i in range(1, len(metavars)):
+        prev = merged_metavars[-1]
+        curr = metavars[i]
+        if (
+            prev.startswith("{")
+            and prev.endswith("}")
+            and curr.startswith("{")
+            and curr.endswith("}")
+        ):
+            merged_metavars[-1] = prev[:-1] + "," + curr[1:]
+        else:
+            merged_metavars.append(curr)
+
+    for i, m in enumerate(merged_metavars):
+        if " " in m:
+            merged_metavars[i] = "{" + m + "}"
+
+    return "|".join(merged_metavars)
 
 
 def remove_single_line_breaks(helptext: str) -> str:

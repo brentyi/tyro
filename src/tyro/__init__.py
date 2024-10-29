@@ -4,7 +4,7 @@ from . import conf as conf
 from . import extras as extras
 from ._cli import cli as cli
 from ._fields import MISSING as MISSING
-from ._instantiators import (
+from .constructors._primitive_spec import (
     UnsupportedTypeAnnotationError as UnsupportedTypeAnnotationError,
 )
 

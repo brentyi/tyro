@@ -40,6 +40,10 @@ def get_helptext_with_checks(
     unformatted_helptext = parser.format_help()
     assert (
         tyro._strings.strip_ansi_sequences(unformatted_helptext) == unformatted_helptext
+    ), (
+        tyro._strings.strip_ansi_sequences(unformatted_helptext)
+        + "\n|\n"
+        + unformatted_helptext
     )
     unformatted_usage = parser.format_usage()
     assert tyro._strings.strip_ansi_sequences(unformatted_usage) == unformatted_usage

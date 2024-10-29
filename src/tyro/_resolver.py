@@ -215,8 +215,8 @@ def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
             isinstance(
                 anno,
                 (
-                    conf._confstruct._ArgConfiguration,
-                    conf._confstruct._SubcommandConfiguration,
+                    conf._confstruct._ArgConfig,
+                    conf._confstruct._SubcommandConfig,
                 ),
             )
             and anno.constructor_factory is not None
