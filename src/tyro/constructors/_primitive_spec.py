@@ -532,7 +532,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             return out
 
         def str_from_instance(instance: dict) -> list[str]:
-            out = []
+            out: list[Any] = []
             assert (
                 len(instance) == 0
             ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
