@@ -1037,6 +1037,19 @@ def test_append_nested_dict_double() -> None:
     assert tyro.cli(A, args=[]) == A(x={})
 
 
+def test_append_nested_dict_double_with_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Dict[str, Dict[str, int]]] = dataclasses.field(
+            default_factory=dict
+        )
+
+    assert tyro.cli(A, args="--x 0 1 2 3 4 --x 4 5 6".split(" ")) == A(
+        x={"0": {"1": 2, "3": 4}, "4": {"5": 6}}
+    )
+    assert tyro.cli(A, args=[]) == A(x={})
+
+
 def test_duplicated_arg() -> None:
     # Loosely inspired by: https://github.com/brentyi/tyro/issues/49
     @dataclasses.dataclass

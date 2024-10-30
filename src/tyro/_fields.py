@@ -43,14 +43,7 @@ from typing_extensions import (
     is_typeddict,
 )
 
-from . import (
-    _docstrings,
-    _resolver,
-    _singleton,
-    _strings,
-    _unsafe_cache,
-    conf,  # Avoid circular import.
-)
+from . import _docstrings, _resolver, _singleton, _strings, _unsafe_cache
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import UnsupportedTypeAnnotationError
@@ -374,6 +367,8 @@ def _try_field_list_from_callable(
         # Check for default instances in subcommand configs. This is needed for
         # is_nested_type() when arguments are not valid without a default, and this
         # default is specified in the subcommand config.
+        from . import conf  # Avoid circular import.
+
         f, found_subcommand_configs = _resolver.unwrap_annotated(
             f, conf._confstruct._SubcommandConfig
         )

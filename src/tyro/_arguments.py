@@ -21,6 +21,7 @@ from typing import (
 
 import rich.markup
 import shtab
+from typing_extensions import get_origin
 
 from . import _argparse as argparse
 from . import _fields, _strings
@@ -326,12 +327,45 @@ def _rule_apply_primitive_specs(
 
     if spec._action == "append":
 
-        def append_instantiator(x: Any) -> Any:
-            out = spec.instance_from_str(x)
-            if arg.field.default in _fields.MISSING_SINGLETONS:
-                return spec.instance_from_str(x)
+        def append_instantiator(x: list[list[str]]) -> Any:
+            """Handle UseAppendAction effects."""
+            # We'll assume that the type is annotated as Dict[...], Tuple[...], List[...], etc.
+            container_type = get_origin(arg.field.type_or_callable)
+            if container_type is None:
+                # Raw annotation, like `UseAppendAction[list]`. It's unlikely
+                # that a user would use this but we can handle it.
+                container_type = arg.field.type_or_callable
 
-            return type(out)(arg.field.default) + out
+            # Instantiate initial output.
+            out = (
+                arg.field.default
+                if arg.field.default not in _fields.MISSING_SINGLETONS
+                else None
+            )
+            if out is None:
+                out = {} if container_type is dict else []
+            elif isinstance(out, dict):
+                out = out.copy()
+            else:
+                # All sequence types will be lists for now to make sure we can
+                # append to them.
+                out = list(out)
+
+            # Get + merge parts.
+            parts = [spec.instance_from_str(arg_list) for arg_list in x]
+            for part in parts:
+                if out is None:
+                    out = part
+                elif isinstance(out, dict):
+                    out.update(part)
+                else:
+                    out.append(part)
+
+            # Return output with correct type.
+            if type(out) is dict:
+                return out
+            else:
+                return container_type(out)
 
         lowered.instance_from_str = append_instantiator
         lowered.default = None

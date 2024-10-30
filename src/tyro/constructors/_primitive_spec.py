@@ -58,6 +58,8 @@ def get_active_primitive_registry() -> PrimitiveConstructorRegistry:
 
 @dataclasses.dataclass(frozen=True)
 class PrimitiveTypeInfo:
+    """Information used to generate constructors for primitive types."""
+
     type: TypeForm
     """Field type, with runtime annotations (typing.Annotated) stripped."""
     type_origin: TypeForm | None
@@ -86,19 +88,36 @@ class PrimitiveTypeInfo:
 
 @dataclasses.dataclass(frozen=True)
 class PrimitiveConstructorSpec(Generic[T]):
+    """Specification for constructing a primitive type from a string."""
+
     nargs: int | Literal["*"]
+    """Number of arguments required to construct an instance. If nargs is "*", then
+    the number of arguments is variable."""
     metavar: str
+    """Metavar to display in help messages."""
     instance_from_str: Callable[[list[str]], T]
+    """Given a list of string arguments, construct an instance of the type. The
+    length of the list will match the value of nargs."""
     is_instance: Callable[[Any], bool]
+    """Given an object instance, does it match this primitive type? This is
+    used for help messages when a default is provided."""
     str_from_instance: Callable[[T], list[str]]
+    """Convert an instance to a list of string arguments that would construct
+    the instance. This is used for help messages when a default is provided."""
     choices: tuple[str, ...] | None = None
+    """Finite set of choices for arguments."""
+
     _action: Literal["append"] | None = None
+    """Internal action to use. Not part of the public API."""
 
 
 SpecFactory = Callable[[PrimitiveTypeInfo], PrimitiveConstructorSpec]
 
 
 class PrimitiveConstructorRegistry:
+    """Registry for rules that define how primitive types that can be
+    constructed from a single command-line argument."""
+
     def __init__(self) -> None:
         self._old_registry: PrimitiveConstructorRegistry | None = None
         self._rules: list[
@@ -402,29 +421,10 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
                 source_registry=type_info.constructor_registry,
             )
         )
-        if _markers.UseAppendAction in type_info.markers:
 
-            def str_from_instance_append(instance: Sequence) -> list[str]:
-                # TODO: this is not quite right.
-                out = []
-                for i in instance:
-                    out.extend(inner_spec.str_from_instance(i))
-                return out
-
-            return PrimitiveConstructorSpec(
-                nargs=inner_spec.nargs,
-                metavar=inner_spec.metavar,
-                choices=inner_spec.choices,
-                instance_from_str=lambda args: cast(Callable, type_info.type_origin)(
-                    inner_spec.instance_from_str(a) for a in cast(List[List[str]], args)
-                ),
-                is_instance=lambda x: isinstance(x, container_type)
-                and all(inner_spec.is_instance(i) for i in x),
-                str_from_instance=str_from_instance_append,
-                _action="append",
-            )
-
-        if not isinstance(inner_spec.nargs, int):
+        if _markers.UseAppendAction not in type_info.markers and not isinstance(
+            inner_spec.nargs, int
+        ):
             raise UnsupportedTypeAnnotationError(
                 f"{container_type} and {contained_type} are both variable-length sequences."
                 " This causes ambiguity."
@@ -455,15 +455,27 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
                 out.extend(inner_spec.str_from_instance(i))
             return out
 
-        return PrimitiveConstructorSpec(
-            nargs="*",
-            metavar=_strings.multi_metavar_from_single(inner_spec.metavar),
-            instance_from_str=instance_from_str,
-            is_instance=lambda x: isinstance(x, container_type)
-            and all(inner_spec.is_instance(i) for i in x),
-            str_from_instance=str_from_instance,
-            choices=inner_spec.choices,
-        )
+        if _markers.UseAppendAction in type_info.markers:
+            return PrimitiveConstructorSpec(
+                nargs=inner_spec.nargs,
+                metavar=inner_spec.metavar,
+                instance_from_str=inner_spec.instance_from_str,
+                is_instance=lambda x: isinstance(x, container_type)
+                and all(inner_spec.is_instance(i) for i in x),
+                str_from_instance=str_from_instance,
+                choices=inner_spec.choices,
+                _action="append",
+            )
+        else:
+            return PrimitiveConstructorSpec(
+                nargs="*",
+                metavar=_strings.multi_metavar_from_single(inner_spec.metavar),
+                instance_from_str=instance_from_str,
+                is_instance=lambda x: isinstance(x, container_type)
+                and all(inner_spec.is_instance(i) for i in x),
+                str_from_instance=str_from_instance,
+                choices=inner_spec.choices,
+            )
 
     @registry.define_rule(
         lambda type_info: type_info.type_origin in (dict, collections.abc.Mapping)
@@ -491,37 +503,49 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
                 "Dictionary keys must have a fixed number of arguments."
             )
 
+        if _markers.UseAppendAction not in type_info.markers and not isinstance(
+            val_spec.nargs, int
+        ):
+            raise UnsupportedTypeAnnotationError(
+                "Dictionary values must have a fixed number of arguments."
+            )
+
+        def instance_from_str(args: list[str]) -> dict:
+            out = {}
+            key_nargs = key_spec.nargs
+            assert isinstance(key_nargs, int)
+            val_nargs = (
+                val_spec.nargs
+                if _markers.UseAppendAction not in type_info.markers
+                else len(args) - key_nargs
+            )
+            assert isinstance(val_nargs, int)
+
+            pair_nargs = key_nargs + val_nargs
+            if len(args) % pair_nargs != 0:
+                raise ValueError("Incomplete set of key-value pairs!")
+
+            for i in range(0, len(args), pair_nargs):
+                key = key_spec.instance_from_str(args[i : i + key_nargs])
+                value = val_spec.instance_from_str(args[i + key_nargs : i + pair_nargs])
+                out[key] = value
+            return out
+
+        def str_from_instance(instance: dict) -> list[str]:
+            out = []
+            assert (
+                len(instance) == 0
+            ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
+            # for key, value in instance.items():
+            #     out.extend(key_spec.str_from_instance(key))
+            #     out.extend(val_spec.str_from_instance(value))
+            return out
+
         if _markers.UseAppendAction in type_info.markers:
-
-            def instance_from_str(args: list[str]) -> dict:
-                # Our types are currently broken for the append actions.
-                args_cast = cast(List[List[str]], args)
-
-                key_nargs = key_spec.nargs
-                assert isinstance(key_nargs, int)
-                out = {}
-                for s in args_cast:
-                    out[key_spec.instance_from_str(s[:key_nargs])] = (
-                        val_spec.instance_from_str(s[key_nargs:])
-                    )
-                return out
-
-            def str_from_instance(instance: dict) -> list[str]:
-                out = []
-                assert (
-                    len(instance) == 0
-                ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
-                # for key, value in instance.items():
-                #     out.extend(key_spec.str_from_instance(key))
-                #     out.extend(val_spec.str_from_instance(value))
-                return out
-
             return PrimitiveConstructorSpec(
-                nargs=(
-                    key_spec.nargs + val_spec.nargs
-                    if isinstance(val_spec.nargs, int)
-                    else "*"
-                ),
+                nargs=key_spec.nargs + val_spec.nargs
+                if isinstance(val_spec.nargs, int)
+                else "*",
                 metavar=pair_metavar,
                 instance_from_str=instance_from_str,
                 is_instance=lambda x: isinstance(x, dict)
@@ -533,40 +557,6 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
                 _action="append",
             )
         else:
-            if not isinstance(val_spec.nargs, int):
-                raise UnsupportedTypeAnnotationError(
-                    "Dictionary values must have a fixed number of arguments."
-                )
-
-            def instance_from_str(args: list[str]) -> dict:
-                out = {}
-                key_nargs = key_spec.nargs
-                val_nargs = val_spec.nargs
-                assert isinstance(key_nargs, int)
-                assert isinstance(val_nargs, int)
-
-                pair_nargs = key_nargs + val_nargs
-                if len(args) % pair_nargs != 0:
-                    raise ValueError("Incomplete set of key-value pairs!")
-
-                for i in range(0, len(args), pair_nargs):
-                    key = key_spec.instance_from_str(args[i : i + key_nargs])
-                    value = val_spec.instance_from_str(
-                        args[i + key_nargs : i + pair_nargs]
-                    )
-                    out[key] = value
-                return out
-
-            def str_from_instance(instance: dict) -> list[str]:
-                out = []
-                assert (
-                    len(instance) == 0
-                ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
-                # for key, value in instance.items():
-                #     out.extend(key_spec.str_from_instance(key))
-                #     out.extend(val_spec.str_from_instance(value))
-                return out
-
             return PrimitiveConstructorSpec(
                 nargs="*",
                 metavar=_strings.multi_metavar_from_single(pair_metavar),
