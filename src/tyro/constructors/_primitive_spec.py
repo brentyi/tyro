@@ -563,9 +563,11 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
 
         if _markers.UseAppendAction in type_info.markers:
             return PrimitiveConstructorSpec(
-                nargs=key_spec.nargs + val_spec.nargs
-                if isinstance(val_spec.nargs, int)
-                else "*",
+                nargs=(
+                    key_spec.nargs + val_spec.nargs
+                    if isinstance(val_spec.nargs, int)
+                    else "*"
+                ),
                 metavar=pair_metavar,
                 instance_from_str=instance_from_str,
                 is_instance=lambda x: isinstance(x, dict)

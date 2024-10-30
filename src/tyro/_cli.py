@@ -1,21 +1,12 @@
 """Core public API."""
 
+from __future__ import annotations
+
 import dataclasses
 import pathlib
 import sys
 import warnings
-from typing import (
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Sequence,
-    Tuple,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import Callable, Sequence, TypeVar, cast, overload
 
 import shtab
 from typing_extensions import Literal
@@ -50,14 +41,14 @@ OutT = TypeVar("OutT")
 def cli(
     f: TypeForm[OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
+    default: None | OutT = None,
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[conf._markers.Marker]] = None,
+    config: None | Sequence[conf._markers.Marker] = None,
     primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
 ) -> OutT: ...
 
@@ -66,25 +57,25 @@ def cli(
 def cli(
     f: TypeForm[OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
+    default: None | OutT = None,
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[conf._markers.Marker]] = None,
+    config: None | Sequence[conf._markers.Marker] = None,
     primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
-) -> Tuple[OutT, List[str]]: ...
+) -> tuple[OutT, list[str]]: ...
 
 
 @overload
 def cli(
     f: Callable[..., OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
     # Passing a default makes sense for things like dataclasses, but are not
     # supported for general callables. These can, however, be specified in the
     # signature of the callable itself.
@@ -92,7 +83,7 @@ def cli(
     return_unknown_args: Literal[False] = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[conf._markers.Marker]] = None,
+    config: None | Sequence[conf._markers.Marker] = None,
     primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
 ) -> OutT: ...
 
@@ -101,9 +92,9 @@ def cli(
 def cli(
     f: Callable[..., OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
     # Passing a default makes sense for things like dataclasses, but are not
     # supported for general callables. These can, however, be specified in the
     # signature of the callable itself.
@@ -111,25 +102,25 @@ def cli(
     return_unknown_args: Literal[True],
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[conf._markers.Marker]] = None,
+    config: None | Sequence[conf._markers.Marker] = None,
     primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
-) -> Tuple[OutT, List[str]]: ...
+) -> tuple[OutT, list[str]]: ...
 
 
 def cli(
-    f: Union[TypeForm[OutT], Callable[..., OutT]],
+    f: TypeForm[OutT] | Callable[..., OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    args: Optional[Sequence[str]] = None,
-    default: Optional[OutT] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    args: None | Sequence[str] = None,
+    default: None | OutT = None,
     return_unknown_args: bool = False,
     use_underscores: bool = False,
     console_outputs: bool = True,
-    config: Optional[Sequence[conf._markers.Marker]] = None,
+    config: None | Sequence[conf._markers.Marker] = None,
     primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
     **deprecated_kwargs,
-) -> Union[OutT, Tuple[OutT, List[str]]]:
+) -> OutT | tuple[OutT, list[str]]:
     """Call or instantiate `f`, with inputs populated from an automatically generated
     CLI interface.
 
@@ -246,9 +237,9 @@ def cli(
 def get_parser(
     f: TypeForm[OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    default: Optional[OutT] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
 ) -> argparse.ArgumentParser: ...
@@ -258,22 +249,22 @@ def get_parser(
 def get_parser(
     f: Callable[..., OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    default: Optional[OutT] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
 ) -> argparse.ArgumentParser: ...
 
 
 def get_parser(
-    f: Union[TypeForm[OutT], Callable[..., OutT]],
+    f: TypeForm[OutT] | Callable[..., OutT],
     *,
     # We have no `args` argument, since this is only used when
     # parser.parse_args() is called.
-    prog: Optional[str] = None,
-    description: Optional[str] = None,
-    default: Optional[OutT] = None,
+    prog: None | str = None,
+    description: None | str = None,
+    default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
 ) -> argparse.ArgumentParser:
@@ -300,21 +291,24 @@ def get_parser(
 
 
 def _cli_impl(
-    f: Union[TypeForm[OutT], Callable[..., OutT]],
+    f: TypeForm[OutT] | Callable[..., OutT],
     *,
-    prog: Optional[str] = None,
-    description: Optional[str],
-    args: Optional[Sequence[str]],
-    default: Optional[OutT],
+    prog: None | str = None,
+    description: None | str,
+    args: None | Sequence[str],
+    default: None | OutT,
     return_parser: bool,
     return_unknown_args: bool,
     console_outputs: bool,
     **deprecated_kwargs,
-) -> Union[
-    OutT,
-    argparse.ArgumentParser,
-    Tuple[Callable[[], OutT], List[str]],
-]:
+) -> (
+    OutT
+    | argparse.ArgumentParser
+    | tuple[
+        Callable[[], OutT],
+        list[str],
+    ]
+):
     """Helper for stitching the `tyro` pipeline together."""
     if "default_instance" in deprecated_kwargs:
         warnings.warn(
@@ -335,7 +329,7 @@ def _cli_impl(
     #   one or many arguments, depending on various factors).
     #
     # This could be revisited.
-    default_instance_internal: Union[_fields.NonpropagatingMissingType, OutT] = (
+    default_instance_internal: _fields.NonpropagatingMissingType | OutT = (
         _fields.MISSING_NONPROP if default is None else default
     )
 
@@ -364,7 +358,7 @@ def _cli_impl(
     # Fix arguments. This will modify all option-style arguments replacing
     # underscores with hyphens, or vice versa if use_underscores=True.
     # If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.
-    modified_args: Dict[str, str] = {}
+    modified_args: dict[str, str] = {}
     for index, arg in enumerate(args):
         if not arg.startswith("--"):
             continue
@@ -511,7 +505,7 @@ def _cli_impl(
         # `field_name_prefix == ""` condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
-        from rich.console import Console, Group, RenderableType
+        from rich.console import Console, Group
         from rich.padding import Padding
         from rich.panel import Panel
         from rich.rule import Rule
@@ -527,7 +521,7 @@ def _cli_impl(
                         "[bright_red][bold]Error parsing"
                         f" {e.arg.lowered.name_or_flag if isinstance(e.arg, _arguments.ArgumentDefinition) else e.arg}[/bold]:[/bright_red] {e.message}",
                         *cast(  # Cast to appease mypy...
-                            List[RenderableType],
+                            list,
                             (
                                 []
                                 if not isinstance(e.arg, _arguments.ArgumentDefinition)

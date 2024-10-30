@@ -967,6 +967,16 @@ def test_append_dict() -> None:
         tyro.cli(A, args=["--x", "1", "2", "3"])
 
 
+def test_append_dict_vague() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[dict]
+
+    assert tyro.cli(A, args="--x 1 1 --x 2 2 --x 3 3".split(" ")) == A(
+        {"1": "1", "2": "2", "3": "3"}
+    )
+
+
 def test_append_dict_with_default() -> None:
     """Append has no impact when a dictionary has a default value."""
 

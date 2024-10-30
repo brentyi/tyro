@@ -367,7 +367,7 @@ def _rule_apply_primitive_specs(
                     out.append(part)
 
             # Return output with correct type.
-            if type(out) is dict:
+            if isinstance(out, dict):
                 return out
             else:
                 return container_type(out)
