@@ -32,6 +32,10 @@ from . import (
     conf,
 )
 from ._typing import TypeForm
+from .constructors._primitive_spec import (
+    PrimitiveConstructorRegistry,
+    use_primitive_registry,
+)
 
 OutT = TypeVar("OutT")
 
@@ -54,6 +58,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[conf._markers.Marker]] = None,
+    primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
 ) -> OutT: ...
 
 
@@ -69,6 +74,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[conf._markers.Marker]] = None,
+    primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
 ) -> Tuple[OutT, List[str]]: ...
 
 
@@ -87,6 +93,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[conf._markers.Marker]] = None,
+    primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
 ) -> OutT: ...
 
 
@@ -105,6 +112,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[conf._markers.Marker]] = None,
+    primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
 ) -> Tuple[OutT, List[str]]: ...
 
 
@@ -119,6 +127,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[conf._markers.Marker]] = None,
+    primitive_constructor_registry: PrimitiveConstructorRegistry | None = None,
     **deprecated_kwargs,
 ) -> Union[OutT, Tuple[OutT, List[str]]]:
     """Call or instantiate `f`, with inputs populated from an automatically generated
@@ -189,6 +198,9 @@ def cli(
             alternative to using them locally in annotations
             (`tyro.conf.FlagConversionOff[bool]`), we can also pass in a sequence of
             them here to apply globally.
+        primitive_constructor_registry: A custom registry for primitive constructors.
+            Not typically needed, but can be used to extend the set of primitive types
+            that are supported by `tyro`.
 
     Returns:
         The output of `f(...)` or an instance `f`. If `f` is a class, the two are
@@ -204,18 +216,19 @@ def cli(
         f = conf.configure(*config)(f)
 
     with _strings.delimeter_context("_" if use_underscores else "-"):
-        output = _cli_impl(
-            f,
-            prog=prog,
-            description=description,
-            args=args,
-            default=default,
-            return_parser=False,
-            return_unknown_args=return_unknown_args,
-            use_underscores=use_underscores,
-            console_outputs=console_outputs,
-            **deprecated_kwargs,
-        )
+        with use_primitive_registry(primitive_constructor_registry):
+            output = _cli_impl(
+                f,
+                prog=prog,
+                description=description,
+                args=args,
+                default=default,
+                return_parser=False,
+                return_unknown_args=return_unknown_args,
+                use_underscores=use_underscores,
+                console_outputs=console_outputs,
+                **deprecated_kwargs,
+            )
 
     # Prevent unnecessary memory usage.
     _unsafe_cache.clear_cache()

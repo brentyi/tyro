@@ -29,7 +29,7 @@ from .conf import _markers
 from .constructors._primitive_spec import (
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
-    get_active_primitive_registry,
+    get_current_primitive_registry,
 )
 
 if TYPE_CHECKING:
@@ -270,6 +270,7 @@ def _rule_apply_primitive_specs(
     Conversions from strings to our desired types happen in the instantiator; this is a
     bit more flexible, and lets us handle more complex types like enums and multi-type
     tuples."""
+
     if _markers.Fixed in arg.field.markers:
         lowered.instance_from_str = None
         lowered.metavar = "{fixed}"
@@ -278,15 +279,19 @@ def _rule_apply_primitive_specs(
         return
     if lowered.instance_from_str is not None:
         return
+
     try:
-        registry = get_active_primitive_registry()
-        spec = registry.get_spec(
-            PrimitiveTypeInfo.make(
-                cast(type, arg.field.type_or_callable),
-                arg.field.markers,
-                source_registry=registry,
+        if arg.field.primitive_spec is not None:
+            spec = arg.field.primitive_spec
+        else:
+            registry = get_current_primitive_registry()
+            spec = registry.get_spec(
+                PrimitiveTypeInfo.make(
+                    cast(type, arg.field.type_or_callable),
+                    arg.field.markers,
+                    source_registry=registry,
+                )
             )
-        )
     except UnsupportedTypeAnnotationError as e:
         if arg.field.default in _fields.MISSING_SINGLETONS:
             field_name = _strings.make_field_name(
@@ -324,6 +329,8 @@ def _rule_apply_primitive_specs(
     ):
         # Set default.
         lowered.default = spec.str_from_instance(arg.field.default)
+    else:
+        lowered.default = arg.field.default
 
     if spec._action == "append":
 
@@ -354,9 +361,7 @@ def _rule_apply_primitive_specs(
             # Get + merge parts.
             parts = [spec.instance_from_str(arg_list) for arg_list in x]
             for part in parts:
-                if out is None:
-                    out = part
-                elif isinstance(out, dict):
+                if isinstance(out, dict):
                     out.update(part)
                 else:
                     out.append(part)
@@ -501,8 +506,6 @@ def _rule_generate_helptext(
             and default in _fields.MISSING_SINGLETONS
         ):
             # Argument in an optional group, but with no default. This is typically used
-            # Note: lowered.default is the stringified version! See
-            # `_rule_convert_defaults_to_strings()`.
             # when general (non-argument, non-dataclass) object arguments are given a
             # default, or when we use `tyro.conf.arg(constructor=...)`.
             #

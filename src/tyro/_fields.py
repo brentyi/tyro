@@ -46,7 +46,10 @@ from typing_extensions import (
 from . import _docstrings, _resolver, _singleton, _strings, _unsafe_cache
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
-from .constructors._primitive_spec import UnsupportedTypeAnnotationError
+from .constructors._primitive_spec import (
+    PrimitiveConstructorSpec,
+    UnsupportedTypeAnnotationError,
+)
 
 global_context_markers: List[Tuple[_markers.Marker, ...]] = []
 
@@ -66,6 +69,7 @@ class FieldDefinition:
     custom_constructor: bool
 
     argconf: _confstruct._ArgConfig
+    primitive_spec: PrimitiveConstructorSpec | None
 
     # Override the name in our kwargs. Useful whenever the user-facing argument name
     # doesn't match the keyword expected by our callable.
@@ -135,6 +139,14 @@ class FieldDefinition:
             if argconf.help is not None:
                 helptext = argconf.help
 
+        _, primitive_spec = _resolver.unwrap_annotated(
+            static_type, PrimitiveConstructorSpec
+        )
+        if len(primitive_spec) > 0:
+            primitive_spec = primitive_spec[0]
+        else:
+            primitive_spec = None
+
         static_type, markers = _resolver.unwrap_annotated(static_type, _markers._Marker)
 
         # Include markers set via context manager.
@@ -184,6 +196,7 @@ class FieldDefinition:
             call_argname=(
                 call_argname_override if call_argname_override is not None else name
             ),
+            primitive_spec=primitive_spec,
         )
         return out
 

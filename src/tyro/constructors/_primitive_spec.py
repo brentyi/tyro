@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import collections
 import collections.abc
+import contextlib
 import dataclasses
 import datetime
 import enum
@@ -14,6 +15,7 @@ from typing import (
     Any,
     Callable,
     Dict,
+    Generator,
     Generic,
     List,
     Sequence,
@@ -49,11 +51,27 @@ T = TypeVar("T")
 current_registry: PrimitiveConstructorRegistry | None = None
 
 
-def get_active_primitive_registry() -> PrimitiveConstructorRegistry:
+def get_current_primitive_registry() -> PrimitiveConstructorRegistry:
+    """For internal use: get the current primitive registry."""
     global current_registry
     if current_registry is None:
         current_registry = PrimitiveConstructorRegistry()
     return current_registry
+
+
+@contextlib.contextmanager
+def use_primitive_registry(
+    registry: PrimitiveConstructorRegistry | None,
+) -> Generator[None, None, None]:
+    """For internal use: temporarily use a different primitive registry."""
+    global current_registry
+    if registry is not None:
+        old_registry = current_registry
+        current_registry = registry
+        yield
+        current_registry = old_registry
+    else:
+        yield
 
 
 @dataclasses.dataclass(frozen=True)
@@ -88,7 +106,16 @@ class PrimitiveTypeInfo:
 
 @dataclasses.dataclass(frozen=True)
 class PrimitiveConstructorSpec(Generic[T]):
-    """Specification for constructing a primitive type from a string."""
+    """Specification for constructing a primitive type from a string.
+
+    There are two ways to use this class:
+
+    First, we can include it in a type signature via `typing.Annotated`.
+    This is the simplest, and allows for per-field customization of
+    instantiation behavior.
+
+    Alternatively, it can be returned by a rule in a `PrimitiveConstructorRegistry`.
+    """
 
     nargs: int | Literal["*"]
     """Number of arguments required to construct an instance. If nargs is "*", then
@@ -135,6 +162,9 @@ class PrimitiveConstructorRegistry:
     def define_rule(
         self, matcher_fn: Callable[[PrimitiveTypeInfo], bool]
     ) -> Callable[[SpecFactory], SpecFactory]:
+        """Define a rule for constructing a primitive type from a string. The
+        most recently added rule will be applied first."""
+
         def decorator(spec_factory: SpecFactory) -> SpecFactory:
             self._rules.append((matcher_fn, spec_factory))
             return spec_factory
@@ -143,23 +173,13 @@ class PrimitiveConstructorRegistry:
 
     def get_spec(self, type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec:
         """Get a constructor specification for a given type."""
-        for matcher_fn, spec_factory in self._rules:
+        for matcher_fn, spec_factory in self._rules[::-1]:
             if matcher_fn(type_info):
                 return spec_factory(type_info)
 
         raise UnsupportedTypeAnnotationError(
             f"Unsupported type annotation: {type_info.type}"
         )
-
-    def __enter__(self) -> PrimitiveConstructorRegistry:
-        global current_registry
-        self._old_registry = current_registry
-        current_registry = self
-        return self
-
-    def __exit__(self, *args) -> None:
-        global current_registry
-        current_registry = self._old_registry
 
 
 def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
@@ -532,7 +552,7 @@ def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
             return out
 
         def str_from_instance(instance: dict) -> list[str]:
-            out: list[Any] = []
+            out: list[str] = []
             assert (
                 len(instance) == 0
             ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
