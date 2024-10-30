@@ -1182,6 +1182,8 @@ def _get_pydantic_v2_field_default(
 ) -> Tuple[Any, bool]:
     """Helper for getting the default instance for a Pydantic field."""
 
+    import pydantic
+
     # Try grabbing default from parent instance.
     if (
         parent_default_instance not in MISSING_SINGLETONS
@@ -1199,7 +1201,10 @@ def _get_pydantic_v2_field_default(
             )
 
     if not field.is_required():
-        return field.get_default(call_default_factory=True), False
+        try:
+            return field.get_default(call_default_factory=True), False
+        except pydantic.ValidationError:
+            pass
 
     # Otherwise, no default.
     return MISSING_NONPROP, False
