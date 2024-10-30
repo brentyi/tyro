@@ -27,9 +27,9 @@ from . import _argparse as argparse
 from . import _fields, _strings
 from .conf import _markers
 from .constructors._primitive_spec import (
+    PrimitiveConstructorRegistry,
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
-    get_current_primitive_registry,
 )
 
 if TYPE_CHECKING:
@@ -284,7 +284,7 @@ def _rule_apply_primitive_specs(
         if arg.field.primitive_spec is not None:
             spec = arg.field.primitive_spec
         else:
-            registry = get_current_primitive_registry()
+            registry = PrimitiveConstructorRegistry._get_active_registry()
             spec = registry.get_spec(
                 PrimitiveTypeInfo.make(
                     cast(type, arg.field.type_or_callable),

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import collections
 import collections.abc
-import contextlib
 import dataclasses
 import datetime
 import enum
@@ -14,8 +13,8 @@ import sys
 from typing import (
     Any,
     Callable,
+    ClassVar,
     Dict,
-    Generator,
     Generic,
     List,
     Sequence,
@@ -47,31 +46,6 @@ class UnsupportedTypeAnnotationError(Exception):
 
 
 T = TypeVar("T")
-
-current_registry: PrimitiveConstructorRegistry | None = None
-
-
-def get_current_primitive_registry() -> PrimitiveConstructorRegistry:
-    """For internal use: get the current primitive registry."""
-    global current_registry
-    if current_registry is None:
-        current_registry = PrimitiveConstructorRegistry()
-    return current_registry
-
-
-@contextlib.contextmanager
-def use_primitive_registry(
-    registry: PrimitiveConstructorRegistry | None,
-) -> Generator[None, None, None]:
-    """For internal use: temporarily use a different primitive registry."""
-    global current_registry
-    if registry is not None:
-        old_registry = current_registry
-        current_registry = registry
-        yield
-        current_registry = old_registry
-    else:
-        yield
 
 
 @dataclasses.dataclass(frozen=True)
@@ -140,13 +114,17 @@ class PrimitiveConstructorSpec(Generic[T]):
 
 SpecFactory = Callable[[PrimitiveTypeInfo], PrimitiveConstructorSpec]
 
+current_registry: PrimitiveConstructorRegistry | None = None
+
 
 class PrimitiveConstructorRegistry:
     """Registry for rules that define how primitive types that can be
     constructed from a single command-line argument."""
 
+    _active_registry: ClassVar[PrimitiveConstructorRegistry | None] = None
+    _old_registry: PrimitiveConstructorRegistry | None = None
+
     def __init__(self) -> None:
-        self._old_registry: PrimitiveConstructorRegistry | None = None
         self._rules: list[
             tuple[
                 # Matching function.
@@ -180,6 +158,23 @@ class PrimitiveConstructorRegistry:
         raise UnsupportedTypeAnnotationError(
             f"Unsupported type annotation: {type_info.type}"
         )
+
+    @classmethod
+    def _get_active_registry(cls) -> PrimitiveConstructorRegistry:
+        """Get the active registry. Can be changed by using a
+        PrimitiveConstructorRegistry object as a context."""
+        if cls._active_registry is None:
+            cls._active_registry = PrimitiveConstructorRegistry()
+        return cls._active_registry
+
+    def __enter__(self) -> None:
+        cls = self.__class__
+        self._old_registry = cls._active_registry
+        cls._active_registry = self
+
+    def __exit__(self, *args: Any) -> None:
+        cls = self.__class__
+        cls._active_registry = self._old_registry
 
 
 def _apply_default_rules(registry: PrimitiveConstructorRegistry) -> None:
