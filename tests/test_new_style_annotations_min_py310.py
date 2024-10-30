@@ -46,14 +46,16 @@ def test_union_literal() -> None:
 
 def test_super_nested() -> None:
     def main(
-        x: None
-        | list[
-            tuple[
-                None | int,
-                Literal[3, 4],
-                tuple[int, int] | tuple[str, str],
+        x: (
+            None
+            | list[
+                tuple[
+                    None | int,
+                    Literal[3, 4],
+                    tuple[int, int] | tuple[str, str],
+                ]
             ]
-        ] = None,
+        ) = None,
     ) -> Any:
         return x
 

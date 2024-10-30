@@ -967,6 +967,16 @@ def test_append_dict() -> None:
         tyro.cli(A, args=["--x", "1", "2", "3"])
 
 
+def test_append_dict_vague() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[dict]
+
+    assert tyro.cli(A, args="--x 1 1 --x 2 2 --x 3 3".split(" ")) == A(
+        {"1": "1", "2": "2", "3": "3"}
+    )
+
+
 def test_append_dict_with_default() -> None:
     """Append has no impact when a dictionary has a default value."""
 
@@ -1030,6 +1040,19 @@ def test_append_nested_dict_double() -> None:
     @dataclasses.dataclass
     class A:
         x: tyro.conf.UseAppendAction[Dict[str, Dict[str, int]]]
+
+    assert tyro.cli(A, args="--x 0 1 2 3 4 --x 4 5 6".split(" ")) == A(
+        x={"0": {"1": 2, "3": 4}, "4": {"5": 6}}
+    )
+    assert tyro.cli(A, args=[]) == A(x={})
+
+
+def test_append_nested_dict_double_with_default() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Dict[str, Dict[str, int]]] = dataclasses.field(
+            default_factory=dict
+        )
 
     assert tyro.cli(A, args="--x 0 1 2 3 4 --x 4 5 6".split(" ")) == A(
         x={"0": {"1": 2, "3": 4}, "4": {"5": 6}}
