@@ -14,9 +14,9 @@ json_constructor_spec = tyro.constructors.PrimitiveConstructorSpec(
 
 def test_custom_primitive_registry():
     """Test that we can use a custom primitive registry to parse a custom type."""
-    registry = tyro.constructors.PrimitiveConstructorRegistry()
+    primitive_registry = tyro.constructors.PrimitiveConstructorRegistry()
 
-    @registry.define_rule(
+    @primitive_registry.define_rule(
         matcher_fn=lambda type_info: type_info.type_origin is dict
         and get_args(type_info.type) == (str, Any)
     )
@@ -29,9 +29,8 @@ def test_custom_primitive_registry():
     def main(x: Dict[str, Any]) -> Dict[str, Any]:
         return x
 
-    assert tyro.cli(
-        main, args=["--x", '{"a": 1}'], primitive_constructor_registry=registry
-    ) == {"a": 1}
+    with primitive_registry:
+        assert tyro.cli(main, args=["--x", '{"a": 1}']) == {"a": 1}
 
 
 def test_custom_primitive_annotated():
