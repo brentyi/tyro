@@ -230,6 +230,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -1146,9 +1147,11 @@
             <span class="n">console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span>
                 <span class="n">Panel</span><span class="p">(</span>
                     <span class="n">Group</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                        <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                        <span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">message</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="si">}</span><span class="s2">&quot;</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">message</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+                            <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+                        <span class="p">),</span>
                         <span class="o">*</span><span class="n">extra_info</span><span class="p">,</span>
                         <span class="n">Rule</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">)),</span>
                         <span class="sa">f</span><span class="s2">&quot;For full helptext, run [bold]</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">prog</span><span class="si">}</span><span class="s2"> --help[/bold]&quot;</span><span class="p">,</span>
@@ -1644,9 +1647,11 @@
                     <span class="n">new_actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                         <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">(</span>
                             <span class="p">[</span>
-                                <span class="s2">&quot;OPTIONS&quot;</span>
-                                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prog_parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-                                <span class="k">else</span> <span class="n">prog_parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; OPTIONS&quot;</span>
+                                <span class="p">(</span>
+                                    <span class="s2">&quot;OPTIONS&quot;</span>
+                                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prog_parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+                                    <span class="k">else</span> <span class="n">prog_parts</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; OPTIONS&quot;</span>
+                                <span class="p">)</span>
                             <span class="p">],</span>
                             <span class="n">dest</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                         <span class="p">)</span>

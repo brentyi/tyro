@@ -231,6 +231,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -309,9 +310,9 @@ value, automatically converted to flags.</p>
 │ --optional-boolean {None,True,False}                                     │
 │     Optional boolean. Same as above, but can be omitted. (default: None) │
 │ --flag-a, --no-flag-a                                                    │
-│     Pass --flag-a in to set this value to True. (default: False)         │
+│     Pass --flag-a in to set this value to True. (default: None)          │
 │ --flag-b, --no-flag-b                                                    │
-│     Pass --no-flag-b in to set this value to False. (default: True)      │
+│     Pass --no-flag-b in to set this value to False. (default: None)      │
 ╰──────────────────────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 01_basics/05_flags.py --boolean True</kbd><pre class="ansi-block literal-block">Args(boolean=True, optional_boolean=None, flag_a=False, flag_b=True)</pre>

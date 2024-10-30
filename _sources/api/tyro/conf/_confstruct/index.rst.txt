@@ -9,6 +9,10 @@
 Module Contents
 ---------------
 
+.. py:data:: T
+
+   
+
 .. py:function:: subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
                  subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
 

@@ -230,6 +230,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -274,15 +275,16 @@
 
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_instantiators</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_typing</span>
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_typing</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span>
+<span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 
 
 <div class="viewcode-block" id="match_subcommand">
 <a class="viewcode-back" href="../../../api/tyro/_subcommand_matching/#tyro._subcommand_matching.match_subcommand">[docs]</a>
 <span class="k">def</span> <span class="nf">match_subcommand</span><span class="p">(</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfiguration</span><span class="p">],</span>
+    <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">],</span>
     <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a subcommand mapping and a default, return which subcommand the default</span>
@@ -354,7 +356,7 @@
             <span class="n">typ</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_callable</span><span class="p">(</span>
                 <span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span>
             <span class="p">)</span>
-        <span class="k">except</span> <span class="n">_instantiators</span><span class="o">.</span><span class="n">UnsupportedTypeAnnotationError</span><span class="p">:</span>
+        <span class="k">except</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_TypeTree</span><span class="p">(</span><span class="n">typ_unwrap</span><span class="p">,</span> <span class="p">{})</span>
 
         <span class="k">return</span> <span class="n">_TypeTree</span><span class="p">(</span>

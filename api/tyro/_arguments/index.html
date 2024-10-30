@@ -231,6 +231,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -359,11 +360,11 @@ argparse’s <code class="docutils literal notranslate"><span class="pre">add_ar
 <dt class="sig sig-object py" id="tyro._arguments.LoweredArgumentDefinition">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">LoweredArgumentDefinition</span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#LoweredArgumentDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.LoweredArgumentDefinition" title="Link to this definition">#</a></dt>
 <dd><p>Contains fields meant to be passed directly into argparse.
-.. py:attribute:: instantiator</p>
+.. py:attribute:: instance_from_str</p>
 <blockquote>
 <div><dl class="field-list simple">
 <dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Optional[tyro._instantiators.Instantiator]</p>
+<dd class="field-odd"><p>Optional[Callable]</p>
 </dd>
 </dl>
 </div></blockquote>

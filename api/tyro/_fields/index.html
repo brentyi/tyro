@@ -231,6 +231,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -324,7 +325,12 @@ defaults, from general callables.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.argconf">
-<span class="sig-name descname"><span class="pre">argconf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro.conf._confstruct._ArgConfiguration</span></em><a class="headerlink" href="#tyro._fields.FieldDefinition.argconf" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">argconf</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro.conf._confstruct._ArgConfig</span></em><a class="headerlink" href="#tyro._fields.FieldDefinition.argconf" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._fields.FieldDefinition.primitive_spec">
+<span class="sig-name descname"><span class="pre">primitive_spec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec" title="tyro.constructors._primitive_spec.PrimitiveConstructorSpec"><span class="pre">tyro.constructors._primitive_spec.PrimitiveConstructorSpec</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tyro._fields.FieldDefinition.primitive_spec" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -351,17 +357,16 @@ context will have the specified markers.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._fields.FieldDefinition.make">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_or_callable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default_from_default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">helptext</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_argname_override</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.make" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">static_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_default_from_default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">helptext</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">call_argname_override</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_fields/#FieldDefinition.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.FieldDefinition.make" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<em>str</em>) – </p></li>
-<li><p><strong>type_or_callable</strong> (<em>Union</em><em>[</em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Callable</em><em>]</em>) – </p></li>
+<li><p><strong>static_type</strong> (<em>Union</em><em>[</em><em>tyro._typing.TypeForm</em><em>[</em><em>Any</em><em>]</em><em>, </em><em>Callable</em><em>]</em>) – </p></li>
 <li><p><strong>default</strong> (<em>Any</em>) – </p></li>
 <li><p><strong>is_default_from_default_instance</strong> (<em>bool</em>) – </p></li>
 <li><p><strong>helptext</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p></li>
 <li><p><strong>call_argname_override</strong> (<em>Optional</em><em>[</em><em>Any</em><em>]</em>) – </p></li>
-<li><p><strong>markers</strong> (<em>Tuple</em><em>[</em><em>tyro.conf._markers.Marker</em><em>, </em><em>Ellipsis</em><em>]</em>) – </p></li>
 </ul>
 </dd>
 </dl>
@@ -455,7 +460,7 @@ in via <code class="docutils literal notranslate"><span class="pre">default=</sp
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._fields.UnsupportedNestedTypeMessage">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">UnsupportedNestedTypeMessage</span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#UnsupportedNestedTypeMessage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.UnsupportedNestedTypeMessage" title="Link to this definition">#</a></dt>
-<dd><p>Reason why a callable cannot be treated as a nested type.
+<dd><p>Reason why a callable cannot be treated as a struct type.
 .. py:attribute:: message</p>
 <blockquote>
 <div><dl class="field-list simple">
@@ -467,12 +472,12 @@ in via <code class="docutils literal notranslate"><span class="pre">default=</sp
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._fields.is_nested_type">
-<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">is_nested_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#is_nested_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.is_nested_type" title="Link to this definition">#</a></dt>
-<dd><p>Determine whether a type should be treated as a ‘nested type’, where a single
+<dt class="sig sig-object py" id="tyro._fields.is_struct_type">
+<span class="sig-prename descclassname"><span class="pre">tyro._fields.</span></span><span class="sig-name descname"><span class="pre">is_struct_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DefaultInstance</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_fields/#is_struct_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._fields.is_struct_type" title="Link to this definition">#</a></dt>
+<dd><p>Determine whether a type should be treated as a ‘struct type’, where a single
 type can be broken down into multiple fields (eg for nested dataclasses or
 classes).</p>
-<p>TODO: we should come up with a better name than ‘nested type’, which is a little bit
+<p>TODO: we should come up with a better name than ‘struct type’, which is a little bit
 misleading.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -576,6 +581,7 @@ A list of field definitions.</p>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.markers"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.markers</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.custom_constructor"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.custom_constructor</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.argconf"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.argconf</span></code></a></li>
+<li><a class="reference internal" href="#tyro._fields.FieldDefinition.primitive_spec"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.primitive_spec</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.call_argname"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.call_argname</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.__post_init__"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.__post_init__()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.FieldDefinition.marker_context"><code class="docutils literal notranslate"><span class="pre">FieldDefinition.marker_context()</span></code></a></li>
@@ -596,7 +602,7 @@ A list of field definitions.</p>
 <li><a class="reference internal" href="#tyro._fields.MISSING_SINGLETONS"><code class="docutils literal notranslate"><span class="pre">MISSING_SINGLETONS</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.DEFAULT_SENTINEL_SINGLETONS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_SENTINEL_SINGLETONS</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.UnsupportedNestedTypeMessage"><code class="docutils literal notranslate"><span class="pre">UnsupportedNestedTypeMessage</span></code></a></li>
-<li><a class="reference internal" href="#tyro._fields.is_nested_type"><code class="docutils literal notranslate"><span class="pre">is_nested_type()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._fields.is_struct_type"><code class="docutils literal notranslate"><span class="pre">is_struct_type()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.field_list_from_callable"><code class="docutils literal notranslate"><span class="pre">field_list_from_callable()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._fields.DefaultInstance"><code class="docutils literal notranslate"><span class="pre">DefaultInstance</span></code></a></li>
 </ul>

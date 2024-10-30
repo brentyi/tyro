@@ -65,7 +65,12 @@ Module Contents
       
 
    .. py:attribute:: argconf
-      :type: tyro.conf._confstruct._ArgConfiguration
+      :type: tyro.conf._confstruct._ArgConfig
+
+      
+
+   .. py:attribute:: primitive_spec
+      :type: tyro.constructors._primitive_spec.PrimitiveConstructorSpec | None
 
       
 
@@ -84,7 +89,7 @@ Module Contents
       Context for setting markers on fields. All fields created within the
       context will have the specified markers.
 
-   .. py:method:: make(name: str, type_or_callable: Union[tyro._typing.TypeForm[Any], Callable], default: Any, is_default_from_default_instance: bool, helptext: Optional[str], call_argname_override: Optional[Any] = None, *, markers: Tuple[tyro.conf._markers.Marker, Ellipsis] = ())
+   .. py:method:: make(name: str, static_type: Union[tyro._typing.TypeForm[Any], Callable], default: Any, is_default_from_default_instance: bool, helptext: Optional[str], call_argname_override: Optional[Any] = None)
       :staticmethod:
 
 
@@ -158,21 +163,21 @@ Module Contents
 
 
    
-   Reason why a callable cannot be treated as a nested type.
+   Reason why a callable cannot be treated as a struct type.
    .. py:attribute:: message
       :type: str
 
       
 
 
-.. py:function:: is_nested_type(typ: Union[tyro._typing.TypeForm[Any], Callable], default_instance: DefaultInstance) -> bool
+.. py:function:: is_struct_type(typ: Union[tyro._typing.TypeForm[Any], Callable], default_instance: DefaultInstance) -> bool
 
    
-   Determine whether a type should be treated as a 'nested type', where a single
+   Determine whether a type should be treated as a 'struct type', where a single
    type can be broken down into multiple fields (eg for nested dataclasses or
    classes).
 
-   TODO: we should come up with a better name than 'nested type', which is a little bit
+   TODO: we should come up with a better name than 'struct type', which is a little bit
    misleading.
 
 .. py:function:: field_list_from_callable(f: Union[Callable, tyro._typing.TypeForm[Any]], default_instance: DefaultInstance, support_single_arg_types: bool) -> Tuple[Union[Callable, tyro._typing.TypeForm[Any]], List[FieldDefinition]]

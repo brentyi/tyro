@@ -70,6 +70,23 @@ Module Contents
 .. py:function:: multi_metavar_from_single(single: str) -> str
 
 
+.. py:function:: join_union_metavars(metavars: Iterable[str]) -> str
+
+   
+   Metavar generation helper for unions. Could be revisited.
+
+   .. rubric:: Examples
+
+   None, INT => NONE|INT
+   {0,1,2}, {3,4} => {0,1,2,3,4}
+   {0,1,2}, {3,4}, STR => {0,1,2,3,4}|STR
+   {None}, INT [INT ...] => {None}|{INT [INT ...]}
+   STR, INT [INT ...] => STR|{INT [INT ...]}
+   STR, INT INT => STR|{INT INT}
+
+   The curly brackets are unfortunately overloaded but alternatives all interfere with
+   argparse internals.
+
 .. py:function:: remove_single_line_breaks(helptext: str) -> str
 
 

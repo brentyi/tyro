@@ -9,7 +9,7 @@
 Module Contents
 ---------------
 
-.. py:function:: match_subcommand(default: Any, subcommand_config_from_name: Dict[str, tyro.conf._confstruct._SubcommandConfiguration], subcommand_type_from_name: Dict[str, type]) -> Optional[str]
+.. py:function:: match_subcommand(default: Any, subcommand_config_from_name: Dict[str, tyro.conf._confstruct._SubcommandConfig], subcommand_type_from_name: Dict[str, type]) -> Optional[str]
 
    
    Given a subcommand mapping and a default, return which subcommand the default

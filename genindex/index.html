@@ -229,6 +229,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api/tyro/constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -268,7 +269,7 @@
           
 <section class="genindex-section">
   <h1 id="index">Index</h1>
-  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#Z"><strong>Z</strong></a></div>
+  <div class="genindex-jumpbox"><a href="#_"><strong>_</strong></a> | <a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#J"><strong>J</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#U"><strong>U</strong></a> | <a href="#Z"><strong>Z</strong></a></div>
 </section>
 <section id="_" class="genindex-section">
   <h2>_</h2>
@@ -284,12 +285,24 @@
         </ul></li>
         <li><a href="../api/tyro/_argparse/#tyro._argparse.Namespace.__contains__">__contains__() (tyro._argparse.Namespace method)</a>
 </li>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext.__enter__">__enter__() (tyro._resolver.TypeParamAssignmentContext method)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorRegistry.__enter__">(tyro.constructors._primitive_spec.PrimitiveConstructorRegistry method)</a>
+</li>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorRegistry.__enter__">(tyro.constructors.PrimitiveConstructorRegistry method)</a>
+</li>
+        </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext.__enter__">__enter__() (tyro._resolver.TypeParamAssignmentContext method)</a>
-</li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext.__exit__">__exit__() (tyro._resolver.TypeParamAssignmentContext method)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorRegistry.__exit__">(tyro.constructors._primitive_spec.PrimitiveConstructorRegistry method)</a>
 </li>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorRegistry.__exit__">(tyro.constructors.PrimitiveConstructorRegistry method)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.__post_init__">__post_init__() (tyro._fields.FieldDefinition method)</a>
 </li>
         <li><a href="../api/tyro/_argparse/#tyro._argparse.FileType.__repr__">__repr__() (tyro._argparse.FileType method)</a>
@@ -307,11 +320,7 @@
         <li><a href="../api/tyro/_argparse/#tyro._argparse.Action">Action (class in tyro._argparse)</a>
 </li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition.action">action (tyro._arguments.LoweredArgumentDefinition attribute)</a>
-
-        <ul>
-          <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.action">(tyro._instantiators.InstantiatorMetadata attribute)</a>
 </li>
-        </ul></li>
         <li><a href="../api/tyro/_argparse/#tyro._argparse.HelpFormatter.add_argument">add_argument() (tyro._argparse.HelpFormatter method)</a>
 
         <ul>
@@ -406,20 +415,18 @@
           <li><a href="../api/tyro/conf/_markers/#tyro.conf._markers.CallableType">(in module tyro.conf._markers)</a>
 </li>
         </ul></li>
-        <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.check_choices">check_choices() (tyro._instantiators.InstantiatorMetadata method)</a>
-</li>
         <li><a href="../api/tyro/_parsers/#tyro._parsers.ParserSpecification.child_from_prefix">child_from_prefix (tyro._parsers.ParserSpecification attribute)</a>
 </li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition.choices">choices (tyro._arguments.LoweredArgumentDefinition attribute)</a>
 
         <ul>
-          <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.choices">(tyro._instantiators.InstantiatorMetadata attribute)</a>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.choices">(tyro.constructors._primitive_spec.PrimitiveConstructorSpec attribute)</a>
+</li>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorSpec.choices">(tyro.constructors.PrimitiveConstructorSpec attribute)</a>
 </li>
         </ul></li>
         <li><a href="../api/tyro/_unsafe_cache/#tyro._unsafe_cache.clear_cache">clear_cache() (in module tyro._unsafe_cache)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/#tyro.cli">cli() (in module tyro)</a>
 
         <ul>
@@ -430,6 +437,8 @@
           <li><a href="../api/tyro/extras/#tyro.extras.SubcommandApp.cli">(tyro.extras.SubcommandApp method)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.TypeParamResolver.concretize_type_params">concretize_type_params() (tyro._resolver.TypeParamResolver static method)</a>
 </li>
         <li><a href="../api/tyro/conf/#tyro.conf.configure">configure() (in module tyro.conf)</a>
@@ -446,7 +455,15 @@
           <li><a href="../api/tyro/conf/_markers/#tyro.conf._markers.ConsolidateSubcommandArgs">(in module tyro.conf._markers)</a>
 </li>
         </ul></li>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo.constructor_registry">constructor_registry (tyro.constructors._primitive_spec.PrimitiveTypeInfo attribute)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveTypeInfo.constructor_registry">(tyro.constructors.PrimitiveTypeInfo attribute)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_argparse/#tyro._argparse.ArgumentParser.convert_arg_line_to_args">convert_arg_line_to_args() (tyro._argparse.ArgumentParser method)</a>
+</li>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.current_registry">current_registry (in module tyro.constructors._primitive_spec)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.custom_constructor">custom_constructor (tyro._fields.FieldDefinition attribute)</a>
 </li>
@@ -612,12 +629,18 @@
 </li>
         <li><a href="../api/tyro/_docstrings/#tyro._docstrings.get_field_docstring">get_field_docstring() (in module tyro._docstrings)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_cli/#tyro._cli.get_parser">get_parser() (in module tyro._cli)</a>
 
         <ul>
           <li><a href="../api/tyro/extras/#tyro.extras.get_parser">(in module tyro.extras)</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorRegistry.get_spec">get_spec() (tyro.constructors._primitive_spec.PrimitiveConstructorRegistry method)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorRegistry.get_spec">(tyro.constructors.PrimitiveConstructorRegistry method)</a>
 </li>
         </ul></li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.get_type_hints_with_backported_syntax">get_type_hints_with_backported_syntax() (in module tyro._resolver)</a>
@@ -668,13 +691,13 @@
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_singleton/#tyro._singleton.Singleton.init">init() (tyro._singleton.Singleton method)</a>
 </li>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.instance_from_str">instance_from_str (tyro.constructors._primitive_spec.PrimitiveConstructorSpec attribute)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorSpec.instance_from_str">(tyro.constructors.PrimitiveConstructorSpec attribute)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_calling/#tyro._calling.InstantiationError">InstantiationError</a>
-</li>
-        <li><a href="../api/tyro/_instantiators/#tyro._instantiators.Instantiator">Instantiator (in module tyro._instantiators)</a>
-</li>
-        <li><a href="../api/tyro/_instantiators/#tyro._instantiators.instantiator_from_type">instantiator_from_type() (in module tyro._instantiators)</a>
-</li>
-        <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata">InstantiatorMetadata (class in tyro._instantiators)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.intern_name">intern_name (tyro._fields.FieldDefinition attribute)</a>
 </li>
@@ -686,25 +709,39 @@
           <li><a href="../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.intern_prefix">(tyro._parsers.SubparsersSpecification attribute)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme.invocation">invocation (tyro._argparse_formatter.TyroTheme attribute)</a>
 </li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.is_dataclass">is_dataclass() (in module tyro._resolver)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.is_default_from_default_instance">is_default_from_default_instance (tyro._fields.FieldDefinition attribute)</a>
 </li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition.is_fixed">is_fixed() (tyro._arguments.LoweredArgumentDefinition method)</a>
 </li>
-        <li><a href="../api/tyro/_resolver/#tyro._resolver.is_namedtuple">is_namedtuple() (in module tyro._resolver)</a>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.is_instance">is_instance (tyro.constructors._primitive_spec.PrimitiveConstructorSpec attribute)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorSpec.is_instance">(tyro.constructors.PrimitiveConstructorSpec attribute)</a>
 </li>
-        <li><a href="../api/tyro/_fields/#tyro._fields.is_nested_type">is_nested_type() (in module tyro._fields)</a>
+        </ul></li>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.is_namedtuple">is_namedtuple() (in module tyro._resolver)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional">is_positional() (tyro._fields.FieldDefinition method)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional_call">is_positional_call() (tyro._fields.FieldDefinition method)</a>
 </li>
-        <li><a href="../api/tyro/_instantiators/#tyro._instantiators.is_type_string_converter">is_type_string_converter() (in module tyro._instantiators)</a>
+        <li><a href="../api/tyro/_fields/#tyro._fields.is_struct_type">is_struct_type() (in module tyro._fields)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="J" class="genindex-section">
+  <h2>J</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="../api/tyro/_strings/#tyro._strings.join_union_metavars">join_union_metavars() (in module tyro._strings)</a>
 </li>
     </ul></td>
   </tr></table>
@@ -722,7 +759,7 @@
         </ul></li>
     </ul></td>
     <td style="width: 33%; vertical-align: top;"><ul>
-        <li><a href="../api/tyro/_instantiators/#tyro._instantiators.LiteralAlternate">LiteralAlternate (in module tyro._instantiators)</a>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.LiteralAlternate">LiteralAlternate (in module tyro.constructors._primitive_spec)</a>
 </li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition">LoweredArgumentDefinition (class in tyro._arguments)</a>
 </li>
@@ -735,7 +772,13 @@
   <table style="width: 100%" class="indextable genindextable"><tr>
     <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.make">make() (tyro._fields.FieldDefinition static method)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo.make">(tyro.constructors._primitive_spec.PrimitiveTypeInfo static method)</a>
 </li>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveTypeInfo.make">(tyro.constructors.PrimitiveTypeInfo static method)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_strings/#tyro._strings.make_field_name">make_field_name() (in module tyro._strings)</a>
 </li>
         <li><a href="../api/tyro/_strings/#tyro._strings.make_subparser_dest">make_subparser_dest() (in module tyro._strings)</a>
@@ -745,7 +788,13 @@
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.marker_context">marker_context() (tyro._fields.FieldDefinition static method)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.markers">markers (tyro._fields.FieldDefinition attribute)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo.markers">(tyro.constructors._primitive_spec.PrimitiveTypeInfo attribute)</a>
 </li>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveTypeInfo.markers">(tyro.constructors.PrimitiveTypeInfo attribute)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_subcommand_matching/#tyro._subcommand_matching.match_subcommand">match_subcommand() (in module tyro._subcommand_matching)</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.MetadataType">MetadataType (in module tyro._resolver)</a>
@@ -755,7 +804,9 @@
         <ul>
           <li><a href="../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition.metavar">(tyro._arguments.LoweredArgumentDefinition attribute)</a>
 </li>
-          <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.metavar">(tyro._instantiators.InstantiatorMetadata attribute)</a>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.metavar">(tyro.constructors._primitive_spec.PrimitiveConstructorSpec attribute)</a>
+</li>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorSpec.metavar">(tyro.constructors.PrimitiveConstructorSpec attribute)</a>
 </li>
         </ul></li>
         <li><a href="../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme.metavar_fixed">metavar_fixed (tyro._argparse_formatter.TyroTheme attribute)</a>
@@ -798,8 +849,6 @@
 </li>
           <li><a href="../api/tyro/_fields/#module-tyro._fields">tyro._fields</a>
 </li>
-          <li><a href="../api/tyro/_instantiators/#module-tyro._instantiators">tyro._instantiators</a>
-</li>
           <li><a href="../api/tyro/_parsers/#module-tyro._parsers">tyro._parsers</a>
 </li>
           <li><a href="../api/tyro/_resolver/#module-tyro._resolver">tyro._resolver</a>
@@ -819,6 +868,10 @@
           <li><a href="../api/tyro/conf/_confstruct/#module-tyro.conf._confstruct">tyro.conf._confstruct</a>
 </li>
           <li><a href="../api/tyro/conf/_markers/#module-tyro.conf._markers">tyro.conf._markers</a>
+</li>
+          <li><a href="../api/tyro/constructors/#module-tyro.constructors">tyro.constructors</a>
+</li>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#module-tyro.constructors._primitive_spec">tyro.constructors._primitive_spec</a>
 </li>
           <li><a href="../api/tyro/extras/#module-tyro.extras">tyro.extras</a>
 </li>
@@ -852,11 +905,7 @@
         <li><a href="../api/tyro/_argparse/#tyro._argparse.Namespace">Namespace (class in tyro._argparse)</a>
 </li>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition.nargs">nargs (tyro._arguments.LoweredArgumentDefinition attribute)</a>
-
-        <ul>
-          <li><a href="../api/tyro/_instantiators/#tyro._instantiators.InstantiatorMetadata.nargs">(tyro._instantiators.InstantiatorMetadata attribute)</a>
 </li>
-        </ul></li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_collection_types">narrow_collection_types() (in module tyro._resolver)</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.narrow_subtypes">narrow_subtypes() (in module tyro._resolver)</a>
@@ -867,12 +916,8 @@
 </li>
         <li><a href="../api/tyro/_parsers/#tyro._parsers.none_proxy">none_proxy() (in module tyro._parsers)</a>
 </li>
-        <li><a href="../api/tyro/_instantiators/#tyro._instantiators.NoneType">NoneType (in module tyro._instantiators)</a>
-
-        <ul>
-          <li><a href="../api/tyro/_resolver/#tyro._resolver.NoneType">(in module tyro._resolver)</a>
+        <li><a href="../api/tyro/_resolver/#tyro._resolver.NoneType">NoneType (in module tyro._resolver)</a>
 </li>
-        </ul></li>
         <li><a href="../api/tyro/_fields/#tyro._fields.NonpropagatingMissingType">NonpropagatingMissingType (class in tyro._fields)</a>
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE (in module tyro._fields)</a>
@@ -939,8 +984,6 @@
 </li>
         <li><a href="../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.parser_from_name">parser_from_name (tyro._parsers.SubparsersSpecification attribute)</a>
 </li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_parsers/#tyro._parsers.ParserSpecification">ParserSpecification (class in tyro._parsers)</a>
 </li>
         <li><a href="../api/tyro/conf/#tyro.conf.Positional">Positional (in module tyro.conf)</a>
@@ -949,10 +992,32 @@
           <li><a href="../api/tyro/conf/_markers/#tyro.conf._markers.Positional">(in module tyro.conf._markers)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/conf/#tyro.conf.PositionalRequiredArgs">PositionalRequiredArgs (in module tyro.conf)</a>
 
         <ul>
           <li><a href="../api/tyro/conf/_markers/#tyro.conf._markers.PositionalRequiredArgs">(in module tyro.conf._markers)</a>
+</li>
+        </ul></li>
+        <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.primitive_spec">primitive_spec (tyro._fields.FieldDefinition attribute)</a>
+</li>
+        <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorRegistry">PrimitiveConstructorRegistry (class in tyro.constructors)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorRegistry">(class in tyro.constructors._primitive_spec)</a>
+</li>
+        </ul></li>
+        <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorSpec">PrimitiveConstructorSpec (class in tyro.constructors)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec">(class in tyro.constructors._primitive_spec)</a>
+</li>
+        </ul></li>
+        <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveTypeInfo">PrimitiveTypeInfo (class in tyro.constructors)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo">(class in tyro.constructors._primitive_spec)</a>
 </li>
         </ul></li>
         <li><a href="../api/tyro/_argparse/#tyro._argparse.ArgumentParser.print_help">print_help() (tyro._argparse.ArgumentParser method)</a>
@@ -1011,8 +1076,16 @@
         </ul></li>
         <li><a href="../api/tyro/_singleton/#tyro._singleton.Singleton">Singleton (class in tyro._singleton)</a>
 </li>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.SpecFactory">SpecFactory (in module tyro.constructors._primitive_spec)</a>
+</li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.standardize_builtin_generics">standardize_builtin_generics() (in module tyro._resolver)</a>
 </li>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.str_from_instance">str_from_instance (tyro.constructors._primitive_spec.PrimitiveConstructorSpec attribute)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveConstructorSpec.str_from_instance">(tyro.constructors.PrimitiveConstructorSpec attribute)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_argparse_formatter/#tyro._argparse_formatter.str_from_rich">str_from_rich() (in module tyro._argparse_formatter)</a>
 </li>
         <li><a href="../api/tyro/_strings/#tyro._strings.strip_ansi_sequences">strip_ansi_sequences() (in module tyro._strings)</a>
@@ -1031,6 +1104,8 @@
           <li><a href="../api/tyro/extras/_subcommand_cli_from_dict/#tyro.extras._subcommand_cli_from_dict.subcommand_cli_from_dict">(in module tyro.extras._subcommand_cli_from_dict)</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.subcommand_prefix">subcommand_prefix (tyro._arguments.ArgumentDefinition attribute)</a>
 </li>
         <li><a href="../api/tyro/extras/#tyro.extras.subcommand_type_from_defaults">subcommand_type_from_defaults() (in module tyro.extras)</a>
@@ -1039,8 +1114,6 @@
           <li><a href="../api/tyro/extras/_base_configs/#tyro.extras._base_configs.subcommand_type_from_defaults">(in module tyro.extras._base_configs)</a>
 </li>
         </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
         <li><a href="../api/tyro/extras/#tyro.extras.SubcommandApp">SubcommandApp (class in tyro.extras)</a>
 
         <ul>
@@ -1084,11 +1157,13 @@
         <ul>
           <li><a href="../api/tyro/_docstrings/#tyro._docstrings.T">(in module tyro._docstrings)</a>
 </li>
-          <li><a href="../api/tyro/_instantiators/#tyro._instantiators.T">(in module tyro._instantiators)</a>
-</li>
           <li><a href="../api/tyro/_parsers/#tyro._parsers.T">(in module tyro._parsers)</a>
 </li>
+          <li><a href="../api/tyro/conf/_confstruct/#tyro.conf._confstruct.T">(in module tyro.conf._confstruct)</a>
+</li>
           <li><a href="../api/tyro/conf/_markers/#tyro.conf._markers.T">(in module tyro.conf._markers)</a>
+</li>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.T">(in module tyro.constructors._primitive_spec)</a>
 </li>
           <li><a href="../api/tyro/extras/_base_configs/#tyro.extras._base_configs.T">(in module tyro.extras._base_configs)</a>
 </li>
@@ -1109,6 +1184,12 @@
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.FieldDefinition.type_or_callable">type_or_callable (tyro._fields.FieldDefinition attribute)</a>
 </li>
+        <li><a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo.type_origin">type_origin (tyro.constructors._primitive_spec.PrimitiveTypeInfo attribute)</a>
+
+        <ul>
+          <li><a href="../api/tyro/constructors/#tyro.constructors.PrimitiveTypeInfo.type_origin">(tyro.constructors.PrimitiveTypeInfo attribute)</a>
+</li>
+        </ul></li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.TypeOrCallable">TypeOrCallable (in module tyro._resolver)</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.TypeOrCallableOrNone">TypeOrCallableOrNone (in module tyro._resolver)</a>
@@ -1181,21 +1262,14 @@
 </li>
         </ul></li>
         <li>
-    tyro._instantiators
-
-        <ul>
-          <li><a href="../api/tyro/_instantiators/#module-tyro._instantiators">module</a>
-</li>
-        </ul></li>
-    </ul></td>
-    <td style="width: 33%; vertical-align: top;"><ul>
-        <li>
     tyro._parsers
 
         <ul>
           <li><a href="../api/tyro/_parsers/#module-tyro._parsers">module</a>
 </li>
         </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
         <li>
     tyro._resolver
 
@@ -1257,6 +1331,20 @@
 
         <ul>
           <li><a href="../api/tyro/conf/_markers/#module-tyro.conf._markers">module</a>
+</li>
+        </ul></li>
+        <li>
+    tyro.constructors
+
+        <ul>
+          <li><a href="../api/tyro/constructors/#module-tyro.constructors">module</a>
+</li>
+        </ul></li>
+        <li>
+    tyro.constructors._primitive_spec
+
+        <ul>
+          <li><a href="../api/tyro/constructors/_primitive_spec/#module-tyro.constructors._primitive_spec">module</a>
 </li>
         </ul></li>
         <li>
@@ -1325,7 +1413,7 @@
 </li>
         <li><a href="../api/tyro/_fields/#tyro._fields.UnsupportedNestedTypeMessage">UnsupportedNestedTypeMessage (class in tyro._fields)</a>
 </li>
-        <li><a href="../api/tyro/#tyro.UnsupportedTypeAnnotationError">UnsupportedTypeAnnotationError</a>, <a href="../api/tyro/_instantiators/#tyro._instantiators.UnsupportedTypeAnnotationError">[1]</a>
+        <li><a href="../api/tyro/#tyro.UnsupportedTypeAnnotationError">UnsupportedTypeAnnotationError</a>, <a href="../api/tyro/constructors/_primitive_spec/#tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError">[1]</a>
 </li>
         <li><a href="../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">unwrap_annotated() (in module tyro._resolver)</a>
 </li>

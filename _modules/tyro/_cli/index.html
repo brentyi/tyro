@@ -230,6 +230,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -269,22 +270,13 @@
           <h1>Source code for tyro._cli</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Core public API.&quot;&quot;&quot;</span>
 
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Callable</span><span class="p">,</span>
-    <span class="n">Dict</span><span class="p">,</span>
-    <span class="n">List</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
-    <span class="n">Sequence</span><span class="p">,</span>
-    <span class="n">Tuple</span><span class="p">,</span>
-    <span class="n">TypeVar</span><span class="p">,</span>
-    <span class="n">Union</span><span class="p">,</span>
-    <span class="n">cast</span><span class="p">,</span>
-    <span class="n">overload</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
 <span class="kn">import</span> <span class="nn">shtab</span>
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
@@ -315,14 +307,14 @@
 <span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -330,24 +322,24 @@
 <span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
+    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
 <span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
     <span class="c1"># supported for general callables. These can, however, be specified in the</span>
     <span class="c1"># signature of the callable itself.</span>
@@ -355,7 +347,7 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span><span class="p">:</span> <span class="o">...</span>
 
 
@@ -363,9 +355,9 @@
 <span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="c1"># Passing a default makes sense for things like dataclasses, but are not</span>
     <span class="c1"># supported for general callables. These can, however, be specified in the</span>
     <span class="c1"># signature of the callable itself.</span>
@@ -373,25 +365,25 @@
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">],</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
+    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <div class="viewcode-block" id="cli">
 <a class="viewcode-back" href="../../../api/tyro/#tyro._cli.cli">[docs]</a>
 <span class="k">def</span> <span class="nf">cli</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Call or instantiate `f`, with inputs populated from an automatically generated</span>
 <span class="sd">    CLI interface.</span>
 
@@ -505,9 +497,9 @@
 <span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
@@ -517,9 +509,9 @@
 <span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span> <span class="o">...</span>
@@ -528,13 +520,13 @@
 <div class="viewcode-block" id="get_parser">
 <a class="viewcode-back" href="../../../api/tyro/extras/#tyro._cli.get_parser">[docs]</a>
 <span class="k">def</span> <span class="nf">get_parser</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="c1"># We have no `args` argument, since this is only used when</span>
     <span class="c1"># parser.parse_args() is called.</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">use_underscores</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
@@ -562,21 +554,24 @@
 
 
 <span class="k">def</span> <span class="nf">_cli_impl</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]],</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">OutT</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">OutT</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">description</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-    <span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-    <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">OutT</span><span class="p">],</span>
+    <span class="n">prog</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">description</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">default</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">OutT</span><span class="p">,</span>
     <span class="n">return_parser</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">return_unknown_args</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span>
-    <span class="n">OutT</span><span class="p">,</span>
-    <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
-    <span class="n">Tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="n">OutT</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-<span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="p">(</span>
+    <span class="n">OutT</span>
+    <span class="o">|</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span>
+    <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span>
+        <span class="n">Callable</span><span class="p">[[],</span> <span class="n">OutT</span><span class="p">],</span>
+        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="p">]</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for stitching the `tyro` pipeline together.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;default_instance&quot;</span> <span class="ow">in</span> <span class="n">deprecated_kwargs</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
@@ -597,14 +592,14 @@
     <span class="c1">#   one or many arguments, depending on various factors).</span>
     <span class="c1">#</span>
     <span class="c1"># This could be revisited.</span>
-    <span class="n">default_instance_internal</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">,</span> <span class="n">OutT</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">default_instance_internal</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span> <span class="o">|</span> <span class="n">OutT</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_NONPROP</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">default</span>
     <span class="p">)</span>
 
     <span class="c1"># We wrap our type with a dummy dataclass if it can&#39;t be treated as a nested type.</span>
     <span class="c1"># For example: passing in f=int will result in a dataclass with a single field</span>
     <span class="c1"># typed as int.</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_nested_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">f</span><span class="p">),</span> <span class="n">default_instance_internal</span><span class="p">):</span>
         <span class="n">dummy_field</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
             <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span>
             <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(),</span>
@@ -626,7 +621,7 @@
     <span class="c1"># Fix arguments. This will modify all option-style arguments replacing</span>
     <span class="c1"># underscores with hyphens, or vice versa if use_underscores=True.</span>
     <span class="c1"># If two options are ambiguous, e.g., --a_b and --a-b, raise a runtime error.</span>
-    <span class="n">modified_args</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">modified_args</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
             <span class="k">continue</span>
@@ -773,7 +768,7 @@
         <span class="c1"># `field_name_prefix == &quot;&quot;` condition in `callable_with_args()`!</span>
 
         <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
-        <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
+        <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span>
         <span class="kn">from</span> <span class="nn">rich.padding</span> <span class="kn">import</span> <span class="n">Padding</span>
         <span class="kn">from</span> <span class="nn">rich.panel</span> <span class="kn">import</span> <span class="n">Panel</span>
         <span class="kn">from</span> <span class="nn">rich.rule</span> <span class="kn">import</span> <span class="n">Rule</span>
@@ -789,7 +784,7 @@
                         <span class="s2">&quot;[bright_red][bold]Error parsing&quot;</span>
                         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="si">}</span><span class="s2">[/bold]:[/bright_red] </span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
                         <span class="o">*</span><span class="n">cast</span><span class="p">(</span>  <span class="c1"># Cast to appease mypy...</span>
-                            <span class="n">List</span><span class="p">[</span><span class="n">RenderableType</span><span class="p">],</span>
+                            <span class="nb">list</span><span class="p">,</span>
                             <span class="p">(</span>
                                 <span class="p">[]</span>
                                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">arg</span><span class="p">,</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span>

@@ -231,6 +231,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -417,6 +418,29 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="tyro._strings.join_union_metavars">
+<span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">join_union_metavars</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">metavars</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/tyro/_strings/#join_union_metavars"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.join_union_metavars" title="Link to this definition">#</a></dt>
+<dd><p>Metavar generation helper for unions. Could be revisited.</p>
+<p class="rubric">Examples</p>
+<p>None, INT =&gt; NONE|INT
+{0,1,2}, {3,4} =&gt; {0,1,2,3,4}
+{0,1,2}, {3,4}, STR =&gt; {0,1,2,3,4}|STR
+{None}, INT [INT …] =&gt; {None}|{INT [INT …]}
+STR, INT [INT …] =&gt; STR|{INT [INT …]}
+STR, INT INT =&gt; STR|{INT INT}</p>
+<p>The curly brackets are unfortunately overloaded but alternatives all interfere with
+argparse internals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>metavars</strong> (<em>Iterable</em><em>[</em><em>str</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="tyro._strings.remove_single_line_breaks">
 <span class="sig-prename descclassname"><span class="pre">tyro._strings.</span></span><span class="sig-name descname"><span class="pre">remove_single_line_breaks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">helptext</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/tyro/_strings/#remove_single_line_breaks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._strings.remove_single_line_breaks" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
@@ -490,6 +514,7 @@
 <li><a class="reference internal" href="#tyro._strings.subparser_name_from_type"><code class="docutils literal notranslate"><span class="pre">subparser_name_from_type()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._strings.strip_ansi_sequences"><code class="docutils literal notranslate"><span class="pre">strip_ansi_sequences()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._strings.multi_metavar_from_single"><code class="docutils literal notranslate"><span class="pre">multi_metavar_from_single()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._strings.join_union_metavars"><code class="docutils literal notranslate"><span class="pre">join_union_metavars()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._strings.remove_single_line_breaks"><code class="docutils literal notranslate"><span class="pre">remove_single_line_breaks()</span></code></a></li>
 </ul>
 </li>

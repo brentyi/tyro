@@ -75,8 +75,8 @@ Module Contents
 
    
    Contains fields meant to be passed directly into argparse.
-   .. py:attribute:: instantiator
-      :type: Optional[tyro._instantiators.Instantiator]
+   .. py:attribute:: instance_from_str
+      :type: Optional[Callable]
 
       
 

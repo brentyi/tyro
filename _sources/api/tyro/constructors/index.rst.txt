@@ -1,0 +1,123 @@
+:py:mod:`tyro.constructors`
+===========================
+
+.. py:module:: tyro.constructors
+
+
+Package Contents
+----------------
+
+.. py:class:: PrimitiveConstructorRegistry
+
+
+   
+   Registry for rules that define how primitive types that can be
+   constructed from a single command-line argument.
+   .. py:method:: define_rule(matcher_fn: Callable[[PrimitiveTypeInfo], bool]) -> Callable[[SpecFactory], SpecFactory]
+
+      
+      Define a rule for constructing a primitive type from a string. The
+      most recently added rule will be applied first.
+
+   .. py:method:: get_spec(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec
+
+      
+      Get a constructor specification for a given type.
+
+   .. py:method:: __enter__() -> None
+
+
+   .. py:method:: __exit__(*args: Any) -> None
+
+
+
+.. py:class:: PrimitiveConstructorSpec
+
+
+   Bases: :py:obj:`Generic`\ [\ :py:obj:`T`\ ]
+
+   
+   Specification for constructing a primitive type from a string.
+
+   There are two ways to use this class:
+
+   First, we can include it in a type signature via ``typing.Annotated``.
+   This is the simplest, and allows for per-field customization of
+   instantiation behavior.
+
+   Alternatively, it can be returned by a rule in a ``PrimitiveConstructorRegistry``.
+   .. py:attribute:: nargs
+      :type: int | typing_extensions.Literal[*]
+
+      
+      Number of arguments required to construct an instance. If nargs is "*", then
+      the number of arguments is variable.
+
+   .. py:attribute:: metavar
+      :type: str
+
+      
+      Metavar to display in help messages.
+
+   .. py:attribute:: instance_from_str
+      :type: Callable[[list[str]], T]
+
+      
+      Given a list of string arguments, construct an instance of the type. The
+      length of the list will match the value of nargs.
+
+   .. py:attribute:: is_instance
+      :type: Callable[[Any], bool]
+
+      
+      Given an object instance, does it match this primitive type? This is
+      used for help messages when a default is provided.
+
+   .. py:attribute:: str_from_instance
+      :type: Callable[[T], list[str]]
+
+      
+      Convert an instance to a list of string arguments that would construct
+      the instance. This is used for help messages when a default is provided.
+
+   .. py:attribute:: choices
+      :type: tuple[str, Ellipsis] | None
+
+      
+      Finite set of choices for arguments.
+
+
+.. py:class:: PrimitiveTypeInfo
+
+
+   
+   Information used to generate constructors for primitive types.
+   .. py:attribute:: type
+      :type: tyro._typing.TypeForm
+
+      
+      Field type, with runtime annotations (typing.Annotated) stripped.
+
+   .. py:attribute:: type_origin
+      :type: tyro._typing.TypeForm | None
+
+      
+      The output of get_origin() on the static type.
+
+   .. py:attribute:: markers
+      :type: set[tyro.conf._markers.Marker]
+
+      
+      Set of tyro markers used to configure this field.
+
+   .. py:attribute:: constructor_registry
+      :type: PrimitiveConstructorRegistry
+
+      
+      The registry used to look up constructor specifications for this type.
+
+   .. py:method:: make(raw_annotation: tyro._typing.TypeForm, parent_markers: set[tyro.conf._markers.Marker], source_registry: PrimitiveConstructorRegistry) -> PrimitiveTypeInfo
+      :staticmethod:
+
+
+

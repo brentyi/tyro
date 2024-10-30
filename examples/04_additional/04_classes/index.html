@@ -231,6 +231,7 @@
 <ul>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../api/tyro/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of tyro</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/conf/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/constructors/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../api/tyro/extras/"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a></li>
 </ul>
 </li>
@@ -302,12 +303,12 @@ constructors of standard Python classes.</p>
 
 Arguments.
 
-╭─ options ────────────────────────────────────────────────╮
-│ -h, --help              show this help message and exit  │
-│ --field1 STR            A string field. (required)       │
-│ --field2 INT            A numeric field. (required)      │
-│ --flag, --no-flag       A boolean flag. (default: False) │
-╰──────────────────────────────────────────────────────────╯</pre>
+╭─ options ───────────────────────────────────────────────╮
+│ -h, --help              show this help message and exit │
+│ --field1 STR            A string field. (required)      │
+│ --field2 INT            A numeric field. (required)     │
+│ --flag, --no-flag       A boolean flag. (default: None) │
+╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
 <kbd>python 04_additional/04_classes.py --field1 hello --field2 7</kbd><pre class="ansi-block literal-block">['hello', 7, False]</pre>
 </section>
