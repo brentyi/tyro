@@ -310,11 +310,6 @@ def handle_field(
 ]:
     """Determine what to do with a single field definition."""
 
-    if isinstance(field.type_or_callable, TypeVar):
-        raise UnsupportedTypeAnnotationError(
-            f"Field {field.intern_name} has an unbound TypeVar: {field.type_or_callable}."
-        )
-
     if (
         field.primitive_spec is None
         and _markers.Fixed not in field.markers
