@@ -25,13 +25,13 @@ from . import (
     _arguments,
     _docstrings,
     _fields,
-    _instantiators,
     _resolver,
     _strings,
     _subcommand_matching,
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
+from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 T = TypeVar("T")
 
@@ -92,7 +92,7 @@ class ParserSpecification:
         # Note that 'parent' here refers to in the nesting hierarchy, not the
         # superclass.
         if f in parent_classes and f is not dict:
-            raise _instantiators.UnsupportedTypeAnnotationError(
+            raise UnsupportedTypeAnnotationError(
                 f"Found a cyclic dependency with type {f}."
             )
 
@@ -310,12 +310,11 @@ def handle_field(
 ]:
     """Determine what to do with a single field definition."""
 
-    if isinstance(field.type_or_callable, TypeVar):
-        raise _instantiators.UnsupportedTypeAnnotationError(
-            f"Field {field.intern_name} has an unbound TypeVar: {field.type_or_callable}."
-        )
-
-    if _markers.Fixed not in field.markers and _markers.Suppress not in field.markers:
+    if (
+        field.primitive_spec is None
+        and _markers.Fixed not in field.markers
+        and _markers.Suppress not in field.markers
+    ):
         # (1) Handle Unions over callables; these result in subparsers.
         subparsers_attempt = SubparsersSpecification.from_field(
             field,
@@ -334,7 +333,7 @@ def handle_field(
                 return subparsers_attempt
 
         # (2) Handle nested callables.
-        if _fields.is_nested_type(field.type_or_callable, field.default):
+        if _fields.is_struct_type(field.type_or_callable, field.default):
             field = dataclasses.replace(
                 field,
                 type_or_callable=_resolver.narrow_subtypes(
@@ -351,11 +350,11 @@ def handle_field(
                 intern_prefix=_strings.make_field_name(
                     [intern_prefix, field.intern_name]
                 ),
-                extern_prefix=_strings.make_field_name(
-                    [extern_prefix, field.extern_name]
-                )
-                if field.argconf.prefix_name in (True, None)
-                else field.extern_name,
+                extern_prefix=(
+                    _strings.make_field_name([extern_prefix, field.extern_name])
+                    if field.argconf.prefix_name in (True, None)
+                    else field.extern_name
+                ),
                 subcommand_prefix=subcommand_prefix,
                 support_single_arg_types=False,
             )
@@ -407,7 +406,7 @@ class SubparsersSpecification:
         # If specified, swap types using tyro.conf.subcommand(constructor=...).
         for i, option in enumerate(options):
             _, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfiguration
+                option, _confstruct._SubcommandConfig
             )
             if (
                 len(found_subcommand_configs) > 0
@@ -424,26 +423,26 @@ class SubparsersSpecification:
         if not any(
             [
                 o is not none_proxy
-                and _fields.is_nested_type(cast(type, o), _fields.MISSING_NONPROP)
+                and _fields.is_struct_type(cast(type, o), _fields.MISSING_NONPROP)
                 for o in options
             ]
         ):
             return None
 
         # Get subcommand configurations from `tyro.conf.subcommand()`.
-        subcommand_config_from_name: Dict[
-            str, _confstruct._SubcommandConfiguration
-        ] = {}
+        subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
         subcommand_type_from_name: Dict[str, type] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                ""
-                if _markers.OmitSubcommandPrefixes in field.markers
-                else extern_prefix,
+                (
+                    ""
+                    if _markers.OmitSubcommandPrefixes in field.markers
+                    else extern_prefix
+                ),
                 type(None) if option is none_proxy else cast(type, option),
             )
             option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfiguration
+                option, _confstruct._SubcommandConfig
             )
             if len(found_subcommand_configs) != 0:
                 # Explicitly annotated default.
@@ -479,9 +478,11 @@ class SubparsersSpecification:
         parser_from_name: Dict[str, ParserSpecification] = {}
         for option in options:
             subcommand_name = _strings.subparser_name_from_type(
-                ""
-                if _markers.OmitSubcommandPrefixes in field.markers
-                else extern_prefix,
+                (
+                    ""
+                    if _markers.OmitSubcommandPrefixes in field.markers
+                    else extern_prefix
+                ),
                 type(None) if option is none_proxy else cast(type, option),
             )
 
@@ -490,7 +491,7 @@ class SubparsersSpecification:
             if subcommand_name in subcommand_config_from_name:
                 subcommand_config = subcommand_config_from_name[subcommand_name]
             else:
-                subcommand_config = _confstruct._SubcommandConfiguration(
+                subcommand_config = _confstruct._SubcommandConfig(
                     "unused",
                     description=None,
                     default=_fields.MISSING_NONPROP,
@@ -513,7 +514,7 @@ class SubparsersSpecification:
             annotations = tuple(
                 a
                 for a in annotations
-                if not isinstance(a, _confstruct._SubcommandConfiguration)
+                if not isinstance(a, _confstruct._SubcommandConfig)
             )
             if len(annotations) == 0:
                 option = option_origin

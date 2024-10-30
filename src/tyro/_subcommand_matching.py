@@ -5,13 +5,14 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from typing_extensions import get_args, get_origin
 
-from . import _fields, _instantiators, _resolver, _typing
+from . import _fields, _resolver, _typing
 from .conf import _confstruct
+from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 
 def match_subcommand(
     default: Any,
-    subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfiguration],
+    subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig],
     subcommand_type_from_name: Dict[str, type],
 ) -> Optional[str]:
     """Given a subcommand mapping and a default, return which subcommand the default
@@ -82,7 +83,7 @@ class _TypeTree:
             typ, field_list = _fields.field_list_from_callable(
                 typ, default_instance=default_instance, support_single_arg_types=False
             )
-        except _instantiators.UnsupportedTypeAnnotationError:
+        except UnsupportedTypeAnnotationError:
             return _TypeTree(typ_unwrap, {})
 
         return _TypeTree(

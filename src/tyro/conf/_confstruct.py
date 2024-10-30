@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Callable, Sequence, overload
+from typing import Any, Callable, Sequence, TypeVar, overload
 
 from .._fields import MISSING_NONPROP
 
+T = TypeVar("T")
+
 
 @dataclasses.dataclass(frozen=True)
-class _SubcommandConfiguration:
+class _SubcommandConfig:
     name: str | None
     default: Any
     description: str | None
@@ -99,19 +101,19 @@ def subcommand(
     assert not (
         constructor is not None and constructor_factory is not None
     ), "`constructor` and `constructor_factory` cannot both be set."
-    return _SubcommandConfiguration(
+    return _SubcommandConfig(
         name,
         default,
         description,
         prefix_name,
-        constructor_factory=constructor_factory
-        if constructor is None
-        else lambda: constructor,
+        constructor_factory=(
+            constructor_factory if constructor is None else lambda: constructor
+        ),
     )
 
 
 @dataclasses.dataclass(frozen=True)
-class _ArgConfiguration:
+class _ArgConfig:
     name: str | None
     metavar: str | None
     help: str | None
@@ -205,14 +207,14 @@ def arg(
         for alias in aliases:
             assert alias.startswith("-"), "Argument alias needs to start with a hyphen!"
 
-    return _ArgConfiguration(
+    return _ArgConfig(
         name=name,
         metavar=metavar,
         help=help,
         help_behavior_hint=help_behavior_hint,
         aliases=tuple(aliases) if aliases is not None else None,
         prefix_name=prefix_name,
-        constructor_factory=constructor_factory
-        if constructor is None
-        else lambda: constructor,
+        constructor_factory=(
+            constructor_factory if constructor is None else lambda: constructor
+        ),
     )

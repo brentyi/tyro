@@ -4,8 +4,6 @@ argparse's `add_argument()`."""
 from __future__ import annotations
 
 import dataclasses
-import enum
-import itertools
 import json
 import shlex
 from typing import (
@@ -13,7 +11,6 @@ from typing import (
     Any,
     Callable,
     Iterable,
-    Mapping,
     Optional,
     Sequence,
     Tuple,
@@ -24,10 +21,16 @@ from typing import (
 
 import rich.markup
 import shtab
+from typing_extensions import get_origin
 
 from . import _argparse as argparse
-from . import _fields, _instantiators, _strings
+from . import _fields, _strings
 from .conf import _markers
+from .constructors._primitive_spec import (
+    PrimitiveConstructorRegistry,
+    PrimitiveTypeInfo,
+    UnsupportedTypeAnnotationError,
+)
 
 if TYPE_CHECKING:
     cached_property = property
@@ -114,7 +117,7 @@ class ArgumentDefinition:
 
         # Get keyword arguments, with None values removed.
         kwargs = dict(self.lowered.__dict__)  # type: ignore
-        kwargs.pop("instantiator")
+        kwargs.pop("instance_from_str")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
         name_or_flag = kwargs.pop("name_or_flag")
         if len(name_or_flag) == 0:
@@ -184,10 +187,8 @@ class ArgumentDefinition:
         # Each rule will mutate the lowered object. This is (unfortunately)
         # much faster than a functional approach.
         lowered = LoweredArgumentDefinition()
-        _rule_handle_defaults(self, lowered)
         _rule_handle_boolean_flags(self, lowered)
-        _rule_recursive_instantiator_from_type(self, lowered)
-        _rule_convert_defaults_to_strings(self, lowered)
+        _rule_apply_primitive_specs(self, lowered)
         _rule_counters(self, lowered)
         _rule_generate_helptext(self, lowered)
         _rule_set_name_or_flag_and_dest(self, lowered)
@@ -204,14 +205,14 @@ class LoweredArgumentDefinition:
     #
     # The main reason we use this instead of the standard 'type' argument is to enable
     # mixed-type tuples.
-    instantiator: Optional[_instantiators.Instantiator] = None
+    instance_from_str: Optional[Callable] = None
 
     def is_fixed(self) -> bool:
         """If the instantiator is set to `None`, even after all argument
         transformations, it means that we don't have a valid instantiator for an
         argument. We then mark the argument as 'fixed', with a value always equal to the
         field default."""
-        return self.instantiator is None
+        return self.instance_from_str is None
 
     # From here on out, all fields correspond 1:1 to inputs to argparse's
     # add_argument() method.
@@ -226,25 +227,6 @@ class LoweredArgumentDefinition:
     # sequences, multiple arguments, etc, manually.
     metavar: Optional[str] = None
     help: Optional[str] = None
-
-
-def _rule_handle_defaults(
-    arg: ArgumentDefinition,
-    lowered: LoweredArgumentDefinition,
-) -> None:
-    """Set `required=False` if a default value is set."""
-
-    # Mark lowered as required if a default is set.
-    if (
-        arg.field.default in _fields.MISSING_SINGLETONS
-        and _markers._OPTIONAL_GROUP not in arg.field.markers
-    ):
-        lowered.default = None
-        lowered.required = True
-        return
-
-    lowered.default = arg.field.default
-    return
 
 
 def _rule_handle_boolean_flags(
@@ -265,16 +247,18 @@ def _rule_handle_boolean_flags(
     elif arg.field.default in (True, False):
         # Default `False` => --flag passed in flips to `True`.
         lowered.action = BooleanOptionalAction
-        lowered.instantiator = lambda x: x  # argparse will directly give us a bool!
+        lowered.instance_from_str = (
+            lambda x: x
+        )  # argparse will directly give us a bool!
         return
 
     assert False, (
         f"Expected a boolean as a default for {arg.field.intern_name}, but got"
-        f" {lowered.default}."
+        f" {arg.field.default}."
     )
 
 
-def _rule_recursive_instantiator_from_type(
+def _rule_apply_primitive_specs(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
@@ -286,26 +270,35 @@ def _rule_recursive_instantiator_from_type(
     Conversions from strings to our desired types happen in the instantiator; this is a
     bit more flexible, and lets us handle more complex types like enums and multi-type
     tuples."""
+
     if _markers.Fixed in arg.field.markers:
-        lowered.instantiator = None
+        lowered.instance_from_str = None
         lowered.metavar = "{fixed}"
         lowered.required = False
         lowered.default = _fields.MISSING_PROP
         return
-    if lowered.instantiator is not None:
+    if lowered.instance_from_str is not None:
         return
+
     try:
-        instantiator, metadata = _instantiators.instantiator_from_type(
-            arg.field.type_or_callable,
-            arg.field.markers,
-        )
-    except _instantiators.UnsupportedTypeAnnotationError as e:
+        if arg.field.primitive_spec is not None:
+            spec = arg.field.primitive_spec
+        else:
+            registry = PrimitiveConstructorRegistry._get_active_registry()
+            spec = registry.get_spec(
+                PrimitiveTypeInfo.make(
+                    cast(type, arg.field.type_or_callable),
+                    arg.field.markers,
+                    source_registry=registry,
+                )
+            )
+    except UnsupportedTypeAnnotationError as e:
         if arg.field.default in _fields.MISSING_SINGLETONS:
             field_name = _strings.make_field_name(
                 [arg.extern_prefix, arg.field.intern_name]
             )
             if field_name != "":
-                raise _instantiators.UnsupportedTypeAnnotationError(
+                raise UnsupportedTypeAnnotationError(
                     f"Unsupported type annotation for the field {field_name}; "
                     f"{e.args[0]} "
                     "To suppress this error, assign the field either a default value or a different type."
@@ -323,59 +316,76 @@ def _rule_recursive_instantiator_from_type(
             lowered.default = _fields.MISSING_PROP
             return
 
-    if metadata.action == "append":
-
-        def append_instantiator(x: Any) -> Any:
-            out = instantiator(x)
-            if arg.field.default in _fields.MISSING_SINGLETONS:
-                return instantiator(x)
-
-            return type(out)(arg.field.default) + out
-
-        lowered.instantiator = append_instantiator
+    # Mark lowered as required if a default is missing.
+    if (
+        arg.field.default in _fields.MISSING_SINGLETONS
+        and _markers._OPTIONAL_GROUP not in arg.field.markers
+    ):
         lowered.default = None
-        lowered.choices = metadata.choices
-        lowered.nargs = metadata.nargs
-        lowered.metavar = metadata.metavar
-        lowered.action = metadata.action
+        lowered.required = True
+    elif (
+        arg.field.default is not _fields.EXCLUDE_FROM_CALL
+        and arg.field.default not in _fields.MISSING_SINGLETONS
+    ):
+        # Set default.
+        lowered.default = spec.str_from_instance(arg.field.default)
+    else:
+        lowered.default = arg.field.default
+
+    if spec._action == "append":
+
+        def append_instantiator(x: list[list[str]]) -> Any:
+            """Handle UseAppendAction effects."""
+            # We'll assume that the type is annotated as Dict[...], Tuple[...], List[...], etc.
+            container_type = get_origin(arg.field.type_or_callable)
+            if container_type is None:
+                # Raw annotation, like `UseAppendAction[list]`. It's unlikely
+                # that a user would use this but we can handle it.
+                container_type = arg.field.type_or_callable
+
+            # Instantiate initial output.
+            out = (
+                arg.field.default
+                if arg.field.default not in _fields.MISSING_SINGLETONS
+                else None
+            )
+            if out is None:
+                out = {} if container_type is dict else []
+            elif isinstance(out, dict):
+                out = out.copy()
+            else:
+                # All sequence types will be lists for now to make sure we can
+                # append to them.
+                out = list(out)
+
+            # Get + merge parts.
+            parts = [spec.instance_from_str(arg_list) for arg_list in x]
+            for part in parts:
+                if isinstance(out, dict):
+                    out.update(part)
+                else:
+                    out.append(part)
+
+            # Return output with correct type.
+            if isinstance(out, dict):
+                return out
+            else:
+                return container_type(out)
+
+        lowered.instance_from_str = append_instantiator
+        lowered.default = None
+        lowered.choices = spec.choices
+        lowered.nargs = spec.nargs
+        lowered.metavar = spec.metavar
+        lowered.action = spec._action
         lowered.required = False
         return
     else:
-        lowered.instantiator = instantiator
-        lowered.choices = metadata.choices
-        lowered.nargs = metadata.nargs
-        lowered.metavar = metadata.metavar
-        lowered.action = metadata.action
-        return
-
-
-def _rule_convert_defaults_to_strings(
-    arg: ArgumentDefinition,
-    lowered: LoweredArgumentDefinition,
-) -> None:
-    """Sets all default values to strings, as required as input to our instantiator
-    functions. Special-cased for enums."""
-
-    def as_str(x: Any) -> Tuple[str, ...]:
-        if isinstance(x, str):
-            return (x,)
-        elif isinstance(x, enum.Enum):
-            return (x.name,)
-        elif isinstance(x, Mapping):
-            return tuple(itertools.chain(*map(as_str, itertools.chain(*x.items()))))
-        elif isinstance(x, Sequence):
-            return tuple(itertools.chain(*map(as_str, x)))
-        else:
-            return (str(x),)
-
-    if (
-        lowered.default is None
-        or lowered.default in _fields.MISSING_SINGLETONS
-        or lowered.action is not None
-    ):
-        return
-    else:
-        lowered.default = as_str(lowered.default)
+        lowered.instance_from_str = spec.instance_from_str
+        lowered.choices = spec.choices
+        lowered.nargs = spec.nargs
+        lowered.metavar = spec.metavar
+        lowered.action = spec._action
         return
 
 
@@ -407,7 +417,9 @@ def _rule_counters(
         lowered.action = "count"
         lowered.default = 0
         lowered.required = False
-        lowered.instantiator = lambda x: x  # argparse will directly give us an int!
+        lowered.instance_from_str = (
+            lambda x: x
+        )  # argparse will directly give us an int!
         return
 
 
@@ -438,8 +450,7 @@ def _rule_generate_helptext(
 
     if not lowered.required:
         # Get the default value.
-        # Note: lowered.default is the stringified version! See
-        # `_rule_convert_defaults_to_strings()`.
+        # Note: lowered.default is the stringified version!
         default = lowered.default
         if lowered.is_fixed() or lowered.action == "append":
             # Cases where we'll be missing the lowered default. Use field default instead.
@@ -473,7 +484,7 @@ def _rule_generate_helptext(
                 if callable(help_behavior_hint)
                 else help_behavior_hint
             )
-        elif lowered.instantiator is None:
+        elif lowered.instance_from_str is None:
             # Intentionally not quoted via shlex, since this can't actually be passed
             # in via the commandline.
             behavior_hint = f"(fixed to: {default_label})"
@@ -495,8 +506,6 @@ def _rule_generate_helptext(
             and default in _fields.MISSING_SINGLETONS
         ):
             # Argument in an optional group, but with no default. This is typically used
-            # Note: lowered.default is the stringified version! See
-            # `_rule_convert_defaults_to_strings()`.
             # when general (non-argument, non-dataclass) object arguments are given a
             # default, or when we use `tyro.conf.arg(constructor=...)`.
             #
