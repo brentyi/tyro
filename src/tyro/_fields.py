@@ -139,11 +139,11 @@ class FieldDefinition:
             if argconf.help is not None:
                 helptext = argconf.help
 
-        _, primitive_spec = _resolver.unwrap_annotated(
+        _, primitive_specs = _resolver.unwrap_annotated(
             static_type, PrimitiveConstructorSpec
         )
-        if len(primitive_spec) > 0:
-            primitive_spec = primitive_spec[0]
+        if len(primitive_specs) > 0:
+            primitive_spec = primitive_specs[0]
         else:
             primitive_spec = None
 
