@@ -18,14 +18,14 @@ def test_custom_primitive_registry():
     """Test that we can use a custom primitive registry to parse a custom type."""
     primitive_registry = tyro.constructors.PrimitiveConstructorRegistry()
 
-    @primitive_registry.define_rule(
-        matcher_fn=lambda type_info: type_info.type_origin is dict
-        and get_args(type_info.type) == (str, Any)
-    )
+    @primitive_registry.define_rule
     def json_dict_spec(
         type_info: tyro.constructors.PrimitiveTypeInfo,
-    ) -> tyro.constructors.PrimitiveConstructorSpec:
-        del type_info  # We won't use type_info.
+    ) -> tyro.constructors.PrimitiveConstructorSpec | None:
+        if not (
+            type_info.type_origin is dict and get_args(type_info.type) == (str, Any)
+        ):
+            return None
         return json_constructor_spec
 
     def main(x: Dict[str, Any]) -> Dict[str, Any]:
