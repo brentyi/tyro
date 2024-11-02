@@ -53,7 +53,9 @@ class PrimitiveTypeInfo:
     """Information used to generate constructors for primitive types."""
 
     type: TypeForm
-    """Field type, with runtime annotations (typing.Annotated) stripped."""
+    """Annotated field type. Forward references, aliases, and type
+    variables/parameters will have been resolved and runtime annotations
+    (typing.Annotated) will have been stripped."""
     type_origin: TypeForm | None
     """The output of get_origin() on the static type."""
     markers: set[_markers.Marker]
