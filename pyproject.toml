@@ -135,4 +135,4 @@ extend-exclude = ["**/_argparse.py"]
 
 [tool.pyright]
 pythonVersion = "3.12"
-ignore = ["**/_argparse.py"]
+ignore = ["**/_argparse.py", "./docs/**/*"]
