@@ -639,10 +639,13 @@ def _is_pydantic(cls: TypeForm[Any]) -> bool:
         else:
             pydantic_v1 = None
 
-    if issubclass(cls, pydantic.BaseModel):
-        return True
-    if pydantic_v1 is not None and issubclass(cls, pydantic_v1.BaseModel):
-        return True
+    try:
+        if issubclass(cls, pydantic.BaseModel):
+            return True
+        if pydantic_v1 is not None and issubclass(cls, pydantic_v1.BaseModel):
+            return True
+    except TypeError:
+        pass  # Suppress issubclass errors for non-class types.
     return False
 
 
