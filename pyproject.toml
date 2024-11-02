@@ -25,7 +25,8 @@ classifiers = [
 ]
 dependencies = [
     "docstring-parser>=0.16",
-    "typing-extensions>=4.9.0",
+    "typing-extensions>=4.9.0; python_version>='3.8'",
+    "typing-extensions>=4.7.0; python_version<'3.8'",
     "backports.cached-property>=1.0.2; python_version<'3.8'",
     "colorama>=0.4.0; platform_system=='Windows'",
     "rich>=11.1.0",
