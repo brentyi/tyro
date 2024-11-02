@@ -8,6 +8,7 @@ import pytest
 
 import tyro
 from tyro.conf._markers import OmitArgPrefixes
+from tyro.constructors import UnsupportedTypeAnnotationError
 
 
 def test_simple_generic():
@@ -143,7 +144,7 @@ def test_pep695_recursive_types() -> None:
     class Config:
         arg: RecursiveList[str]
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(Config, args=["--arg", "True"])
 
 

@@ -5,13 +5,13 @@ from . import constructors as constructors
 from . import extras as extras
 from ._cli import cli as cli
 from ._fields import MISSING as MISSING
-from .constructors._primitive_spec import (
-    UnsupportedTypeAnnotationError as UnsupportedTypeAnnotationError,
-)
 
 # Deprecated interface.
 if not TYPE_CHECKING:
     from ._deprecated import *  # noqa
+    from .constructors._primitive_spec import (
+        UnsupportedTypeAnnotationError as UnsupportedTypeAnnotationError,
+    )
 
 
 # TODO: this should be synchronized automatically with the pyproject.toml.
