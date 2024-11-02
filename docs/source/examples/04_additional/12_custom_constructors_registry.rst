@@ -21,12 +21,15 @@ API that tyro relies on for the built-in types.
         custom_registry = tyro.constructors.PrimitiveConstructorRegistry()
 
 
-        @custom_registry.define_rule(
-            matcher_fn=lambda type_info: type_info.type == dict[str, Any]
-        )
+        @custom_registry.define_rule
         def _(
             type_info: tyro.constructors.PrimitiveTypeInfo,
-        ) -> tyro.constructors.PrimitiveConstructorSpec:
+        ) -> tyro.constructors.PrimitiveConstructorSpec | None:
+            # We return `None` if the rule does not apply.
+            if type_info.type != dict[str, Any]:
+                return None
+
+            # If the rule applies, we return the constructor spec.
             return tyro.constructors.PrimitiveConstructorSpec(
                 nargs=1,
                 metavar="JSON",
