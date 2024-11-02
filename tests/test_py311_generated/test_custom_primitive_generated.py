@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from typing import Annotated, Any, Dict, get_args
 
