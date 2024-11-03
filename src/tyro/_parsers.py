@@ -26,6 +26,7 @@ from . import (
     _docstrings,
     _fields,
     _resolver,
+    _singleton,
     _strings,
     _subcommand_matching,
 )
@@ -66,7 +67,7 @@ class ParserSpecification:
         description: Optional[str],
         parent_classes: Set[Type[Any]],
         default_instance: Union[
-            T, _fields.PropagatingMissingType, _fields.NonpropagatingMissingType
+            T, _singleton.PropagatingMissingType, _singleton.NonpropagatingMissingType
         ],
         intern_prefix: str,
         extern_prefix: str,
@@ -81,7 +82,7 @@ class ParserSpecification:
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
-            f, field_list = _fields.field_list_from_callable(
+            f, field_list = _fields.field_list_from_type_or_callable(
                 f=f,
                 default_instance=default_instance,
                 support_single_arg_types=support_single_arg_types,
@@ -423,7 +424,7 @@ class SubparsersSpecification:
         if not any(
             [
                 o is not none_proxy
-                and _fields.is_struct_type(cast(type, o), _fields.MISSING_NONPROP)
+                and _fields.is_struct_type(cast(type, o), _singleton.MISSING_NONPROP)
                 for o in options
             ]
         ):
@@ -456,7 +457,7 @@ class SubparsersSpecification:
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
-        if field.default is None or field.default in _fields.MISSING_SINGLETONS:
+        if field.default is None or field.default in _singleton.MISSING_SINGLETONS:
             default_name = None
         else:
             default_name = _subcommand_matching.match_subcommand(
@@ -494,7 +495,7 @@ class SubparsersSpecification:
                 subcommand_config = _confstruct._SubcommandConfig(
                     "unused",
                     description=None,
-                    default=_fields.MISSING_NONPROP,
+                    default=_singleton.MISSING_NONPROP,
                     prefix_name=True,
                     constructor_factory=None,
                 )
@@ -502,7 +503,7 @@ class SubparsersSpecification:
             # If names match, borrow subcommand default from field default.
             if default_name == subcommand_name and (
                 field.is_default_from_default_instance
-                or subcommand_config.default in _fields.MISSING_SINGLETONS
+                or subcommand_config.default in _singleton.MISSING_SINGLETONS
             ):
                 subcommand_config = dataclasses.replace(
                     subcommand_config, default=field.default

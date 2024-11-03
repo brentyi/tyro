@@ -4,7 +4,7 @@ from . import conf as conf
 from . import constructors as constructors
 from . import extras as extras
 from ._cli import cli as cli
-from ._fields import MISSING as MISSING
+from ._singleton import MISSING as MISSING
 
 # Deprecated interface.
 if not TYPE_CHECKING:

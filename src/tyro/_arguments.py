@@ -24,10 +24,10 @@ import shtab
 from typing_extensions import get_origin
 
 from . import _argparse as argparse
-from . import _fields, _strings
+from . import _fields, _singleton, _strings
 from .conf import _markers
-from .constructors._primitive_spec import (
-    PrimitiveConstructorRegistry,
+from .constructors import (
+    ConstructorRegistry,
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
@@ -129,7 +129,7 @@ class ArgumentDefinition:
         # the field default to a string format, then back to the desired type.
         action = kwargs.get("action", None)
         if action not in {"append", "count"}:
-            kwargs["default"] = _fields.MISSING_NONPROP
+            kwargs["default"] = _singleton.MISSING_NONPROP
         elif action in {BooleanOptionalAction, "count"}:
             pass
         else:
@@ -237,7 +237,7 @@ def _rule_handle_boolean_flags(
         return
 
     if (
-        arg.field.default in _fields.MISSING_SINGLETONS
+        arg.field.default in _singleton.MISSING_SINGLETONS
         or arg.field.is_positional()
         or _markers.FlagConversionOff in arg.field.markers
         or _markers.Fixed in arg.field.markers
@@ -275,7 +275,7 @@ def _rule_apply_primitive_specs(
         lowered.instance_from_str = None
         lowered.metavar = "{fixed}"
         lowered.required = False
-        lowered.default = _fields.MISSING_PROP
+        lowered.default = _singleton.MISSING_PROP
         return
     if lowered.instance_from_str is not None:
         return
@@ -284,16 +284,14 @@ def _rule_apply_primitive_specs(
         if arg.field.primitive_spec is not None:
             spec = arg.field.primitive_spec
         else:
-            registry = PrimitiveConstructorRegistry._get_active_registry()
-            spec = registry.get_spec(
+            spec = ConstructorRegistry._get_active_registry().get_primitive_spec(
                 PrimitiveTypeInfo.make(
                     cast(type, arg.field.type_or_callable),
                     arg.field.markers,
-                    source_registry=registry,
                 )
             )
     except UnsupportedTypeAnnotationError as e:
-        if arg.field.default in _fields.MISSING_SINGLETONS:
+        if arg.field.default in _singleton.MISSING_SINGLETONS:
             field_name = _strings.make_field_name(
                 [arg.extern_prefix, arg.field.intern_name]
             )
@@ -313,19 +311,19 @@ def _rule_apply_primitive_specs(
             # available.
             lowered.metavar = "{fixed}"
             lowered.required = False
-            lowered.default = _fields.MISSING_PROP
+            lowered.default = _singleton.MISSING_PROP
             return
 
     # Mark lowered as required if a default is missing.
     if (
-        arg.field.default in _fields.MISSING_SINGLETONS
+        arg.field.default in _singleton.MISSING_SINGLETONS
         and _markers._OPTIONAL_GROUP not in arg.field.markers
     ):
         lowered.default = None
         lowered.required = True
     elif (
-        arg.field.default is not _fields.EXCLUDE_FROM_CALL
-        and arg.field.default not in _fields.MISSING_SINGLETONS
+        arg.field.default is not _singleton.EXCLUDE_FROM_CALL
+        and arg.field.default not in _singleton.MISSING_SINGLETONS
     ):
         # Set default.
         lowered.default = spec.str_from_instance(arg.field.default)
@@ -346,7 +344,7 @@ def _rule_apply_primitive_specs(
             # Instantiate initial output.
             out = (
                 arg.field.default
-                if arg.field.default not in _fields.MISSING_SINGLETONS
+                if arg.field.default not in _singleton.MISSING_SINGLETONS
                 else None
             )
             if out is None:
@@ -454,7 +452,7 @@ def _rule_generate_helptext(
         default = lowered.default
         if lowered.is_fixed() or lowered.action == "append":
             # Cases where we'll be missing the lowered default. Use field default instead.
-            assert default in _fields.MISSING_SINGLETONS or default is None
+            assert default in _singleton.MISSING_SINGLETONS or default is None
             default = arg.field.default
 
         # Get the default value label.
@@ -492,18 +490,18 @@ def _rule_generate_helptext(
             # Repeatable argument.
             behavior_hint = "(repeatable)"
         elif lowered.action == "append" and (
-            default in _fields.MISSING_SINGLETONS or len(cast(tuple, default)) == 0
+            default in _singleton.MISSING_SINGLETONS or len(cast(tuple, default)) == 0
         ):
             behavior_hint = "(repeatable)"
         elif lowered.action == "append" and len(cast(tuple, default)) > 0:
             assert default is not None  # Just for type checker.
             behavior_hint = f"(repeatable, appends to: {default_label})"
-        elif arg.field.default is _fields.EXCLUDE_FROM_CALL:
+        elif arg.field.default is _singleton.EXCLUDE_FROM_CALL:
             # ^important to use arg.field.default and not the stringified default variable.
             behavior_hint = "(unset by default)"
         elif (
             _markers._OPTIONAL_GROUP in arg.field.markers
-            and default in _fields.MISSING_SINGLETONS
+            and default in _singleton.MISSING_SINGLETONS
         ):
             # Argument in an optional group, but with no default. This is typically used
             # when general (non-argument, non-dataclass) object arguments are given a

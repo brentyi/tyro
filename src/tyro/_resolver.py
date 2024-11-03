@@ -36,7 +36,8 @@ from typing_extensions import (
     get_type_hints,
 )
 
-from . import _fields, _unsafe_cache, conf
+from . import _unsafe_cache, conf
+from ._singleton import MISSING_SINGLETONS
 from ._typing import TypeForm
 
 UnionType = getattr(types, "UnionType", Union)
@@ -472,7 +473,7 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
 
     # (A)
     try:
-        if default_instance not in _fields.MISSING_SINGLETONS and not any(
+        if default_instance not in MISSING_SINGLETONS and not any(
             isinstance(default_instance, o) for o in options_unwrapped
         ):
             warnings.warn(

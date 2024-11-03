@@ -1,0 +1,259 @@
+from __future__ import annotations
+
+import dataclasses
+import sys
+import warnings
+from typing import TYPE_CHECKING, Any, Callable
+
+from typing_extensions import (
+    NotRequired,
+    Required,
+    cast,
+    get_args,
+    get_origin,
+    is_typeddict,
+)
+
+from .. import _docstrings, _resolver
+from .._singleton import (
+    EXCLUDE_FROM_CALL,
+    MISSING_NONPROP,
+    MISSING_PROP,
+    MISSING_SINGLETONS,
+)
+from .._typing import TypeForm
+from ..conf import _markers
+
+if TYPE_CHECKING:
+    from ._registry import ConstructorRegistry
+
+
+@dataclasses.dataclass(frozen=True)
+class UnsupportedStructTypeMessage:
+    """Reason why a callable cannot be treated as a struct type."""
+
+    message: str
+
+
+@dataclasses.dataclass(frozen=True)
+class StructFieldSpec:
+    """Behavior specification for a single field in our callable."""
+
+    name: str
+    type: TypeForm
+    default: Any
+    is_default_overridden: bool
+    helptext: str | None
+
+
+@dataclasses.dataclass(frozen=True)
+class StructConstructorSpec:
+    instantiate: Callable[..., Any]
+    fields: tuple[StructFieldSpec, ...]
+
+
+@dataclasses.dataclass(frozen=True)
+class StructTypeInfo:
+    """Information used to generate constructors for primitive types."""
+
+    type: TypeForm
+    markers: set[_markers.Marker]
+    """Set of tyro markers used to configure this field."""
+
+    default: Any
+
+
+# TODO
+def is_struct_type(typ: TypeForm[Any] | Callable, default_instance: Any) -> bool: ...
+
+
+def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
+    @registry.struct_rule
+    def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if not dataclasses.is_dataclass(info.type):
+            return None
+
+        is_flax_module = False
+        try:
+            # Check if dataclass is a flax module. This is only possible if flax is already
+            # loaded.
+            #
+            # We generally want to avoid importing flax, since it requires a lot of heavy
+            # imports.
+            if "flax.linen" in sys.modules.keys():
+                import flax.linen
+
+                if issubclass(info.type, flax.linen.Module):
+                    is_flax_module = True
+        except ImportError:
+            pass
+
+        # Handle dataclasses.
+        field_list = []
+        for dc_field in filter(
+            lambda field: field.init, _resolver.resolved_fields(info.type)
+        ):
+            # For flax modules, we ignore the built-in "name" and "parent" fields.
+            if is_flax_module and dc_field.name in ("name", "parent"):
+                continue
+
+            default, is_default_from_default_instance = _get_dataclass_field_default(
+                dc_field, info.default
+            )
+
+            # Try to get helptext from field metadata. This is also intended to be
+            # compatible with HuggingFace-style config objects.
+            helptext = dc_field.metadata.get("help", None)
+            assert isinstance(helptext, (str, type(None)))
+
+            # Try to get helptext from docstrings. Note that this can't be generated
+            # dynamically.
+            if helptext is None:
+                helptext = _docstrings.get_field_docstring(info.type, dc_field.name)
+
+            assert not isinstance(dc_field.type, str)
+            field_list.append(
+                StructFieldSpec(
+                    name=dc_field.name,
+                    type=dc_field.type,
+                    default=default,
+                    is_default_overridden=is_default_from_default_instance,
+                    helptext=helptext,
+                )
+            )
+        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+    @registry.struct_rule
+    def typeddict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        # Is this a TypedDict?
+        if not is_typeddict(info.type):
+            return None
+
+        cls = cast(type, info.type)
+
+        # Handle TypedDicts.
+        field_list = []
+        valid_default_instance = (
+            info.default not in MISSING_SINGLETONS
+            and info.default is not EXCLUDE_FROM_CALL
+        )
+        assert not valid_default_instance or isinstance(info.default, dict)
+        total = getattr(cls, "__total__", True)
+        assert isinstance(total, bool)
+        assert not valid_default_instance or isinstance(info.default, dict)
+        for name, typ in _resolver.get_type_hints_with_backported_syntax(
+            cls, include_extras=True
+        ).items():
+            typ_origin = get_origin(typ)
+            is_default_from_default_instance = False
+            if valid_default_instance and name in cast(dict, info.default):
+                default = cast(dict, info.default)[name]
+                is_default_from_default_instance = True
+            elif typ_origin is Required and total is False:
+                # Support total=False.
+                default = MISSING_PROP
+            elif total is False:
+                # Support total=False.
+                default = EXCLUDE_FROM_CALL
+                if is_struct_type(typ, MISSING_NONPROP):
+                    # total=False behavior is unideal for nested structures.
+                    pass
+                    # raise _instantiators.UnsupportedTypeAnnotationError(
+                    #     "`total=False` not supported for nested structures."
+                    # )
+            elif typ_origin is NotRequired:
+                # Support typing.NotRequired[].
+                default = EXCLUDE_FROM_CALL
+            else:
+                default = MISSING_PROP
+
+            # Nested types need to be populated / can't be excluded from the call.
+            if default is EXCLUDE_FROM_CALL and is_struct_type(typ, MISSING_NONPROP):
+                default = MISSING_NONPROP
+
+            if typ_origin in (Required, NotRequired):
+                args = get_args(typ)
+                assert (
+                    len(args) == 1
+                ), "typing.Required[] and typing.NotRequired[T] require a concrete type T."
+                typ = args[0]
+                del args
+
+            field_list.append(
+                StructFieldSpec(
+                    name=name,
+                    type=typ,
+                    default=default,
+                    is_default_overridden=is_default_from_default_instance,
+                    helptext=_docstrings.get_field_docstring(cls, name),
+                )
+            )
+        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+
+def _ensure_dataclass_instance_used_as_default_is_frozen(
+    field: dataclasses.Field, default_instance: Any
+) -> None:
+    """Ensure that a dataclass type used directly as a default value is marked as
+    frozen."""
+    assert dataclasses.is_dataclass(default_instance)
+    cls = type(default_instance)
+    if not cls.__dataclass_params__.frozen:  # type: ignore
+        warnings.warn(
+            f"Mutable type {cls} is used as a default value for `{field.name}`. This is"
+            " dangerous! Consider using `dataclasses.field(default_factory=...)` or"
+            f" marking {cls} as frozen."
+        )
+
+
+def _get_dataclass_field_default(
+    field: dataclasses.Field, parent_default_instance: Any
+) -> tuple[Any, bool]:
+    """Helper for getting the default instance for a dataclass field."""
+    # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
+    # as well.
+    if parent_default_instance is MISSING_PROP:
+        return MISSING_PROP, False
+
+    # Try grabbing default from parent instance.
+    if (
+        parent_default_instance not in MISSING_SINGLETONS
+        and parent_default_instance is not None
+    ):
+        # Populate default from some parent, eg `default=` in `tyro.cli()`.
+        if hasattr(parent_default_instance, field.name):
+            return getattr(parent_default_instance, field.name), True
+        else:
+            warnings.warn(
+                f"Could not find field {field.name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
+            )
+
+    # Try grabbing default from dataclass field.
+    if field.default not in MISSING_SINGLETONS:
+        default = field.default
+        # Note that dataclasses.is_dataclass() will also return true for dataclass
+        # _types_, not just instances.
+        if type(default) is not type and dataclasses.is_dataclass(default):
+            _ensure_dataclass_instance_used_as_default_is_frozen(field, default)
+        return default, False
+
+    # Populate default from `dataclasses.field(default_factory=...)`.
+    if field.default_factory is not dataclasses.MISSING and not (
+        # Special case to ignore default_factory if we write:
+        # `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.
+        #
+        # In other words, treat it the same way as: `field: Dataclass`.
+        #
+        # The only time this matters is when we our dataclass has a `__post_init__`
+        # function that mutates the dataclass. We choose here to use the default values
+        # before this method is called.
+        dataclasses.is_dataclass(field.type) and field.default_factory is field.type
+    ):
+        return field.default_factory(), False
+
+    # Otherwise, no default. This is different from MISSING, because MISSING propagates
+    # to children. We could revisit this design to make it clearer.
+    return MISSING_NONPROP, False

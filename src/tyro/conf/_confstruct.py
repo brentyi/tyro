@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Callable, Sequence, TypeVar, overload
 
-from .._fields import MISSING_NONPROP
+from .._singleton import MISSING_NONPROP
 
 T = TypeVar("T")
 
