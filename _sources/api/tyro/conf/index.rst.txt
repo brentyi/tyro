@@ -51,12 +51,12 @@ Package Contents
                    structure, and are not supported for positional arguments.
    :param prefix_name: Whether or not to prefix the name of the argument based on where
                        it is in a nested structure. Arguments are prefixed by default.
-   :param constructor: A constructor type or function. This should either be (a) a subtype
-                       of an argument's annotated type, or (b) a function with type-annotated
-                       inputs that returns an instance of the annotated type. This will be used in
-                       place of the argument's type for parsing arguments. No validation is done.
-   :param constructor_factory: A function that returns a constructor type or function.
-                               Useful when the constructor isn't immediately available.
+   :param constructor: A constructor type or function. This will be used in
+                       place of the argument's type for parsing arguments. For more
+                       configurability, see :module:`tyro.constructors`.
+   :param constructor_factory: A function that returns a constructor type. This
+                               will be used in place of the argument's type for parsing arguments.
+                               For more configurability, see :module:`tyro.constructors`.
 
    :returns: Object to attach via ``typing.Annotated[]``.
 
@@ -101,12 +101,12 @@ Package Contents
                        docstring.
    :param prefix_name: Whether to prefix the name of the subcommand based on where it
                        is in a nested structure.
-   :param constructor: A constructor type or function. This should either be (a) a subtype
-                       of an argument's annotated type, or (b) a function with type-annotated
-                       inputs that returns an instance of the annotated type. This will be used in
-                       place of the argument's type for parsing arguments. No validation is done.
-   :param constructor_factory: A function that returns a constructor type or function.
-                               Useful when the constructor isn't immediately available.
+   :param constructor: A constructor type or function. This will be used in
+                       place of the argument's type for parsing arguments. For more
+                       configurability, see :module:`tyro.constructors`.
+   :param constructor_factory: A function that returns a constructor type. This
+                               will be used in place of the argument's type for parsing arguments.
+                               For more configurability, see :module:`tyro.constructors`.
 
 .. py:data:: AvoidSubcommands
 

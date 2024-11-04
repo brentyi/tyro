@@ -16,3 +16,58 @@ Module Contents
 
 
 
+.. py:class:: PropagatingMissingType
+
+
+   Bases: :py:obj:`Singleton`
+
+
+.. py:class:: NonpropagatingMissingType
+
+
+   Bases: :py:obj:`Singleton`
+
+
+.. py:class:: ExcludeFromCallType
+
+
+   Bases: :py:obj:`Singleton`
+
+
+.. py:class:: NotRequiredButWeDontKnowTheValueType
+
+
+   Bases: :py:obj:`Singleton`
+
+
+.. py:data:: MISSING_PROP
+
+   
+
+.. py:data:: MISSING_NONPROP
+
+   
+
+.. py:data:: NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE
+
+   
+
+.. py:data:: EXCLUDE_FROM_CALL
+
+   
+
+.. py:data:: MISSING
+   :type: Any
+
+   
+   Sentinel value to mark fields as missing. Can be used to mark fields passed
+   in via ``default=`` for ``tyro.cli()`` as required.
+
+.. py:data:: MISSING_SINGLETONS
+
+   
+
+.. py:data:: DEFAULT_SENTINEL_SINGLETONS
+
+   
+

@@ -34,7 +34,9 @@ Module Contents
       :type: tyro._typing.TypeForm
 
       
-      Field type, with runtime annotations (typing.Annotated) stripped.
+      Annotated field type. Forward references, aliases, and type
+      variables/parameters will have been resolved and runtime annotations
+      (typing.Annotated) will have been stripped.
 
    .. py:attribute:: type_origin
       :type: tyro._typing.TypeForm | None
@@ -48,13 +50,7 @@ Module Contents
       
       Set of tyro markers used to configure this field.
 
-   .. py:attribute:: constructor_registry
-      :type: PrimitiveConstructorRegistry
-
-      
-      The registry used to look up constructor specifications for this type.
-
-   .. py:method:: make(raw_annotation: tyro._typing.TypeForm, parent_markers: set[tyro.conf._markers.Marker], source_registry: PrimitiveConstructorRegistry) -> PrimitiveTypeInfo
+   .. py:method:: make(raw_annotation: tyro._typing.TypeForm | Callable, parent_markers: set[tyro.conf._markers.Marker]) -> PrimitiveTypeInfo
       :staticmethod:
 
 
@@ -70,8 +66,8 @@ Module Contents
    There are two ways to use this class:
 
    First, we can include it in a type signature via ``typing.Annotated``.
-   This is the simplest, and allows for per-field customization of
-   instantiation behavior.
+   This is the simplest for making local modifications to parsing behavior for
+   individual fields.
 
    Alternatively, it can be returned by a rule in a ``PrimitiveConstructorRegistry``.
    .. py:attribute:: nargs
@@ -99,7 +95,8 @@ Module Contents
 
       
       Given an object instance, does it match this primitive type? This is
-      used for help messages when a default is provided.
+      used for specific help messages when both a union type is present and a
+      default is provided.
 
    .. py:attribute:: str_from_instance
       :type: Callable[[T], list[str]]
@@ -115,36 +112,8 @@ Module Contents
       Finite set of choices for arguments.
 
 
-.. py:data:: SpecFactory
+.. py:function:: apply_default_primitive_rules(registry: tyro.constructors._registry.ConstructorRegistry) -> None
 
    
-
-.. py:data:: current_registry
-   :type: PrimitiveConstructorRegistry | None
-
-   
-
-.. py:class:: PrimitiveConstructorRegistry
-
-
-   
-   Registry for rules that define how primitive types that can be
-   constructed from a single command-line argument.
-   .. py:method:: define_rule(matcher_fn: Callable[[PrimitiveTypeInfo], bool]) -> Callable[[SpecFactory], SpecFactory]
-
-      
-      Define a rule for constructing a primitive type from a string. The
-      most recently added rule will be applied first.
-
-   .. py:method:: get_spec(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec
-
-      
-      Get a constructor specification for a given type.
-
-   .. py:method:: __enter__() -> None
-
-
-   .. py:method:: __exit__(*args: Any) -> None
-
-
+   Apply default rules to the registry.
 

@@ -1,0 +1,95 @@
+:orphan:
+
+:py:mod:`tyro.constructors._struct_spec`
+========================================
+
+.. py:module:: tyro.constructors._struct_spec
+
+
+Module Contents
+---------------
+
+.. py:class:: UnsupportedStructTypeMessage
+
+
+   
+   Reason why a callable cannot be treated as a struct type.
+   .. py:attribute:: message
+      :type: str
+
+      
+
+
+.. py:class:: StructFieldSpec
+
+
+   
+   Behavior specification for a single field in our callable.
+   .. py:attribute:: name
+      :type: str
+
+      
+
+   .. py:attribute:: type
+      :type: tyro._typing.TypeForm
+
+      
+
+   .. py:attribute:: default
+      :type: Any
+
+      
+
+   .. py:attribute:: is_default_overridden
+      :type: bool
+
+      
+
+   .. py:attribute:: helptext
+      :type: str | None
+
+      
+
+
+.. py:class:: StructConstructorSpec
+
+
+   .. py:attribute:: instantiate
+      :type: Callable[Ellipsis, Any]
+
+      
+
+   .. py:attribute:: fields
+      :type: tuple[StructFieldSpec, Ellipsis]
+
+      
+
+
+.. py:class:: StructTypeInfo
+
+
+   
+   Information used to generate constructors for primitive types.
+   .. py:attribute:: type
+      :type: tyro._typing.TypeForm
+
+      
+
+   .. py:attribute:: markers
+      :type: tuple[Any, Ellipsis]
+
+      
+
+   .. py:attribute:: default
+      :type: Any
+
+      
+
+   .. py:method:: make(f: tyro._typing.TypeForm | Callable, default: Any) -> StructTypeInfo
+      :staticmethod:
+
+
+
+.. py:function:: apply_default_struct_rules(registry: tyro.constructors._registry.ConstructorRegistry) -> None
+
+

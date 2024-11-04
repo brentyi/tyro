@@ -138,12 +138,6 @@ Module Contents
       Apply type parameter assignments based on the current context.
 
 
-.. py:function:: standardize_builtin_generics(typ: TypeOrCallable) -> TypeOrCallable
-
-   
-   Apply shims to convert ``types.UnionType`` to ``typing.Union``\ , ``list`` to
-   ``typing.List``\ , etc.
-
 .. py:class:: TypeParamAssignmentContext(origin_type: TypeOrCallable, type_from_typevar: Dict[TypeVar, tyro._typing.TypeForm[Any]])
 
 

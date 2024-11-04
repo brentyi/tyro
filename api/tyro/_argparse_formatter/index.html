@@ -14,14 +14,14 @@
     </script>
     <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" />
 
-    <!-- Generated with Sphinx 7.2.6 and Furo 2023.09.10 -->
+    <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._argparse_formatter - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=135e06be" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
     <link rel="stylesheet" type="text/css" href="../../../_static/ansi.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=36a5483c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=302659d7" />
     
     
 
@@ -82,7 +82,7 @@
   <symbol id="svg-sun" viewBox="0 0 24 24">
     <title>Light mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
       <circle cx="12" cy="12" r="5"></circle>
       <line x1="12" y1="1" x2="12" y2="3"></line>
       <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -97,22 +97,63 @@
   <symbol id="svg-moon" viewBox="0 0 24 24">
     <title>Dark mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
       <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
     </svg>
   </symbol>
-  <symbol id="svg-sun-half" viewBox="0 0 24 24">
-    <title>Auto light/dark mode</title>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-      <circle cx="12" cy="12" r="9" />
-      <path d="M13 12h5" />
-      <path d="M13 15h4" />
-      <path d="M13 18h1" />
-      <path d="M13 9h4" />
-      <path d="M13 6h1" />
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
     </svg>
   </symbol>
 </svg>
@@ -125,6 +166,8 @@
 <label class="overlay toc-overlay" for="__toc">
   <div class="visually-hidden">Hide table of contents sidebar</div>
 </label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
 
 
 
@@ -143,7 +186,8 @@
       <div class="theme-toggle-container theme-toggle-header">
         <button class="theme-toggle">
           <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
-          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
           <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
@@ -215,11 +259,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -254,11 +299,17 @@
           <span>Back to top</span>
         </a>
         <div class="content-icon-container">
-          
+          <div class="view-this-page">
+  <a class="muted-link" href="../../../_sources/api/tyro/_argparse_formatter/index.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
 <div class="theme-toggle-container theme-toggle-content">
             <button class="theme-toggle">
               <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
-              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
               <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
@@ -268,9 +319,9 @@
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
-        <article role="main">
+        <article role="main" id="furo-main-content">
           <section id="module-tyro._argparse_formatter">
-<span id="tyro-argparse-formatter"></span><h1><a class="reference internal" href="#module-tyro._argparse_formatter" title="tyro._argparse_formatter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._argparse_formatter</span></code></a><a class="headerlink" href="#module-tyro._argparse_formatter" title="Link to this heading">#</a></h1>
+<span id="tyro-argparse-formatter"></span><h1><a class="reference internal" href="#module-tyro._argparse_formatter" title="tyro._argparse_formatter"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro._argparse_formatter</span></code></a><a class="headerlink" href="#module-tyro._argparse_formatter" title="Link to this heading">¶</a></h1>
 <p>Utilities and functions for helptext formatting. We replace argparse’s simple help
 messages with ones that:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>- Are more nicely formatted!
@@ -282,53 +333,53 @@ messages with ones that:</p>
 <p>This is largely built by fussing around in argparse implementation details. It’s
 chaotic as a result; for stability we mirror argparse at _argparse.py.</p>
 <section id="module-contents">
-<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroTheme</span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroTheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroTheme</span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroTheme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme" title="Link to this definition">¶</a></dt>
 <dd><dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.border">
-<span class="sig-name descname"><span class="pre">border</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.border" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">border</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.border" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.description">
-<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.description" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">description</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.description" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.invocation">
-<span class="sig-name descname"><span class="pre">invocation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.invocation" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">invocation</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.invocation" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.metavar">
-<span class="sig-name descname"><span class="pre">metavar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.metavar" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">metavar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.metavar" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.metavar_fixed">
-<span class="sig-name descname"><span class="pre">metavar_fixed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.metavar_fixed" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">metavar_fixed</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.metavar_fixed" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.helptext">
-<span class="sig-name descname"><span class="pre">helptext</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.helptext" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">helptext</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.helptext" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.helptext_required">
-<span class="sig-name descname"><span class="pre">helptext_required</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.helptext_required" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">helptext_required</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.helptext_required" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.helptext_default">
-<span class="sig-name descname"><span class="pre">helptext_default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.helptext_default" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">helptext_default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">rich.style.Style</span></em><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.helptext_default" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroTheme.as_rich_theme">
-<span class="sig-name descname"><span class="pre">as_rich_theme</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rich.theme.Theme</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroTheme.as_rich_theme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.as_rich_theme" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">as_rich_theme</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">rich.theme.Theme</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroTheme.as_rich_theme"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroTheme.as_rich_theme" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>rich.theme.Theme</p>
@@ -340,12 +391,12 @@ chaotic as a result; for stability we mirror argparse at _argparse.py.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.set_accent_color">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">set_accent_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accent_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#set_accent_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.set_accent_color" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">set_accent_color</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">accent_color</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#set_accent_color"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.set_accent_color" title="Link to this definition">¶</a></dt>
 <dd><p>Set an accent color to use in help messages. Takes any color supported by <code class="docutils literal notranslate"><span class="pre">rich</span></code>,
 see <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">rich.color</span></code>. Experimental.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>accent_color</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>accent_color</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>None</p>
@@ -355,7 +406,7 @@ see <code class="docutils literal notranslate"><span class="pre">python</span> <
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.recursive_arg_search">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">recursive_arg_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrecognized_arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">_ArgumentInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#recursive_arg_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.recursive_arg_search" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">recursive_arg_search</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parser_spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">tyro._parsers.ParserSpecification</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unrecognized_arguments</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Set</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">_ArgumentInfo</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#recursive_arg_search"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.recursive_arg_search" title="Link to this definition">¶</a></dt>
 <dd><p>Recursively search for arguments in a ParserSpecification. Used for error message
 printing.</p>
 <p>Returns a list of arguments, whether the parser has subcommands or not, and – if
@@ -368,7 +419,7 @@ under a different subparser.</p>
 <li><p><strong>parser_spec</strong> (<a class="reference internal" href="../_parsers/#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>tyro._parsers.ParserSpecification</em></a>) – Argument parser specification.</p></li>
 <li><p><strong>subcommands</strong> – Prog corresponding to parser_spec.</p></li>
 <li><p><strong>unrecognized_arguments</strong> (<em>Set</em><em>[</em><em>str</em><em>]</em>) – Used for same_exists return value.</p></li>
-<li><p><strong>prog</strong> (<em>str</em>) – </p></li>
+<li><p><strong>prog</strong> (<em>str</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -379,15 +430,15 @@ under a different subparser.</p>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.THEME">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">THEME</span></span><a class="headerlink" href="#tyro._argparse_formatter.THEME" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">THEME</span></span><a class="headerlink" href="#tyro._argparse_formatter.THEME" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.monkeypatch_len">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">monkeypatch_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#monkeypatch_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.monkeypatch_len" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">monkeypatch_len</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#monkeypatch_len"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.monkeypatch_len" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>obj</strong> (<em>Any</em>) – </p>
+<dd class="field-odd"><p><strong>obj</strong> (<em>Any</em>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>int</p>
@@ -397,7 +448,7 @@ under a different subparser.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.ansi_context">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">ansi_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#ansi_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.ansi_context" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">ansi_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#ansi_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.ansi_context" title="Link to this definition">¶</a></dt>
 <dd><p>Context for working with ANSI codes + argparse:</p>
 <ul class="simple">
 <li><p>Applies a temporary monkey patch for making argparse ignore ANSI codes when
@@ -413,13 +464,13 @@ wrapping usage text.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.str_from_rich">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">str_from_rich</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">renderable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rich.console.RenderableType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">soft_wrap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#str_from_rich"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.str_from_rich" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">str_from_rich</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">renderable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">rich.console.RenderableType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">soft_wrap</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#str_from_rich"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.str_from_rich" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>renderable</strong> (<em>rich.console.RenderableType</em>) – </p></li>
-<li><p><strong>width</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>) – </p></li>
-<li><p><strong>soft_wrap</strong> (<em>bool</em>) – </p></li>
+<li><p><strong>renderable</strong> (<em>rich.console.RenderableType</em>)</p></li>
+<li><p><strong>width</strong> (<em>Optional</em><em>[</em><em>int</em><em>]</em>)</p></li>
+<li><p><strong>soft_wrap</strong> (<em>bool</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -430,12 +481,12 @@ wrapping usage text.</p></li>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.global_unrecognized_arg_and_prog">
-<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">global_unrecognized_arg_and_prog</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#tyro._argparse_formatter.global_unrecognized_arg_and_prog" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">global_unrecognized_arg_and_prog</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#tyro._argparse_formatter.global_unrecognized_arg_and_prog" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgumentParser">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroArgumentParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgumentParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgumentParser" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroArgumentParser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgumentParser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgumentParser" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._argparse.ArgumentParser</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">argparse.ArgumentParser</span></code></p>
 <p>Object for parsing command line strings into Python objects.</p>
 <dl class="field-list simple">
@@ -443,23 +494,23 @@ wrapping usage text.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>(</strong><strong>default</strong> (<em>- usage -- A usage message</em>) – <code class="docutils literal notranslate"><span class="pre">os.path.basename(sys.argv[0])</span></code>)</p></li>
 <li><p><strong>(</strong><strong>default</strong> – auto-generated from arguments)</p></li>
-<li><p><strong>does</strong> (<em>- description -- A description</em><em> of </em><em>what the program</em>) – </p></li>
-<li><p><strong>descriptions</strong> (<em>- epilog -- Text following the argument</em>) – </p></li>
-<li><p><strong>one</strong> (<em>- parents -- Parsers whose arguments should be copied into this</em>) – </p></li>
-<li><p><strong>messages</strong> (<em>- formatter_class -- HelpFormatter class for printing help</em>) – </p></li>
-<li><p><strong>arguments</strong> (<em>- argument_default -- The default value for all</em>) – </p></li>
+<li><p><strong>does</strong> (<em>- description -- A description</em><em> of </em><em>what the program</em>)</p></li>
+<li><p><strong>descriptions</strong> (<em>- epilog -- Text following the argument</em>)</p></li>
+<li><p><strong>one</strong> (<em>- parents -- Parsers whose arguments should be copied into this</em>)</p></li>
+<li><p><strong>messages</strong> (<em>- formatter_class -- HelpFormatter class for printing help</em>)</p></li>
+<li><p><strong>arguments</strong> (<em>- argument_default -- The default value for all</em>)</p></li>
 <li><p><strong>containing</strong> (<em>- fromfile_prefix_chars -- Characters that prefix files</em>) – additional arguments</p></li>
-<li><p><strong>arguments</strong> – </p></li>
-<li><p><strong>conflicts</strong> (<em>- conflict_handler -- String indicating how to handle</em>) – </p></li>
-<li><p><strong>option</strong> (<em>- add_help -- Add a -h/-help</em>) – </p></li>
-<li><p><strong>unambiguously</strong> (<em>- allow_abbrev -- Allow long options to be abbreviated</em>) – </p></li>
+<li><p><strong>arguments</strong></p></li>
+<li><p><strong>conflicts</strong> (<em>- conflict_handler -- String indicating how to handle</em>)</p></li>
+<li><p><strong>option</strong> (<em>- add_help -- Add a -h/-help</em>)</p></li>
+<li><p><strong>unambiguously</strong> (<em>- allow_abbrev -- Allow long options to be abbreviated</em>)</p></li>
 <li><p><strong>with</strong> (<em>- exit_on_error -- Determines whether</em><em> or </em><em>not ArgumentParser exits</em>) – error info when an error occurs</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgumentParser.error">
-<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NoReturn</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgumentParser.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgumentParser.error" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">NoReturn</span></span></span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgumentParser.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgumentParser.error" title="Link to this definition">¶</a></dt>
 <dd><p>Improve error messages from argparse.</p>
 <p>error(message: string)</p>
 <p>Prints a usage message incorporating the message to stderr and
@@ -468,7 +519,7 @@ exits.</p>
 should either exit or raise an exception.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>message</strong> (<em>str</em>) – </p>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>NoReturn</p>
@@ -480,7 +531,7 @@ should either exit or raise an exception.</p>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgparseHelpFormatter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroArgparseHelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgparseHelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgparseHelpFormatter" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._argparse_formatter.</span></span><span class="sig-name descname"><span class="pre">TyroArgparseHelpFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prog</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgparseHelpFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgparseHelpFormatter" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../_argparse/#tyro._argparse.RawDescriptionHelpFormatter" title="tyro._argparse.RawDescriptionHelpFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._argparse.RawDescriptionHelpFormatter</span></code></a></p>
 <p>Help message formatter which retains any formatting in descriptions.</p>
 <p>Only the name of this class is considered a public API. All the methods
@@ -488,12 +539,12 @@ provided by the class are considered an implementation detail.
 .. py:method:: add_argument(action)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>prog</strong> (<em>str</em>) – </p>
+<dd class="field-odd"><p><strong>prog</strong> (<em>str</em>)</p>
 </dd>
 </dl>
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help">
-<span class="sig-name descname"><span class="pre">format_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgparseHelpFormatter.format_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">format_help</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse_formatter/#TyroArgparseHelpFormatter.format_help"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -588,8 +639,8 @@ provided by the class are considered an implementation detail.
     </aside>
   </div>
 </div><script src="../../../_static/documentation_options.js?v=187304be"></script>
-    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="../../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../../_static/scripts/furo.js?v=5fa4622c"></script>
     </body>
 </html>
