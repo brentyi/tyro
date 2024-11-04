@@ -7,7 +7,7 @@ import tyro
 T = TypeVar("T")
 
 
-def test_pydantic_generic():
+def test_pydantic_generic() -> None:
     class ManyTypesA(BaseModel, Generic[T]):
         i: T
         s: str = "hello"

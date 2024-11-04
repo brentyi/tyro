@@ -352,7 +352,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         contained_type = get_args(info.type)[0] if get_args(info.type) else Any
 
         if info.default in MISSING_SINGLETONS and not is_struct_type(
-            contained_type, MISSING_NONPROP
+            cast(TypeForm, contained_type), MISSING_NONPROP
         ):
             return None
 
@@ -448,7 +448,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             else:
                 pydantic_v1 = None  # type: ignore
         except ImportError:
-            pydantic_v1 = None
+            pydantic_v1 = None  # type: ignore
 
         # Check if the type is a Pydantic model
         try:
