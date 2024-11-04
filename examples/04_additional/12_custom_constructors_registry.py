@@ -17,10 +17,10 @@ from typing import Any
 
 import tyro
 
-custom_registry = tyro.constructors.PrimitiveConstructorRegistry()
+custom_registry = tyro.constructors.ConstructorRegistry()
 
 
-@custom_registry.define_rule
+@custom_registry.primitive_rule
 def _(
     type_info: tyro.constructors.PrimitiveTypeInfo,
 ) -> tyro.constructors.PrimitiveConstructorSpec | None:

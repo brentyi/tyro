@@ -1,10 +1,11 @@
 from __future__ import annotations
 
+import collections.abc
 import dataclasses
 import enum
 import sys
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, Union
 
 from typing_extensions import (
     Annotated,
@@ -15,6 +16,8 @@ from typing_extensions import (
     get_origin,
     is_typeddict,
 )
+
+from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 from .. import _docstrings, _resolver
 from .._singleton import (
@@ -63,34 +66,29 @@ class StructTypeInfo:
     type: TypeForm
     markers: tuple[Any, ...]
     default: Any
+    _typevar_context: _resolver.TypeParamAssignmentContext
 
     @staticmethod
     def make(f: TypeForm, default: Any) -> StructTypeInfo:
         _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
+        f = _resolver.swap_type_using_confstruct(f)
         f, found_subcommand_configs = _resolver.unwrap_annotated(
             f, _confstruct._SubcommandConfig
         )
         if len(found_subcommand_configs) > 0:
             default = found_subcommand_configs[0].default
 
-        # Unwrap generics.
+        # Handle generics.
+        typevar_context = _resolver.TypeParamResolver.get_assignment_context(f)
+        f = typevar_context.origin_type
         f = _resolver.narrow_subtypes(f, default)
         f = _resolver.narrow_collection_types(f, default)
-        return StructTypeInfo(f, parent_markers, default)
-
-
-# TODO
-def is_struct_type(typ: TypeForm[Any], default_instance: Any) -> bool:
-    from ._registry import ConstructorRegistry
-
-    registry = ConstructorRegistry._get_active_registry()
-    spec = registry.get_struct_spec(StructTypeInfo.make(typ, default_instance))
-    if isinstance(spec, UnsupportedStructTypeMessage):
-        return False
-    return True
+        return StructTypeInfo(f, parent_markers, default, typevar_context)
 
 
 def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
+    from .._fields import is_struct_type
+
     @registry.struct_rule
     def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         if not dataclasses.is_dataclass(info.type):
@@ -294,12 +292,144 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         return StructConstructorSpec(instantiate=dict, fields=tuple(field_list))
 
     @registry.struct_rule
+    def namedtuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if not (
+            isinstance(info.type, type)
+            and issubclass(info.type, tuple)
+            and hasattr(info.type, "_fields")
+        ):
+            return None
+
+        field_list = []
+        field_defaults = getattr(info.type, "_field_defaults", {})
+
+        for name, typ in _resolver.get_type_hints_with_backported_syntax(
+            info.type, include_extras=True
+        ).items():
+            default = field_defaults.get(name, MISSING_NONPROP)
+            is_default_from_default_instance = False
+
+            if info.default not in MISSING_SINGLETONS and hasattr(info.default, name):
+                default = getattr(info.default, name)
+                is_default_from_default_instance = True
+            elif info.default is MISSING_PROP:
+                default = MISSING_PROP
+
+            field_list.append(
+                StructFieldSpec(
+                    name=name,
+                    type=typ,
+                    default=default,
+                    is_default_overridden=is_default_from_default_instance,
+                    helptext=_docstrings.get_field_docstring(info.type, name),
+                )
+            )
+
+        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+    @registry.struct_rule
+    def sequence_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if get_origin(info.type) not in (
+            list,
+            set,
+            tuple,
+            Sequence,
+            collections.abc.Sequence,
+        ) or not isinstance(info.default, Iterable):
+            return None
+
+        contained_type = get_args(info.type)[0] if get_args(info.type) else Any
+
+        if info.default in MISSING_SINGLETONS and not is_struct_type(
+            contained_type, MISSING_NONPROP
+        ):
+            return None
+
+        if all(not is_struct_type(type(x), x) for x in info.default):
+            return None
+
+        field_list = []
+        for i, default_i in enumerate(info.default):
+            field_list.append(
+                StructFieldSpec(
+                    name=str(i),
+                    type=cast(type, contained_type),
+                    default=default_i,
+                    is_default_overridden=True,
+                    helptext="",
+                )
+            )
+
+        return StructConstructorSpec(
+            instantiate=type(info.default), fields=tuple(field_list)
+        )
+
+    @registry.struct_rule
+    def tuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        # It's important that this tuple rule is defined *after* the general sequence rule. It should take precedence.
+        if info.type is not tuple and get_origin(info.type) is not tuple:
+            return None
+
+        # Fixed-length tuples.
+        children = get_args(info.type)
+        if Ellipsis in children:
+            return None  # We don't handle variable-length tuples here
+
+        # Infer more specific type when tuple annotation isn't subscripted.
+        if len(children) == 0:
+            if info.default in MISSING_SINGLETONS:
+                return None
+            else:
+                assert isinstance(info.default, tuple)
+                children = tuple(type(x) for x in info.default)
+
+        if info.default in MISSING_SINGLETONS or info.default is EXCLUDE_FROM_CALL:
+            default_instance = (info.default,) * len(children)
+        else:
+            default_instance = info.default
+
+        field_list: list[StructFieldSpec] = []
+        for i, child in enumerate(children):
+            default_i = default_instance[i]
+            field_list.append(
+                StructFieldSpec(
+                    name=str(i),
+                    type=child,
+                    default=default_i,
+                    is_default_overridden=True,
+                    helptext="",
+                )
+            )
+
+        contains_nested = False
+        for field in field_list:
+            # Inefficient, since is_struct_type will compute StructTypeInfo again.
+            field_info = StructTypeInfo.make(field.type, field.default)
+            if get_origin(field_info.type) is Union:
+                for option in get_args(field_info.type):
+                    # The second argument here is the default value, which can help with
+                    # narrowing but is generall not necessary.
+                    contains_nested |= is_struct_type(option, MISSING_NONPROP)
+            contains_nested |= is_struct_type(field.type, field.default)
+            if contains_nested:
+                break
+
+        if not contains_nested:
+            return None
+        return StructConstructorSpec(instantiate=tuple, fields=tuple(field_list))
+
+    @registry.struct_rule
     def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # Check if pydantic is imported
         if "pydantic" not in sys.modules.keys():
             return None
 
-        import pydantic
+        try:
+            import pydantic
+        except ImportError:
+            # Needed for the mock import test in
+            # test_missing_optional_packages.py to pass.
+            return None
 
         try:
             if "pydantic.v1" in sys.modules.keys():
@@ -367,7 +497,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 default, is_default_from_default_instance = (
                     _get_pydantic_v2_field_default(name, pd2_field, info.default)
                 )
-
                 field_list.append(
                     StructFieldSpec(
                         name=name,
@@ -383,119 +512,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                         helptext=helptext,
                     )
                 )
-
-        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
-
-    @registry.struct_rule
-    def tuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        if info.type is not tuple and get_origin(info.type) is not tuple:
-            return None
-
-        # Fixed-length tuples.
-        children = get_args(info.type)
-        if Ellipsis in children:
-            return None  # We don't handle variable-length tuples here
-
-        # Infer more specific type when tuple annotation isn't subscripted.
-        if len(children) == 0:
-            if info.default in MISSING_SINGLETONS:
-                return None
-            else:
-                assert isinstance(info.default, tuple)
-                children = tuple(type(x) for x in info.default)
-
-        if info.default in MISSING_SINGLETONS or info.default is EXCLUDE_FROM_CALL:
-            default_instance = (info.default,) * len(children)
-        else:
-            default_instance = info.default
-
-        field_list = []
-        for i, child in enumerate(children):
-            default_i = default_instance[i]
-            field_list.append(
-                StructFieldSpec(
-                    name=str(i),
-                    type=child,
-                    default=default_i,
-                    is_default_overridden=True,
-                    helptext="",
-                )
-            )
-
-        contains_nested = any(
-            is_struct_type(field.type, field.default) for field in field_list
-        )
-        if not contains_nested:
-            return None
-
-        return StructConstructorSpec(instantiate=tuple, fields=tuple(field_list))
-
-    @registry.struct_rule
-    def sequence_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        if not isinstance(info.default, Iterable) or isinstance(
-            info.default, (str, bytes)
-        ):
-            return None
-
-        contained_type = get_args(info.type)[0] if get_args(info.type) else Any
-
-        if info.default in MISSING_SINGLETONS and not is_struct_type(
-            contained_type, MISSING_NONPROP
-        ):
-            return None
-
-        if all(not is_struct_type(type(x), x) for x in info.default):
-            return None
-
-        field_list = []
-        for i, default_i in enumerate(info.default):
-            field_list.append(
-                StructFieldSpec(
-                    name=str(i),
-                    type=cast(type, contained_type),
-                    default=default_i,
-                    is_default_overridden=True,
-                    helptext="",
-                )
-            )
-
-        return StructConstructorSpec(
-            instantiate=type(info.default), fields=tuple(field_list)
-        )
-
-    @registry.struct_rule
-    def namedtuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        if not (
-            isinstance(info.type, type)
-            and issubclass(info.type, tuple)
-            and hasattr(info.type, "_fields")
-        ):
-            return None
-
-        field_list = []
-        field_defaults = getattr(info.type, "_field_defaults", {})
-
-        for name, typ in _resolver.get_type_hints_with_backported_syntax(
-            info.type, include_extras=True
-        ).items():
-            default = field_defaults.get(name, MISSING_NONPROP)
-            is_default_from_default_instance = False
-
-            if info.default not in MISSING_SINGLETONS and hasattr(info.default, name):
-                default = getattr(info.default, name)
-                is_default_from_default_instance = True
-            elif info.default is MISSING_PROP:
-                default = MISSING_PROP
-
-            field_list.append(
-                StructFieldSpec(
-                    name=name,
-                    type=typ,
-                    default=default,
-                    is_default_overridden=is_default_from_default_instance,
-                    helptext=_docstrings.get_field_docstring(info.type, name),
-                )
-            )
 
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
 

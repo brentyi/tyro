@@ -671,7 +671,7 @@ def test_unparsable() -> None:
         pass
 
     helptext = get_helptext_with_checks(main)
-    assert "--x {fixed}" in helptext
+    assert "--x {fixed}" not in helptext
 
     def main2(x: Callable = nn.ReLU):
         pass

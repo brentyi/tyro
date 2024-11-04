@@ -14,7 +14,7 @@ from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 import docstring_parser
 from typing_extensions import Annotated
 
-from . import _resolver, _strings, _unsafe_cache
+from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import DEFAULT_SENTINEL_SINGLETONS, MISSING_SINGLETONS
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
@@ -231,15 +231,11 @@ def field_list_from_type_or_callable(
         A list of field definitions.
     """
 
-    # Apply any custom constructors.
     f = _resolver.swap_type_using_confstruct(f)
+    registry = ConstructorRegistry._get_active_registry()
+    type_info = StructTypeInfo.make(f, default_instance)
 
-    # Concretize generics.
-    typevar_context = _resolver.TypeParamResolver.get_assignment_context(f)
-    f = typevar_context.origin_type
-    with typevar_context:
-        registry = ConstructorRegistry._get_active_registry()
-        type_info = StructTypeInfo.make(f, default_instance)
+    with type_info._typevar_context:
         spec = registry.get_struct_spec(type_info)
 
         with FieldDefinition.marker_context(type_info.markers):
@@ -307,7 +303,13 @@ def _field_list_from_function(
             f = f.func
             done = False
 
-    # Sometime functools.* is applied to a class.
+    # Check for abstract classes.
+    if inspect.isabstract(f):
+        return UnsupportedStructTypeMessage(f"Abstract classes cannot be instantiated!")
+
+    # `f` that is called (output) may be different from what we want to
+    # inspect.
+    f_out = f
     if inspect.isclass(f):
         if hasattr(f, "__init__") and f.__init__ is not object.__init__:
             f = f.__init__  # type: ignore
@@ -337,8 +339,8 @@ def _field_list_from_function(
         helptext = docstring_from_arg_name.get(param.name)
 
         # TODO: re-add.
-        # if helptext is None and cls is not None:
-        #     helptext = _docstrings.get_field_docstring(cls, param.name)
+        if helptext is None and inspect.isclass(f_out):
+            helptext = _docstrings.get_field_docstring(f_out, param.name)
 
         if param.name not in hints:
             out = UnsupportedStructTypeMessage(
@@ -391,4 +393,4 @@ def _field_list_from_function(
                 )
             )
 
-    return f, field_list
+    return f_out, field_list

@@ -16,9 +16,9 @@ json_constructor_spec = tyro.constructors.PrimitiveConstructorSpec(
 
 def test_custom_primitive_registry():
     """Test that we can use a custom primitive registry to parse a custom type."""
-    primitive_registry = tyro.constructors.PrimitiveConstructorRegistry()
+    primitive_registry = tyro.constructors.ConstructorRegistry()
 
-    @primitive_registry.define_rule
+    @primitive_registry.primitive_rule
     def json_dict_spec(
         type_info: tyro.constructors.PrimitiveTypeInfo,
     ) -> tyro.constructors.PrimitiveConstructorSpec | None:
