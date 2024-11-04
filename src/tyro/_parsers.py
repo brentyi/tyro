@@ -19,6 +19,8 @@ from typing import (
 
 from typing_extensions import Annotated, get_args, get_origin
 
+from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
+
 from . import _argparse as argparse
 from . import (
     _argparse_formatter,
@@ -82,11 +84,13 @@ class ParserSpecification:
 
         # Resolve the type of `f`, generate a field list.
         with _fields.FieldDefinition.marker_context(tuple(markers)):
-            f, field_list = _fields.field_list_from_type_or_callable(
+            out = _fields.field_list_from_type_or_callable(
                 f=f,
                 default_instance=default_instance,
                 support_single_arg_types=support_single_arg_types,
             )
+            assert not isinstance(out, UnsupportedStructTypeMessage)
+            f, field_list = out
 
         # Cycle detection.
         #

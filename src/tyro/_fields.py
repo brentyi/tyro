@@ -12,6 +12,7 @@ import warnings
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import docstring_parser
+from typing_extensions import Annotated
 
 from . import _resolver, _strings, _unsafe_cache
 from ._singleton import DEFAULT_SENTINEL_SINGLETONS, MISSING_SINGLETONS
@@ -19,6 +20,7 @@ from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
     PrimitiveConstructorSpec,
+    PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
 from .constructors._registry import ConstructorRegistry
@@ -229,49 +231,64 @@ def field_list_from_type_or_callable(
         A list of field definitions.
     """
 
-    # Try to generate field list.
-    # We recursively apply markers.
-    _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
-
+    # Apply any custom constructors.
     f = _resolver.swap_type_using_confstruct(f)
+
+    # Concretize generics.
     typevar_context = _resolver.TypeParamResolver.get_assignment_context(f)
     f = typevar_context.origin_type
     with typevar_context:
-        # Check for default instances in subcommand configs. This is needed for
-        # is_nested_type() when arguments are not valid without a default, and this
-        # default is specified in the subcommand config.
-        from . import conf  # Avoid circular import.
-
-        f, found_subcommand_configs = _resolver.unwrap_annotated(
-            f, conf._confstruct._SubcommandConfig
-        )
-        if len(found_subcommand_configs) > 0:
-            default_instance = found_subcommand_configs[0].default
-
-        # Unwrap generics.
-        f = _resolver.narrow_subtypes(f, default_instance)
-        f = _resolver.narrow_collection_types(f, default_instance)
-
         registry = ConstructorRegistry._get_active_registry()
-        spec = registry.get_struct_spec(StructTypeInfo(f, set(), default_instance))
+        type_info = StructTypeInfo.make(f, default_instance)
+        spec = registry.get_struct_spec(type_info)
 
-        with FieldDefinition.marker_context(parent_markers):
+        with FieldDefinition.marker_context(type_info.markers):
             if not isinstance(spec, UnsupportedStructTypeMessage):
                 return f, [
                     FieldDefinition.make(
-                        f.name, f.type, f.default, f.is_default_overridden, f.helptext
+                        f.name,
+                        f.type,
+                        f.default,
+                        f.is_default_overridden,
+                        f.helptext,
+                        call_argname_override=f._call_argname,
                     )
                     for f in spec.fields
                 ]
 
-            if callable(f) and not inspect.isclass(f):
-                return _field_list_from_function(f)
+            try:
+                registry.get_primitive_spec(PrimitiveTypeInfo.make(f, set()))
+                is_primitive = True
+            except UnsupportedTypeAnnotationError:
+                is_primitive = False
+
+            if is_primitive and support_single_arg_types:
+                with FieldDefinition.marker_context(
+                    (_markers.Positional, _markers._PositionalCall)
+                ):
+                    return (
+                        f,
+                        [
+                            FieldDefinition.make(
+                                name="value",
+                                typ=f,
+                                default=default_instance,
+                                is_default_from_default_instance=True,
+                                helptext="",
+                            )
+                        ],
+                    )
+            elif not is_primitive and callable(f):
+                return _field_list_from_function(
+                    type_info.type,  # This will have typing.Annotated metadata stripped.
+                    default_instance,
+                )
 
     return UnsupportedStructTypeMessage(f"{f} is not a valid struct type!")
 
 
 def _field_list_from_function(
-    f: Callable,
+    f: Callable, default_instance: Any
 ) -> UnsupportedStructTypeMessage | tuple[Callable, list[FieldDefinition]]:
     """Generate field lists from non-class callables."""
     try:
@@ -292,8 +309,10 @@ def _field_list_from_function(
 
     # Sometime functools.* is applied to a class.
     if inspect.isclass(f):
-        cls = f
-        f = f.__init__  # type: ignore
+        if hasattr(f, "__init__") and f.__init__ is not object.__init__:
+            f = f.__init__  # type: ignore
+        elif hasattr(f, "__new__") and f.__new__ is not object.__new__:
+            f = f.__new__
 
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)
@@ -363,7 +382,9 @@ def _field_list_from_function(
                 FieldDefinition.make(
                     name=param.name,
                     # Note that param.annotation doesn't resolve forward references.
-                    typ=typ,
+                    typ=typ
+                    if default_instance in MISSING_SINGLETONS
+                    else Annotated.__class_getitem__((typ, _markers._OPTIONAL_GROUP)),
                     default=default,
                     is_default_from_default_instance=False,
                     helptext=helptext,

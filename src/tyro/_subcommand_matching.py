@@ -9,7 +9,6 @@ from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
 
 from . import _fields, _resolver, _singleton, _typing
 from .conf import _confstruct
-from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 
 def match_subcommand(

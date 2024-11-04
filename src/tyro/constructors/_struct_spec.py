@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 import dataclasses
+import enum
 import sys
 import warnings
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 from typing_extensions import (
+    Annotated,
     NotRequired,
     Required,
     cast,
@@ -22,7 +24,7 @@ from .._singleton import (
     MISSING_SINGLETONS,
 )
 from .._typing import TypeForm
-from ..conf import _markers
+from ..conf import _confstruct, _markers
 
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
@@ -44,6 +46,8 @@ class StructFieldSpec:
     default: Any
     is_default_overridden: bool
     helptext: str | None
+    # TODO: it's theoretically possible to override the argname with `None`.
+    _call_argname: Any = None
 
 
 @dataclasses.dataclass(frozen=True)
@@ -57,14 +61,33 @@ class StructTypeInfo:
     """Information used to generate constructors for primitive types."""
 
     type: TypeForm
-    markers: set[_markers.Marker]
-    """Set of tyro markers used to configure this field."""
-
+    markers: tuple[Any, ...]
     default: Any
+
+    @staticmethod
+    def make(f: TypeForm, default: Any) -> StructTypeInfo:
+        _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
+        f, found_subcommand_configs = _resolver.unwrap_annotated(
+            f, _confstruct._SubcommandConfig
+        )
+        if len(found_subcommand_configs) > 0:
+            default = found_subcommand_configs[0].default
+
+        # Unwrap generics.
+        f = _resolver.narrow_subtypes(f, default)
+        f = _resolver.narrow_collection_types(f, default)
+        return StructTypeInfo(f, parent_markers, default)
 
 
 # TODO
-def is_struct_type(typ: TypeForm[Any] | Callable, default_instance: Any) -> bool: ...
+def is_struct_type(typ: TypeForm[Any], default_instance: Any) -> bool:
+    from ._registry import ConstructorRegistry
+
+    registry = ConstructorRegistry._get_active_registry()
+    spec = registry.get_struct_spec(StructTypeInfo.make(typ, default_instance))
+    if isinstance(spec, UnsupportedStructTypeMessage):
+        return False
+    return True
 
 
 def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
@@ -190,6 +213,292 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
 
+    @registry.struct_rule
+    def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        # attr will already be imported if it's used.
+        if "attr" not in sys.modules.keys():  # pragma: no cover
+            return None
+
+        try:
+            import attr
+        except ImportError:
+            # This is needed for the mock import test in
+            # test_missing_optional_packages.py to pass.
+            return None
+
+        if not attr.has(info.type):
+            return None
+
+        # Resolve forward references in-place, if any exist.
+        attr.resolve_types(info.type)
+
+        # Handle attr classes.
+        field_list = []
+        for attr_field in attr.fields(info.type):
+            # Skip fields with init=False.
+            if not attr_field.init:
+                continue
+
+            # Default handling.
+            name = attr_field.name
+            default = attr_field.default
+            is_default_from_default_instance = False
+            if info.default not in MISSING_SINGLETONS:
+                if hasattr(info.default, name):
+                    default = getattr(info.default, name)
+                    is_default_from_default_instance = True
+                else:
+                    warnings.warn(
+                        f"Could not find field {name} in default instance"
+                        f" {info.default}, which has"
+                        f" type {type(info.default)},",
+                        stacklevel=2,
+                    )
+            elif default is attr.NOTHING:
+                default = MISSING_NONPROP
+            elif isinstance(default, attr.Factory):  # type: ignore
+                default = default.factory()  # type: ignore
+
+            assert attr_field.type is not None, attr_field
+            field_list.append(
+                StructFieldSpec(
+                    name=name,
+                    type=attr_field.type,
+                    default=default,
+                    is_default_overridden=is_default_from_default_instance,
+                    helptext=_docstrings.get_field_docstring(info.type, name),
+                )
+            )
+        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+    @registry.struct_rule
+    def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if is_typeddict(info.type) or not isinstance(info.default, dict):
+            return None
+
+        if info.default in MISSING_SINGLETONS or len(info.default) == 0:
+            return None
+
+        field_list = []
+        for k, v in info.default.items():
+            field_list.append(
+                StructFieldSpec(
+                    name=str(k) if not isinstance(k, enum.Enum) else k.name,
+                    type=type(v),
+                    default=v,
+                    is_default_overridden=True,
+                    helptext=None,
+                    _call_argname=k,
+                )
+            )
+        return StructConstructorSpec(instantiate=dict, fields=tuple(field_list))
+
+    @registry.struct_rule
+    def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        # Check if pydantic is imported
+        if "pydantic" not in sys.modules.keys():
+            return None
+
+        import pydantic
+
+        try:
+            if "pydantic.v1" in sys.modules.keys():
+                from pydantic import v1 as pydantic_v1
+            else:
+                pydantic_v1 = None  # type: ignore
+        except ImportError:
+            pydantic_v1 = None
+
+        # Check if the type is a Pydantic model
+        try:
+            if not (
+                issubclass(info.type, pydantic.BaseModel)
+                or (
+                    pydantic_v1 is not None
+                    and issubclass(info.type, pydantic_v1.BaseModel)
+                )
+            ):
+                return None
+        except TypeError:
+            # issubclass failed!
+            return None
+
+        field_list = []
+        pydantic_version = int(
+            getattr(pydantic, "__version__", "1.0.0").partition(".")[0]
+        )
+
+        if pydantic_version < 2 or (
+            pydantic_v1 is not None and issubclass(info.type, pydantic_v1.BaseModel)
+        ):
+            # Pydantic 1.xx
+            cls_cast = info.type
+            hints = _resolver.get_type_hints_with_backported_syntax(
+                info.type, include_extras=True
+            )
+            for pd1_field in cls_cast.__fields__.values():
+                helptext = pd1_field.field_info.description
+                if helptext is None:
+                    helptext = _docstrings.get_field_docstring(
+                        info.type, pd1_field.name
+                    )
+
+                default, is_default_from_default_instance = (
+                    _get_pydantic_v1_field_default(
+                        pd1_field.name, pd1_field, info.default
+                    )
+                )
+                field_list.append(
+                    StructFieldSpec(
+                        name=pd1_field.name,
+                        type=hints[pd1_field.name],
+                        default=default,
+                        is_default_overridden=is_default_from_default_instance,
+                        helptext=helptext,
+                    )
+                )
+        else:
+            # Pydantic 2.xx
+            for name, pd2_field in info.type.model_fields.items():
+                helptext = pd2_field.description
+                if helptext is None:
+                    helptext = _docstrings.get_field_docstring(info.type, name)
+
+                default, is_default_from_default_instance = (
+                    _get_pydantic_v2_field_default(name, pd2_field, info.default)
+                )
+
+                field_list.append(
+                    StructFieldSpec(
+                        name=name,
+                        type=(
+                            Annotated.__class_getitem__(  # type: ignore
+                                (pd2_field.annotation,) + tuple(pd2_field.metadata)
+                            )
+                            if len(pd2_field.metadata) > 0
+                            else pd2_field.annotation
+                        ),
+                        default=default,
+                        is_default_overridden=is_default_from_default_instance,
+                        helptext=helptext,
+                    )
+                )
+
+        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
+    @registry.struct_rule
+    def tuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if info.type is not tuple and get_origin(info.type) is not tuple:
+            return None
+
+        # Fixed-length tuples.
+        children = get_args(info.type)
+        if Ellipsis in children:
+            return None  # We don't handle variable-length tuples here
+
+        # Infer more specific type when tuple annotation isn't subscripted.
+        if len(children) == 0:
+            if info.default in MISSING_SINGLETONS:
+                return None
+            else:
+                assert isinstance(info.default, tuple)
+                children = tuple(type(x) for x in info.default)
+
+        if info.default in MISSING_SINGLETONS or info.default is EXCLUDE_FROM_CALL:
+            default_instance = (info.default,) * len(children)
+        else:
+            default_instance = info.default
+
+        field_list = []
+        for i, child in enumerate(children):
+            default_i = default_instance[i]
+            field_list.append(
+                StructFieldSpec(
+                    name=str(i),
+                    type=child,
+                    default=default_i,
+                    is_default_overridden=True,
+                    helptext="",
+                )
+            )
+
+        contains_nested = any(
+            is_struct_type(field.type, field.default) for field in field_list
+        )
+        if not contains_nested:
+            return None
+
+        return StructConstructorSpec(instantiate=tuple, fields=tuple(field_list))
+
+    @registry.struct_rule
+    def sequence_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if not isinstance(info.default, Iterable) or isinstance(
+            info.default, (str, bytes)
+        ):
+            return None
+
+        contained_type = get_args(info.type)[0] if get_args(info.type) else Any
+
+        if info.default in MISSING_SINGLETONS and not is_struct_type(
+            contained_type, MISSING_NONPROP
+        ):
+            return None
+
+        if all(not is_struct_type(type(x), x) for x in info.default):
+            return None
+
+        field_list = []
+        for i, default_i in enumerate(info.default):
+            field_list.append(
+                StructFieldSpec(
+                    name=str(i),
+                    type=cast(type, contained_type),
+                    default=default_i,
+                    is_default_overridden=True,
+                    helptext="",
+                )
+            )
+
+        return StructConstructorSpec(
+            instantiate=type(info.default), fields=tuple(field_list)
+        )
+
+    @registry.struct_rule
+    def namedtuple_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+        if not (
+            isinstance(info.type, type)
+            and issubclass(info.type, tuple)
+            and hasattr(info.type, "_fields")
+        ):
+            return None
+
+        field_list = []
+        field_defaults = getattr(info.type, "_field_defaults", {})
+
+        for name, typ in _resolver.get_type_hints_with_backported_syntax(
+            info.type, include_extras=True
+        ).items():
+            default = field_defaults.get(name, MISSING_NONPROP)
+            is_default_from_default_instance = False
+
+            if info.default not in MISSING_SINGLETONS and hasattr(info.default, name):
+                default = getattr(info.default, name)
+                is_default_from_default_instance = True
+            elif info.default is MISSING_PROP:
+                default = MISSING_PROP
+
+            field_list.append(
+                StructFieldSpec(
+                    name=name,
+                    type=typ,
+                    default=default,
+                    is_default_overridden=is_default_from_default_instance,
+                    helptext=_docstrings.get_field_docstring(info.type, name),
+                )
+            )
+
+        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+
 
 def _ensure_dataclass_instance_used_as_default_is_frozen(
     field: dataclasses.Field, default_instance: Any
@@ -256,4 +565,69 @@ def _get_dataclass_field_default(
 
     # Otherwise, no default. This is different from MISSING, because MISSING propagates
     # to children. We could revisit this design to make it clearer.
+    return MISSING_NONPROP, False
+
+
+if TYPE_CHECKING:
+    import pydantic as pydantic
+    import pydantic.v1.fields as pydantic_v1_fields
+
+
+def _get_pydantic_v1_field_default(
+    name: str,
+    field: pydantic_v1_fields.ModelField,
+    parent_default_instance: Any,
+) -> tuple[Any, bool]:
+    """Helper for getting the default instance for a Pydantic field."""
+
+    # Try grabbing default from parent instance.
+    if (
+        parent_default_instance not in MISSING_SINGLETONS
+        and parent_default_instance is not None
+    ):
+        # Populate default from some parent, eg `default=` in `tyro.cli()`.
+        if hasattr(parent_default_instance, name):
+            return getattr(parent_default_instance, name), True
+        else:
+            warnings.warn(
+                f"Could not find field {name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
+            )
+
+    if not field.required:
+        return field.get_default(), False
+
+    # Otherwise, no default.
+    return MISSING_NONPROP, False
+
+
+def _get_pydantic_v2_field_default(
+    name: str,
+    field: pydantic.fields.FieldInfo,
+    parent_default_instance: Any,
+) -> tuple[Any, bool]:
+    """Helper for getting the default instance for a Pydantic field."""
+
+    # Try grabbing default from parent instance.
+    if (
+        parent_default_instance not in MISSING_SINGLETONS
+        and parent_default_instance is not None
+    ):
+        # Populate default from some parent, eg `default=` in `tyro.cli()`.
+        if hasattr(parent_default_instance, name):
+            return getattr(parent_default_instance, name), True
+        else:
+            warnings.warn(
+                f"Could not find field {name} in default instance"
+                f" {parent_default_instance}, which has"
+                f" type {type(parent_default_instance)},",
+                stacklevel=2,
+            )
+
+    if not field.is_required():
+        return field.get_default(call_default_factory=True), False
+
+    # Otherwise, no default.
     return MISSING_NONPROP, False

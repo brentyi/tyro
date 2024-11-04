@@ -471,7 +471,6 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     options = get_args(typ)
     options_unwrapped = [unwrap_origin_strip_extras(o) for o in options]
 
-    # (A)
     try:
         if default_instance not in MISSING_SINGLETONS and not any(
             isinstance(default_instance, o) for o in options_unwrapped
