@@ -5,15 +5,7 @@ import dataclasses
 import enum
 import sys
 import warnings
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    Iterable,
-    Sequence,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Union
 
 from typing_extensions import (
     Annotated,
@@ -279,9 +271,17 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
     @registry.struct_rule
     def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        if is_typeddict(info.type) or get_origin(info.type) not in (
-            dict,
-            collections.abc.Mapping,
+        if is_typeddict(info.type) or (
+            info.type
+            not in (
+                dict,
+                collections.abc.Mapping,
+            )
+            and get_origin(info.type)
+            not in (
+                dict,
+                collections.abc.Mapping,
+            )
         ):
             return None
 
