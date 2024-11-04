@@ -142,7 +142,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 if type_info.type is bytes
                 else type_info.type(args[0])
             ),
-            is_instance=lambda x: isinstance(x, type_info.type),
+            # Numeric tower in Python is weird...
+            is_instance=lambda x: isinstance(x, (int, float))
+            if type_info.type is float
+            else isinstance(x, type_info.type),
             str_from_instance=lambda instance: [str(instance)],
         )
 
@@ -502,13 +505,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return out
 
         def str_from_instance(instance: dict) -> list[str]:
+            # TODO: this may be strange right now for the append action.
             out: list[str] = []
-            assert (
-                len(instance) == 0
-            ), "When parsed as a primitive, we currrently assume all defaults are length=0. Dictionaries with non-zero-length defaults are interpreted as struct types."
-            # for key, value in instance.items():
-            #     out.extend(key_spec.str_from_instance(key))
-            #     out.extend(val_spec.str_from_instance(value))
+            for key, value in instance.items():
+                out.extend(key_spec.str_from_instance(key))
+                out.extend(val_spec.str_from_instance(value))
             return out
 
         if _markers.UseAppendAction in type_info.markers:

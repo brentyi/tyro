@@ -274,6 +274,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         if is_typeddict(info.type) or (
             info.type
             not in (
+                Dict,
                 dict,
                 collections.abc.Mapping,
             )
