@@ -2,7 +2,8 @@ import dataclasses
 import pathlib
 from typing import Any, Dict, List, Tuple
 
-from tyro._fields import MISSING_NONPROP, is_struct_type
+from tyro._fields import is_struct_type
+from tyro._singleton import MISSING_NONPROP
 
 
 def test_is_struct_type_simple():

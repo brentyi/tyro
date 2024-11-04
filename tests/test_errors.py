@@ -7,6 +7,7 @@ import pytest
 from typing_extensions import Literal
 
 import tyro
+from tyro.constructors import UnsupportedTypeAnnotationError
 
 
 def test_ambiguous_collection_0() -> None:
@@ -14,7 +15,7 @@ def test_ambiguous_collection_0() -> None:
     class A:
         x: Tuple[Tuple[int, ...], ...]
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(A, args=["--x", "0", "1"])
 
 
@@ -23,7 +24,7 @@ def test_ambiguous_collection_1() -> None:
     class A:
         x: List[List[int]]
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(A, args=["--x", "0", "1"])
 
 
@@ -31,7 +32,7 @@ def test_ambiguous_collection_2() -> None:
     def main(x: Tuple[List[str], List[str]]) -> None:
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError) as e:
+    with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
     assert "Unsupported type annotation for the field x" in e.value.args[0]
 
@@ -40,14 +41,14 @@ def test_ambiguous_collection_3() -> None:
     def main(x: List[Union[Tuple[int, int], Tuple[int, int, int]]]) -> None:
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError) as e:
+    with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
     assert "Unsupported type annotation for the field x" in e.value.args[0]
 
 
 def test_ambiguous_collection_4() -> None:
     X = List[Union[Tuple[int, int], Tuple[int, int, int]]]
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError) as e:
+    with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(X, args=["--help"])
     assert "Unsupported type annotation for the field" not in e.value.args[0]
 
@@ -57,7 +58,7 @@ def test_ambiguous_collection_5() -> None:
     class A:
         x: Dict[List[int], str]
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(A, args=["--x", "0", "1"])
 
 
@@ -66,7 +67,7 @@ def test_ambiguous_collection_6() -> None:
     class A:
         x: Dict[str, List[int]]
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(A, args=["--x", "0", "1"])
 
 
@@ -77,7 +78,7 @@ class _CycleDataclass:
 
 
 def test_cycle() -> None:
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(_CycleDataclass, args=[])
 
 
@@ -85,7 +86,7 @@ def test_uncallable_annotation() -> None:
     def main(arg: 5) -> None:  # type: ignore
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=[])
 
 
@@ -97,7 +98,7 @@ def test_nested_annotation() -> None:
     def main(arg: List[OneIntArg]) -> List[OneIntArg]:  # type: ignore
         return arg
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=[])
 
     @dataclasses.dataclass
@@ -107,7 +108,7 @@ def test_nested_annotation() -> None:
     def main(arg: List[OneStringArg]) -> List[OneStringArg]:  # type: ignore
         return arg
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--arg", "0", "1", "2"])
 
     @dataclasses.dataclass
@@ -118,7 +119,7 @@ def test_nested_annotation() -> None:
     def main2(arg: List[TwoStringArg]) -> None:
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main2, args=[])
 
 
@@ -126,7 +127,7 @@ def test_missing_annotation_1() -> None:
     def main(a, b) -> None:
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
 
 
@@ -134,7 +135,7 @@ def test_missing_annotation_2() -> None:
     def main(*, a) -> None:
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
 
 
@@ -143,7 +144,7 @@ def test_tuple_needs_default() -> None:
         pass
 
     # This formerly raised an error, but now defaults to Tuple[str, ...].
-    #  with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    #  with pytest.raises(UnsupportedTypeAnnotationError):
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 
@@ -154,7 +155,7 @@ def test_unbound_typevar() -> None:
     def main(arg: T) -> None:  # type: ignore
         pass
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
 
 
@@ -162,7 +163,7 @@ def test_missing_default_fixed() -> None:
     def main(value: tyro.conf.SuppressFixed[tyro.conf.Fixed[int]]) -> int:
         return value
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
 
 
@@ -170,7 +171,7 @@ def test_missing_default_suppressed() -> None:
     def main(value: tyro.conf.Suppress[int]) -> int:
         return value
 
-    with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(main, args=["--help"])
 
 
@@ -179,7 +180,7 @@ def test_ambiguous_sequence() -> None:
         return None
 
     # This formerly raised an error, but now defaults to List[str].
-    #  with pytest.raises(tyro.UnsupportedTypeAnnotationError):
+    #  with pytest.raises(UnsupportedTypeAnnotationError):
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--help"])
 

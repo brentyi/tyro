@@ -5,9 +5,10 @@ from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 from typing_extensions import get_args, get_origin
 
-from . import _fields, _resolver, _typing
+from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
+
+from . import _fields, _resolver, _singleton, _typing
 from .conf import _confstruct
-from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 
 
 def match_subcommand(
@@ -25,14 +26,14 @@ def match_subcommand(
     # Get default subcommand name: by default hash.
     default_hash = object.__hash__(default)
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _fields.MISSING_SINGLETONS:
+        if conf.default in _singleton.MISSING_SINGLETONS:
             continue
         if default_hash == object.__hash__(conf.default):
             return subcommand_name
 
     # Get default subcommand name: by default value.
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _fields.MISSING_SINGLETONS:
+        if conf.default in _singleton.MISSING_SINGLETONS:
             continue
         equal = default == conf.default
         if isinstance(equal, bool) and equal:
@@ -41,14 +42,14 @@ def match_subcommand(
     # Get default subcommand name: by concrete type tree.
     typetree = _TypeTree.make(type(default), default)
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _fields.MISSING_SINGLETONS:
+        if conf.default in _singleton.MISSING_SINGLETONS:
             continue
         if typetree == _TypeTree.make(type(conf.default), conf.default):
             return subcommand_name
 
     # Get default subcommand name: by annotated type tree.
     typetree_from_name = {
-        subcommand_name: _TypeTree.make(subcommand_type, _fields.MISSING_NONPROP)
+        subcommand_name: _TypeTree.make(subcommand_type, _singleton.MISSING_NONPROP)
         for subcommand_name, subcommand_type in subcommand_type_from_name.items()
     }
     for subcommand_name in subcommand_type_from_name.keys():
@@ -73,19 +74,19 @@ class _TypeTree:
     @staticmethod
     def make(
         typ: Union[Callable, _typing.TypeForm],
-        default_instance: _fields.DefaultInstance,
+        default_instance: Any,
     ) -> _TypeTree:
         """From an object instance, return a data structure representing the types in the object."""
 
         typ_unwrap = _resolver.resolve_generic_types(typ)[0]
 
-        try:
-            typ, field_list = _fields.field_list_from_callable(
-                typ, default_instance=default_instance, support_single_arg_types=False
-            )
-        except UnsupportedTypeAnnotationError:
+        field_list_out = _fields.field_list_from_type_or_callable(
+            typ, default_instance=default_instance, support_single_arg_types=False
+        )
+        if isinstance(field_list_out, UnsupportedStructTypeMessage):
             return _TypeTree(typ_unwrap, {})
 
+        typ, field_list = field_list_out
         return _TypeTree(
             typ_unwrap,
             {

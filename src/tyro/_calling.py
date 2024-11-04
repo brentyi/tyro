@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, List, Set, Tuple, TypeVar, Union
 
 from typing_extensions import get_args
 
-from . import _arguments, _fields, _parsers, _resolver, _strings
+from . import _arguments, _fields, _parsers, _resolver, _singleton, _strings
 from .conf import _markers
 
 
@@ -29,7 +29,7 @@ T = TypeVar("T")
 def callable_with_args(
     f: Callable[..., T],
     parser_definition: _parsers.ParserSpecification,
-    default_instance: Union[T, _fields.NonpropagatingMissingType],
+    default_instance: Union[T, _singleton.NonpropagatingMissingType],
     value_from_prefixed_field_name: Dict[str, Any],
     field_name_prefix: str,
 ) -> Tuple[Callable[[], T], Set[str]]:
@@ -167,7 +167,7 @@ def callable_with_args(
                     (
                         field.default
                         if type(field.default) is chosen_f
-                        else _fields.MISSING_NONPROP
+                        else _singleton.MISSING_NONPROP
                     ),
                     value_from_prefixed_field_name,
                     field_name_prefix=prefixed_field_name,
@@ -176,7 +176,7 @@ def callable_with_args(
                 del get_value
                 consumed_keywords |= consumed_keywords_child
 
-        if value is _fields.EXCLUDE_FROM_CALL:
+        if value is _singleton.EXCLUDE_FROM_CALL:
             continue
 
         if _markers._UnpackArgsCall in field.markers:

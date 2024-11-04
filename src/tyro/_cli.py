@@ -18,6 +18,7 @@ from . import (
     _calling,
     _fields,
     _parsers,
+    _singleton,
     _strings,
     _unsafe_cache,
     conf,
@@ -316,8 +317,8 @@ def _cli_impl(
     #   one or many arguments, depending on various factors).
     #
     # This could be revisited.
-    default_instance_internal: _fields.NonpropagatingMissingType | OutT = (
-        _fields.MISSING_NONPROP if default is None else default
+    default_instance_internal: _singleton.NonpropagatingMissingType | OutT = (
+        _singleton.MISSING_NONPROP if default is None else default
     )
 
     # We wrap our type with a dummy dataclass if it can't be treated as a nested type.
