@@ -305,7 +305,7 @@ def _field_list_from_function(
 
     # Check for abstract classes.
     if inspect.isabstract(f):
-        return UnsupportedStructTypeMessage(f"Abstract classes cannot be instantiated!")
+        return UnsupportedStructTypeMessage("Abstract classes cannot be instantiated!")
 
     # `f` that is called (output) may be different from what we want to
     # inspect.

@@ -17,8 +17,6 @@ from typing_extensions import (
     is_typeddict,
 )
 
-from tyro.constructors._primitive_spec import UnsupportedTypeAnnotationError
-
 from .. import _docstrings, _resolver
 from .._singleton import (
     EXCLUDE_FROM_CALL,

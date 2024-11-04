@@ -11,7 +11,6 @@ from ._primitive_spec import (
 from ._struct_spec import (
     StructConstructorSpec,
     StructTypeInfo,
-    UnsupportedStructTypeMessage,
     apply_default_struct_rules,
 )
 

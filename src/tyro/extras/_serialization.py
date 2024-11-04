@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 from typing_extensions import get_args, get_origin
 
-from .. import _fields, _resolver
+from .. import _resolver
 from ..constructors._struct_spec import MISSING_PROP
 
 ENUM_YAML_TAG_PREFIX = "!enum:"
