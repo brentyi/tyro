@@ -5,7 +5,7 @@ import dataclasses
 import enum
 import sys
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Sequence, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Union
 
 from typing_extensions import (
     Annotated,
@@ -69,7 +69,7 @@ class StructTypeInfo:
     _typevar_context: _resolver.TypeParamAssignmentContext
 
     @staticmethod
-    def make(f: TypeForm, default: Any) -> StructTypeInfo:
+    def make(f: TypeForm | Callable, default: Any) -> StructTypeInfo:
         _, parent_markers = _resolver.unwrap_annotated(f, _markers._Marker)
         f = _resolver.swap_type_using_confstruct(f)
         f, found_subcommand_configs = _resolver.unwrap_annotated(
@@ -83,7 +83,9 @@ class StructTypeInfo:
         f = typevar_context.origin_type
         f = _resolver.narrow_subtypes(f, default)
         f = _resolver.narrow_collection_types(f, default)
-        return StructTypeInfo(f, parent_markers, default, typevar_context)
+        return StructTypeInfo(
+            cast(TypeForm, f), parent_markers, default, typevar_context
+        )
 
 
 def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
@@ -466,7 +468,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             hints = _resolver.get_type_hints_with_backported_syntax(
                 info.type, include_extras=True
             )
-            for pd1_field in cls_cast.__fields__.values():
+            for pd1_field in cast(Dict[str, Any], cls_cast.__fields__).values():
                 helptext = pd1_field.field_info.description
                 if helptext is None:
                     helptext = _docstrings.get_field_docstring(
@@ -489,7 +491,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 )
         else:
             # Pydantic 2.xx
-            for name, pd2_field in info.type.model_fields.items():
+            for name, pd2_field in cast(Any, info.type).model_fields.items():
                 helptext = pd2_field.description
                 if helptext is None:
                     helptext = _docstrings.get_field_docstring(info.type, name)

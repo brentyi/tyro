@@ -239,7 +239,7 @@ def field_list_from_type_or_callable(
         spec = registry.get_struct_spec(type_info)
 
         with FieldDefinition.marker_context(type_info.markers):
-            if not isinstance(spec, UnsupportedStructTypeMessage):
+            if spec is not None:
                 return f, [
                     FieldDefinition.make(
                         f.name,
@@ -386,7 +386,7 @@ def _field_list_from_function(
                     # Note that param.annotation doesn't resolve forward references.
                     typ=typ
                     if default_instance in MISSING_SINGLETONS
-                    else Annotated.__class_getitem__((typ, _markers._OPTIONAL_GROUP)),
+                    else Annotated.__class_getitem__((typ, _markers._OPTIONAL_GROUP)),  # type: ignore
                     default=default,
                     is_default_from_default_instance=False,
                     helptext=helptext,

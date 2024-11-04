@@ -18,9 +18,7 @@ from ._struct_spec import (
 current_registry: ConstructorRegistry | None = None
 
 PrimitiveSpecRule = Callable[[PrimitiveTypeInfo], Union[PrimitiveConstructorSpec, None]]
-StructSpecRule = Callable[
-    [StructTypeInfo], Union[StructConstructorSpec, UnsupportedStructTypeMessage, None]
-]
+StructSpecRule = Callable[[StructTypeInfo], Union[StructConstructorSpec, None]]
 
 
 class ConstructorRegistry:
@@ -97,15 +95,15 @@ class ConstructorRegistry:
 
     def get_struct_spec(
         self, type_info: StructTypeInfo
-    ) -> StructConstructorSpec | UnsupportedStructTypeMessage:
-        """Get a constructor specification for a given type."""
+    ) -> StructConstructorSpec | None:
+        """Get a constructor specification for a given type. Returns `None` if
+        unsuccessful."""
         for spec_factory in self._struct_rules[::-1]:
             maybe_spec = spec_factory(type_info)
             if maybe_spec is not None:
                 return maybe_spec
 
-        # TODO: revisit?
-        return UnsupportedStructTypeMessage(f"Unsupported type annotation: {type_info}")
+        return None
 
     @classmethod
     def _get_active_registry(cls) -> ConstructorRegistry:

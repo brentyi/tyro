@@ -65,14 +65,14 @@ class PrimitiveTypeInfo:
 
     @staticmethod
     def make(
-        raw_annotation: TypeForm,
+        raw_annotation: TypeForm | Callable,
         parent_markers: set[_markers.Marker],
     ) -> PrimitiveTypeInfo:
         typ, extra_markers = _resolver.unwrap_annotated(
             raw_annotation, search_type=_markers._Marker
         )
         return PrimitiveTypeInfo(
-            type=typ,
+            type=cast(TypeForm, typ),
             type_origin=get_origin(typ),
             markers=parent_markers | set(extra_markers),
         )
