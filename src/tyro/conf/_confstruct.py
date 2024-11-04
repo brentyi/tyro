@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 from typing import Any, Callable, Sequence, TypeVar, overload
 
-from .._fields import MISSING_NONPROP
+from .._singleton import MISSING_NONPROP
 
 T = TypeVar("T")
 
@@ -91,12 +91,12 @@ def subcommand(
             docstring.
         prefix_name: Whether to prefix the name of the subcommand based on where it
             is in a nested structure.
-        constructor: A constructor type or function. This should either be (a) a subtype
-            of an argument's annotated type, or (b) a function with type-annotated
-            inputs that returns an instance of the annotated type. This will be used in
-            place of the argument's type for parsing arguments. No validation is done.
-        constructor_factory: A function that returns a constructor type or function.
-            Useful when the constructor isn't immediately available.
+        constructor: A constructor type or function. This will be used in
+            place of the argument's type for parsing arguments. For more
+            configurability, see :module:`tyro.constructors`.
+        constructor_factory: A function that returns a constructor type. This
+            will be used in place of the argument's type for parsing arguments.
+            For more configurability, see :module:`tyro.constructors`.
     """
     assert not (
         constructor is not None and constructor_factory is not None
@@ -189,12 +189,12 @@ def arg(
             structure, and are not supported for positional arguments.
         prefix_name: Whether or not to prefix the name of the argument based on where
             it is in a nested structure. Arguments are prefixed by default.
-        constructor: A constructor type or function. This should either be (a) a subtype
-            of an argument's annotated type, or (b) a function with type-annotated
-            inputs that returns an instance of the annotated type. This will be used in
-            place of the argument's type for parsing arguments. No validation is done.
-        constructor_factory: A function that returns a constructor type or function.
-            Useful when the constructor isn't immediately available.
+        constructor: A constructor type or function. This will be used in
+            place of the argument's type for parsing arguments. For more
+            configurability, see :module:`tyro.constructors`.
+        constructor_factory: A function that returns a constructor type. This
+            will be used in place of the argument's type for parsing arguments.
+            For more configurability, see :module:`tyro.constructors`.
 
     Returns:
         Object to attach via `typing.Annotated[]`.

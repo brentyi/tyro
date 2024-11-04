@@ -14,12 +14,10 @@ from typing import (
     Callable,
     ClassVar,
     Dict,
-    FrozenSet,
     List,
     Sequence,
     Set,
     Tuple,
-    Type,
     TypeVar,
     Union,
     cast,
@@ -38,7 +36,8 @@ from typing_extensions import (
     get_type_hints,
 )
 
-from . import _fields, _unsafe_cache, conf
+from . import _unsafe_cache, conf
+from ._singleton import MISSING_SINGLETONS
 from ._typing import TypeForm
 
 UnionType = getattr(types, "UnionType", Union)
@@ -425,47 +424,18 @@ class TypeParamResolver:
                 for x in new_args_list
             )
 
-            # Apply shims to convert from types.UnionType to typing.Union, list to typing.List, etc.
-            # This will let us call `copy_with()` next.
-            typ = standardize_builtin_generics(typ)
-
             # Standard generic aliases have a `copy_with()`!
-            if hasattr(typ, "copy_with"):
+            if origin is UnionType:
+                return Union.__getitem__(new_args)  # type: ignore
+            elif hasattr(typ, "copy_with"):
+                # typing.List, typing.Dict, etc.
                 return typ.copy_with(new_args)  # type: ignore
             else:
-                # `collections` types, like collections.abc.Sequence.
-                assert hasattr(origin, "__class_getitem__")
-                return origin.__class_getitem__(new_args)  # type: ignore
+                # list[], dict[], etc.
+                assert origin is not None
+                return origin[new_args]
 
         return typ  # type: ignore
-
-
-def standardize_builtin_generics(typ: TypeOrCallable) -> TypeOrCallable:
-    """Apply shims to convert `types.UnionType` to `typing.Union`, `list` to
-    `typing.List`, etc."""
-    origin = get_origin(typ)
-    args = get_args(typ)
-
-    if origin is None or len(args) == 0:
-        return typ
-
-    # Convert Python 3.9 and 3.10 types to their typing library equivalents, which
-    # support `.copy_with()`. This is not really the right place for this logic...
-    if sys.version_info[:2] >= (3, 9):
-        shim_table = {
-            # PEP 585. Requires Python 3.9.
-            tuple: Tuple,
-            list: List,
-            dict: Dict,
-            set: Set,
-            frozenset: FrozenSet,
-            type: Type,
-            UnionType: Union,
-        }
-
-        if origin in shim_table:  # type: ignore
-            typ = shim_table[origin].__getitem__(args)  # type: ignore
-    return typ
 
 
 class TypeParamAssignmentContext:
@@ -501,9 +471,8 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     options = get_args(typ)
     options_unwrapped = [unwrap_origin_strip_extras(o) for o in options]
 
-    # (A)
     try:
-        if default_instance not in _fields.MISSING_SINGLETONS and not any(
+        if default_instance not in MISSING_SINGLETONS and not any(
             isinstance(default_instance, o) for o in options_unwrapped
         ):
             warnings.warn(
@@ -535,7 +504,6 @@ def resolve_generic_types(
 
     # Apply shims to convert from types.UnionType to typing.Union, list to
     # typing.List, etc.
-    typ = standardize_builtin_generics(typ)
     typ = resolve_newtype_and_aliases(typ)
 
     # We'll ignore NewType when getting the origin + args for generics.
