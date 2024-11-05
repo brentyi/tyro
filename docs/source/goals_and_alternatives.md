@@ -10,7 +10,7 @@ Usage distinctions are the result of two API goals:
   `tyro` should reduce to learning to write type-annotated Python. For example,
   types are specified using standard annotations, helptext using docstrings,
   choices using the standard `typing.Literal` type, subcommands with
-  `typing.Union` of nested types, and positional arguments with `/`.
+  `typing.Union` of struct types, and positional arguments with `/`.
   - In contrast, similar libraries have more expansive APIs , and require more
     library-specific structures, decorators, or metadata formats for configuring
     parsing behavior.
@@ -21,23 +21,31 @@ Usage distinctions are the result of two API goals:
     dynamic argparse-style namespaces, or string-based accessors that can't be
     statically checked.
 
+<!-- prettier-ignore-start -->
+
+.. warning::
+    This survey was conducted in late 2022. It may be out of date.
+
+<!-- prettier-ignore-end -->
+
 More concretely, we can also compare specific features. A noncomprehensive set:
 
-|                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structures | Unions over primitives | Unions over nested types  | Lists, tuples        | Dictionaries | Generics |
-| -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | ----------------- | ---------------------- | ------------------------- | -------------------- | ------------ | -------- |
-| [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |                        |                   |                        |                           |                      |              |          |
-| [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |                        |                   |                        |                           |                      |              |          |
-| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                   |                        | ✓[^datargs_unions_nested] | ✓                    |              |          |
-| [tap][tap]                                   |             |           | ✓                    | ✓                      |                   | ✓                      | ~[^tap_unions_nested]     | ✓                    |              |          |
-| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓                 | ✓                      | ✓[^simp_unions_nested]    | ✓                    | ✓            |          |
-| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                   |                        |                           |                      |              |          |
-| [clout][clout]                               | ✓           |           |                      |                        | ✓                 |                        |                           |                      |              |          |
-| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                   |                        |                           | ✓                    | ✓            |          |
-| [typer][typer]                               |             | ✓         |                      |                        |                   |                        | ~[^typer_unions_nested]   | ~[^typer_containers] |              |          |
-| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓                 |                        |                           | ✓                    |              |          |
-| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓                 | ✓                      | ~[^yahp_unions_nested]    | ✓                    |              |          |
-| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓                 |                        |                           | ✓                    | ✓            |          |
-| **tyro**                                     | ✓           | ✓         | ✓                    | ✓                      | ✓                 | ✓                      | ✓                         | ✓                    | ✓            | ✓        |
+|                                              | Dataclasses | Functions | Literals             | Docstrings as helptext | Nested structs | Unions over primitives | Unions over structs       | Lists, tuples        | Dicts | Generics |
+| -------------------------------------------- | ----------- | --------- | -------------------- | ---------------------- | -------------- | ---------------------- | ------------------------- | -------------------- | ----- | -------- |
+| [argparse-dataclass][argparse-dataclass]     | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
+| [argparse-dataclasses][argparse-dataclasses] | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
+| [datargs][datargs]                           | ✓           |           | ✓[^datargs_literals] |                        |                |                        | ✓[^datargs_unions_struct] | ✓                    |       |          |
+| [tap][tap]                                   |             |           | ✓                    | ✓                      |                | ✓                      | ~[^tap_unions_struct]     | ✓                    |       |          |
+| [simple-parsing][simple-parsing]             | ✓           |           | ✓[^simp_literals]    | ✓                      | ✓              | ✓                      | ✓[^simp_unions_struct]    | ✓                    | ✓     |          |
+| [dataclass-cli][dataclass-cli]               | ✓           |           |                      |                        |                |                        |                           |                      |       |          |
+| [clout][clout]                               | ✓           |           |                      |                        | ✓              |                        |                           |                      |       |          |
+| [hf_argparser][hf_argparser]                 | ✓           |           |                      |                        |                |                        |                           | ✓                    | ✓     |          |
+| [typer][typer]                               |             | ✓         |                      |                        |                |                        | ~[^typer_unions_struct]   | ~[^typer_containers] |       |          |
+| [pyrallis][pyrallis]                         | ✓           |           |                      | ✓                      | ✓              |                        |                           | ✓                    |       |          |
+| [yahp][yahp]                                 | ✓           |           |                      | ~[^yahp_docstrings]    | ✓              | ✓                      | ~[^yahp_unions_struct]    | ✓                    |       |          |
+| [omegaconf][omegaconf]                       | ✓           |           |                      |                        | ✓              |                        |                           | ✓                    | ✓     |          |
+| [defopt][defopt]                             |             | ✓         | ✓                    | ✓                      | ✓              | ✓                      |                           | ✓                    |       |          |
+| **tyro**                                     | ✓           | ✓         | ✓                    | ✓                      | ✓              | ✓                      | ✓                         | ✓                    | ✓     | ✓        |
 
 <!-- prettier-ignore-start -->
 
@@ -53,12 +61,13 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 [typer]: https://typer.tiangolo.com/
 [yahp]: https://github.com/mosaicml/yahp
 [omegaconf]: https://omegaconf.readthedocs.io/en/2.1_branch/structured_config.html
+[defopt]: https://github.com/anntzer/defopt/
 
-[^datargs_unions_nested]: One allowed per class.
-[^tap_unions_nested]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
-[^simp_unions_nested]: One allowed per class.
-[^yahp_unions_nested]: Not supported, but similar functionality available via ["registries"](https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html).
-[^typer_unions_nested]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
+[^datargs_unions_struct]: One allowed per class.
+[^tap_unions_struct]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
+[^simp_unions_struct]: One allowed per class.
+[^yahp_unions_struct]: Not supported, but similar functionality available via ["registries"](https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html).
+[^typer_unions_struct]: Not supported, but API exists for creating subcommands that accomplish a similar goal.
 [^simp_literals]: Not supported for mixed (eg `Literal[5, "five"]`) or in container (eg `List[Literal[1, 2]]`) types.
 [^datargs_literals]: Not supported for mixed types (eg `Literal[5, "five"]`).
 [^typer_containers]: `typer` uses positional arguments for all required fields, which means that only one variable-length argument (such as `List[int]`) without a default is supported per argument parser.

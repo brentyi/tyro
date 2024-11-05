@@ -62,12 +62,19 @@ class PrimitiveTypeInfo:
     """The output of get_origin() on the static type."""
     markers: set[_markers.Marker]
     """Set of tyro markers used to configure this field."""
+    _primitive_spec: PrimitiveConstructorSpec | None
+    """Primitive constructor spec that was scraped from runtime annotations."""
 
     @staticmethod
     def make(
         raw_annotation: TypeForm | Callable,
         parent_markers: set[_markers.Marker],
     ) -> PrimitiveTypeInfo:
+        _, primitive_specs = _resolver.unwrap_annotated(
+            raw_annotation, search_type=PrimitiveConstructorSpec
+        )
+        primitive_spec = primitive_specs[0] if len(primitive_specs) > 0 else None
+
         typ, extra_markers = _resolver.unwrap_annotated(
             raw_annotation, search_type=_markers._Marker
         )
@@ -75,6 +82,7 @@ class PrimitiveTypeInfo:
             type=cast(TypeForm, typ),
             type_origin=get_origin(typ),
             markers=parent_markers | set(extra_markers),
+            _primitive_spec=primitive_spec,
         )
 
 
@@ -84,11 +92,11 @@ class PrimitiveConstructorSpec(Generic[T]):
 
     There are two ways to use this class:
 
-    First, we can include it in a type signature via `typing.Annotated`.
+    First, we can include it in a type signature via :class:`typing.Annotated`.
     This is the simplest for making local modifications to parsing behavior for
     individual fields.
 
-    Alternatively, it can be returned by a rule in a `PrimitiveConstructorRegistry`.
+    Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
     """
 
     nargs: int | Literal["*"]
@@ -118,7 +126,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     from ._registry import ConstructorRegistry
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def any_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type is not Any:
             return None
@@ -130,7 +138,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     # on the behavior so we'll do our best not to break it.
     vanilla_types = (int, str, float, bytes, json.loads)
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type not in vanilla_types:
             return None
@@ -152,7 +160,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     if "torch" in sys.modules.keys():
         import torch
 
-        @registry.primitive_rule
+        @registry._default_primitive_rules.append
         def torch_device_rule(
             type_info: PrimitiveTypeInfo,
         ) -> PrimitiveConstructorSpec | None:
@@ -166,7 +174,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 str_from_instance=lambda instance: [str(instance)],
             )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def bool_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type is not bool:
             return None
@@ -179,7 +187,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: ["True" if instance else "False"],
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def nonetype_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type is not type(None):
             return None
@@ -192,7 +200,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: ["None"],
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def path_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if not (
             type_info.type in (os.PathLike, pathlib.Path)
@@ -210,7 +218,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: [str(instance)],
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def enum_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if not (
             inspect.isclass(type_info.type) and issubclass(type_info.type, enum.Enum)
@@ -243,7 +251,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             choices=choices,
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def datetime_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type not in (datetime.datetime, datetime.date, datetime.time):
             return None
@@ -264,7 +272,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: [instance.isoformat()],
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def vague_container_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | None:
@@ -299,7 +307,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def sequence_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type_origin not in (
             collections.abc.Sequence,
@@ -384,7 +392,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 choices=inner_spec.choices,
             )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def tuple_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type_origin is not tuple:
             return None
@@ -449,7 +457,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             and all(spec.is_instance(member) for member, spec in zip(x, inner_specs)),
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def dict_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type_origin not in (dict, collections.abc.Mapping):
             return None
@@ -542,7 +550,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 str_from_instance=str_from_instance,
             )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def literal_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type_origin not in (Literal, LiteralAlternate):
             return None
@@ -568,7 +576,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             choices=str_choices,
         )
 
-    @registry.primitive_rule
+    @registry._default_primitive_rules.append
     def union_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type_origin not in (Union, _resolver.UnionType):
             return None

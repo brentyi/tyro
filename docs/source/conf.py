@@ -395,6 +395,8 @@ def docstring(app, what, name, obj, options, lines):
     rst = m2r2.convert(md)
     lines.clear()
     lines += rst.splitlines()  # type: ignore
+    lines.append("")
+    lines.append("")
 
 
 def setup(app):

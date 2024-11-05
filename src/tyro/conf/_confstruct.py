@@ -93,10 +93,10 @@ def subcommand(
             is in a nested structure.
         constructor: A constructor type or function. This will be used in
             place of the argument's type for parsing arguments. For more
-            configurability, see :module:`tyro.constructors`.
+            configurability, see :mod:`tyro.constructors`.
         constructor_factory: A function that returns a constructor type. This
             will be used in place of the argument's type for parsing arguments.
-            For more configurability, see :module:`tyro.constructors`.
+            For more configurability, see :mod:`tyro.constructors`.
     """
     assert not (
         constructor is not None and constructor_factory is not None
@@ -191,10 +191,10 @@ def arg(
             it is in a nested structure. Arguments are prefixed by default.
         constructor: A constructor type or function. This will be used in
             place of the argument's type for parsing arguments. For more
-            configurability, see :module:`tyro.constructors`.
+            configurability, see :mod:`tyro.constructors`.
         constructor_factory: A function that returns a constructor type. This
             will be used in place of the argument's type for parsing arguments.
-            For more configurability, see :module:`tyro.constructors`.
+            For more configurability, see :mod:`tyro.constructors`.
 
     Returns:
         Object to attach via `typing.Annotated[]`.

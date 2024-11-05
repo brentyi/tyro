@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Callable, ClassVar, Union
 
+from typing_extensions import Literal
+
 from ._primitive_spec import (
     PrimitiveConstructorSpec,
     PrimitiveTypeInfo,
@@ -58,7 +60,8 @@ class ConstructorRegistry:
     _old_registry: ConstructorRegistry | None = None
 
     def __init__(self) -> None:
-        self._primitive_rules: list[PrimitiveSpecRule] = []
+        self._default_primitive_rules: list[PrimitiveSpecRule] = []
+        self._custom_primitive_rules: list[PrimitiveSpecRule] = []
         self._struct_rules: list[StructSpecRule] = []
 
         # Apply the default primitive-handling rules.
@@ -67,9 +70,13 @@ class ConstructorRegistry:
 
     def primitive_rule(self, rule: PrimitiveSpecRule) -> PrimitiveSpecRule:
         """Define a rule for constructing a primitive type from a string. The
-        most recently added rule will be applied first."""
+        most recently added rule will be applied first.
 
-        self._primitive_rules.append(rule)
+        Custom primitive rules will take precedence over both default primitive
+        rules and struct rules
+        """
+
+        self._custom_primitive_rules.append(rule)
         return rule
 
     def struct_rule(self, rule: StructSpecRule) -> StructSpecRule:
@@ -80,13 +87,25 @@ class ConstructorRegistry:
         return rule
 
     def get_primitive_spec(
-        self, type_info: PrimitiveTypeInfo
+        self,
+        type_info: PrimitiveTypeInfo,
+        rule_mode: Literal["default", "custom", "all"] = "all",
     ) -> PrimitiveConstructorSpec:
         """Get a constructor specification for a given type."""
-        for spec_factory in self._primitive_rules[::-1]:
-            maybe_spec = spec_factory(type_info)
-            if maybe_spec is not None:
-                return maybe_spec
+
+        if type_info._primitive_spec is not None:
+            return type_info._primitive_spec
+
+        if rule_mode in ("custom", "all"):
+            for spec_factory in self._custom_primitive_rules[::-1]:
+                maybe_spec = spec_factory(type_info)
+                if maybe_spec is not None:
+                    return maybe_spec
+        if rule_mode in ("default", "all"):
+            for spec_factory in self._default_primitive_rules[::-1]:
+                maybe_spec = spec_factory(type_info)
+                if maybe_spec is not None:
+                    return maybe_spec
 
         raise UnsupportedTypeAnnotationError(
             f"Unsupported type annotation: {type_info.type}"
@@ -97,6 +116,7 @@ class ConstructorRegistry:
     ) -> StructConstructorSpec | None:
         """Get a constructor specification for a given type. Returns `None` if
         unsuccessful."""
+
         for spec_factory in self._struct_rules[::-1]:
             maybe_spec = spec_factory(type_info)
             if maybe_spec is not None:

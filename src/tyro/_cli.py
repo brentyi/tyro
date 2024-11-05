@@ -408,7 +408,6 @@ def _cli_impl(
         default_instance=default_instance_internal,  # Overrides for default values.
         intern_prefix="",  # Used for recursive calls.
         extern_prefix="",  # Used for recursive calls.
-        subcommand_prefix="",  # Used for recursive calls.
     )
 
     # Generate parser!

@@ -1,15 +1,16 @@
-"""Custom Constructors
+"""Custom Primitive
 
-For additional flexibility, :module:`tyro.constructors` exposes
-tyro's API for defining behavior for different types. This is the same
-API that tyro relies on for the built-in types.
+For additional flexibility, :mod:`tyro.constructors` exposes tyro's API for
+defining behavior for different types. There are two categories of types:
+primitive types can be instantiated from a single commandline argument, while
+struct types are broken down into multiple.
+
+In this example, we attach a custom constructor via a runtime annotation.
 
 Usage:
-`python ./10_custom_constructors.py --help`
-`python ./10_custom_constructors.py --dict1.json '{"hello": "world"}'`
-`python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}"`
-`python ./10_custom_constructors.py --dict1.json '{"hello": "world"}' --dict2.json '{"hello": "world"}'`
-`python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}" --dict2.json "{\"hello\": \"world\"}"`
+`python ./01_primitive_annotation.py --help`
+`python ./01_primitive_annotation.py --dict1 '{"hello": "world"}'`
+`python ./01_primitive_annotation.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'`
 """
 
 import json

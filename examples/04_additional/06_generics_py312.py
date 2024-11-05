@@ -1,7 +1,7 @@
 # mypy: ignore-errors
 #
 # PEP 695 isn't yet supported in mypy. (April 4, 2024)
-"""Generic Types (Python 3.12+ syntax)
+"""Generic Types (Python 3.12+)
 
 Example of parsing for generic dataclasses using syntax introduced in Python
 3.12 (`PEP 695 <https://peps.python.org/pep-0695/>`_).

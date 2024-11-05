@@ -12,19 +12,22 @@ import warnings
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import docstring_parser
-from typing_extensions import Annotated
+from typing_extensions import Annotated, get_args, get_origin
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import DEFAULT_SENTINEL_SINGLETONS, MISSING_SINGLETONS
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
-    PrimitiveConstructorSpec,
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
 from .constructors._registry import ConstructorRegistry
-from .constructors._struct_spec import StructTypeInfo, UnsupportedStructTypeMessage
+from .constructors._struct_spec import (
+    StructFieldSpec,
+    StructTypeInfo,
+    UnsupportedStructTypeMessage,
+)
 
 global_context_markers: List[Tuple[_markers.Marker, ...]] = []
 
@@ -33,7 +36,9 @@ global_context_markers: List[Tuple[_markers.Marker, ...]] = []
 class FieldDefinition:
     intern_name: str
     extern_name: str
-    type_or_callable: Union[TypeForm[Any], Callable]
+    type: TypeForm[Any] | Callable
+    """Full type, including runtime annotations."""
+    type_stripped: TypeForm[Any] | Callable
     default: Any
     # We need to record whether defaults are from default instances to
     # determine if they should override the default in
@@ -44,7 +49,6 @@ class FieldDefinition:
     custom_constructor: bool
 
     argconf: _confstruct._ArgConfig
-    primitive_spec: PrimitiveConstructorSpec | None
 
     # Override the name in our kwargs. Useful whenever the user-facing argument name
     # doesn't match the keyword expected by our callable.
@@ -66,6 +70,17 @@ class FieldDefinition:
         global_context_markers.append(markers)
         yield
         global_context_markers.pop()
+
+    @staticmethod
+    def from_field_spec(field_spec: StructFieldSpec) -> FieldDefinition:
+        return FieldDefinition.make(
+            name=field_spec.name,
+            typ=field_spec.type,
+            default=field_spec.default,
+            is_default_from_default_instance=field_spec.is_default_overridden,
+            helptext=field_spec.helptext,
+            call_argname_override=field_spec._call_argname,
+        )
 
     @staticmethod
     def make(
@@ -114,17 +129,30 @@ class FieldDefinition:
             if argconf.help is not None:
                 helptext = argconf.help
 
-        _, primitive_specs = _resolver.unwrap_annotated(typ, PrimitiveConstructorSpec)
-        if len(primitive_specs) > 0:
-            primitive_spec = primitive_specs[0]
-        else:
-            primitive_spec = None
-
-        typ, markers = _resolver.unwrap_annotated(typ, _markers._Marker)
+        type_stripped, markers = _resolver.unwrap_annotated(typ, _markers._Marker)
 
         # Include markers set via context manager.
         for context_markers in global_context_markers:
             markers += context_markers
+
+        out = FieldDefinition(
+            intern_name=name,
+            extern_name=name if argconf.name is None else argconf.name,
+            type=typ,
+            type_stripped=type_stripped,
+            default=default,
+            is_default_from_default_instance=is_default_from_default_instance,
+            helptext=helptext,
+            markers=set(markers),
+            custom_constructor=argconf.constructor_factory is not None,
+            argconf=argconf,
+            call_argname=(
+                call_argname_override if call_argname_override is not None else name
+            ),
+        )
+
+        if argconf.constructor_factory is not None:
+            out = out.with_new_type_stripped(argconf.constructor_factory())
 
         # Check that the default value matches the final resolved type.
         # There's some similar Union-specific logic for this in narrow_union_type(). We
@@ -133,8 +161,8 @@ class FieldDefinition:
             # Be relatively conservative: isinstance() can be checked on non-type
             # types (like unions in Python >=3.10), but we'll only consider single types
             # for now.
-            type(typ) is type
-            and not isinstance(default, typ)  # type: ignore
+            type(out.type_stripped) is type
+            and not isinstance(default, out.type_stripped)  # type: ignore
             # If a custom constructor is set, static_type may not be
             # matched to the annotated type.
             and argconf.constructor_factory is None
@@ -150,28 +178,24 @@ class FieldDefinition:
                 f"but the default value {default} has type {type(default)}. "
                 f"We'll try to handle this gracefully, but it may cause unexpected behavior."
             )
-            typ = Union[typ, type(default)]  # type: ignore
+            out = out.with_new_type_stripped(Union[out.type_stripped, type(default)])  # type: ignore
 
-        out = FieldDefinition(
-            intern_name=name,
-            extern_name=name if argconf.name is None else argconf.name,
-            type_or_callable=(
-                typ
-                if argconf.constructor_factory is None
-                else argconf.constructor_factory()
-            ),
-            default=default,
-            is_default_from_default_instance=is_default_from_default_instance,
-            helptext=helptext,
-            markers=set(markers),
-            custom_constructor=argconf.constructor_factory is not None,
-            argconf=argconf,
-            call_argname=(
-                call_argname_override if call_argname_override is not None else name
-            ),
-            primitive_spec=primitive_spec,
-        )
         return out
+
+    def with_new_type_stripped(
+        self, new_type_stripped: TypeForm[Any] | Callable
+    ) -> FieldDefinition:
+        if get_origin(self.type) is Annotated:
+            new_type = Annotated.__class_getitem__(  # type: ignore
+                (new_type_stripped, *get_args(self.type)[1:])
+            )
+        else:
+            new_type = new_type_stripped
+        return dataclasses.replace(
+            self,
+            type=new_type,
+            type_stripped=new_type_stripped,
+        )
 
     def is_positional(self) -> bool:
         """Returns True if the argument should be positional in the commandline."""
@@ -240,17 +264,7 @@ def field_list_from_type_or_callable(
 
         with FieldDefinition.marker_context(type_info.markers):
             if spec is not None:
-                return f, [
-                    FieldDefinition.make(
-                        f.name,
-                        f.type,
-                        f.default,
-                        f.is_default_overridden,
-                        f.helptext,
-                        call_argname_override=f._call_argname,
-                    )
-                    for f in spec.fields
-                ]
+                return f, [FieldDefinition.from_field_spec(f) for f in spec.fields]
 
             try:
                 registry.get_primitive_spec(PrimitiveTypeInfo.make(f, set()))
