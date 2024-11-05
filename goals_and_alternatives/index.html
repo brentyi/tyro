@@ -12,7 +12,7 @@
         gtag('js', new Date());
         gtag('config', 'G-624W9VWZWK');
     </script>
-    <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Helptext generation" href="../helptext_generation/" /><link rel="prev" title="Argument Aliases" href="../examples/04_additional/17_aliases/" />
+    <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Helptext generation" href="../helptext_generation/" /><link rel="prev" title="Custom Primitive (Registry)" href="../examples/05_custom_constructors/02_primitive_registry/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Goals and alternatives - tyro</title>
@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul class="current">
@@ -332,7 +335,7 @@ Usage distinctions are the result of two API goals:</p>
 <code class="docutils literal notranslate"><span class="pre">tyro</span></code> should reduce to learning to write type-annotated Python. For example,
 types are specified using standard annotations, helptext using docstrings,
 choices using the standard <code class="docutils literal notranslate"><span class="pre">typing.Literal</span></code> type, subcommands with
-<code class="docutils literal notranslate"><span class="pre">typing.Union</span></code> of nested types, and positional arguments with <code class="docutils literal notranslate"><span class="pre">/</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">typing.Union</span></code> of struct types, and positional arguments with <code class="docutils literal notranslate"><span class="pre">/</span></code>.</p>
 <ul>
 <li><p>In contrast, similar libraries have more expansive APIs , and require more
 library-specific structures, decorators, or metadata formats for configuring
@@ -349,7 +352,11 @@ statically checked.</p></li>
 </ul>
 </li>
 </ul>
-<p>More concretely, we can also compare specific features. A noncomprehensive set:</p>
+<!-- prettier-ignore-start --><div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This survey was conducted in late 2022. It may be out of date.</p>
+</div>
+<!-- prettier-ignore-end --><p>More concretely, we can also compare specific features. A noncomprehensive set:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -358,11 +365,11 @@ statically checked.</p></li>
 <th class="head"><p>Functions</p></th>
 <th class="head"><p>Literals</p></th>
 <th class="head"><p>Docstrings as helptext</p></th>
-<th class="head"><p>Nested structures</p></th>
+<th class="head"><p>Nested structs</p></th>
 <th class="head"><p>Unions over primitives</p></th>
-<th class="head"><p>Unions over nested types</p></th>
+<th class="head"><p>Unions over structs</p></th>
 <th class="head"><p>Lists, tuples</p></th>
-<th class="head"><p>Dictionaries</p></th>
+<th class="head"><p>Dicts</p></th>
 <th class="head"><p>Generics</p></th>
 </tr>
 </thead>
@@ -398,7 +405,7 @@ statically checked.</p></li>
 <td></td>
 <td></td>
 <td></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-unions-nested" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-datargs-unions-struct" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -410,7 +417,7 @@ statically checked.</p></li>
 <td><p>✓</p></td>
 <td></td>
 <td><p>✓</p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-tap-unions-nested" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-tap-unions-struct" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -422,7 +429,7 @@ statically checked.</p></li>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-unions-nested" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
+<td><p>✓<a class="footnote-reference brackets" href="#fn-simp-unions-struct" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>5<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td></td>
@@ -470,7 +477,7 @@ statically checked.</p></li>
 <td></td>
 <td></td>
 <td></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-typer-unions-nested" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-typer-unions-struct" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>6<span class="fn-bracket">]</span></a></p></td>
 <td><p>~<a class="footnote-reference brackets" href="#fn-typer-containers" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>7<span class="fn-bracket">]</span></a></p></td>
 <td></td>
 <td></td>
@@ -494,7 +501,7 @@ statically checked.</p></li>
 <td><p>~<a class="footnote-reference brackets" href="#fn-yahp-docstrings" id="id8" role="doc-noteref"><span class="fn-bracket">[</span>8<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
-<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-unions-nested" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a></p></td>
+<td><p>~<a class="footnote-reference brackets" href="#fn-yahp-unions-struct" id="id9" role="doc-noteref"><span class="fn-bracket">[</span>9<span class="fn-bracket">]</span></a></p></td>
 <td><p>✓</p></td>
 <td></td>
 <td></td>
@@ -511,7 +518,19 @@ statically checked.</p></li>
 <td><p>✓</p></td>
 <td></td>
 </tr>
-<tr class="row-even"><td><p><strong>tyro</strong></p></td>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/anntzer/defopt/">defopt</a></p></td>
+<td></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td><p>✓</p></td>
+<td></td>
+<td><p>✓</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>tyro</strong></p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
 <td><p>✓</p></td>
@@ -561,11 +580,11 @@ like working with YAML formats)</p>
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Not supported for mixed types (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>).</p>
 </aside>
-<aside class="footnote brackets" id="fn-datargs-unions-nested" role="doc-footnote">
+<aside class="footnote brackets" id="fn-datargs-unions-struct" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">2</a><span class="fn-bracket">]</span></span>
 <p>One allowed per class.</p>
 </aside>
-<aside class="footnote brackets" id="fn-tap-unions-nested" role="doc-footnote">
+<aside class="footnote brackets" id="fn-tap-unions-struct" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">3</a><span class="fn-bracket">]</span></span>
 <p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
 </aside>
@@ -573,11 +592,11 @@ like working with YAML formats)</p>
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">4</a><span class="fn-bracket">]</span></span>
 <p>Not supported for mixed (eg <code class="docutils literal notranslate"><span class="pre">Literal[5,</span> <span class="pre">&quot;five&quot;]</span></code>) or in container (eg <code class="docutils literal notranslate"><span class="pre">List[Literal[1,</span> <span class="pre">2]]</span></code>) types.</p>
 </aside>
-<aside class="footnote brackets" id="fn-simp-unions-nested" role="doc-footnote">
+<aside class="footnote brackets" id="fn-simp-unions-struct" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">5</a><span class="fn-bracket">]</span></span>
 <p>One allowed per class.</p>
 </aside>
-<aside class="footnote brackets" id="fn-typer-unions-nested" role="doc-footnote">
+<aside class="footnote brackets" id="fn-typer-unions-struct" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">6</a><span class="fn-bracket">]</span></span>
 <p>Not supported, but API exists for creating subcommands that accomplish a similar goal.</p>
 </aside>
@@ -589,7 +608,7 @@ like working with YAML formats)</p>
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id8">8</a><span class="fn-bracket">]</span></span>
 <p>Via the <code class="docutils literal notranslate"><span class="pre">hp.auto()</span></code> function, which can parse docstrings from external classes. Usage is different from the more direct parsing that <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, <code class="docutils literal notranslate"><span class="pre">tap</span></code>, and <code class="docutils literal notranslate"><span class="pre">simple-parsing</span></code>/<code class="docutils literal notranslate"><span class="pre">pyrallis</span></code> support.</p>
 </aside>
-<aside class="footnote brackets" id="fn-yahp-unions-nested" role="doc-footnote">
+<aside class="footnote brackets" id="fn-yahp-unions-struct" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id9">9</a><span class="fn-bracket">]</span></span>
 <p>Not supported, but similar functionality available via <a class="reference external" href="https://docs.mosaicml.com/projects/yahp/en/stable/examples/registry.html">“registries”</a>.</p>
 </aside>
@@ -611,14 +630,14 @@ like working with YAML formats)</p>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../examples/04_additional/17_aliases/">
+          <a class="prev-page" href="../examples/05_custom_constructors/02_primitive_registry/">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Argument Aliases</div>
+                <div class="title">Custom Primitive (Registry)</div>
                 
               </div>
             </a>

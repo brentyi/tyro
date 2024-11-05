@@ -8,7 +8,12 @@
    
    The :mod:`tyro.extras` submodule contains helpers that complement :func:`tyro.cli()`.
 
-   Compared to the core interface, APIs here are more likely to be changed or deprecated.
+   .. warning::
+   ::
+
+      Compared to the core interface, APIs here are more likely to be changed or deprecated.
+
+
 
 
 Package Contents
@@ -20,6 +25,8 @@ Package Contents
    Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
    see ``python -m rich.color``. Experimental.
 
+
+
 .. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
                  get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
 
@@ -29,6 +36,8 @@ Package Contents
 
    For tab completion, we recommend using ``tyro.cli()``\ 's built-in ``--tyro-write-completion``
    flag.
+
+
 
 .. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, args: Optional[Sequence[str]] = None) -> T
 
@@ -73,6 +82,8 @@ Package Contents
    :param configs: A dictionary of config names mapped to a tuple of
                    (description, config object).
    :param args: Optional arguments to pass to the CLI.
+
+
 
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> tyro._typing.TypeForm[T]
 
@@ -128,6 +139,8 @@ Package Contents
 
    :returns: A subcommand type, which can be passed to :func:`tyro.cli`.
 
+
+
 .. py:function:: literal_type_from_choices(choices: Iterable[T]) -> tyro._typing.TypeForm[T]
 
    
@@ -156,6 +169,8 @@ Package Contents
 
    :returns: A type that can be passed to :func:`tyro.cli()`.
 
+
+
 .. py:function:: from_yaml(cls: Type[DataclassType], stream: Union[str, IO[str], bytes, IO[bytes]]) -> DataclassType
 
    
@@ -179,6 +194,8 @@ Package Contents
 
    :returns: Instantiated dataclass.
 
+
+
 .. py:function:: to_yaml(instance: Any) -> str
 
    
@@ -200,6 +217,8 @@ Package Contents
    :param instance: Dataclass instance to serialize.
 
    :returns: YAML string.
+
+
 
 .. py:class:: SubcommandApp
 
@@ -235,6 +254,8 @@ Package Contents
    ``python my_script.py greet Alice``
    ``python my_script.py greet Bob --loud``
    ``python my_script.py addition 5 3``
+
+
    .. py:method:: command(func: CallableT) -> CallableT
                   command(func: None = None, *, name: str | None = None) -> Callable[[CallableT], CallableT]
 
@@ -247,6 +268,8 @@ Package Contents
       :param func: The function to register as a subcommand. If None, returns a
                    function to use as a decorator.
       :param name: The name of the subcommand. If None, the name of the function is used.
+
+
 
    .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[Any]] = None, sort_subcommands: bool = False) -> Any
 
@@ -271,6 +294,8 @@ Package Contents
                               suppressed.
       :param config: Sequence of config marker objects, from ``tyro.conf``.
       :param sort_subcommands: If True, sort the subcommands alphabetically by name.
+
+
 
 
 .. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None) -> T
@@ -327,4 +352,6 @@ Package Contents
                            is called from multiple workers but we only want console outputs from the
                            main one.
    :param config: Sequence of config marker objects, from ``tyro.conf``.
+
+
 

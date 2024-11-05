@@ -78,6 +78,8 @@
    still considered an implementation detail.)
 
 
+
+
 Module Contents
 ---------------
 
@@ -121,6 +123,8 @@ Module Contents
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
+
+
    .. py:method:: start_section(heading)
 
 
@@ -154,6 +158,8 @@ Module Contents
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
 
+
+
 .. py:class:: RawTextHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
 
 
@@ -164,6 +170,8 @@ Module Contents
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
+
+
 
 .. py:class:: ArgumentDefaultsHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
 
@@ -176,6 +184,8 @@ Module Contents
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
 
+
+
 .. py:class:: MetavarTypeHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
 
 
@@ -187,6 +197,8 @@ Module Contents
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
+
+
 
 .. py:class:: Action(option_strings, dest, nargs=None, const=None, default=None, type=None, choices=None, required=False, help=None, metavar=None)
 
@@ -229,6 +241,8 @@ Module Contents
                                                                               arguments.
    :keyword - help -- The help string describing the argument.:
    :keyword - metavar -- The name to be used for the option's argument with the: help string. If None, the 'dest' value will be used as the name.
+
+
    .. py:method:: format_usage()
 
 
@@ -278,6 +292,8 @@ Module Contents
                                                                               arguments.
    :keyword - help -- The help string describing the argument.:
    :keyword - metavar -- The name to be used for the option's argument with the: help string. If None, the 'dest' value will be used as the name.
+
+
    .. py:method:: __call__(parser, namespace, values, option_string=None)
 
 
@@ -300,6 +316,8 @@ Module Contents
    :keyword - bufsize -- The file's desired buffer size. Accepts the same values as: the builtin open() function.
    :keyword - encoding -- The file's encoding. Accepts the same values as the: builtin open() function.
    :keyword - errors -- A string indicating how encoding and decoding errors are to: be handled. Accepts the same value as the builtin open() function.
+
+
    .. py:method:: __call__(string)
 
 
@@ -307,6 +325,8 @@ Module Contents
 
       
       Return repr(self).
+
+
 
 
 .. py:class:: Namespace(**kwargs)
@@ -319,10 +339,14 @@ Module Contents
 
    Implements equality by attribute names and values, and provides a simple
    string representation.
+
+
    .. py:method:: __eq__(other)
 
       
       Return self==value.
+
+
 
    .. py:method:: __contains__(key)
 
@@ -349,6 +373,8 @@ Module Contents
    :keyword - add_help -- Add a -h/-help option:
    :keyword - allow_abbrev -- Allow long options to be abbreviated unambiguously:
    :keyword - exit_on_error -- Determines whether or not ArgumentParser exits with: error info when an error occurs
+
+
    .. py:method:: add_subparsers(**kwargs)
 
 
@@ -392,5 +418,7 @@ Module Contents
 
       If you override this in a subclass, it should not return -- it
       should either exit or raise an exception.
+
+
 
 

@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -335,8 +338,7 @@ argparse’s <code class="docutils literal notranslate"><span class="pre">add_ar
 <dt class="sig sig-object py" id="tyro._arguments.BooleanOptionalAction">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">BooleanOptionalAction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">option_strings</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Sequence</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dest</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_T</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">_T</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="../_argparse/#tyro._argparse.FileType" title="tyro._argparse.FileType"><span class="pre">tyro._argparse.FileType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">choices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">_T</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metavar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_arguments/#BooleanOptionalAction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.BooleanOptionalAction" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../_argparse/#tyro._argparse.Action" title="tyro._argparse.Action"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tyro._argparse.Action</span></code></a></p>
-<p>Adapted from <a class="reference external" href="https://github.com/python/cpython/pull/27672">https://github.com/python/cpython/pull/27672</a>
-.. py:method:: __call__(parser, namespace, values, option_string=None)</p>
+<p>Adapted from <a class="reference external" href="https://github.com/python/cpython/pull/27672">https://github.com/python/cpython/pull/27672</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -352,6 +354,11 @@ argparse’s <code class="docutils literal notranslate"><span class="pre">add_ar
 </dd>
 </dl>
 <dl class="py method">
+<dt class="sig sig-object py" id="tyro._arguments.BooleanOptionalAction.__call__">
+<span class="sig-name descname"><span class="pre">__call__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parser</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">option_string</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_arguments/#BooleanOptionalAction.__call__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.BooleanOptionalAction.__call__" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="tyro._arguments.BooleanOptionalAction.format_usage">
 <span class="sig-name descname"><span class="pre">format_usage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_arguments/#BooleanOptionalAction.format_usage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.BooleanOptionalAction.format_usage" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -361,16 +368,18 @@ argparse’s <code class="docutils literal notranslate"><span class="pre">add_ar
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._arguments.ArgumentDefinition">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">ArgumentDefinition</span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#ArgumentDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.ArgumentDefinition" title="Link to this definition">¶</a></dt>
-<dd><p>Structure containing everything needed to define an argument.
-.. py:property:: lowered</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>LoweredArgumentDefinition</p>
+<dd><p>Structure containing everything needed to define an argument.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="tyro._arguments.ArgumentDefinition.lowered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">lowered</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition" title="tyro._arguments.LoweredArgumentDefinition"><span class="pre">LoweredArgumentDefinition</span></a></em><a class="headerlink" href="#tyro._arguments.ArgumentDefinition.lowered" title="Link to this definition">¶</a></dt>
+<dd><p>Lowered argument definition, generated by applying a sequence of rules.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition" title="tyro._arguments.LoweredArgumentDefinition">LoweredArgumentDefinition</a></p>
 </dd>
 </dl>
-<p>Lowered argument definition, generated by applying a sequence of rules.</p>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._arguments.ArgumentDefinition.intern_prefix">
 <span class="sig-name descname"><span class="pre">intern_prefix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tyro._arguments.ArgumentDefinition.intern_prefix" title="Link to this definition">¶</a></dt>
@@ -410,15 +419,12 @@ argparse’s <code class="docutils literal notranslate"><span class="pre">add_ar
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro._arguments.LoweredArgumentDefinition">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._arguments.</span></span><span class="sig-name descname"><span class="pre">LoweredArgumentDefinition</span></span><a class="reference internal" href="../../../_modules/tyro/_arguments/#LoweredArgumentDefinition"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._arguments.LoweredArgumentDefinition" title="Link to this definition">¶</a></dt>
-<dd><p>Contains fields meant to be passed directly into argparse.
-.. py:attribute:: instance_from_str</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Optional[Callable]</p>
-</dd>
-</dl>
-</div></blockquote>
+<dd><p>Contains fields meant to be passed directly into argparse.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._arguments.LoweredArgumentDefinition.instance_from_str">
+<span class="sig-name descname"><span class="pre">instance_from_str</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tyro._arguments.LoweredArgumentDefinition.instance_from_str" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._arguments.LoweredArgumentDefinition.name_or_flag">
 <span class="sig-name descname"><span class="pre">name_or_flag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#tyro._arguments.LoweredArgumentDefinition.name_or_flag" title="Link to this definition">¶</a></dt>
@@ -536,10 +542,12 @@ field default.</p>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#tyro._arguments.cached_property"><code class="docutils literal notranslate"><span class="pre">cached_property</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.BooleanOptionalAction"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._arguments.BooleanOptionalAction.__call__"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction.__call__()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.BooleanOptionalAction.format_usage"><code class="docutils literal notranslate"><span class="pre">BooleanOptionalAction.format_usage()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.lowered"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.lowered</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.intern_prefix"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.intern_prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.extern_prefix"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.extern_prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.ArgumentDefinition.subcommand_prefix"><code class="docutils literal notranslate"><span class="pre">ArgumentDefinition.subcommand_prefix</span></code></a></li>
@@ -548,6 +556,7 @@ field default.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition"><code class="docutils literal notranslate"><span class="pre">LoweredArgumentDefinition</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition.instance_from_str"><code class="docutils literal notranslate"><span class="pre">LoweredArgumentDefinition.instance_from_str</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition.name_or_flag"><code class="docutils literal notranslate"><span class="pre">LoweredArgumentDefinition.name_or_flag</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition.default"><code class="docutils literal notranslate"><span class="pre">LoweredArgumentDefinition.default</span></code></a></li>
 <li><a class="reference internal" href="#tyro._arguments.LoweredArgumentDefinition.dest"><code class="docutils literal notranslate"><span class="pre">LoweredArgumentDefinition.dest</span></code></a></li>

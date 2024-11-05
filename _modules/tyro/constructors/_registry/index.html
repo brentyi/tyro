@@ -252,18 +252,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -317,6 +320,8 @@
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
 
 <span class="kn">from</span> <span class="nn">._primitive_spec</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
@@ -376,7 +381,8 @@
     <span class="n">_old_registry</span><span class="p">:</span> <span class="n">ConstructorRegistry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_primitive_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PrimitiveSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_primitive_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PrimitiveSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_custom_primitive_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PrimitiveSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_struct_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">StructSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1"># Apply the default primitive-handling rules.</span>
@@ -387,11 +393,19 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.primitive_rule">[docs]</a>
     <span class="k">def</span> <span class="nf">primitive_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="n">PrimitiveSpecRule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveSpecRule</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Define a rule for constructing a primitive type from a string. The</span>
-<span class="sd">        most recently added rule will be applied first.&quot;&quot;&quot;</span>
+<span class="sd">        most recently added rule will be applied first.</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_primitive_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+<span class="sd">        Custom primitive rules will take precedence over both default primitive</span>
+<span class="sd">        rules and struct rules</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_custom_primitive_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">rule</span></div>
 
+
+    <span class="k">def</span> <span class="nf">_default_primitive_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="n">PrimitiveSpecRule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveSpecRule</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_primitive_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rule</span>
 
 <div class="viewcode-block" id="ConstructorRegistry.struct_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.struct_rule">[docs]</a>
@@ -406,13 +420,25 @@
 <div class="viewcode-block" id="ConstructorRegistry.get_primitive_spec">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.get_primitive_spec">[docs]</a>
     <span class="k">def</span> <span class="nf">get_primitive_spec</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+        <span class="n">rule_mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;custom&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;all&quot;</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a constructor specification for a given type.&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_primitive_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">maybe_spec</span>
+
+        <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_primitive_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_primitive_spec</span>
+
+        <span class="k">if</span> <span class="n">rule_mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;custom&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_custom_primitive_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">maybe_spec</span>
+        <span class="k">if</span> <span class="n">rule_mode</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_primitive_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">maybe_spec</span>
 
         <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Unsupported type annotation: </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -426,6 +452,7 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a constructor specification for a given type. Returns `None` if</span>
 <span class="sd">        unsuccessful.&quot;&quot;&quot;</span>
+
         <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_struct_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>

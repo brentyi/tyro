@@ -12,7 +12,7 @@
         gtag('js', new Date());
         gtag('config', 'G-624W9VWZWK');
     </script>
-    <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Goals and alternatives" href="../../../goals_and_alternatives/" /><link rel="prev" title="Type Aliases (Python 3.12+)" href="../16_type_statement/" />
+    <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Type Aliases (Python 3.12+)" href="../12_type_statement/" /><link rel="prev" title="JAX/Flax Integration" href="../10_flax/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Argument Aliases - tyro</title>
@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -300,7 +303,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../../_sources/examples/04_additional/17_aliases.rst.txt" title="View this page">
+  <a class="muted-link" href="../../../_sources/examples/04_additional/11_aliases.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -353,7 +356,7 @@
 </pre></div>
 </div>
 <hr class="docutils" />
-<kbd>python 04_additional/17_aliases.py --help</kbd><pre class="ansi-block literal-block">usage: 17_aliases.py [-h] {checkout,commit}
+<kbd>python 04_additional/11_aliases.py --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py [-h] {checkout,commit}
 
 ╭─ options ───────────────────────────────────────────────╮
 │ -h, --help              show this help message and exit │
@@ -364,7 +367,7 @@
 │     commit              Make a commit.                  │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/17_aliases.py commit --help</kbd><pre class="ansi-block literal-block">usage: 17_aliases.py commit [-h] --message STR [--all | --no-all | -a]
+<kbd>python 04_additional/11_aliases.py commit --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py commit [-h] --message STR [--all | --no-all | -a]
 
 Make a commit.
 
@@ -374,11 +377,11 @@ Make a commit.
 │ --all, --no-all, -a     (default: None)                 │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/17_aliases.py commit --message hello --all</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
+<kbd>python 04_additional/11_aliases.py commit --message hello --all</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/17_aliases.py commit -m hello -a</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
+<kbd>python 04_additional/11_aliases.py commit -m hello -a</kbd><pre class="ansi-block literal-block">message='hello' all=True</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/17_aliases.py checkout --help</kbd><pre class="ansi-block literal-block">usage: 17_aliases.py checkout [-h] --branch STR
+<kbd>python 04_additional/11_aliases.py checkout --help</kbd><pre class="ansi-block literal-block">usage: 11_aliases.py checkout [-h] --branch STR
 
 Check out a branch.
 
@@ -387,9 +390,9 @@ Check out a branch.
 │ --branch STR, -b STR    (required)                      │
 ╰─────────────────────────────────────────────────────────╯</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/17_aliases.py checkout --branch main</kbd><pre class="ansi-block literal-block">branch='main'</pre>
+<kbd>python 04_additional/11_aliases.py checkout --branch main</kbd><pre class="ansi-block literal-block">branch='main'</pre>
 <hr class="docutils" />
-<kbd>python 04_additional/17_aliases.py checkout -b main</kbd><pre class="ansi-block literal-block">branch='main'</pre>
+<kbd>python 04_additional/11_aliases.py checkout -b main</kbd><pre class="ansi-block literal-block">branch='main'</pre>
 </section>
 
         </article>
@@ -397,23 +400,23 @@ Check out a branch.
       <footer>
         
         <div class="related-pages">
-          <a class="next-page" href="../../../goals_and_alternatives/">
+          <a class="next-page" href="../12_type_statement/">
               <div class="page-info">
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Goals and alternatives</div>
+                <div class="title">Type Aliases (Python 3.12+)</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
-          <a class="prev-page" href="../16_type_statement/">
+          <a class="prev-page" href="../10_flax/">
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
               <div class="page-info">
                 <div class="context">
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Type Aliases (Python 3.12+)</div>
+                <div class="title">JAX/Flax Integration</div>
                 
               </div>
             </a>

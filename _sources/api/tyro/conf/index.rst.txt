@@ -16,6 +16,8 @@
    Features here are supported, but generally unnecessary and should be used sparingly.
 
 
+
+
 Package Contents
 ----------------
 
@@ -53,12 +55,14 @@ Package Contents
                        it is in a nested structure. Arguments are prefixed by default.
    :param constructor: A constructor type or function. This will be used in
                        place of the argument's type for parsing arguments. For more
-                       configurability, see :module:`tyro.constructors`.
+                       configurability, see :mod:`tyro.constructors`.
    :param constructor_factory: A function that returns a constructor type. This
                                will be used in place of the argument's type for parsing arguments.
-                               For more configurability, see :module:`tyro.constructors`.
+                               For more configurability, see :mod:`tyro.constructors`.
 
    :returns: Object to attach via ``typing.Annotated[]``.
+
+
 
 .. py:function:: subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
                  subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
@@ -103,10 +107,12 @@ Package Contents
                        is in a nested structure.
    :param constructor: A constructor type or function. This will be used in
                        place of the argument's type for parsing arguments. For more
-                       configurability, see :module:`tyro.constructors`.
+                       configurability, see :mod:`tyro.constructors`.
    :param constructor_factory: A function that returns a constructor type. This
                                will be used in place of the argument's type for parsing arguments.
-                               For more configurability, see :module:`tyro.constructors`.
+                               For more configurability, see :mod:`tyro.constructors`.
+
+
 
 .. py:data:: AvoidSubcommands
 
@@ -116,6 +122,8 @@ Package Contents
 
    Can be used directly on union types, ``AvoidSubcommands[Union[...]]``\ , or recursively
    applied to nested types.
+
+
 
 .. py:data:: ConsolidateSubcommandArgs
 
@@ -141,6 +149,8 @@ Package Contents
 
    This is more robust to reordering of options, ensuring that any new options can simply
    be placed at the end of the command.
+
+
 
 .. py:data:: EnumChoicesFromValues
 
@@ -170,12 +180,16 @@ Package Contents
    Enum aliases are not relevant when this marker is present. The first entry matching the
    chosen value will be selected.
 
+
+
 .. py:data:: Fixed
 
    
    A type ``T`` can be annotated as ``Fixed[T]`` to prevent ``tyro.cli`` from parsing it; a
    default value should be set instead. Fields that can't be parsed with defaults will also
    be marked as fixed automatically.
+
+
 
 .. py:data:: FlagConversionOff
 
@@ -185,6 +199,8 @@ Package Contents
 
    Can be used directly on boolean annotations, ``FlagConversionOff[bool]``\ , or recursively
    applied to nested types.
+
+
 
 .. py:data:: OmitArgPrefixes
 
@@ -200,6 +216,8 @@ Package Contents
 
    By default, ``--cmd.arg`` may be generated as a flag. If prefixes are omitted, we would
    instead simply have ``--arg``.
+
+
 
 .. py:data:: OmitSubcommandPrefixes
 
@@ -221,16 +239,22 @@ Package Contents
    If subcommand prefixes are omitted, we would instead have ``nested-type-a`` and
    ``nested-type-b``.
 
+
+
 .. py:data:: Positional
 
    
    A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a positional
    argument.
 
+
+
 .. py:data:: PositionalRequiredArgs
 
    
    Make all arguments without defaults positional.
+
+
 
 .. py:data:: Suppress
 
@@ -238,10 +262,14 @@ Package Contents
    A type ``T`` can be annotated as ``Suppress[T]`` to prevent ``tyro.cli`` from parsing it, and
    to prevent it from showing up in helptext.
 
+
+
 .. py:data:: SuppressFixed
 
    
    Hide fields that are either manually or automatically marked as fixed.
+
+
 
 .. py:data:: UseAppendAction
 
@@ -257,12 +285,16 @@ Package Contents
    Can be applied to all variable-length sequences (\ ``list[T]``\ , ``Sequence[T]``\ ,
    ``tuple[T, ...]``\ , etc), including dictionaries without default values.
 
+
+
 .. py:data:: UseCounterAction
 
    
    ``verbose: UseCounterAction[int]``.
 
    :type: Use "counter" actions for integer arguments. Example usage
+
+
 
 .. py:function:: configure(*markers: Marker) -> Callable[[CallableType], CallableType]
 
@@ -289,4 +321,6 @@ Package Contents
           ...
 
    :param markers: Options to apply.
+
+
 

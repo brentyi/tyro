@@ -23,6 +23,8 @@
    chaotic as a result; for stability we mirror argparse at _argparse.py.
 
 
+
+
 Module Contents
 ---------------
 
@@ -79,6 +81,8 @@ Module Contents
    Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
    see ``python -m rich.color``. Experimental.
 
+
+
 .. py:function:: recursive_arg_search(args: List[str], parser_spec: tyro._parsers.ParserSpecification, prog: str, unrecognized_arguments: Set[str]) -> Tuple[List[_ArgumentInfo], bool, bool]
 
    
@@ -93,6 +97,8 @@ Module Contents
    :param parser_spec: Argument parser specification.
    :param subcommands: Prog corresponding to parser_spec.
    :param unrecognized_arguments: Used for same_exists return value.
+
+
 
 .. py:data:: THEME
 
@@ -110,6 +116,8 @@ Module Contents
    * Applies a temporary monkey patch for making argparse ignore ANSI codes when
      wrapping usage text.
    * Enables support for Windows via colorama.
+
+
 
 .. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
 
@@ -141,6 +149,8 @@ Module Contents
    :keyword - add_help -- Add a -h/-help option:
    :keyword - allow_abbrev -- Allow long options to be abbreviated unambiguously:
    :keyword - exit_on_error -- Determines whether or not ArgumentParser exits with: error info when an error occurs
+
+
    .. py:method:: error(message: str) -> NoReturn
 
       
@@ -155,6 +165,8 @@ Module Contents
       should either exit or raise an exception.
 
 
+
+
 .. py:class:: TyroArgparseHelpFormatter(prog: str)
 
 
@@ -165,6 +177,8 @@ Module Contents
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
+
+
    .. py:method:: add_argument(action)
 
 

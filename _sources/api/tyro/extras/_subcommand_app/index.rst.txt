@@ -47,6 +47,8 @@ Module Contents
    ``python my_script.py greet Alice``
    ``python my_script.py greet Bob --loud``
    ``python my_script.py addition 5 3``
+
+
    .. py:method:: command(func: CallableT) -> CallableT
                   command(func: None = None, *, name: str | None = None) -> Callable[[CallableT], CallableT]
 
@@ -59,6 +61,8 @@ Module Contents
       :param func: The function to register as a subcommand. If None, returns a
                    function to use as a decorator.
       :param name: The name of the subcommand. If None, the name of the function is used.
+
+
 
    .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[Any]] = None, sort_subcommands: bool = False) -> Any
 
@@ -83,5 +87,7 @@ Module Contents
                               suppressed.
       :param config: Sequence of config marker objects, from ``tyro.conf``.
       :param sort_subcommands: If True, sort the subcommands alphabetically by name.
+
+
 
 

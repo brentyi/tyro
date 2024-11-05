@@ -11,6 +11,8 @@
    Helpers for parsing docstrings. Used for helptext generation.
 
 
+
+
 Module Contents
 ---------------
 
@@ -29,6 +31,8 @@ Module Contents
    
    Get docstring for a field in a class.
 
+
+
 .. py:function:: get_callable_description(f: Callable) -> str
 
    
@@ -37,4 +41,6 @@ Module Contents
    Note that the ``dataclasses.dataclass`` will automatically populate **doc** based on
    the fields of the class if a docstring is not specified; this helper will ignore
    these docstrings.
+
+
 

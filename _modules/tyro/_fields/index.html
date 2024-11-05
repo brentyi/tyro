@@ -252,18 +252,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -328,19 +331,22 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">docstring_parser</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
 <span class="kn">from</span> <span class="nn">._singleton</span> <span class="kn">import</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span><span class="p">,</span> <span class="n">MISSING_SINGLETONS</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
     <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.constructors._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span>
-<span class="kn">from</span> <span class="nn">.constructors._struct_spec</span> <span class="kn">import</span> <span class="n">StructTypeInfo</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span>
+<span class="kn">from</span> <span class="nn">.constructors._struct_spec</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">StructFieldSpec</span><span class="p">,</span>
+    <span class="n">StructTypeInfo</span><span class="p">,</span>
+    <span class="n">UnsupportedStructTypeMessage</span><span class="p">,</span>
+<span class="p">)</span>
 
 <span class="n">global_context_markers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -351,7 +357,9 @@
 <span class="k">class</span> <span class="nc">FieldDefinition</span><span class="p">:</span>
     <span class="n">intern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">extern_name</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">type_or_callable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">]</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Full type, including runtime annotations.&quot;&quot;&quot;</span>
+    <span class="n">type_stripped</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
     <span class="c1"># We need to record whether defaults are from default instances to</span>
     <span class="c1"># determine if they should override the default in</span>
@@ -362,7 +370,6 @@
     <span class="n">custom_constructor</span><span class="p">:</span> <span class="nb">bool</span>
 
     <span class="n">argconf</span><span class="p">:</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfig</span>
-    <span class="n">primitive_spec</span><span class="p">:</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span>
 
     <span class="c1"># Override the name in our kwargs. Useful whenever the user-facing argument name</span>
     <span class="c1"># doesn&#39;t match the keyword expected by our callable.</span>
@@ -389,6 +396,20 @@
         <span class="n">global_context_markers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
         <span class="k">yield</span>
         <span class="n">global_context_markers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FieldDefinition.from_field_spec">
+<a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.from_field_spec">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_field_spec</span><span class="p">(</span><span class="n">field_spec</span><span class="p">:</span> <span class="n">StructFieldSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">typ</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">is_default_overridden</span><span class="p">,</span>
+            <span class="n">helptext</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
+            <span class="n">call_argname_override</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">_call_argname</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FieldDefinition.make">
@@ -440,17 +461,30 @@
             <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">helptext</span> <span class="o">=</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span>
 
-        <span class="n">_</span><span class="p">,</span> <span class="n">primitive_specs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">primitive_specs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">primitive_spec</span> <span class="o">=</span> <span class="n">primitive_specs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">primitive_spec</span> <span class="o">=</span> <span class="kc">None</span>
-
-        <span class="n">typ</span><span class="p">,</span> <span class="n">markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
+        <span class="n">type_stripped</span><span class="p">,</span> <span class="n">markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
 
         <span class="c1"># Include markers set via context manager.</span>
         <span class="k">for</span> <span class="n">context_markers</span> <span class="ow">in</span> <span class="n">global_context_markers</span><span class="p">:</span>
             <span class="n">markers</span> <span class="o">+=</span> <span class="n">context_markers</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="n">FieldDefinition</span><span class="p">(</span>
+            <span class="n">intern_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">extern_name</span><span class="o">=</span><span class="n">name</span> <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">argconf</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
+            <span class="n">type_stripped</span><span class="o">=</span><span class="n">type_stripped</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
+            <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
+            <span class="n">custom_constructor</span><span class="o">=</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">argconf</span><span class="o">=</span><span class="n">argconf</span><span class="p">,</span>
+            <span class="n">call_argname</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">call_argname_override</span> <span class="k">if</span> <span class="n">call_argname_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">with_new_type_stripped</span><span class="p">(</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">())</span>
 
         <span class="c1"># Check that the default value matches the final resolved type.</span>
         <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
@@ -459,8 +493,8 @@
             <span class="c1"># Be relatively conservative: isinstance() can be checked on non-type</span>
             <span class="c1"># types (like unions in Python &gt;=3.10), but we&#39;ll only consider single types</span>
             <span class="c1"># for now.</span>
-            <span class="nb">type</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="nb">type</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
+            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
             <span class="c1"># If a custom constructor is set, static_type may not be</span>
             <span class="c1"># matched to the annotated type.</span>
             <span class="ow">and</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
@@ -476,28 +510,27 @@
                 <span class="sa">f</span><span class="s2">&quot;but the default value </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2"> has type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
                 <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
             <span class="p">)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span><span class="n">typ</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">with_new_type_stripped</span><span class="p">(</span><span class="n">Union</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)])</span>  <span class="c1"># type: ignore</span>
 
-        <span class="n">out</span> <span class="o">=</span> <span class="n">FieldDefinition</span><span class="p">(</span>
-            <span class="n">intern_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">extern_name</span><span class="o">=</span><span class="n">name</span> <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">argconf</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">type_or_callable</span><span class="o">=</span><span class="p">(</span>
-                <span class="n">typ</span>
-                <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
-                <span class="k">else</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">()</span>
-            <span class="p">),</span>
-            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-            <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
-            <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
-            <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
-            <span class="n">custom_constructor</span><span class="o">=</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">argconf</span><span class="o">=</span><span class="n">argconf</span><span class="p">,</span>
-            <span class="n">call_argname</span><span class="o">=</span><span class="p">(</span>
-                <span class="n">call_argname_override</span> <span class="k">if</span> <span class="n">call_argname_override</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">name</span>
-            <span class="p">),</span>
-            <span class="n">primitive_spec</span><span class="o">=</span><span class="n">primitive_spec</span><span class="p">,</span>
-        <span class="p">)</span>
         <span class="k">return</span> <span class="n">out</span></div>
+
+
+<div class="viewcode-block" id="FieldDefinition.with_new_type_stripped">
+<a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.with_new_type_stripped">[docs]</a>
+    <span class="k">def</span> <span class="nf">with_new_type_stripped</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">new_type_stripped</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+            <span class="n">new_type</span> <span class="o">=</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="p">(</span><span class="n">new_type_stripped</span><span class="p">,</span> <span class="o">*</span><span class="n">get_args</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_type</span> <span class="o">=</span> <span class="n">new_type_stripped</span>
+        <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">new_type</span><span class="p">,</span>
+            <span class="n">type_stripped</span><span class="o">=</span><span class="n">new_type_stripped</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FieldDefinition.is_positional">
@@ -579,17 +612,7 @@
 
         <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="p">[</span>
-                    <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
-                        <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="n">f</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                        <span class="n">f</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                        <span class="n">f</span><span class="o">.</span><span class="n">is_default_overridden</span><span class="p">,</span>
-                        <span class="n">f</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
-                        <span class="n">call_argname_override</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">_call_argname</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">fields</span>
-                <span class="p">]</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="p">[</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">from_field_spec</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">fields</span><span class="p">]</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span><span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">set</span><span class="p">()))</span>

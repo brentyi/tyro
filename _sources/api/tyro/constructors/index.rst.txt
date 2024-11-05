@@ -3,6 +3,20 @@
 
 .. py:module:: tyro.constructors
 
+.. autoapi-nested-parse::
+
+   
+   The :mod:`tyro.constructors` submodule exposes tyro's API for defining
+   behavior for different types.
+
+   .. warning::
+   ::
+
+      This submodule exposes advanced functionality, and is not needed for the
+      majority of users.
+
+
+
 
 Package Contents
 ----------------
@@ -17,11 +31,13 @@ Package Contents
 
    There are two ways to use this class:
 
-   First, we can include it in a type signature via ``typing.Annotated``.
+   First, we can include it in a type signature via :class:`typing.Annotated`.
    This is the simplest for making local modifications to parsing behavior for
    individual fields.
 
-   Alternatively, it can be returned by a rule in a ``PrimitiveConstructorRegistry``.
+   Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
+
+
    .. py:attribute:: nargs
       :type: int | typing_extensions.Literal[*]
 
@@ -29,11 +45,15 @@ Package Contents
       Number of arguments required to construct an instance. If nargs is "*", then
       the number of arguments is variable.
 
+
+
    .. py:attribute:: metavar
       :type: str
 
       
       Metavar to display in help messages.
+
+
 
    .. py:attribute:: instance_from_str
       :type: Callable[[list[str]], T]
@@ -41,6 +61,8 @@ Package Contents
       
       Given a list of string arguments, construct an instance of the type. The
       length of the list will match the value of nargs.
+
+
 
    .. py:attribute:: is_instance
       :type: Callable[[Any], bool | typing_extensions.Literal[~]]
@@ -54,12 +76,16 @@ Package Contents
       only be used if there are no other matches. This is used for numeric tower
       support.
 
+
+
    .. py:attribute:: str_from_instance
       :type: Callable[[T], list[str]]
 
       
       Convert an instance to a list of string arguments that would construct
       the instance. This is used for help messages when a default is provided.
+
+
 
    .. py:attribute:: choices
       :type: tuple[str, Ellipsis] | None
@@ -68,11 +94,15 @@ Package Contents
       Finite set of choices for arguments.
 
 
+
+
 .. py:class:: PrimitiveTypeInfo
 
 
    
    Information used to generate constructors for primitive types.
+
+
    .. py:attribute:: type
       :type: tyro._typing.TypeForm
 
@@ -81,17 +111,23 @@ Package Contents
       variables/parameters will have been resolved and runtime annotations
       (typing.Annotated) will have been stripped.
 
+
+
    .. py:attribute:: type_origin
       :type: tyro._typing.TypeForm | None
 
       
       The output of get_origin() on the static type.
 
+
+
    .. py:attribute:: markers
       :type: set[tyro.conf._markers.Marker]
 
       
       Set of tyro markers used to configure this field.
+
+
 
    .. py:method:: make(raw_annotation: tyro._typing.TypeForm | Callable, parent_markers: set[tyro.conf._markers.Marker]) -> PrimitiveTypeInfo
       :staticmethod:
@@ -105,6 +141,8 @@ Package Contents
 
    
    Exception raised when an unsupported type annotation is detected.
+
+
 
 .. py:class:: ConstructorRegistry
 
@@ -143,11 +181,18 @@ Package Contents
 
       with registry:
           tyro.cli(...)
+
+
    .. py:method:: primitive_rule(rule: PrimitiveSpecRule) -> PrimitiveSpecRule
 
       
       Define a rule for constructing a primitive type from a string. The
       most recently added rule will be applied first.
+
+      Custom primitive rules will take precedence over both default primitive
+      rules and struct rules
+
+
 
    .. py:method:: struct_rule(rule: StructSpecRule) -> StructSpecRule
 
@@ -155,16 +200,22 @@ Package Contents
       Define a rule for constructing a primitive type from a string. The
       most recently added rule will be applied first.
 
-   .. py:method:: get_primitive_spec(type_info: tyro.constructors._primitive_spec.PrimitiveTypeInfo) -> tyro.constructors._primitive_spec.PrimitiveConstructorSpec
+
+
+   .. py:method:: get_primitive_spec(type_info: tyro.constructors._primitive_spec.PrimitiveTypeInfo, rule_mode: typing_extensions.Literal[default, custom, all] = 'all') -> tyro.constructors._primitive_spec.PrimitiveConstructorSpec
 
       
       Get a constructor specification for a given type.
+
+
 
    .. py:method:: get_struct_spec(type_info: tyro.constructors._struct_spec.StructTypeInfo) -> tyro.constructors._struct_spec.StructConstructorSpec | None
 
       
       Get a constructor specification for a given type. Returns ``None`` if
       unsuccessful.
+
+
 
    .. py:method:: __enter__() -> None
 
@@ -176,15 +227,33 @@ Package Contents
 .. py:class:: StructConstructorSpec
 
 
+   
+   Specification for a struct type, which is broken down into multiple
+   fields.
+
+   Each struct type is instantiated by calling an ``instantiate(**kwargs)``
+   function with keyword a set of keyword arguments.
+
+   Unlike ``PrimitiveConstructorSpec``\ , there is only one way to use this class.
+   It must be returned by a rule in ``ConstructorRegistry``.
+
+
    .. py:attribute:: instantiate
       :type: Callable[Ellipsis, Any]
 
       
+      Function to call to instantiate the struct.
+
+
 
    .. py:attribute:: fields
       :type: tuple[StructFieldSpec, Ellipsis]
 
       
+      Fields used to construct the callable. Each field is used as a keyword
+      argument for the ``instantiate(**kwargs)`` function.
+
+
 
 
 .. py:class:: StructFieldSpec
@@ -192,30 +261,50 @@ Package Contents
 
    
    Behavior specification for a single field in our callable.
+
+
    .. py:attribute:: name
       :type: str
 
       
+      The name of the field. This will be used as a keyword argument for the
+      struct's associated ``instantiate(**kwargs)`` function.
+
+
 
    .. py:attribute:: type
       :type: tyro._typing.TypeForm
 
       
+      The type of the field. Can be either a primitive or a nested struct type.
+
+
 
    .. py:attribute:: default
       :type: Any
 
       
+      The default value of the field.
+
+
 
    .. py:attribute:: is_default_overridden
       :type: bool
+      :value: False
 
       
+      Whether the default value was overridden by the default instance. Should
+      be set to False if the default value was assigned by the field itself.
+
+
 
    .. py:attribute:: helptext
       :type: str | None
 
       
+      Helpjext for the field.
+
+
 
 
 .. py:class:: StructTypeInfo
@@ -223,6 +312,8 @@ Package Contents
 
    
    Information used to generate constructors for primitive types.
+
+
    .. py:attribute:: type
       :type: tyro._typing.TypeForm
 

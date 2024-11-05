@@ -11,6 +11,8 @@
    Core public API.
 
 
+
+
 Module Contents
 ---------------
 
@@ -102,6 +104,8 @@ Module Contents
              equivalent. If ``return_unknown_args`` is True, returns a tuple of the output of
              ``f(...)`` and a list of unknown arguments.
 
+
+
 .. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
                  get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
 
@@ -111,4 +115,6 @@ Module Contents
 
    For tab completion, we recommend using ``tyro.cli()``\ 's built-in ``--tyro-write-completion``
    flag.
+
+
 

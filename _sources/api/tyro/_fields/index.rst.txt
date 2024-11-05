@@ -12,6 +12,8 @@
    defaults, from general callables.
 
 
+
+
 Module Contents
 ---------------
 
@@ -34,8 +36,16 @@ Module Contents
 
       
 
-   .. py:attribute:: type_or_callable
-      :type: Union[tyro._typing.TypeForm[Any], Callable]
+   .. py:attribute:: type
+      :type: tyro._typing.TypeForm[Any] | Callable
+
+      
+      Full type, including runtime annotations.
+
+
+
+   .. py:attribute:: type_stripped
+      :type: tyro._typing.TypeForm[Any] | Callable
 
       
 
@@ -69,11 +79,6 @@ Module Contents
 
       
 
-   .. py:attribute:: primitive_spec
-      :type: tyro.constructors._primitive_spec.PrimitiveConstructorSpec | None
-
-      
-
    .. py:attribute:: call_argname
       :type: Any
 
@@ -89,8 +94,17 @@ Module Contents
       Context for setting markers on fields. All fields created within the
       context will have the specified markers.
 
+
+
+   .. py:method:: from_field_spec(field_spec: tyro.constructors._struct_spec.StructFieldSpec) -> FieldDefinition
+      :staticmethod:
+
+
    .. py:method:: make(name: str, typ: Union[tyro._typing.TypeForm[Any], Callable], default: Any, is_default_from_default_instance: bool, helptext: Optional[str], call_argname_override: Optional[Any] = None)
       :staticmethod:
+
+
+   .. py:method:: with_new_type_stripped(new_type_stripped: tyro._typing.TypeForm[Any] | Callable) -> FieldDefinition
 
 
    .. py:method:: is_positional() -> bool
@@ -98,10 +112,14 @@ Module Contents
       
       Returns True if the argument should be positional in the commandline.
 
+
+
    .. py:method:: is_positional_call() -> bool
 
       
       Returns True if the argument should be positional in underlying Python call.
+
+
 
 
 .. py:function:: is_struct_type(typ: Union[tyro._typing.TypeForm[Any], Callable], default_instance: Any) -> bool
@@ -114,6 +132,8 @@ Module Contents
    TODO: we should come up with a better name than 'struct type', which is a little bit
    misleading.
 
+
+
 .. py:function:: field_list_from_type_or_callable(f: Union[Callable, tyro._typing.TypeForm[Any]], default_instance: Any, support_single_arg_types: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
 
    
@@ -122,4 +142,6 @@ Module Contents
 
    :returns: The type that ``f`` is resolved as.
              A list of field definitions.
+
+
 

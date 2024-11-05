@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -371,6 +374,8 @@ command-line arguments.</p>
 <span class="sig-name descname"><span class="pre">primitive_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PrimitiveSpecRule</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PrimitiveSpecRule</span></span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.primitive_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._registry.ConstructorRegistry.primitive_rule" title="Link to this definition">¶</a></dt>
 <dd><p>Define a rule for constructing a primitive type from a string. The
 most recently added rule will be applied first.</p>
+<p>Custom primitive rules will take precedence over both default primitive
+rules and struct rules</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>rule</strong> (<em>PrimitiveSpecRule</em>)</p>
@@ -398,11 +403,14 @@ most recently added rule will be applied first.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors._registry.ConstructorRegistry.get_primitive_spec">
-<span class="sig-name descname"><span class="pre">get_primitive_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo" title="tyro.constructors._primitive_spec.PrimitiveTypeInfo"><span class="pre">tyro.constructors._primitive_spec.PrimitiveTypeInfo</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec" title="tyro.constructors._primitive_spec.PrimitiveConstructorSpec"><span class="pre">tyro.constructors._primitive_spec.PrimitiveConstructorSpec</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.get_primitive_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._registry.ConstructorRegistry.get_primitive_spec" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">get_primitive_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo" title="tyro.constructors._primitive_spec.PrimitiveTypeInfo"><span class="pre">tyro.constructors._primitive_spec.PrimitiveTypeInfo</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">rule_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">typing_extensions.Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">default</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">custom</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">all</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'all'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec" title="tyro.constructors._primitive_spec.PrimitiveConstructorSpec"><span class="pre">tyro.constructors._primitive_spec.PrimitiveConstructorSpec</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.get_primitive_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._registry.ConstructorRegistry.get_primitive_spec" title="Link to this definition">¶</a></dt>
 <dd><p>Get a constructor specification for a given type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>type_info</strong> (<a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo" title="tyro.constructors._primitive_spec.PrimitiveTypeInfo"><em>tyro.constructors._primitive_spec.PrimitiveTypeInfo</em></a>)</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>type_info</strong> (<a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveTypeInfo" title="tyro.constructors._primitive_spec.PrimitiveTypeInfo"><em>tyro.constructors._primitive_spec.PrimitiveTypeInfo</em></a>)</p></li>
+<li><p><strong>rule_mode</strong> (<em>typing_extensions.Literal</em><em>[</em><em>default</em><em>, </em><em>custom</em><em>, </em><em>all</em><em>]</em>)</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../_primitive_spec/#tyro.constructors._primitive_spec.PrimitiveConstructorSpec" title="tyro.constructors._primitive_spec.PrimitiveConstructorSpec">tyro.constructors._primitive_spec.PrimitiveConstructorSpec</a></p>

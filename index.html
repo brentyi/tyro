@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -323,40 +326,61 @@
           <section id="tyro">
 <h1>tyro<a class="headerlink" href="#tyro" title="Link to this heading">¶</a></h1>
 <p><a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Build status icon" src="https://github.com/brentyi/tyro/actions/workflows/build.yml/badge.svg" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Lint status icon" src="https://github.com/brentyi/tyro/actions/workflows/ruff.yml/badge.svg" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Mypy status icon" src="https://github.com/brentyi/tyro/actions/workflows/mypy.yml/badge.svg" /></a> <a class="reference external" href="https://github.com/brentyi/tyro"><img alt="Mypy status icon" src="https://github.com/brentyi/tyro/actions/workflows/pyright.yml/badge.svg" /></a> <a class="reference external" href="https://codecov.io/gh/brentyi/tyro"><img alt="Test coverage status icon" src="https://codecov.io/gh/brentyi/tyro/branch/main/graph/badge.svg" /></a> <a class="reference external" href="https://pypi.org/project/tyro/"><img alt="Version icon" src="https://img.shields.io/pypi/pyversions/tyro" /></a></p>
-<p><code class="code docutils literal notranslate"><span class="pre">tyro</span></code> is a tool for generating command-line interfaces and configuration
-objects in Python.</p>
-<p>Our core API, <a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>,</p>
-<ul class="simple">
-<li><p><strong>Generates CLI interfaces</strong> from a comprehensive set of Python type
-constructs.</p></li>
-<li><p><strong>Populates helptext automatically</strong> from defaults, annotations, and
-docstrings.</p></li>
-<li><p><strong>Understands nesting</strong> of <code class="docutils literal notranslate"><span class="pre">dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, and <code class="docutils literal notranslate"><span class="pre">attrs</span></code> structures.</p></li>
-<li><p><strong>Prioritizes static analysis</strong> for type checking and autocompletion with
-tools like
-<a class="reference external" href="https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance">Pylance</a>,
-<a class="reference external" href="https://github.com/microsoft/pyright">Pyright</a>, and
-<a class="reference external" href="https://github.com/python/mypy">mypy</a>.</p></li>
-</ul>
-<p>For advanced users, it also supports:</p>
-<ul class="simple">
-<li><p><strong>Subcommands</strong>, as well as choosing between and overriding values in
-configuration objects.</p></li>
-<li><p><strong>Completion script generation</strong> for <code class="docutils literal notranslate"><span class="pre">bash</span></code>, <code class="docutils literal notranslate"><span class="pre">zsh</span></code>, and <code class="docutils literal notranslate"><span class="pre">tcsh</span></code>.</p></li>
-<li><p><strong>Fine-grained configuration</strong> via <a class="reference external" href="https://peps.python.org/pep-0593/">PEP
-593</a> annotations (<code class="docutils literal notranslate"><span class="pre">tyro.conf.*</span></code>).</p></li>
-</ul>
-<p>To get started, we recommend browsing the examples to the left.</p>
+<p><a class="reference internal" href="api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> is a tool for generating CLI
+interfaces.</p>
+<p>We can define configurable scripts using functions:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;A command-line interface defined using a function signature.</span>
+
+<span class="sd">Usage: python script_name.py --foo INT [--bar STR]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">tyro</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+    <span class="n">foo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">bar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>  <span class="c1"># Main body of a script.</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># Generate a CLI and call `main` with its two arguments: `foo` and `bar`.</span>
+    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Or instantiate config objects defined using tools like <code class="docutils literal notranslate"><span class="pre">dataclasses</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, and <code class="docutils literal notranslate"><span class="pre">attrs</span></code>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;A command-line interface defined using a class signature.</span>
+
+<span class="sd">Usage: python script_name.py --foo INT [--bar STR]</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span> <span class="nn">tyro</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+    <span class="n">foo</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="n">bar</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="c1"># Generate a CLI and instantiate `Config` with its two arguments: `foo` and `bar`.</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">)</span>
+
+    <span class="c1"># Rest of script.</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">Config</span><span class="p">)</span>  <span class="c1"># Should pass.</span>
+</pre></div>
+</div>
+<p>Other features include helptext generation, nested structures, subcommands, and
+shell completion.</p>
 <section id="why-tyro">
 <h2>Why <code class="docutils literal notranslate"><span class="pre">tyro</span></code>?<a class="headerlink" href="#why-tyro" title="Link to this heading">¶</a></h2>
 <ol class="arabic">
-<li><p><strong>Strong typing.</strong></p>
+<li><p><strong>Types.</strong></p>
 <p>Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
 arguments populated by <code class="docutils literal notranslate"><span class="pre">tyro</span></code> benefit from IDE and language server-supported
 operations — think tab completion, rename, jump-to-def, docstrings on hover —
 as well as static checking tools like <code class="docutils literal notranslate"><span class="pre">pyright</span></code> and <code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p>
 </li>
-<li><p><strong>Minimal overhead.</strong></p>
+<li><p><strong>Define things once.</strong></p>
 <p>Standard Python type annotations, docstrings, and default values are parsed
 to automatically generate command-line interfaces with informative helptext.</p>
 <p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> works seamlessly with tools you already use: examples are included for
@@ -371,12 +395,10 @@ and more.</p>
 distribute definitions, defaults, and documentation of configurable fields
 across modules or source files.</p>
 </li>
-<li><p><strong>Tab completion.</strong></p>
-<p>By extending <a class="reference external" href="https://github.com/iterative/shtab">shtab</a>, <code class="docutils literal notranslate"><span class="pre">tyro</span></code>
-automatically generates tab completion scripts for bash, zsh, and tcsh.</p>
-</li>
 </ol>
 <!-- prettier-ignore-start --><div class="toctree-wrapper compound">
+</div>
+<div class="toctree-wrapper compound">
 </div>
 <div class="toctree-wrapper compound">
 </div>

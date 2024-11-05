@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -344,18 +347,15 @@
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveTypeInfo">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors._primitive_spec.</span></span><span class="sig-name descname"><span class="pre">PrimitiveTypeInfo</span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_primitive_spec/#PrimitiveTypeInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo" title="Link to this definition">¶</a></dt>
-<dd><p>Information used to generate constructors for primitive types.
-.. py:attribute:: type</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tyro._typing.TypeForm</p>
-</dd>
-</dl>
-<p>Annotated field type. Forward references, aliases, and type
+<dd><p>Information used to generate constructors for primitive types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveTypeInfo.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo.type" title="Link to this definition">¶</a></dt>
+<dd><p>Annotated field type. Forward references, aliases, and type
 variables/parameters will have been resolved and runtime annotations
 (typing.Annotated) will have been stripped.</p>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveTypeInfo.type_origin">
 <span class="sig-name descname"><span class="pre">type_origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo.type_origin" title="Link to this definition">¶</a></dt>
@@ -392,20 +392,17 @@ variables/parameters will have been resolved and runtime annotations
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Generic</span></code>[<a class="reference internal" href="#tyro.constructors._primitive_spec.T" title="tyro.constructors._primitive_spec.T"><code class="xref py py-obj docutils literal notranslate"><span class="pre">T</span></code></a>]</p>
 <p>Specification for constructing a primitive type from a string.</p>
 <p>There are two ways to use this class:</p>
-<p>First, we can include it in a type signature via <code class="docutils literal notranslate"><span class="pre">typing.Annotated</span></code>.
+<p>First, we can include it in a type signature via <code class="xref py py-class docutils literal notranslate"><span class="pre">typing.Annotated</span></code>.
 This is the simplest for making local modifications to parsing behavior for
 individual fields.</p>
-<p>Alternatively, it can be returned by a rule in a <code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorRegistry</span></code>.
-.. py:attribute:: nargs</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>int | typing_extensions.Literal[*]</p>
-</dd>
-</dl>
-<p>Number of arguments required to construct an instance. If nargs is “*”, then
+<p>Alternatively, it can be returned by a rule in a <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstructorRegistry</span></code>.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs">
+<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">typing_extensions.Literal[*]</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs" title="Link to this definition">¶</a></dt>
+<dd><p>Number of arguments required to construct an instance. If nargs is “*”, then
 the number of arguments is variable.</p>
-</div></blockquote>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveConstructorSpec.metavar">
 <span class="sig-name descname"><span class="pre">metavar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.metavar" title="Link to this definition">¶</a></dt>
@@ -512,12 +509,14 @@ the instance. This is used for help messages when a default is provided.</p>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError"><code class="docutils literal notranslate"><span class="pre">UnsupportedTypeAnnotationError</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.T"><code class="docutils literal notranslate"><span class="pre">T</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo"><code class="docutils literal notranslate"><span class="pre">PrimitiveTypeInfo</span></code></a><ul>
+<li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo.type"><code class="docutils literal notranslate"><span class="pre">PrimitiveTypeInfo.type</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo.type_origin"><code class="docutils literal notranslate"><span class="pre">PrimitiveTypeInfo.type_origin</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo.markers"><code class="docutils literal notranslate"><span class="pre">PrimitiveTypeInfo.markers</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo.make"><code class="docutils literal notranslate"><span class="pre">PrimitiveTypeInfo.make()</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec</span></code></a><ul>
+<li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec.nargs</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.metavar"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec.metavar</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.instance_from_str"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec.instance_from_str</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.is_instance"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec.is_instance</span></code></a></li>

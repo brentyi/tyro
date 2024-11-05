@@ -12,6 +12,8 @@
    namespaces.
 
 
+
+
 Module Contents
 ---------------
 
@@ -23,6 +25,8 @@ Module Contents
    
    Exception raised when instantiation fail; this typically means that values from
    the CLI are invalid.
+
+
    .. py:attribute:: message
       :type: str
 
@@ -49,4 +53,6 @@ Module Contents
    We return a ``Callable[[], OutT]`` instead of ``T`` directly for aesthetic
    reasons; it lets use reduce layers in stack traces for errors from
    functions passed to ``tyro``.
+
+
 

@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -418,8 +421,12 @@ still considered an implementation detail.)</p>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Formatter for generating usage messages and argument help strings.</p>
 <p>Only the name of this class is considered a public API. All the methods
-provided by the class are considered an implementation detail.
-.. py:method:: start_section(heading)</p>
+provided by the class are considered an implementation detail.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.start_section">
+<span class="sig-name descname"><span class="pre">start_section</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">heading</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.start_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.start_section" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._argparse.HelpFormatter.end_section">
 <span class="sig-name descname"><span class="pre">end_section</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#HelpFormatter.end_section"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.HelpFormatter.end_section" title="Link to this definition">¶</a></dt>
@@ -641,11 +648,13 @@ ArgumentParser add_argument() method.</p>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">_AttributeHolder</span></code></p>
 <p>Simple object for storing attributes.</p>
 <p>Implements equality by attribute names and values, and provides a simple
-string representation.
-.. py:method:: __eq__(other)</p>
-<blockquote>
-<div><p>Return self==value.</p>
-</div></blockquote>
+string representation.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="tyro._argparse.Namespace.__eq__">
+<span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#Namespace.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.Namespace.__eq__" title="Link to this definition">¶</a></dt>
+<dd><p>Return self==value.</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._argparse.Namespace.__contains__">
 <span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/tyro/_argparse/#Namespace.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._argparse.Namespace.__contains__" title="Link to this definition">¶</a></dt>
@@ -800,6 +809,7 @@ should either exit or raise an exception.</p>
 <li><a class="reference internal" href="#tyro._argparse.PARSER"><code class="docutils literal notranslate"><span class="pre">PARSER</span></code></a></li>
 <li><a class="reference internal" href="#tyro._argparse.REMAINDER"><code class="docutils literal notranslate"><span class="pre">REMAINDER</span></code></a></li>
 <li><a class="reference internal" href="#tyro._argparse.HelpFormatter"><code class="docutils literal notranslate"><span class="pre">HelpFormatter</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.HelpFormatter.start_section"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.start_section()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._argparse.HelpFormatter.end_section"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.end_section()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._argparse.HelpFormatter.add_text"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.add_text()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._argparse.HelpFormatter.add_usage"><code class="docutils literal notranslate"><span class="pre">HelpFormatter.add_usage()</span></code></a></li>
@@ -828,6 +838,7 @@ should either exit or raise an exception.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._argparse.Namespace"><code class="docutils literal notranslate"><span class="pre">Namespace</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._argparse.Namespace.__eq__"><code class="docutils literal notranslate"><span class="pre">Namespace.__eq__()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._argparse.Namespace.__contains__"><code class="docutils literal notranslate"><span class="pre">Namespace.__contains__()</span></code></a></li>
 </ul>
 </li>

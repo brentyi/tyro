@@ -11,6 +11,8 @@
    Type-safe, human-readable serialization helpers for dataclasses.
 
 
+
+
 Module Contents
 ---------------
 
@@ -56,6 +58,8 @@ Module Contents
 
    :returns: Instantiated dataclass.
 
+
+
 .. py:function:: to_yaml(instance: Any) -> str
 
    
@@ -77,4 +81,6 @@ Module Contents
    :param instance: Dataclass instance to serialize.
 
    :returns: YAML string.
+
+
 

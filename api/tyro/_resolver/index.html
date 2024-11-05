@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/05_generics/">Generic Types</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/06_generics_py312/">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../examples/04_additional/17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -343,15 +346,12 @@ Python. types.UnionType was added in Python 3.10, and is created when the <code 
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">TyroTypeAliasBreadCrumb</span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#TyroTypeAliasBreadCrumb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.TyroTypeAliasBreadCrumb" title="Link to this definition">¶</a></dt>
 <dd><p>A breadcrumb we can leave behind to track names of type aliases and
 <code class="docutils literal notranslate"><span class="pre">NewType</span></code> types. We can use type alias names to auto-populate
-subcommands.
-.. py:attribute:: name</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
-</div></blockquote>
+subcommands.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._resolver.TyroTypeAliasBreadCrumb.name">
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tyro._resolver.TyroTypeAliasBreadCrumb.name" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py function">
@@ -733,7 +733,10 @@ and generics (list[str]) in older versions of Python.</p>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
 <li><a class="reference internal" href="#tyro._resolver.UnionType"><code class="docutils literal notranslate"><span class="pre">UnionType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.TypeOrCallable"><code class="docutils literal notranslate"><span class="pre">TypeOrCallable</span></code></a></li>
-<li><a class="reference internal" href="#tyro._resolver.TyroTypeAliasBreadCrumb"><code class="docutils literal notranslate"><span class="pre">TyroTypeAliasBreadCrumb</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.TyroTypeAliasBreadCrumb"><code class="docutils literal notranslate"><span class="pre">TyroTypeAliasBreadCrumb</span></code></a><ul>
+<li><a class="reference internal" href="#tyro._resolver.TyroTypeAliasBreadCrumb.name"><code class="docutils literal notranslate"><span class="pre">TyroTypeAliasBreadCrumb.name</span></code></a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#tyro._resolver.unwrap_origin_strip_extras"><code class="docutils literal notranslate"><span class="pre">unwrap_origin_strip_extras()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.is_dataclass"><code class="docutils literal notranslate"><span class="pre">is_dataclass()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.resolved_fields"><code class="docutils literal notranslate"><span class="pre">resolved_fields()</span></code></a></li>

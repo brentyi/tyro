@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../../../genindex/" /><link rel="search" title="Search" href="../../../search/" /><link rel="next" title="Configuration via typing.Annotated[]" href="../07_conf/" /><link rel="prev" title="Generic Types" href="../05_generics/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Generic Types (Python 3.12+ syntax) - tyro</title>
+        <title>Generic Types (Python 3.12+) - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b20cc3f5" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
@@ -253,18 +253,21 @@
 <li class="toctree-l1"><a class="reference internal" href="../03_tuples/">Tuples</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../04_classes/">Instantiating Classes</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../05_generics/">Generic Types</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Generic Types (Python 3.12+ syntax)</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Generic Types (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../07_conf/">Configuration via typing.Annotated[]</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../08_pydantic/">Pydantic Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../09_attrs/">Attrs Integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../10_flax/">JAX/Flax Integration</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../11_custom_constructors/">Custom Constructors</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../12_custom_constructors_registry/">Custom Constructors (Registry)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../11_aliases/">Argument Aliases</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../12_type_statement/">Type Aliases (Python 3.12+)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../13_counters/">Counters</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../14_suppress_console_outputs/">Cleaner Console Outputs for Scripts with Multiple Workers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../15_decorator_subcommands/">Decorator-based Subcommands</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../16_type_statement/">Type Aliases (Python 3.12+)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../17_aliases/">Argument Aliases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Custom Constructors</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../05_custom_constructors/01_primitive_annotation/">Custom Primitive</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../05_custom_constructors/02_primitive_registry/">Custom Primitive (Registry)</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Notes</span></p>
 <ul>
@@ -320,8 +323,8 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="generic-types-python-3-12-syntax">
-<h1>Generic Types (Python 3.12+ syntax)<a class="headerlink" href="#generic-types-python-3-12-syntax" title="Link to this heading">¶</a></h1>
+          <section id="generic-types-python-3-12">
+<h1>Generic Types (Python 3.12+)<a class="headerlink" href="#generic-types-python-3-12" title="Link to this heading">¶</a></h1>
 <p>Example of parsing for generic dataclasses using syntax introduced in Python
 3.12 (<a class="reference external" href="https://peps.python.org/pep-0695/">PEP 695</a>).</p>
 <div class="admonition warning">

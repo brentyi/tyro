@@ -11,6 +11,8 @@
    Utilities and constants for working with strings.
 
 
+
+
 Module Contents
 ---------------
 
@@ -31,15 +33,21 @@ Module Contents
    Context for setting the delimeter. Determines if ``field_a`` is populated as
    ``--field-a`` or ``--field_a``. Not thread-safe.
 
+
+
 .. py:function:: get_delimeter() -> typing_extensions.Literal[-, _]
 
    
    Get delimeter used to separate words.
 
+
+
 .. py:function:: replace_delimeter_in_part(p: str) -> str
 
    
    Replace hyphens with underscores (or vice versa) except when at the start.
+
+
 
 .. py:function:: make_field_name(parts: Sequence[str]) -> str
 
@@ -50,6 +58,8 @@ Module Contents
    ('parents', '1', '_child_node') => 'parents.1._child-node'
    ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
 
+
+
 .. py:function:: make_subparser_dest(name: str) -> str
 
 
@@ -57,6 +67,8 @@ Module Contents
 
    
    Same as textwrap.dedent, but ignores the first line.
+
+
 
 .. py:function:: hyphen_separated_from_camel_case(name: str) -> str
 
@@ -86,6 +98,8 @@ Module Contents
 
    The curly brackets are unfortunately overloaded but alternatives all interfere with
    argparse internals.
+
+
 
 .. py:function:: remove_single_line_breaks(helptext: str) -> str
 

@@ -23,6 +23,8 @@ Module Contents
    very strong assumption of not only immutability, but that unhashable types don't go
    out of scope.
 
+
+
 .. py:function:: unsafe_hash(obj: Any) -> Any
 
 

@@ -56,10 +56,12 @@ Module Contents
                        is in a nested structure.
    :param constructor: A constructor type or function. This will be used in
                        place of the argument's type for parsing arguments. For more
-                       configurability, see :module:`tyro.constructors`.
+                       configurability, see :mod:`tyro.constructors`.
    :param constructor_factory: A function that returns a constructor type. This
                                will be used in place of the argument's type for parsing arguments.
-                               For more configurability, see :module:`tyro.constructors`.
+                               For more configurability, see :mod:`tyro.constructors`.
+
+
 
 .. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
                  arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
@@ -95,10 +97,12 @@ Module Contents
                        it is in a nested structure. Arguments are prefixed by default.
    :param constructor: A constructor type or function. This will be used in
                        place of the argument's type for parsing arguments. For more
-                       configurability, see :module:`tyro.constructors`.
+                       configurability, see :mod:`tyro.constructors`.
    :param constructor_factory: A function that returns a constructor type. This
                                will be used in place of the argument's type for parsing arguments.
-                               For more configurability, see :module:`tyro.constructors`.
+                               For more configurability, see :mod:`tyro.constructors`.
 
    :returns: Object to attach via ``typing.Annotated[]``.
+
+
 

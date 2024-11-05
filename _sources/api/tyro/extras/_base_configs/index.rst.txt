@@ -57,6 +57,8 @@ Module Contents
                    (description, config object).
    :param args: Optional arguments to pass to the CLI.
 
+
+
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> tyro._typing.TypeForm[T]
 
    
@@ -110,4 +112,6 @@ Module Contents
    :param prefix_names: Whether to prefix subcommand names.
 
    :returns: A subcommand type, which can be passed to :func:`tyro.cli`.
+
+
 

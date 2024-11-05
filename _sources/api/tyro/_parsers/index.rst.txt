@@ -11,6 +11,8 @@
    Interface for generating ``argparse.ArgumentParser()`` definitions from callables.
 
 
+
+
 Module Contents
 ---------------
 
@@ -23,6 +25,8 @@ Module Contents
 
    
    Each parser contains a list of arguments and optionally some subparsers.
+
+
    .. py:attribute:: f
       :type: Callable
 
@@ -89,10 +93,14 @@ Module Contents
       
       Create a parser definition from a callable or type.
 
+
+
    .. py:method:: apply(parser: tyro._argparse.ArgumentParser) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
 
       
       Create defined arguments and subparsers.
+
+
 
    .. py:method:: apply_args(parser: tyro._argparse.ArgumentParser, parent: Optional[ParserSpecification] = None) -> None
 
@@ -100,16 +108,22 @@ Module Contents
       Create defined arguments and subparsers.
 
 
+
+
 .. py:function:: handle_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str, subcommand_prefix: str) -> Union[tyro._arguments.ArgumentDefinition, ParserSpecification, SubparsersSpecification]
 
    
    Determine what to do with a single field definition.
+
+
 
 .. py:class:: SubparsersSpecification
 
 
    
    Structure for defining subparsers. Each subparser is a parser with a name.
+
+
    .. py:attribute:: name
       :type: str
 
