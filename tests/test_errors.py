@@ -572,7 +572,7 @@ def test_value_error_subcommand() -> None:
 def test_wrong_annotation() -> None:
     @dataclasses.dataclass
     class Args:
-        x: dict | int = None  # type: ignore
+        x: Union[dict, int] = None  # type: ignore
 
     with pytest.warns(UserWarning):
         assert tyro.cli(Args, args=[]).x is None
