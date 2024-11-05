@@ -947,13 +947,13 @@ def test_time_parsing_harder_format():
 def test_numeric_tower() -> None:
     @dataclasses.dataclass(frozen=True)
     class NumericTower:
-        a: complex | str = 3.0
-        b: bytearray | str = dataclasses.field(
+        a: Union[complex, str] = 3.0
+        b: Union[bytearray, str] = dataclasses.field(
             default_factory=lambda: bytearray(b"123")
         )
-        c: complex | str = True
-        d: int | complex = False
-        e: float | str = 3
+        c: Union[complex, str] = True
+        d: Union[int, complex] = False
+        e: Union[float, str] = 3
 
     assert tyro.cli(NumericTower, args=[]) == NumericTower(3.0)
     assert tyro.cli(NumericTower, args="--a 1+3j".split(" ")) == NumericTower(1 + 3j)
