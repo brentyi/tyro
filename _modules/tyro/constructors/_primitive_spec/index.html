@@ -426,10 +426,15 @@
     <span class="n">instance_from_str</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">T</span><span class="p">]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a list of string arguments, construct an instance of the type. The</span>
 <span class="sd">    length of the list will match the value of nargs.&quot;&quot;&quot;</span>
-    <span class="n">is_instance</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span><span class="p">]</span>
+    <span class="n">is_instance</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">],</span> <span class="nb">bool</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;~&quot;</span><span class="p">]]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Given an object instance, does it match this primitive type? This is</span>
 <span class="sd">    used for specific help messages when both a union type is present and a</span>
-<span class="sd">    default is provided.&quot;&quot;&quot;</span>
+<span class="sd">    default is provided.</span>
+
+<span class="sd">    Can return &quot;~&quot; to signify that an instance is a &quot;fuzzy&quot; match, and should</span>
+<span class="sd">    only be used if there are no other matches. This is used for numeric tower</span>
+<span class="sd">    support.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">str_from_instance</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an instance to a list of string arguments that would construct</span>
 <span class="sd">    the instance. This is used for help messages when a default is provided.&quot;&quot;&quot;</span>
@@ -454,11 +459,12 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="s2">&quot;`Any` is not a parsable type.&quot;</span><span class="p">)</span>
 
-    <span class="c1"># HACK: this is for code that uses `tyro.conf.arg(constructor=json.loads)`.</span>
-    <span class="c1"># We&#39;re going to deprecate this syntax (the constructor= argument in</span>
-    <span class="c1"># tyro.conf.arg), but there is code that lives in the wild that relies</span>
-    <span class="c1"># on the behavior so we&#39;ll do our best not to break it.</span>
-    <span class="n">vanilla_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">)</span>
+    <span class="c1"># HACK (json.loads): this is for code that uses</span>
+    <span class="c1"># `tyro.conf.arg(constructor=json.loads)`. We&#39;re going to deprecate this</span>
+    <span class="c1"># syntax (the constructor= argument in tyro.conf.arg), but there is code</span>
+    <span class="c1"># that lives in the wild that relies on the behavior so we&#39;ll do our best</span>
+    <span class="c1"># not to break it.</span>
+    <span class="n">vanilla_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">basics_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -472,10 +478,11 @@
                 <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="nb">bytes</span>
                 <span class="k">else</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="p">),</span>
-            <span class="c1"># Numeric tower in Python is weird...</span>
-            <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span>
-            <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="nb">float</span>
-            <span class="k">else</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
+            <span class="c1"># issubclass(type(x), y) here is preferable over isinstance(x, y)</span>
+            <span class="c1"># due to quirks in the numeric tower.</span>
+            <span class="n">is_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">isinstance_with_fuzzy_numeric_tower</span><span class="p">(</span>
+                <span class="n">x</span><span class="p">,</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span>
+            <span class="p">),</span>
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
         <span class="p">)</span>
 
@@ -912,7 +919,7 @@
 
         <span class="c1"># General unions, eg Union[int, bool]. We&#39;ll try to convert these from left to</span>
         <span class="c1"># right.</span>
-        <span class="n">option_specs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">option_specs</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PrimitiveConstructorSpec</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">choices</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">()</span>
         <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
@@ -976,9 +983,18 @@
             <span class="p">)</span>
 
         <span class="k">def</span> <span class="nf">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+            <span class="n">fuzzy_match</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">option_spec</span> <span class="ow">in</span> <span class="n">option_specs</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">):</span>
+                <span class="n">is_instance</span> <span class="o">=</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">is_instance</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">is_instance</span> <span class="o">==</span> <span class="s2">&quot;~&quot;</span><span class="p">:</span>
+                    <span class="n">fuzzy_match</span> <span class="o">=</span> <span class="n">option_spec</span>
+
+            <span class="c1"># If we get here, we have a fuzzy match.</span>
+            <span class="k">if</span> <span class="n">fuzzy_match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">fuzzy_match</span><span class="o">.</span><span class="n">str_from_instance</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+
             <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;could not match default value </span><span class="si">{</span><span class="n">instance</span><span class="si">}</span><span class="s2"> with any types in union </span><span class="si">{</span><span class="n">options</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">return</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">(</span>

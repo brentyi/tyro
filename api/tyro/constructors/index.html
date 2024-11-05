@@ -359,10 +359,13 @@ length of the list will match the value of nargs.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveConstructorSpec.is_instance">
-<span class="sig-name descname"><span class="pre">is_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.is_instance" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable[[Any],</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">typing_extensions.Literal[~]]</span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.is_instance" title="Link to this definition">¶</a></dt>
 <dd><p>Given an object instance, does it match this primitive type? This is
 used for specific help messages when both a union type is present and a
 default is provided.</p>
+<p>Can return “~” to signify that an instance is a “fuzzy” match, and should
+only be used if there are no other matches. This is used for numeric tower
+support.</p>
 </dd></dl>
 
 <dl class="py attribute">

@@ -334,6 +334,7 @@
     <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">Set</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Type</span><span class="p">,</span>
     <span class="n">TypeVar</span><span class="p">,</span>
     <span class="n">Union</span><span class="p">,</span>
     <span class="n">cast</span><span class="p">,</span>
@@ -842,7 +843,8 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options_unwrapped</span>
+            <span class="n">isinstance_with_fuzzy_numeric_tower</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">options_unwrapped</span>
         <span class="p">):</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2"> does not match any type in Union:&quot;</span>
@@ -853,6 +855,43 @@
         <span class="k">pass</span>
 
     <span class="k">return</span> <span class="n">typ</span></div>
+
+
+
+<div class="viewcode-block" id="isinstance_with_fuzzy_numeric_tower">
+<a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.isinstance_with_fuzzy_numeric_tower">[docs]</a>
+<span class="k">def</span> <span class="nf">isinstance_with_fuzzy_numeric_tower</span><span class="p">(</span>
+    <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">classinfo</span><span class="p">:</span> <span class="n">Type</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;~&quot;</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Enhanced version of isinstance() that returns:</span>
+<span class="sd">    - True: if object is exactly of the specified type</span>
+<span class="sd">    - &quot;~&quot;: if object follows numeric tower rules but isn&#39;t exact type</span>
+<span class="sd">    - False: if object is not of the specified type or numeric tower rules don&#39;t apply</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(3, int)       # Returns True</span>
+<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(3, float)     # Returns &quot;~&quot;</span>
+<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(True, int)    # Returns &quot;~&quot;</span>
+<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(3, bool)      # Returns False</span>
+<span class="sd">    &gt;&gt;&gt; enhanced_isinstance(True, bool)   # Returns True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Handle exact match first</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">classinfo</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># Handle numeric tower cases</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">classinfo</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;~&quot;</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>  <span class="c1"># explicit bool check</span>
+        <span class="k">if</span> <span class="n">classinfo</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s2">&quot;~&quot;</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">classinfo</span> <span class="ow">is</span> <span class="nb">complex</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;~&quot;</span>
+
+    <span class="k">return</span> <span class="kc">False</span></div>
 
 
 

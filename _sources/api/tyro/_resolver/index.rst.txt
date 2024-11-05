@@ -159,6 +159,31 @@ Module Contents
    In this case, we raise a warning, then add the type of the default value to the
    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20
 
+.. py:function:: isinstance_with_fuzzy_numeric_tower(obj: Any, classinfo: Type) -> Union[bool, typing_extensions.Literal[~]]
+
+   
+   Enhanced version of isinstance() that returns:
+
+
+   * True: if object is exactly of the specified type
+   * "~": if object follows numeric tower rules but isn't exact type
+   * False: if object is not of the specified type or numeric tower rules don't apply
+
+   Examples:
+
+   ..
+
+      ..
+
+         ..
+
+            enhanced_isinstance(3, int)       # Returns True
+            enhanced_isinstance(3, float)     # Returns "~"
+            enhanced_isinstance(True, int)    # Returns "~"
+            enhanced_isinstance(3, bool)      # Returns False
+            enhanced_isinstance(True, bool)   # Returns True
+
+
 .. py:data:: NoneType
 
    

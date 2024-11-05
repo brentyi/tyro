@@ -91,12 +91,16 @@ Module Contents
       length of the list will match the value of nargs.
 
    .. py:attribute:: is_instance
-      :type: Callable[[Any], bool]
+      :type: Callable[[Any], bool | typing_extensions.Literal[~]]
 
       
       Given an object instance, does it match this primitive type? This is
       used for specific help messages when both a union type is present and a
       default is provided.
+
+      Can return "~" to signify that an instance is a "fuzzy" match, and should
+      only be used if there are no other matches. This is used for numeric tower
+      support.
 
    .. py:attribute:: str_from_instance
       :type: Callable[[T], list[str]]

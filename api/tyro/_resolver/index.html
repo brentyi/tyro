@@ -610,6 +610,40 @@ union. Loosely motivated by: <a class="reference external" href="https://github.
 </dl>
 </dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro._resolver.isinstance_with_fuzzy_numeric_tower">
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">isinstance_with_fuzzy_numeric_tower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classinfo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union[bool,</span> <span class="pre">typing_extensions.Literal[~]]</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#isinstance_with_fuzzy_numeric_tower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.isinstance_with_fuzzy_numeric_tower" title="Link to this definition">¶</a></dt>
+<dd><p>Enhanced version of isinstance() that returns:</p>
+<ul class="simple">
+<li><p>True: if object is exactly of the specified type</p></li>
+<li><p>“~”: if object follows numeric tower rules but isn’t exact type</p></li>
+<li><p>False: if object is not of the specified type or numeric tower rules don’t apply</p></li>
+</ul>
+<p>Examples:</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div><p>enhanced_isinstance(3, int)       # Returns True
+enhanced_isinstance(3, float)     # Returns “~”
+enhanced_isinstance(True, int)    # Returns “~”
+enhanced_isinstance(3, bool)      # Returns False
+enhanced_isinstance(True, bool)   # Returns True</p>
+</div></blockquote>
+</div></blockquote>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> (<em>Any</em>)</p></li>
+<li><p><strong>classinfo</strong> (<em>Type</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Union[bool, typing_extensions.Literal[~]]</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._resolver.NoneType">
 <span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">NoneType</span></span><a class="headerlink" href="#tyro._resolver.NoneType" title="Link to this definition">¶</a></dt>
@@ -725,6 +759,7 @@ and generics (list[str]) in older versions of Python.</p>
 </ul>
 </li>
 <li><a class="reference internal" href="#tyro._resolver.narrow_union_type"><code class="docutils literal notranslate"><span class="pre">narrow_union_type()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.isinstance_with_fuzzy_numeric_tower"><code class="docutils literal notranslate"><span class="pre">isinstance_with_fuzzy_numeric_tower()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.NoneType"><code class="docutils literal notranslate"><span class="pre">NoneType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.resolve_generic_types"><code class="docutils literal notranslate"><span class="pre">resolve_generic_types()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.get_type_hints_with_backported_syntax"><code class="docutils literal notranslate"><span class="pre">get_type_hints_with_backported_syntax()</span></code></a></li>
