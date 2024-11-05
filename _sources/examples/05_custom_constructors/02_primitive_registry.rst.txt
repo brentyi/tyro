@@ -11,7 +11,7 @@ struct types are broken down into multiple.
 
 
 In this example, we attach a custom constructor by defining a rule that applies
-to all types that match `dict[str, Any]`.
+to all types that match ``dict[str, Any]``.
 
 
 .. code-block:: python
@@ -71,22 +71,6 @@ to all types that match `dict[str, Any]`.
         <kbd>python 05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}'</kbd>
 
 .. program-output:: python ../../examples/05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}'
-
-------------
-
-.. raw:: html
-
-        <kbd>python 05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}'</kbd>
-
-.. program-output:: python ../../examples/05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}'
-
-------------
-
-.. raw:: html
-
-        <kbd>python 05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'</kbd>
-
-.. program-output:: python ../../examples/05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'
 
 ------------
 

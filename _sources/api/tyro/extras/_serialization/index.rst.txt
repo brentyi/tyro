@@ -50,6 +50,7 @@ Module Contents
    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
 
    .. warning::
+
        Serialization functionality is stable but deprecated. It may be removed in a
        future version of :code:`tyro`.
 
@@ -75,6 +76,7 @@ Module Contents
    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
 
    .. warning::
+
        Serialization functionality is stable but deprecated. It may be removed in a
        future version of :code:`tyro`.
 

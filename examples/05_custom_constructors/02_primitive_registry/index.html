@@ -330,7 +330,7 @@ defining behavior for different types. There are two categories of types:
 primitive types can be instantiated from a single commandline argument, while
 struct types are broken down into multiple.</p>
 <p>In this example, we attach a custom constructor by defining a rule that applies
-to all types that match <cite>dict[str, Any]</cite>.</p>
+to all types that match <code class="docutils literal notranslate"><span class="pre">dict[str,</span> <span class="pre">Any]</span></code>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="kn">import</span> <span class="nn">json</span>
 <span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
 <span class="linenos"> 3</span>
@@ -381,12 +381,6 @@ to all types that match <cite>dict[str, Any]</cite>.</p>
 <hr class="docutils" />
 <kbd>python 05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">dict1={'hello': 'world'}
 dict2={'default': None}</pre>
-<hr class="docutils" />
-<kbd>python 05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">dict1={'hello': 'world'}
-dict2={'default': None}</pre>
-<hr class="docutils" />
-<kbd>python 05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">dict1={'hello': 'world'}
-dict2={'hello': 'world'}</pre>
 <hr class="docutils" />
 <kbd>python 05_custom_constructors/02_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'</kbd><pre class="ansi-block literal-block">dict1={'hello': 'world'}
 dict2={'hello': 'world'}</pre>

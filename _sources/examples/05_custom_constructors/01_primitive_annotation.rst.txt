@@ -66,22 +66,6 @@ In this example, we attach a custom constructor via a runtime annotation.
 
 .. raw:: html
 
-        <kbd>python 05_custom_constructors/01_primitive_annotation.py --dict1 '{"hello": "world"}'</kbd>
-
-.. program-output:: python ../../examples/05_custom_constructors/01_primitive_annotation.py --dict1 '{"hello": "world"}'
-
-------------
-
-.. raw:: html
-
-        <kbd>python 05_custom_constructors/01_primitive_annotation.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'</kbd>
-
-.. program-output:: python ../../examples/05_custom_constructors/01_primitive_annotation.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'
-
-------------
-
-.. raw:: html
-
         <kbd>python 05_custom_constructors/01_primitive_annotation.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'</kbd>
 
 .. program-output:: python ../../examples/05_custom_constructors/01_primitive_annotation.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'

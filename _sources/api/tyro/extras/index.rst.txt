@@ -118,6 +118,7 @@ Package Contents
    preferred, but this function can be helpful for succinctness.
 
    .. warning::
+
        The type returned by this function can be safely used as an input to
        :func:`tyro.cli()`, but for static analysis when used for annotations we
        recommend applying a `TYPE_CHECKING` guard:
@@ -150,6 +151,7 @@ Package Contents
    helpful when choices are generated dynamically.
 
    .. warning::
+
        The type returned by this function can be safely used as an input to
        :func:`tyro.cli()`, but for static analysis when used for annotations we
        recommend applying a `TYPE_CHECKING` guard:
@@ -186,6 +188,7 @@ Package Contents
    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
 
    .. warning::
+
        Serialization functionality is stable but deprecated. It may be removed in a
        future version of :code:`tyro`.
 
@@ -211,6 +214,7 @@ Package Contents
    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
 
    .. warning::
+
        Serialization functionality is stable but deprecated. It may be removed in a
        future version of :code:`tyro`.
 
