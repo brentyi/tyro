@@ -53,35 +53,35 @@ def subcommand(
     constructor: type | Callable | None = None,
     constructor_factory: Callable[[], type | Callable] | None = None,
 ) -> Any:
-    """Returns a metadata object for configuring subcommands with `typing.Annotated`.
-    Useful for aesthetics.
+    """Returns a metadata object for configuring subcommands with
+    :py:data:`typing.Annotated`. Useful for aesthetics.
 
     Consider the standard approach for creating subcommands:
 
-    ```python
-    tyro.cli(
-        Union[NestedTypeA, NestedTypeB]
-    )
-    ```
+    .. code-block:: python
+
+        tyro.cli(
+            Union[NestedTypeA, NestedTypeB]
+        )
 
     This will create two subcommands: `nested-type-a` and `nested-type-b`.
 
-    Annotating each type with `tyro.conf.subcommand()` allows us to override for
-    each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix
-    the name or not.
+    Annotating each type with :func:`tyro.conf.subcommand()` allows us to
+    override for each subcommand the (a) name, (b) defaults, (c) helptext, and
+    (d) whether to prefix the name or not.
 
-    ```python
-    tyro.cli(
-        Union[
-            Annotated[
-                NestedTypeA, subcommand("a", ...)
-            ],
-            Annotated[
-                NestedTypeB, subcommand("b", ...)
-            ],
-        ]
-    )
-    ```
+    .. code-block:: python
+
+        tyro.cli(
+            Union[
+                Annotated[
+                    NestedTypeA, subcommand("a", ...)
+                ],
+                Annotated[
+                    NestedTypeB, subcommand("b", ...)
+                ],
+            ]
+        )
 
     Arguments:
         name: The name of the subcommand in the CLI.
@@ -93,10 +93,10 @@ def subcommand(
             is in a nested structure.
         constructor: A constructor type or function. This will be used in
             place of the argument's type for parsing arguments. For more
-            configurability, see :module:`tyro.constructors`.
+            configurability, see :mod:`tyro.constructors`.
         constructor_factory: A function that returns a constructor type. This
             will be used in place of the argument's type for parsing arguments.
-            For more configurability, see :module:`tyro.constructors`.
+            For more configurability, see :mod:`tyro.constructors`.
     """
     assert not (
         constructor is not None and constructor_factory is not None
@@ -163,18 +163,21 @@ def arg(
     constructor_factory: Callable[[], type | Callable] | None = None,
 ) -> Any:
     """Returns a metadata object for fine-grained argument configuration with
-    `typing.Annotated`. Should typically not be required.
+    :py:data:`typing.Annotated`. Should typically not be required.
 
-    We support using `arg()` at the root of arguments. For example:
-    ```python
-    x: Annotated[int, tyro.conf.arg(...)]
-    ```
+    We support using :func:`arg()` at the root of arguments. For example:
 
-    Nesting `arg()` within other types is generally not supported:
-    ```python
-    # Not supported.
-    x: tuple[Annotated[int, tyro.conf.arg(...)], ...]
-    ```
+    .. code-block:: python
+
+        x: Annotated[int, tyro.conf.arg(...)]
+
+    Nesting :func:`arg()` within other types is generally not supported:
+
+    .. code-block:: python
+
+        # Not supported.
+        x: list[Annotated[int, tyro.conf.arg(...)]]
+
 
     Arguments:
         name: A new name for the argument in the CLI.
@@ -191,10 +194,10 @@ def arg(
             it is in a nested structure. Arguments are prefixed by default.
         constructor: A constructor type or function. This will be used in
             place of the argument's type for parsing arguments. For more
-            configurability, see :module:`tyro.constructors`.
+            configurability, see :mod:`tyro.constructors`.
         constructor_factory: A function that returns a constructor type. This
             will be used in place of the argument's type for parsing arguments.
-            For more configurability, see :module:`tyro.constructors`.
+            For more configurability, see :mod:`tyro.constructors`.
 
     Returns:
         Object to attach via `typing.Annotated[]`.

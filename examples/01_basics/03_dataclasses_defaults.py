@@ -5,6 +5,7 @@ types.
 
 
 .. warning::
+
     We advise against mutation of configuration objects from a dataclass's
     :code:`__post_init__` method [#f1]_. In the example below,
     :code:`__post_init__` would be called twice: once for the :code:`Args()`

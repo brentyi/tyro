@@ -90,7 +90,7 @@ class _TypeTree:
         return _TypeTree(
             typ_unwrap,
             {
-                field.intern_name: _TypeTree.make(field.type_or_callable, field.default)
+                field.intern_name: _TypeTree.make(field.type_stripped, field.default)
                 for field in field_list
             },
         )

@@ -177,7 +177,12 @@ def from_yaml(
     stream: Union[str, IO[str], bytes, IO[bytes]],
 ) -> DataclassType:
     """Re-construct a dataclass instance from a yaml-compatible string, which should be
-    generated from `tyro.extras.to_yaml()`.
+    generated from :func:`tyro.extras.to_yaml()`.
+
+    .. warning::
+
+        **Deprecated.** Serialization functionality is stable but deprecated.
+        It may be removed in a future version of :code:`tyro`.
 
     As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
     configuration use cases, we also introduce functions for human-readable dataclass
@@ -186,10 +191,6 @@ def from_yaml(
     dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
     references enable custom tags that are robust against code reorganization and
     refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
-
-    .. warning::
-        Serialization functionality is stable but deprecated. It may be removed in a
-        future version of :code:`tyro`.
 
     Args:
         cls: Type to reconstruct.
@@ -208,7 +209,12 @@ def from_yaml(
 
 def to_yaml(instance: Any) -> str:
     """Serialize a dataclass; returns a yaml-compatible string that can be deserialized
-    via `tyro.extras.from_yaml()`.
+    via :func:`tyro.extras.from_yaml()`.
+
+    .. warning::
+
+        **Deprecated.** Serialization functionality is stable but deprecated.
+        It may be removed in a future version of :code:`tyro`.
 
     As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
     configuration use cases, we also introduce functions for human-readable dataclass
@@ -217,10 +223,6 @@ def to_yaml(instance: Any) -> str:
     dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
     references enable custom tags that are robust against code reorganization and
     refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
-
-    .. warning::
-        Serialization functionality is stable but deprecated. It may be removed in a
-        future version of :code:`tyro`.
 
     Args:
         instance: Dataclass instance to serialize.

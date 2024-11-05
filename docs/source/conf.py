@@ -8,8 +8,6 @@
 
 from typing import Dict, List
 
-import m2r2
-
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -55,7 +53,13 @@ extensions = [
     "sphinxcontrib.programoutput",
     "sphinxcontrib.ansi",
     "sphinxcontrib.googleanalytics",
+    "sphinx.ext.intersphinx",
 ]
+
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", (None, "python-inv.txt"))
+}
+
 programoutput_use_ansi = True
 html_ansi_stylesheet = "black-on-white.css"
 html_static_path = ["_static"]
@@ -390,13 +394,15 @@ todo_include_todos = True
 # -- Enable Markdown -> RST conversion ----------------------------------------
 
 
-def docstring(app, what, name, obj, options, lines):
-    md = "\n".join(lines)
-    rst = m2r2.convert(md)
-    lines.clear()
-    lines += rst.splitlines()  # type: ignore
+# def docstring(app, what, name, obj, options, lines):
+#     md = "\n".join(lines)
+#     rst = m2r2.convert(md)
+#     lines.clear()
+#     lines += rst.splitlines()  # type: ignore
+#     lines.append("")
+#     lines.append("")
 
 
 def setup(app):
-    app.connect("autodoc-process-docstring", docstring)
+    # app.connect("autodoc-process-docstring", docstring)
     app.add_css_file("css/compact_table_header.css")

@@ -70,7 +70,7 @@ def callable_with_args(
         )
 
         # Resolve field type.
-        field_type = field.type_or_callable
+        field_type = field.type_stripped
         if prefixed_field_name in arg_from_prefixed_field_name:
             assert prefixed_field_name not in consumed_keywords
 

@@ -52,53 +52,53 @@ def subcommand_cli_from_dict(
 
     For an input like:
 
-    ```python
-    tyro.extras.subcommand_cli_from_dict(
-        {
-            "checkout": checkout,
-            "commit": commit,
-        }
-    )
-    ```
+    .. code-block:: python
+
+        tyro.extras.subcommand_cli_from_dict(
+            {
+                "checkout": checkout,
+                "commit": commit,
+            }
+        )
 
     This is internally accomplished by generating and calling:
 
-    ```python
-    from typing import Annotated, Any, Union
-    import tyro
+    .. code-block:: python
 
-    tyro.cli(
-        Union[
-            Annotated[
-                Any,
-                tyro.conf.subcommand(name="checkout", constructor=checkout),
-            ],
-            Annotated[
-                Any,
-                tyro.conf.subcommand(name="commit", constructor=commit),
-            ],
-        ]
-    )
-    ```
+        from typing import Annotated, Any, Union
+        import tyro
+
+        tyro.cli(
+            Union[
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="checkout", constructor=checkout),
+                ],
+                Annotated[
+                    Any,
+                    tyro.conf.subcommand(name="commit", constructor=commit),
+                ],
+            ]
+        )
 
     Args:
         subcommands: Dictionary that maps the subcommand name to function to call.
         prog: The name of the program printed in helptext. Mirrors argument from
-            `argparse.ArgumentParser()`.
+            :py:class:`argparse.ArgumentParser`.
         description: Description text for the parser, displayed when the --help flag is
             passed in. If not specified, `f`'s docstring is used. Mirrors argument from
-            `argparse.ArgumentParser()`.
+            :py:class:`argparse.ArgumentParser`.
         args: If set, parse arguments from a sequence of strings instead of the
-            commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
+            commandline. Mirrors argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
         use_underscores: If True, use underscores as a word delimeter instead of hyphens.
             This primarily impacts helptext; underscores and hyphens are treated equivalently
             when parsing happens. We default helptext to hyphens to follow the GNU style guide.
             https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
-        console_outputs: If set to `False`, parsing errors and help messages will be
-            supressed. This can be useful for distributed settings, where `tyro.cli()`
+        console_outputs: If set to ``False``, parsing errors and help messages will be
+            supressed. This can be useful for distributed settings, where :func:`tyro.cli()`
             is called from multiple workers but we only want console outputs from the
             main one.
-        config: Sequence of config marker objects, from `tyro.conf`.
+        config: Sequence of config marker objects, from :mod:`tyro.conf`.
     """
     # We need to form a union type, which requires at least two elements.
     assert len(subcommands) >= 2, "At least two subcommands are required."

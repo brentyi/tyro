@@ -8,36 +8,40 @@ CallableT = TypeVar("CallableT", bound=Callable)
 
 
 class SubcommandApp:
-    """This module provides a decorator-based API for subcommands in `tyro`, inspired by click.
+    """This module provides a decorator-based API for subcommands in :mod:`tyro`, inspired by click.
 
     Example:
 
-    ```python
-    from tyro.extras import SubcommandApp
+    .. code-block:: python
 
-    app = SubcommandApp()
+        from tyro.extras import SubcommandApp
 
-    @app.command
-    def greet(name: str, loud: bool = False):
-        '''Greet someone.'''
-        greeting = f"Hello, {name}!"
-        if loud:
-            greeting = greeting.upper()
-        print(greeting)
+        app = SubcommandApp()
 
-    @app.command(name="addition")
-    def add(a: int, b: int):
-        '''Add two numbers.'''
-        print(f"{a} + {b} = {a + b}")
+        @app.command
+        def greet(name: str, loud: bool = False):
+            '''Greet someone.'''
+            greeting = f"Hello, {name}!"
+            if loud:
+                greeting = greeting.upper()
+            print(greeting)
 
-    if __name__ == "__main__":
-        app.cli()
-    ```
+        @app.command(name="addition")
+        def add(a: int, b: int):
+            '''Add two numbers.'''
+            print(f"{a} + {b} = {a + b}")
+
+        if __name__ == "__main__":
+            app.cli()
 
     Usage:
-    `python my_script.py greet Alice`
-    `python my_script.py greet Bob --loud`
-    `python my_script.py addition 5 3`
+
+    .. code-block:: bash
+
+        python my_script.py greet Alice
+        python my_script.py greet Bob --loud
+        python my_script.py addition 5 3
+
     """
 
     def __init__(self) -> None:
@@ -62,7 +66,7 @@ class SubcommandApp:
     ) -> CallableT | Callable[[CallableT], CallableT]:
         """A decorator to register a function as a subcommand.
 
-        This method is inspired by Click's @cli.command() decorator.
+        This method is inspired by Click's ``@cli.command()`` decorator.
         It adds the decorated function to the list of subcommands.
 
         Args:

@@ -43,54 +43,54 @@ Argument Aliases
 
 .. raw:: html
 
-        <kbd>python 04_additional/17_aliases.py --help</kbd>
+        <kbd>python 04_additional/11_aliases.py --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/17_aliases.py --help
-
-------------
-
-.. raw:: html
-
-        <kbd>python 04_additional/17_aliases.py commit --help</kbd>
-
-.. program-output:: python ../../examples/04_additional/17_aliases.py commit --help
+.. program-output:: python ../../examples/04_additional/11_aliases.py --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/17_aliases.py commit --message hello --all</kbd>
+        <kbd>python 04_additional/11_aliases.py commit --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/17_aliases.py commit --message hello --all
-
-------------
-
-.. raw:: html
-
-        <kbd>python 04_additional/17_aliases.py commit -m hello -a</kbd>
-
-.. program-output:: python ../../examples/04_additional/17_aliases.py commit -m hello -a
+.. program-output:: python ../../examples/04_additional/11_aliases.py commit --help
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/17_aliases.py checkout --help</kbd>
+        <kbd>python 04_additional/11_aliases.py commit --message hello --all</kbd>
 
-.. program-output:: python ../../examples/04_additional/17_aliases.py checkout --help
-
-------------
-
-.. raw:: html
-
-        <kbd>python 04_additional/17_aliases.py checkout --branch main</kbd>
-
-.. program-output:: python ../../examples/04_additional/17_aliases.py checkout --branch main
+.. program-output:: python ../../examples/04_additional/11_aliases.py commit --message hello --all
 
 ------------
 
 .. raw:: html
 
-        <kbd>python 04_additional/17_aliases.py checkout -b main</kbd>
+        <kbd>python 04_additional/11_aliases.py commit -m hello -a</kbd>
 
-.. program-output:: python ../../examples/04_additional/17_aliases.py checkout -b main
+.. program-output:: python ../../examples/04_additional/11_aliases.py commit -m hello -a
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/11_aliases.py checkout --help</kbd>
+
+.. program-output:: python ../../examples/04_additional/11_aliases.py checkout --help
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/11_aliases.py checkout --branch main</kbd>
+
+.. program-output:: python ../../examples/04_additional/11_aliases.py checkout --branch main
+
+------------
+
+.. raw:: html
+
+        <kbd>python 04_additional/11_aliases.py checkout -b main</kbd>
+
+.. program-output:: python ../../examples/04_additional/11_aliases.py checkout -b main

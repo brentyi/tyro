@@ -3,13 +3,13 @@
 :func:`tyro.conf.arg()` can be used to attach aliases to arguments.
 
 Usage:
-`python ./12_aliases.py --help`
-`python ./12_aliases.py commit --help`
-`python ./12_aliases.py commit --message hello --all`
-`python ./12_aliases.py commit -m hello -a`
-`python ./12_aliases.py checkout --help`
-`python ./12_aliases.py checkout --branch main`
-`python ./12_aliases.py checkout -b main`
+`python ./11_aliases.py --help`
+`python ./11_aliases.py commit --help`
+`python ./11_aliases.py commit --message hello --all`
+`python ./11_aliases.py commit -m hello -a`
+`python ./11_aliases.py checkout --help`
+`python ./11_aliases.py checkout --branch main`
+`python ./11_aliases.py checkout -b main`
 """
 
 from typing_extensions import Annotated

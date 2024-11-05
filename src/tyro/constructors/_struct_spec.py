@@ -43,18 +43,40 @@ class StructFieldSpec:
     """Behavior specification for a single field in our callable."""
 
     name: str
+    """The name of the field. This will be used as a keyword argument for the
+    struct's associated `instantiate(**kwargs)` function."""
     type: TypeForm
+    """The type of the field. Can be either a primitive or a nested struct type."""
     default: Any
-    is_default_overridden: bool
-    helptext: str | None
+    """The default value of the field."""
+    is_default_overridden: bool = False
+    """Whether the default value was overridden by the default instance. Should
+    be set to False if the default value was assigned by the field itself."""
+    helptext: str | None = None
+    """Helpjext for the field."""
     # TODO: it's theoretically possible to override the argname with `None`.
     _call_argname: Any = None
+    """Private: the name of the argument to pass to the callable. This is used
+    for dictionary types."""
 
 
 @dataclasses.dataclass(frozen=True)
 class StructConstructorSpec:
+    """Specification for a struct type, which is broken down into multiple
+    fields.
+
+    Each struct type is instantiated by calling an `instantiate(**kwargs)`
+    function with keyword a set of keyword arguments.
+
+    Unlike `PrimitiveConstructorSpec`, there is only one way to use this class.
+    It must be returned by a rule in `ConstructorRegistry`.
+    """
+
     instantiate: Callable[..., Any]
+    """Function to call to instantiate the struct."""
     fields: tuple[StructFieldSpec, ...]
+    """Fields used to construct the callable. Each field is used as a keyword
+    argument for the `instantiate(**kwargs)` function."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -81,6 +103,7 @@ class StructTypeInfo:
         f = typevar_context.origin_type
         f = _resolver.narrow_subtypes(f, default)
         f = _resolver.narrow_collection_types(f, default)
+
         return StructTypeInfo(
             cast(TypeForm, f), parent_markers, default, typevar_context
         )
