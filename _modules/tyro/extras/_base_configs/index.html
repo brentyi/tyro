@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">Supported types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -344,31 +344,32 @@
 
 
 <span class="sd">    Example usage:</span>
-<span class="sd">    ```python</span>
-<span class="sd">    import dataclasses</span>
 
-<span class="sd">    import tyro</span>
+<span class="sd">    .. code-block:: python</span>
 
+<span class="sd">        import dataclasses</span>
 
-<span class="sd">    @dataclasses.dataclass</span>
-<span class="sd">    class Config:</span>
-<span class="sd">        a: int</span>
-<span class="sd">        b: str</span>
+<span class="sd">        import tyro</span>
 
 
-<span class="sd">    default_configs = {</span>
-<span class="sd">        &quot;small&quot;: (</span>
-<span class="sd">            &quot;Small config&quot;,</span>
-<span class="sd">            Config(1, &quot;small&quot;),</span>
-<span class="sd">        ),</span>
-<span class="sd">        &quot;big&quot;: (</span>
-<span class="sd">            &quot;Big config&quot;,</span>
-<span class="sd">            Config(100, &quot;big&quot;),</span>
-<span class="sd">        ),</span>
-<span class="sd">    }</span>
-<span class="sd">    config = tyro.extras.overridable_config_cli(default_configs)</span>
-<span class="sd">    print(config)</span>
-<span class="sd">    ```</span>
+<span class="sd">        @dataclasses.dataclass</span>
+<span class="sd">        class Config:</span>
+<span class="sd">            a: int</span>
+<span class="sd">            b: str</span>
+
+
+<span class="sd">        default_configs = {</span>
+<span class="sd">            &quot;small&quot;: (</span>
+<span class="sd">                &quot;Small config&quot;,</span>
+<span class="sd">                Config(1, &quot;small&quot;),</span>
+<span class="sd">            ),</span>
+<span class="sd">            &quot;big&quot;: (</span>
+<span class="sd">                &quot;Big config&quot;,</span>
+<span class="sd">                Config(100, &quot;big&quot;),</span>
+<span class="sd">            ),</span>
+<span class="sd">        }</span>
+<span class="sd">        config = tyro.extras.overridable_config_cli(default_configs)</span>
+<span class="sd">        print(config)</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        configs: A dictionary of config names mapped to a tuple of</span>
@@ -399,31 +400,31 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Construct a Union type for defining subcommands that choose between defaults.</span>
 
-<span class="sd">    For example, when `defaults` is set to:</span>
+<span class="sd">    For example, when ``defaults`` is set to:</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    {</span>
-<span class="sd">        &quot;small&quot;: Config(...),</span>
-<span class="sd">        &quot;big&quot;: Config(...),</span>
-<span class="sd">    }</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        {</span>
+<span class="sd">            &quot;small&quot;: Config(...),</span>
+<span class="sd">            &quot;big&quot;: Config(...),</span>
+<span class="sd">        }</span>
 
 <span class="sd">    We return:</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    Union[</span>
-<span class="sd">        Annotated[</span>
-<span class="sd">            Config,</span>
-<span class="sd">            tyro.conf.subcommand(&quot;small&quot;, default=Config(...))</span>
-<span class="sd">        ],</span>
-<span class="sd">        Annotated[</span>
-<span class="sd">            Config,</span>
-<span class="sd">            tyro.conf.subcommand(&quot;big&quot;, default=Config(...))</span>
-<span class="sd">        ]</span>
-<span class="sd">    ]</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. code-block:: python</span>
 
-<span class="sd">    Direct use of `typing.Union` and :func:`tyro.conf.subcommand()` should generally be</span>
+<span class="sd">        Union[</span>
+<span class="sd">            Annotated[</span>
+<span class="sd">                Config,</span>
+<span class="sd">                tyro.conf.subcommand(&quot;small&quot;, default=Config(...))</span>
+<span class="sd">            ],</span>
+<span class="sd">            Annotated[</span>
+<span class="sd">                Config,</span>
+<span class="sd">                tyro.conf.subcommand(&quot;big&quot;, default=Config(...))</span>
+<span class="sd">            ]</span>
+<span class="sd">        ]</span>
+
+<span class="sd">    Direct use of :py:data:`typing.Union` and :func:`tyro.conf.subcommand()` should generally be</span>
 <span class="sd">    preferred, but this function can be helpful for succinctness.</span>
 
 <span class="sd">    .. warning::</span>

@@ -5,14 +5,11 @@
 
 .. autoapi-nested-parse::
 
-   
    The :mod:`tyro.extras` submodule contains helpers that complement :func:`tyro.cli()`.
 
    .. warning::
-   ::
 
-      Compared to the core interface, APIs here are more likely to be changed or deprecated.
-
+       Compared to the core interface, APIs here are more likely to be changed or deprecated.
 
 
 
@@ -21,27 +18,22 @@ Package Contents
 
 .. py:function:: set_accent_color(accent_color: Optional[str]) -> None
 
-   
-   Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
+   Set an accent color to use in help messages. Takes any color supported by ``rich``,
    see ``python -m rich.color``. Experimental.
-
 
 
 .. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
                  get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
 
-   
    Get the ``argparse.ArgumentParser`` object generated under-the-hood by
-   ``tyro.cli()``. Useful for tools like ``sphinx-argparse``\ , ``argcomplete``\ , etc.
+   :func:`tyro.cli()`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
 
-   For tab completion, we recommend using ``tyro.cli()``\ 's built-in ``--tyro-write-completion``
-   flag.
-
+   For tab completion, we recommend using :func:`tyro.cli()`'s built-in
+   ``--tyro-write-completion`` flag.
 
 
 .. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, args: Optional[Sequence[str]] = None) -> T
 
-   
    Helper function for creating a CLI interface that allows us to choose
    between default config objects (typically dataclasses) and override values
    within it. Turns off subcommand creation for any union types within the
@@ -51,70 +43,69 @@ Package Contents
    arguments populated. Also see
    :func:`tyro.extras.subcommand_type_from_defaults()`.
 
+
    Example usage:
 
    .. code-block:: python
 
-      import dataclasses
+       import dataclasses
 
-      import tyro
-
-
-      @dataclasses.dataclass
-      class Config:
-          a: int
-          b: str
+       import tyro
 
 
-      default_configs = {
-          "small": (
-              "Small config",
-              Config(1, "small"),
-          ),
-          "big": (
-              "Big config",
-              Config(100, "big"),
-          ),
-      }
-      config = tyro.extras.overridable_config_cli(default_configs)
-      print(config)
+       @dataclasses.dataclass
+       class Config:
+           a: int
+           b: str
+
+
+       default_configs = {
+           "small": (
+               "Small config",
+               Config(1, "small"),
+           ),
+           "big": (
+               "Big config",
+               Config(100, "big"),
+           ),
+       }
+       config = tyro.extras.overridable_config_cli(default_configs)
+       print(config)
 
    :param configs: A dictionary of config names mapped to a tuple of
                    (description, config object).
    :param args: Optional arguments to pass to the CLI.
 
 
-
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> tyro._typing.TypeForm[T]
 
-   
    Construct a Union type for defining subcommands that choose between defaults.
 
    For example, when ``defaults`` is set to:
 
    .. code-block:: python
 
-      {
-          "small": Config(...),
-          "big": Config(...),
-      }
+       {
+           "small": Config(...),
+           "big": Config(...),
+       }
 
    We return:
 
    .. code-block:: python
 
-      Union[
-          Annotated[
-              Config,
-              tyro.conf.subcommand("small", default=Config(...))
-          ],
-          Annotated[
-              Config,
-              tyro.conf.subcommand("big", default=Config(...))
-          ]
-      ]
+       Union[
+           Annotated[
+               Config,
+               tyro.conf.subcommand("small", default=Config(...))
+           ],
+           Annotated[
+               Config,
+               tyro.conf.subcommand("big", default=Config(...))
+           ]
+       ]
 
-   Direct use of ``typing.Union`` and :func:`tyro.conf.subcommand()` should generally be
+   Direct use of :py:data:`typing.Union` and :func:`tyro.conf.subcommand()` should generally be
    preferred, but this function can be helpful for succinctness.
 
    .. warning::
@@ -141,11 +132,9 @@ Package Contents
    :returns: A subcommand type, which can be passed to :func:`tyro.cli`.
 
 
-
 .. py:function:: literal_type_from_choices(choices: Iterable[T]) -> tyro._typing.TypeForm[T]
 
-   
-   Generate a ``typing.Literal[]`` type that constrains values to a set of choices.
+   Generate a :py:data:`typing.Literal` type that constrains values to a set of choices.
 
    Using ``Literal[...]`` directly should generally be preferred, but this function can be
    helpful when choices are generated dynamically.
@@ -172,12 +161,15 @@ Package Contents
    :returns: A type that can be passed to :func:`tyro.cli()`.
 
 
-
 .. py:function:: from_yaml(cls: Type[DataclassType], stream: Union[str, IO[str], bytes, IO[bytes]]) -> DataclassType
 
-   
    Re-construct a dataclass instance from a yaml-compatible string, which should be
-   generated from ``tyro.extras.to_yaml()``.
+   generated from :func:`tyro.extras.to_yaml()`.
+
+   .. warning::
+
+       **Deprecated.** Serialization functionality is stable but deprecated.
+       It may be removed in a future version of :code:`tyro`.
 
    As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
    configuration use cases, we also introduce functions for human-readable dataclass
@@ -186,11 +178,6 @@ Package Contents
    dumping or loading dataclass instances (via pickle, PyYAML, etc), explicit type
    references enable custom tags that are robust against code reorganization and
    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
-
-   .. warning::
-
-       Serialization functionality is stable but deprecated. It may be removed in a
-       future version of :code:`tyro`.
 
    :param cls: Type to reconstruct.
    :param stream: YAML to read from.
@@ -198,12 +185,15 @@ Package Contents
    :returns: Instantiated dataclass.
 
 
-
 .. py:function:: to_yaml(instance: Any) -> str
 
-   
    Serialize a dataclass; returns a yaml-compatible string that can be deserialized
-   via ``tyro.extras.from_yaml()``.
+   via :func:`tyro.extras.from_yaml()`.
+
+   .. warning::
+
+       **Deprecated.** Serialization functionality is stable but deprecated.
+       It may be removed in a future version of :code:`tyro`.
 
    As a secondary feature aimed at enabling the use of :func:`tyro.cli` for general
    configuration use cases, we also introduce functions for human-readable dataclass
@@ -213,60 +203,55 @@ Package Contents
    references enable custom tags that are robust against code reorganization and
    refactor, while a PyYAML backend enables serialization of arbitrary Python objects.
 
-   .. warning::
-
-       Serialization functionality is stable but deprecated. It may be removed in a
-       future version of :code:`tyro`.
-
    :param instance: Dataclass instance to serialize.
 
    :returns: YAML string.
 
 
-
 .. py:class:: SubcommandApp
 
 
-   
-   This module provides a decorator-based API for subcommands in ``tyro``\ , inspired by click.
+   This module provides a decorator-based API for subcommands in :mod:`tyro`, inspired by click.
 
    Example:
 
    .. code-block:: python
 
-      from tyro.extras import SubcommandApp
+       from tyro.extras import SubcommandApp
 
-      app = SubcommandApp()
+       app = SubcommandApp()
 
-      @app.command
-      def greet(name: str, loud: bool = False):
-          '''Greet someone.'''
-          greeting = f"Hello, {name}!"
-          if loud:
-              greeting = greeting.upper()
-          print(greeting)
+       @app.command
+       def greet(name: str, loud: bool = False):
+           '''Greet someone.'''
+           greeting = f"Hello, {name}!"
+           if loud:
+               greeting = greeting.upper()
+           print(greeting)
 
-      @app.command(name="addition")
-      def add(a: int, b: int):
-          '''Add two numbers.'''
-          print(f"{a} + {b} = {a + b}")
+       @app.command(name="addition")
+       def add(a: int, b: int):
+           '''Add two numbers.'''
+           print(f"{a} + {b} = {a + b}")
 
-      if __name__ == "__main__":
-          app.cli()
+       if __name__ == "__main__":
+           app.cli()
 
    Usage:
-   ``python my_script.py greet Alice``
-   ``python my_script.py greet Bob --loud``
-   ``python my_script.py addition 5 3``
+
+   .. code-block:: bash
+
+       python my_script.py greet Alice
+       python my_script.py greet Bob --loud
+       python my_script.py addition 5 3
 
 
    .. py:method:: command(func: CallableT) -> CallableT
                   command(func: None = None, *, name: str | None = None) -> Callable[[CallableT], CallableT]
 
-      
       A decorator to register a function as a subcommand.
 
-      This method is inspired by Click's @cli.command() decorator.
+      This method is inspired by Click's ``@cli.command()`` decorator.
       It adds the decorated function to the list of subcommands.
 
       :param func: The function to register as a subcommand. If None, returns a
@@ -274,88 +259,83 @@ Package Contents
       :param name: The name of the subcommand. If None, the name of the function is used.
 
 
-
    .. py:method:: cli(*, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[Any]] = None, sort_subcommands: bool = False) -> Any
 
-      
       Run the command-line interface.
 
       This method creates a CLI using tyro, with all subcommands registered using
       :func:`command()`.
 
       :param prog: The name of the program printed in helptext. Mirrors argument from
-                   ``argparse.ArgumentParser()``.
+                   `argparse.ArgumentParser()`.
       :param description: Description text for the parser, displayed when the --help flag is
                           passed in. If not specified, the class docstring is used. Mirrors argument from
-                          ``argparse.ArgumentParser()``.
+                          `argparse.ArgumentParser()`.
       :param args: If set, parse arguments from a sequence of strings instead of the
-                   commandline. Mirrors argument from ``argparse.ArgumentParser.parse_args()``.
+                   commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
       :param use_underscores: If True, use underscores as a word delimiter instead of hyphens.
                               This primarily impacts helptext; underscores and hyphens are treated equivalently
                               when parsing happens. We default helptext to hyphens to follow the GNU style guide.
                               https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
-      :param console_outputs: If set to ``False``\ , parsing errors and help messages will be
+      :param console_outputs: If set to `False`, parsing errors and help messages will be
                               suppressed.
-      :param config: Sequence of config marker objects, from ``tyro.conf``.
+      :param config: Sequence of config marker objects, from `tyro.conf`.
       :param sort_subcommands: If True, sort the subcommands alphabetically by name.
-
 
 
 
 .. py:function:: subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None) -> T
                  subcommand_cli_from_dict(subcommands: Dict[str, Callable[Ellipsis, Any]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[tyro.conf._markers.Marker]] = None) -> Any
 
-   
    Generate a subcommand CLI from a dictionary of functions.
 
    For an input like:
 
    .. code-block:: python
 
-      tyro.extras.subcommand_cli_from_dict(
-          {
-              "checkout": checkout,
-              "commit": commit,
-          }
-      )
+       tyro.extras.subcommand_cli_from_dict(
+           {
+               "checkout": checkout,
+               "commit": commit,
+           }
+       )
 
    This is internally accomplished by generating and calling:
 
    .. code-block:: python
 
-      from typing import Annotated, Any, Union
-      import tyro
+       from typing import Annotated, Any, Union
+       import tyro
 
-      tyro.cli(
-          Union[
-              Annotated[
-                  Any,
-                  tyro.conf.subcommand(name="checkout", constructor=checkout),
-              ],
-              Annotated[
-                  Any,
-                  tyro.conf.subcommand(name="commit", constructor=commit),
-              ],
-          ]
-      )
+       tyro.cli(
+           Union[
+               Annotated[
+                   Any,
+                   tyro.conf.subcommand(name="checkout", constructor=checkout),
+               ],
+               Annotated[
+                   Any,
+                   tyro.conf.subcommand(name="commit", constructor=commit),
+               ],
+           ]
+       )
 
    :param subcommands: Dictionary that maps the subcommand name to function to call.
    :param prog: The name of the program printed in helptext. Mirrors argument from
-                ``argparse.ArgumentParser()``.
+                :py:class:`argparse.ArgumentParser`.
    :param description: Description text for the parser, displayed when the --help flag is
-                       passed in. If not specified, ``f``\ 's docstring is used. Mirrors argument from
-                       ``argparse.ArgumentParser()``.
+                       passed in. If not specified, `f`'s docstring is used. Mirrors argument from
+                       :py:class:`argparse.ArgumentParser`.
    :param args: If set, parse arguments from a sequence of strings instead of the
-                commandline. Mirrors argument from ``argparse.ArgumentParser.parse_args()``.
+                commandline. Mirrors argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
    :param use_underscores: If True, use underscores as a word delimeter instead of hyphens.
                            This primarily impacts helptext; underscores and hyphens are treated equivalently
                            when parsing happens. We default helptext to hyphens to follow the GNU style guide.
                            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
-   :param console_outputs: If set to ``False``\ , parsing errors and help messages will be
-                           supressed. This can be useful for distributed settings, where ``tyro.cli()``
+   :param console_outputs: If set to ``False``, parsing errors and help messages will be
+                           supressed. This can be useful for distributed settings, where :func:`tyro.cli()`
                            is called from multiple workers but we only want console outputs from the
                            main one.
-   :param config: Sequence of config marker objects, from ``tyro.conf``.
-
+   :param config: Sequence of config marker objects, from :mod:`tyro.conf`.
 
 

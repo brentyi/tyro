@@ -12,9 +12,7 @@ Module Contents
 .. py:class:: UnsupportedStructTypeMessage
 
 
-   
    Reason why a callable cannot be treated as a struct type.
-
 
    .. py:attribute:: message
       :type: str
@@ -25,92 +23,65 @@ Module Contents
 .. py:class:: StructFieldSpec
 
 
-   
    Behavior specification for a single field in our callable.
-
 
    .. py:attribute:: name
       :type: str
 
-      
       The name of the field. This will be used as a keyword argument for the
-      struct's associated ``instantiate(**kwargs)`` function.
-
-
+      struct's associated `instantiate(**kwargs)` function.
 
    .. py:attribute:: type
       :type: tyro._typing.TypeForm
 
-      
       The type of the field. Can be either a primitive or a nested struct type.
-
-
 
    .. py:attribute:: default
       :type: Any
 
-      
       The default value of the field.
-
-
 
    .. py:attribute:: is_default_overridden
       :type: bool
       :value: False
 
-      
       Whether the default value was overridden by the default instance. Should
       be set to False if the default value was assigned by the field itself.
-
-
 
    .. py:attribute:: helptext
       :type: str | None
 
-      
       Helpjext for the field.
-
-
 
 
 .. py:class:: StructConstructorSpec
 
 
-   
    Specification for a struct type, which is broken down into multiple
    fields.
 
-   Each struct type is instantiated by calling an ``instantiate(**kwargs)``
+   Each struct type is instantiated by calling an `instantiate(**kwargs)`
    function with keyword a set of keyword arguments.
 
-   Unlike ``PrimitiveConstructorSpec``\ , there is only one way to use this class.
-   It must be returned by a rule in ``ConstructorRegistry``.
-
+   Unlike `PrimitiveConstructorSpec`, there is only one way to use this class.
+   It must be returned by a rule in `ConstructorRegistry`.
 
    .. py:attribute:: instantiate
       :type: Callable[Ellipsis, Any]
 
-      
       Function to call to instantiate the struct.
-
-
 
    .. py:attribute:: fields
       :type: tuple[StructFieldSpec, Ellipsis]
 
-      
       Fields used to construct the callable. Each field is used as a keyword
-      argument for the ``instantiate(**kwargs)`` function.
-
-
+      argument for the `instantiate(**kwargs)` function.
 
 
 .. py:class:: StructTypeInfo
 
 
-   
    Information used to generate constructors for primitive types.
-
 
    .. py:attribute:: type
       :type: tyro._typing.TypeForm

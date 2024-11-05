@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">Supported types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -374,35 +374,35 @@
     <span class="n">constructor</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for configuring subcommands with `typing.Annotated`.</span>
-<span class="sd">    Useful for aesthetics.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for configuring subcommands with</span>
+<span class="sd">    :py:data:`typing.Annotated`. Useful for aesthetics.</span>
 
 <span class="sd">    Consider the standard approach for creating subcommands:</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    tyro.cli(</span>
-<span class="sd">        Union[NestedTypeA, NestedTypeB]</span>
-<span class="sd">    )</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        tyro.cli(</span>
+<span class="sd">            Union[NestedTypeA, NestedTypeB]</span>
+<span class="sd">        )</span>
 
 <span class="sd">    This will create two subcommands: `nested-type-a` and `nested-type-b`.</span>
 
-<span class="sd">    Annotating each type with `tyro.conf.subcommand()` allows us to override for</span>
-<span class="sd">    each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix</span>
-<span class="sd">    the name or not.</span>
+<span class="sd">    Annotating each type with :func:`tyro.conf.subcommand()` allows us to</span>
+<span class="sd">    override for each subcommand the (a) name, (b) defaults, (c) helptext, and</span>
+<span class="sd">    (d) whether to prefix the name or not.</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    tyro.cli(</span>
-<span class="sd">        Union[</span>
-<span class="sd">            Annotated[</span>
-<span class="sd">                NestedTypeA, subcommand(&quot;a&quot;, ...)</span>
-<span class="sd">            ],</span>
-<span class="sd">            Annotated[</span>
-<span class="sd">                NestedTypeB, subcommand(&quot;b&quot;, ...)</span>
-<span class="sd">            ],</span>
-<span class="sd">        ]</span>
-<span class="sd">    )</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        tyro.cli(</span>
+<span class="sd">            Union[</span>
+<span class="sd">                Annotated[</span>
+<span class="sd">                    NestedTypeA, subcommand(&quot;a&quot;, ...)</span>
+<span class="sd">                ],</span>
+<span class="sd">                Annotated[</span>
+<span class="sd">                    NestedTypeB, subcommand(&quot;b&quot;, ...)</span>
+<span class="sd">                ],</span>
+<span class="sd">            ]</span>
+<span class="sd">        )</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        name: The name of the subcommand in the CLI.</span>
@@ -487,18 +487,21 @@
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for fine-grained argument configuration with</span>
-<span class="sd">    `typing.Annotated`. Should typically not be required.</span>
+<span class="sd">    :py:data:`typing.Annotated`. Should typically not be required.</span>
 
-<span class="sd">    We support using `arg()` at the root of arguments. For example:</span>
-<span class="sd">    ```python</span>
-<span class="sd">    x: Annotated[int, tyro.conf.arg(...)]</span>
-<span class="sd">    ```</span>
+<span class="sd">    We support using :func:`arg()` at the root of arguments. For example:</span>
 
-<span class="sd">    Nesting `arg()` within other types is generally not supported:</span>
-<span class="sd">    ```python</span>
-<span class="sd">    # Not supported.</span>
-<span class="sd">    x: tuple[Annotated[int, tyro.conf.arg(...)], ...]</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        x: Annotated[int, tyro.conf.arg(...)]</span>
+
+<span class="sd">    Nesting :func:`arg()` within other types is generally not supported:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        # Not supported.</span>
+<span class="sd">        x: list[Annotated[int, tyro.conf.arg(...)]]</span>
+
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        name: A new name for the argument in the CLI.</span>

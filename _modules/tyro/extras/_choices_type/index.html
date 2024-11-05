@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">Supported types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -330,9 +330,9 @@
 <div class="viewcode-block" id="literal_type_from_choices">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._choices_type.literal_type_from_choices">[docs]</a>
 <span class="k">def</span> <span class="nf">literal_type_from_choices</span><span class="p">(</span><span class="n">choices</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a `typing.Literal[]` type that constrains values to a set of choices.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a :py:data:`typing.Literal` type that constrains values to a set of choices.</span>
 
-<span class="sd">    Using `Literal[...]` directly should generally be preferred, but this function can be</span>
+<span class="sd">    Using ``Literal[...]`` directly should generally be preferred, but this function can be</span>
 <span class="sd">    helpful when choices are generated dynamically.</span>
 
 <span class="sd">    .. warning::</span>

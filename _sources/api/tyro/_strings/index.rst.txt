@@ -7,9 +7,7 @@
 
 .. autoapi-nested-parse::
 
-   
    Utilities and constants for working with strings.
-
 
 
 
@@ -29,29 +27,22 @@ Module Contents
 
 .. py:function:: delimeter_context(delimeter: typing_extensions.Literal[-, _])
 
-   
-   Context for setting the delimeter. Determines if ``field_a`` is populated as
-   ``--field-a`` or ``--field_a``. Not thread-safe.
-
+   Context for setting the delimeter. Determines if `field_a` is populated as
+   `--field-a` or `--field_a`. Not thread-safe.
 
 
 .. py:function:: get_delimeter() -> typing_extensions.Literal[-, _]
 
-   
    Get delimeter used to separate words.
-
 
 
 .. py:function:: replace_delimeter_in_part(p: str) -> str
 
-   
    Replace hyphens with underscores (or vice versa) except when at the start.
-
 
 
 .. py:function:: make_field_name(parts: Sequence[str]) -> str
 
-   
    Join parts of a field name together. Used for nesting.
 
    ('parent_1', 'child') => 'parent-1.child'
@@ -59,15 +50,12 @@ Module Contents
    ('parents', '1', 'middle._child_node') => 'parents.1.middle._child-node'
 
 
-
 .. py:function:: make_subparser_dest(name: str) -> str
 
 
 .. py:function:: dedent(text: str) -> str
 
-   
    Same as textwrap.dedent, but ignores the first line.
-
 
 
 .. py:function:: hyphen_separated_from_camel_case(name: str) -> str
@@ -84,7 +72,6 @@ Module Contents
 
 .. py:function:: join_union_metavars(metavars: Iterable[str]) -> str
 
-   
    Metavar generation helper for unions. Could be revisited.
 
    .. rubric:: Examples
@@ -98,7 +85,6 @@ Module Contents
 
    The curly brackets are unfortunately overloaded but alternatives all interfere with
    argparse internals.
-
 
 
 .. py:function:: remove_single_line_breaks(helptext: str) -> str

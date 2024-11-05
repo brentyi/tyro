@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">Supported types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -373,53 +373,53 @@
 
 <span class="sd">    For an input like:</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    tyro.extras.subcommand_cli_from_dict(</span>
-<span class="sd">        {</span>
-<span class="sd">            &quot;checkout&quot;: checkout,</span>
-<span class="sd">            &quot;commit&quot;: commit,</span>
-<span class="sd">        }</span>
-<span class="sd">    )</span>
-<span class="sd">    ```</span>
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        tyro.extras.subcommand_cli_from_dict(</span>
+<span class="sd">            {</span>
+<span class="sd">                &quot;checkout&quot;: checkout,</span>
+<span class="sd">                &quot;commit&quot;: commit,</span>
+<span class="sd">            }</span>
+<span class="sd">        )</span>
 
 <span class="sd">    This is internally accomplished by generating and calling:</span>
 
-<span class="sd">    ```python</span>
-<span class="sd">    from typing import Annotated, Any, Union</span>
-<span class="sd">    import tyro</span>
+<span class="sd">    .. code-block:: python</span>
 
-<span class="sd">    tyro.cli(</span>
-<span class="sd">        Union[</span>
-<span class="sd">            Annotated[</span>
-<span class="sd">                Any,</span>
-<span class="sd">                tyro.conf.subcommand(name=&quot;checkout&quot;, constructor=checkout),</span>
-<span class="sd">            ],</span>
-<span class="sd">            Annotated[</span>
-<span class="sd">                Any,</span>
-<span class="sd">                tyro.conf.subcommand(name=&quot;commit&quot;, constructor=commit),</span>
-<span class="sd">            ],</span>
-<span class="sd">        ]</span>
-<span class="sd">    )</span>
-<span class="sd">    ```</span>
+<span class="sd">        from typing import Annotated, Any, Union</span>
+<span class="sd">        import tyro</span>
+
+<span class="sd">        tyro.cli(</span>
+<span class="sd">            Union[</span>
+<span class="sd">                Annotated[</span>
+<span class="sd">                    Any,</span>
+<span class="sd">                    tyro.conf.subcommand(name=&quot;checkout&quot;, constructor=checkout),</span>
+<span class="sd">                ],</span>
+<span class="sd">                Annotated[</span>
+<span class="sd">                    Any,</span>
+<span class="sd">                    tyro.conf.subcommand(name=&quot;commit&quot;, constructor=commit),</span>
+<span class="sd">                ],</span>
+<span class="sd">            ]</span>
+<span class="sd">        )</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        subcommands: Dictionary that maps the subcommand name to function to call.</span>
 <span class="sd">        prog: The name of the program printed in helptext. Mirrors argument from</span>
-<span class="sd">            `argparse.ArgumentParser()`.</span>
+<span class="sd">            :py:class:`argparse.ArgumentParser`.</span>
 <span class="sd">        description: Description text for the parser, displayed when the --help flag is</span>
 <span class="sd">            passed in. If not specified, `f`&#39;s docstring is used. Mirrors argument from</span>
-<span class="sd">            `argparse.ArgumentParser()`.</span>
+<span class="sd">            :py:class:`argparse.ArgumentParser`.</span>
 <span class="sd">        args: If set, parse arguments from a sequence of strings instead of the</span>
-<span class="sd">            commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.</span>
+<span class="sd">            commandline. Mirrors argument from :py:meth:`argparse.ArgumentParser.parse_args()`.</span>
 <span class="sd">        use_underscores: If True, use underscores as a word delimeter instead of hyphens.</span>
 <span class="sd">            This primarily impacts helptext; underscores and hyphens are treated equivalently</span>
 <span class="sd">            when parsing happens. We default helptext to hyphens to follow the GNU style guide.</span>
 <span class="sd">            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html</span>
-<span class="sd">        console_outputs: If set to `False`, parsing errors and help messages will be</span>
-<span class="sd">            supressed. This can be useful for distributed settings, where `tyro.cli()`</span>
+<span class="sd">        console_outputs: If set to ``False``, parsing errors and help messages will be</span>
+<span class="sd">            supressed. This can be useful for distributed settings, where :func:`tyro.cli()`</span>
 <span class="sd">            is called from multiple workers but we only want console outputs from the</span>
 <span class="sd">            main one.</span>
-<span class="sd">        config: Sequence of config marker objects, from `tyro.conf`.</span>
+<span class="sd">        config: Sequence of config marker objects, from :mod:`tyro.conf`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># We need to form a union type, which requires at least two elements.</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">subcommands</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;At least two subcommands are required.&quot;</span>

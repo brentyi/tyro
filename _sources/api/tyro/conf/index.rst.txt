@@ -5,16 +5,14 @@
 
 .. autoapi-nested-parse::
 
-   
    The :mod:`tyro.conf` submodule contains helpers for attaching parsing-specific
-   configuration metadata to types via `PEP 593 <https://peps.python.org/pep-0593/>`_ runtime
+   configuration metadata to types via [PEP 593](https://peps.python.org/pep-0593/) runtime
    annotations.
 
    Configuration flags are applied recursively, and should generally be subscripted:
-   ``Fixed[T]``\ , ``Suppress[T]``\ , etc.
+   ``Fixed[T]``, ``Suppress[T]``, etc.
 
    Features here are supported, but generally unnecessary and should be used sparingly.
-
 
 
 
@@ -24,32 +22,32 @@ Package Contents
 .. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
                  arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
 
-   
    Returns a metadata object for fine-grained argument configuration with
-   ``typing.Annotated``. Should typically not be required.
+   :py:data:`typing.Annotated`. Should typically not be required.
 
-   We support using ``arg()`` at the root of arguments. For example:
-
-   .. code-block:: python
-
-      x: Annotated[int, tyro.conf.arg(...)]
-
-   Nesting ``arg()`` within other types is generally not supported:
+   We support using :func:`arg()` at the root of arguments. For example:
 
    .. code-block:: python
 
-      # Not supported.
-      x: tuple[Annotated[int, tyro.conf.arg(...)], ...]
+       x: Annotated[int, tyro.conf.arg(...)]
+
+   Nesting :func:`arg()` within other types is generally not supported:
+
+   .. code-block:: python
+
+       # Not supported.
+       x: list[Annotated[int, tyro.conf.arg(...)]]
+
 
    :param name: A new name for the argument in the CLI.
    :param metavar: Argument name in usage messages. The type is used by default.
    :param help: Override helptext for this argument. The docstring is used by default.
    :param help_behavior_hint: Override highlighted text that follows the helptext.
-                              Typically used for behavior hints like the ``(default: XXX)`` or
-                              ``(optional)``. Can either be a string or a lambda function whose
+                              Typically used for behavior hints like the `(default: XXX)` or
+                              `(optional)`. Can either be a string or a lambda function whose
                               input is a formatted default value.
    :param aliases: Aliases for this argument. All strings in the sequence should start
-                   with a hyphen (-). Aliases will *not* currently be prefixed in a nested
+                   with a hyphen (-). Aliases will _not_ currently be prefixed in a nested
                    structure, and are not supported for positional arguments.
    :param prefix_name: Whether or not to prefix the name of the argument based on where
                        it is in a nested structure. Arguments are prefixed by default.
@@ -60,43 +58,41 @@ Package Contents
                                will be used in place of the argument's type for parsing arguments.
                                For more configurability, see :mod:`tyro.constructors`.
 
-   :returns: Object to attach via ``typing.Annotated[]``.
-
+   :returns: Object to attach via `typing.Annotated[]`.
 
 
 .. py:function:: subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
                  subcommand(name: str | None = None, *, default: Any = MISSING_NONPROP, description: str | None = None, prefix_name: bool = True, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
 
-   
-   Returns a metadata object for configuring subcommands with ``typing.Annotated``.
-   Useful for aesthetics.
+   Returns a metadata object for configuring subcommands with
+   :py:data:`typing.Annotated`. Useful for aesthetics.
 
    Consider the standard approach for creating subcommands:
 
    .. code-block:: python
 
-      tyro.cli(
-          Union[NestedTypeA, NestedTypeB]
-      )
+       tyro.cli(
+           Union[NestedTypeA, NestedTypeB]
+       )
 
-   This will create two subcommands: ``nested-type-a`` and ``nested-type-b``.
+   This will create two subcommands: `nested-type-a` and `nested-type-b`.
 
-   Annotating each type with ``tyro.conf.subcommand()`` allows us to override for
-   each subcommand the (a) name, (b) defaults, (c) helptext, and (d) whether to prefix
-   the name or not.
+   Annotating each type with :func:`tyro.conf.subcommand()` allows us to
+   override for each subcommand the (a) name, (b) defaults, (c) helptext, and
+   (d) whether to prefix the name or not.
 
    .. code-block:: python
 
-      tyro.cli(
-          Union[
-              Annotated[
-                  NestedTypeA, subcommand("a", ...)
-              ],
-              Annotated[
-                  NestedTypeB, subcommand("b", ...)
-              ],
-          ]
-      )
+       tyro.cli(
+           Union[
+               Annotated[
+                   NestedTypeA, subcommand("a", ...)
+               ],
+               Annotated[
+                   NestedTypeB, subcommand("b", ...)
+               ],
+           ]
+       )
 
    :param name: The name of the subcommand in the CLI.
    :param default: A default value for the subcommand, for struct-like types. (eg
@@ -113,124 +109,94 @@ Package Contents
                                For more configurability, see :mod:`tyro.constructors`.
 
 
-
 .. py:data:: AvoidSubcommands
 
-   
    Avoid creating subcommands when a default is provided for unions over nested types.
    This simplifies CLI interfaces, but makes them less expressive.
 
-   Can be used directly on union types, ``AvoidSubcommands[Union[...]]``\ , or recursively
+   Can be used directly on union types, ``AvoidSubcommands[Union[...]]``, or recursively
    applied to nested types.
-
-
 
 .. py:data:: ConsolidateSubcommandArgs
 
-   
    Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
    ordering, at the cost of support for optional subcommands.
 
-   By default, ``tyro`` will generate a traditional CLI interface where args are applied to
-   the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``\ :
-
-   ::
-
-      python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
+   By default, :mod:`tyro` will generate a traditional CLI interface where args are applied to
+   the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``:
+   ``
+   python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
+   ``
 
    This can be frustrating because the resulting CLI is sensitive to the positioning of
    options.
 
    To consolidate subcommands, we push arguments to the end, after all subcommands:
-
-   ::
-
-      python x.py s1 s2 {--root, s1, and s2 options}
+   ``
+   python x.py s1 s2 {--root, s1, and s2 options}
+   ``
 
    This is more robust to reordering of options, ensuring that any new options can simply
    be placed at the end of the command.
 
-
-
 .. py:data:: EnumChoicesFromValues
 
-   
    Populate choices from enum values rather than enum names.
 
    Example:
 
-   ::
+   .. code-block:: python
 
-          class OutputFormats(enum.StrEnum):
-              JSON = enum.auto()
-              PRETTY = enum.auto()
-              RICH = enum.auto()
-              TOML = enum.auto()
+       class OutputFormats(enum.StrEnum):
+           JSON = enum.auto()
+           PRETTY = enum.auto()
+           RICH = enum.auto()
+           TOML = enum.auto()
 
-          @dataclasses.dataclass
-          class Args:
-              display_format: Annotated[
-                  OutputFormats, tyro.conf.EnumChoicesFromValues
-              ] = OutputFormats.PRETTY
+       @dataclasses.dataclass
+       class Args:
+           display_format: Annotated[
+               OutputFormats, tyro.conf.EnumChoicesFromValues
+           ] = OutputFormats.PRETTY
 
-   The above will result in ``json``\ , ``pretty``\ , ``rich``\ , and ``toml`` (all lowercase) as choices,
-   since the auto values for ``StrEnum`` (Python 3.11+) are lowercase transformations of the
-   names. Without this marker, the choices would be ``JSON``\ , ``PRETTY``\ , ``RICH``\ , and ``TOML``.
+   The above will result in ``json``, ``pretty``, ``rich``, and ``toml`` (all lowercase) as choices,
+   since the auto values for `StrEnum` (Python 3.11+) are lowercase transformations of the
+   names. Without this marker, the choices would be ``JSON``, ``PRETTY``, ``RICH``, and ``TOML``.
 
    Enum aliases are not relevant when this marker is present. The first entry matching the
    chosen value will be selected.
 
-
-
 .. py:data:: Fixed
 
-   
-   A type ``T`` can be annotated as ``Fixed[T]`` to prevent ``tyro.cli`` from parsing it; a
-   default value should be set instead. Fields that can't be parsed with defaults will also
-   be marked as fixed automatically.
-
-
+   A type ``T`` can be annotated as ``Fixed[T]`` to prevent :func:`tyro.cli`
+   from parsing it; a default value should be set instead. Fields that can't be
+   parsed with defaults will also be marked as fixed automatically.
 
 .. py:data:: FlagConversionOff
 
-   
    Turn off flag conversion for booleans with default values. Instead, types annotated
-   with ``bool`` will expect an explicit True or False.
+   with `bool` will expect an explicit True or False.
 
-   Can be used directly on boolean annotations, ``FlagConversionOff[bool]``\ , or recursively
+   Can be used directly on boolean annotations, ``FlagConversionOff[bool]``, or recursively
    applied to nested types.
-
-
 
 .. py:data:: OmitArgPrefixes
 
-   
    Make flags used for keyword arguments shorter by omitting prefixes.
 
    If we have a structure with the field:
 
-   ::
-
-      cmd: NestedType
-
+       cmd: NestedType
 
    By default, ``--cmd.arg`` may be generated as a flag. If prefixes are omitted, we would
    instead simply have ``--arg``.
 
-
-
 .. py:data:: OmitSubcommandPrefixes
 
-   
    Make CLI inputs used for subcommands shorter by omitting the subcommand-specific
    portion of the prefix.
 
-   If we have a structure with the field:
-
-   ::
-
-      cmd: Union[NestedTypeA, NestedTypeB]
-
+   If we have a structure with the field ``cmd: Union[NestedTypeA, NestedTypeB]``:
 
    By default, ``--cmd.arg`` may be generated as a flag for each dataclass in the union.
    If subcommand prefixes are omitted, we would instead have ``--arg``.
@@ -239,88 +205,66 @@ Package Contents
    If subcommand prefixes are omitted, we would instead have ``nested-type-a`` and
    ``nested-type-b``.
 
-
-
 .. py:data:: Positional
 
-   
    A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a positional
    argument.
 
-
-
 .. py:data:: PositionalRequiredArgs
 
-   
    Make all arguments without defaults positional.
-
-
 
 .. py:data:: Suppress
 
-   
-   A type ``T`` can be annotated as ``Suppress[T]`` to prevent ``tyro.cli`` from parsing it, and
+   A type ``T`` can be annotated as ``Suppress[T]`` to prevent :func:`tyro.cli` from parsing it, and
    to prevent it from showing up in helptext.
-
-
 
 .. py:data:: SuppressFixed
 
-   
    Hide fields that are either manually or automatically marked as fixed.
-
-
 
 .. py:data:: UseAppendAction
 
-   
    Use "append" actions for variable-length arguments.
 
-   Given an annotation like ``x: list[int]``\ , this means that ``x = [0, 1, 2]`` can be set via
+   Given an annotation like ``x: list[int]``, this means that ``x = [0, 1, 2]`` can be set via
    the CLI syntax ``--x 0 --x 1 --x 2`` instead of the default of ``--x 0 1 2``.
 
-   The resulting syntax may be more user-friendly; for ``tyro``\ , it also enables support for
+   The resulting syntax may be more user-friendly; for :mod:`tyro`, it also enables support for
    otherwise ambiguous annotations like ``list[list[int]]``.
 
-   Can be applied to all variable-length sequences (\ ``list[T]``\ , ``Sequence[T]``\ ,
-   ``tuple[T, ...]``\ , etc), including dictionaries without default values.
-
-
+   Can be applied to all variable-length sequences (``list[T]``, ``Sequence[T]``,
+   ``tuple[T, ...]``, etc), including dictionaries without default values.
 
 .. py:data:: UseCounterAction
 
-   
    ``verbose: UseCounterAction[int]``.
 
    :type: Use "counter" actions for integer arguments. Example usage
 
-
-
 .. py:function:: configure(*markers: Marker) -> Callable[[CallableType], CallableType]
 
-   
    Decorator for applying configuration options.
 
-   Consider using the ``config=`` argument of ``tyro.cli()`` instead, which takes the same
-   config marker objects as inputs.
+   Consider using the ``config=`` argument of :func:`tyro.cli()` instead,
+   which takes the same config marker objects as inputs.
 
-   Configuration markers are implemented via ``typing.Annotated`` and straightforward
+   Configuration markers are implemented via :py:data:`typing.Annotated` and straightforward
    to apply to types, for example:
 
    .. code-block:: python
 
-      field: tyro.conf.FlagConversionOff[bool]
+       field: tyro.conf.FlagConversionOff[bool]
 
    This decorator makes markers applicable to general functions as well:
 
    .. code-block:: python
 
-      # Recursively apply FlagConversionOff to all fields in `main()`.
-      @tyro.conf.configure(tyro.conf.FlagConversionOff)
-      def main(field: bool) -> None:
-          ...
+       # Recursively apply FlagConversionOff to all fields in `main()`.
+       @tyro.conf.configure(tyro.conf.FlagConversionOff)
+       def main(field: bool) -> None:
+           ...
 
    :param markers: Options to apply.
-
 
 

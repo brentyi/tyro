@@ -18,9 +18,7 @@ Module Contents
 
    Bases: :py:obj:`Exception`
 
-   
    Exception raised when an unsupported type annotation is detected.
-
 
 
 .. py:data:: T
@@ -30,35 +28,24 @@ Module Contents
 .. py:class:: PrimitiveTypeInfo
 
 
-   
    Information used to generate constructors for primitive types.
-
 
    .. py:attribute:: type
       :type: tyro._typing.TypeForm
 
-      
       Annotated field type. Forward references, aliases, and type
       variables/parameters will have been resolved and runtime annotations
       (typing.Annotated) will have been stripped.
 
-
-
    .. py:attribute:: type_origin
       :type: tyro._typing.TypeForm | None
 
-      
       The output of get_origin() on the static type.
-
-
 
    .. py:attribute:: markers
       :type: set[tyro.conf._markers.Marker]
 
-      
       Set of tyro markers used to configure this field.
-
-
 
    .. py:method:: make(raw_annotation: tyro._typing.TypeForm | Callable, parent_markers: set[tyro.conf._markers.Marker]) -> PrimitiveTypeInfo
       :staticmethod:
@@ -70,7 +57,6 @@ Module Contents
 
    Bases: :py:obj:`Generic`\ [\ :py:obj:`T`\ ]
 
-   
    Specification for constructing a primitive type from a string.
 
    There are two ways to use this class:
@@ -81,37 +67,26 @@ Module Contents
 
    Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
 
-
    .. py:attribute:: nargs
       :type: int | typing_extensions.Literal[*]
 
-      
       Number of arguments required to construct an instance. If nargs is "*", then
       the number of arguments is variable.
-
-
 
    .. py:attribute:: metavar
       :type: str
 
-      
       Metavar to display in help messages.
-
-
 
    .. py:attribute:: instance_from_str
       :type: Callable[[list[str]], T]
 
-      
       Given a list of string arguments, construct an instance of the type. The
       length of the list will match the value of nargs.
-
-
 
    .. py:attribute:: is_instance
       :type: Callable[[Any], bool | typing_extensions.Literal[~]]
 
-      
       Given an object instance, does it match this primitive type? This is
       used for specific help messages when both a union type is present and a
       default is provided.
@@ -120,30 +95,20 @@ Module Contents
       only be used if there are no other matches. This is used for numeric tower
       support.
 
-
-
    .. py:attribute:: str_from_instance
       :type: Callable[[T], list[str]]
 
-      
       Convert an instance to a list of string arguments that would construct
       the instance. This is used for help messages when a default is provided.
-
-
 
    .. py:attribute:: choices
       :type: tuple[str, Ellipsis] | None
 
-      
       Finite set of choices for arguments.
-
-
 
 
 .. py:function:: apply_default_primitive_rules(registry: tyro.constructors._registry.ConstructorRegistry) -> None
 
-   
    Apply default rules to the registry.
-
 
 

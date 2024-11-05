@@ -7,10 +7,8 @@
 
 .. autoapi-nested-parse::
 
-   
    Abstractions for pulling out 'field' definitions, which specify inputs, types, and # type: ignore
    defaults, from general callables.
-
 
 
 
@@ -39,10 +37,7 @@ Module Contents
    .. py:attribute:: type
       :type: tyro._typing.TypeForm[Any] | Callable
 
-      
       Full type, including runtime annotations.
-
-
 
    .. py:attribute:: type_stripped
       :type: tyro._typing.TypeForm[Any] | Callable
@@ -90,10 +85,8 @@ Module Contents
    .. py:method:: marker_context(markers: Tuple[tyro.conf._markers.Marker, Ellipsis])
       :staticmethod:
 
-      
       Context for setting markers on fields. All fields created within the
       context will have the specified markers.
-
 
 
    .. py:method:: from_field_spec(field_spec: tyro.constructors._struct_spec.StructFieldSpec) -> FieldDefinition
@@ -109,22 +102,17 @@ Module Contents
 
    .. py:method:: is_positional() -> bool
 
-      
       Returns True if the argument should be positional in the commandline.
-
 
 
    .. py:method:: is_positional_call() -> bool
 
-      
       Returns True if the argument should be positional in underlying Python call.
-
 
 
 
 .. py:function:: is_struct_type(typ: Union[tyro._typing.TypeForm[Any], Callable], default_instance: Any) -> bool
 
-   
    Determine whether a type should be treated as a 'struct type', where a single
    type can be broken down into multiple fields (eg for nested dataclasses or
    classes).
@@ -133,15 +121,12 @@ Module Contents
    misleading.
 
 
-
 .. py:function:: field_list_from_type_or_callable(f: Union[Callable, tyro._typing.TypeForm[Any]], default_instance: Any, support_single_arg_types: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
 
-   
    Generate a list of generic 'field' objects corresponding to the inputs of some
    annotated callable.
 
-   :returns: The type that ``f`` is resolved as.
+   :returns: The type that `f` is resolved as.
              A list of field definitions.
-
 
 

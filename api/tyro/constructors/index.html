@@ -220,7 +220,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">Supported types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -327,9 +327,9 @@
 <span id="tyro-constructors"></span><h1><a class="reference internal" href="#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a><a class="headerlink" href="#module-tyro.constructors" title="Link to this heading">¶</a></h1>
 <p>The <a class="reference internal" href="#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a> submodule exposes tyro’s API for defining
 behavior for different types.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">This</span> <span class="n">submodule</span> <span class="n">exposes</span> <span class="n">advanced</span> <span class="n">functionality</span><span class="p">,</span> <span class="ow">and</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">needed</span> <span class="k">for</span> <span class="n">the</span>
-<span class="n">majority</span> <span class="n">of</span> <span class="n">users</span><span class="o">.</span>
-</pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This submodule is not needed for the majority of users.</p>
 </div>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
@@ -352,13 +352,13 @@ the number of arguments is variable.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveConstructorSpec.metavar">
-<span class="sig-name descname"><span class="pre">metavar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.metavar" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">metavar</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.metavar" title="Link to this definition">¶</a></dt>
 <dd><p>Metavar to display in help messages.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveConstructorSpec.instance_from_str">
-<span class="sig-name descname"><span class="pre">instance_from_str</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.instance_from_str" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">instance_from_str</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">T</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.instance_from_str" title="Link to this definition">¶</a></dt>
 <dd><p>Given a list of string arguments, construct an instance of the type. The
 length of the list will match the value of nargs.</p>
 </dd></dl>
@@ -376,14 +376,14 @@ support.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveConstructorSpec.str_from_instance">
-<span class="sig-name descname"><span class="pre">str_from_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.str_from_instance" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">str_from_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">T</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.str_from_instance" title="Link to this definition">¶</a></dt>
 <dd><p>Convert an instance to a list of string arguments that would construct
 the instance. This is used for help messages when a default is provided.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveConstructorSpec.choices">
-<span class="sig-name descname"><span class="pre">choices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.choices" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">choices</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec.choices" title="Link to this definition">¶</a></dt>
 <dd><p>Finite set of choices for arguments.</p>
 </dd></dl>
 
@@ -403,24 +403,24 @@ variables/parameters will have been resolved and runtime annotations
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveTypeInfo.type_origin">
-<span class="sig-name descname"><span class="pre">type_origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tyro.constructors.PrimitiveTypeInfo.type_origin" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">type_origin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro.constructors.PrimitiveTypeInfo.type_origin" title="Link to this definition">¶</a></dt>
 <dd><p>The output of get_origin() on the static type.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveTypeInfo.markers">
-<span class="sig-name descname"><span class="pre">markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.PrimitiveTypeInfo.markers" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.PrimitiveTypeInfo.markers" title="Link to this definition">¶</a></dt>
 <dd><p>Set of tyro markers used to configure this field.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveTypeInfo.make">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro.constructors.PrimitiveTypeInfo" title="tyro.constructors.PrimitiveTypeInfo"><span class="pre">PrimitiveTypeInfo</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_primitive_spec/#PrimitiveTypeInfo.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.PrimitiveTypeInfo.make" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_annotation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parent_markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><span class="pre">tyro.conf._markers.Marker</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#tyro.constructors.PrimitiveTypeInfo" title="tyro.constructors.PrimitiveTypeInfo"><span class="pre">PrimitiveTypeInfo</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_primitive_spec/#PrimitiveTypeInfo.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.PrimitiveTypeInfo.make" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>raw_annotation</strong> (<em>tyro._typing.TypeForm</em><em> | </em><em>Callable</em>)</p></li>
-<li><p><strong>parent_markers</strong> (<em>set</em><em>[</em><em>tyro.conf._markers.Marker</em><em>]</em>)</p></li>
+<li><p><strong>parent_markers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>[</em><em>tyro.conf._markers.Marker</em><em>]</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -434,7 +434,7 @@ variables/parameters will have been resolved and runtime annotations
 <dl class="py exception">
 <dt class="sig sig-object py" id="tyro.constructors.UnsupportedTypeAnnotationError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors.</span></span><span class="sig-name descname"><span class="pre">UnsupportedTypeAnnotationError</span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_primitive_spec/#UnsupportedTypeAnnotationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.UnsupportedTypeAnnotationError" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.13)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Exception</span></code></a></p>
 <p>Exception raised when an unsupported type annotation is detected.</p>
 </dd></dl>
 
@@ -444,27 +444,28 @@ variables/parameters will have been resolved and runtime annotations
 <dd><p>Registry for rules that define how types are constructed from
 command-line arguments.</p>
 <p>The behavior of CLIs generated by tyro are based on two types of rules.</p>
-<p><em>Primitive rules</em> should be a callable with the signature:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span>
-</pre></div>
-</div>
-<p>where <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned if the rule doesn’t apply. Each primitive rule
+<p><em>Primitive rules</em> should be a callable with the signature:
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">(type_info:</span> <span class="pre">PrimitiveTypeInfo)</span> <span class="pre">-&gt;</span> <span class="pre">PrimitiveConstructorSpec</span> <span class="pre">|</span> <span class="pre">None</span>
+<span class="pre">`</span></code>
+where <cite>None</cite> is returned if the rule doesn’t apply. Each primitive rule
 defines behavior for a type that can be instantiated from a single
 command-line argument.</p>
-<p><em>Struct rules</em> should be a callable with the signature:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span>
-</pre></div>
-</div>
-<p>where <code class="docutils literal notranslate"><span class="pre">None</span></code> is returned if the rule doesn’t apply. Each struct rule
+<p><em>Struct rules</em> should be a callable with the signature:
+<code class="docutils literal notranslate"><span class="pre">`python</span>
+<span class="pre">(type_info:</span> <span class="pre">StructTypeInfo)</span> <span class="pre">-&gt;</span> <span class="pre">StructConstructorSpec</span> <span class="pre">|</span> <span class="pre">None</span>
+<span class="pre">`</span></code>
+where <cite>None</cite> is returned if the rule doesn’t apply. Each struct rule
 defines behavior for a type that can be instantiated from multiple
 command-line arguments.</p>
 <p>To activate a registry, use it as a context manager. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="p">()</span>
-
-<span class="k">with</span> <span class="n">registry</span><span class="p">:</span>
-    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</pre></div>
-</div>
+<p><a href="#id1"><span class="problematic" id="id2">``</span></a><a href="#id3"><span class="problematic" id="id4">`</span></a>python
+registry = ConstructorRegistry()</p>
+<dl class="simple">
+<dt>with registry:</dt><dd><p>tyro.cli(…)</p>
+</dd>
+</dl>
+<p><a href="#id5"><span class="problematic" id="id6">``</span></a><a href="#id7"><span class="problematic" id="id8">`</span></a></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors.ConstructorRegistry.primitive_rule">
 <span class="sig-name descname"><span class="pre">primitive_rule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rule</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">PrimitiveSpecRule</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">PrimitiveSpecRule</span></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.primitive_rule"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.ConstructorRegistry.primitive_rule" title="Link to this definition">¶</a></dt>
@@ -516,8 +517,8 @@ most recently added rule will be applied first.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors.ConstructorRegistry.get_struct_spec">
-<span class="sig-name descname"><span class="pre">get_struct_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="_struct_spec/#tyro.constructors._struct_spec.StructTypeInfo" title="tyro.constructors._struct_spec.StructTypeInfo"><span class="pre">tyro.constructors._struct_spec.StructTypeInfo</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="_struct_spec/#tyro.constructors._struct_spec.StructConstructorSpec" title="tyro.constructors._struct_spec.StructConstructorSpec"><span class="pre">tyro.constructors._struct_spec.StructConstructorSpec</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.get_struct_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.ConstructorRegistry.get_struct_spec" title="Link to this definition">¶</a></dt>
-<dd><p>Get a constructor specification for a given type. Returns <code class="docutils literal notranslate"><span class="pre">None</span></code> if
+<span class="sig-name descname"><span class="pre">get_struct_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">type_info</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="_struct_spec/#tyro.constructors._struct_spec.StructTypeInfo" title="tyro.constructors._struct_spec.StructTypeInfo"><span class="pre">tyro.constructors._struct_spec.StructTypeInfo</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="_struct_spec/#tyro.constructors._struct_spec.StructConstructorSpec" title="tyro.constructors._struct_spec.StructConstructorSpec"><span class="pre">tyro.constructors._struct_spec.StructConstructorSpec</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.get_struct_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.ConstructorRegistry.get_struct_spec" title="Link to this definition">¶</a></dt>
+<dd><p>Get a constructor specification for a given type. Returns <cite>None</cite> if
 unsuccessful.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -531,7 +532,7 @@ unsuccessful.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors.ConstructorRegistry.__enter__">
-<span class="sig-name descname"><span class="pre">__enter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.__enter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.ConstructorRegistry.__enter__" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__enter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.__enter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.ConstructorRegistry.__enter__" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>None</p>
@@ -541,7 +542,7 @@ unsuccessful.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors.ConstructorRegistry.__exit__">
-<span class="sig-name descname"><span class="pre">__exit__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.__exit__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.ConstructorRegistry.__exit__" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__exit__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_registry/#ConstructorRegistry.__exit__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.ConstructorRegistry.__exit__" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>args</strong> (<em>Any</em>)</p>
@@ -559,10 +560,10 @@ unsuccessful.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors.</span></span><span class="sig-name descname"><span class="pre">StructConstructorSpec</span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_struct_spec/#StructConstructorSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.StructConstructorSpec" title="Link to this definition">¶</a></dt>
 <dd><p>Specification for a struct type, which is broken down into multiple
 fields.</p>
-<p>Each struct type is instantiated by calling an <code class="docutils literal notranslate"><span class="pre">instantiate(**kwargs)</span></code>
+<p>Each struct type is instantiated by calling an <cite>instantiate(**kwargs)</cite>
 function with keyword a set of keyword arguments.</p>
-<p>Unlike <code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec</span></code>, there is only one way to use this class.
-It must be returned by a rule in <code class="docutils literal notranslate"><span class="pre">ConstructorRegistry</span></code>.</p>
+<p>Unlike <cite>PrimitiveConstructorSpec</cite>, there is only one way to use this class.
+It must be returned by a rule in <cite>ConstructorRegistry</cite>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructConstructorSpec.instantiate">
 <span class="sig-name descname"><span class="pre">instantiate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.StructConstructorSpec.instantiate" title="Link to this definition">¶</a></dt>
@@ -571,9 +572,9 @@ It must be returned by a rule in <code class="docutils literal notranslate"><spa
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructConstructorSpec.fields">
-<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro.constructors.StructFieldSpec" title="tyro.constructors.StructFieldSpec"><span class="pre">StructFieldSpec</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.StructConstructorSpec.fields" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro.constructors.StructFieldSpec" title="tyro.constructors.StructFieldSpec"><span class="pre">StructFieldSpec</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.StructConstructorSpec.fields" title="Link to this definition">¶</a></dt>
 <dd><p>Fields used to construct the callable. Each field is used as a keyword
-argument for the <code class="docutils literal notranslate"><span class="pre">instantiate(**kwargs)</span></code> function.</p>
+argument for the <cite>instantiate(**kwargs)</cite> function.</p>
 </dd></dl>
 
 </dd></dl>
@@ -584,9 +585,9 @@ argument for the <code class="docutils literal notranslate"><span class="pre">in
 <dd><p>Behavior specification for a single field in our callable.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructFieldSpec.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tyro.constructors.StructFieldSpec.name" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro.constructors.StructFieldSpec.name" title="Link to this definition">¶</a></dt>
 <dd><p>The name of the field. This will be used as a keyword argument for the
-struct’s associated <code class="docutils literal notranslate"><span class="pre">instantiate(**kwargs)</span></code> function.</p>
+struct’s associated <cite>instantiate(**kwargs)</cite> function.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -603,14 +604,14 @@ struct’s associated <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructFieldSpec.is_default_overridden">
-<span class="sig-name descname"><span class="pre">is_default_overridden</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#tyro.constructors.StructFieldSpec.is_default_overridden" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_default_overridden</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#tyro.constructors.StructFieldSpec.is_default_overridden" title="Link to this definition">¶</a></dt>
 <dd><p>Whether the default value was overridden by the default instance. Should
 be set to False if the default value was assigned by the field itself.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructFieldSpec.helptext">
-<span class="sig-name descname"><span class="pre">helptext</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#tyro.constructors.StructFieldSpec.helptext" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">helptext</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro.constructors.StructFieldSpec.helptext" title="Link to this definition">¶</a></dt>
 <dd><p>Helpjext for the field.</p>
 </dd></dl>
 
@@ -627,7 +628,7 @@ be set to False if the default value was assigned by the field itself.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo.markers">
-<span class="sig-name descname"><span class="pre">markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.StructTypeInfo.markers" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.StructTypeInfo.markers" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">

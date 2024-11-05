@@ -59,11 +59,8 @@ Module Contents
 .. py:data:: MISSING
    :type: Any
 
-   
    Sentinel value to mark fields as missing. Can be used to mark fields passed
-   in via ``default=`` for ``tyro.cli()`` as required.
-
-
+   in via `default=` for `tyro.cli()` as required.
 
 .. py:data:: MISSING_SINGLETONS
 

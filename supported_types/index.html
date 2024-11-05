@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Functions" href="../examples/01_basics/01_functions/" /><link rel="prev" title="Your first CLI" href="../your_first_cli/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Supported types - tyro</title>
+        <title>What’s supported - tyro</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b20cc3f5" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
@@ -220,7 +220,7 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Supported types</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -303,7 +303,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/supported_types.md.txt" title="View this page">
+  <a class="muted-link" href="../_sources/supported_types.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -323,33 +323,32 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="supported-types">
-<h1>Supported types<a class="headerlink" href="#supported-types" title="Link to this heading">¶</a></h1>
-<p>For minimum-boilerplate CLIs, <code class="docutils literal notranslate"><span class="pre">tyro</span></code> aims to maximize support of
-Python’s standard <a class="reference external" href="https://docs.python.org/3/library/typing.html">typing</a>
-features.</p>
+          <section id="what-s-supported">
+<h1>What’s supported<a class="headerlink" href="#what-s-supported" title="Link to this heading">¶</a></h1>
+<p>For minimum-boilerplate CLIs, <cite>tyro</cite> aims to maximize support of
+Python’s standard <a class="reference external" href="https://docs.python.org/3/library/typing.html#module-typing" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">typing</span></code></a> features.</p>
 <p>As a partial list, inputs can be annotated with:</p>
 <ul class="simple">
-<li><p>Basic types like <code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code>, <code class="docutils literal notranslate"><span class="pre">bool</span></code>, <code class="docutils literal notranslate"><span class="pre">pathlib.Path</span></code>, <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">datetime.date</span></code>, <code class="docutils literal notranslate"><span class="pre">datetime.datetime</span></code>, and <code class="docutils literal notranslate"><span class="pre">datetime.time</span></code>.</p></li>
-<li><p>Container types like <code class="docutils literal notranslate"><span class="pre">list</span></code>, <code class="docutils literal notranslate"><span class="pre">dict</span></code>, <code class="docutils literal notranslate"><span class="pre">tuple</span></code>, and <code class="docutils literal notranslate"><span class="pre">set</span></code>.</p></li>
-<li><p>Union types, like <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span> <span class="pre">Y</span></code>, <code class="docutils literal notranslate"><span class="pre">Union[X,</span> <span class="pre">Y]</span></code>, and <code class="docutils literal notranslate"><span class="pre">Optional[T]</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">typing.Literal</span></code> and <code class="docutils literal notranslate"><span class="pre">enum.Enum</span></code> .</p></li>
-<li><p>Type aliases, for example using Python 3.12’s <a class="reference external" href="https://peps.python.org/pep-0695/">PEP 695</a> <code class="docutils literal notranslate"><span class="pre">type</span></code> statement.</p></li>
-<li><p>Generics, such as those annotated with <code class="docutils literal notranslate"><span class="pre">typing.TypeVar</span></code> or with the type parameter syntax introduced by Python 3.12’s <a class="reference external" href="https://peps.python.org/pep-0695/">PEP 695</a>.</p></li>
+<li><p>Basic types like <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pathlib.Path</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.date" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.date</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.datetime</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.time" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime.time</span></code></a>.</p></li>
+<li><p>Container types like <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">set</span></code></a>.</p></li>
+<li><p>Union types, like <cite>X | Y</cite>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Union</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Optional</span></code></a>.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Literal</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a>.</p></li>
+<li><p>Type aliases, for example using Python 3.12’s <a class="reference external" href="https://peps.python.org/pep-0695/">PEP 695</a> <cite>type</cite> statement.</p></li>
+<li><p>Generics, such as those annotated with <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypeVar</span></code></a> or with the type parameter syntax introduced by Python 3.12’s <a class="reference external" href="https://peps.python.org/pep-0695/">PEP 695</a>.</p></li>
 <li><p>etc</p></li>
 </ul>
 <p>Compositions of the above types, like <code class="docutils literal notranslate"><span class="pre">tuple[int</span> <span class="pre">|</span> <span class="pre">str,</span> <span class="pre">...]</span> <span class="pre">|</span> <span class="pre">None</span></code>, are also supported.</p>
 <p>Types can also be placed and nested in various structures, such as:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">dataclasses.dataclass</span></code>.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.dataclass()</span></code></a>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">attrs</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, and <code class="docutils literal notranslate"><span class="pre">flax.linen</span></code> models.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">typing.TypedDict</span></code>, flags like <code class="docutils literal notranslate"><span class="pre">total=</span></code>, and associated annotations like <code class="docutils literal notranslate"><span class="pre">typing.Required</span></code>, <code class="docutils literal notranslate"><span class="pre">typing.NotRequired</span></code>, <code class="docutils literal notranslate"><span class="pre">typing.ReadOnly</span></code>,</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NamedTuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code></a>.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypedDict</span></code></a>, flags like <code class="docutils literal notranslate"><span class="pre">total=</span></code>, and associated annotations like <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Required" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Required</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NotRequired" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.NotRequired</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ReadOnly" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.ReadOnly</span></code></a>,</p></li>
 </ul>
 <section id="what-s-not-supported">
 <h2>What’s not supported<a class="headerlink" href="#what-s-not-supported" title="Link to this heading">¶</a></h2>
-<p>There are some limitations. We currently <em>do not</em> support:</p>
+<p>There are some limitations. We currently _do <a href="#id2"><span class="problematic" id="id3">not_</span></a> support:</p>
 <ul class="simple">
 <li><p>Variable-length sequences over nested structures, unless a default is
 provided. For types like <code class="docutils literal notranslate"><span class="pre">list[Dataclass]</span></code>, we require a default value to
@@ -429,7 +428,7 @@ can be defined as a workaround.</p>
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Supported types</a><ul>
+<li><a class="reference internal" href="#">What’s supported</a><ul>
 <li><a class="reference internal" href="#what-s-not-supported">What’s not supported</a></li>
 </ul>
 </li>

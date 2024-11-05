@@ -7,76 +7,65 @@
 
 .. autoapi-nested-parse::
 
-   
    Command-line parsing library
 
    This module is an optparse-inspired command-line parsing library that:
 
-   ::
-
-      - handles both optional and positional arguments
-      - produces highly informative usage messages
-      - supports parsers that dispatch to sub-parsers
-
+       - handles both optional and positional arguments
+       - produces highly informative usage messages
+       - supports parsers that dispatch to sub-parsers
 
    The following is a simple usage example that sums integers from the
-   command-line and writes the result to a file:
+   command-line and writes the result to a file::
 
-   ::
-
-      parser = argparse.ArgumentParser(
-          description='sum the integers at the command line')
-      parser.add_argument(
-          'integers', metavar='int', nargs='+', type=int,
-          help='an integer to be summed')
-      parser.add_argument(
-          '--log', default=sys.stdout, type=argparse.FileType('w'),
-          help='the file where the sum should be written')
-      args = parser.parse_args()
-      args.log.write('%s' % sum(args.integers))
-      args.log.close()
-
+       parser = argparse.ArgumentParser(
+           description='sum the integers at the command line')
+       parser.add_argument(
+           'integers', metavar='int', nargs='+', type=int,
+           help='an integer to be summed')
+       parser.add_argument(
+           '--log', default=sys.stdout, type=argparse.FileType('w'),
+           help='the file where the sum should be written')
+       args = parser.parse_args()
+       args.log.write('%s' % sum(args.integers))
+       args.log.close()
 
    The module contains the following public classes:
 
-   ::
+       - ArgumentParser -- The main entry point for command-line parsing. As the
+           example above shows, the add_argument() method is used to populate
+           the parser with actions for optional and positional arguments. Then
+           the parse_args() method is invoked to convert the args at the
+           command-line into an object with attributes.
 
-      - ArgumentParser -- The main entry point for command-line parsing. As the
-          example above shows, the add_argument() method is used to populate
-          the parser with actions for optional and positional arguments. Then
-          the parse_args() method is invoked to convert the args at the
-          command-line into an object with attributes.
+       - ArgumentError -- The exception raised by ArgumentParser objects when
+           there are errors with the parser's actions. Errors raised while
+           parsing the command-line are caught by ArgumentParser and emitted
+           as command-line messages.
 
-      - ArgumentError -- The exception raised by ArgumentParser objects when
-          there are errors with the parser's actions. Errors raised while
-          parsing the command-line are caught by ArgumentParser and emitted
-          as command-line messages.
+       - FileType -- A factory for defining types of files to be created. As the
+           example above shows, instances of FileType are typically passed as
+           the type= argument of add_argument() calls.
 
-      - FileType -- A factory for defining types of files to be created. As the
-          example above shows, instances of FileType are typically passed as
-          the type= argument of add_argument() calls.
+       - Action -- The base class for parser actions. Typically actions are
+           selected by passing strings like 'store_true' or 'append_const' to
+           the action= argument of add_argument(). However, for greater
+           customization of ArgumentParser actions, subclasses of Action may
+           be defined and passed as the action= argument.
 
-      - Action -- The base class for parser actions. Typically actions are
-          selected by passing strings like 'store_true' or 'append_const' to
-          the action= argument of add_argument(). However, for greater
-          customization of ArgumentParser actions, subclasses of Action may
-          be defined and passed as the action= argument.
-
-      - HelpFormatter, RawDescriptionHelpFormatter, RawTextHelpFormatter,
-          ArgumentDefaultsHelpFormatter -- Formatter classes which
-          may be passed as the formatter_class= argument to the
-          ArgumentParser constructor. HelpFormatter is the default,
-          RawDescriptionHelpFormatter and RawTextHelpFormatter tell the parser
-          not to change the formatting for help text, and
-          ArgumentDefaultsHelpFormatter adds information about argument defaults
-          to the help.
-
+       - HelpFormatter, RawDescriptionHelpFormatter, RawTextHelpFormatter,
+           ArgumentDefaultsHelpFormatter -- Formatter classes which
+           may be passed as the formatter_class= argument to the
+           ArgumentParser constructor. HelpFormatter is the default,
+           RawDescriptionHelpFormatter and RawTextHelpFormatter tell the parser
+           not to change the formatting for help text, and
+           ArgumentDefaultsHelpFormatter adds information about argument defaults
+           to the help.
 
    All other classes in this module are considered implementation details.
    (Also note that HelpFormatter and RawDescriptionHelpFormatter are only
    considered public as object names -- the API of the formatter objects is
    still considered an implementation detail.)
-
 
 
 
@@ -118,12 +107,10 @@ Module Contents
 
    Bases: :py:obj:`object`
 
-   
    Formatter for generating usage messages and argument help strings.
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
-
 
    .. py:method:: start_section(heading)
 
@@ -152,12 +139,10 @@ Module Contents
 
    Bases: :py:obj:`HelpFormatter`
 
-   
    Help message formatter which retains any formatting in descriptions.
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
-
 
 
 .. py:class:: RawTextHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
@@ -165,12 +150,10 @@ Module Contents
 
    Bases: :py:obj:`RawDescriptionHelpFormatter`
 
-   
    Help message formatter which retains formatting of all help text.
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
-
 
 
 .. py:class:: ArgumentDefaultsHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
@@ -178,12 +161,10 @@ Module Contents
 
    Bases: :py:obj:`HelpFormatter`
 
-   
    Help message formatter which adds default values to argument help.
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
-
 
 
 .. py:class:: MetavarTypeHelpFormatter(prog, indent_increment=2, max_help_position=24, width=None)
@@ -191,7 +172,6 @@ Module Contents
 
    Bases: :py:obj:`HelpFormatter`
 
-   
    Help message formatter which uses the argument 'type' as the default
    metavar value (instead of the argument 'dest')
 
@@ -199,13 +179,11 @@ Module Contents
    provided by the class are considered an implementation detail.
 
 
-
 .. py:class:: Action(option_strings, dest, nargs=None, const=None, default=None, type=None, choices=None, required=False, help=None, metavar=None)
 
 
    Bases: :py:obj:`_AttributeHolder`
 
-   
    Information about how to convert command line strings to Python objects.
 
    Action objects are used by an ArgumentParser to represent the information
@@ -218,17 +196,13 @@ Module Contents
    :kwtype - dest -- The name of the attribute to hold the created object: s
    :keyword - nargs -- The number of command-line arguments that should be: consumed. By default, one argument will be consumed and a single
                                                                             value will be produced.  Other values include:
-
-   ::
-
-                                                                               - N (an integer) consumes N arguments (and produces a list)
-                                                                               - '?' consumes zero or one arguments
-                                                                               - '*' consumes zero or more arguments (and produces a list)
-                                                                               - '+' consumes one or more arguments (and produces a list)
-                                                                           Note that the difference between the default and nargs=1 is that
-                                                                           with the default, a single value will be produced, while with
-                                                                           nargs=1, a list containing a single value will be produced.
-
+                                                                                - N (an integer) consumes N arguments (and produces a list)
+                                                                                - '?' consumes zero or one arguments
+                                                                                - '*' consumes zero or more arguments (and produces a list)
+                                                                                - '+' consumes one or more arguments (and produces a list)
+                                                                            Note that the difference between the default and nargs=1 is that
+                                                                            with the default, a single value will be produced, while with
+                                                                            nargs=1, a list containing a single value will be produced.
    :keyword - const -- The value to be produced if the option is specified and the: option uses an action that takes no values.
    :keyword - default -- The value to be produced if the option is not specified.:
    :keyword - type -- A callable that accepts a single string argument, and: returns the converted value.  The standard Python types str, int,
@@ -241,7 +215,6 @@ Module Contents
                                                                               arguments.
    :keyword - help -- The help string describing the argument.:
    :keyword - metavar -- The name to be used for the option's argument with the: help string. If None, the 'dest' value will be used as the name.
-
 
    .. py:method:: format_usage()
 
@@ -256,7 +229,6 @@ Module Contents
 
    Bases: :py:obj:`Action`
 
-   
    Information about how to convert command line strings to Python objects.
 
    Action objects are used by an ArgumentParser to represent the information
@@ -269,17 +241,13 @@ Module Contents
    :kwtype - dest -- The name of the attribute to hold the created object: s
    :keyword - nargs -- The number of command-line arguments that should be: consumed. By default, one argument will be consumed and a single
                                                                             value will be produced.  Other values include:
-
-   ::
-
-                                                                               - N (an integer) consumes N arguments (and produces a list)
-                                                                               - '?' consumes zero or one arguments
-                                                                               - '*' consumes zero or more arguments (and produces a list)
-                                                                               - '+' consumes one or more arguments (and produces a list)
-                                                                           Note that the difference between the default and nargs=1 is that
-                                                                           with the default, a single value will be produced, while with
-                                                                           nargs=1, a list containing a single value will be produced.
-
+                                                                                - N (an integer) consumes N arguments (and produces a list)
+                                                                                - '?' consumes zero or one arguments
+                                                                                - '*' consumes zero or more arguments (and produces a list)
+                                                                                - '+' consumes one or more arguments (and produces a list)
+                                                                            Note that the difference between the default and nargs=1 is that
+                                                                            with the default, a single value will be produced, while with
+                                                                            nargs=1, a list containing a single value will be produced.
    :keyword - const -- The value to be produced if the option is specified and the: option uses an action that takes no values.
    :keyword - default -- The value to be produced if the option is not specified.:
    :keyword - type -- A callable that accepts a single string argument, and: returns the converted value.  The standard Python types str, int,
@@ -293,7 +261,6 @@ Module Contents
    :keyword - help -- The help string describing the argument.:
    :keyword - metavar -- The name to be used for the option's argument with the: help string. If None, the 'dest' value will be used as the name.
 
-
    .. py:method:: __call__(parser, namespace, values, option_string=None)
 
 
@@ -306,7 +273,6 @@ Module Contents
 
    Bases: :py:obj:`object`
 
-   
    Factory for creating file object types
 
    Instances of FileType are typically passed as type= arguments to the
@@ -317,15 +283,12 @@ Module Contents
    :keyword - encoding -- The file's encoding. Accepts the same values as the: builtin open() function.
    :keyword - errors -- A string indicating how encoding and decoding errors are to: be handled. Accepts the same value as the builtin open() function.
 
-
    .. py:method:: __call__(string)
 
 
    .. py:method:: __repr__()
 
-      
       Return repr(self).
-
 
 
 
@@ -334,18 +297,14 @@ Module Contents
 
    Bases: :py:obj:`_AttributeHolder`
 
-   
    Simple object for storing attributes.
 
    Implements equality by attribute names and values, and provides a simple
    string representation.
 
-
    .. py:method:: __eq__(other)
 
-      
       Return self==value.
-
 
 
    .. py:method:: __contains__(key)
@@ -357,10 +316,9 @@ Module Contents
 
    Bases: :py:obj:`_AttributeHolder`, :py:obj:`_ActionsContainer`
 
-   
    Object for parsing command line strings into Python objects.
 
-   :keyword - prog -- The name of the program (default: ``os.path.basename(sys.argv[0])``\ )
+   :keyword - prog -- The name of the program (default: ``os.path.basename(sys.argv[0])``)
    :keyword - usage -- A usage message (default: auto-generated from arguments)
    :keyword - description -- A description of what the program does:
    :keyword - epilog -- Text following the argument descriptions:
@@ -373,7 +331,6 @@ Module Contents
    :keyword - add_help -- Add a -h/-help option:
    :keyword - allow_abbrev -- Allow long options to be abbreviated unambiguously:
    :keyword - exit_on_error -- Determines whether or not ArgumentParser exits with: error info when an error occurs
-
 
    .. py:method:: add_subparsers(**kwargs)
 
@@ -410,7 +367,6 @@ Module Contents
 
    .. py:method:: error(message)
 
-      
       error(message: string)
 
       Prints a usage message incorporating the message to stderr and
@@ -418,7 +374,6 @@ Module Contents
 
       If you override this in a subclass, it should not return -- it
       should either exit or raise an exception.
-
 
 
 

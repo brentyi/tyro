@@ -220,7 +220,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">Supported types</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Basics</span></p>
 <ul>
@@ -332,8 +332,8 @@
 <dt class="sig sig-object py" id="tyro._resolver.UnionType">
 <span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">UnionType</span></span><a class="headerlink" href="#tyro._resolver.UnionType" title="Link to this definition">¶</a></dt>
 <dd><p>Same as types.UnionType, but points to typing.Union for older versions of
-Python. types.UnionType was added in Python 3.10, and is created when the <code class="docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span>
-<span class="pre">Y</span></code> syntax is used for unions.</p>
+Python. types.UnionType was added in Python 3.10, and is created when the <cite>X |
+Y</cite> syntax is used for unions.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -345,11 +345,11 @@ Python. types.UnionType was added in Python 3.10, and is created when the <code 
 <dt class="sig sig-object py" id="tyro._resolver.TyroTypeAliasBreadCrumb">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">TyroTypeAliasBreadCrumb</span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#TyroTypeAliasBreadCrumb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.TyroTypeAliasBreadCrumb" title="Link to this definition">¶</a></dt>
 <dd><p>A breadcrumb we can leave behind to track names of type aliases and
-<code class="docutils literal notranslate"><span class="pre">NewType</span></code> types. We can use type alias names to auto-populate
+<cite>NewType</cite> types. We can use type alias names to auto-populate
 subcommands.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._resolver.TyroTypeAliasBreadCrumb.name">
-<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#tyro._resolver.TyroTypeAliasBreadCrumb.name" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._resolver.TyroTypeAliasBreadCrumb.name" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -371,21 +371,21 @@ returns typ.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._resolver.is_dataclass">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">is_dataclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#is_dataclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.is_dataclass" title="Link to this definition">¶</a></dt>
-<dd><p>Same as <code class="docutils literal notranslate"><span class="pre">dataclasses.is_dataclass</span></code>, but also handles generic aliases.</p>
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">is_dataclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#is_dataclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.is_dataclass" title="Link to this definition">¶</a></dt>
+<dd><p>Same as <cite>dataclasses.is_dataclass</cite>, but also handles generic aliases.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cls</strong> (<em>Union</em><em>[</em><em>tyro._typing.TypeForm</em><em>, </em><em>Callable</em><em>]</em>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>bool</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._resolver.resolved_fields">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">resolved_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">dataclasses.Field</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#resolved_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.resolved_fields" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">resolved_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.Field" title="(in Python v3.13)"><span class="pre">dataclasses.Field</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#resolved_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.resolved_fields" title="Link to this definition">¶</a></dt>
 <dd><p>Similar to dataclasses.fields(), but includes dataclasses.InitVar types and
 resolves forward references.</p>
 <dl class="field-list simple">
@@ -393,20 +393,20 @@ resolves forward references.</p>
 <dd class="field-odd"><p><strong>cls</strong> (<em>tyro._typing.TypeForm</em>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>List[dataclasses.Field]</p>
+<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.Field" title="(in Python v3.13)">dataclasses.Field</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._resolver.is_namedtuple">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">is_namedtuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#is_namedtuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.is_namedtuple" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">is_namedtuple</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tyro._typing.TypeForm</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#is_namedtuple"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.is_namedtuple" title="Link to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cls</strong> (<em>tyro._typing.TypeForm</em>)</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>bool</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -469,8 +469,8 @@ strings!)</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._resolver.swap_type_using_confstruct">
 <span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">swap_type_using_confstruct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#swap_type_using_confstruct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.swap_type_using_confstruct" title="Link to this definition">¶</a></dt>
-<dd><p>Swap types using the <code class="docutils literal notranslate"><span class="pre">constructor_factory</span></code> attribute from
-<code class="docutils literal notranslate"><span class="pre">tyro.conf.arg</span></code> and <code class="docutils literal notranslate"><span class="pre">tyro.conf.subcommand</span></code>. Runtime annotations are
+<dd><p>Swap types using the <cite>constructor_factory</cite> attribute from
+<cite>tyro.conf.arg</cite> and <cite>tyro.conf.subcommand</cite>. Runtime annotations are
 kept, but the type is swapped.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -515,14 +515,12 @@ kept, but the type is swapped.</p>
 <dt class="sig sig-object py">
 <span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_annotated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">typing_extensions.Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">all</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">TypeOrCallable</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span></dt>
 <dt class="sig sig-object py">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_annotated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span></dt>
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">unwrap_annotated</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span></dt>
 <dd><p>Helper for parsing typing.Annotated types.</p>
-<p>Examples:</p>
-<ul class="simple">
-<li><p>int, int =&gt; (int, ())</p></li>
-<li><p>Annotated[int, 1], int =&gt; (int, (1,))</p></li>
-<li><p>Annotated[int, “1”], int =&gt; (int, ())</p></li>
-</ul>
+<p>Examples:
+- int, int =&gt; (int, ())
+- Annotated[int, 1], int =&gt; (int, (1,))
+- Annotated[int, “1”], int =&gt; (int, ())</p>
 </dd></dl>
 
 <dl class="py class">
@@ -549,13 +547,13 @@ kept, but the type is swapped.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro._resolver.TypeParamResolver.concretize_type_params">
-<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">concretize_type_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#TypeParamResolver.concretize_type_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.TypeParamResolver.concretize_type_params" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">concretize_type_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><span class="pre">set</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#TypeParamResolver.concretize_type_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.TypeParamResolver.concretize_type_params" title="Link to this definition">¶</a></dt>
 <dd><p>Apply type parameter assignments based on the current context.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>typ</strong> (<em>TypeOrCallable</em>)</p></li>
-<li><p><strong>seen</strong> (<em>set</em><em>[</em><em>Any</em><em>] </em><em>| </em><em>None</em>)</p></li>
+<li><p><strong>seen</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#set" title="(in Python v3.13)"><em>set</em></a><em>[</em><em>Any</em><em>] </em><em>| </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -613,24 +611,16 @@ union. Loosely motivated by: <a class="reference external" href="https://github.
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._resolver.isinstance_with_fuzzy_numeric_tower">
 <span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">isinstance_with_fuzzy_numeric_tower</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">classinfo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union[bool,</span> <span class="pre">typing_extensions.Literal[~]]</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#isinstance_with_fuzzy_numeric_tower"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.isinstance_with_fuzzy_numeric_tower" title="Link to this definition">¶</a></dt>
-<dd><p>Enhanced version of isinstance() that returns:</p>
-<ul class="simple">
-<li><p>True: if object is exactly of the specified type</p></li>
-<li><p>“~”: if object follows numeric tower rules but isn’t exact type</p></li>
-<li><p>False: if object is not of the specified type or numeric tower rules don’t apply</p></li>
-</ul>
-<p>Examples:</p>
-<blockquote>
-<div><blockquote>
-<div><blockquote>
-<div><p>enhanced_isinstance(3, int)       # Returns True
-enhanced_isinstance(3, float)     # Returns “~”
-enhanced_isinstance(True, int)    # Returns “~”
-enhanced_isinstance(3, bool)      # Returns False
-enhanced_isinstance(True, bool)   # Returns True</p>
-</div></blockquote>
-</div></blockquote>
-</div></blockquote>
+<dd><p>Enhanced version of isinstance() that returns:
+- True: if object is exactly of the specified type
+- “~”: if object follows numeric tower rules but isn’t exact type
+- False: if object is not of the specified type or numeric tower rules don’t apply</p>
+<p>Examples:
+&gt;&gt;&gt; enhanced_isinstance(3, int)       # Returns True
+&gt;&gt;&gt; enhanced_isinstance(3, float)     # Returns “~”
+&gt;&gt;&gt; enhanced_isinstance(True, int)    # Returns “~”
+&gt;&gt;&gt; enhanced_isinstance(3, bool)      # Returns False
+&gt;&gt;&gt; enhanced_isinstance(True, bool)   # Returns True</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -639,7 +629,7 @@ enhanced_isinstance(True, bool)   # Returns True</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Union[bool, typing_extensions.Literal[~]]</p>
+<dd class="field-even"><p>Union[<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a>, typing_extensions.Literal[~]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -666,18 +656,18 @@ class, and a mapping from typevars to concrete types.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro._resolver.get_type_hints_with_backported_syntax">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">get_type_hints_with_backported_syntax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_extras</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#get_type_hints_with_backported_syntax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.get_type_hints_with_backported_syntax" title="Link to this definition">¶</a></dt>
-<dd><p>Same as <code class="docutils literal notranslate"><span class="pre">typing.get_type_hints()</span></code>, but supports new union syntax (X | Y)
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">get_type_hints_with_backported_syntax</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_extras</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#get_type_hints_with_backported_syntax"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.get_type_hints_with_backported_syntax" title="Link to this definition">¶</a></dt>
+<dd><p>Same as <cite>typing.get_type_hints()</cite>, but supports new union syntax (X | Y)
 and generics (list[str]) in older versions of Python.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>obj</strong> (<em>Callable</em><em>[</em><em>Ellipsis</em><em>, </em><em>Any</em><em>]</em>)</p></li>
-<li><p><strong>include_extras</strong> (<em>bool</em>)</p></li>
+<li><p><strong>include_extras</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><em>bool</em></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Dict[str, Any]</p>
+<dd class="field-even"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)">str</a>, Any]</p>
 </dd>
 </dl>
 </dd></dl>

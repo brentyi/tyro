@@ -15,7 +15,6 @@ Module Contents
 
 .. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, args: Optional[Sequence[str]] = None) -> T
 
-   
    Helper function for creating a CLI interface that allows us to choose
    between default config objects (typically dataclasses) and override values
    within it. Turns off subcommand creation for any union types within the
@@ -25,70 +24,69 @@ Module Contents
    arguments populated. Also see
    :func:`tyro.extras.subcommand_type_from_defaults()`.
 
+
    Example usage:
 
    .. code-block:: python
 
-      import dataclasses
+       import dataclasses
 
-      import tyro
-
-
-      @dataclasses.dataclass
-      class Config:
-          a: int
-          b: str
+       import tyro
 
 
-      default_configs = {
-          "small": (
-              "Small config",
-              Config(1, "small"),
-          ),
-          "big": (
-              "Big config",
-              Config(100, "big"),
-          ),
-      }
-      config = tyro.extras.overridable_config_cli(default_configs)
-      print(config)
+       @dataclasses.dataclass
+       class Config:
+           a: int
+           b: str
+
+
+       default_configs = {
+           "small": (
+               "Small config",
+               Config(1, "small"),
+           ),
+           "big": (
+               "Big config",
+               Config(100, "big"),
+           ),
+       }
+       config = tyro.extras.overridable_config_cli(default_configs)
+       print(config)
 
    :param configs: A dictionary of config names mapped to a tuple of
                    (description, config object).
    :param args: Optional arguments to pass to the CLI.
 
 
-
 .. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> tyro._typing.TypeForm[T]
 
-   
    Construct a Union type for defining subcommands that choose between defaults.
 
    For example, when ``defaults`` is set to:
 
    .. code-block:: python
 
-      {
-          "small": Config(...),
-          "big": Config(...),
-      }
+       {
+           "small": Config(...),
+           "big": Config(...),
+       }
 
    We return:
 
    .. code-block:: python
 
-      Union[
-          Annotated[
-              Config,
-              tyro.conf.subcommand("small", default=Config(...))
-          ],
-          Annotated[
-              Config,
-              tyro.conf.subcommand("big", default=Config(...))
-          ]
-      ]
+       Union[
+           Annotated[
+               Config,
+               tyro.conf.subcommand("small", default=Config(...))
+           ],
+           Annotated[
+               Config,
+               tyro.conf.subcommand("big", default=Config(...))
+           ]
+       ]
 
-   Direct use of ``typing.Union`` and :func:`tyro.conf.subcommand()` should generally be
+   Direct use of :py:data:`typing.Union` and :func:`tyro.conf.subcommand()` should generally be
    preferred, but this function can be helpful for succinctness.
 
    .. warning::
@@ -113,6 +111,5 @@ Module Contents
    :param prefix_names: Whether to prefix subcommand names.
 
    :returns: A subcommand type, which can be passed to :func:`tyro.cli`.
-
 
 

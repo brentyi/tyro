@@ -7,21 +7,15 @@
 
 .. autoapi-nested-parse::
 
-   
    Utilities and functions for helptext formatting. We replace argparse's simple help
    messages with ones that:
-
-   ::
-
-      - Are more nicely formatted!
-      - Support multiple columns when many fields are defined.
-      - Use `rich` for formatting.
-      - Can be themed with an accent color.
-
+       - Are more nicely formatted!
+       - Support multiple columns when many fields are defined.
+       - Use `rich` for formatting.
+       - Can be themed with an accent color.
 
    This is largely built by fussing around in argparse implementation details. It's
    chaotic as a result; for stability we mirror argparse at _argparse.py.
-
 
 
 
@@ -77,27 +71,23 @@ Module Contents
 
 .. py:function:: set_accent_color(accent_color: Optional[str]) -> None
 
-   
-   Set an accent color to use in help messages. Takes any color supported by ``rich``\ ,
+   Set an accent color to use in help messages. Takes any color supported by ``rich``,
    see ``python -m rich.color``. Experimental.
-
 
 
 .. py:function:: recursive_arg_search(args: List[str], parser_spec: tyro._parsers.ParserSpecification, prog: str, unrecognized_arguments: Set[str]) -> Tuple[List[_ArgumentInfo], bool, bool]
 
-   
    Recursively search for arguments in a ParserSpecification. Used for error message
    printing.
 
    Returns a list of arguments, whether the parser has subcommands or not, and -- if
-   ``unrecognized_arguments`` is passed in --- whether an unrecognized argument exists
+   `unrecognized_arguments` is passed in --- whether an unrecognized argument exists
    under a different subparser.
 
    :param args: Arguments being parsed. Used for heuristics on subcommands.
    :param parser_spec: Argument parser specification.
    :param subcommands: Prog corresponding to parser_spec.
    :param unrecognized_arguments: Used for same_exists return value.
-
 
 
 .. py:data:: THEME
@@ -109,14 +99,10 @@ Module Contents
 
 .. py:function:: ansi_context() -> Generator[None, None, None]
 
-   
    Context for working with ANSI codes + argparse:
-
-
-   * Applies a temporary monkey patch for making argparse ignore ANSI codes when
+   - Applies a temporary monkey patch for making argparse ignore ANSI codes when
      wrapping usage text.
-   * Enables support for Windows via colorama.
-
+   - Enables support for Windows via colorama.
 
 
 .. py:function:: str_from_rich(renderable: rich.console.RenderableType, width: Optional[int] = None, soft_wrap: bool = False) -> str
@@ -133,10 +119,9 @@ Module Contents
 
    Bases: :py:obj:`tyro._argparse.ArgumentParser`, :py:obj:`argparse.ArgumentParser`
 
-   
    Object for parsing command line strings into Python objects.
 
-   :keyword - prog -- The name of the program (default: ``os.path.basename(sys.argv[0])``\ )
+   :keyword - prog -- The name of the program (default: ``os.path.basename(sys.argv[0])``)
    :keyword - usage -- A usage message (default: auto-generated from arguments)
    :keyword - description -- A description of what the program does:
    :keyword - epilog -- Text following the argument descriptions:
@@ -150,10 +135,8 @@ Module Contents
    :keyword - allow_abbrev -- Allow long options to be abbreviated unambiguously:
    :keyword - exit_on_error -- Determines whether or not ArgumentParser exits with: error info when an error occurs
 
-
    .. py:method:: error(message: str) -> NoReturn
 
-      
       Improve error messages from argparse.
 
       error(message: string)
@@ -166,18 +149,15 @@ Module Contents
 
 
 
-
 .. py:class:: TyroArgparseHelpFormatter(prog: str)
 
 
    Bases: :py:obj:`tyro._argparse.RawDescriptionHelpFormatter`
 
-   
    Help message formatter which retains any formatting in descriptions.
 
    Only the name of this class is considered a public API. All the methods
    provided by the class are considered an implementation detail.
-
 
    .. py:method:: add_argument(action)
 
