@@ -19,6 +19,7 @@ from typing import (
 
 from typing_extensions import Annotated, get_args, get_origin
 
+from tyro.constructors._registry import ConstructorRegistry
 from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
 
 from . import _argparse as argparse
@@ -34,7 +35,11 @@ from . import (
 )
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
-from .constructors._primitive_spec import UnsupportedTypeAnnotationError
+from .constructors._primitive_spec import (
+    PrimitiveConstructorSpec,
+    PrimitiveTypeInfo,
+    UnsupportedTypeAnnotationError,
+)
 
 T = TypeVar("T")
 
@@ -315,8 +320,20 @@ def handle_field(
 ]:
     """Determine what to do with a single field definition."""
 
+    registry = ConstructorRegistry._get_active_registry()
+
+    # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
+    force_primitive = len(
+        _resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]
+    ) > 0 or (
+        len(registry._custom_primitive_rules) > 0
+        and registry.get_primitive_spec(
+            PrimitiveTypeInfo.make(field.type, field.markers), rule_mode="custom"
+        )
+        is not None
+    )
     if (
-        field.primitive_spec is None
+        not force_primitive
         and _markers.Fixed not in field.markers
         and _markers.Suppress not in field.markers
     ):
@@ -333,21 +350,22 @@ def handle_field(
                 and _markers.AvoidSubcommands in field.markers
             ):
                 # Don't make a subparser.
-                field = dataclasses.replace(field, type_or_callable=type(field.default))
+                field = field.with_new_type_stripped(type(field.default))
             else:
                 return subparsers_attempt
 
         # (2) Handle nested callables.
-        if _fields.is_struct_type(field.type_or_callable, field.default):
-            field = dataclasses.replace(
-                field,
-                type_or_callable=_resolver.narrow_subtypes(
-                    field.type_or_callable,
+        if force_primitive == "struct" or _fields.is_struct_type(
+            field.type_stripped, field.default
+        ):
+            field = field.with_new_type_stripped(
+                _resolver.narrow_subtypes(
+                    field.type_stripped,
                     field.default,
                 ),
             )
             return ParserSpecification.from_callable_or_type(
-                field.type_or_callable,
+                field.type_stripped,
                 markers=field.markers,
                 description=None,
                 parent_classes=parent_classes,
@@ -393,7 +411,7 @@ class SubparsersSpecification:
         extern_prefix: str,
     ) -> Optional[SubparsersSpecification]:
         # Union of classes should create subparsers.
-        typ = _resolver.unwrap_annotated(field.type_or_callable)
+        typ = _resolver.unwrap_annotated(field.type_stripped)
         if get_origin(typ) not in (Union, _resolver.UnionType):
             return None
 

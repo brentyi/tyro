@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
-from typing import Annotated, Any, Dict, get_args
+from typing import Any, Dict, Union
+
+from typing_extensions import Annotated, get_args
 
 import tyro
 
@@ -34,6 +36,13 @@ def test_custom_primitive_registry():
     with primitive_registry:
         assert tyro.cli(main, args=["--x", '{"a": 1}']) == {"a": 1}
 
+    def main_with_default(x: Dict[str, Any] = {"hello": 5}) -> Dict[str, Any]:
+        return x
+
+    with primitive_registry:
+        assert tyro.cli(main_with_default, args=[]) == {"hello": 5}
+        assert tyro.cli(main_with_default, args=["--x", '{"a": 1}']) == {"a": 1}
+
 
 def test_custom_primitive_annotated():
     """Test that we can use typing.Annotated to specify custom constructors."""
@@ -41,4 +50,16 @@ def test_custom_primitive_annotated():
     def main(x: Annotated[Dict[str, Any], json_constructor_spec]) -> Dict[str, Any]:
         return x
 
+    assert tyro.cli(main, args=["--x", '{"a": 1}']) == {"a": 1}
+
+
+def test_custom_primitive_union():
+    """Test that we can use typing.Annotated to specify custom constructors."""
+
+    def main(
+        x: Union[int, Annotated[Dict[str, Any], json_constructor_spec]],
+    ) -> Union[int, Dict[str, Any]]:
+        return x
+
+    assert tyro.cli(main, args=["--x", "3"]) == 3
     assert tyro.cli(main, args=["--x", '{"a": 1}']) == {"a": 1}

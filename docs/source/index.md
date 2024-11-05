@@ -2,42 +2,67 @@
 
 |build| |nbsp| |ruff| |nbsp| |mypy| |nbsp| |pyright| |nbsp| |coverage| |nbsp| |versions|
 
-:code:`tyro` is a tool for generating command-line interfaces and configuration
-objects in Python.
+:func:`tyro.cli()` is a tool for generating CLI
+interfaces.
 
-Our core API, :func:`tyro.cli()`,
+We can define configurable scripts using functions:
 
-- **Generates CLI interfaces** from a comprehensive set of Python type
-  constructs.
-- **Populates helptext automatically** from defaults, annotations, and
-  docstrings.
-- **Understands nesting** of `dataclasses`, `pydantic`, and `attrs` structures.
-- **Prioritizes static analysis** for type checking and autocompletion with
-  tools like
-  [Pylance](https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance),
-  [Pyright](https://github.com/microsoft/pyright), and
-  [mypy](https://github.com/python/mypy).
+```python
+"""A command-line interface defined using a function signature.
 
-For advanced users, it also supports:
+Usage: python script_name.py --foo INT [--bar STR]
+"""
 
-- **Subcommands**, as well as choosing between and overriding values in
-  configuration objects.
-- **Completion script generation** for `bash`, `zsh`, and `tcsh`.
-- **Fine-grained configuration** via [PEP
-  593](https://peps.python.org/pep-0593/) annotations (`tyro.conf.*`).
+import tyro
 
-To get started, we recommend browsing the examples to the left.
+def main(
+    foo: int,
+    bar: str = "default",
+) -> None:
+    ...  # Main body of a script.
 
-### Why `tyro`?
+if __name__ == "__main__":
+    # Generate a CLI and call `main` with its two arguments: `foo` and `bar`.
+    tyro.cli(main)
+```
 
-1. **Strong typing.**
+Or instantiate config objects defined using tools like `dataclasses`, `pydantic`, and `attrs`:
+
+```python
+"""A command-line interface defined using a class signature.
+
+Usage: python script_name.py --foo INT [--bar STR]
+"""
+
+from dataclasses import dataclass
+import tyro
+
+@dataclass
+class Config:
+    foo: int
+    bar: str = "default"
+
+if __name__ == "__main__":
+    # Generate a CLI and instantiate `Config` with its two arguments: `foo` and `bar`.
+    config = tyro.cli(Config)
+
+    # Rest of script.
+    assert isinstance(config, Config)  # Should pass.
+```
+
+Other features include helptext generation, nested structures, subcommands, and
+shell completion.
+
+#### Why `tyro`?
+
+1. **Types.**
 
    Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
    arguments populated by `tyro` benefit from IDE and language server-supported
    operations — think tab completion, rename, jump-to-def, docstrings on hover —
    as well as static checking tools like `pyright` and `mypy`.
 
-2. **Minimal overhead.**
+2. **Define things once.**
 
    Standard Python type annotations, docstrings, and default values are parsed
    to automatically generate command-line interfaces with informative helptext.
@@ -54,11 +79,6 @@ To get started, we recommend browsing the examples to the left.
    `tyro` supports hierarchical configuration structures, which make it easy to
    distribute definitions, defaults, and documentation of configurable fields
    across modules or source files.
-
-4. **Tab completion.**
-
-   By extending [shtab](https://github.com/iterative/shtab), `tyro`
-   automatically generates tab completion scripts for bash, zsh, and tcsh.
 
 <!-- prettier-ignore-start -->
 
@@ -110,6 +130,16 @@ To get started, we recommend browsing the examples to the left.
    :glob:
 
    examples/04_additional/*
+
+
+.. toctree::
+   :caption: Custom Constructors
+   :hidden:
+   :maxdepth: 1
+   :titlesonly:
+   :glob:
+
+   examples/05_custom_constructors/*
 
 
 .. toctree::

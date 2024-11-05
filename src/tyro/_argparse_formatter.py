@@ -55,8 +55,8 @@ class TyroTheme:
 
 
 def set_accent_color(accent_color: Optional[str]) -> None:
-    """Set an accent color to use in help messages. Takes any color supported by `rich`,
-    see `python -m rich.color`. Experimental."""
+    """Set an accent color to use in help messages. Takes any color supported by ``rich``,
+    see ``python -m rich.color``. Experimental."""
     THEME.border = Style(color=accent_color, dim=True)
     THEME.description = Style(color=accent_color, bold=True)
     THEME.invocation = Style()

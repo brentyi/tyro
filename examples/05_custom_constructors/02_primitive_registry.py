@@ -1,15 +1,17 @@
-"""Custom Constructors (Registry)
+"""Custom Primitive (Registry)
+For additional flexibility, :mod:`tyro.constructors` exposes tyro's API for
+defining behavior for different types. There are two categories of types:
+primitive types can be instantiated from a single commandline argument, while
+struct types are broken down into multiple.
 
-For additional flexibility, :module:`tyro.constructors` exposes
-tyro's API for defining behavior for different types. This is the same
-API that tyro relies on for the built-in types.
+
+In this example, we attach a custom constructor by defining a rule that applies
+to all types that match ``dict[str, Any]``.
 
 Usage:
-`python ./10_custom_constructors.py --help`
-`python ./10_custom_constructors.py --dict1.json '{"hello": "world"}'`
-`python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}"`
-`python ./10_custom_constructors.py --dict1.json '{"hello": "world"}' --dict2.json '{"hello": "world"}'`
-`python ./10_custom_constructors.py --dict1.json "{\"hello\": \"world\"}" --dict2.json "{\"hello\": \"world\"}"`
+`python ./02_primitive_registry.py --help`
+`python ./02_primitive_registry.py --dict1 '{"hello": "world"}'`
+`python ./02_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'`
 """
 
 import json

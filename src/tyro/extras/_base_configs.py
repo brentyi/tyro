@@ -23,31 +23,32 @@ def overridable_config_cli(
 
 
     Example usage:
-    ```python
-    import dataclasses
 
-    import tyro
+    .. code-block:: python
 
+        import dataclasses
 
-    @dataclasses.dataclass
-    class Config:
-        a: int
-        b: str
+        import tyro
 
 
-    default_configs = {
-        "small": (
-            "Small config",
-            Config(1, "small"),
-        ),
-        "big": (
-            "Big config",
-            Config(100, "big"),
-        ),
-    }
-    config = tyro.extras.overridable_config_cli(default_configs)
-    print(config)
-    ```
+        @dataclasses.dataclass
+        class Config:
+            a: int
+            b: str
+
+
+        default_configs = {
+            "small": (
+                "Small config",
+                Config(1, "small"),
+            ),
+            "big": (
+                "Big config",
+                Config(100, "big"),
+            ),
+        }
+        config = tyro.extras.overridable_config_cli(default_configs)
+        print(config)
 
     Args:
         configs: A dictionary of config names mapped to a tuple of
@@ -75,34 +76,35 @@ def subcommand_type_from_defaults(
 ) -> TypeForm[T]:
     """Construct a Union type for defining subcommands that choose between defaults.
 
-    For example, when `defaults` is set to:
+    For example, when ``defaults`` is set to:
 
-    ```python
-    {
-        "small": Config(...),
-        "big": Config(...),
-    }
-    ```
+    .. code-block:: python
+
+        {
+            "small": Config(...),
+            "big": Config(...),
+        }
 
     We return:
 
-    ```python
-    Union[
-        Annotated[
-            Config,
-            tyro.conf.subcommand("small", default=Config(...))
-        ],
-        Annotated[
-            Config,
-            tyro.conf.subcommand("big", default=Config(...))
-        ]
-    ]
-    ```
+    .. code-block:: python
 
-    Direct use of `typing.Union` and :func:`tyro.conf.subcommand()` should generally be
+        Union[
+            Annotated[
+                Config,
+                tyro.conf.subcommand("small", default=Config(...))
+            ],
+            Annotated[
+                Config,
+                tyro.conf.subcommand("big", default=Config(...))
+            ]
+        ]
+
+    Direct use of :py:data:`typing.Union` and :func:`tyro.conf.subcommand()` should generally be
     preferred, but this function can be helpful for succinctness.
 
     .. warning::
+
         The type returned by this function can be safely used as an input to
         :func:`tyro.cli()`, but for static analysis when used for annotations we
         recommend applying a `TYPE_CHECKING` guard:

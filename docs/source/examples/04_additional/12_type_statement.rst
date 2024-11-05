@@ -45,6 +45,6 @@ In Python 3.12, the :code:`type` statement is introduced to create type aliases.
 
 .. raw:: html
 
-        <kbd>python 04_additional/16_type_statement.py --help</kbd>
+        <kbd>python 04_additional/12_type_statement.py --help</kbd>
 
-.. program-output:: python ../../examples/04_additional/16_type_statement.py --help
+.. program-output:: python ../../examples/04_additional/12_type_statement.py --help

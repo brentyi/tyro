@@ -174,9 +174,9 @@ class ArgumentDefinition:
             )
             complete_as_path = (
                 # Catch types like Path, List[Path], Tuple[Path, ...] etc.
-                "Path" in str(self.field.type_or_callable)
+                "Path" in str(self.field.type_stripped)
                 # For string types, we require more evidence.
-                or ("str" in str(self.field.type_or_callable) and name_suggests_path)
+                or ("str" in str(self.field.type_stripped) and name_suggests_path)
             )
             if complete_as_path:
                 arg.complete = shtab.DIRECTORY if name_suggests_dir else shtab.FILE  # type: ignore
@@ -233,7 +233,7 @@ def _rule_handle_boolean_flags(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
-    if arg.field.type_or_callable is not bool:
+    if arg.field.type_stripped is not bool:
         return
 
     if (
@@ -281,15 +281,12 @@ def _rule_apply_primitive_specs(
         return
 
     try:
-        if arg.field.primitive_spec is not None:
-            spec = arg.field.primitive_spec
-        else:
-            spec = ConstructorRegistry._get_active_registry().get_primitive_spec(
-                PrimitiveTypeInfo.make(
-                    cast(type, arg.field.type_or_callable),
-                    arg.field.markers,
-                )
+        spec = ConstructorRegistry._get_active_registry().get_primitive_spec(
+            PrimitiveTypeInfo.make(
+                cast(type, arg.field.type),
+                arg.field.markers,
             )
+        )
     except UnsupportedTypeAnnotationError as e:
         if arg.field.default in _singleton.MISSING_SINGLETONS:
             field_name = _strings.make_field_name(
@@ -335,11 +332,11 @@ def _rule_apply_primitive_specs(
         def append_instantiator(x: list[list[str]]) -> Any:
             """Handle UseAppendAction effects."""
             # We'll assume that the type is annotated as Dict[...], Tuple[...], List[...], etc.
-            container_type = get_origin(arg.field.type_or_callable)
+            container_type = get_origin(arg.field.type_stripped)
             if container_type is None:
                 # Raw annotation, like `UseAppendAction[list]`. It's unlikely
                 # that a user would use this but we can handle it.
-                container_type = arg.field.type_or_callable
+                container_type = arg.field.type_stripped
 
             # Instantiate initial output.
             out = (
@@ -407,7 +404,7 @@ def _rule_counters(
     """Handle counters, like -vvv for level-3 verbosity."""
     if (
         _markers.UseCounterAction in arg.field.markers
-        and arg.field.type_or_callable is int
+        and arg.field.type_stripped is int
         and not arg.field.is_positional()
     ):
         lowered.metavar = None
@@ -459,7 +456,7 @@ def _rule_generate_helptext(
         if arg.field.argconf.constructor_factory is not None:
             default_label = (
                 str(default)
-                if arg.field.type_or_callable is not json.loads
+                if arg.field.type_stripped is not json.loads
                 else json.dumps(arg.field.default)
             )
         elif type(default) in (tuple, list, set):
