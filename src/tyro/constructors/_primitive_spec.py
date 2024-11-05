@@ -99,10 +99,15 @@ class PrimitiveConstructorSpec(Generic[T]):
     instance_from_str: Callable[[list[str]], T]
     """Given a list of string arguments, construct an instance of the type. The
     length of the list will match the value of nargs."""
-    is_instance: Callable[[Any], bool]
+    is_instance: Callable[[Any], bool | Literal["~"]]
     """Given an object instance, does it match this primitive type? This is
     used for specific help messages when both a union type is present and a
-    default is provided."""
+    default is provided.
+
+    Can return "~" to signify that an instance is a "fuzzy" match, and should
+    only be used if there are no other matches. This is used for numeric tower
+    support.
+    """
     str_from_instance: Callable[[T], list[str]]
     """Convert an instance to a list of string arguments that would construct
     the instance. This is used for help messages when a default is provided."""
@@ -124,11 +129,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             return None
         raise UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
 
-    # HACK: this is for code that uses `tyro.conf.arg(constructor=json.loads)`.
-    # We're going to deprecate this syntax (the constructor= argument in
-    # tyro.conf.arg), but there is code that lives in the wild that relies
-    # on the behavior so we'll do our best not to break it.
-    vanilla_types = (int, str, float, bytes, json.loads)
+    # HACK (json.loads): this is for code that uses
+    # `tyro.conf.arg(constructor=json.loads)`. We're going to deprecate this
+    # syntax (the constructor= argument in tyro.conf.arg), but there is code
+    # that lives in the wild that relies on the behavior so we'll do our best
+    # not to break it.
+    vanilla_types = (int, str, float, complex, bytes, bytearray, json.loads)
 
     @registry.primitive_rule
     def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
@@ -142,10 +148,11 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 if type_info.type is bytes
                 else type_info.type(args[0])
             ),
-            # Numeric tower in Python is weird...
-            is_instance=lambda x: isinstance(x, (int, float))
-            if type_info.type is float
-            else isinstance(x, type_info.type),
+            # issubclass(type(x), y) here is preferable over isinstance(x, y)
+            # due to quirks in the numeric tower.
+            is_instance=lambda x: _resolver.isinstance_with_fuzzy_numeric_tower(
+                x, type_info.type
+            ),
             str_from_instance=lambda instance: [str(instance)],
         )
 
@@ -582,7 +589,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
         # General unions, eg Union[int, bool]. We'll try to convert these from left to
         # right.
-        option_specs = []
+        option_specs: list[PrimitiveConstructorSpec] = []
         choices: tuple[str, ...] | None = ()
         nargs: int | Literal["*"] = 1
         first = True
@@ -646,9 +653,18 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
 
         def str_from_instance(instance: Any) -> List[str]:
+            fuzzy_match = None
             for option_spec in option_specs:
-                if option_spec.is_instance(instance):
+                is_instance = option_spec.is_instance(instance)
+                if is_instance is True:
                     return option_spec.str_from_instance(instance)
+                elif is_instance == "~":
+                    fuzzy_match = option_spec
+
+            # If we get here, we have a fuzzy match.
+            if fuzzy_match is not None:
+                return fuzzy_match.str_from_instance(instance)
+
             assert False, f"could not match default value {instance} with any types in union {options}"
 
         return PrimitiveConstructorSpec(
