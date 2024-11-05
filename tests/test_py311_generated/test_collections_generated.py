@@ -494,7 +494,7 @@ def test_dict_no_annotation_2() -> None:
 
 def test_dict_optional() -> None:
     # In this case, the `None` is ignored.
-    def main(x: Optional[Dict[str, int]] = {"three": 3, "five": 5}):
+    def main(x: Optional[Dict[str, float]] = {"three": 3, "five": 5}):
         return x
 
     assert tyro.cli(main, args=[]) == {"three": 3, "five": 5}

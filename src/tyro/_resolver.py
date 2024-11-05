@@ -18,6 +18,7 @@ from typing import (
     Sequence,
     Set,
     Tuple,
+    Type,
     TypeVar,
     Union,
     cast,
@@ -473,7 +474,8 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
 
     try:
         if default_instance not in MISSING_SINGLETONS and not any(
-            isinstance(default_instance, o) for o in options_unwrapped
+            isinstance_with_fuzzy_numeric_tower(default_instance, o) is not False
+            for o in options_unwrapped
         ):
             warnings.warn(
                 f"{type(default_instance)} does not match any type in Union:"
@@ -484,6 +486,40 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
         pass
 
     return typ
+
+
+def isinstance_with_fuzzy_numeric_tower(
+    obj: Any, classinfo: Type
+) -> Union[bool, Literal["~"]]:
+    """
+    Enhanced version of isinstance() that returns:
+    - True: if object is exactly of the specified type
+    - "~": if object follows numeric tower rules but isn't exact type
+    - False: if object is not of the specified type or numeric tower rules don't apply
+
+    Examples:
+    >>> enhanced_isinstance(3, int)       # Returns True
+    >>> enhanced_isinstance(3, float)     # Returns "~"
+    >>> enhanced_isinstance(True, int)    # Returns "~"
+    >>> enhanced_isinstance(3, bool)      # Returns False
+    >>> enhanced_isinstance(True, bool)   # Returns True
+    """
+    # Handle exact match first
+    if isinstance(obj, classinfo):
+        return True
+
+    # Handle numeric tower cases
+    if isinstance(obj, bool):
+        if classinfo in (int, float, complex):
+            return "~"
+    elif isinstance(obj, int) and not isinstance(obj, bool):  # explicit bool check
+        if classinfo in (float, complex):
+            return "~"
+    elif isinstance(obj, float):
+        if classinfo is complex:
+            return "~"
+
+    return False
 
 
 NoneType = type(None)
