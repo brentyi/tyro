@@ -79,6 +79,10 @@ class ConstructorRegistry:
         self._custom_primitive_rules.append(rule)
         return rule
 
+    def _default_primitive_rule(self, rule: PrimitiveSpecRule) -> PrimitiveSpecRule:
+        self._default_primitive_rules.append(rule)
+        return rule
+
     def struct_rule(self, rule: StructSpecRule) -> StructSpecRule:
         """Define a rule for constructing a primitive type from a string. The
         most recently added rule will be applied first."""
