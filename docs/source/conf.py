@@ -18,7 +18,7 @@ from typing import Dict, List
 # -- Project information -----------------------------------------------------
 
 project = "tyro"
-copyright = "2022"
+copyright = "2024"
 author = "brentyi"
 
 # The short X.Y version
