@@ -1,6 +1,9 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build]
+packages = ["src/tyro"]
 
 [project]
 name = "tyro"
@@ -10,7 +13,7 @@ authors = [
 version = "0.8.14"  # TODO: currently needs to be synchronized manually with __init__.py.
 description = "Strongly typed, zero-effort CLI interfaces"
 readme = "README.md"
-license = { text="MIT" }
+license = { text = "MIT" }
 requires-python = ">=3.7"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -57,12 +60,6 @@ dev = [
 
 [project.urls]
 "GitHub" = "https://github.com/brentyi/tyro"
-
-[tool.setuptools.package-data]
-tyro = ["py.typed"]
-
-[tool.isort]
-profile = "black"
 
 [tool.mypy]
 python_version = "3.12"
