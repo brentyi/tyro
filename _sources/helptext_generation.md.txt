@@ -12,10 +12,7 @@ and Epydoc docstrings are supported as well. Under the hood, all of these
 options use [docstring_parser](https://github.com/rr-/docstring_parser).
 
 ```python
-def main(
-    field1: str,
-    field2: int = 3,
-) -> None:
+def main(field1: str, field2: int = 3) -> None:
     """Function, whose arguments will be populated from a CLI interface.
 
     Args:
