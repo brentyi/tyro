@@ -136,7 +136,7 @@ class ArgumentDefinition:
             kwargs["default"] = []
 
         # Apply overrides in our arg configuration object.
-        # Note that the `name` field is applied when the field object is instantiated!
+        # The `name` field is applied when the field object is instantiated!
         if self.field.argconf.metavar is not None:
             kwargs["metavar"] = self.field.argconf.metavar
 
@@ -250,6 +250,7 @@ def _rule_handle_boolean_flags(
         lowered.instance_from_str = (
             lambda x: x
         )  # argparse will directly give us a bool!
+        lowered.default = arg.field.default
         return
 
     assert False, (
@@ -518,7 +519,7 @@ def _rule_generate_helptext(
     else:
         help_parts.append(_rich_tag_if_enabled("(required)", "helptext_required"))
 
-    # Note that the percent symbol needs some extra handling in argparse.
+    # The percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
     lowered.help = " ".join([p for p in help_parts if len(p) > 0]).replace("%", "%%")
     return
@@ -546,10 +547,10 @@ def _rule_set_name_or_flag_and_dest(
         _markers.OmitSubcommandPrefixes in arg.field.markers
         and arg.subcommand_prefix != ""
     ):
-        # Strip subcommand prefixes, but keep following prefixes. Note that
-        # `extern_prefix` can start with the prefix corresponding to the parent
-        # subcommand, but end with other prefixes correspondeding to nested
-        # structures within the subcommand.
+        # Strip subcommand prefixes, but keep following
+        # prefixes.`extern_prefix` can start with the prefix corresponding to
+        # the parent subcommand, but end with other prefixes correspondeding to
+        # nested structures within the subcommand.
         name_or_flag = _strings.make_field_name(
             [arg.extern_prefix, arg.field.extern_name]
         )
@@ -584,7 +585,7 @@ def _rule_positional_special_handling(
         if metavar is not None:
             metavar = "[" + metavar + "]"
         if lowered.nargs == 1:
-            # Optional positional arguments. Note that this needs to be special-cased in
+            # Optional positional arguments. This needs to be special-cased in
             # _calling.py.
             nargs = "?"
         else:

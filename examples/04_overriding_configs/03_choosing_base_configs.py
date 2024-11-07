@@ -52,17 +52,16 @@ class ExperimentConfig:
     # Total number of training steps.
     train_steps: int
 
-    # Random seed. This is helpful for making sure that our experiments are all
-    # reproducible!
+    # Random seed.
     seed: int
 
-    # Activation to use. Not specifiable via the commandline.
+    # Not specifiable via the commandline.
     activation: Callable[[], nn.Module]
 
 
-# Note that we could also define this library using separate YAML files (similar to
-# `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
-# checking + IDE support.
+# We could also define this library using separate YAML files (similar to
+# `config_path`/`config_name` in Hydra), but staying in Python enables seamless
+# type checking + IDE support.
 default_configs = {
     "small": (
         "Small experiment.",

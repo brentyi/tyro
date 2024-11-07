@@ -150,7 +150,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             helptext = dc_field.metadata.get("help", None)
             assert isinstance(helptext, (str, type(None)))
 
-            # Try to get helptext from docstrings. Note that this can't be generated
+            # Try to get helptext from docstrings. This can't be generated
             # dynamically.
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(info.type, dc_field.name)
@@ -589,7 +589,7 @@ def _get_dataclass_field_default(
     # Try grabbing default from dataclass field.
     if field.default not in MISSING_SINGLETONS:
         default = field.default
-        # Note that dataclasses.is_dataclass() will also return true for dataclass
+        # dataclasses.is_dataclass() will also return true for dataclass
         # _types_, not just instances.
         if type(default) is not type and dataclasses.is_dataclass(default):
             _ensure_dataclass_instance_used_as_default_is_frozen(field, default)

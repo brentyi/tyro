@@ -298,9 +298,9 @@ _callable_description_blocklist: Set[Hashable] = set(
 def get_callable_description(f: Callable) -> str:
     """Get description associated with a callable via docstring parsing.
 
-    Note that the `dataclasses.dataclass` will automatically populate __doc__ based on
-    the fields of the class if a docstring is not specified; this helper will ignore
-    these docstrings."""
+    `dataclasses.dataclass` will automatically populate __doc__ based on the
+    fields of the class if a docstring is not specified; this helper will
+    ignore these docstrings."""
 
     f, _ = _resolver.resolve_generic_types(f)
     f = _resolver.unwrap_origin_strip_extras(f)

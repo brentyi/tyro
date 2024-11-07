@@ -99,8 +99,7 @@ class ParserSpecification:
 
         # Cycle detection.
         #
-        # Note that 'parent' here refers to in the nesting hierarchy, not the
-        # superclass.
+        # 'parent' here refers to in the nesting hierarchy, not the superclass.
         if f in parent_classes and f is not dict:
             raise UnsupportedTypeAnnotationError(
                 f"Found a cyclic dependency with type {f}."
@@ -270,7 +269,7 @@ class ParserSpecification:
         positional_group = parser._action_groups[0]
         assert positional_group.title == "positional arguments"
 
-        # Add each argument group. Note that groups with only suppressed arguments won't
+        # Add each argument group. Groups with only suppressed arguments won't
         # be added.
         for arg in self.args:
             group_name = group_name_from_arg(arg)

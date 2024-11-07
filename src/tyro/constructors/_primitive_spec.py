@@ -404,7 +404,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if type_info.type_origin is not tuple:
             return None
         types = get_args(type_info.type)
-        typeset = set(types)  # Note that sets are unordered.
+        typeset = set(types)  # Sets are unordered.
         typeset_no_ellipsis = typeset - {Ellipsis}  # type: ignore
 
         if typeset_no_ellipsis != typeset:

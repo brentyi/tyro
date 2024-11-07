@@ -277,8 +277,8 @@ Multiple unions over struct types are populated using a series of subcommands.
         tyro.cli(train, config=(tyro.conf.ConsolidateSubcommandArgs,))
 
 
-Note that we apply the :class:`tyro.conf.ConsolidateSubcommandArgs` flag.
-This pushes all arguments to the end of the command:
+We apply the :class:`tyro.conf.ConsolidateSubcommandArgs` flag. This
+pushes all arguments to the end of the command:
 
 .. raw:: html
 
@@ -331,21 +331,20 @@ This pushes all arguments to the end of the command:
            [-h] [--optimizer.learning-rate <span style="font-weight: bold">FLOAT</span>] [--optimizer.betas <span style="font-weight: bold">FLOAT FLOAT</span>]
            [--dataset.binary | --dataset.no-binary]
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">───────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help                                                       <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">show this help message and exit</span>                              <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> optimizer options </span><span style="font-weight: lighter">─────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> --optimizer.learning-rate <span style="font-weight: bold">FLOAT</span>                                  <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.001)</span>                                             <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --optimizer.betas <span style="font-weight: bold">FLOAT FLOAT</span>                                    <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.9 0.999)</span>                                         <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> dataset options </span><span style="font-weight: lighter">───────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> --dataset.binary, --dataset.no-binary                            <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Set to load binary version of MNIST dataset.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
-    
-    <span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help                                                        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">show this help message and exit</span>                               <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> optimizer options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --optimizer.learning-rate <span style="font-weight: bold">FLOAT</span>                                   <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.001)</span>                                              <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --optimizer.betas <span style="font-weight: bold">FLOAT FLOAT</span>                                     <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.9 0.999)</span>                                          <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> dataset options </span><span style="font-weight: lighter">────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --dataset.binary, --dataset.no-binary                             <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Set to load binary version of MNIST dataset.</span> <span style="color: #008080">(default: False)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────╯</span>
     </pre>
 
 
@@ -422,7 +421,7 @@ subcommands, which is inspired by `click <https://click.palletsprojects.com/>`_.
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --name <span style="font-weight: bold">STR</span>              <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --loud, --no-loud       <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --loud, --no-loud       <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
     </pre>
 
@@ -534,7 +533,7 @@ more generality is needed, the internal working are explained in the docs for
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help             <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --message <span style="font-weight: bold">STR</span>          <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --all, --no-all        <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --all, --no-all        <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰────────────────────────────────────────────────────────╯</span>
     </pre>
 

@@ -1,10 +1,10 @@
 """Overriding YAML Configs
 
-:mod:`tyro` understands a wide range of data structures, including standard dictionaries
-and lists.
+:mod:`tyro` understands a wide range of data structures, including standard
+dictionaries and lists.
 
-If you have a library of existing YAML files that you want to use, `tyro` can
-help override values within them.
+If you have a library of existing YAML files that you want to use,
+:func:`tyro.cli` can help override values within them.
 
 .. note::
 
@@ -20,7 +20,7 @@ import yaml
 
 import tyro
 
-# YAML configuration. Note that this could also be loaded from a file! Environment
+# YAML configuration. This could also be loaded from a file! Environment
 # variables are an easy way to select between different YAML files.
 default_yaml = r"""
 exp_name: test

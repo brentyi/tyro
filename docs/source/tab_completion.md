@@ -64,8 +64,8 @@ Borrowing from the `bash-completion` source[^bash_completion], we can run:
 completion_dir=${BASH_COMPLETION_USER_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/bash-completion}/completions/
 mkdir -p $completion_dir
 
-# (2) Write completion scripts. Note that the name of the completion script must
-# match the name of the file.
+# (2) Write completion scripts. The name of the completion script must match
+# the name of the file.
 python 01_functions.py --tyro-write-completion bash ${completion_dir}/01_functions.py
 ```
 
