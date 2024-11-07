@@ -495,8 +495,8 @@ Commit(message='Hello!')
 <span class="linenos">51</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span><span class="p">,))</span>
 </pre></div>
 </div>
-<p>Note that we apply the <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.ConsolidateSubcommandArgs" title="tyro.conf.ConsolidateSubcommandArgs"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.ConsolidateSubcommandArgs</span></code></a> flag.
-This pushes all arguments to the end of the command:</p>
+<p>We apply the <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.ConsolidateSubcommandArgs" title="tyro.conf.ConsolidateSubcommandArgs"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.ConsolidateSubcommandArgs</span></code></a> flag. This
+pushes all arguments to the end of the command:</p>
 <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_multiple_subcommands.py --help</strong>
 <span style="font-weight: bold">usage</span>: 03_multiple_subcommands.py [-h] <span style="font-weight: bold">{dataset:mnist,dataset:image-net}</span>
@@ -534,21 +534,20 @@ Example training script.
        [-h] [--optimizer.learning-rate <span style="font-weight: bold">FLOAT</span>] [--optimizer.betas <span style="font-weight: bold">FLOAT FLOAT</span>]
        [--dataset.binary | --dataset.no-binary]
 
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">───────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> -h, --help                                                       <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">show this help message and exit</span>                              <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────╯</span>
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> optimizer options </span><span style="font-weight: lighter">─────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> --optimizer.learning-rate <span style="font-weight: bold">FLOAT</span>                                  <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.001)</span>                                             <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --optimizer.betas <span style="font-weight: bold">FLOAT FLOAT</span>                                    <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.9 0.999)</span>                                         <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────╯</span>
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> dataset options </span><span style="font-weight: lighter">───────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> --dataset.binary, --dataset.no-binary                            <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Set to load binary version of MNIST dataset.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
-
-<span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> -h, --help                                                        <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">show this help message and exit</span>                               <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> optimizer options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --optimizer.learning-rate <span style="font-weight: bold">FLOAT</span>                                   <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.001)</span>                                              <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --optimizer.betas <span style="font-weight: bold">FLOAT FLOAT</span>                                     <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>     <span style="color: #008080">(default: 0.9 0.999)</span>                                          <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> dataset options </span><span style="font-weight: lighter">────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --dataset.binary, --dataset.no-binary                             <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Set to load binary version of MNIST dataset.</span> <span style="color: #008080">(default: False)</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --optimizer.learning-rate 3e-4 --dataset.binary</strong>
 Mnist(binary=True)
@@ -601,7 +600,7 @@ Greet someone.
 <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
 <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --name <span style="font-weight: bold">STR</span>              <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --loud, --no-loud       <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --loud, --no-loud       <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python 04_decorator_subcommands.py greet --name Alice</strong>
@@ -671,7 +670,7 @@ Make a commit.
 <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
 <span style="font-weight: lighter">│</span> -h, --help             <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --message <span style="font-weight: bold">STR</span>          <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --all, --no-all        <span style="color: #008080">(default: None)</span>                 <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --all, --no-all        <span style="color: #008080">(default: False)</span>                <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./05_subcommands_func.py commit --message hello --all</strong>

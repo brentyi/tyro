@@ -76,12 +76,12 @@ More concretely, we can also compare specific features. A noncomprehensive set:
 
 <!-- prettier-ignore-end -->
 
-Note that other libraries are generally aimed specifically at only one of
-dataclasses (`datargs`, `simple-parsing`, `argparse-dataclass`,
-`argparse-dataclasses`, `dataclass-cli`, `clout`, `hf_argparser`, `pyrallis`,
-`yahp`), custom structures (`tap`), or functions (`typer`) rather than general
-types and callables, but offer other features that you might find critical, such
-as registration for custom types (`pyrallis`), built-in approaches for
+Other libraries are generally aimed specifically at only one of dataclasses
+(`datargs`, `simple-parsing`, `argparse-dataclass`, `argparse-dataclasses`,
+`dataclass-cli`, `clout`, `hf_argparser`, `pyrallis`, `yahp`), custom
+structures (`tap`), or functions (`typer`, `defopt`) rather than general types
+and callables, but offer other features that you might find critical, such as
+registration for custom types (`pyrallis`), built-in approaches for
 serialization and config files (`tap`, `pyrallis`, `yahp`), and opportunities
 for integration with fields generated using standard argparse definitions
 (`simple-parsing`).

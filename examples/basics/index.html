@@ -425,50 +425,6 @@ Config(source_paths=(PosixPath('data'),), dimensions=(16, 16))
 Config(source_paths=(PosixPath('data1'), PosixPath('data2')),
        dimensions=(32, 32))
 </pre></section>
-<section id="instantiating-classes">
-<span id="example-04-classes"></span><h2>Instantiating Classes<a class="headerlink" href="#instantiating-classes" title="Link to this heading">¶</a></h2>
-<p>In addition to functions and dataclasses, we can also generate CLIs from the
-constructors of standard Python classes.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 04_classes.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">tyro</span>
-<span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 5</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-<span class="linenos"> 6</span>        <span class="bp">self</span><span class="p">,</span>
-<span class="linenos"> 7</span>        <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="linenos"> 8</span>        <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-<span class="linenos"> 9</span>        <span class="n">flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-<span class="linenos">10</span>    <span class="p">):</span>
-<span class="linenos">11</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Arguments.</span>
-<span class="linenos">12</span>
-<span class="linenos">13</span><span class="sd">        Args:</span>
-<span class="linenos">14</span><span class="sd">            field1: A string field.</span>
-<span class="linenos">15</span><span class="sd">            field2: A numeric field.</span>
-<span class="linenos">16</span><span class="sd">            flag: A boolean flag.</span>
-<span class="linenos">17</span><span class="sd">        &quot;&quot;&quot;</span>
-<span class="linenos">18</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">,</span> <span class="n">flag</span><span class="p">]</span>
-<span class="linenos">19</span>
-<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">21</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
-<span class="linenos">22</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
-</pre></div>
-</div>
-<pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_classes.py --help</strong>
-<span style="font-weight: bold">usage</span>: 04_classes.py [-h] --field1 <span style="font-weight: bold">STR</span> --field2 <span style="font-weight: bold">INT</span> [--flag | --no-flag]
-
-Arguments.
-
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --field1 <span style="font-weight: bold">STR</span>            <span style="font-weight: lighter">A string field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>      <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --field2 <span style="font-weight: bold">INT</span>            <span style="font-weight: lighter">A numeric field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>     <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --flag, --no-flag       <span style="font-weight: lighter">A boolean flag.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-</pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_classes.py --field1 hello --field2 7</strong>
-['hello', 7, False]
-</pre></section>
 <section id="booleans-and-flags">
 <span id="example-04-flags"></span><h2>Booleans and Flags<a class="headerlink" href="#booleans-and-flags" title="Link to this heading">¶</a></h2>
 <p>Booleans can either be expected to be explicitly passed in, or, if given a default
@@ -511,9 +467,9 @@ value, automatically converted to flags.</p>
 <span style="font-weight: lighter">│</span> --optional-boolean <span style="font-weight: bold">{None,True,False}</span>                                     <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Optional boolean. Same as above, but can be omitted.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --flag-a, --no-flag-a                                                    <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --flag-a in to set this value to True.</span> <span style="color: #008080">(default: None)</span>          <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --flag-a in to set this value to True.</span> <span style="color: #008080">(default: False)</span>         <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --flag-b, --no-flag-b                                                    <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --no-flag-b in to set this value to False.</span> <span style="color: #008080">(default: None)</span>      <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --no-flag-b in to set this value to False.</span> <span style="color: #008080">(default: True)</span>      <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_flags.py --boolean True</strong>
@@ -721,7 +677,7 @@ Args(union_over_types=0,
 <span class="linenos">11</span>    <span class="o">/</span><span class="p">,</span>  <span class="c1"># Mark the end of positional arguments.</span>
 <span class="linenos">12</span>    <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="linenos">13</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Command-line interface defined using a function signature. Note that this</span>
+<span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Command-line interface defined using a function signature. This</span>
 <span class="linenos">15</span><span class="sd">    docstring is parsed to generate helptext.</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span><span class="sd">    Args:</span>
@@ -739,18 +695,18 @@ Args(union_over_types=0,
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python 08_positional.py --help</strong>
 <span style="font-weight: bold">usage</span>: 08_positional.py [-h] [--verbose | --no-verbose] <span style="font-weight: bold">PATH</span> <span style="font-weight: bold">PATH</span>
 
-Command-line interface defined using a function signature. Note that this
-docstring is parsed to generate helptext.
+Command-line interface defined using a function signature. This docstring is
+parsed to generate helptext.
 
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> positional arguments </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Source path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                     <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Destination path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>             <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --verbose, --no-verbose                                       <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Explain what is being done.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> positional arguments </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Source path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Destination path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                 <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>              <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --verbose, --no-verbose                                        <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Explain what is being done.</span> <span style="color: #008080">(default: False)</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python 08_positional.py ./a ./b</strong>
 source=PosixPath('a')
@@ -958,6 +914,50 @@ Verbosity level (aliased): 0
 Verbosity level: 0
 Verbosity level (aliased): 3
 </pre></section>
+<section id="instantiating-classes">
+<span id="example-13-classes"></span><h2>Instantiating Classes<a class="headerlink" href="#instantiating-classes" title="Link to this heading">¶</a></h2>
+<p>In addition to functions and dataclasses, we can also generate CLIs from the
+constructors of standard Python classes.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 13_classes.py</span>
+<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 5</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos"> 6</span>        <span class="bp">self</span><span class="p">,</span>
+<span class="linenos"> 7</span>        <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+<span class="linenos"> 8</span>        <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<span class="linenos"> 9</span>        <span class="n">flag</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="linenos">10</span>    <span class="p">):</span>
+<span class="linenos">11</span><span class="w">        </span><span class="sd">&quot;&quot;&quot;Arguments.</span>
+<span class="linenos">12</span>
+<span class="linenos">13</span><span class="sd">        Args:</span>
+<span class="linenos">14</span><span class="sd">            field1: A string field.</span>
+<span class="linenos">15</span><span class="sd">            field2: A numeric field.</span>
+<span class="linenos">16</span><span class="sd">            flag: A boolean flag.</span>
+<span class="linenos">17</span><span class="sd">        &quot;&quot;&quot;</span>
+<span class="linenos">18</span>        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">,</span> <span class="n">flag</span><span class="p">]</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">21</span>    <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
+<span class="linenos">22</span>    <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./13_classes.py --help</strong>
+<span style="font-weight: bold">usage</span>: 13_classes.py [-h] --field1 <span style="font-weight: bold">STR</span> --field2 <span style="font-weight: bold">INT</span> [--flag | --no-flag]
+
+Arguments.
+
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">───────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span>  <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --field1 <span style="font-weight: bold">STR</span>            <span style="font-weight: lighter">A string field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>       <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --field2 <span style="font-weight: bold">INT</span>            <span style="font-weight: lighter">A numeric field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>      <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --flag, --no-flag       <span style="font-weight: lighter">A boolean flag.</span> <span style="color: #008080">(default: False)</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰──────────────────────────────────────────────────────────╯</span>
+</pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./13_classes.py --field1 hello --field2 7</strong>
+['hello', 7, False]
+</pre></section>
 </section>
 
         </article>
@@ -1026,7 +1026,6 @@ Verbosity level (aliased): 3
 <li><a class="reference internal" href="#functions">Functions</a></li>
 <li><a class="reference internal" href="#dataclasses">Dataclasses</a></li>
 <li><a class="reference internal" href="#multi-value-arguments">Multi-value Arguments</a></li>
-<li><a class="reference internal" href="#instantiating-classes">Instantiating Classes</a></li>
 <li><a class="reference internal" href="#booleans-and-flags">Booleans and Flags</a></li>
 <li><a class="reference internal" href="#choices">Choices</a></li>
 <li><a class="reference internal" href="#enums">Enums</a></li>
@@ -1036,6 +1035,7 @@ Verbosity level (aliased): 3
 <li><a class="reference internal" href="#argument-aliases">Argument Aliases</a></li>
 <li><a class="reference internal" href="#type-aliases-3-12">Type Aliases (3.12+)</a></li>
 <li><a class="reference internal" href="#counters">Counters</a></li>
+<li><a class="reference internal" href="#instantiating-classes">Instantiating Classes</a></li>
 </ul>
 </li>
 </ul>

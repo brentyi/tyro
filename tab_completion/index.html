@@ -338,8 +338,8 @@ loaded automatically on demand when the respective command is being completed
 <span class="nv">completion_dir</span><span class="o">=</span><span class="si">${</span><span class="nv">BASH_COMPLETION_USER_DIR</span><span class="k">:-</span><span class="si">${</span><span class="nv">XDG_DATA_HOME</span><span class="k">:-</span><span class="nv">$HOME</span><span class="p">/.local/share</span><span class="si">}</span><span class="p">/bash-completion</span><span class="si">}</span>/completions/
 mkdir<span class="w"> </span>-p<span class="w"> </span><span class="nv">$completion_dir</span>
 
-<span class="c1"># (2) Write completion scripts. Note that the name of the completion script must</span>
-<span class="c1"># match the name of the file.</span>
+<span class="c1"># (2) Write completion scripts. The name of the completion script must match</span>
+<span class="c1"># the name of the file.</span>
 python<span class="w"> </span>01_functions.py<span class="w"> </span>--tyro-write-completion<span class="w"> </span>bash<span class="w"> </span><span class="si">${</span><span class="nv">completion_dir</span><span class="si">}</span>/01_functions.py
 </pre></div>
 </div>

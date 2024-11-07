@@ -697,10 +697,10 @@
             <span class="c1">#</span>
             <span class="c1"># This will create a `--kwargs STR T [STR T ...]` CLI argument.</span>
             <span class="c1">#</span>
-            <span class="c1"># Note that it would be straightforward to make both this and *args truly</span>
-            <span class="c1"># positional, omitting the --args/--kwargs prefix, but we are choosing not</span>
-            <span class="c1"># to because it would make *args and **kwargs difficult to use in</span>
-            <span class="c1"># conjunction.</span>
+            <span class="c1"># It would be straightforward to make both this and *args truly</span>
+            <span class="c1"># positional, omitting the --args/--kwargs prefix, but we are</span>
+            <span class="c1"># choosing not to because it would make *args and **kwargs</span>
+            <span class="c1"># difficult to use in conjunction.</span>
             <span class="n">markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackKwargsCall</span><span class="p">,)</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">((</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
             <span class="n">default</span> <span class="o">=</span> <span class="p">{}</span>
@@ -709,7 +709,7 @@
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="c1"># Note that param.annotation doesn&#39;t resolve forward references.</span>
+                    <span class="c1"># param.annotation doesn&#39;t resolve forward references.</span>
                     <span class="n">typ</span><span class="o">=</span><span class="n">typ</span>
                     <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
                     <span class="k">else</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span><span class="p">)),</span>  <span class="c1"># type: ignore</span>

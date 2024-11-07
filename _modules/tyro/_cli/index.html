@@ -310,8 +310,9 @@
 <span class="n">OutT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;OutT&quot;</span><span class="p">)</span>
 
 
-<span class="c1"># Note that the overload here is necessary for pyright and pylance due to special-casing</span>
-<span class="c1"># related to using typing.Type[] as a temporary replacement for typing.TypeForm[].</span>
+<span class="c1"># The overload here is necessary for pyright and pylance due to special-casing</span>
+<span class="c1"># related to using typing.Type[] as a temporary replacement for</span>
+<span class="c1"># typing.TypeForm[].</span>
 <span class="c1">#</span>
 <span class="c1"># https://github.com/microsoft/pyright/issues/4298</span>
 
@@ -743,10 +744,10 @@
         <span class="p">)</span>
     <span class="k">except</span> <span class="n">_calling</span><span class="o">.</span><span class="n">InstantiationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="c1"># Print prettier errors.</span>
-        <span class="c1"># Note that this doesn&#39;t catch errors raised directly by get_out(),</span>
-        <span class="c1"># since that&#39;s called later! This is intentional, because we do less</span>
-        <span class="c1"># error handling for the root callable. Relevant: the</span>
-        <span class="c1"># `field_name_prefix == &quot;&quot;` condition in `callable_with_args()`!</span>
+        <span class="c1"># This doesn&#39;t catch errors raised directly by get_out(), since that&#39;s</span>
+        <span class="c1"># called later! This is intentional, because we do less error handling</span>
+        <span class="c1"># for the root callable. Relevant: the `field_name_prefix == &quot;&quot;`</span>
+        <span class="c1"># condition in `callable_with_args()`!</span>
 
         <span class="c1"># Emulate argparse&#39;s error behavior when invalid arguments are passed in.</span>
         <span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span>

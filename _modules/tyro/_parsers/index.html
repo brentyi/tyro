@@ -385,8 +385,7 @@
 
         <span class="c1"># Cycle detection.</span>
         <span class="c1">#</span>
-        <span class="c1"># Note that &#39;parent&#39; here refers to in the nesting hierarchy, not the</span>
-        <span class="c1"># superclass.</span>
+        <span class="c1"># &#39;parent&#39; here refers to in the nesting hierarchy, not the superclass.</span>
         <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">parent_classes</span> <span class="ow">and</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Found a cyclic dependency with type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">.&quot;</span>
@@ -562,7 +561,7 @@
         <span class="n">positional_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">assert</span> <span class="n">positional_group</span><span class="o">.</span><span class="n">title</span> <span class="o">==</span> <span class="s2">&quot;positional arguments&quot;</span>
 
-        <span class="c1"># Add each argument group. Note that groups with only suppressed arguments won&#39;t</span>
+        <span class="c1"># Add each argument group. Groups with only suppressed arguments won&#39;t</span>
         <span class="c1"># be added.</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="n">group_name</span> <span class="o">=</span> <span class="n">group_name_from_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>

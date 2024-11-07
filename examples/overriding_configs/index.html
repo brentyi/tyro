@@ -361,10 +361,10 @@ hello, hello, hello, hello, hello
 </pre></section>
 <section id="overriding-yaml-configs">
 <span id="example-02-overriding-yaml"></span><h2>Overriding YAML Configs<a class="headerlink" href="#overriding-yaml-configs" title="Link to this heading">¶</a></h2>
-<p><a class="reference internal" href="../../api/tyro/#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> understands a wide range of data structures, including standard dictionaries
-and lists.</p>
-<p>If you have a library of existing YAML files that you want to use, <cite>tyro</cite> can
-help override values within them.</p>
+<p><a class="reference internal" href="../../api/tyro/#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> understands a wide range of data structures, including standard
+dictionaries and lists.</p>
+<p>If you have a library of existing YAML files that you want to use,
+<a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can help override values within them.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>We recommend dataclass configs for new projects.</p>
@@ -374,7 +374,7 @@ help override values within them.</p>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="c1"># YAML configuration. Note that this could also be loaded from a file! Environment</span>
+<span class="linenos"> 6</span><span class="c1"># YAML configuration. This could also be loaded from a file! Environment</span>
 <span class="linenos"> 7</span><span class="c1"># variables are an easy way to select between different YAML files.</span>
 <span class="linenos"> 8</span><span class="n">default_yaml</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;&quot;&quot;</span>
 <span class="linenos"> 9</span><span class="s2">exp_name: test</span>
@@ -473,45 +473,44 @@ syntax.</p>
 <span class="linenos">21</span>    <span class="c1"># Total number of training steps.</span>
 <span class="linenos">22</span>    <span class="n">train_steps</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos">23</span>
-<span class="linenos">24</span>    <span class="c1"># Random seed. This is helpful for making sure that our experiments are all</span>
-<span class="linenos">25</span>    <span class="c1"># reproducible!</span>
-<span class="linenos">26</span>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span>
-<span class="linenos">27</span>
-<span class="linenos">28</span>    <span class="c1"># Activation to use. Not specifiable via the commandline.</span>
-<span class="linenos">29</span>    <span class="n">activation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span>
-<span class="linenos">30</span>
-<span class="linenos">31</span><span class="c1"># Note that we could also define this library using separate YAML files (similar to</span>
-<span class="linenos">32</span><span class="c1"># `config_path`/`config_name` in Hydra), but staying in Python enables seamless type</span>
-<span class="linenos">33</span><span class="c1"># checking + IDE support.</span>
-<span class="linenos">34</span><span class="n">default_configs</span> <span class="o">=</span> <span class="p">{</span>
-<span class="linenos">35</span>    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="p">(</span>
-<span class="linenos">36</span>        <span class="s2">&quot;Small experiment.&quot;</span><span class="p">,</span>
-<span class="linenos">37</span>        <span class="n">ExperimentConfig</span><span class="p">(</span>
-<span class="linenos">38</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span>
-<span class="linenos">39</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
-<span class="linenos">40</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
-<span class="linenos">41</span>            <span class="n">units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
-<span class="linenos">42</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">30_000</span><span class="p">,</span>
-<span class="linenos">43</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<span class="linenos">44</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
-<span class="linenos">45</span>        <span class="p">),</span>
-<span class="linenos">46</span>    <span class="p">),</span>
-<span class="linenos">47</span>    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="p">(</span>
-<span class="linenos">48</span>        <span class="s2">&quot;Big experiment.&quot;</span><span class="p">,</span>
-<span class="linenos">49</span>        <span class="n">ExperimentConfig</span><span class="p">(</span>
-<span class="linenos">50</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;imagenet-50&quot;</span><span class="p">,</span>
-<span class="linenos">51</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-<span class="linenos">52</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
-<span class="linenos">53</span>            <span class="n">units</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
-<span class="linenos">54</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
-<span class="linenos">55</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-<span class="linenos">56</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
-<span class="linenos">57</span>        <span class="p">),</span>
-<span class="linenos">58</span>    <span class="p">),</span>
-<span class="linenos">59</span><span class="p">}</span>
-<span class="linenos">60</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">61</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">overridable_config_cli</span><span class="p">(</span><span class="n">default_configs</span><span class="p">)</span>
-<span class="linenos">62</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+<span class="linenos">24</span>    <span class="c1"># Random seed.</span>
+<span class="linenos">25</span>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span>
+<span class="linenos">26</span>
+<span class="linenos">27</span>    <span class="c1"># Not specifiable via the commandline.</span>
+<span class="linenos">28</span>    <span class="n">activation</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">]</span>
+<span class="linenos">29</span>
+<span class="linenos">30</span><span class="c1"># We could also define this library using separate YAML files (similar to</span>
+<span class="linenos">31</span><span class="c1"># `config_path`/`config_name` in Hydra), but staying in Python enables seamless</span>
+<span class="linenos">32</span><span class="c1"># type checking + IDE support.</span>
+<span class="linenos">33</span><span class="n">default_configs</span> <span class="o">=</span> <span class="p">{</span>
+<span class="linenos">34</span>    <span class="s2">&quot;small&quot;</span><span class="p">:</span> <span class="p">(</span>
+<span class="linenos">35</span>        <span class="s2">&quot;Small experiment.&quot;</span><span class="p">,</span>
+<span class="linenos">36</span>        <span class="n">ExperimentConfig</span><span class="p">(</span>
+<span class="linenos">37</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;mnist&quot;</span><span class="p">,</span>
+<span class="linenos">38</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">2048</span><span class="p">,</span>
+<span class="linenos">39</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+<span class="linenos">40</span>            <span class="n">units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span>
+<span class="linenos">41</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">30_000</span><span class="p">,</span>
+<span class="linenos">42</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">43</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">,</span>
+<span class="linenos">44</span>        <span class="p">),</span>
+<span class="linenos">45</span>    <span class="p">),</span>
+<span class="linenos">46</span>    <span class="s2">&quot;big&quot;</span><span class="p">:</span> <span class="p">(</span>
+<span class="linenos">47</span>        <span class="s2">&quot;Big experiment.&quot;</span><span class="p">,</span>
+<span class="linenos">48</span>        <span class="n">ExperimentConfig</span><span class="p">(</span>
+<span class="linenos">49</span>            <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;imagenet-50&quot;</span><span class="p">,</span>
+<span class="linenos">50</span>            <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+<span class="linenos">51</span>            <span class="n">num_layers</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+<span class="linenos">52</span>            <span class="n">units</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+<span class="linenos">53</span>            <span class="n">train_steps</span><span class="o">=</span><span class="mi">100_000</span><span class="p">,</span>
+<span class="linenos">54</span>            <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+<span class="linenos">55</span>            <span class="n">activation</span><span class="o">=</span><span class="n">nn</span><span class="o">.</span><span class="n">GELU</span><span class="p">,</span>
+<span class="linenos">56</span>        <span class="p">),</span>
+<span class="linenos">57</span>    <span class="p">),</span>
+<span class="linenos">58</span><span class="p">}</span>
+<span class="linenos">59</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">60</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">extras</span><span class="o">.</span><span class="n">overridable_config_cli</span><span class="p">(</span><span class="n">default_configs</span><span class="p">)</span>
+<span class="linenos">61</span>    <span class="nb">print</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Overall helptext:</p>
@@ -542,11 +541,9 @@ Small experiment.
 <span style="font-weight: lighter">│</span> --units <span style="font-weight: bold">INT</span>             <span style="font-weight: lighter">Model size.</span> <span style="color: #008080">(default: 64)</span>                          <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --batch-size <span style="font-weight: bold">INT</span>        <span style="font-weight: lighter">Batch size.</span> <span style="color: #008080">(default: 2048)</span>                        <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --train-steps <span style="font-weight: bold">INT</span>       <span style="font-weight: lighter">Total number of training steps.</span> <span style="color: #008080">(default: 30000)</span>   <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed. This is helpful for making sure that </span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">our experiments are all reproducible!</span> <span style="color: #008080">(default: 0)</span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Activation to use. Not specifiable via the </span>        <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">commandline.</span> <span style="color: #008080">(fixed to: &lt;class </span>                    <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>                         <span style="color: #008080">'torch.nn.modules.activation.ReLU'&gt;)</span>               <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed.</span> <span style="color: #008080">(default: 0)</span>                          <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Not specifiable via the commandline.</span> <span style="color: #008080">(fixed to: </span>   <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                         <span style="color: #008080">&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</span>        <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_choosing_base_configs.py small --seed 94720</strong>
@@ -567,11 +564,9 @@ Big experiment.
 <span style="font-weight: lighter">│</span> --units <span style="font-weight: bold">INT</span>             <span style="font-weight: lighter">Model size.</span> <span style="color: #008080">(default: 256)</span>                         <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --batch-size <span style="font-weight: bold">INT</span>        <span style="font-weight: lighter">Batch size.</span> <span style="color: #008080">(default: 32)</span>                          <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">│</span> --train-steps <span style="font-weight: bold">INT</span>       <span style="font-weight: lighter">Total number of training steps.</span> <span style="color: #008080">(default: 100000)</span>  <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed. This is helpful for making sure that </span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">our experiments are all reproducible!</span> <span style="color: #008080">(default: 0)</span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Activation to use. Not specifiable via the </span>        <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">commandline.</span> <span style="color: #008080">(fixed to: &lt;class </span>                    <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span>                         <span style="color: #008080">'torch.nn.modules.activation.GELU'&gt;)</span>               <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed.</span> <span style="color: #008080">(default: 0)</span>                          <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Not specifiable via the commandline.</span> <span style="color: #008080">(fixed to: </span>   <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                         <span style="color: #008080">&lt;class 'torch.nn.modules.activation.GELU'&gt;)</span>        <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_choosing_base_configs.py big --seed 94720</strong>

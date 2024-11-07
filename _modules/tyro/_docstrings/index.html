@@ -591,9 +591,9 @@
 <span class="k">def</span> <span class="nf">get_callable_description</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get description associated with a callable via docstring parsing.</span>
 
-<span class="sd">    Note that the `dataclasses.dataclass` will automatically populate __doc__ based on</span>
-<span class="sd">    the fields of the class if a docstring is not specified; this helper will ignore</span>
-<span class="sd">    these docstrings.&quot;&quot;&quot;</span>
+<span class="sd">    `dataclasses.dataclass` will automatically populate __doc__ based on the</span>
+<span class="sd">    fields of the class if a docstring is not specified; this helper will</span>
+<span class="sd">    ignore these docstrings.&quot;&quot;&quot;</span>
 
     <span class="n">f</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
     <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>

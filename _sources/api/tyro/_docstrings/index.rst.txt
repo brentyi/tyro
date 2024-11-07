@@ -33,8 +33,8 @@ Module Contents
 
    Get description associated with a callable via docstring parsing.
 
-   Note that the `dataclasses.dataclass` will automatically populate __doc__ based on
-   the fields of the class if a docstring is not specified; this helper will ignore
-   these docstrings.
+   `dataclasses.dataclass` will automatically populate __doc__ based on the
+   fields of the class if a docstring is not specified; this helper will
+   ignore these docstrings.
 
 
