@@ -25,7 +25,7 @@ def test_subparser_strip_non_nested() -> None:
     @dataclasses.dataclass
     class DefaultSubparser:
         x: int
-        # Note that we add [int, str] to the annotation here... this should be ignored.
+        # We add [int, str] to the annotation here... this should be ignored.
         bc: Union[int, str, DefaultHTTPServer, DefaultSMTPServer] = dataclasses.field(
             default_factory=lambda: DefaultHTTPServer(5)
         )
@@ -70,7 +70,7 @@ def test_subparser_strip_nested() -> None:
     @dataclasses.dataclass
     class DefaultSubparser:
         x: int
-        # Note that we add [int, str] to the annotation here... this should be ignored.
+        # We add [int, str] to the annotation here... this should be ignored.
         bc: Union[int, str, DefaultHTTPServer, DefaultSMTPServer] = 5
 
     assert (

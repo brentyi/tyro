@@ -212,68 +212,6 @@ We can override arguments:
     Config(source_paths=(PosixPath('data1'), PosixPath('data2')),
            dimensions=(32, 32))
     </pre>
-.. _example-04_classes:
-
-Instantiating Classes
----------------------
-
-In addition to functions and dataclasses, we can also generate CLIs from the
-constructors of standard Python classes.
-
-
-.. code-block:: python
-    :linenos:
-
-    # 04_classes.py
-    import tyro
-
-    class Args:
-        def __init__(
-            self,
-            field1: str,
-            field2: int,
-            flag: bool = False,
-        ):
-            """Arguments.
-
-            Args:
-                field1: A string field.
-                field2: A numeric field.
-                flag: A boolean flag.
-            """
-            self.data = [field1, field2, flag]
-
-    if __name__ == "__main__":
-        args = tyro.cli(Args)
-        print(args.data)
-
-
-
-
-.. raw:: html
-
-    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_classes.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 04_classes.py [-h] --field1 <span style="font-weight: bold">STR</span> --field2 <span style="font-weight: bold">INT</span> [--flag | --no-flag]
-    
-    Arguments.
-    
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --field1 <span style="font-weight: bold">STR</span>            <span style="font-weight: lighter">A string field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>      <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --field2 <span style="font-weight: bold">INT</span>            <span style="font-weight: lighter">A numeric field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>     <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --flag, --no-flag       <span style="font-weight: lighter">A boolean flag.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
-    </pre>
-
-
-
-.. raw:: html
-
-    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_classes.py --field1 hello --field2 7</strong>
-    ['hello', 7, False]
-    </pre>
 .. _example-04_flags:
 
 Booleans and Flags
@@ -329,9 +267,9 @@ To turn off conversion, see :class:`tyro.conf.FlagConversionOff`.
     <span style="font-weight: lighter">│</span> --optional-boolean <span style="font-weight: bold">{None,True,False}</span>                                     <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Optional boolean. Same as above, but can be omitted.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --flag-a, --no-flag-a                                                    <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --flag-a in to set this value to True.</span> <span style="color: #008080">(default: None)</span>          <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --flag-a in to set this value to True.</span> <span style="color: #008080">(default: False)</span>         <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --flag-b, --no-flag-b                                                    <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --no-flag-b in to set this value to False.</span> <span style="color: #008080">(default: None)</span>      <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     <span style="font-weight: lighter">Pass --no-flag-b in to set this value to False.</span> <span style="color: #008080">(default: True)</span>      <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰──────────────────────────────────────────────────────────────────────────╯</span>
     </pre>
 
@@ -650,7 +588,7 @@ For more general positional arguments, see :class:`tyro.conf.Positional`.
         /,  # Mark the end of positional arguments.
         verbose: bool = False,
     ) -> None:
-        """Command-line interface defined using a function signature. Note that this
+        """Command-line interface defined using a function signature. This
         docstring is parsed to generate helptext.
 
         Args:
@@ -672,18 +610,18 @@ For more general positional arguments, see :class:`tyro.conf.Positional`.
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python 08_positional.py --help</strong>
     <span style="font-weight: bold">usage</span>: 08_positional.py [-h] [--verbose | --no-verbose] <span style="font-weight: bold">PATH</span> <span style="font-weight: bold">PATH</span>
     
-    Command-line interface defined using a function signature. Note that this 
-    docstring is parsed to generate helptext.
+    Command-line interface defined using a function signature. This docstring is 
+    parsed to generate helptext.
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> positional arguments </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Source path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                     <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Destination path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>             <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --verbose, --no-verbose                                       <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Explain what is being done.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> positional arguments </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Source path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Destination path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>              <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --verbose, --no-verbose                                        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Explain what is being done.</span> <span style="color: #008080">(default: False)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────╯</span>
     </pre>
 
 
@@ -987,4 +925,66 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./12_counters.py -vvv</strong>
     Verbosity level: 0
     Verbosity level (aliased): 3
+    </pre>
+.. _example-13_classes:
+
+Instantiating Classes
+---------------------
+
+In addition to functions and dataclasses, we can also generate CLIs from the
+constructors of standard Python classes.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 13_classes.py
+    import tyro
+
+    class Args:
+        def __init__(
+            self,
+            field1: str,
+            field2: int,
+            flag: bool = False,
+        ):
+            """Arguments.
+
+            Args:
+                field1: A string field.
+                field2: A numeric field.
+                flag: A boolean flag.
+            """
+            self.data = [field1, field2, flag]
+
+    if __name__ == "__main__":
+        args = tyro.cli(Args)
+        print(args.data)
+
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./13_classes.py --help</strong>
+    <span style="font-weight: bold">usage</span>: 13_classes.py [-h] --field1 <span style="font-weight: bold">STR</span> --field2 <span style="font-weight: bold">INT</span> [--flag | --no-flag]
+    
+    Arguments.
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">───────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span>  <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --field1 <span style="font-weight: bold">STR</span>            <span style="font-weight: lighter">A string field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>       <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --field2 <span style="font-weight: bold">INT</span>            <span style="font-weight: lighter">A numeric field.</span> <span style="font-weight: bold; color: #e60000">(required)</span>      <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --flag, --no-flag       <span style="font-weight: lighter">A boolean flag.</span> <span style="color: #008080">(default: False)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰──────────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./13_classes.py --field1 hello --field2 7</strong>
+    ['hello', 7, False]
     </pre>

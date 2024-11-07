@@ -46,7 +46,7 @@ NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE = NotRequiredButWeDontKnowTheValueType()
 
 EXCLUDE_FROM_CALL = ExcludeFromCallType()
 
-# Note that our "public" missing API will always be the propagating missing sentinel.
+# Our "public" missing API will always be the propagating missing sentinel.
 MISSING: Any = MISSING_PROP
 """Sentinel value to mark fields as missing. Can be used to mark fields passed
 in via `default=` for `tyro.cli()` as required."""

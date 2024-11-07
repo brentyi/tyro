@@ -24,7 +24,7 @@ def main(
     /,  # Mark the end of positional arguments.
     verbose: bool = False,
 ) -> None:
-    """Command-line interface defined using a function signature. Note that this
+    """Command-line interface defined using a function signature. This
     docstring is parsed to generate helptext.
 
     Args:

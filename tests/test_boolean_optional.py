@@ -2,6 +2,8 @@ import dataclasses
 
 import tyro
 
+from helptext_utils import get_helptext_with_checks
+
 
 def test_flag_default_false() -> None:
     """Test for argparse.BooleanOptionalAction-style usage."""
@@ -69,3 +71,15 @@ def test_flag_default_true() -> None:
         args=["--x", "True"],
         default=A(False),  # type: ignore
     ) == A(True)
+
+
+def test_flag_default_true_helptext() -> None:
+    """Test for argparse.BooleanOptionalAction-style usage."""
+
+    @dataclasses.dataclass
+    class A:
+        x: bool = True
+
+    assert "(default: True)" in get_helptext_with_checks(A)
+    assert "(default: False)" not in get_helptext_with_checks(A)
+    assert "(default: None)" not in get_helptext_with_checks(A)

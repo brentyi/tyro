@@ -1,8 +1,7 @@
 <br />
 <p align="center">
     <!--
-    Note that this README will be used for both GitHub and PyPI.
-    We therefore:
+    This README will be used for both GitHub and PyPI. We therefore:
     - Keep all image URLs absolute.
     - In the GitHub action we use for publishing, strip some HTML tags that aren't supported by PyPI.
     -->

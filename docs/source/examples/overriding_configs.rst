@@ -105,11 +105,11 @@ types.
 Overriding YAML Configs
 -----------------------
 
-:mod:`tyro` understands a wide range of data structures, including standard dictionaries
-and lists.
+:mod:`tyro` understands a wide range of data structures, including standard
+dictionaries and lists.
 
-If you have a library of existing YAML files that you want to use, `tyro` can
-help override values within them.
+If you have a library of existing YAML files that you want to use,
+:func:`tyro.cli` can help override values within them.
 
 .. note::
 
@@ -120,11 +120,10 @@ help override values within them.
     :linenos:
 
     # 02_overriding_yaml.py
+    import tyro
     import yaml
 
-    import tyro
-
-    # YAML configuration. Note that this could also be loaded from a file! Environment
+    # YAML configuration. This could also be loaded from a file! Environment
     # variables are an easy way to select between different YAML files.
     default_yaml = r"""
     exp_name: test
@@ -244,16 +243,16 @@ syntax.
         # Total number of training steps.
         train_steps: int
 
-        # Random seed. This is helpful for making sure that our experiments are all
-        # reproducible!
+        # Random seed.
         seed: int
 
-        # Activation to use. Not specifiable via the commandline.
+        # Not specifiable via the commandline.
         activation: Callable[[], nn.Module]
 
-    # Note that we could also define this library using separate YAML files (similar to
-    # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
-    # checking + IDE support.
+    # We could also define this library using separate YAML files (similar to
+                                                                   # `config_path`/`config_name`
+                                                                   # in Hydra), but
+    # staying in Python enables seamless type checking + IDE support.
     default_configs = {
         "small": (
             "Small experiment.",
@@ -321,11 +320,9 @@ The "small" subcommand:
     <span style="font-weight: lighter">│</span> --units <span style="font-weight: bold">INT</span>             <span style="font-weight: lighter">Model size.</span> <span style="color: #008080">(default: 64)</span>                          <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --batch-size <span style="font-weight: bold">INT</span>        <span style="font-weight: lighter">Batch size.</span> <span style="color: #008080">(default: 2048)</span>                        <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --train-steps <span style="font-weight: bold">INT</span>       <span style="font-weight: lighter">Total number of training steps.</span> <span style="color: #008080">(default: 30000)</span>   <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed. This is helpful for making sure that </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">our experiments are all reproducible!</span> <span style="color: #008080">(default: 0)</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Activation to use. Not specifiable via the </span>        <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">commandline.</span> <span style="color: #008080">(fixed to: &lt;class </span>                    <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="color: #008080">'torch.nn.modules.activation.ReLU'&gt;)</span>               <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed.</span> <span style="color: #008080">(default: 0)</span>                          <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Not specifiable via the commandline.</span> <span style="color: #008080">(fixed to: </span>   <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                         <span style="color: #008080">&lt;class 'torch.nn.modules.activation.ReLU'&gt;)</span>        <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────────────────╯</span>
     </pre>
 
@@ -357,11 +354,9 @@ The "big" subcommand:
     <span style="font-weight: lighter">│</span> --units <span style="font-weight: bold">INT</span>             <span style="font-weight: lighter">Model size.</span> <span style="color: #008080">(default: 256)</span>                         <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --batch-size <span style="font-weight: bold">INT</span>        <span style="font-weight: lighter">Batch size.</span> <span style="color: #008080">(default: 32)</span>                          <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --train-steps <span style="font-weight: bold">INT</span>       <span style="font-weight: lighter">Total number of training steps.</span> <span style="color: #008080">(default: 100000)</span>  <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed. This is helpful for making sure that </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">our experiments are all reproducible!</span> <span style="color: #008080">(default: 0)</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Activation to use. Not specifiable via the </span>        <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">commandline.</span> <span style="color: #008080">(fixed to: &lt;class </span>                    <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="color: #008080">'torch.nn.modules.activation.GELU'&gt;)</span>               <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --seed <span style="font-weight: bold">INT</span>              <span style="font-weight: lighter">Random seed.</span> <span style="color: #008080">(default: 0)</span>                          <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --activation <span style="font-weight: bold; color: #800000">{fixed}</span>    <span style="font-weight: lighter">Not specifiable via the commandline.</span> <span style="color: #008080">(fixed to: </span>   <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                         <span style="color: #008080">&lt;class 'torch.nn.modules.activation.GELU'&gt;)</span>        <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────────────────╯</span>
     </pre>
 
