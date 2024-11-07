@@ -39,7 +39,7 @@
 <br />
 
 <strong><code>tyro.cli()</code></strong> is a tool for generating CLI
-interfaces.
+interfaces in Python.
 
 We can define configurable scripts using functions:
 
@@ -211,9 +211,10 @@ particularly like:
   [jsonargparse](https://github.com/omni-us/jsonargparse), which provide deeper
   integration with configuration file formats like YAML and JSON.
 - [clipstick](https://github.com/sander76/clipstick), which focuses on
-  generating CLIs from Pydantic models.
+  simplicity + generating CLIs from Pydantic models.
 - [datargs](https://github.com/roee30/datargs), which provides a minimal API for
   dataclasses.
+- [defopt](https://defopt.readthedocs.io/), which has similarly comprehensive type annotation support.
 - [fire](https://github.com/google/python-fire) and
   [clize](https://github.com/epsy/clize), which support arguments without type
   annotations.

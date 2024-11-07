@@ -1,19 +1,24 @@
 """Dataclasses
 
-Common pattern: use :func:`tyro.cli()` to instantiate a dataclass.
+In addition to functions, :func:`tyro.cli()` can also take dataclasses as input.
 
 Usage:
-`python ./02_dataclasses.py --help`
-`python ./02_dataclasses.py --field1 hello`
-`python ./02_dataclasses.py --field1 hello --field2 5`
+
+    # To show the help message, we can use the ``--help`` flag:
+    python ./02_dataclasses.py --help
+
+    # We can override ``field1`` and ``field2``:
+    python ./02_dataclasses.py --field1 hello
+    python ./02_dataclasses.py --field1 hello --field2 5
 """
 
-import dataclasses
+from dataclasses import dataclass
+from pprint import pprint
 
 import tyro
 
 
-@dataclasses.dataclass
+@dataclass
 class Args:
     """Description.
     This should show up in the helptext!"""
@@ -27,4 +32,4 @@ class Args:
 
 if __name__ == "__main__":
     args = tyro.cli(Args)
-    print(args)
+    pprint(args)

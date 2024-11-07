@@ -8,7 +8,9 @@ CallableT = TypeVar("CallableT", bound=Callable)
 
 
 class SubcommandApp:
-    """This module provides a decorator-based API for subcommands in :mod:`tyro`, inspired by click.
+    """This class provides a decorator-based API for subcommands in
+    :mod:`tyro`, inspired by click. Under-the-hood, this is a light wrapper
+    over :func:`tyro.cli`.
 
     Example:
 
