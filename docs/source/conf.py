@@ -82,6 +82,7 @@ html_theme_options = {
     ],
     "light_logo": "logo-light.svg",
     "dark_logo": "logo-dark.svg",
+    "navigation_with_keys": True,
 }
 
 # Pull documentation types from hints
@@ -112,7 +113,7 @@ language: str = "en"
 exclude_patterns: List[str] = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "monokai"
+pygments_style = "default"
 
 
 # -- Options for HTML output -------------------------------------------------

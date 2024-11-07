@@ -41,6 +41,5 @@ There are some limitations. We currently _do not_ support:
   ambiguous to parse and not supported.
 - Self-referential types, like ``type RecursiveList[T] = T | list[RecursiveList[T]]``.
 
-In each of these cases, a `custom
-constructor <https://brentyi.github.io/tyro/examples/04_additional/11_custom_constructors/>`_
-can be defined as a workaround.
+In each of these cases, a :ref:`custom constructor
+<example-category-custom_constructors>` can be defined as a workaround.

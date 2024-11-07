@@ -4,11 +4,17 @@
 multiple types.
 
 Usage:
-`python ./07_unions.py --help`
+
+    python ./07_unions.py --help
+    python ./07_unions.py --union-over-types 3
+    python ./07_unions.py --union-over-types three
+    python ./07_unions.py --integer None
+    python ./07_unions.py --integer 0
 """
 
 import dataclasses
 import enum
+from pprint import pprint
 from typing import Literal, Optional
 
 import tyro
@@ -41,4 +47,4 @@ class Args:
 
 if __name__ == "__main__":
     args = tyro.cli(Args)
-    print(args)
+    pprint(args)

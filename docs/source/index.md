@@ -2,8 +2,7 @@
 
 |build| |nbsp| |ruff| |nbsp| |mypy| |nbsp| |pyright| |nbsp| |coverage| |nbsp| |versions|
 
-:func:`tyro.cli()` is a tool for generating CLI
-interfaces.
+:func:`tyro.cli()` is a tool for generating CLI interfaces in Python.
 
 We can define configurable scripts using functions:
 
@@ -93,53 +92,15 @@ shell completion.
    supported_types
 
 .. toctree::
-   :caption: Basics
-   :hidden:
-   :maxdepth: 1
-   :titlesonly:
-   :glob:
+   :caption: Examples
 
-   examples/01_basics/*
-
-
-.. toctree::
-   :caption: Hierarchies
-   :hidden:
-   :maxdepth: 1
-   :titlesonly:
-   :glob:
-
-   examples/02_nesting/*
-
-
-.. toctree::
-   :caption: Config Management
-   :hidden:
-   :maxdepth: 1
-   :titlesonly:
-   :glob:
-
-   examples/03_config_systems/*
-
-
-.. toctree::
-   :caption: Additional Features
-   :hidden:
-   :maxdepth: 1
-   :titlesonly:
-   :glob:
-
-   examples/04_additional/*
-
-
-.. toctree::
-   :caption: Custom Constructors
-   :hidden:
-   :maxdepth: 1
-   :titlesonly:
-   :glob:
-
-   examples/05_custom_constructors/*
+   ./examples/basics.rst
+   ./examples/nested_structures.rst
+   ./examples/subcommands.rst
+   ./examples/overriding_configs.rst
+   ./examples/generics.rst
+   ./examples/custom_constructors.rst
+   ./examples/pytorch_jax.rst
 
 
 .. toctree::
