@@ -82,7 +82,6 @@ html_theme_options = {
     ],
     "light_logo": "logo-light.svg",
     "dark_logo": "logo-dark.svg",
-    "navigation_with_keys": True,
 }
 
 # Pull documentation types from hints

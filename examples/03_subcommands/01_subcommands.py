@@ -1,3 +1,7 @@
+# mypy: ignore-errors
+#
+# Passing a Union type directly to tyro.cli() doesn't type-check correctly in
+# mypy. This will be fixed by `typing.TypeForm`: https://peps.python.org/pep-0747/
 """Subcommands are Unions
 
 All of :mod:`tyro`'s subcommand features are built using unions over struct
