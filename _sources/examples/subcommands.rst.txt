@@ -19,12 +19,6 @@ the union; arguments are then populated from the chosen type.
 
 .. note::
 
-    For convenience, we also expose several helpers for generating subcommands in
-    :mod:`tyro.extras`. These are all thin wrappers around :func:`tyro.cli()`'s
-    more verbose, :py:data:`typing.Union`-based syntax.
-
-.. note::
-
     For configuring subcommands beyond what can be expressed with type annotations, see
     :func:`tyro.conf.subcommand()`.
 
@@ -52,7 +46,8 @@ the union; arguments are then populated from the chosen type.
         message: str
 
     if __name__ == "__main__":
-        tyro.cli(Checkout | Commit)
+        cmd = tyro.cli(Checkout | Commit)
+        print(cmd)
 
 
 Print the helptext. This will show the available subcommands:
@@ -95,6 +90,7 @@ The `commit` subcommand:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_subcommands.py commit --message hello</strong>
+    Commit(message='hello')
     </pre>
 
 The `checkout` subcommand:
@@ -119,6 +115,7 @@ The `checkout` subcommand:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_subcommands.py checkout --branch main</strong>
+    Checkout(branch='main')
     </pre>
 .. _example-02_subcommands_in_func:
 

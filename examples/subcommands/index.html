@@ -297,12 +297,6 @@ types (typically dataclasses). Subcommands are used to choose between types in
 the union; arguments are then populated from the chosen type.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>For convenience, we also expose several helpers for generating subcommands in
-<a class="reference internal" href="../../api/tyro/extras/#module-tyro.extras" title="tyro.extras"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.extras</span></code></a>. These are all thin wrappers around <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>’s
-more verbose, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Union</span></code></a>-based syntax.</p>
-</div>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
 <p>For configuring subcommands beyond what can be expressed with type annotations, see
 <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.subcommand" title="tyro.conf.subcommand"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.subcommand()</span></code></a>.</p>
 </div>
@@ -326,7 +320,8 @@ more verbose, <a class="reference external" href="https://docs.python.org/3/libr
 <span class="linenos">18</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">21</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Checkout</span> <span class="o">|</span> <span class="n">Commit</span><span class="p">)</span>
+<span class="linenos">21</span>    <span class="n">cmd</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Checkout</span> <span class="o">|</span> <span class="n">Commit</span><span class="p">)</span>
+<span class="linenos">22</span>    <span class="nb">print</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Print the helptext. This will show the available subcommands:</p>
@@ -355,6 +350,7 @@ Commit changes.
 <span style="font-weight: lighter">╰──────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_subcommands.py commit --message hello</strong>
+Commit(message='hello')
 </pre><p>The <cite>checkout</cite> subcommand:</p>
 <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_subcommands.py checkout --help</strong>
@@ -368,6 +364,7 @@ Checkout a branch.
 <span style="font-weight: lighter">╰─────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./01_subcommands.py checkout --branch main</strong>
+Checkout(branch='main')
 </pre></section>
 <section id="subcommands-as-function-arguments">
 <span id="example-02-subcommands-in-func"></span><h2>Subcommands as Function Arguments<a class="headerlink" href="#subcommands-as-function-arguments" title="Link to this heading">¶</a></h2>

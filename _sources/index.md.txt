@@ -93,6 +93,8 @@ shell completion.
 
 .. toctree::
    :caption: Examples
+   :hidden:
+   :titlesonly:
 
    ./examples/basics.rst
    ./examples/nested_structures.rst
