@@ -62,7 +62,7 @@ DataConfigDataParserUnion = tyro.extras.subcommand_type_from_defaults(
 )
 
 
-# Note that we could also define this library using separate YAML files (similar to
+# We could also define this library using separate YAML files (similar to
 # `config_path`/`config_name` in Hydra), but staying in Python enables seamless type
 # checking + IDE support.
 ExperimentConfigDataParserUnion = tyro.extras.subcommand_type_from_defaults(

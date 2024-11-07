@@ -5,8 +5,8 @@ constructors of standard Python classes.
 
 Usage:
 
-    python ./04_classes.py --help
-    python ./04_classes.py --field1 hello --field2 7
+    python ./13_classes.py --help
+    python ./13_classes.py --field1 hello --field2 7
 """
 
 import tyro

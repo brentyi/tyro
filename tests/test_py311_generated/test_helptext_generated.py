@@ -303,7 +303,7 @@ def test_helptext_hard_bool() -> None:
         """Helptext. 2% milk."""
         # fmt: on
 
-    # Note that the percent symbol needs some extra handling in argparse.
+    # The percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
 
     helptext = get_helptext_with_checks(HelptextHardString)

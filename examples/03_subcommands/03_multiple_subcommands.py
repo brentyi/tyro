@@ -4,8 +4,8 @@ Multiple unions over struct types are populated using a series of subcommands.
 
 Usage:
 
-    # Note that we apply the :class:`tyro.conf.ConsolidateSubcommandArgs` flag.
-    # This pushes all arguments to the end of the command:
+    # We apply the :class:`tyro.conf.ConsolidateSubcommandArgs` flag. This
+    # pushes all arguments to the end of the command:
     python ./03_multiple_subcommands.py --help
     python ./03_multiple_subcommands.py dataset:mnist --help
     python ./03_multiple_subcommands.py dataset:mnist optimizer:adam --help

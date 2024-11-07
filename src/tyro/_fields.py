@@ -385,10 +385,10 @@ def _field_list_from_function(
             #
             # This will create a `--kwargs STR T [STR T ...]` CLI argument.
             #
-            # Note that it would be straightforward to make both this and *args truly
-            # positional, omitting the --args/--kwargs prefix, but we are choosing not
-            # to because it would make *args and **kwargs difficult to use in
-            # conjunction.
+            # It would be straightforward to make both this and *args truly
+            # positional, omitting the --args/--kwargs prefix, but we are
+            # choosing not to because it would make *args and **kwargs
+            # difficult to use in conjunction.
             markers = (_markers._UnpackKwargsCall,)
             typ = Dict.__getitem__((str, typ))  # type: ignore
             default = {}
@@ -397,7 +397,7 @@ def _field_list_from_function(
             field_list.append(
                 FieldDefinition.make(
                     name=param.name,
-                    # Note that param.annotation doesn't resolve forward references.
+                    # param.annotation doesn't resolve forward references.
                     typ=typ
                     if default_instance in MISSING_SINGLETONS
                     else Annotated.__class_getitem__((typ, _markers._OPTIONAL_GROUP)),  # type: ignore

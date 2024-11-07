@@ -28,8 +28,9 @@ from ._typing import TypeForm
 OutT = TypeVar("OutT")
 
 
-# Note that the overload here is necessary for pyright and pylance due to special-casing
-# related to using typing.Type[] as a temporary replacement for typing.TypeForm[].
+# The overload here is necessary for pyright and pylance due to special-casing
+# related to using typing.Type[] as a temporary replacement for
+# typing.TypeForm[].
 #
 # https://github.com/microsoft/pyright/issues/4298
 
@@ -455,10 +456,10 @@ def _cli_impl(
         )
     except _calling.InstantiationError as e:
         # Print prettier errors.
-        # Note that this doesn't catch errors raised directly by get_out(),
-        # since that's called later! This is intentional, because we do less
-        # error handling for the root callable. Relevant: the
-        # `field_name_prefix == ""` condition in `callable_with_args()`!
+        # This doesn't catch errors raised directly by get_out(), since that's
+        # called later! This is intentional, because we do less error handling
+        # for the root callable. Relevant: the `field_name_prefix == ""`
+        # condition in `callable_with_args()`!
 
         # Emulate argparse's error behavior when invalid arguments are passed in.
         from rich.console import Console, Group

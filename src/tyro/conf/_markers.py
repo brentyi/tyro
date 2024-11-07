@@ -7,7 +7,7 @@ from .. import _singleton
 # Current design issue: markers are applied recursively to nested structures, but can't
 # be unapplied.
 
-# Note that all Annotated[T, None] values are just for static checkers. The real marker
+# All Annotated[T, None] values are just for static checkers. The real marker
 # singletons are instantiated dynamically below.
 #
 # An alias could ideally be made, but SpecialForm aliases aren't well supported by
