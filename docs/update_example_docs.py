@@ -14,8 +14,9 @@ import subprocess
 from pathlib import Path
 from typing import Iterable, Optional, Tuple, Union
 
-import tyro
 from tqdm import tqdm
+
+import tyro
 
 
 def command_to_rst(
