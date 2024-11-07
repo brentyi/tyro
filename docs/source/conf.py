@@ -112,7 +112,7 @@ language: str = "en"
 exclude_patterns: List[str] = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = "monokai"
+pygments_style = "default"
 
 
 # -- Options for HTML output -------------------------------------------------

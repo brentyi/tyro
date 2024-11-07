@@ -14,7 +14,7 @@ Usage distinctions are the result of two API goals:
   - In contrast, similar libraries have more expansive APIs , and require more
     library-specific structures, decorators, or metadata formats for configuring
     parsing behavior.
-- **Strict typing.** Any type that can be annotated and unambiguously parsed
+- **Types.** Any type that can be annotated and unambiguously parsed
   with an `argparse`-style CLI interface should work out-of-the-box; any public
   API that isn't statically analyzable should be avoided.
   - In contrast, many similar libraries implement features that depend on

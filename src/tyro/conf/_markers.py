@@ -68,17 +68,22 @@ ordering, at the cost of support for optional subcommands.
 
 By default, :mod:`tyro` will generate a traditional CLI interface where args are applied to
 the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``:
-``
-python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
-``
+
+
+.. code-block:: bash
+
+    python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
 
 This can be frustrating because the resulting CLI is sensitive to the positioning of
 options.
 
 To consolidate subcommands, we push arguments to the end, after all subcommands:
-``
-python x.py s1 s2 {--root, s1, and s2 options}
-``
+
+
+.. code-block:: bash
+
+    python x.py s1 s2 {--root, s1, and s2 options}
+
 
 This is more robust to reordering of options, ensuring that any new options can simply
 be placed at the end of the command.
@@ -102,6 +107,8 @@ OmitArgPrefixes = Annotated[T, None]
 """Make flags used for keyword arguments shorter by omitting prefixes.
 
 If we have a structure with the field:
+
+.. code-block:: python
 
     cmd: NestedType
 
