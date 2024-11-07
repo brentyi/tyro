@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Helper script for updating the auto-generated examples pages in the documentation."""
 
 from __future__ import annotations
