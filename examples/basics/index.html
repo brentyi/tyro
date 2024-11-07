@@ -287,7 +287,7 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="basics">
-<h1>Basics<a class="headerlink" href="#basics" title="Link to this heading">¶</a></h1>
+<span id="example-category-basics"></span><h1>Basics<a class="headerlink" href="#basics" title="Link to this heading">¶</a></h1>
 <p>In these examples, we show basic examples of using <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>: functions,
 dataclasses, supported annotations, and configuration.</p>
 <section id="functions">
@@ -736,19 +736,37 @@ Args(union_over_types=0,
 </pre></div>
 </div>
 <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./08_positional_args.py --help</strong>
-python: can't open file '/Users/brentyi/tyro/examples/01_basics/./08_positional_args.py': [Errno 2] No such file or directory
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python 08_positional.py --help</strong>
+<span style="font-weight: bold">usage</span>: 08_positional.py [-h] [--verbose | --no-verbose] <span style="font-weight: bold">PATH</span> <span style="font-weight: bold">PATH</span>
+
+Command-line interface defined using a function signature. Note that this
+docstring is parsed to generate helptext.
+
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> positional arguments </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Source path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                     <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> PATH              <span style="font-weight: lighter">Destination path.</span> <span style="font-weight: bold; color: #e60000">(required)</span>                <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>             <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --verbose, --no-verbose                                       <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Explain what is being done.</span> <span style="color: #008080">(default: None)</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./08_positional_args.py ./a ./b</strong>
-python: can't open file '/Users/brentyi/tyro/examples/01_basics/./08_positional_args.py': [Errno 2] No such file or directory
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python 08_positional.py ./a ./b</strong>
+source=PosixPath('a')
+dest=PosixPath('b')
+verbose=False
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./08_positional_args.py ./test1 ./test2 --verbose</strong>
-python: can't open file '/Users/brentyi/tyro/examples/01_basics/./08_positional_args.py': [Errno 2] No such file or directory
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python 08_positional.py ./test1 ./test2 --verbose</strong>
+source=PosixPath('test1')
+dest=PosixPath('test2')
+verbose=True
 </pre></section>
 <section id="configuration-via-typing-annotated">
 <span id="example-09-conf"></span><h2>Configuration via typing.Annotated[]<a class="headerlink" href="#configuration-via-typing-annotated" title="Link to this heading">¶</a></h2>
-<p>The <a class="reference internal" href="../../api/tyro/conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> module contains utilities that can be used to configure
-command-line interfaces beyond what is expressible via static type annotations.</p>
+<p>The <a class="reference internal" href="../../api/tyro/conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> module contains utilities that can be used in conjunction
+with <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> to configure command-line interfaces beyond
+what is expressible via static type annotations.</p>
 <p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 09_conf.py</span>
 <span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
