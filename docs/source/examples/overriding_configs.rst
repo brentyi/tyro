@@ -120,8 +120,9 @@ If you have a library of existing YAML files that you want to use,
     :linenos:
 
     # 02_overriding_yaml.py
-    import tyro
     import yaml
+
+    import tyro
 
     # YAML configuration. This could also be loaded from a file! Environment
     # variables are an easy way to select between different YAML files.
@@ -250,9 +251,8 @@ syntax.
         activation: Callable[[], nn.Module]
 
     # We could also define this library using separate YAML files (similar to
-                                                                   # `config_path`/`config_name`
-                                                                   # in Hydra), but
-    # staying in Python enables seamless type checking + IDE support.
+    # `config_path`/`config_name` in Hydra), but staying in Python enables seamless
+    # type checking + IDE support.
     default_configs = {
         "small": (
             "Small experiment.",

@@ -16,8 +16,9 @@ Usage:
     python ./02_overriding_yaml.py --training.checkpoint-steps 300 1000 9000
 """
 
-import tyro
 import yaml
+
+import tyro
 
 # YAML configuration. This could also be loaded from a file! Environment
 # variables are an easy way to select between different YAML files.

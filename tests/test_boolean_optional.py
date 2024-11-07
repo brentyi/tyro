@@ -1,8 +1,8 @@
 import dataclasses
 
-import tyro
-
 from helptext_utils import get_helptext_with_checks
+
+import tyro
 
 
 def test_flag_default_false() -> None:
