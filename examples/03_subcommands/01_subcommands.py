@@ -8,12 +8,16 @@ All of :mod:`tyro`'s subcommand features are built using unions over struct
 types (typically dataclasses). Subcommands are used to choose between types in
 the union; arguments are then populated from the chosen type.
 
-For convenience, we also expose several helpers for generating subcommands in
-:mod:`tyro.extras`. These are all thin wrappers around :func:`tyro.cli()`'s
-more verbose, :py:data:`typing.Union`-based syntax.
+.. note::
 
-For configuring subcommands beyond what can be expressed with type annotations, see
-:func:`tyro.conf.subcommand()`.
+    For convenience, we also expose several helpers for generating subcommands in
+    :mod:`tyro.extras`. These are all thin wrappers around :func:`tyro.cli()`'s
+    more verbose, :py:data:`typing.Union`-based syntax.
+
+.. note::
+
+    For configuring subcommands beyond what can be expressed with type annotations, see
+    :func:`tyro.conf.subcommand()`.
 
 Usage:
 

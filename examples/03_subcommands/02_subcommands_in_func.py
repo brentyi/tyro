@@ -5,6 +5,11 @@ struct types.
 
 .. note::
 
+    To prevent :func:`tyro.cli()` from converting a Union type into a subcommand,
+    use :class:`tyro.conf.AvoidSubcommands`.
+
+.. note::
+
     Argument ordering for subcommands can be tricky. In the example below,
     ``--shared-arg`` must always come *before* the subcommand. As an option for
     alleviating this, see :class:`tyro.conf.ConsolidateSubcommandArgs`.

@@ -14,9 +14,8 @@ import subprocess
 from pathlib import Path
 from typing import Iterable, Optional, Tuple, Union
 
-from tqdm import tqdm
-
 import tyro
+from tqdm import tqdm
 
 
 def command_to_rst(
@@ -227,7 +226,7 @@ def main(
             )
 
         category_set = set()
-        example_contents = {}
+        example_contents: dict[str, str] = {}
         for future in tqdm(futures, total=len(futures)):
             category, content = future.result()
             category_set.add(category)

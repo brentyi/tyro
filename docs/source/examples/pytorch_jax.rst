@@ -4,7 +4,7 @@
 PyTorch / JAX
 =============
 
-In these examples, we show some useful patterns for using `tyro` with PyTorch and JAX.
+In these examples, we show some patterns for using :func:`tyro.cli` with PyTorch and JAX.
 
 
 .. _example-01_pytorch_parallelism:
