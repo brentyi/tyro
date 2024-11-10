@@ -13,6 +13,7 @@ from typing import (
     Dict,
     List,
     Optional,
+    Text,
     Tuple,
     TypeVar,
     Union,
@@ -20,9 +21,8 @@ from typing import (
 
 import pytest
 import torch
-from typing_extensions import Annotated, Final, Literal, TypeAlias
-
 import tyro
+from typing_extensions import Annotated, Final, Literal, TypeAlias
 
 
 def test_no_args() -> None:
@@ -570,6 +570,15 @@ def test_any_str() -> None:
 
     # Use bytes when provided ascii-compatible inputs.
     assert tyro.cli(main, args=["--x", "hello"]) == b"hello"
+    assert tyro.cli(main, args=["--x", "hello„"]) == "hello„"
+
+
+def test_text() -> None:
+    # `Text` is an alias for `str` in Python 3.
+    def main(x: Text) -> Text:
+        return x
+
+    assert tyro.cli(main, args=["--x", "hello"]) == "hello"
     assert tyro.cli(main, args=["--x", "hello„"]) == "hello„"
 
 
