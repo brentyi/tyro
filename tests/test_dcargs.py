@@ -21,8 +21,9 @@ from typing import (
 
 import pytest
 import torch
-import tyro
 from typing_extensions import Annotated, Final, Literal, TypeAlias
+
+import tyro
 
 
 def test_no_args() -> None:
