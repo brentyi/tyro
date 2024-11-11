@@ -97,7 +97,7 @@ shell completion.
    :titlesonly:
 
    ./examples/basics.rst
-   ./examples/nested_structures.rst
+   ./examples/hierarchical_structures.rst
    ./examples/subcommands.rst
    ./examples/overriding_configs.rst
    ./examples/generics.rst

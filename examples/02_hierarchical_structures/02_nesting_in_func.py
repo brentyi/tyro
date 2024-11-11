@@ -41,7 +41,7 @@ def train(
         config: Experiment configuration.
     """
     print(f"Saving to: {out_dir}")
-    print(f"Config: f{config}")
+    print(f"Config: {config}")
 
 
 if __name__ == "__main__":
