@@ -20,10 +20,8 @@ from typing import (
 )
 
 import pytest
-import torch
-from typing_extensions import Annotated, Final, Literal, TypeAlias
-
 import tyro
+from typing_extensions import Annotated, Final, Literal, TypeAlias
 
 
 def test_no_args() -> None:
@@ -606,25 +604,6 @@ def test_fixed_dataclass_type() -> None:
 
 def test_missing_singleton() -> None:
     assert tyro.MISSING is copy.deepcopy(tyro.MISSING)
-
-
-def test_torch_device() -> None:
-    def main(device: torch.device) -> torch.device:
-        return device
-
-    assert tyro.cli(main, args=["--device", "cpu"]) == torch.device("cpu")
-
-
-def test_supports_inference_mode_decorator() -> None:
-    @torch.inference_mode()
-    def main(x: int, device: str) -> Tuple[int, str]:
-        return x, device
-
-    assert tyro.cli(main, args="--x 3 --device cuda".split(" ")) == (3, "cuda")
-
-
-def test_torch_device_2() -> None:
-    assert tyro.cli(torch.device, args=["cpu"]) == torch.device("cpu")
 
 
 def test_just_int() -> None:

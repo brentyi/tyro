@@ -434,12 +434,12 @@ class SubparsersSpecification:
                 len(found_subcommand_configs) > 0
                 and found_subcommand_configs[0].constructor_factory is not None
             ):
-                options[i] = Annotated.__class_getitem__(  # type: ignore
+                options[i] = Annotated[  # type: ignore
                     (
                         found_subcommand_configs[0].constructor_factory(),
                         *_resolver.unwrap_annotated(option, "all")[1],
                     )
-                )
+                ]
 
         # Exit if we don't contain any nested types.
         if not any(
@@ -541,13 +541,11 @@ class SubparsersSpecification:
             if len(annotations) == 0:
                 option = option_origin
             else:
-                option = Annotated.__class_getitem__(  # type: ignore
-                    (option_origin,) + annotations
-                )
+                option = Annotated[(option_origin,) + annotations]
 
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
-                    option,
+                    option,  # type: ignore
                     markers=field.markers,
                     description=subcommand_config.description,
                     parent_classes=parent_classes,

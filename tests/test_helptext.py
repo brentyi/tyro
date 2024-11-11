@@ -6,11 +6,10 @@ import pathlib
 from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
-from helptext_utils import get_helptext_with_checks
-from torch import nn
+import tyro
 from typing_extensions import Annotated, Literal, NotRequired, TypedDict
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_helptext() -> None:
@@ -660,26 +659,6 @@ def test_comment_in_subclass_list() -> None:
     helptext = get_helptext_with_checks(Something)
     assert "This text should not" not in helptext
     assert "But this text should!" in helptext
-
-
-def test_unparsable() -> None:
-    class Struct:
-        a: int = 5
-        b: str = "7"
-
-    def main(x: Any = Struct()):
-        pass
-
-    helptext = get_helptext_with_checks(main)
-    assert "--x {fixed}" not in helptext
-
-    def main2(x: Callable = nn.ReLU):
-        pass
-
-    helptext = get_helptext_with_checks(main2)
-    assert "--x {fixed}" in helptext
-    assert "(fixed to:" in helptext
-    assert "torch" in helptext
 
 
 def test_pathlike() -> None:

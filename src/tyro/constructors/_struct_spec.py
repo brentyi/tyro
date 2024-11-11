@@ -531,9 +531,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     StructFieldSpec(
                         name=name,
                         type=(
-                            Annotated.__class_getitem__(  # type: ignore
+                            Annotated[  # type: ignore
                                 (pd2_field.annotation,) + tuple(pd2_field.metadata)
-                            )
+                            ]
                             if len(pd2_field.metadata) > 0
                             else pd2_field.annotation
                         ),

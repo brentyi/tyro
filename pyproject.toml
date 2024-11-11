@@ -45,14 +45,14 @@ dev = [
     "pytest-cov>=3.0.0",
     "omegaconf>=2.2.2",
     "attrs>=21.4.0",
-    "torch>=1.10.0",
+    "torch>=1.10.0;python_version<='3.12'",
     "pyright>=1.1.349,!=1.1.379",
     "ruff>=0.1.13",
     "mypy>=1.4.1",
     "numpy>=1.20.0",
     # As of 7/27/2023, flax install fails for Python 3.7 without pinning to an
     # old version. But doing so breaks other Python versions.
-    "flax>=0.6.9;python_version>='3.8'",
+    "flax>=0.6.9;python_version>='3.8' and python_version<='3.12'",
     "pydantic>=2.5.2",
     "coverage[toml]>=6.5.0",
     "eval_type_backport>=0.1.3",
