@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../../genindex/" /><link rel="search" title="Search" href="../../search/" /><link rel="next" title="Subcommands" href="../subcommands/" /><link rel="prev" title="Basics" href="../basics/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Nested Structures - tyro</title>
+        <title>Hierarchical Structures - tyro</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
@@ -225,7 +225,7 @@
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../basics/">Basics</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Nested Structures</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Hierarchical Structures</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../subcommands/">Subcommands</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../overriding_configs/">Overriding Configs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../generics/">Generics</a></li>
@@ -266,7 +266,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../../_sources/examples/nested_structures.rst.txt" title="View this page">
+  <a class="muted-link" href="../../_sources/examples/hierarchical_structures.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -286,10 +286,10 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="nested-structures">
-<span id="example-category-nested-structures"></span><h1>Nested Structures<a class="headerlink" href="#nested-structures" title="Link to this heading">¶</a></h1>
+          <section id="hierarchical-structures">
+<span id="example-category-hierarchical-structures"></span><h1>Hierarchical Structures<a class="headerlink" href="#hierarchical-structures" title="Link to this heading">¶</a></h1>
 <p>In these examples, we show how <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be used to instantiate
-nested structures. This can enable modular, reusable, and composable CLI
+hierarchical structures. This can enable modular, reusable, and composable CLI
 interfaces.</p>
 <section id="nested-dataclasses">
 <span id="example-01-nesting"></span><h2>Nested Dataclasses<a class="headerlink" href="#nested-dataclasses" title="Link to this heading">¶</a></h2>
@@ -375,7 +375,7 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span class="linenos">28</span><span class="sd">        config: Experiment configuration.</span>
 <span class="linenos">29</span><span class="sd">    &quot;&quot;&quot;</span>
 <span class="linenos">30</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Saving to: </span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">31</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config: f</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">31</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Config: </span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="linenos">32</span>
 <span class="linenos">33</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
 <span class="linenos">34</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
@@ -407,11 +407,11 @@ Train a model.
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_nesting_in_func.py --out-dir /tmp/test1</strong>
 Saving to: /tmp/test1
-Config: fConfig(optimizer=OptimizerConfig(learning_rate=0.0003, weight_decay=0.01), seed=0)
+Config: Config(optimizer=OptimizerConfig(learning_rate=0.0003, weight_decay=0.01), seed=0)
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./02_nesting_in_func.py --out-dir /tmp/test2 --config.seed 4</strong>
 Saving to: /tmp/test2
-Config: fConfig(optimizer=OptimizerConfig(learning_rate=0.0003, weight_decay=0.01), seed=4)
+Config: Config(optimizer=OptimizerConfig(learning_rate=0.0003, weight_decay=0.01), seed=4)
 </pre></section>
 <section id="nesting-in-containers">
 <span id="example-03-nesting-containers"></span><h2>Nesting in Containers<a class="headerlink" href="#nesting-in-containers" title="Link to this heading">¶</a></h2>
@@ -779,7 +779,7 @@ Args(field1='hello', field2=5)
         <div class="toc-tree-container">
           <div class="toc-tree">
             <ul>
-<li><a class="reference internal" href="#">Nested Structures</a><ul>
+<li><a class="reference internal" href="#">Hierarchical Structures</a><ul>
 <li><a class="reference internal" href="#nested-dataclasses">Nested Dataclasses</a></li>
 <li><a class="reference internal" href="#structures-as-function-arguments">Structures as Function Arguments</a></li>
 <li><a class="reference internal" href="#nesting-in-containers">Nesting in Containers</a></li>
