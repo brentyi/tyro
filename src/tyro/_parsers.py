@@ -541,7 +541,7 @@ class SubparsersSpecification:
             if len(annotations) == 0:
                 option = option_origin
             else:
-                option = Annotated[(option_origin,) + annotations]
+                option = Annotated[(option_origin,) + annotations]  # type: ignore
 
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
