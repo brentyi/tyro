@@ -1,10 +1,10 @@
 from typing import Any, Callable, Tuple
 
 import torch
-import tyro
+from helptext_utils import get_helptext_with_checks
 from torch import nn
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 def test_torch_device() -> None:

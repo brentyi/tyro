@@ -3,13 +3,12 @@ import enum
 import json
 import os
 import pathlib
-from collections.abc import Callable
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union, cast
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Literal, NotRequired, TypedDict
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 def test_helptext() -> None:
