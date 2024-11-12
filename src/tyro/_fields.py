@@ -186,12 +186,12 @@ class FieldDefinition:
         self, new_type_stripped: TypeForm[Any] | Callable
     ) -> FieldDefinition:
         if get_origin(self.type) is Annotated:
-            new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]
+            new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
         else:
-            new_type = new_type_stripped
+            new_type = new_type_stripped  # type: ignore
         return dataclasses.replace(
             self,
-            type=new_type,
+            type=new_type,  # type: ignore
             type_stripped=new_type_stripped,
         )
 
