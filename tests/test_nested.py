@@ -1231,3 +1231,31 @@ def test_subcommand_by_type_tree() -> None:
 
     assert tyro.cli(Args, args=[]) == Args(A("hello"))
     assert "default: inner:alt" in get_helptext_with_checks(Args)
+
+
+def test_annotated_narrow_0() -> None:
+    @dataclasses.dataclass
+    class A: ...
+
+    @dataclasses.dataclass
+    class B(A):
+        x: int
+
+    def main(x: Annotated[A, tyro.conf.OmitArgPrefixes] = B(x=3)) -> Any:
+        return x
+
+    assert tyro.cli(main, args=[]) == B(x=3)
+    assert tyro.cli(main, args="--x 5".split(" ")) == B(x=5)
+
+
+def test_annotated_narrow_1() -> None:
+    @dataclasses.dataclass
+    class A: ...
+
+    @dataclasses.dataclass
+    class B(A):
+        x: int
+
+    from tyro._resolver import narrow_subtypes
+
+    assert narrow_subtypes(Annotated[A, False], B(3)) == Annotated[B, False]  # type: ignore

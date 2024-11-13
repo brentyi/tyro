@@ -170,7 +170,7 @@ CallableType = TypeVar("CallableType", bound=Callable)
 
 class _Marker(_singleton.Singleton):
     def __getitem__(self, key):
-        return Annotated.__class_getitem__((key, self))  # type: ignore
+        return Annotated[(key, self)]  # type: ignore
 
 
 Marker = Any

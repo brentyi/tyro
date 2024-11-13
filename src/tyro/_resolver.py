@@ -137,12 +137,12 @@ def resolve_newtype_and_aliases(
 ) -> TypeOrCallableOrNone:
     # Handle type aliases, eg via the `type` statement in Python 3.12.
     if isinstance(typ, TypeAliasType):
-        return Annotated.__class_getitem__(
+        return Annotated[
             (
                 cast(Any, resolve_newtype_and_aliases(typ.__value__)),
                 TyroTypeAliasBreadCrumb(typ.__name__),
             )
-        )
+        ]
 
     # We'll unwrap NewType annotations here; this is needed before issubclass
     # checks!
@@ -156,7 +156,7 @@ def resolve_newtype_and_aliases(
         typ = resolve_newtype_and_aliases(getattr(typ, "__supertype__"))
 
     if return_name is not None:
-        typ = Annotated.__class_getitem__((typ, TyroTypeAliasBreadCrumb(return_name)))  # type: ignore
+        typ = Annotated[(typ, TyroTypeAliasBreadCrumb(return_name))]  # type: ignore
 
     return cast(TypeOrCallableOrNone, typ)
 
@@ -192,9 +192,7 @@ def narrow_subtypes(
 
         if superclass is Any or issubclass(potential_subclass, superclass):  # type: ignore
             if get_origin(typ) is Annotated:
-                return Annotated.__class_getitem__(  # type: ignore
-                    (potential_subclass,) + get_args(typ)[1:]
-                )
+                return Annotated[(potential_subclass,) + get_args(typ)[1:]]  # type: ignore
             typ = cast(TypeOrCallable, potential_subclass)
     except TypeError:
         # TODO: document where this TypeError can be raised, and reduce the amount of
@@ -221,9 +219,7 @@ def swap_type_using_confstruct(typ: TypeOrCallable) -> TypeOrCallable:
             )
             and anno.constructor_factory is not None
         ):
-            return Annotated.__class_getitem__(  # type: ignore
-                (anno.constructor_factory(),) + annotations
-            )
+            return Annotated[(anno.constructor_factory(),) + annotations]  # type: ignore
     return typ
 
 
@@ -589,7 +585,7 @@ def resolve_generic_types(
         return typ, type_from_typevar
     else:
         return (
-            Annotated.__class_getitem__((typ, *annotations)),  # type: ignore
+            Annotated[(typ, *annotations)],  # type: ignore
             type_from_typevar,
         )
 
@@ -625,12 +621,12 @@ def get_type_hints_with_backported_syntax(
                     non_none = args[1] if args[0] is NoneType else args[0]
                     if get_origin(non_none) is Annotated:
                         annotated_args = get_args(non_none)
-                        out[k] = Annotated.__class_getitem__(  # type: ignore
+                        out[k] = Annotated[  # type: ignore
                             (
                                 Union.__getitem__((annotated_args[0], None)),  # type: ignore
                                 *annotated_args[1:],
                             )
-                        )
+                        ]
         return out
 
     except TypeError as e:  # pragma: no cover

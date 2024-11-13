@@ -134,7 +134,7 @@ def subcommand_type_from_defaults(
     assert len(defaults) >= 2, "At least two subcommands are required."
     return Union.__getitem__(  # type: ignore
         tuple(
-            Annotated.__class_getitem__(  # type: ignore
+            Annotated[  # type: ignore
                 (
                     type(v),
                     tyro.conf.subcommand(
@@ -144,7 +144,7 @@ def subcommand_type_from_defaults(
                         prefix_name=prefix_names,
                     ),
                 )
-            )
+            ]
             for k, v in defaults.items()
         )
     )

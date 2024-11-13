@@ -186,14 +186,12 @@ class FieldDefinition:
         self, new_type_stripped: TypeForm[Any] | Callable
     ) -> FieldDefinition:
         if get_origin(self.type) is Annotated:
-            new_type = Annotated.__class_getitem__(  # type: ignore
-                (new_type_stripped, *get_args(self.type)[1:])
-            )
+            new_type = Annotated[(new_type_stripped, *get_args(self.type)[1:])]  # type: ignore
         else:
-            new_type = new_type_stripped
+            new_type = new_type_stripped  # type: ignore
         return dataclasses.replace(
             self,
-            type=new_type,
+            type=new_type,  # type: ignore
             type_stripped=new_type_stripped,
         )
 
@@ -400,7 +398,7 @@ def _field_list_from_function(
                     # param.annotation doesn't resolve forward references.
                     typ=typ
                     if default_instance in MISSING_SINGLETONS
-                    else Annotated.__class_getitem__((typ, _markers._OPTIONAL_GROUP)),  # type: ignore
+                    else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
                     default=default,
                     is_default_from_default_instance=False,
                     helptext=helptext,
