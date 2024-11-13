@@ -830,9 +830,9 @@
                     <span class="n">StructFieldSpec</span><span class="p">(</span>
                         <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                         <span class="nb">type</span><span class="o">=</span><span class="p">(</span>
-                            <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                            <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
                                 <span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
-                            <span class="p">)</span>
+                            <span class="p">]</span>
                             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
                             <span class="k">else</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span>
                         <span class="p">),</span>

@@ -735,12 +735,12 @@
                 <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
                 <span class="ow">and</span> <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="p">):</span>
-                <span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
                     <span class="p">(</span>
                         <span class="n">found_subcommand_configs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">(),</span>
                         <span class="o">*</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="s2">&quot;all&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">],</span>
                     <span class="p">)</span>
-                <span class="p">)</span>
+                <span class="p">]</span>
 
         <span class="c1"># Exit if we don&#39;t contain any nested types.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span>
@@ -842,13 +842,11 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">option</span> <span class="o">=</span> <span class="n">option_origin</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">option</span> <span class="o">=</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
-                    <span class="p">(</span><span class="n">option_origin</span><span class="p">,)</span> <span class="o">+</span> <span class="n">annotations</span>
-                <span class="p">)</span>
+                <span class="n">option</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">option_origin</span><span class="p">,)</span> <span class="o">+</span> <span class="n">annotations</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 
             <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)):</span>
                 <span class="n">subparser</span> <span class="o">=</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
-                    <span class="n">option</span><span class="p">,</span>
+                    <span class="n">option</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
                     <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
                     <span class="n">description</span><span class="o">=</span><span class="n">subcommand_config</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
                     <span class="n">parent_classes</span><span class="o">=</span><span class="n">parent_classes</span><span class="p">,</span>

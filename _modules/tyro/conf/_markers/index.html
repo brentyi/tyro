@@ -452,7 +452,7 @@
 
 <span class="k">class</span> <span class="nc">_Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Annotated</span><span class="o">.</span><span class="n">__class_getitem__</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
 
 
 <span class="n">Marker</span> <span class="o">=</span> <span class="n">Any</span>
