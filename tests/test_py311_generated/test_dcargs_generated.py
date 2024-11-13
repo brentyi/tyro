@@ -16,13 +16,13 @@ from typing import (
     List,
     Literal,
     Optional,
+    Text,
     Tuple,
     TypeAlias,
     TypeVar,
 )
 
 import pytest
-import torch
 
 import tyro
 
@@ -575,6 +575,15 @@ def test_any_str() -> None:
     assert tyro.cli(main, args=["--x", "hello„"]) == "hello„"
 
 
+def test_text() -> None:
+    # `Text` is an alias for `str` in Python 3.
+    def main(x: Text) -> Text:
+        return x
+
+    assert tyro.cli(main, args=["--x", "hello"]) == "hello"
+    assert tyro.cli(main, args=["--x", "hello„"]) == "hello„"
+
+
 def test_fixed() -> None:
     def main(x: Callable[[int], int] = lambda x: x * 2) -> Callable[[int], int]:
         return x
@@ -598,25 +607,6 @@ def test_fixed_dataclass_type() -> None:
 
 def test_missing_singleton() -> None:
     assert tyro.MISSING is copy.deepcopy(tyro.MISSING)
-
-
-def test_torch_device() -> None:
-    def main(device: torch.device) -> torch.device:
-        return device
-
-    assert tyro.cli(main, args=["--device", "cpu"]) == torch.device("cpu")
-
-
-def test_supports_inference_mode_decorator() -> None:
-    @torch.inference_mode()
-    def main(x: int, device: str) -> Tuple[int, str]:
-        return x, device
-
-    assert tyro.cli(main, args="--x 3 --device cuda".split(" ")) == (3, "cuda")
-
-
-def test_torch_device_2() -> None:
-    assert tyro.cli(torch.device, args=["cpu"]) == torch.device("cpu")
 
 
 def test_just_int() -> None:
