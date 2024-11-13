@@ -2,11 +2,11 @@ import dataclasses
 from typing import Any, Generic, Mapping, NewType, Optional, Tuple, TypeVar, Union
 
 import pytest
+import tyro
 from frozendict import frozendict  # type: ignore
-from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Final, Literal
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_nested() -> None:
@@ -1233,7 +1233,7 @@ def test_subcommand_by_type_tree() -> None:
     assert "default: inner:alt" in get_helptext_with_checks(Args)
 
 
-def test_annotated_narrow() -> None:
+def test_annotated_narrow_0() -> None:
     @dataclasses.dataclass
     class A: ...
 
@@ -1246,3 +1246,16 @@ def test_annotated_narrow() -> None:
 
     assert tyro.cli(main, args=[]) == B(x=3)
     assert tyro.cli(main, args="--x 5".split(" ")) == B(x=5)
+
+
+def test_annotated_narrow_1() -> None:
+    @dataclasses.dataclass
+    class A: ...
+
+    @dataclasses.dataclass
+    class B(A):
+        x: int
+
+    from tyro._resolver import narrow_subtypes
+
+    assert narrow_subtypes(Annotated[A, False], B(3)) == Annotated[B, False]  # type: ignore
