@@ -500,87 +500,94 @@ add support for a custom type.</p>
 <span class="linenos"> 6</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lower</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">upper</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="linenos"> 7</span>        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="p">(</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span>
 <span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="c1"># Create a custom registry, which stores constructor rules.</span>
-<span class="linenos">10</span><span class="n">custom_registry</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">ConstructorRegistry</span><span class="p">()</span>
+<span class="linenos"> 9</span>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="linenos">10</span>        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;(lower=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">, upper=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span>
 <span class="linenos">11</span>
-<span class="linenos">12</span><span class="c1"># Define a rule that applies to all types that match `Bounds`.</span>
-<span class="linenos">13</span><span class="nd">@custom_registry</span><span class="o">.</span><span class="n">struct_rule</span>
-<span class="linenos">14</span><span class="k">def</span> <span class="nf">_</span><span class="p">(</span>
-<span class="linenos">15</span>    <span class="n">type_info</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructTypeInfo</span><span class="p">,</span>
-<span class="linenos">16</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">17</span>    <span class="c1"># We return `None` if the rule does not apply.</span>
-<span class="linenos">18</span>    <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">Bounds</span><span class="p">:</span>
-<span class="linenos">19</span>        <span class="k">return</span> <span class="kc">None</span>
-<span class="linenos">20</span>
-<span class="linenos">21</span>    <span class="c1"># We can extract the default value of the field from `type_info`.</span>
-<span class="linenos">22</span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Bounds</span><span class="p">):</span>
-<span class="linenos">23</span>        <span class="c1"># If the default value is a `Bounds` instance, we don&#39;t need to generate a constructor.</span>
-<span class="linenos">24</span>        <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-<span class="linenos">25</span>        <span class="n">is_default_overridden</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="linenos">26</span>    <span class="k">else</span><span class="p">:</span>
-<span class="linenos">27</span>        <span class="c1"># Otherwise, the default value is missing. We&#39;ll mark the child defaults as missing as well.</span>
-<span class="linenos">28</span>        <span class="k">assert</span> <span class="n">type_info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="p">(</span>
-<span class="linenos">29</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
-<span class="linenos">30</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
-<span class="linenos">31</span>        <span class="p">)</span>
-<span class="linenos">32</span>        <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">)</span>
-<span class="linenos">33</span>        <span class="n">is_default_overridden</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="linenos">34</span>
-<span class="linenos">35</span>    <span class="c1"># If the rule applies, we return the constructor spec.</span>
-<span class="linenos">36</span>    <span class="k">return</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructConstructorSpec</span><span class="p">(</span>
-<span class="linenos">37</span>        <span class="c1"># The instantiate function will be called with the fields as keyword arguments.</span>
-<span class="linenos">38</span>        <span class="n">instantiate</span><span class="o">=</span><span class="n">Bounds</span><span class="p">,</span>
-<span class="linenos">39</span>        <span class="n">fields</span><span class="o">=</span><span class="p">(</span>
-<span class="linenos">40</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructFieldSpec</span><span class="p">(</span>
-<span class="linenos">41</span>                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
-<span class="linenos">42</span>                <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
-<span class="linenos">43</span>                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-<span class="linenos">44</span>                <span class="n">is_default_overridden</span><span class="o">=</span><span class="n">is_default_overridden</span><span class="p">,</span>
-<span class="linenos">45</span>                <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;Lower bound.&quot;</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos">46</span>            <span class="p">),</span>
-<span class="linenos">47</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructFieldSpec</span><span class="p">(</span>
-<span class="linenos">48</span>                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;upper&quot;</span><span class="p">,</span>
-<span class="linenos">49</span>                <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
-<span class="linenos">50</span>                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
-<span class="linenos">51</span>                <span class="n">is_default_overridden</span><span class="o">=</span><span class="n">is_default_overridden</span><span class="p">,</span>
-<span class="linenos">52</span>                <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;Upper bound.&quot;</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-<span class="linenos">53</span>            <span class="p">),</span>
-<span class="linenos">54</span>        <span class="p">),</span>
-<span class="linenos">55</span>    <span class="p">)</span>
-<span class="linenos">56</span>
-<span class="linenos">57</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
-<span class="linenos">58</span>    <span class="n">bounds</span><span class="p">:</span> <span class="n">Bounds</span><span class="p">,</span>
-<span class="linenos">59</span>    <span class="n">bounds_with_default</span><span class="p">:</span> <span class="n">Bounds</span> <span class="o">=</span> <span class="n">Bounds</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
-<span class="linenos">60</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="linenos">61</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A function with two `Bounds` instances as input.&quot;&quot;&quot;</span>
-<span class="linenos">62</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bounds</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">63</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bounds_with_default</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="linenos">64</span>
-<span class="linenos">65</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-<span class="linenos">66</span>    <span class="c1"># To activate a custom registry, we should use it as a context manager.</span>
-<span class="linenos">67</span>    <span class="k">with</span> <span class="n">custom_registry</span><span class="p">:</span>
-<span class="linenos">68</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+<span class="linenos">12</span><span class="c1"># Create a custom registry, which stores constructor rules.</span>
+<span class="linenos">13</span><span class="n">custom_registry</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">ConstructorRegistry</span><span class="p">()</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span><span class="c1"># Define a rule that applies to all types that match `Bounds`.</span>
+<span class="linenos">16</span><span class="nd">@custom_registry</span><span class="o">.</span><span class="n">struct_rule</span>
+<span class="linenos">17</span><span class="k">def</span> <span class="nf">_</span><span class="p">(</span>
+<span class="linenos">18</span>    <span class="n">type_info</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructTypeInfo</span><span class="p">,</span>
+<span class="linenos">19</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">20</span>    <span class="c1"># We return `None` if the rule does not apply.</span>
+<span class="linenos">21</span>    <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">Bounds</span><span class="p">:</span>
+<span class="linenos">22</span>        <span class="k">return</span> <span class="kc">None</span>
+<span class="linenos">23</span>
+<span class="linenos">24</span>    <span class="c1"># We can extract the default value of the field from `type_info`.</span>
+<span class="linenos">25</span>    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Bounds</span><span class="p">):</span>
+<span class="linenos">26</span>        <span class="c1"># If the default value is a `Bounds` instance, we don&#39;t need to generate a constructor.</span>
+<span class="linenos">27</span>        <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">bounds</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+<span class="linenos">28</span>        <span class="n">is_default_overridden</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="linenos">29</span>    <span class="k">else</span><span class="p">:</span>
+<span class="linenos">30</span>        <span class="c1"># Otherwise, the default value is missing. We&#39;ll mark the child defaults as missing as well.</span>
+<span class="linenos">31</span>        <span class="k">assert</span> <span class="n">type_info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="p">(</span>
+<span class="linenos">32</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span>
+<span class="linenos">33</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">,</span>
+<span class="linenos">34</span>        <span class="p">)</span>
+<span class="linenos">35</span>        <span class="n">default</span> <span class="o">=</span> <span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">)</span>
+<span class="linenos">36</span>        <span class="n">is_default_overridden</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="linenos">37</span>
+<span class="linenos">38</span>    <span class="c1"># If the rule applies, we return the constructor spec.</span>
+<span class="linenos">39</span>    <span class="k">return</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructConstructorSpec</span><span class="p">(</span>
+<span class="linenos">40</span>        <span class="c1"># The instantiate function will be called with the fields as keyword arguments.</span>
+<span class="linenos">41</span>        <span class="n">instantiate</span><span class="o">=</span><span class="n">Bounds</span><span class="p">,</span>
+<span class="linenos">42</span>        <span class="n">fields</span><span class="o">=</span><span class="p">(</span>
+<span class="linenos">43</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructFieldSpec</span><span class="p">(</span>
+<span class="linenos">44</span>                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;lower&quot;</span><span class="p">,</span>
+<span class="linenos">45</span>                <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+<span class="linenos">46</span>                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="linenos">47</span>                <span class="n">is_default_overridden</span><span class="o">=</span><span class="n">is_default_overridden</span><span class="p">,</span>
+<span class="linenos">48</span>                <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;Lower bound.&quot;</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">49</span>            <span class="p">),</span>
+<span class="linenos">50</span>            <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">StructFieldSpec</span><span class="p">(</span>
+<span class="linenos">51</span>                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;upper&quot;</span><span class="p">,</span>
+<span class="linenos">52</span>                <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span>
+<span class="linenos">53</span>                <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+<span class="linenos">54</span>                <span class="n">is_default_overridden</span><span class="o">=</span><span class="n">is_default_overridden</span><span class="p">,</span>
+<span class="linenos">55</span>                <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;Upper bound.&quot;</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+<span class="linenos">56</span>            <span class="p">),</span>
+<span class="linenos">57</span>        <span class="p">),</span>
+<span class="linenos">58</span>    <span class="p">)</span>
+<span class="linenos">59</span>
+<span class="linenos">60</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos">61</span>    <span class="n">bounds</span><span class="p">:</span> <span class="n">Bounds</span><span class="p">,</span>
+<span class="linenos">62</span>    <span class="n">bounds_with_default</span><span class="p">:</span> <span class="n">Bounds</span> <span class="o">=</span> <span class="n">Bounds</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span>
+<span class="linenos">63</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">64</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;A function with two `Bounds` instances as input.&quot;&quot;&quot;</span>
+<span class="linenos">65</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bounds</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">66</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">bounds_with_default</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="linenos">67</span>
+<span class="linenos">68</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">69</span>    <span class="c1"># To activate a custom registry, we should use it as a context manager.</span>
+<span class="linenos">70</span>    <span class="k">with</span> <span class="n">custom_registry</span><span class="p">:</span>
+<span class="linenos">71</span>        <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
 </pre></div>
 </div>
 <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --help</strong>
-<span style="font-weight: bold">usage</span>: 03_primitive_registry.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_struct_registry.py --help</strong>
+<span style="font-weight: bold">usage</span>: 04_struct_registry.py [-h] [OPTIONS]
 
-A function with two arguments, which can be populated from the CLI via JSON.
+A function with two `Bounds` instances as input.
 
-<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-<span style="font-weight: lighter">│</span> -h, --help          <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --dict1 <span style="font-weight: bold">JSON</span>        <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">│</span> --dict2 <span style="font-weight: bold">JSON</span>        <span style="color: #008080">(default: '{"default": null}')</span>  <span style="font-weight: lighter">│</span>
-<span style="font-weight: lighter">╰─────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> bounds options </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --bounds.lower <span style="font-weight: bold">INT</span>      <span style="font-weight: lighter">Lower bound.</span> <span style="font-weight: bold; color: #e60000">(required)</span>         <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --bounds.upper <span style="font-weight: bold">INT</span>      <span style="font-weight: lighter">Upper bound.</span> <span style="font-weight: bold; color: #e60000">(required)</span>         <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> bounds-with-default options </span><span style="font-weight: lighter">──────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --bounds-with-default.lower <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">Lower bound.</span> <span style="color: #008080">(default: 0)</span>       <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --bounds-with-default.upper <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">Upper bound.</span> <span style="color: #008080">(default: 100)</span>     <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --dict1 '{"hello": "world"}'</strong>
-dict1={'hello': 'world'}
-dict2={'default': None}
-</pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'</strong>
-dict1={'hello': 'world'}
-dict2={'hello': 'world'}
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_struct_registry.py --bounds.lower 5 --bounds.upper 10</strong>
+bounds=(lower=5, upper=10)
+bounds_with_default=(lower=0, upper=100)
 </pre></section>
 </section>
 

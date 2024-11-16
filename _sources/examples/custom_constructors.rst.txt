@@ -301,6 +301,9 @@ add support for a custom type.
         def __init__(self, lower: int, upper: int):
             self.bounds = (lower, upper)
 
+        def __repr__(self) -> str:
+            return f"(lower={self.bounds[0]}, upper={self.bounds[1]})"
+
     # Create a custom registry, which stores constructor rules.
     custom_registry = tyro.constructors.ConstructorRegistry()
 
@@ -368,16 +371,24 @@ add support for a custom type.
 .. raw:: html
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 03_primitive_registry.py [-h] --dict1 <span style="font-weight: bold">JSON</span> [--dict2 <span style="font-weight: bold">JSON</span>]
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_struct_registry.py --help</strong>
+    <span style="font-weight: bold">usage</span>: 04_struct_registry.py [-h] [OPTIONS]
     
-    A function with two arguments, which can be populated from the CLI via JSON.
+    A function with two `Bounds` instances as input.
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help          <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --dict1 <span style="font-weight: bold">JSON</span>        <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --dict2 <span style="font-weight: bold">JSON</span>        <span style="color: #008080">(default: '{"default": null}')</span>  <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> bounds options </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --bounds.lower <span style="font-weight: bold">INT</span>      <span style="font-weight: lighter">Lower bound.</span> <span style="font-weight: bold; color: #e60000">(required)</span>         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --bounds.upper <span style="font-weight: bold">INT</span>      <span style="font-weight: lighter">Upper bound.</span> <span style="font-weight: bold; color: #e60000">(required)</span>         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> bounds-with-default options </span><span style="font-weight: lighter">──────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --bounds-with-default.lower <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">Lower bound.</span> <span style="color: #008080">(default: 0)</span>       <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --bounds-with-default.upper <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                         <span style="font-weight: lighter">Upper bound.</span> <span style="color: #008080">(default: 100)</span>     <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
     </pre>
 
 
@@ -385,17 +396,7 @@ add support for a custom type.
 .. raw:: html
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --dict1 '{"hello": "world"}'</strong>
-    dict1={'hello': 'world'}
-    dict2={'default': None}
-    </pre>
-
-
-
-.. raw:: html
-
-    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'</strong>
-    dict1={'hello': 'world'}
-    dict2={'hello': 'world'}
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_struct_registry.py --bounds.lower 5 --bounds.upper 10</strong>
+    bounds=(lower=5, upper=10)
+    bounds_with_default=(lower=0, upper=100)
     </pre>
