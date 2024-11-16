@@ -81,7 +81,7 @@ def callable_with_args(
             if not arg.lowered.is_fixed():
                 value = get_value_from_arg(name_maybe_prefixed)
 
-                if value in _fields.MISSING_SINGLETONS:
+                if value in _fields.MISSING_AND_MISSING_NONPROP:
                     value = arg.field.default
 
                     # Consider a function with a positional sequence argument:
@@ -92,7 +92,7 @@ def callable_with_args(
                     # as empty input for x. But the argparse default will be a MISSING
                     # value, and the field default will be inspect.Parameter.empty.
                     if (
-                        value in _fields.MISSING_SINGLETONS
+                        value in _fields.MISSING_AND_MISSING_NONPROP
                         and field.is_positional_call()
                         and arg.lowered.nargs in ("?", "*")
                     ):
@@ -113,10 +113,10 @@ def callable_with_args(
                             arg,
                         )
             else:
-                assert arg.field.default not in _fields.MISSING_SINGLETONS
+                assert arg.field.default not in _fields.MISSING_AND_MISSING_NONPROP
                 value = arg.field.default
                 parsed_value = value_from_prefixed_field_name.get(prefixed_field_name)
-                if parsed_value not in _fields.MISSING_SINGLETONS:
+                if parsed_value not in _fields.MISSING_AND_MISSING_NONPROP:
                     raise InstantiationError(
                         f"{arg.lowered.name_or_flag} was passed in, but"
                         " is a fixed argument that cannot be parsed",
@@ -146,7 +146,7 @@ def callable_with_args(
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = get_value_from_arg(subparser_dest)
             else:
-                assert subparser_def.default_instance not in _fields.MISSING_SINGLETONS
+                assert subparser_def.default_instance not in _fields.MISSING_AND_MISSING_NONPROP
                 subparser_name = None
 
             if subparser_name is None:
@@ -196,7 +196,7 @@ def callable_with_args(
 
     # Logic for _markers._OPTIONAL_GROUP.
     is_missing_list = [
-        v in _fields.MISSING_SINGLETONS
+        any(v is m for m in _fields.MISSING_AND_MISSING_NONPROP)
         for v in itertools.chain(positional_args, kwargs.values())
     ]
     if any(is_missing_list):
@@ -208,7 +208,7 @@ def callable_with_args(
         if len(kwargs) > 0:
             missing_args: List[str] = []
             for k, v in kwargs.items():
-                if v not in _fields.MISSING_SINGLETONS:
+                if v not in _fields.MISSING_AND_MISSING_NONPROP:
                     break
 
                 # Argument is missing.

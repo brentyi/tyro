@@ -20,9 +20,9 @@ from typing_extensions import (
 from .. import _docstrings, _resolver
 from .._singleton import (
     EXCLUDE_FROM_CALL,
+    MISSING,
+    MISSING_AND_MISSING_NONPROP,
     MISSING_NONPROP,
-    MISSING_PROP,
-    MISSING_SINGLETONS,
 )
 from .._typing import TypeForm
 from ..conf import _confstruct, _markers
@@ -81,11 +81,17 @@ class StructConstructorSpec:
 
 @dataclasses.dataclass(frozen=True)
 class StructTypeInfo:
-    """Information used to generate constructors for primitive types."""
+    """Information used to generate constructors for struct types."""
 
     type: TypeForm
+    """The type of the (potential) struct."""
     markers: tuple[Any, ...]
+    """Markers from :mod:`tyro.conf` that are associated with this field."""
     default: Any
+    """The default value of the struct, or a member of
+    :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function
+    signature, this is `X` in `def main(x=X): ...`. This can be useful for
+    populating the default values of the struct."""
     _typevar_context: _resolver.TypeParamAssignmentContext
 
     @staticmethod
@@ -178,7 +184,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         # Handle TypedDicts.
         field_list = []
         valid_default_instance = (
-            info.default not in MISSING_SINGLETONS
+            info.default not in MISSING_AND_MISSING_NONPROP
             and info.default is not EXCLUDE_FROM_CALL
         )
         assert not valid_default_instance or isinstance(info.default, dict)
@@ -195,7 +201,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 is_default_from_default_instance = True
             elif typ_origin is Required and total is False:
                 # Support total=False.
-                default = MISSING_PROP
+                default = MISSING
             elif total is False:
                 # Support total=False.
                 default = EXCLUDE_FROM_CALL
@@ -209,7 +215,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 # Support typing.NotRequired[].
                 default = EXCLUDE_FROM_CALL
             else:
-                default = MISSING_PROP
+                default = MISSING
 
             # Nested types need to be populated / can't be excluded from the call.
             if default is EXCLUDE_FROM_CALL and is_struct_type(typ, MISSING_NONPROP):
@@ -264,7 +270,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             name = attr_field.name
             default = attr_field.default
             is_default_from_default_instance = False
-            if info.default not in MISSING_SINGLETONS:
+            if info.default not in MISSING_AND_MISSING_NONPROP:
                 if hasattr(info.default, name):
                     default = getattr(info.default, name)
                     is_default_from_default_instance = True
@@ -309,7 +315,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ):
             return None
 
-        if info.default in MISSING_SINGLETONS or len(info.default) == 0:
+        if info.default in MISSING_AND_MISSING_NONPROP or len(info.default) == 0:
             return None
 
         field_list = []
@@ -344,11 +350,13 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             default = field_defaults.get(name, MISSING_NONPROP)
             is_default_from_default_instance = False
 
-            if info.default not in MISSING_SINGLETONS and hasattr(info.default, name):
+            if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
+                info.default, name
+            ):
                 default = getattr(info.default, name)
                 is_default_from_default_instance = True
-            elif info.default is MISSING_PROP:
-                default = MISSING_PROP
+            elif info.default is MISSING:
+                default = MISSING
 
             field_list.append(
                 StructFieldSpec(
@@ -407,13 +415,16 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         # Infer more specific type when tuple annotation isn't subscripted.
         if len(children) == 0:
-            if info.default in MISSING_SINGLETONS:
+            if info.default in MISSING_AND_MISSING_NONPROP:
                 return None
             else:
                 assert isinstance(info.default, tuple)
                 children = tuple(type(x) for x in info.default)
 
-        if info.default in MISSING_SINGLETONS or info.default is EXCLUDE_FROM_CALL:
+        if (
+            info.default in MISSING_AND_MISSING_NONPROP
+            or info.default is EXCLUDE_FROM_CALL
+        ):
             default_instance = (info.default,) * len(children)
         else:
             default_instance = info.default
@@ -567,12 +578,12 @@ def _get_dataclass_field_default(
     """Helper for getting the default instance for a dataclass field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
     # as well.
-    if parent_default_instance is MISSING_PROP:
-        return MISSING_PROP, False
+    if parent_default_instance is MISSING:
+        return MISSING, False
 
     # Try grabbing default from parent instance.
     if (
-        parent_default_instance not in MISSING_SINGLETONS
+        parent_default_instance not in MISSING_AND_MISSING_NONPROP
         and parent_default_instance is not None
     ):
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
@@ -587,7 +598,10 @@ def _get_dataclass_field_default(
             )
 
     # Try grabbing default from dataclass field.
-    if field.default not in MISSING_SINGLETONS:
+    if (
+        field.default not in MISSING_AND_MISSING_NONPROP
+        and field.default is not dataclasses.MISSING
+    ):
         default = field.default
         # dataclasses.is_dataclass() will also return true for dataclass
         # _types_, not just instances.
@@ -609,8 +623,7 @@ def _get_dataclass_field_default(
     ):
         return field.default_factory(), False
 
-    # Otherwise, no default. This is different from MISSING, because MISSING propagates
-    # to children. We could revisit this design to make it clearer.
+    # Otherwise, no default.
     return MISSING_NONPROP, False
 
 
@@ -628,7 +641,7 @@ def _get_pydantic_v1_field_default(
 
     # Try grabbing default from parent instance.
     if (
-        parent_default_instance not in MISSING_SINGLETONS
+        parent_default_instance not in MISSING_AND_MISSING_NONPROP
         and parent_default_instance is not None
     ):
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
@@ -658,7 +671,7 @@ def _get_pydantic_v2_field_default(
 
     # Try grabbing default from parent instance.
     if (
-        parent_default_instance not in MISSING_SINGLETONS
+        parent_default_instance not in MISSING_AND_MISSING_NONPROP
         and parent_default_instance is not None
     ):
         # Populate default from some parent, eg `default=` in `tyro.cli()`.

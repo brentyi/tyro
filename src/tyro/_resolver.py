@@ -38,7 +38,7 @@ from typing_extensions import (
 )
 
 from . import _unsafe_cache, conf
-from ._singleton import MISSING_SINGLETONS
+from ._singleton import MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
 
 UnionType = getattr(types, "UnionType", Union)
@@ -469,7 +469,7 @@ def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCalla
     options_unwrapped = [unwrap_origin_strip_extras(o) for o in options]
 
     try:
-        if default_instance not in MISSING_SINGLETONS and not any(
+        if default_instance not in MISSING_AND_MISSING_NONPROP and not any(
             isinstance_with_fuzzy_numeric_tower(default_instance, o) is not False
             for o in options_unwrapped
         ):

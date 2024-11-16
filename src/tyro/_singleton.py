@@ -37,8 +37,46 @@ class NotRequiredButWeDontKnowTheValueType(Singleton):
 # We have two types of missing sentinels: a propagating missing value, which when set as
 # a default will set all child values of nested structures as missing as well, and a
 # nonpropagating missing sentinel, which does not override child defaults.
-MISSING_PROP = PropagatingMissingType()
-MISSING_NONPROP = NonpropagatingMissingType()
+MISSING: Any = PropagatingMissingType()
+"""Sentinel value to mark default values as missing. Can be used to mark fields
+passed in via `default=` for `tyro.cli()` as required.
+
+When used, the 'missing' semantics propagate to children. For example, if we write:
+
+.. code-block:: python
+
+    def main(inner: Dataclass = tyro.MISSING) -> None:
+        ...
+
+    tyro.cli(main)
+
+then all fields belonging to ``Dataclass`` will be marked as missing, even if a
+default exists in the dataclass definition.
+"""
+MISSING_NONPROP: Any = NonpropagatingMissingType()
+"""Non-propagating version of :data:`tyro.MISSING`.
+
+When used, the 'missing' semantics do not propagate to children. For example:
+
+.. code-block:: python
+
+    def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -> None:
+        ...
+
+    tyro.cli(main)
+
+is equivalent to:
+
+.. code-block:: python
+
+    def main(inner: Dataclass) -> None:
+        ...
+
+    tyro.cli(main)
+
+where default values for fields belonging to ``Dataclass`` will be taken from
+the dataclass definition.
+"""
 
 # When total=False in a TypedDict, we exclude fields from the constructor by default.
 NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE = NotRequiredButWeDontKnowTheValueType()
@@ -46,27 +84,14 @@ NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE = NotRequiredButWeDontKnowTheValueType()
 
 EXCLUDE_FROM_CALL = ExcludeFromCallType()
 
-# Our "public" missing API will always be the propagating missing sentinel.
-MISSING: Any = MISSING_PROP
-"""Sentinel value to mark fields as missing. Can be used to mark fields passed
-in via `default=` for `tyro.cli()` as required."""
 
-
-MISSING_SINGLETONS = [
-    dataclasses.MISSING,
-    MISSING_PROP,
+MISSING_AND_MISSING_NONPROP = (
+    MISSING,
     MISSING_NONPROP,
-    inspect.Parameter.empty,
-]
-try:
-    # Undocumented feature: support omegaconf dataclasses out of the box.
-    import omegaconf
+)
+"""Singletons that are considered missing values when generating CLI interfaces."""
 
-    MISSING_SINGLETONS.append(omegaconf.MISSING)
-except ImportError:
-    pass
-
-DEFAULT_SENTINEL_SINGLETONS = MISSING_SINGLETONS + [
+DEFAULT_SENTINEL_SINGLETONS = MISSING_AND_MISSING_NONPROP + (
     NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE,
     EXCLUDE_FROM_CALL,
-]
+)
