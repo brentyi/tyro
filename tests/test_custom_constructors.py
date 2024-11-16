@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, Union
+from typing import Any, Dict, Literal, Union
 
-from typing_extensions import Annotated, get_args
-
+import numpy as np
 import tyro
+from typing_extensions import Annotated, get_args
 
 json_constructor_spec = tyro.constructors.PrimitiveConstructorSpec(
     nargs=1,
@@ -63,3 +63,30 @@ def test_custom_primitive_union():
 
     assert tyro.cli(main, args=["--x", "3"]) == 3
     assert tyro.cli(main, args=["--x", '{"a": 1}']) == {"a": 1}
+
+
+def _construct_array(
+    values: tuple[float, ...], dtype: Literal["float32", "float64"] = "float64"
+) -> np.ndarray:
+    return np.array(
+        values,
+        dtype={"float32": np.float32, "float64": np.float64}[dtype],
+    )
+
+
+def test_custom_constructor_numpy() -> None:
+    def main(
+        array: Annotated[np.ndarray, tyro.conf.arg(constructor=_construct_array)],
+    ) -> np.ndarray:
+        return array
+
+    assert np.allclose(
+        tyro.cli(main, args="--array.values 1 2 3 4 5".split(" ")),
+        np.array([1, 2, 3, 4, 5], dtype=np.float64),
+    )
+    assert (
+        tyro.cli(
+            main, args="--array.values 1 2 3 4 5 --array.dtype float32".split(" ")
+        ).dtype
+        == np.float32
+    )

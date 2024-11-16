@@ -11,13 +11,11 @@ from typing import (
     Dict,
     Generic,
     List,
-    Literal,
     Tuple,
     Type,
     TypeVar,
 )
 
-import numpy as np
 import pytest
 from helptext_utils import get_helptext_with_checks
 
@@ -1551,29 +1549,3 @@ def test_counter_action() -> None:
         # Doesn't work in Python 3.7 because of argparse limitations.
         assert tyro.cli(main, args="--verbosity --verbosity -vv".split(" ")) == (2, 2)
         assert tyro.cli(main, args="--verbosity --verbosity -vvv".split(" ")) == (2, 3)
-
-
-def test_custom_constructor_numpy() -> None:
-    def construct_array(
-        values: tuple[float, ...], dtype: Literal["float32", "float64"] = "float64"
-    ) -> np.ndarray:
-        return np.array(
-            values,
-            dtype={"float32": np.float32, "float64": np.float64}[dtype],
-        )
-
-    def main(
-        array: Annotated[np.ndarray, tyro.conf.arg(constructor=construct_array)],
-    ) -> np.ndarray:
-        return array
-
-    assert np.allclose(
-        tyro.cli(main, args="--array.values 1 2 3 4 5".split(" ")),
-        np.array([1, 2, 3, 4, 5], dtype=np.float64),
-    )
-    assert (
-        tyro.cli(
-            main, args="--array.values 1 2 3 4 5 --array.dtype float32".split(" ")
-        ).dtype
-        == np.float32
-    )
