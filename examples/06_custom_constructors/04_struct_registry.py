@@ -14,9 +14,6 @@ Usage:
     python ./03_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'
 """
 
-import json
-from typing import Any
-
 import tyro
 
 

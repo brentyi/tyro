@@ -89,6 +89,19 @@ Other features include helptext generation, nested structures, subcommands, and
 shell completion. For examples and the API reference, see our
 [documentation](https://brentyi.github.io/tyro).
 
+### Why `tyro`?
+
+1. **Define things once.** Standard Python type annotations, docstrings, and default values are parsed to automatically generate command-line interfaces with informative helptext.
+
+2. **Static types.** Unlike tools dependent on dictionaries, YAML, or dynamic
+   namespaces, arguments populated by `tyro` benefit from IDE and language
+   server-supported operations — tab completion, rename, jump-to-def,
+   docstrings on hover — as well as static checking tools like `pyright` and
+   `mypy`.
+
+3. **Modularity.** `tyro` supports hierarchical configuration structures, which
+   make it easy to decentralize definitions, defaults, and documentation.
+
 ### In the wild
 
 `tyro` is designed to be lightweight enough for throwaway scripts, while

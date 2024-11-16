@@ -15,7 +15,11 @@ import docstring_parser
 from typing_extensions import Annotated, get_args, get_origin
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
-from ._singleton import DEFAULT_SENTINEL_SINGLETONS, MISSING_NONPROP, MISSING_AND_MISSING_NONPROP
+from ._singleton import (
+    DEFAULT_SENTINEL_SINGLETONS,
+    MISSING_AND_MISSING_NONPROP,
+    MISSING_NONPROP,
+)
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (

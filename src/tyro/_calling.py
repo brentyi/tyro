@@ -146,7 +146,10 @@ def callable_with_args(
             if subparser_dest in value_from_prefixed_field_name:
                 subparser_name = get_value_from_arg(subparser_dest)
             else:
-                assert subparser_def.default_instance not in _fields.MISSING_AND_MISSING_NONPROP
+                assert (
+                    subparser_def.default_instance
+                    not in _fields.MISSING_AND_MISSING_NONPROP
+                )
                 subparser_name = None
 
             if subparser_name is None:

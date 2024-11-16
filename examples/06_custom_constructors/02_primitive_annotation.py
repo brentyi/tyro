@@ -12,8 +12,9 @@ Usage:
 
 import json
 
-import tyro
 from typing_extensions import Annotated
+
+import tyro
 
 # A dictionary type, but `tyro` will expect a JSON string from the CLI.
 JsonDict = Annotated[

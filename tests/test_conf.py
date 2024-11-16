@@ -9,10 +9,10 @@ from typing import Any, Dict, Generic, List, Literal, Tuple, Type, TypeVar, Unio
 
 import numpy as np
 import pytest
-import tyro
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 def test_suppress_subcommand() -> None:

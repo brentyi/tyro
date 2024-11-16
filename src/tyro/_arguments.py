@@ -488,7 +488,8 @@ def _rule_generate_helptext(
             # Repeatable argument.
             behavior_hint = "(repeatable)"
         elif lowered.action == "append" and (
-            default in _singleton.MISSING_AND_MISSING_NONPROP or len(cast(tuple, default)) == 0
+            default in _singleton.MISSING_AND_MISSING_NONPROP
+            or len(cast(tuple, default)) == 0
         ):
             behavior_hint = "(repeatable)"
         elif lowered.action == "append" and len(cast(tuple, default)) > 0:

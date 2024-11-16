@@ -478,7 +478,10 @@ class SubparsersSpecification:
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
-        if field.default is None or field.default in _singleton.MISSING_AND_MISSING_NONPROP:
+        if (
+            field.default is None
+            or field.default in _singleton.MISSING_AND_MISSING_NONPROP
+        ):
             default_name = None
         else:
             default_name = _subcommand_matching.match_subcommand(
