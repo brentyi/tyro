@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -779,7 +779,10 @@
             <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
 
         <span class="c1"># If a field default is provided, try to find a matching subcommand name.</span>
-        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span>
+            <span class="ow">or</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="p">):</span>
             <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">default_name</span> <span class="o">=</span> <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
@@ -825,7 +828,7 @@
             <span class="c1"># If names match, borrow subcommand default from field default.</span>
             <span class="k">if</span> <span class="n">default_name</span> <span class="o">==</span> <span class="n">subcommand_name</span> <span class="ow">and</span> <span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">is_default_from_default_instance</span>
-                <span class="ow">or</span> <span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+                <span class="ow">or</span> <span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
             <span class="p">):</span>
                 <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                     <span class="n">subcommand_config</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
@@ -868,7 +871,7 @@
             <span class="n">parser_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser</span>
 
         <span class="c1"># Required if a default is missing.</span>
-        <span class="n">required</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
 
         <span class="c1"># Required if a default is passed in, but the default value has missing</span>
         <span class="c1"># parameters.</span>
@@ -890,7 +893,7 @@
         <span class="n">description_parts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (default: </span><span class="si">{</span><span class="n">default_name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
         <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
             <span class="c1"># We use `None` instead of an empty string to prevent a line break from</span>

@@ -220,7 +220,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -296,6 +296,44 @@ behavior for different types.</p>
 </div>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.constructors.MISSING">
+<span class="sig-prename descclassname"><span class="pre">tyro.constructors.</span></span><span class="sig-name descname"><span class="pre">MISSING</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro.constructors.MISSING" title="Link to this definition">¶</a></dt>
+<dd><p>Sentinel value to mark default values as missing. Can be used to mark fields
+passed in via <cite>default=</cite> for <cite>tyro.cli()</cite> as required.</p>
+<p>When used, the ‘missing’ semantics propagate to children. For example, if we write:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>then all fields belonging to <code class="docutils literal notranslate"><span class="pre">Dataclass</span></code> will be marked as missing, even if a
+default exists in the dataclass definition.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="tyro.constructors.MISSING_NONPROP">
+<span class="sig-prename descclassname"><span class="pre">tyro.constructors.</span></span><span class="sig-name descname"><span class="pre">MISSING_NONPROP</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro.constructors.MISSING_NONPROP" title="Link to this definition">¶</a></dt>
+<dd><p>Non-propagating version of <a class="reference internal" href="../#tyro.MISSING" title="tyro.MISSING"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.MISSING</span></code></a>.</p>
+<p>When used, the ‘missing’ semantics do not propagate to children. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>is equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where default values for fields belonging to <code class="docutils literal notranslate"><span class="pre">Dataclass</span></code> will be taken from
+the dataclass definition.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro.constructors.PrimitiveConstructorSpec">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors.</span></span><span class="sig-name descname"><span class="pre">PrimitiveConstructorSpec</span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_primitive_spec/#PrimitiveConstructorSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.PrimitiveConstructorSpec" title="Link to this definition">¶</a></dt>
@@ -583,21 +621,27 @@ be set to False if the default value was assigned by the field itself.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors.</span></span><span class="sig-name descname"><span class="pre">StructTypeInfo</span></span><a class="reference internal" href="../../../_modules/tyro/constructors/_struct_spec/#StructTypeInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors.StructTypeInfo" title="Link to this definition">¶</a></dt>
-<dd><p>Information used to generate constructors for primitive types.</p>
+<dd><p>Information used to generate constructors for struct types.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo.type">
 <span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tyro._typing.TypeForm</span></em><a class="headerlink" href="#tyro.constructors.StructTypeInfo.type" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The type of the (potential) struct.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo.markers">
 <span class="sig-name descname"><span class="pre">markers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors.StructTypeInfo.markers" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Markers from <a class="reference internal" href="../conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> that are associated with this field.</p>
+</dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo.default">
 <span class="sig-name descname"><span class="pre">default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro.constructors.StructTypeInfo.default" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>The default value of the struct, or a member of
+<code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.constructors.MISSING_SINGLETONS</span></code> if not present. In a function
+signature, this is <cite>X</cite> in <cite>def main(x=X): …</cite>. This can be useful for
+populating the default values of the struct.</p>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="tyro.constructors.StructTypeInfo.make">
@@ -684,6 +728,8 @@ be set to False if the default value was assigned by the field itself.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a><ul>
 <li><a class="reference internal" href="#package-contents">Package Contents</a><ul>
+<li><a class="reference internal" href="#tyro.constructors.MISSING"><code class="docutils literal notranslate"><span class="pre">MISSING</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors.MISSING_NONPROP"><code class="docutils literal notranslate"><span class="pre">MISSING_NONPROP</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors.PrimitiveConstructorSpec"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec</span></code></a><ul>
 <li><a class="reference internal" href="#tyro.constructors.PrimitiveConstructorSpec.nargs"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec.nargs</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors.PrimitiveConstructorSpec.metavar"><code class="docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec.metavar</span></code></a></li>

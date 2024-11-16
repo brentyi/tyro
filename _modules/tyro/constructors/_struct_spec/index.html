@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -302,9 +302,9 @@
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span>
 <span class="kn">from</span> <span class="nn">.._singleton</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">EXCLUDE_FROM_CALL</span><span class="p">,</span>
+    <span class="n">MISSING</span><span class="p">,</span>
+    <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">MISSING_NONPROP</span><span class="p">,</span>
-    <span class="n">MISSING_PROP</span><span class="p">,</span>
-    <span class="n">MISSING_SINGLETONS</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">..conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
@@ -374,11 +374,17 @@
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructTypeInfo">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">StructTypeInfo</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Information used to generate constructors for primitive types.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Information used to generate constructors for struct types.&quot;&quot;&quot;</span>
 
     <span class="nb">type</span><span class="p">:</span> <span class="n">TypeForm</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of the (potential) struct.&quot;&quot;&quot;</span>
     <span class="n">markers</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Markers from :mod:`tyro.conf` that are associated with this field.&quot;&quot;&quot;</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The default value of the struct, or a member of</span>
+<span class="sd">    :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function</span>
+<span class="sd">    signature, this is `X` in `def main(x=X): ...`. This can be useful for</span>
+<span class="sd">    populating the default values of the struct.&quot;&quot;&quot;</span>
     <span class="n">_typevar_context</span><span class="p">:</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamAssignmentContext</span>
 
 <div class="viewcode-block" id="StructTypeInfo.make">
@@ -477,7 +483,7 @@
         <span class="c1"># Handle TypedDicts.</span>
         <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">valid_default_instance</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
             <span class="ow">and</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">EXCLUDE_FROM_CALL</span>
         <span class="p">)</span>
         <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
@@ -494,7 +500,7 @@
                 <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">elif</span> <span class="n">typ_origin</span> <span class="ow">is</span> <span class="n">Required</span> <span class="ow">and</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="c1"># Support total=False.</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING</span>
             <span class="k">elif</span> <span class="n">total</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="c1"># Support total=False.</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
@@ -508,7 +514,7 @@
                 <span class="c1"># Support typing.NotRequired[].</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">EXCLUDE_FROM_CALL</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING</span>
 
             <span class="c1"># Nested types need to be populated / can&#39;t be excluded from the call.</span>
             <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span> <span class="ow">and</span> <span class="n">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">):</span>
@@ -563,7 +569,7 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">name</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">default</span>
             <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
                     <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                     <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">True</span>
@@ -608,7 +614,7 @@
         <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -643,11 +649,13 @@
             <span class="n">default</span> <span class="o">=</span> <span class="n">field_defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">)</span>
             <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">False</span>
 
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span>
+            <span class="p">):</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
                 <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">elif</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span><span class="p">:</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_PROP</span>
+            <span class="k">elif</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">MISSING</span><span class="p">:</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING</span>
 
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">StructFieldSpec</span><span class="p">(</span>
@@ -706,13 +714,16 @@
 
         <span class="c1"># Infer more specific type when tuple annotation isn&#39;t subscripted.</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">None</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
                 <span class="n">children</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span> <span class="ow">or</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+            <span class="ow">or</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="n">EXCLUDE_FROM_CALL</span>
+        <span class="p">):</span>
             <span class="n">default_instance</span> <span class="o">=</span> <span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">children</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">default_instance</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span>
@@ -867,12 +878,12 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a dataclass field.&quot;&quot;&quot;</span>
     <span class="c1"># If the dataclass&#39;s parent is explicitly marked MISSING, mark this field as missing</span>
     <span class="c1"># as well.</span>
-    <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">MISSING_PROP</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">MISSING</span><span class="p">,</span> <span class="kc">False</span>
 
     <span class="c1"># Try grabbing default from parent instance.</span>
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
         <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">):</span>
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
@@ -887,7 +898,10 @@
             <span class="p">)</span>
 
     <span class="c1"># Try grabbing default from dataclass field.</span>
-    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span>
+    <span class="p">):</span>
         <span class="n">default</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
         <span class="c1"># dataclasses.is_dataclass() will also return true for dataclass</span>
         <span class="c1"># _types_, not just instances.</span>
@@ -909,8 +923,7 @@
     <span class="p">):</span>
         <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">(),</span> <span class="kc">False</span>
 
-    <span class="c1"># Otherwise, no default. This is different from MISSING, because MISSING propagates</span>
-    <span class="c1"># to children. We could revisit this design to make it clearer.</span>
+    <span class="c1"># Otherwise, no default.</span>
     <span class="k">return</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span> <span class="kc">False</span>
 
 
@@ -928,7 +941,7 @@
 
     <span class="c1"># Try grabbing default from parent instance.</span>
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
         <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">):</span>
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
@@ -958,7 +971,7 @@
 
     <span class="c1"># Try grabbing default from parent instance.</span>
     <span class="k">if</span> <span class="p">(</span>
-        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_SINGLETONS</span>
+        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
         <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="p">):</span>
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>

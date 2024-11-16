@@ -68,8 +68,20 @@ Package Contents
 .. py:data:: MISSING
    :type: Any
 
-   Sentinel value to mark fields as missing. Can be used to mark fields passed
-   in via `default=` for `tyro.cli()` as required.
+   Sentinel value to mark default values as missing. Can be used to mark fields
+   passed in via `default=` for `tyro.cli()` as required.
+
+   When used, the 'missing' semantics propagate to children. For example, if we write:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass = tyro.MISSING) -> None:
+           ...
+
+       tyro.cli(main)
+
+   then all fields belonging to ``Dataclass`` will be marked as missing, even if a
+   default exists in the dataclass definition.
 
 .. py:data:: __version__
    :value: '0.8.14'

@@ -220,7 +220,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -325,14 +325,42 @@
 </dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="tyro._singleton.MISSING_PROP">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_PROP</span></span><a class="headerlink" href="#tyro._singleton.MISSING_PROP" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="tyro._singleton.MISSING">
+<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro._singleton.MISSING" title="Link to this definition">¶</a></dt>
+<dd><p>Sentinel value to mark default values as missing. Can be used to mark fields
+passed in via <cite>default=</cite> for <cite>tyro.cli()</cite> as required.</p>
+<p>When used, the ‘missing’ semantics propagate to children. For example, if we write:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">MISSING</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>then all fields belonging to <code class="docutils literal notranslate"><span class="pre">Dataclass</span></code> will be marked as missing, even if a
+default exists in the dataclass definition.</p>
+</dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._singleton.MISSING_NONPROP">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_NONPROP</span></span><a class="headerlink" href="#tyro._singleton.MISSING_NONPROP" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_NONPROP</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro._singleton.MISSING_NONPROP" title="Link to this definition">¶</a></dt>
+<dd><p>Non-propagating version of <a class="reference internal" href="../#tyro.MISSING" title="tyro.MISSING"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.MISSING</span></code></a>.</p>
+<p>When used, the ‘missing’ semantics do not propagate to children. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">constructors</span><span class="o">.</span><span class="n">MISSING_NONPROP</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>is equivalent to:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">inner</span><span class="p">:</span> <span class="n">Dataclass</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="o">...</span>
+
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">main</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where default values for fields belonging to <code class="docutils literal notranslate"><span class="pre">Dataclass</span></code> will be taken from
+the dataclass definition.</p>
+</dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._singleton.NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE">
@@ -345,16 +373,10 @@
 <dd></dd></dl>
 
 <dl class="py data">
-<dt class="sig sig-object py" id="tyro._singleton.MISSING">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro._singleton.MISSING" title="Link to this definition">¶</a></dt>
-<dd><p>Sentinel value to mark fields as missing. Can be used to mark fields passed
-in via <cite>default=</cite> for <cite>tyro.cli()</cite> as required.</p>
+<dt class="sig sig-object py" id="tyro._singleton.MISSING_AND_MISSING_NONPROP">
+<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_AND_MISSING_NONPROP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">()</span></em><a class="headerlink" href="#tyro._singleton.MISSING_AND_MISSING_NONPROP" title="Link to this definition">¶</a></dt>
+<dd><p>Singletons that are considered missing values when generating CLI interfaces.</p>
 </dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro._singleton.MISSING_SINGLETONS">
-<span class="sig-prename descclassname"><span class="pre">tyro._singleton.</span></span><span class="sig-name descname"><span class="pre">MISSING_SINGLETONS</span></span><a class="headerlink" href="#tyro._singleton.MISSING_SINGLETONS" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._singleton.DEFAULT_SENTINEL_SINGLETONS">
@@ -418,12 +440,11 @@ in via <cite>default=</cite> for <cite>tyro.cli()</cite> as required.</p>
 <li><a class="reference internal" href="#tyro._singleton.NonpropagatingMissingType"><code class="docutils literal notranslate"><span class="pre">NonpropagatingMissingType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.ExcludeFromCallType"><code class="docutils literal notranslate"><span class="pre">ExcludeFromCallType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.NotRequiredButWeDontKnowTheValueType"><code class="docutils literal notranslate"><span class="pre">NotRequiredButWeDontKnowTheValueType</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.MISSING_PROP"><code class="docutils literal notranslate"><span class="pre">MISSING_PROP</span></code></a></li>
+<li><a class="reference internal" href="#tyro._singleton.MISSING"><code class="docutils literal notranslate"><span class="pre">MISSING</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.MISSING_NONPROP"><code class="docutils literal notranslate"><span class="pre">MISSING_NONPROP</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE"><code class="docutils literal notranslate"><span class="pre">NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.EXCLUDE_FROM_CALL"><code class="docutils literal notranslate"><span class="pre">EXCLUDE_FROM_CALL</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.MISSING"><code class="docutils literal notranslate"><span class="pre">MISSING</span></code></a></li>
-<li><a class="reference internal" href="#tyro._singleton.MISSING_SINGLETONS"><code class="docutils literal notranslate"><span class="pre">MISSING_SINGLETONS</span></code></a></li>
+<li><a class="reference internal" href="#tyro._singleton.MISSING_AND_MISSING_NONPROP"><code class="docutils literal notranslate"><span class="pre">MISSING_AND_MISSING_NONPROP</span></code></a></li>
 <li><a class="reference internal" href="#tyro._singleton.DEFAULT_SENTINEL_SINGLETONS"><code class="docutils literal notranslate"><span class="pre">DEFAULT_SENTINEL_SINGLETONS</span></code></a></li>
 </ul>
 </li>

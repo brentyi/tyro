@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -368,7 +368,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">():</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">name_maybe_prefixed</span><span class="p">)</span>
 
-                <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
 
                     <span class="c1"># Consider a function with a positional sequence argument:</span>
@@ -379,7 +379,7 @@
                     <span class="c1"># as empty input for x. But the argparse default will be a MISSING</span>
                     <span class="c1"># value, and the field default will be inspect.Parameter.empty.</span>
                     <span class="k">if</span> <span class="p">(</span>
-                        <span class="n">value</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+                        <span class="n">value</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
                         <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">is_positional_call</span><span class="p">()</span>
                         <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span>
                     <span class="p">):</span>
@@ -400,10 +400,10 @@
                             <span class="n">arg</span><span class="p">,</span>
                         <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+                <span class="k">assert</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
                 <span class="n">value</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
                 <span class="n">parsed_value</span> <span class="o">=</span> <span class="n">value_from_prefixed_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">parsed_value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">parsed_value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">InstantiationError</span><span class="p">(</span>
                         <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flag</span><span class="si">}</span><span class="s2"> was passed in, but&quot;</span>
                         <span class="s2">&quot; is a fixed argument that cannot be parsed&quot;</span><span class="p">,</span>
@@ -433,7 +433,10 @@
             <span class="k">if</span> <span class="n">subparser_dest</span> <span class="ow">in</span> <span class="n">value_from_prefixed_field_name</span><span class="p">:</span>
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="n">get_value_from_arg</span><span class="p">(</span><span class="n">subparser_dest</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+                <span class="k">assert</span> <span class="p">(</span>
+                    <span class="n">subparser_def</span><span class="o">.</span><span class="n">default_instance</span>
+                    <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+                <span class="p">)</span>
                 <span class="n">subparser_name</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="k">if</span> <span class="n">subparser_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -483,7 +486,7 @@
 
     <span class="c1"># Logic for _markers._OPTIONAL_GROUP.</span>
     <span class="n">is_missing_list</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">v</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span>
+        <span class="nb">any</span><span class="p">(</span><span class="n">v</span> <span class="ow">is</span> <span class="n">m</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">positional_args</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="p">]</span>
     <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">is_missing_list</span><span class="p">):</span>
@@ -495,7 +498,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">missing_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
                     <span class="k">break</span>
 
                 <span class="c1"># Argument is missing.</span>

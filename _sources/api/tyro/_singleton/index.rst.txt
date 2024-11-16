@@ -40,13 +40,49 @@ Module Contents
    Bases: :py:obj:`Singleton`
 
 
-.. py:data:: MISSING_PROP
+.. py:data:: MISSING
+   :type: Any
 
-   
+   Sentinel value to mark default values as missing. Can be used to mark fields
+   passed in via `default=` for `tyro.cli()` as required.
+
+   When used, the 'missing' semantics propagate to children. For example, if we write:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass = tyro.MISSING) -> None:
+           ...
+
+       tyro.cli(main)
+
+   then all fields belonging to ``Dataclass`` will be marked as missing, even if a
+   default exists in the dataclass definition.
 
 .. py:data:: MISSING_NONPROP
+   :type: Any
 
-   
+   Non-propagating version of :data:`tyro.MISSING`.
+
+   When used, the 'missing' semantics do not propagate to children. For example:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -> None:
+           ...
+
+       tyro.cli(main)
+
+   is equivalent to:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass) -> None:
+           ...
+
+       tyro.cli(main)
+
+   where default values for fields belonging to ``Dataclass`` will be taken from
+   the dataclass definition.
 
 .. py:data:: NOT_REQUIRED_BUT_WE_DONT_KNOW_THE_VALUE
 
@@ -56,15 +92,10 @@ Module Contents
 
    
 
-.. py:data:: MISSING
-   :type: Any
+.. py:data:: MISSING_AND_MISSING_NONPROP
+   :value: ()
 
-   Sentinel value to mark fields as missing. Can be used to mark fields passed
-   in via `default=` for `tyro.cli()` as required.
-
-.. py:data:: MISSING_SINGLETONS
-
-   
+   Singletons that are considered missing values when generating CLI interfaces.
 
 .. py:data:: DEFAULT_SENTINEL_SINGLETONS
 

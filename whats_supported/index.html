@@ -266,7 +266,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/supported_types.rst.txt" title="View this page">
+  <a class="muted-link" href="../_sources/whats_supported.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -288,7 +288,7 @@
         <article role="main" id="furo-main-content">
           <section id="what-s-supported">
 <h1>What’s supported<a class="headerlink" href="#what-s-supported" title="Link to this heading">¶</a></h1>
-<p>For minimum-boilerplate CLIs, <cite>tyro</cite> aims to maximize support of
+<p>For minimum-boilerplate CLIs, <a class="reference internal" href="../api/tyro/#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> aims to maximize support of
 Python’s standard <a class="reference external" href="https://docs.python.org/3/library/typing.html#module-typing" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">typing</span></code></a> features.</p>
 <p>As a partial list, inputs can be annotated with:</p>
 <ul class="simple">
@@ -299,9 +299,8 @@ Python’s standard <a class="reference external" href="https://docs.python.org/
 <li><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Literal</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a>.</p></li>
 <li><p>Type aliases, for example using Python 3.12’s <a class="reference external" href="https://peps.python.org/pep-0695/">PEP 695</a> <cite>type</cite> statement.</p></li>
 <li><p>Generics, such as those annotated with <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypeVar</span></code></a> or with the type parameter syntax introduced by Python 3.12’s <a class="reference external" href="https://peps.python.org/pep-0695/">PEP 695</a>.</p></li>
-<li><p>etc</p></li>
+<li><p>Compositions of the above types, like <code class="docutils literal notranslate"><span class="pre">tuple[int</span> <span class="pre">|</span> <span class="pre">str,</span> <span class="pre">...]</span> <span class="pre">|</span> <span class="pre">None</span></code>.</p></li>
 </ul>
-<p>Compositions of the above types, like <code class="docutils literal notranslate"><span class="pre">tuple[int</span> <span class="pre">|</span> <span class="pre">str,</span> <span class="pre">...]</span> <span class="pre">|</span> <span class="pre">None</span></code>, are also supported.</p>
 <p>Types can also be placed and nested in various structures, such as:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.dataclass()</span></code></a>.</p></li>

@@ -17,6 +17,50 @@
 Package Contents
 ----------------
 
+.. py:data:: MISSING
+   :type: Any
+
+   Sentinel value to mark default values as missing. Can be used to mark fields
+   passed in via `default=` for `tyro.cli()` as required.
+
+   When used, the 'missing' semantics propagate to children. For example, if we write:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass = tyro.MISSING) -> None:
+           ...
+
+       tyro.cli(main)
+
+   then all fields belonging to ``Dataclass`` will be marked as missing, even if a
+   default exists in the dataclass definition.
+
+.. py:data:: MISSING_NONPROP
+   :type: Any
+
+   Non-propagating version of :data:`tyro.MISSING`.
+
+   When used, the 'missing' semantics do not propagate to children. For example:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass = tyro.constructors.MISSING_NONPROP) -> None:
+           ...
+
+       tyro.cli(main)
+
+   is equivalent to:
+
+   .. code-block:: python
+
+       def main(inner: Dataclass) -> None:
+           ...
+
+       tyro.cli(main)
+
+   where default values for fields belonging to ``Dataclass`` will be taken from
+   the dataclass definition.
+
 .. py:class:: PrimitiveConstructorSpec
 
 
@@ -236,22 +280,25 @@ Package Contents
 .. py:class:: StructTypeInfo
 
 
-   Information used to generate constructors for primitive types.
+   Information used to generate constructors for struct types.
 
    .. py:attribute:: type
       :type: tyro._typing.TypeForm
 
-      
+      The type of the (potential) struct.
 
    .. py:attribute:: markers
       :type: tuple[Any, Ellipsis]
 
-      
+      Markers from :mod:`tyro.conf` that are associated with this field.
 
    .. py:attribute:: default
       :type: Any
 
-      
+      The default value of the struct, or a member of
+      :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function
+      signature, this is `X` in `def main(x=X): ...`. This can be useful for
+      populating the default values of the struct.
 
    .. py:method:: make(f: tyro._typing.TypeForm | Callable, default: Any) -> StructTypeInfo
       :staticmethod:

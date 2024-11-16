@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -310,14 +310,14 @@
     <span class="c1"># Get default subcommand name: by default hash.</span>
     <span class="n">default_hash</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">conf</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">default_hash</span> <span class="o">==</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">subcommand_name</span>
 
     <span class="c1"># Get default subcommand name: by default value.</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">conf</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="n">equal</span> <span class="o">=</span> <span class="n">default</span> <span class="o">==</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">equal</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span> <span class="ow">and</span> <span class="n">equal</span><span class="p">:</span>
@@ -326,7 +326,7 @@
     <span class="c1"># Get default subcommand name: by concrete type tree.</span>
     <span class="n">typetree</span> <span class="o">=</span> <span class="n">_TypeTree</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">),</span> <span class="n">default</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">subcommand_name</span><span class="p">,</span> <span class="n">conf</span> <span class="ow">in</span> <span class="n">subcommand_config_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_SINGLETONS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">typetree</span> <span class="o">==</span> <span class="n">_TypeTree</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">),</span> <span class="n">conf</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">subcommand_name</span>

@@ -81,22 +81,25 @@ Module Contents
 .. py:class:: StructTypeInfo
 
 
-   Information used to generate constructors for primitive types.
+   Information used to generate constructors for struct types.
 
    .. py:attribute:: type
       :type: tyro._typing.TypeForm
 
-      
+      The type of the (potential) struct.
 
    .. py:attribute:: markers
       :type: tuple[Any, Ellipsis]
 
-      
+      Markers from :mod:`tyro.conf` that are associated with this field.
 
    .. py:attribute:: default
       :type: Any
 
-      
+      The default value of the struct, or a member of
+      :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function
+      signature, this is `X` in `def main(x=X): ...`. This can be useful for
+      populating the default values of the struct.
 
    .. py:method:: make(f: tyro._typing.TypeForm | Callable, default: Any) -> StructTypeInfo
       :staticmethod:

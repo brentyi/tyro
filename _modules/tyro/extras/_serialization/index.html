@@ -219,7 +219,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -296,7 +296,7 @@
 <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
 <span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_resolver</span>
-<span class="kn">from</span> <span class="nn">..constructors._struct_spec</span> <span class="kn">import</span> <span class="n">MISSING_PROP</span>
+<span class="kn">from</span> <span class="nn">..constructors._struct_spec</span> <span class="kn">import</span> <span class="n">MISSING</span>
 
 <span class="n">ENUM_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;!enum:&quot;</span>
 <span class="n">DATACLASS_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;!dataclass:&quot;</span>
@@ -401,7 +401,7 @@
 
     <span class="n">DataclassLoader</span><span class="o">.</span><span class="n">add_constructor</span><span class="p">(</span>
         <span class="n">tag</span><span class="o">=</span><span class="n">MISSING_YAML_TAG_PREFIX</span><span class="p">,</span>
-        <span class="n">constructor</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_unused</span><span class="p">:</span> <span class="n">MISSING_PROP</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
+        <span class="n">constructor</span><span class="o">=</span><span class="k">lambda</span> <span class="o">*</span><span class="n">_unused</span><span class="p">:</span> <span class="n">MISSING</span><span class="p">,</span>  <span class="c1"># type: ignore</span>
     <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">DataclassLoader</span>
@@ -412,7 +412,7 @@
 
     <span class="k">class</span> <span class="nc">DataclassDumper</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
         <span class="k">def</span> <span class="nf">ignore_aliases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">ignore_aliases</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span> <span class="ow">is</span> <span class="n">MISSING_PROP</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">ignore_aliases</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span> <span class="ow">is</span> <span class="n">MISSING</span>
 
     <span class="n">contained_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_get_contained_special_types_from_type</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">)))</span>
     <span class="n">contained_type_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="bp">cls</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">contained_types</span><span class="p">))</span>
@@ -446,7 +446,7 @@
         <span class="n">DataclassDumper</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">make_representer</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
 
     <span class="n">DataclassDumper</span><span class="o">.</span><span class="n">add_representer</span><span class="p">(</span>
-        <span class="nb">type</span><span class="p">(</span><span class="n">MISSING_PROP</span><span class="p">),</span>
+        <span class="nb">type</span><span class="p">(</span><span class="n">MISSING</span><span class="p">),</span>
         <span class="k">lambda</span> <span class="n">dumper</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_scalar</span><span class="p">(</span>
             <span class="n">tag</span><span class="o">=</span><span class="n">MISSING_YAML_TAG_PREFIX</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
         <span class="p">),</span>

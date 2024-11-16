@@ -220,7 +220,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation/">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="your_first_cli/">Your first CLI</a></li>
-<li class="toctree-l1"><a class="reference internal" href="supported_types/">What’s supported</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
 <ul>
@@ -335,28 +335,17 @@
 shell completion.</p>
 <section id="why-tyro">
 <h2>Why <code class="docutils literal notranslate"><span class="pre">tyro</span></code>?<a class="headerlink" href="#why-tyro" title="Link to this heading">¶</a></h2>
-<ol class="arabic">
-<li><p><strong>Types.</strong></p>
-<p>Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
-arguments populated by <code class="docutils literal notranslate"><span class="pre">tyro</span></code> benefit from IDE and language server-supported
-operations — think tab completion, rename, jump-to-def, docstrings on hover —
-as well as static checking tools like <code class="docutils literal notranslate"><span class="pre">pyright</span></code> and <code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p>
-</li>
-<li><p><strong>Define things once.</strong></p>
-<p>Standard Python type annotations, docstrings, and default values are parsed
-to automatically generate command-line interfaces with informative helptext.</p>
-<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> works seamlessly with tools you already use: examples are included for
-<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html">dataclasses</a>,
-<a class="reference external" href="https://www.attrs.org/">attrs</a>,
-<a class="reference external" href="https://pydantic-docs.helpmanual.io/">pydantic</a>,
-<a class="reference external" href="https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html">flax.linen</a>,
-and more.</p>
-</li>
-<li><p><strong>Modularity.</strong></p>
-<p><code class="docutils literal notranslate"><span class="pre">tyro</span></code> supports hierarchical configuration structures, which make it easy to
-distribute definitions, defaults, and documentation of configurable fields
-across modules or source files.</p>
-</li>
+<ol class="arabic simple">
+<li><p><strong>Define things once.</strong> Standard Python type annotations, docstrings, and
+default values are parsed to automatically generate command-line interfaces
+with informative helptext.</p></li>
+<li><p><strong>Static types.</strong> Unlike tools dependent on dictionaries, YAML, or dynamic
+namespaces, arguments populated by <code class="docutils literal notranslate"><span class="pre">tyro</span></code> benefit from IDE and language
+server-supported operations — tab completion, rename, jump-to-def,
+docstrings on hover — as well as static checking tools like <code class="docutils literal notranslate"><span class="pre">pyright</span></code> and
+<code class="docutils literal notranslate"><span class="pre">mypy</span></code>.</p></li>
+<li><p><strong>Modularity.</strong> <code class="docutils literal notranslate"><span class="pre">tyro</span></code> supports hierarchical configuration structures, which
+make it easy to decentralize definitions, defaults, and documentation.</p></li>
 </ol>
 <!-- prettier-ignore-start --><div class="toctree-wrapper compound">
 </div>
