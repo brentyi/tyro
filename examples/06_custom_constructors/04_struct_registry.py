@@ -8,10 +8,8 @@ add support for a custom type.
     This will be complicated!
 
 Usage:
-
-    python ./03_primitive_registry.py --help
-    python ./03_primitive_registry.py --dict1 '{"hello": "world"}'
-    python ./03_primitive_registry.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'
+    python ./04_struct_registry.py --help
+    python ./04_struct_registry.py --bounds.lower 5 --bounds.upper 10
 """
 
 import tyro
@@ -21,6 +19,9 @@ import tyro
 class Bounds:
     def __init__(self, lower: int, upper: int):
         self.bounds = (lower, upper)
+
+    def __repr__(self) -> str:
+        return f"(lower={self.bounds[0]}, upper={self.bounds[1]})"
 
 
 # Create a custom registry, which stores constructor rules.
