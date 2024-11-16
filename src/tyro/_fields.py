@@ -15,7 +15,11 @@ import docstring_parser
 from typing_extensions import Annotated, get_args, get_origin
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
-from ._singleton import DEFAULT_SENTINEL_SINGLETONS, MISSING_SINGLETONS
+from ._singleton import (
+    DEFAULT_SENTINEL_SINGLETONS,
+    MISSING_AND_MISSING_NONPROP,
+    MISSING_NONPROP,
+)
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
@@ -57,7 +61,7 @@ class FieldDefinition:
     def __post_init__(self):
         if (
             _markers.Fixed in self.markers or _markers.Suppress in self.markers
-        ) and self.default in MISSING_SINGLETONS:
+        ) and self.default in MISSING_AND_MISSING_NONPROP:
             raise UnsupportedTypeAnnotationError(
                 f"Field {self.intern_name} is missing a default value!"
             )
@@ -95,7 +99,7 @@ class FieldDefinition:
         typ = _resolver.TypeParamResolver.concretize_type_params(typ)
 
         # Narrow types.
-        if typ is Any and default not in MISSING_SINGLETONS:
+        if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
             typ = type(default)
         else:
             # TypeVar constraints are already applied in
@@ -205,7 +209,7 @@ class FieldDefinition:
             or (
                 # Make required arguments positional.
                 _markers.PositionalRequiredArgs in self.markers
-                and self.default in MISSING_SINGLETONS
+                and self.default in MISSING_AND_MISSING_NONPROP
             )
         )
 
@@ -397,9 +401,9 @@ def _field_list_from_function(
                     name=param.name,
                     # param.annotation doesn't resolve forward references.
                     typ=typ
-                    if default_instance in MISSING_SINGLETONS
+                    if default_instance in MISSING_AND_MISSING_NONPROP
                     else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
-                    default=default,
+                    default=default if default is not param.empty else MISSING_NONPROP,
                     is_default_from_default_instance=False,
                     helptext=helptext,
                 )

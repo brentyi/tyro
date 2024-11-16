@@ -26,14 +26,14 @@ def match_subcommand(
     # Get default subcommand name: by default hash.
     default_hash = object.__hash__(default)
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _singleton.MISSING_SINGLETONS:
+        if conf.default in _singleton.MISSING_AND_MISSING_NONPROP:
             continue
         if default_hash == object.__hash__(conf.default):
             return subcommand_name
 
     # Get default subcommand name: by default value.
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _singleton.MISSING_SINGLETONS:
+        if conf.default in _singleton.MISSING_AND_MISSING_NONPROP:
             continue
         equal = default == conf.default
         if isinstance(equal, bool) and equal:
@@ -42,7 +42,7 @@ def match_subcommand(
     # Get default subcommand name: by concrete type tree.
     typetree = _TypeTree.make(type(default), default)
     for subcommand_name, conf in subcommand_config_from_name.items():
-        if conf.default in _singleton.MISSING_SINGLETONS:
+        if conf.default in _singleton.MISSING_AND_MISSING_NONPROP:
             continue
         if typetree == _TypeTree.make(type(conf.default), conf.default):
             return subcommand_name

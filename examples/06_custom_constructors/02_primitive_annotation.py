@@ -1,23 +1,13 @@
 """Custom Primitive
 
-.. note::
-
-    This is an advanced feature, which should not be needed for the vast
-    majority of use cases. If :mod:`tyro` is missing support for a built-in
-    Python type, please open an issue on `GitHub <http://github.com/brentyi/tyro/issues>`_.
-
-For additional flexibility, :mod:`tyro.constructors` exposes tyro's API for
-defining behavior for different types. There are two categories of types:
-primitive types can be instantiated from a single commandline argument, while
-struct types are broken down into multiple.
-
-In this example, we attach a custom constructor via a runtime annotation.
+In this example, we use :mod:`tyro.constructors` to attach a primitive
+constructor via a runtime annotation.
 
 Usage:
 
-    python ./01_primitive_annotation.py --help
-    python ./01_primitive_annotation.py --dict1 '{"hello": "world"}'
-    python ./01_primitive_annotation.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'
+    python ./02_primitive_annotation.py --help
+    python ./02_primitive_annotation.py --dict1 '{"hello": "world"}'
+    python ./02_primitive_annotation.py --dict1 '{"hello": "world"}' --dict2 '{"hello": "world"}'
 """
 
 import json

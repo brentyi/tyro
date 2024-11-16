@@ -478,7 +478,10 @@ class SubparsersSpecification:
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
-        if field.default is None or field.default in _singleton.MISSING_SINGLETONS:
+        if (
+            field.default is None
+            or field.default in _singleton.MISSING_AND_MISSING_NONPROP
+        ):
             default_name = None
         else:
             default_name = _subcommand_matching.match_subcommand(
@@ -524,7 +527,7 @@ class SubparsersSpecification:
             # If names match, borrow subcommand default from field default.
             if default_name == subcommand_name and (
                 field.is_default_from_default_instance
-                or subcommand_config.default in _singleton.MISSING_SINGLETONS
+                or subcommand_config.default in _singleton.MISSING_AND_MISSING_NONPROP
             ):
                 subcommand_config = dataclasses.replace(
                     subcommand_config, default=field.default
@@ -567,7 +570,7 @@ class SubparsersSpecification:
             parser_from_name[subcommand_name] = subparser
 
         # Required if a default is missing.
-        required = field.default in _fields.MISSING_SINGLETONS
+        required = field.default in _fields.MISSING_AND_MISSING_NONPROP
 
         # Required if a default is passed in, but the default value has missing
         # parameters.
@@ -589,7 +592,7 @@ class SubparsersSpecification:
         description_parts = []
         if field.helptext is not None:
             description_parts.append(field.helptext)
-        if not required and field.default not in _fields.MISSING_SINGLETONS:
+        if not required and field.default not in _fields.MISSING_AND_MISSING_NONPROP:
             description_parts.append(f" (default: {default_name})")
         description = (
             # We use `None` instead of an empty string to prevent a line break from

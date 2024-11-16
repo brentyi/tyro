@@ -54,30 +54,18 @@ shell completion.
 
 #### Why `tyro`?
 
-1. **Types.**
+1. **Define things once.** Standard Python type annotations, docstrings, and
+   default values are parsed to automatically generate command-line interfaces
+   with informative helptext.
 
-   Unlike tools dependent on dictionaries, YAML, or dynamic namespaces,
-   arguments populated by `tyro` benefit from IDE and language server-supported
-   operations — think tab completion, rename, jump-to-def, docstrings on hover —
-   as well as static checking tools like `pyright` and `mypy`.
+2. **Static types.** Unlike tools dependent on dictionaries, YAML, or dynamic
+   namespaces, arguments populated by `tyro` benefit from IDE and language
+   server-supported operations — tab completion, rename, jump-to-def,
+   docstrings on hover — as well as static checking tools like `pyright` and
+   `mypy`.
 
-2. **Define things once.**
-
-   Standard Python type annotations, docstrings, and default values are parsed
-   to automatically generate command-line interfaces with informative helptext.
-
-   `tyro` works seamlessly with tools you already use: examples are included for
-   [dataclasses](https://docs.python.org/3/library/dataclasses.html),
-   [attrs](https://www.attrs.org/),
-   [pydantic](https://pydantic-docs.helpmanual.io/),
-   [flax.linen](https://flax.readthedocs.io/en/latest/api_reference/flax.linen.html),
-   and more.
-
-3. **Modularity.**
-
-   `tyro` supports hierarchical configuration structures, which make it easy to
-   distribute definitions, defaults, and documentation of configurable fields
-   across modules or source files.
+3. **Modularity.** `tyro` supports hierarchical configuration structures, which
+   make it easy to decentralize definitions, defaults, and documentation.
 
 <!-- prettier-ignore-start -->
 
@@ -89,7 +77,7 @@ shell completion.
 
    installation
    your_first_cli
-   supported_types
+   whats_supported
 
 .. toctree::
    :caption: Examples
