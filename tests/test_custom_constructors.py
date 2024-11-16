@@ -4,8 +4,9 @@ import json
 from typing import Any, Dict, Union
 
 import numpy as np
-import tyro
 from typing_extensions import Annotated, Literal, get_args
+
+import tyro
 
 json_constructor_spec = tyro.constructors.PrimitiveConstructorSpec(
     nargs=1,
