@@ -5,13 +5,13 @@ import io
 import json as json_
 import shlex
 import sys
-from typing import Any, Dict, Generic, List, Literal, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
-import tyro
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 def test_suppress_subcommand() -> None:
