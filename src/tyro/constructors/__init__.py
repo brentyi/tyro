@@ -7,6 +7,8 @@ behavior for different types.
 
 """
 
+from .._singleton import MISSING as MISSING
+from .._singleton import MISSING_NONPROP as MISSING_NONPROP
 from ._primitive_spec import PrimitiveConstructorSpec as PrimitiveConstructorSpec
 from ._primitive_spec import PrimitiveTypeInfo as PrimitiveTypeInfo
 from ._primitive_spec import (

@@ -1,7 +1,7 @@
 What's supported
 ================
 
-For minimum-boilerplate CLIs, `tyro` aims to maximize support of
+For minimum-boilerplate CLIs, :mod:`tyro` aims to maximize support of
 Python's standard :mod:`typing` features.
 
 As a partial list, inputs can be annotated with:
@@ -13,9 +13,8 @@ As a partial list, inputs can be annotated with:
 - :py:data:`typing.Literal` and :class:`enum.Enum`.
 - Type aliases, for example using Python 3.12's `PEP 695 <https://peps.python.org/pep-0695/>`_ `type` statement.
 - Generics, such as those annotated with :py:class:`typing.TypeVar` or with the type parameter syntax introduced by Python 3.12's `PEP 695 <https://peps.python.org/pep-0695/>`_.
-- etc
+- Compositions of the above types, like ``tuple[int | str, ...] | None``.
 
-Compositions of the above types, like ``tuple[int | str, ...] | None``, are also supported.
 
 Types can also be placed and nested in various structures, such as:
 
