@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, Literal, Union
+from typing import Any, Dict, Union
 
 import numpy as np
-from typing_extensions import Annotated, get_args
-
 import tyro
+from typing_extensions import Annotated, Literal, get_args
 
 json_constructor_spec = tyro.constructors.PrimitiveConstructorSpec(
     nargs=1,
