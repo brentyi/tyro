@@ -214,11 +214,11 @@ Structures can be nested inside of standard containers.
         color_tuple: tuple[RGB, RGB]
         color_dict: dict[str, RGB] = dataclasses.field(
             # We can't use mutable values as defaults directly.
-            default_factory={
+            default_factory=lambda: {
                 "red": RGB(255, 0, 0),
                 "green": RGB(0, 255, 0),
                 "blue": RGB(0, 0, 255),
-            }.copy
+            }
         )
 
     if __name__ == "__main__":

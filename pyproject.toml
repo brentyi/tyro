@@ -10,7 +10,7 @@ name = "tyro"
 authors = [
     {name = "brentyi", email = "brentyi@berkeley.edu"},
 ]
-version = "0.8.14"  # TODO: currently needs to be synchronized manually with __init__.py.
+version = "0.9.0"  # TODO: currently needs to be synchronized manually with __init__.py.
 description = "Strongly typed, zero-effort CLI interfaces"
 readme = "README.md"
 license = { text = "MIT" }

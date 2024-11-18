@@ -15,4 +15,4 @@ if not TYPE_CHECKING:
 
 
 # TODO: this should be synchronized automatically with the pyproject.toml.
-__version__ = "0.8.14"
+__version__ = "0.9.0"
