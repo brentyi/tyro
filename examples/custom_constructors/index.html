@@ -288,9 +288,9 @@
         <article role="main" id="furo-main-content">
           <section id="custom-constructors">
 <span id="example-category-custom-constructors"></span><h1>Custom constructors<a class="headerlink" href="#custom-constructors" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> is designed for comprehensive support of standard Python type
-constructs. In some cases, however, it can be useful to extend the set of types
-supported by <a class="reference internal" href="../../api/tyro/#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a>.</p>
+<p><a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> aims for comprehensive support of standard Python type
+constructs. It can still, however, be useful to extend the set of suported
+types.</p>
 <p>We provide two complementary approaches for doing so:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="../../api/tyro/conf/#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> provides a simple API for specifying custom constructor
@@ -300,6 +300,11 @@ for different types. There are two categories of types: <em>primitive</em> types
 instantiated from a single commandline argument, while <em>struct</em> types are
 broken down into multiple arguments.</p></li>
 </ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Custom constructors are useful, but can be verbose and require care. We
+recommend using them sparingly.</p>
+</div>
 <section id="simple-constructors">
 <span id="example-01-simple-constructors"></span><h2>Simple Constructors<a class="headerlink" href="#simple-constructors" title="Link to this heading">¶</a></h2>
 <p>For simple custom constructors, we can pass a constructor function into

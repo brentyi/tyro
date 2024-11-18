@@ -438,11 +438,11 @@ value.</p>
 <span class="linenos">14</span>    <span class="n">color_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">RGB</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span>
 <span class="linenos">15</span>    <span class="n">color_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
 <span class="linenos">16</span>        <span class="c1"># We can&#39;t use mutable values as defaults directly.</span>
-<span class="linenos">17</span>        <span class="n">default_factory</span><span class="o">=</span><span class="p">{</span>
+<span class="linenos">17</span>        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span>
 <span class="linenos">18</span>            <span class="s2">&quot;red&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 <span class="linenos">19</span>            <span class="s2">&quot;green&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
 <span class="linenos">20</span>            <span class="s2">&quot;blue&quot;</span><span class="p">:</span> <span class="n">RGB</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">),</span>
-<span class="linenos">21</span>        <span class="p">}</span><span class="o">.</span><span class="n">copy</span>
+<span class="linenos">21</span>        <span class="p">}</span>
 <span class="linenos">22</span>    <span class="p">)</span>
 <span class="linenos">23</span>
 <span class="linenos">24</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>

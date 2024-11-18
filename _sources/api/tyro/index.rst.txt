@@ -84,7 +84,7 @@ Package Contents
    default exists in the dataclass definition.
 
 .. py:data:: __version__
-   :value: '0.8.14'
+   :value: '0.9.0'
 
    
 
