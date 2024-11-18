@@ -9,7 +9,7 @@ import warnings
 from typing import Callable, Sequence, TypeVar, cast, overload
 
 import shtab
-from typing_extensions import Literal
+from typing_extensions import Annotated, Literal
 
 from . import _argparse as argparse
 from . import (
@@ -163,7 +163,7 @@ def cli(
     _unsafe_cache.clear_cache()
 
     if config is not None:
-        f = conf.configure(*config)(f)
+        f = Annotated[(f, *config)]  # type: ignore
 
     with _strings.delimeter_context("_" if use_underscores else "-"):
         output = _cli_impl(

@@ -254,6 +254,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                     if _markers.EnumChoicesFromValues in type_info.markers
                     else instance.name
                 )
+                # Backup for pydantic's `use_enum_values=True`.
+                # https://github.com/brentyi/tyro/issues/203
+                if isinstance(instance, enum.Enum)
+                else str(instance)
             ],
             choices=choices,
         )
