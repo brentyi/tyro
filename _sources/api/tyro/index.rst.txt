@@ -18,6 +18,11 @@ Subpackages
 Package Contents
 ----------------
 
+.. py:data:: __version__
+   :value: '0.9.1'
+
+   
+
 .. py:function:: cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: None | OutT = None, return_unknown_args: typing_extensions.Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> OutT
                  cli(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: None | OutT = None, return_unknown_args: typing_extensions.Literal[True], use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tuple[OutT, list[str]]
                  cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: None = None, return_unknown_args: typing_extensions.Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> OutT
@@ -82,9 +87,4 @@ Package Contents
 
    then all fields belonging to ``Dataclass`` will be marked as missing, even if a
    default exists in the dataclass definition.
-
-.. py:data:: __version__
-   :value: '0.9.0'
-
-   
 
