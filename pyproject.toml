@@ -2,7 +2,13 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build]
+[tool.hatch.version]
+path = "src/tyro/__init__.py"
+
+[tool.hatch.sdist]
+packages = ["src/tyro"]
+
+[tool.hatch.build.targets.wheel]
 packages = ["src/tyro"]
 
 [project]
@@ -10,8 +16,8 @@ name = "tyro"
 authors = [
     {name = "brentyi", email = "brentyi@berkeley.edu"},
 ]
-version = "0.9.0"  # TODO: currently needs to be synchronized manually with __init__.py.
-description = "Strongly typed, zero-effort CLI interfaces"
+description = "CLI interfaces & config objects, from types"
+dynamic = ["version"]
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.7"
