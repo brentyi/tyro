@@ -1,5 +1,8 @@
 from typing import TYPE_CHECKING
 
+__version__ = "0.9.1"
+
+
 from . import conf as conf
 from . import constructors as constructors
 from . import extras as extras
@@ -12,7 +15,3 @@ if not TYPE_CHECKING:
     from .constructors._primitive_spec import (
         UnsupportedTypeAnnotationError as UnsupportedTypeAnnotationError,
     )
-
-
-# TODO: this should be synchronized automatically with the pyproject.toml.
-__version__ = "0.9.0"
