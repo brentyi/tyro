@@ -9,7 +9,7 @@ As a partial list, inputs can be annotated with:
 - Basic types like :class:`int`, :class:`str`, :class:`float`, :class:`bool`, :class:`pathlib.Path`, :data:`None`.
 - :class:`datetime.date`, :class:`datetime.datetime`, and :class:`datetime.time`.
 - Container types like :class:`list`, :class:`dict`, :class:`tuple`, and :class:`set`.
-- Union types, like `X | Y`, :py:data:`typing.Union`, and :py:data:`typing.Optional`.
+- Union types, like ``X | Y``, :py:data:`typing.Union`, and :py:data:`typing.Optional`.
 - :py:data:`typing.Literal` and :class:`enum.Enum`.
 - Type aliases, for example using Python 3.12's `PEP 695 <https://peps.python.org/pep-0695/>`_ `type` statement.
 - Generics, such as those annotated with :py:class:`typing.TypeVar` or with the type parameter syntax introduced by Python 3.12's `PEP 695 <https://peps.python.org/pep-0695/>`_.
