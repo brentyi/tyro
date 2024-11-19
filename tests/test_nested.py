@@ -1267,7 +1267,7 @@ def test_union_with_dict() -> None:
         name: str
         age: int
 
-    def main(config: Config | dict = {"name": "hello", "age": 25}) -> Any:
+    def main(config: Union[Config, dict] = {"name": "hello", "age": 25}) -> Any:
         return config
 
     assert tyro.cli(main, args=[]) == {"name": "hello", "age": 25}
@@ -1287,7 +1287,7 @@ def test_union_with_tuple() -> None:
         name: str
         age: int
 
-    def main(config: Config | tuple = ("hello", 5)) -> Any:
+    def main(config: Union[Config, tuple] = ("hello", 5)) -> Any:
         return config
 
     assert tyro.cli(main, args=[]) == ("hello", 5)
@@ -1304,12 +1304,15 @@ def test_union_with_tuple_subscripted() -> None:
         name: str
         age: int
 
-    def main(config: Config | tuple[str, int] = ("hello", 5)) -> Any:
+    def main(config: Union[Config, Tuple[str, int]] = ("hello", 5)) -> Any:
         return config
 
     assert tyro.cli(main, args=[]) == ("hello", 5)
-    assert tyro.cli(main, args="config:tuple".split(" ")) == ("hello", 5)
-    assert tyro.cli(main, args="config:tuple hello 27".split(" ")) == ("hello", 27)
+    assert tyro.cli(main, args="config:tuple-str-int".split(" ")) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple-str-int hello 27".split(" ")) == (
+        "hello",
+        27,
+    )
     assert tyro.cli(
         main, args="config:config --config.name world --config.age 27".split(" ")
     ) == Config(name="world", age=27)
