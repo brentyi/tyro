@@ -168,7 +168,7 @@ class FieldDefinition:
         try:
             typeguard.check_type(default, cast(type, out.type_stripped))
             default_matches_annotated_type = True
-        except typeguard.TypeCheckError:
+        except (typeguard.TypeCheckError, TypeError):
             default_matches_annotated_type = False
 
         if (

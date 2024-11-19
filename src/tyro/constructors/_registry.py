@@ -163,7 +163,7 @@ class ConstructorRegistry:
         ):
             try:
                 typeguard.check_type(type_info.default, type_info.type)
-            except typeguard.TypeCheckError:
+            except (typeguard.TypeCheckError, TypeError):
                 raise InvalidDefaultInstanceError(
                     f"Invalid default instance for type {type_info.type}: {type_info.default}"
                 )
