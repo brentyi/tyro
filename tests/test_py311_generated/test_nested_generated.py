@@ -1269,3 +1269,40 @@ def test_annotated_narrow_1() -> None:
     from tyro._resolver import narrow_subtypes
 
     assert narrow_subtypes(Annotated[A, False], B(3)) == Annotated[B, False]  # type: ignore
+
+
+def test_union_with_dict() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Config:
+        name: str
+        age: int
+
+    def main(config: Config | dict = {"name": "hello", "age": 25}) -> Any:
+        return config
+
+    assert tyro.cli(main, args=[]) == {"name": "hello", "age": 25}
+    assert tyro.cli(main, args="config:dict".split(" ")) == {"name": "hello", "age": 25}
+    assert tyro.cli(main, args="config:dict --config.age 27".split(" ")) == {
+        "name": "hello",
+        "age": 27,
+    }
+    assert tyro.cli(
+        main, args="config:config --config.name world --config.age 27".split(" ")
+    ) == Config(name="world", age=27)
+
+
+def test_union_with_tuple() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Config:
+        name: str
+        age: int
+
+    def main(config: Config | tuple = ("hello", 5)) -> Any:
+        return config
+
+    assert tyro.cli(main, args=[]) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple".split(" ")) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple hello 27".split(" ")) == ("hello", 27)
+    assert tyro.cli(
+        main, args="config:config --config.name world --config.age 27".split(" ")
+    ) == Config(name="world", age=27)

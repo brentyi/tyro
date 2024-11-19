@@ -249,15 +249,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             ),
             is_instance=lambda x: isinstance(x, cast_type),
             str_from_instance=lambda instance: [
-                (
-                    str(instance.value)
-                    if _markers.EnumChoicesFromValues in type_info.markers
-                    else instance.name
-                )
-                # Backup for pydantic's `use_enum_values=True`.
-                # https://github.com/brentyi/tyro/issues/203
-                if isinstance(instance, enum.Enum)
-                else str(instance)
+                str(instance.value)
+                if _markers.EnumChoicesFromValues in type_info.markers
+                else instance.name
             ],
             choices=choices,
         )

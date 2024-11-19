@@ -5,13 +5,14 @@ from dataclasses import dataclass
 from typing import Annotated, Any, Literal, NewType
 
 import pytest
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 from tyro.conf._markers import OmitArgPrefixes
 from tyro.constructors import UnsupportedTypeAnnotationError
 
 
-def test_simple_generic():
+def test_simple_generic() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: T
@@ -31,7 +32,7 @@ class Inner[T]:
     b: T
 
 
-def test_generic_with_type_statement_0():
+def test_generic_with_type_statement_0() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: T
@@ -40,7 +41,7 @@ def test_generic_with_type_statement_0():
     assert tyro.cli(Container[X], args="--a 1 --b 2".split(" ")) == Container(1, 2)
 
 
-def test_generic_with_type_statement_1():
+def test_generic_with_type_statement_1() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: tuple[X, ...]
@@ -49,7 +50,7 @@ def test_generic_with_type_statement_1():
     assert tyro.cli(Container[Y], args="--a 1 --b 2".split(" ")) == Container((1,), [2])
 
 
-def test_generic_with_type_statement_2():
+def test_generic_with_type_statement_2() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: Z
@@ -62,7 +63,7 @@ def test_generic_with_type_statement_2():
 type AnnotatedBasic = Annotated[int, tyro.conf.arg(name="basic")]
 
 
-def test_annotated_alias():
+def test_annotated_alias() -> None:
     @dataclass(frozen=True)
     class Container:
         a: AnnotatedBasic
@@ -204,7 +205,7 @@ def test_pep695_new_type_alias() -> None:
     assert tyro.cli(main, args=["1", "2"]) == [1, 2]
 
 
-def test_generic_config():
+def test_generic_config() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: Inner[T]
@@ -216,7 +217,7 @@ def test_generic_config():
     ) == Container(Inner(True, False))
 
 
-def test_generic_config_subcommand():
+def test_generic_config_subcommand() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: T
@@ -243,7 +244,7 @@ def test_generic_config_subcommand():
     ) == Container(Container(False))
 
 
-def test_generic_config_subcommand2():
+def test_generic_config_subcommand2() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: tyro.conf.OmitSubcommandPrefixes[T]
@@ -254,7 +255,7 @@ def test_generic_config_subcommand2():
     ) == Container(Container(True))
 
 
-def test_generic_config_subcommand3():
+def test_generic_config_subcommand3() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: T
@@ -267,7 +268,7 @@ def test_generic_config_subcommand3():
     ) == Container(Container(True))
 
 
-def test_generic_config_subcommand4():
+def test_generic_config_subcommand4() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: T
@@ -277,7 +278,6 @@ def test_generic_config_subcommand4():
         args="container-literal-1-2 --a 2".split(" "),
         config=(tyro.conf.OmitSubcommandPrefixes,),
     ) == Container(Container("2"))
-
     assert tyro.cli(
         Container[Container[bool] | Container[Literal["1", "2"]]],
         args=[],
@@ -285,11 +285,32 @@ def test_generic_config_subcommand4():
         config=(tyro.conf.OmitSubcommandPrefixes,),
     ) == Container(Container(True))
 
-    # This case is currently too hard for tyro's subcommand matcher.
-    with pytest.raises(AssertionError):
-        tyro.cli(
-            Container[Container[bool] | Container[Literal["1", "2"]]],
-            args=[],
-            default=Container(Container(a="1")),
-            config=(tyro.conf.OmitSubcommandPrefixes,),
-        )
+
+def test_generic_config_subcommand_matching() -> None:
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert "default: a:container-bool" in get_helptext_with_checks(
+        Container[Container[bool] | Container[str]],
+        default=Container(Container(a=False)),
+    )
+    assert "default: a:container-str" in get_helptext_with_checks(
+        Container[Container[bool] | Container[str]],
+        default=Container(Container(a="False")),
+    )
+    assert "default: a:container-literal-1-2" in get_helptext_with_checks(
+        Container[Container[Literal[1, 2]] | Container[str]],
+        default=Container(Container(a=1)),
+    )
+    assert "default: a:container-str" in get_helptext_with_checks(
+        Container[Container[Literal[1, 2]] | Container[str]],
+        default=Container(Container(a="1")),
+    )
+
+    assert tyro.cli(
+        Container[Container[Literal["1", "2"]] | Container[bool]],
+        args=[],
+        default=Container(Container(a="1")),
+        config=(tyro.conf.OmitSubcommandPrefixes,),
+    ) == Container(Container("1"))

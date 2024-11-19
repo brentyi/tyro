@@ -9,9 +9,10 @@ import functools
 import inspect
 import numbers
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
 
 import docstring_parser
+import typeguard
 from typing_extensions import Annotated, get_args, get_origin
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
@@ -26,8 +27,9 @@ from .constructors._primitive_spec import (
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
-from .constructors._registry import ConstructorRegistry
+from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
+    InvalidDefaultInstanceError,
     StructFieldSpec,
     StructTypeInfo,
     UnsupportedStructTypeMessage,
@@ -72,8 +74,10 @@ class FieldDefinition:
         """Context for setting markers on fields. All fields created within the
         context will have the specified markers."""
         global_context_markers.append(markers)
-        yield
-        global_context_markers.pop()
+        try:
+            yield
+        finally:
+            global_context_markers.pop()
 
     @staticmethod
     def from_field_spec(field_spec: StructFieldSpec) -> FieldDefinition:
@@ -161,12 +165,14 @@ class FieldDefinition:
         # Check that the default value matches the final resolved type.
         # There's some similar Union-specific logic for this in narrow_union_type(). We
         # may be able to consolidate this.
+        try:
+            typeguard.check_type(name, default, cast(type, out.type_stripped))
+            default_matches_annotated_type = True
+        except TypeError:
+            default_matches_annotated_type = False
+
         if (
-            # Be relatively conservative: isinstance() can be checked on non-type
-            # types (like unions in Python >=3.10), but we'll only consider single types
-            # for now.
-            type(out.type_stripped) is type
-            and not isinstance(default, out.type_stripped)  # type: ignore
+            not default_matches_annotated_type
             # If a custom constructor is set, static_type may not be
             # matched to the annotated type.
             and argconf.constructor_factory is None
@@ -177,11 +183,15 @@ class FieldDefinition:
         ):
             # If the default value doesn't match the resolved type, we expand the
             # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
-            warnings.warn(
+            message = (
                 f"The field {name} is annotated with type {typ}, "
                 f"but the default value {default} has type {type(default)}. "
                 f"We'll try to handle this gracefully, but it may cause unexpected behavior."
             )
+            if check_default_instances():
+                raise InvalidDefaultInstanceError(message)
+
+            warnings.warn(message)
             out = out.with_new_type_stripped(Union[out.type_stripped, type(default)])  # type: ignore
 
         return out

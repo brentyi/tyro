@@ -31,6 +31,7 @@ classifiers = [
     "Operating System :: OS Independent"
 ]
 dependencies = [
+    "typeguard",
     "docstring-parser>=0.16",
     "typing-extensions>=4.9.0; python_version>='3.8'",
     "typing-extensions>=4.7.0; python_version<'3.8'",
