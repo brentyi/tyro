@@ -166,9 +166,9 @@ class FieldDefinition:
         # There's some similar Union-specific logic for this in narrow_union_type(). We
         # may be able to consolidate this.
         try:
-            typeguard.check_type(name, default, cast(type, out.type_stripped))
+            typeguard.check_type(default, cast(type, out.type_stripped))
             default_matches_annotated_type = True
-        except TypeError:
+        except typeguard.TypeCheckError:
             default_matches_annotated_type = False
 
         if (

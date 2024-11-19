@@ -162,10 +162,8 @@ class ConstructorRegistry:
             and type_info.default not in DEFAULT_SENTINEL_SINGLETONS
         ):
             try:
-                typeguard.check_type(
-                    "struct_type", value=type_info.default, expected_type=type_info.type
-                )
-            except TypeError:
+                typeguard.check_type(type_info.default, type_info.type)
+            except typeguard.TypeCheckError:
                 raise InvalidDefaultInstanceError(
                     f"Invalid default instance for type {type_info.type}: {type_info.default}"
                 )

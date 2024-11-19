@@ -48,9 +48,9 @@ def match_subcommand(
         # try:
         #     import typeguard
         #
-        #     typeguard.check_type(subcommand_name, default, subcommand_type)
+        #     typeguard.check_type(default, subcommand_type)
         #     return subcommand_name
-        # except TypeError:
+        # except typeguard.TypeCheckError:
         #     continue
 
         if _recursive_struct_match(subcommand_type, default, root=True):
