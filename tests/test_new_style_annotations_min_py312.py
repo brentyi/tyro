@@ -286,7 +286,7 @@ def test_generic_config_subcommand4() -> None:
     ) == Container(Container(True))
 
 
-def test_generic_config_subcommand_matching() -> None:
+def test_generic_config_subcommand_matching_nested() -> None:
     @dataclass(frozen=True)
     class Container[T]:
         a: T
@@ -314,3 +314,48 @@ def test_generic_config_subcommand_matching() -> None:
         default=Container(Container(a="1")),
         config=(tyro.conf.OmitSubcommandPrefixes,),
     ) == Container(Container("1"))
+
+
+def test_generic_config_subcommand_matching_dict() -> None:
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert "default: container-dict-str-str" in get_helptext_with_checks(
+        Container[dict[str, int]] | Container[dict[str, str]],  # type: ignore
+        default=Container({"a": "text"}),
+    )
+    assert "default: container-dict-str-int" in get_helptext_with_checks(
+        Container[dict[str, int]] | Container[dict[str, str]],  # type: ignore
+        default=Container({"a": 5}),
+    )
+
+
+def test_generic_config_subcommand_matching_tuple() -> None:
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert "default: container-tuple-str-str" in get_helptext_with_checks(
+        Container[tuple[str, int]] | Container[tuple[str, str]],  # type: ignore
+        default=Container(("a", "text")),
+    )
+    assert "default: container-tuple-str-int" in get_helptext_with_checks(
+        Container[tuple[str, int]] | Container[tuple[str, str]],  # type: ignore
+        default=Container(("a", 5)),
+    )
+
+
+def test_generic_config_subcommand_matching_tuple_variable() -> None:
+    @dataclass(frozen=True)
+    class Container[T]:
+        a: T
+
+    assert "default: container-tuple-str-ellipsis" in get_helptext_with_checks(
+        Container[tuple[str, ...]] | Container[tuple[int, ...]],  # type: ignore
+        default=Container(("a", "text")),
+    )
+    assert "default: container-tuple-int-ellipsis" in get_helptext_with_checks(
+        Container[tuple[str, ...]] | Container[tuple[int, ...]],  # type: ignore
+        default=Container((1, 2, 3)),
+    )

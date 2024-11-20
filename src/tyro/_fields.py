@@ -9,10 +9,9 @@ import functools
 import inspect
 import numbers
 import warnings
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union, cast
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import docstring_parser
-import typeguard
 from typing_extensions import Annotated, get_args, get_origin
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
@@ -165,14 +164,8 @@ class FieldDefinition:
         # Check that the default value matches the final resolved type.
         # There's some similar Union-specific logic for this in narrow_union_type(). We
         # may be able to consolidate this.
-        try:
-            typeguard.check_type(default, cast(type, out.type_stripped))
-            default_matches_annotated_type = True
-        except (typeguard.TypeCheckError, TypeError):
-            default_matches_annotated_type = False
-
         if (
-            not default_matches_annotated_type
+            not _resolver.is_instance(out.type_stripped, default)
             # If a custom constructor is set, static_type may not be
             # matched to the annotated type.
             and argconf.constructor_factory is None

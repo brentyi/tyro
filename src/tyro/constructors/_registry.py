@@ -3,11 +3,11 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Any, Callable, ClassVar, Union
 
-import typeguard
 from typing_extensions import Literal
 
 from tyro._singleton import DEFAULT_SENTINEL_SINGLETONS
 
+from .. import _resolver
 from ._primitive_spec import (
     PrimitiveConstructorSpec,
     PrimitiveTypeInfo,
@@ -160,13 +160,11 @@ class ConstructorRegistry:
         if (
             check_default_instances()
             and type_info.default not in DEFAULT_SENTINEL_SINGLETONS
+            and not _resolver.is_instance(type_info.type, type_info.default)
         ):
-            try:
-                typeguard.check_type(type_info.default, type_info.type)
-            except (typeguard.TypeCheckError, TypeError):
-                raise InvalidDefaultInstanceError(
-                    f"Invalid default instance for type {type_info.type}: {type_info.default}"
-                )
+            raise InvalidDefaultInstanceError(
+                f"Invalid default instance for type {type_info.type}: {type_info.default}"
+            )
 
         for spec_factory in self._struct_rules[::-1]:
             maybe_spec = spec_factory(type_info)
