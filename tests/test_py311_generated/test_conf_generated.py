@@ -5,16 +5,7 @@ import io
 import json as json_
 import shlex
 import sys
-from typing import (
-    Annotated,
-    Any,
-    Dict,
-    Generic,
-    List,
-    Tuple,
-    Type,
-    TypeVar,
-)
+from typing import Annotated, Any, Dict, Generic, List, Tuple, Type, TypeVar
 
 import pytest
 from helptext_utils import get_helptext_with_checks

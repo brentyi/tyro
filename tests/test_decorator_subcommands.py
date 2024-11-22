@@ -8,7 +8,7 @@ app_just_one = SubcommandApp()
 
 @app_just_one.command
 @app.command
-def greet(name: str, loud: bool = False) -> None:
+def greet_person(name: str, loud: bool = False) -> None:
     """Greet someone."""
     greeting = f"Hello, {name}!"
     if loud:
@@ -28,7 +28,7 @@ def test_app_just_one_cli(capsys):
         app_just_one.cli(args=["--help"])
     captured = capsys.readouterr()
     assert "usage: " in captured.out
-    assert "greet" not in captured.out
+    assert "greet-person" not in captured.out
     assert "addition" not in captured.out
     assert "--name" in captured.out
 
@@ -39,23 +39,23 @@ def test_app_cli(capsys):
         app.cli(args=["--help"])
     captured = capsys.readouterr()
     assert "usage: " in captured.out
-    assert "greet" in captured.out
+    assert "greet-person" in captured.out
     assert "addition" in captured.out
 
-    # Test: `python my_script.py greet --help`
+    # Test: `python my_script.py greet-person --help`
     with pytest.raises(SystemExit):
-        app.cli(args=["greet", "--help"], sort_subcommands=False)
+        app.cli(args=["greet-person", "--help"], sort_subcommands=False)
     captured = capsys.readouterr()
     assert "usage: " in captured.out
     assert "Greet someone." in captured.out
 
-    # Test: `python my_script.py greet --name Alice`
-    app.cli(args=["greet", "--name", "Alice"], sort_subcommands=True)
+    # Test: `python my_script.py greet-person --name Alice`
+    app.cli(args=["greet-person", "--name", "Alice"], sort_subcommands=True)
     captured = capsys.readouterr()
     assert captured.out.strip() == "Hello, Alice!"
 
-    # Test: `python my_script.py greet --name Bob --loud`
-    app.cli(args=["greet", "--name", "Bob", "--loud"])
+    # Test: `python my_script.py greet-person --name Bob --loud`
+    app.cli(args=["greet-person", "--name", "Bob", "--loud"])
     captured = capsys.readouterr()
     assert captured.out.strip() == "HELLO, BOB!"
 
@@ -70,3 +70,16 @@ def test_app_cli(capsys):
     app.cli(args=["addition", "--a", "5", "--b", "3"])
     captured = capsys.readouterr()
     assert captured.out.strip() == "5 + 3 = 8"
+
+
+def test_use_underscores(capsys) -> None:
+    with pytest.raises(SystemExit):
+        app.cli(args=["--help"], use_underscores=True)
+    captured = capsys.readouterr()
+    assert "greet-person" not in captured.out
+    assert "greet_person" in captured.out
+
+    # Test: `python my_script.py greet-person --name Bob --loud`
+    app.cli(args=["greet_person", "--name", "Bob", "--loud"], use_underscores=True)
+    captured = capsys.readouterr()
+    assert captured.out.strip() == "HELLO, BOB!"

@@ -9,11 +9,13 @@ Microliter = NewType("Microliter", int)
 
 
 class Measurements(BaseModel):
-    single: Microliter = pydantic.Field(10)
+    single: Microliter = pydantic.Field(Microliter(10))
     renamed_single: Annotated[Microliter, tyro.conf.arg(name="other_single")] = (
-        pydantic.Field(10)
+        pydantic.Field(Microliter(10))
     )
-    pair: Tuple[Microliter, Microliter] = pydantic.Field((20, 30))
+    pair: Tuple[Microliter, Microliter] = pydantic.Field(
+        (Microliter(20), Microliter(30))
+    )
 
 
 IncorrectMeasurements = NewType("IncorrectMeasurements", Measurements)
