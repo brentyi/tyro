@@ -30,7 +30,7 @@ def get_delimeter() -> Literal["-", "_"]:
     return DELIMETER
 
 
-def replace_delimeter_in_part(p: str) -> str:
+def swap_delimeters(p: str) -> str:
     """Replace hyphens with underscores (or vice versa) except when at the start."""
     if get_delimeter() == "-":
         stripped = p.lstrip("_")
@@ -49,7 +49,7 @@ def make_field_name(parts: Sequence[str]) -> str:
     """
     out = ".".join(parts)
     return ".".join(
-        replace_delimeter_in_part(part)
+        swap_delimeters(part)
         for part in out.split(".")
         if len(part) > 0 and part != dummy_field_name
     )

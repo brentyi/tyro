@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any, Callable, Dict, Optional, Sequence, TypeVar, overload
 
 import tyro
+from tyro._strings import delimeter_context, swap_delimeters
 
 CallableT = TypeVar("CallableT", bound=Callable)
 
@@ -127,15 +128,19 @@ class SubcommandApp:
 
         # Sort subcommands by name.
         if sort_subcommands:
-            sorted_subcommands = dict(
-                sorted(self._subcommands.items(), key=lambda x: x[0])
-            )
+            subcommands = dict(sorted(self._subcommands.items(), key=lambda x: x[0]))
         else:
-            sorted_subcommands = self._subcommands
+            subcommands = self._subcommands.copy()
 
-        if len(sorted_subcommands) == 1:
+        # Replace delimeter in subcommand names.
+        with delimeter_context("_" if use_underscores else "-"):
+            orig_subcommand_names = list(subcommands.keys())
+            for orig_name in orig_subcommand_names:
+                subcommands[swap_delimeters(orig_name)] = subcommands.pop(orig_name)
+
+        if len(subcommands) == 1:
             return tyro.cli(
-                next(iter(sorted_subcommands.values())),
+                next(iter(subcommands.values())),
                 prog=prog,
                 description=description,
                 args=args,
@@ -145,7 +150,7 @@ class SubcommandApp:
             )
         else:
             return tyro.extras.subcommand_cli_from_dict(
-                sorted_subcommands,
+                subcommands,
                 prog=prog,
                 description=description,
                 args=args,
