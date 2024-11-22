@@ -318,9 +318,9 @@
 
 
 
-<div class="viewcode-block" id="replace_delimeter_in_part">
-<a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.replace_delimeter_in_part">[docs]</a>
-<span class="k">def</span> <span class="nf">replace_delimeter_in_part</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="swap_delimeters">
+<a class="viewcode-back" href="../../../api/tyro/_strings/#tyro._strings.swap_delimeters">[docs]</a>
+<span class="k">def</span> <span class="nf">swap_delimeters</span><span class="p">(</span><span class="n">p</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace hyphens with underscores (or vice versa) except when at the start.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">get_delimeter</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;-&quot;</span><span class="p">:</span>
         <span class="n">stripped</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span>
@@ -342,7 +342,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">out</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
     <span class="k">return</span> <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-        <span class="n">replace_delimeter_in_part</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+        <span class="n">swap_delimeters</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">part</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">part</span> <span class="o">!=</span> <span class="n">dummy_field_name</span>
     <span class="p">)</span></div>

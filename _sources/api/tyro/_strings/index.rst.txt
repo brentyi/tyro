@@ -36,7 +36,7 @@ Module Contents
    Get delimeter used to separate words.
 
 
-.. py:function:: replace_delimeter_in_part(p: str) -> str
+.. py:function:: swap_delimeters(p: str) -> str
 
    Replace hyphens with underscores (or vice versa) except when at the start.
 
