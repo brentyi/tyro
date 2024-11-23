@@ -21,11 +21,8 @@ from typing import (
 
 from typing_extensions import Annotated, get_args, get_origin
 
-from tyro.constructors._registry import ConstructorRegistry, check_default_instances
-from tyro.constructors._struct_spec import (
-    InvalidDefaultInstanceError,
-    UnsupportedStructTypeMessage,
-)
+from tyro.constructors._registry import ConstructorRegistry
+from tyro.constructors._struct_spec import UnsupportedStructTypeMessage
 
 from . import _argparse as argparse
 from . import (
@@ -347,9 +344,6 @@ def handle_field(
             f"but the default value `{field.default}` has type `{type(field.default)}`. "
             f"We'll try to handle this gracefully, but it may cause unexpected behavior."
         )
-        if check_default_instances():
-            raise InvalidDefaultInstanceError(message)
-
         warnings.warn(message)
         field = field.with_new_type_stripped(
             Union[field.type_stripped, type(field.default)]  # type: ignore
