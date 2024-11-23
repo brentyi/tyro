@@ -34,7 +34,7 @@ def test_ambiguous_collection_2() -> None:
 
     with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
-    assert "Unsupported type annotation for the field x" in e.value.args[0]
+    assert "Unsupported type annotation for field with name `x`" in e.value.args[0]
 
 
 def test_ambiguous_collection_3() -> None:
@@ -43,14 +43,14 @@ def test_ambiguous_collection_3() -> None:
 
     with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
-    assert "Unsupported type annotation for the field x" in e.value.args[0]
+    assert "Unsupported type annotation for field with name `x`" in e.value.args[0]
 
 
 def test_ambiguous_collection_4() -> None:
     X = List[Union[Tuple[int, int], Tuple[int, int, int]]]
     with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(X, args=["--help"])
-    assert "Unsupported type annotation for the field" not in e.value.args[0]
+    assert "Unsupported type annotation for field with name `x`" not in e.value.args[0]
 
 
 def test_ambiguous_collection_5() -> None:
@@ -69,6 +69,19 @@ def test_ambiguous_collection_6() -> None:
 
     with pytest.raises(UnsupportedTypeAnnotationError):
         tyro.cli(A, args=["--x", "0", "1"])
+
+
+def test_ambiguous_collection_7() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: Dict[List[int], str]
+
+    def main(x: A) -> None:
+        pass
+
+    with pytest.raises(UnsupportedTypeAnnotationError) as e:
+        tyro.cli(main, args=["--help"])
+    assert "Unsupported type annotation for field with name `x.x`" in e.value.args[0]
 
 
 # Must be global.

@@ -7,8 +7,6 @@ import contextlib
 import dataclasses
 import functools
 import inspect
-import numbers
-import warnings
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import docstring_parser
@@ -16,7 +14,6 @@ from typing_extensions import Annotated, get_args, get_origin
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import (
-    DEFAULT_SENTINEL_SINGLETONS,
     MISSING_AND_MISSING_NONPROP,
     MISSING_NONPROP,
 )
@@ -26,9 +23,8 @@ from .constructors._primitive_spec import (
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
-from .constructors._registry import ConstructorRegistry, check_default_instances
+from .constructors._registry import ConstructorRegistry
 from .constructors._struct_spec import (
-    InvalidDefaultInstanceError,
     StructFieldSpec,
     StructTypeInfo,
     UnsupportedStructTypeMessage,
@@ -161,32 +157,6 @@ class FieldDefinition:
         if argconf.constructor_factory is not None:
             out = out.with_new_type_stripped(argconf.constructor_factory())
 
-        # Check that the default value matches the final resolved type.
-        # There's some similar Union-specific logic for this in narrow_union_type(). We
-        # may be able to consolidate this.
-        if (
-            not _resolver.is_instance(out.type_stripped, default)
-            # If a custom constructor is set, static_type may not be
-            # matched to the annotated type.
-            and argconf.constructor_factory is None
-            and default not in DEFAULT_SENTINEL_SINGLETONS
-            # The numeric tower in Python is wacky. This logic is non-critical, so
-            # we'll just skip it (+the complexity) for numbers.
-            and not isinstance(default, numbers.Number)
-        ):
-            # If the default value doesn't match the resolved type, we expand the
-            # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
-            message = (
-                f"The field {name} is annotated with type {typ}, "
-                f"but the default value {default} has type {type(default)}. "
-                f"We'll try to handle this gracefully, but it may cause unexpected behavior."
-            )
-            if check_default_instances():
-                raise InvalidDefaultInstanceError(message)
-
-            warnings.warn(message)
-            out = out.with_new_type_stripped(Union[out.type_stripped, type(default)])  # type: ignore
-
         return out
 
     def with_new_type_stripped(
@@ -306,6 +276,10 @@ def _field_list_from_function(
     f: Callable, default_instance: Any
 ) -> UnsupportedStructTypeMessage | tuple[Callable, list[FieldDefinition]]:
     """Generate field lists from non-class callables."""
+
+    if f is Any:
+        return UnsupportedStructTypeMessage("`Any` is not a valid struct type!")
+
     try:
         params = list(inspect.signature(f).parameters.values())
     except ValueError:

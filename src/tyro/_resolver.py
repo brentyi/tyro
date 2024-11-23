@@ -177,6 +177,9 @@ def narrow_subtypes(
 
     typ = resolve_newtype_and_aliases(typ)
 
+    if default_instance in MISSING_AND_MISSING_NONPROP:
+        return typ
+
     try:
         potential_subclass = type(default_instance)
 
