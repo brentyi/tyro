@@ -4,12 +4,15 @@
 # mypy. This will be fixed by `typing.TypeForm`: https://peps.python.org/pep-0747/
 """Generic Subcommands
 
+Just like standard classes, generic classes within unions can be selected
+between using subcommands.
+
 Usage:
 
     python ./03_generic_subcommands.py --help
     python ./03_generic_subcommands.py experiment-adam --help
     python ./03_generic_subcommands.py experiment-sgd --help
-    python ./03_generic_subcommands.py experiment-adam --path /tmp --lr 1e-3
+    python ./03_generic_subcommands.py experiment-adam --path /tmp --opt.lr 1e-3
 """
 
 import dataclasses
