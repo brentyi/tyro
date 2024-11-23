@@ -229,7 +229,7 @@ syntax.
 
     import tyro
 
-    @dataclass(frozen=True)
+    @dataclass
     class ExperimentConfig:
         # Dataset to run experiment on.
         dataset: Literal["mnist", "imagenet-50"]

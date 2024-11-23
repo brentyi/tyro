@@ -32,7 +32,7 @@ class Adam:
     betas: tuple[float, float] = (0.9, 0.999)
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Experiment[OptimizerT: (Adam, Sgd)]:
     path: Path
     opt: OptimizerT

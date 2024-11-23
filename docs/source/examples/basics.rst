@@ -463,7 +463,7 @@ multiple types.
         GREEN = enum.auto()
         BLUE = enum.auto()
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Args:
         # Unions can be used to specify multiple allowable types.
         union_over_types: int | str = 0
