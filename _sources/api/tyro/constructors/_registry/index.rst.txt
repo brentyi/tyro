@@ -22,6 +22,26 @@ Module Contents
 
    
 
+.. py:function:: check_default_instances() -> bool
+
+   Check whether we should be strict about checking that default types and
+   instances match.
+
+   This is usually `False`; tyro attempts to be somewhat lenient when
+   inconsistent types are encounted. Strictness, however, is useful for
+   matching annotated subcommands to default values.
+
+
+.. py:function:: check_default_instances_context()
+
+   Context for whether we should be strict about checking that default
+   types and instances match.
+
+   This is usually `False`; tyro attempts to be somewhat lenient when
+   inconsistent types are encounted. Strictness, however, is useful for
+   matching annotated subcommands to default values.
+
+
 .. py:class:: ConstructorRegistry
 
 

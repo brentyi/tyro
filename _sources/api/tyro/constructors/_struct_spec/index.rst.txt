@@ -20,6 +20,14 @@ Module Contents
       
 
 
+.. py:exception:: InvalidDefaultInstanceError(message: str)
+
+
+   Bases: :py:obj:`Exception`
+
+   Raised when a default instance is not applicable to an annoated struct type.
+
+
 .. py:class:: StructFieldSpec
 
 

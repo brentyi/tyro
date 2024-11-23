@@ -84,8 +84,8 @@ This example uses syntax introduced in Python 3.12 (`PEP 695 <https://peps.pytho
     </pre>
 .. _example-02_generics:
 
-Generics (Legacy)
------------------
+Generics (Python <3.12)
+-----------------------
 
 The legacy :py:class:`typing.Generic` and :py:class:`typing.TypeVar` syntax for
 generic types is also supported.
@@ -154,4 +154,116 @@ generic types is also supported.
     <span style="font-weight: lighter">│</span> --shape.c.z <span style="font-weight: bold">FLOAT</span>       <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --shape.c.frame-id <span style="font-weight: bold">STR</span>  <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
+    </pre>
+.. _example-03_generic_subcommands:
+
+Generic Subcommands
+-------------------
+
+
+
+
+.. code-block:: python
+    :linenos:
+
+    # 03_generic_subcommands.py
+    import dataclasses
+    from pathlib import Path
+
+    import tyro
+
+    @dataclasses.dataclass
+    class Sgd:
+        lr: float = 1e-4
+
+    @dataclasses.dataclass
+    class Adam:
+        lr: float = 3e-4
+        betas: tuple[float, float] = (0.9, 0.999)
+
+    @dataclasses.dataclass(frozen=True)
+    class Experiment[OptimizerT: (Adam, Sgd)]:
+        path: Path
+        opt: OptimizerT
+
+    if __name__ == "__main__":
+        args = tyro.cli(Experiment[Adam] | Experiment[Sgd])
+        print(args)
+
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py --help</strong>
+    <span style="font-weight: bold">usage</span>: 03_generic_subcommands.py [-h] <span style="font-weight: bold">{experiment-adam,experiment-sgd}</span>
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> subcommands </span><span style="font-weight: lighter">────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> {experiment-adam,experiment-sgd}                  <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     experiment-adam                               <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     experiment-sgd                                <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-adam --help</strong>
+    <span style="font-weight: bold">usage</span>: 03_generic_subcommands.py experiment-adam [-h] --path <span style="font-weight: bold">PATH</span>
+                                                     [--opt.lr <span style="font-weight: bold">FLOAT</span>]
+                                                     [--opt.betas <span style="font-weight: bold">FLOAT FLOAT</span>]
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help            <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --path <span style="font-weight: bold">PATH</span>           <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> opt options </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --opt.lr <span style="font-weight: bold">FLOAT</span>        <span style="color: #008080">(default: 0.0003)</span>               <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --opt.betas <span style="font-weight: bold">FLOAT FLOAT</span>                               <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                       <span style="color: #008080">(default: 0.9 0.999)</span>            <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-sgd --help</strong>
+    <span style="font-weight: bold">usage</span>: 03_generic_subcommands.py experiment-sgd [-h] --path <span style="font-weight: bold">PATH</span>
+                                                    [--opt.lr <span style="font-weight: bold">FLOAT</span>]
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help            <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --path <span style="font-weight: bold">PATH</span>           <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> opt options </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --opt.lr <span style="font-weight: bold">FLOAT</span>        <span style="color: #008080">(default: 0.0001)</span>               <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-adam --path /tmp --lr 1e-3</strong>
+    <span style="color: #e60000">╭─</span><span style="color: #e60000"> </span><span style="font-weight: bold; color: #e60000">Unrecognized options</span><span style="color: #e60000"> </span><span style="color: #e60000">─────────────────────────────────────────</span><span style="color: #e60000">─╮</span>
+    <span style="color: #e60000">│</span> Unrecognized options: --lr                                      <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> Perhaps you meant:                                              <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span>     <span style="font-weight: bold">--opt.lr FLOAT</span>                                              <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span>         <span style="color: #008080">(default: 0.0003)</span>                                       <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span>             in <span style="color: #008000">03_generic_subcommands.py experiment-adam --help</span> <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span>         <span style="color: #008080">(default: 0.0001)</span>                                       <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span>             in <span style="color: #008000">03_generic_subcommands.py experiment-sgd --help</span>  <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
+    <span style="color: #e60000">│</span> For full helptext, run <span style="font-weight: bold">03_generic_subcommands.py --help</span>         <span style="color: #e60000">│</span>
+    <span style="color: #e60000">╰─────────────────────────────────────────────────────────────────╯</span>
     </pre>

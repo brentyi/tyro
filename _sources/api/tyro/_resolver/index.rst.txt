@@ -187,3 +187,8 @@ Module Contents
    and generics (list[str]) in older versions of Python.
 
 
+.. py:function:: is_instance(typ: Any, value: Any) -> bool
+
+   Typeguard-based alternative for `isinstance()`.
+
+

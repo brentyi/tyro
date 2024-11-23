@@ -289,8 +289,6 @@
 <span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">import</span> <span class="nn">numbers</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">docstring_parser</span>
@@ -298,7 +296,6 @@
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
 <span class="kn">from</span> <span class="nn">._singleton</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">DEFAULT_SENTINEL_SINGLETONS</span><span class="p">,</span>
     <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span>
     <span class="n">MISSING_NONPROP</span><span class="p">,</span>
 <span class="p">)</span>
@@ -361,8 +358,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Context for setting markers on fields. All fields created within the</span>
 <span class="sd">        context will have the specified markers.&quot;&quot;&quot;</span>
         <span class="n">global_context_markers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
-        <span class="k">yield</span>
-        <span class="n">global_context_markers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">yield</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="n">global_context_markers</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="FieldDefinition.from_field_spec">
@@ -452,32 +451,6 @@
 
         <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">with_new_type_stripped</span><span class="p">(</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span><span class="p">())</span>
-
-        <span class="c1"># Check that the default value matches the final resolved type.</span>
-        <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
-        <span class="c1"># may be able to consolidate this.</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="c1"># Be relatively conservative: isinstance() can be checked on non-type</span>
-            <span class="c1"># types (like unions in Python &gt;=3.10), but we&#39;ll only consider single types</span>
-            <span class="c1"># for now.</span>
-            <span class="nb">type</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">type</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">out</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
-            <span class="c1"># If a custom constructor is set, static_type may not be</span>
-            <span class="c1"># matched to the annotated type.</span>
-            <span class="ow">and</span> <span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="ow">and</span> <span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
-            <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
-            <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
-            <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
-            <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;The field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> is annotated with type </span><span class="si">{</span><span class="n">typ</span><span class="si">}</span><span class="s2">, &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;but the default value </span><span class="si">{</span><span class="n">default</span><span class="si">}</span><span class="s2"> has type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">. &quot;</span>
-                <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
-            <span class="p">)</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">with_new_type_stripped</span><span class="p">(</span><span class="n">Union</span><span class="p">[</span><span class="n">out</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)])</span>  <span class="c1"># type: ignore</span>
 
         <span class="k">return</span> <span class="n">out</span></div>
 
@@ -615,6 +588,10 @@
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnsupportedStructTypeMessage</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate field lists from non-class callables.&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">f</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="s2">&quot;`Any` is not a valid struct type!&quot;</span><span class="p">)</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>

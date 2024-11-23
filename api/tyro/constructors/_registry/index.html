@@ -305,6 +305,31 @@
 <span class="sig-prename descclassname"><span class="pre">tyro.constructors._registry.</span></span><span class="sig-name descname"><span class="pre">StructSpecRule</span></span><a class="headerlink" href="#tyro.constructors._registry.StructSpecRule" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro.constructors._registry.check_default_instances">
+<span class="sig-prename descclassname"><span class="pre">tyro.constructors._registry.</span></span><span class="sig-name descname"><span class="pre">check_default_instances</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_registry/#check_default_instances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._registry.check_default_instances" title="Link to this definition">¶</a></dt>
+<dd><p>Check whether we should be strict about checking that default types and
+instances match.</p>
+<p>This is usually <cite>False</cite>; tyro attempts to be somewhat lenient when
+inconsistent types are encounted. Strictness, however, is useful for
+matching annotated subcommands to default values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tyro.constructors._registry.check_default_instances_context">
+<span class="sig-prename descclassname"><span class="pre">tyro.constructors._registry.</span></span><span class="sig-name descname"><span class="pre">check_default_instances_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/tyro/constructors/_registry/#check_default_instances_context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._registry.check_default_instances_context" title="Link to this definition">¶</a></dt>
+<dd><p>Context for whether we should be strict about checking that default
+types and instances match.</p>
+<p>This is usually <cite>False</cite>; tyro attempts to be somewhat lenient when
+inconsistent types are encounted. Strictness, however, is useful for
+matching annotated subcommands to default values.</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="tyro.constructors._registry.ConstructorRegistry">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors._registry.</span></span><span class="sig-name descname"><span class="pre">ConstructorRegistry</span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_registry/#ConstructorRegistry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._registry.ConstructorRegistry" title="Link to this definition">¶</a></dt>
@@ -474,6 +499,8 @@ unsuccessful.</p>
 <li><a class="reference internal" href="#tyro.constructors._registry.current_registry"><code class="docutils literal notranslate"><span class="pre">current_registry</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._registry.PrimitiveSpecRule"><code class="docutils literal notranslate"><span class="pre">PrimitiveSpecRule</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._registry.StructSpecRule"><code class="docutils literal notranslate"><span class="pre">StructSpecRule</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors._registry.check_default_instances"><code class="docutils literal notranslate"><span class="pre">check_default_instances()</span></code></a></li>
+<li><a class="reference internal" href="#tyro.constructors._registry.check_default_instances_context"><code class="docutils literal notranslate"><span class="pre">check_default_instances_context()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._registry.ConstructorRegistry"><code class="docutils literal notranslate"><span class="pre">ConstructorRegistry</span></code></a><ul>
 <li><a class="reference internal" href="#tyro.constructors._registry.ConstructorRegistry.primitive_rule"><code class="docutils literal notranslate"><span class="pre">ConstructorRegistry.primitive_rule()</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._registry.ConstructorRegistry.struct_rule"><code class="docutils literal notranslate"><span class="pre">ConstructorRegistry.struct_rule()</span></code></a></li>

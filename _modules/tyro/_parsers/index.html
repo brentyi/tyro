@@ -285,6 +285,8 @@
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">numbers</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
@@ -616,6 +618,32 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine what to do with a single field definition.&quot;&quot;&quot;</span>
 
     <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
+
+    <span class="c1"># Check that the default value matches the final resolved type.</span>
+    <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
+    <span class="c1"># may be able to consolidate this.</span>
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="ow">not</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
+        <span class="c1"># If a custom constructor is set, static_type may not be</span>
+        <span class="c1"># matched to the annotated type.</span>
+        <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="kc">None</span>
+        <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">DEFAULT_SENTINEL_SINGLETONS</span>
+        <span class="c1"># The numeric tower in Python is wacky. This logic is non-critical, so</span>
+        <span class="c1"># we&#39;ll just skip it (+the complexity) for numbers.</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">numbers</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="c1"># If the default value doesn&#39;t match the resolved type, we expand the</span>
+        <span class="c1"># type. This is inspired by https://github.com/brentyi/tyro/issues/88.</span>
+        <span class="n">field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">])</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;The field `</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">` is annotated with type `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;but the default value `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">` has type `</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">`. &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;We&#39;ll try to handle this gracefully, but it may cause unexpected behavior.&quot;</span>
+        <span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">with_new_type_stripped</span><span class="p">(</span>
+            <span class="n">Union</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
+        <span class="p">)</span>
 
     <span class="c1"># Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if</span>
     <span class="n">force_primitive</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>

@@ -323,6 +323,16 @@
 
 
 
+<div class="viewcode-block" id="InvalidDefaultInstanceError">
+<a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec/#tyro.constructors._struct_spec.InvalidDefaultInstanceError">[docs]</a>
+<span class="k">class</span> <span class="nc">InvalidDefaultInstanceError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Raised when a default instance is not applicable to an annoated struct type.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></div>
+
+
+
 <div class="viewcode-block" id="StructFieldSpec">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._struct_spec.StructFieldSpec">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -570,16 +580,9 @@
             <span class="n">default</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">default</span>
             <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-                    <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-                    <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                        <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">, which has&quot;</span>
-                        <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
-                        <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-                    <span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">is_default_from_default_instance</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">elif</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">attr</span><span class="o">.</span><span class="n">NOTHING</span><span class="p">:</span>
                 <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
@@ -889,13 +892,6 @@
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">parent_default_instance</span><span class="si">}</span><span class="s2">, which has&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="p">)</span>
 
     <span class="c1"># Try grabbing default from dataclass field.</span>
     <span class="k">if</span> <span class="p">(</span>
@@ -947,13 +943,6 @@
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">parent_default_instance</span><span class="si">}</span><span class="s2">, which has&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(),</span> <span class="kc">False</span>
@@ -977,13 +966,6 @@
         <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Could not find field </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> in default instance&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">parent_default_instance</span><span class="si">}</span><span class="s2">, which has&quot;</span>
-                <span class="sa">f</span><span class="s2">&quot; type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">)</span><span class="si">}</span><span class="s2">,&quot;</span><span class="p">,</span>
-                <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
-            <span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">is_required</span><span class="p">():</span>
         <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="kc">False</span>
