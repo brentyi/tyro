@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import dataclasses
+import numbers
+import warnings
 from typing import (
     Any,
     Callable,
@@ -320,6 +322,32 @@ def handle_field(
     """Determine what to do with a single field definition."""
 
     registry = ConstructorRegistry._get_active_registry()
+
+    # Check that the default value matches the final resolved type.
+    # There's some similar Union-specific logic for this in narrow_union_type(). We
+    # may be able to consolidate this.
+    if (
+        not _resolver.is_instance(field.type_stripped, field.default)
+        # If a custom constructor is set, static_type may not be
+        # matched to the annotated type.
+        and field.argconf.constructor_factory is None
+        and field.default not in _singleton.DEFAULT_SENTINEL_SINGLETONS
+        # The numeric tower in Python is wacky. This logic is non-critical, so
+        # we'll just skip it (+the complexity) for numbers.
+        and not isinstance(field.default, numbers.Number)
+    ):
+        # If the default value doesn't match the resolved type, we expand the
+        # type. This is inspired by https://github.com/brentyi/tyro/issues/88.
+        field_name = _strings.make_field_name([extern_prefix, field.extern_name])
+        message = (
+            f"The field `{field_name}` is annotated with type `{field.type}`, "
+            f"but the default value `{field.default}` has type `{type(field.default)}`. "
+            f"We'll try to handle this gracefully, but it may cause unexpected behavior."
+        )
+        warnings.warn(message)
+        field = field.with_new_type_stripped(
+            Union[field.type_stripped, type(field.default)]  # type: ignore
+        )
 
     # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
     force_primitive = len(

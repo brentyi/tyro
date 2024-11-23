@@ -304,7 +304,7 @@ To turn off conversion, see :class:`tyro.conf.FlagConversionOff`.
 Choices
 -------
 
-:code:`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices.
+:py:data:`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices.
 
 
 .. code-block:: python
@@ -443,7 +443,7 @@ choices.
 Unions
 ------
 
-:code:`X | Y` or :code:`typing.Union[X, Y]` can be used to expand inputs to
+:code:`X | Y` or :py:data:`typing.Union` can be used to expand inputs to
 multiple types.
 
 

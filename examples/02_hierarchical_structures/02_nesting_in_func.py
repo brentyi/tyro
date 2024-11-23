@@ -1,6 +1,6 @@
 """Structures as Function Arguments
 
-Structures can also be used as input to functions.
+Structures can be used as input to functions.
 
 Usage:
 

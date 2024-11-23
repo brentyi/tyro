@@ -249,11 +249,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             ),
             is_instance=lambda x: isinstance(x, cast_type),
             str_from_instance=lambda instance: [
-                (
-                    str(instance.value)
-                    if _markers.EnumChoicesFromValues in type_info.markers
-                    else instance.name
-                )
+                str(instance.value)
+                if _markers.EnumChoicesFromValues in type_info.markers
+                else instance.name
             ],
             choices=choices,
         )

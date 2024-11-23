@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import Any, Callable, ClassVar, Union
 
 from typing_extensions import Literal
 
+from tyro._singleton import DEFAULT_SENTINEL_SINGLETONS
+
+from .. import _resolver
 from ._primitive_spec import (
     PrimitiveConstructorSpec,
     PrimitiveTypeInfo,
@@ -11,6 +15,7 @@ from ._primitive_spec import (
     apply_default_primitive_rules,
 )
 from ._struct_spec import (
+    InvalidDefaultInstanceError,
     StructConstructorSpec,
     StructTypeInfo,
     apply_default_struct_rules,
@@ -20,6 +25,37 @@ current_registry: ConstructorRegistry | None = None
 
 PrimitiveSpecRule = Callable[[PrimitiveTypeInfo], Union[PrimitiveConstructorSpec, None]]
 StructSpecRule = Callable[[StructTypeInfo], Union[StructConstructorSpec, None]]
+
+_check_default_instances_flag: bool = False
+
+
+def check_default_instances() -> bool:
+    """Check whether we should be strict about checking that default types and
+    instances match.
+
+    This is usually `False`; tyro attempts to be somewhat lenient when
+    inconsistent types are encounted. Strictness, however, is useful for
+    matching annotated subcommands to default values.
+    """
+    return _check_default_instances_flag
+
+
+@contextmanager
+def check_default_instances_context():
+    """Context for whether we should be strict about checking that default
+    types and instances match.
+
+    This is usually `False`; tyro attempts to be somewhat lenient when
+    inconsistent types are encounted. Strictness, however, is useful for
+    matching annotated subcommands to default values.
+    """
+    global _check_default_instances_flag
+    old_value = _check_default_instances_flag
+    _check_default_instances_flag = True
+    try:
+        yield
+    finally:
+        _check_default_instances_flag = old_value
 
 
 class ConstructorRegistry:
@@ -120,6 +156,15 @@ class ConstructorRegistry:
     ) -> StructConstructorSpec | None:
         """Get a constructor specification for a given type. Returns `None` if
         unsuccessful."""
+
+        if (
+            check_default_instances()
+            and type_info.default not in DEFAULT_SENTINEL_SINGLETONS
+            and not _resolver.is_instance(type_info.type, type_info.default)
+        ):
+            raise InvalidDefaultInstanceError(
+                f"Invalid default instance for type {type_info.type}: {type_info.default}"
+            )
 
         for spec_factory in self._struct_rules[::-1]:
             maybe_spec = spec_factory(type_info)

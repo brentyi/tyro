@@ -1259,3 +1259,78 @@ def test_annotated_narrow_1() -> None:
     from tyro._resolver import narrow_subtypes
 
     assert narrow_subtypes(Annotated[A, False], B(3)) == Annotated[B, False]  # type: ignore
+
+
+def test_union_with_dict() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Config:
+        name: str
+        age: int
+
+    def main(config: Union[Config, dict] = {"name": "hello", "age": 25}) -> Any:
+        return config
+
+    assert tyro.cli(main, args=[]) == {"name": "hello", "age": 25}
+    assert tyro.cli(main, args="config:dict".split(" ")) == {"name": "hello", "age": 25}
+    assert tyro.cli(main, args="config:dict --config.age 27".split(" ")) == {
+        "name": "hello",
+        "age": 27,
+    }
+    assert tyro.cli(
+        main, args="config:config --config.name world --config.age 27".split(" ")
+    ) == Config(name="world", age=27)
+
+
+def test_union_with_tuple() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Config:
+        name: str
+        age: int
+
+    def main(config: Union[Config, tuple] = ("hello", 5)) -> Any:
+        return config
+
+    assert tyro.cli(main, args=[]) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple".split(" ")) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple hello 27".split(" ")) == ("hello", 27)
+    assert tyro.cli(
+        main, args="config:config --config.name world --config.age 27".split(" ")
+    ) == Config(name="world", age=27)
+
+
+def test_union_with_tuple_subscripted() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Config:
+        name: str
+        age: int
+
+    def main(config: Union[Config, Tuple[str, int]] = ("hello", 5)) -> Any:
+        return config
+
+    assert tyro.cli(main, args=[]) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple-str-int".split(" ")) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple-str-int hello 27".split(" ")) == (
+        "hello",
+        27,
+    )
+    assert tyro.cli(
+        main, args="config:config --config.name world --config.age 27".split(" ")
+    ) == Config(name="world", age=27)
+
+
+def test_union_with_tuple_autoexpand() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Config:
+        name: str
+        age: int
+
+    # tyro should automatically expand this `Config` type to `Config | tuple`.
+    def main(config: Config = ("hello", 5)) -> Any:  # type: ignore
+        return config
+
+    assert tyro.cli(main, args=[]) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple".split(" ")) == ("hello", 5)
+    assert tyro.cli(main, args="config:tuple hello 27".split(" ")) == ("hello", 27)
+    assert tyro.cli(
+        main, args="config:config --config.name world --config.age 27".split(" ")
+    ) == Config(name="world", age=27)

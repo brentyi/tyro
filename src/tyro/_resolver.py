@@ -25,6 +25,7 @@ from typing import (
     overload,
 )
 
+import typeguard
 from typing_extensions import (
     Annotated,
     Final,
@@ -175,6 +176,9 @@ def narrow_subtypes(
     strings!)"""
 
     typ = resolve_newtype_and_aliases(typ)
+
+    if default_instance in MISSING_AND_MISSING_NONPROP:
+        return typ
 
     try:
         potential_subclass = type(default_instance)
@@ -650,3 +654,12 @@ def get_type_hints_with_backported_syntax(
             except ImportError:
                 pass
         raise e
+
+
+def is_instance(typ: Any, value: Any) -> bool:
+    """Typeguard-based alternative for `isinstance()`."""
+    try:
+        typeguard.check_type(value, typ)
+        return True
+    except (typeguard.TypeCheckError, TypeError):
+        return False
