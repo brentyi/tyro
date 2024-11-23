@@ -1,3 +1,7 @@
+# mypy: ignore-errors
+#
+# Passing a Union type directly to tyro.cli() doesn't type-check correctly in
+# mypy. This will be fixed by `typing.TypeForm`: https://peps.python.org/pep-0747/
 """Generic Subcommands
 
 Usage:
