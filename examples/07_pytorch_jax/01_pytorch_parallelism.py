@@ -4,7 +4,7 @@ The :code:`console_outputs=` argument can be set to :code:`False` to suppress he
 error message printing.
 
 This is useful in PyTorch for distributed training scripts, where you only want
-to print the helptext from the main process:
+to print helptext from the main process:
 
 
 .. code-block:: python
@@ -24,23 +24,13 @@ Usage:
     python ./01_pytorch_parallelism.py --help
 """
 
-import dataclasses
-
 import tyro
 
 
-@dataclasses.dataclass
-class Args:
-    """Description.
-    This should show up in the helptext!"""
-
-    field1: int
-    """A field."""
-
-    field2: int = 3
-    """A numeric field, with a default value."""
+def train(foo: int, bar: str) -> None:
+    """Description. This should show up in the helptext!"""
 
 
 if __name__ == "__main__":
-    args = tyro.cli(Args, console_outputs=False)
+    args = tyro.cli(train, console_outputs=False)
     print(args)
