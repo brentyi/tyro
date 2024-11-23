@@ -363,20 +363,20 @@ generic types is also supported.</p>
 <span class="linenos"> 7</span><span class="n">ScalarType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ScalarType&quot;</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span>
 <span class="linenos"> 8</span><span class="n">ShapeType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;ShapeType&quot;</span><span class="p">)</span>
 <span class="linenos"> 9</span>
-<span class="linenos">10</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">10</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">11</span><span class="k">class</span> <span class="nc">Point3</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">ScalarType</span><span class="p">]):</span>
 <span class="linenos">12</span>    <span class="n">x</span><span class="p">:</span> <span class="n">ScalarType</span>
 <span class="linenos">13</span>    <span class="n">y</span><span class="p">:</span> <span class="n">ScalarType</span>
 <span class="linenos">14</span>    <span class="n">z</span><span class="p">:</span> <span class="n">ScalarType</span>
 <span class="linenos">15</span>    <span class="n">frame_id</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">16</span>
-<span class="linenos">17</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">17</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">18</span><span class="k">class</span> <span class="nc">Triangle</span><span class="p">:</span>
 <span class="linenos">19</span>    <span class="n">a</span><span class="p">:</span> <span class="n">Point3</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
 <span class="linenos">20</span>    <span class="n">b</span><span class="p">:</span> <span class="n">Point3</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
 <span class="linenos">21</span>    <span class="n">c</span><span class="p">:</span> <span class="n">Point3</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
 <span class="linenos">22</span>
-<span class="linenos">23</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">23</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">24</span><span class="k">class</span> <span class="nc">Args</span><span class="p">(</span><span class="n">Generic</span><span class="p">[</span><span class="n">ShapeType</span><span class="p">]):</span>
 <span class="linenos">25</span>    <span class="n">shape</span><span class="p">:</span> <span class="n">ShapeType</span>
 <span class="linenos">26</span>
@@ -430,7 +430,7 @@ between using subcommands.</p>
 <span class="linenos">13</span>    <span class="n">lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3e-4</span>
 <span class="linenos">14</span>    <span class="n">betas</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)</span>
 <span class="linenos">15</span>
-<span class="linenos">16</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="linenos">16</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="linenos">17</span><span class="k">class</span> <span class="nc">Experiment</span><span class="p">[</span><span class="n">OptimizerT</span><span class="p">:</span> <span class="p">(</span><span class="n">Adam</span><span class="p">,</span> <span class="n">Sgd</span><span class="p">)]:</span>
 <span class="linenos">18</span>    <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
 <span class="linenos">19</span>    <span class="n">opt</span><span class="p">:</span> <span class="n">OptimizerT</span>

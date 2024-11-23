@@ -103,20 +103,20 @@ generic types is also supported.
     ScalarType = TypeVar("ScalarType", int, float)
     ShapeType = TypeVar("ShapeType")
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Point3(Generic[ScalarType]):
         x: ScalarType
         y: ScalarType
         z: ScalarType
         frame_id: str
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Triangle:
         a: Point3[float]
         b: Point3[float]
         c: Point3[float]
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Args(Generic[ShapeType]):
         shape: ShapeType
 
@@ -182,7 +182,7 @@ between using subcommands.
         lr: float = 3e-4
         betas: tuple[float, float] = (0.9, 0.999)
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Experiment[OptimizerT: (Adam, Sgd)]:
         path: Path
         opt: OptimizerT
