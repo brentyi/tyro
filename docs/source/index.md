@@ -1,6 +1,6 @@
 # tyro
 
-|build| |nbsp| |ruff| |nbsp| |mypy| |nbsp| |pyright| |nbsp| |coverage| |nbsp| |versions|
+|ruff| |nbsp| |mypy| |nbsp| |pyright| |nbsp| |coverage| |nbsp| |versions|
 
 :func:`tyro.cli()` is a tool for generating CLI interfaces in Python.
 
@@ -114,9 +114,6 @@ shell completion.
 
 
 
-.. |build| image:: https://github.com/brentyi/tyro/actions/workflows/build.yml/badge.svg
-   :alt: Build status icon
-   :target: https://github.com/brentyi/tyro
 .. |mypy| image:: https://github.com/brentyi/tyro/actions/workflows/mypy.yml/badge.svg
    :alt: Mypy status icon
    :target: https://github.com/brentyi/tyro
