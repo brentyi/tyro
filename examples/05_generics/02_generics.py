@@ -17,7 +17,7 @@ ScalarType = TypeVar("ScalarType", int, float)
 ShapeType = TypeVar("ShapeType")
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Point3(Generic[ScalarType]):
     x: ScalarType
     y: ScalarType
@@ -25,14 +25,14 @@ class Point3(Generic[ScalarType]):
     frame_id: str
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Triangle:
     a: Point3[float]
     b: Point3[float]
     c: Point3[float]
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Args(Generic[ShapeType]):
     shape: ShapeType
 

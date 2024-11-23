@@ -34,14 +34,14 @@ import dataclasses
 import tyro
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Checkout:
     """Checkout a branch."""
 
     branch: str
 
 
-@dataclasses.dataclass(frozen=True)
+@dataclasses.dataclass
 class Commit:
     """Commit changes."""
 

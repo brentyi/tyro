@@ -35,13 +35,13 @@ the union; arguments are then populated from the chosen type.
 
     import tyro
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Checkout:
         """Checkout a branch."""
 
         branch: str
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Commit:
         """Commit changes."""
 
@@ -149,13 +149,13 @@ struct types.
 
     import tyro
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Checkout:
         """Checkout a branch."""
 
         branch: str
 
-    @dataclasses.dataclass(frozen=True)
+    @dataclasses.dataclass
     class Commit:
         """Commit changes."""
 
