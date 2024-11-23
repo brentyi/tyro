@@ -413,6 +413,8 @@ generic types is also supported.</p>
 </pre></section>
 <section id="generic-subcommands">
 <span id="example-03-generic-subcommands"></span><h2>Generic Subcommands<a class="headerlink" href="#generic-subcommands" title="Link to this heading">¶</a></h2>
+<p>Just like standard classes, generic classes within unions can be selected
+between using subcommands.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 03_generic_subcommands.py</span>
 <span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
 <span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
@@ -478,19 +480,8 @@ generic types is also supported.</p>
 <span style="font-weight: lighter">│</span> --opt.lr <span style="font-weight: bold">FLOAT</span>        <span style="color: #008080">(default: 0.0001)</span>               <span style="font-weight: lighter">│</span>
 <span style="font-weight: lighter">╰───────────────────────────────────────────────────────╯</span>
 </pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-adam --path /tmp --lr 1e-3</strong>
-<span style="color: #e60000">╭─</span><span style="color: #e60000"> </span><span style="font-weight: bold; color: #e60000">Unrecognized options</span><span style="color: #e60000"> </span><span style="color: #e60000">─────────────────────────────────────────</span><span style="color: #e60000">─╮</span>
-<span style="color: #e60000">│</span> Unrecognized options: --lr                                      <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span> Perhaps you meant:                                              <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span>     <span style="font-weight: bold">--opt.lr FLOAT</span>                                              <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span>         <span style="color: #008080">(default: 0.0003)</span>                                       <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span>             in <span style="color: #008000">03_generic_subcommands.py experiment-adam --help</span> <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span>         <span style="color: #008080">(default: 0.0001)</span>                                       <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span>             in <span style="color: #008000">03_generic_subcommands.py experiment-sgd --help</span>  <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
-<span style="color: #e60000">│</span> For full helptext, run <span style="font-weight: bold">03_generic_subcommands.py --help</span>         <span style="color: #e60000">│</span>
-<span style="color: #e60000">╰─────────────────────────────────────────────────────────────────╯</span>
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-adam --path /tmp --opt.lr 1e-3</strong>
+Experiment(path=PosixPath('/tmp'), opt=Adam(lr=0.001, betas=(0.9, 0.999)))
 </pre></section>
 </section>
 

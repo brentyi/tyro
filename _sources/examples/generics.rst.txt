@@ -160,7 +160,8 @@ generic types is also supported.
 Generic Subcommands
 -------------------
 
-
+Just like standard classes, generic classes within unions can be selected
+between using subcommands.
 
 
 .. code-block:: python
@@ -253,17 +254,6 @@ Generic Subcommands
 .. raw:: html
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-adam --path /tmp --lr 1e-3</strong>
-    <span style="color: #e60000">╭─</span><span style="color: #e60000"> </span><span style="font-weight: bold; color: #e60000">Unrecognized options</span><span style="color: #e60000"> </span><span style="color: #e60000">─────────────────────────────────────────</span><span style="color: #e60000">─╮</span>
-    <span style="color: #e60000">│</span> Unrecognized options: --lr                                      <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span> Perhaps you meant:                                              <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span>     <span style="font-weight: bold">--opt.lr FLOAT</span>                                              <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span>         <span style="color: #008080">(default: 0.0003)</span>                                       <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span>             in <span style="color: #008000">03_generic_subcommands.py experiment-adam --help</span> <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span>         <span style="color: #008080">(default: 0.0001)</span>                                       <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span>             in <span style="color: #008000">03_generic_subcommands.py experiment-sgd --help</span>  <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span> <span style="color: #800000">───────────────────────────────────────────────────────────────</span> <span style="color: #e60000">│</span>
-    <span style="color: #e60000">│</span> For full helptext, run <span style="font-weight: bold">03_generic_subcommands.py --help</span>         <span style="color: #e60000">│</span>
-    <span style="color: #e60000">╰─────────────────────────────────────────────────────────────────╯</span>
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_generic_subcommands.py experiment-adam --path /tmp --opt.lr 1e-3</strong>
+    Experiment(path=PosixPath('/tmp'), opt=Adam(lr=0.001, betas=(0.9, 0.999)))
     </pre>
