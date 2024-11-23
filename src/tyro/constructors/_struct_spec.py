@@ -38,6 +38,13 @@ class UnsupportedStructTypeMessage:
     message: str
 
 
+class InvalidDefaultInstanceError(Exception):
+    """Raised when a default instance is not applicable to an annoated struct type."""
+
+    def __init__(self, message: str):
+        super().__init__(message)
+
+
 @dataclasses.dataclass(frozen=True)
 class StructFieldSpec:
     """Behavior specification for a single field in our callable."""
@@ -271,16 +278,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             default = attr_field.default
             is_default_from_default_instance = False
             if info.default not in MISSING_AND_MISSING_NONPROP:
-                if hasattr(info.default, name):
-                    default = getattr(info.default, name)
-                    is_default_from_default_instance = True
-                else:
-                    warnings.warn(
-                        f"Could not find field {name} in default instance"
-                        f" {info.default}, which has"
-                        f" type {type(info.default)},",
-                        stacklevel=2,
-                    )
+                assert hasattr(info.default, name)
+                default = getattr(info.default, name)
+                is_default_from_default_instance = True
             elif default is attr.NOTHING:
                 default = MISSING_NONPROP
             elif isinstance(default, attr.Factory):  # type: ignore
@@ -589,13 +589,6 @@ def _get_dataclass_field_default(
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, field.name):
             return getattr(parent_default_instance, field.name), True
-        else:
-            warnings.warn(
-                f"Could not find field {field.name} in default instance"
-                f" {parent_default_instance}, which has"
-                f" type {type(parent_default_instance)},",
-                stacklevel=2,
-            )
 
     # Try grabbing default from dataclass field.
     if (
@@ -647,13 +640,6 @@ def _get_pydantic_v1_field_default(
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, name):
             return getattr(parent_default_instance, name), True
-        else:
-            warnings.warn(
-                f"Could not find field {name} in default instance"
-                f" {parent_default_instance}, which has"
-                f" type {type(parent_default_instance)},",
-                stacklevel=2,
-            )
 
     if not field.required:
         return field.get_default(), False
@@ -677,13 +663,6 @@ def _get_pydantic_v2_field_default(
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, name):
             return getattr(parent_default_instance, name), True
-        else:
-            warnings.warn(
-                f"Could not find field {name} in default instance"
-                f" {parent_default_instance}, which has"
-                f" type {type(parent_default_instance)},",
-                stacklevel=2,
-            )
 
     if not field.is_required():
         return field.get_default(call_default_factory=True), False

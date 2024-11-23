@@ -291,11 +291,11 @@ def _rule_apply_primitive_specs(
     except UnsupportedTypeAnnotationError as e:
         if arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP:
             field_name = _strings.make_field_name(
-                [arg.extern_prefix, arg.field.intern_name]
+                [arg.extern_prefix, arg.field.extern_name]
             )
             if field_name != "":
                 raise UnsupportedTypeAnnotationError(
-                    f"Unsupported type annotation for the field {field_name}; "
+                    f"Unsupported type annotation for field with name `{field_name}`, which is annotated as `{arg.field.type}`. "
                     f"{e.args[0]} "
                     "To suppress this error, assign the field either a default value or a different type."
                 ) from e

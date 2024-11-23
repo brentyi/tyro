@@ -1,6 +1,6 @@
 """Choices
 
-:code:`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices.
+:py:data:`typing.Literal[]` can be used to restrict inputs to a fixed set of literal choices.
 
 Usage:
 

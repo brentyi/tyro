@@ -1,4 +1,4 @@
-"""Generics (Legacy)
+"""Generics (Python <3.12)
 
 The legacy :py:class:`typing.Generic` and :py:class:`typing.TypeVar` syntax for
 generic types is also supported.

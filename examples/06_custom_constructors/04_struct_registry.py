@@ -1,7 +1,9 @@
 """Custom Structs (Registry)
 
 In this example, we use a :class:`tyro.constructors.ConstructorRegistry` to
-add support for a custom type.
+add support for a custom struct type. Each struct type is broken down into
+multiple fields, which themselves can be either primitive types or nested
+structs.
 
 .. warning::
 

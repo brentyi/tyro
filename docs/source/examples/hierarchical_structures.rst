@@ -91,7 +91,7 @@ objects. This helps with modularity and grouping in larger projects.
 Structures as Function Arguments
 --------------------------------
 
-Structures can also be used as input to functions.
+Structures can be used as input to functions.
 
 
 .. code-block:: python
@@ -275,10 +275,10 @@ Dictionaries and TypedDict
 --------------------------
 
 Dictionary inputs can be specified using either a standard ``dict[K, V]``
-annotation, or a :code:`TypedDict` subclass.
+annotation, or a :py:class:`TypedDict` subclass.
 
-For configuring :code:`TypedDict`, we also support :code:`total={True/False}`,
-:code:`typing.Required`, and :code:`typing.NotRequired`. See the `Python docs <https://docs.python.org/3/library/typing.html#typing.TypedDict>`_ for all :code:`TypedDict` features.
+For configuring :py:class:`TypedDict`, we also support :code:`total={True/False}`,
+:py:data:`typing.Required`, and :py:data:`typing.NotRequired`. See the `Python docs <https://docs.python.org/3/library/typing.html#typing.TypedDict>`_ for all :py:class:`TypedDict` features.
 
 
 .. code-block:: python
@@ -384,7 +384,7 @@ For configuring :code:`TypedDict`, we also support :code:`total={True/False}`,
 Tuples and NamedTuple
 ---------------------
 
-Example using :func:`tyro.cli()` to instantiate tuple types. :code:`tuple`,
+Example using :func:`tyro.cli()` to instantiate tuple types. :py:class:`tuple`,
 :py:data:`typing.Tuple`, and :py:class:`typing.NamedTuple` are all supported.
 
 
