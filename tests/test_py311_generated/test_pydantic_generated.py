@@ -177,7 +177,7 @@ def test_pydantic_default_instance() -> None:
         x: int = 1
 
     class Outside(BaseModel):
-        i: "Inside" = Inside(x=2)
+        i: Inside = Inside(x=2)
 
     assert tyro.cli(Outside, args=[]).i.x == 2, (
         "Expected x value from the default instance",

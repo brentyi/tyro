@@ -7,12 +7,12 @@ import sys
 from typing import cast
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
+import tyro._strings
 from pydantic import BaseModel, Field, v1
 from typing_extensions import Annotated
 
-import tyro
-import tyro._strings
+from helptext_utils import get_helptext_with_checks
 
 
 def test_pydantic() -> None:
@@ -178,7 +178,7 @@ def test_pydantic_default_instance() -> None:
         x: int = 1
 
     class Outside(BaseModel):
-        i: "Inside" = Inside(x=2)
+        i: Inside = Inside(x=2)
 
     assert tyro.cli(Outside, args=[]).i.x == 2, (
         "Expected x value from the default instance",
