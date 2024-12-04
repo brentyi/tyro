@@ -586,12 +586,16 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if type_info.type_origin not in (Union, _resolver.UnionType):
             return None
         options = list(get_args(type_info.type))
-        if type(None) in options:
-            # Move `None` types to the beginning.
-            # If we have `Optional[str]`, we want this to be parsed as
-            # `Union[NoneType, str]`.
-            options.remove(type(None))
-            options.insert(0, type(None))
+
+        # Heuristic: handle `str` types last, since any input can be captured as a string.
+        #
+        # Some examples where this behavior matters:
+        # - For `Optional[str]`, None will create a None object instead of a string.
+        # - For `str | bool`, True/False will create booleans instead of strings.
+        # - For `str | int`, integers will be created when possible instead of strings.
+        if str in options:
+            options.remove(str)
+            options.append(str)
 
         # General unions, eg Union[int, bool]. We'll try to convert these from left to
         # right.
@@ -600,6 +604,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         nargs: int | Literal["*"] = 1
         first = True
         registry = ConstructorRegistry._get_active_registry()
+
         for t in options:
             option_spec = registry.get_primitive_spec(
                 PrimitiveTypeInfo.make(

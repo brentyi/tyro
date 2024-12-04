@@ -275,7 +275,7 @@ def test_none_default_value_helptext() -> None:
         """An optional variable."""
 
     helptext = get_helptext_with_checks(Config)
-    assert "--x {None}|INT" in helptext
+    assert "--x INT|{None}" in helptext
     assert "An optional variable. (default: None)" in helptext
 
 
@@ -411,7 +411,7 @@ def test_optional_literal_helptext() -> None:
         """A number."""
 
     helptext = get_helptext_with_checks(OptionalLiteralHelptext)
-    assert "--x {None,1,2,3}" in helptext
+    assert "--x {1,2,3,None}" in helptext
     assert "A number. (default: None)" in helptext
 
 
@@ -555,9 +555,9 @@ def test_optional_helptext() -> None:
     helptext = get_helptext_with_checks(OptionalHelptext)
     assert cast(str, cast(str, OptionalHelptext.__doc__)[:20]) in helptext
     assert "2% milk" in helptext
-    assert "--x {None}|INT" in helptext
-    assert "--y [{None}|INT [{None}|INT ...]]" in helptext
-    assert "[--z {None}|INT]" in helptext
+    assert "--x INT|{None}" in helptext
+    assert "--y [INT|{None} [INT|{None} ...]]" in helptext
+    assert "[--z INT|{None}]" in helptext
 
 
 def test_metavar_0() -> None:
