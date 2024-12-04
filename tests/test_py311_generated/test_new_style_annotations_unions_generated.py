@@ -23,7 +23,7 @@ def test_union_with_list():
     assert tyro.cli(main, args=["--x", "5"]) == 5
     assert tyro.cli(main, args=["--x", "6"]) == 6
     assert tyro.cli(main, args=["--x", "five"]) == "five"
-    assert tyro.cli(main, args=["--x", "True"]) == "True"
+    assert tyro.cli(main, args=["--x", "True"]) == [True]
     assert tyro.cli(main, args=["--x", "True", "False"]) == [True, False]
 
 
