@@ -240,6 +240,23 @@ def test_union_basic() -> None:
     assert tyro.cli(main, args=["--x", "five"]) == "five"
 
 
+def test_union_bool_str() -> None:
+    def main(x: bool | str) -> Any:
+        return x
+
+    assert tyro.cli(main, args=["--x", "5"]) == "5"
+    assert tyro.cli(main, args=["--x", "True"]) is True
+    assert tyro.cli(main, args=["--x", "Tru"]) == "Tru"
+
+    # Order should not matter.
+    def flipped(x: str | bool) -> Any:
+        return x
+
+    assert tyro.cli(flipped, args=["--x", "5"]) == "5"
+    assert tyro.cli(flipped, args=["--x", "True"]) is True
+    assert tyro.cli(flipped, args=["--x", "Tru"]) == "Tru"
+
+
 def test_union_with_list() -> None:
     def main(x: int | str | List[bool]) -> Any:
         return x
@@ -247,7 +264,7 @@ def test_union_with_list() -> None:
     assert tyro.cli(main, args=["--x", "5"]) == 5
     assert tyro.cli(main, args=["--x", "6"]) == 6
     assert tyro.cli(main, args=["--x", "five"]) == "five"
-    assert tyro.cli(main, args=["--x", "True"]) == "True"
+    assert tyro.cli(main, args=["--x", "True"]) == [True]
     assert tyro.cli(main, args=["--x", "True", "False"]) == [True, False]
 
 
