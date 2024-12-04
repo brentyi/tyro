@@ -3,8 +3,6 @@ from __future__ import annotations
 from contextlib import contextmanager
 from typing import Any, Callable, ClassVar, Union
 
-from typing_extensions import Literal
-
 from tyro._singleton import DEFAULT_SENTINEL_SINGLETONS
 
 from .. import _resolver
@@ -23,7 +21,10 @@ from ._struct_spec import (
 
 current_registry: ConstructorRegistry | None = None
 
-PrimitiveSpecRule = Callable[[PrimitiveTypeInfo], Union[PrimitiveConstructorSpec, None]]
+PrimitiveSpecRule = Callable[
+    [PrimitiveTypeInfo],
+    Union[PrimitiveConstructorSpec, UnsupportedTypeAnnotationError, None],
+]
 StructSpecRule = Callable[[StructTypeInfo], Union[StructConstructorSpec, None]]
 
 _check_default_instances_flag: bool = False
@@ -127,27 +128,23 @@ class ConstructorRegistry:
         return rule
 
     def get_primitive_spec(
-        self,
-        type_info: PrimitiveTypeInfo,
-        rule_mode: Literal["default", "custom", "all"] = "all",
-    ) -> PrimitiveConstructorSpec:
+        self, type_info: PrimitiveTypeInfo
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError:
         """Get a constructor specification for a given type."""
 
         if type_info._primitive_spec is not None:
             return type_info._primitive_spec
 
-        if rule_mode in ("custom", "all"):
-            for spec_factory in self._custom_primitive_rules[::-1]:
-                maybe_spec = spec_factory(type_info)
-                if maybe_spec is not None:
-                    return maybe_spec
-        if rule_mode in ("default", "all"):
-            for spec_factory in self._default_primitive_rules[::-1]:
-                maybe_spec = spec_factory(type_info)
-                if maybe_spec is not None:
-                    return maybe_spec
+        for spec_factory in self._custom_primitive_rules[::-1]:
+            maybe_spec = spec_factory(type_info)
+            if maybe_spec is not None:
+                return maybe_spec
+        for spec_factory in self._default_primitive_rules[::-1]:
+            maybe_spec = spec_factory(type_info)
+            if maybe_spec is not None:
+                return maybe_spec
 
-        raise UnsupportedTypeAnnotationError(
+        return UnsupportedTypeAnnotationError(
             f"Unsupported type annotation: {type_info.type}"
         )
 

@@ -132,10 +132,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     from ._registry import ConstructorRegistry
 
     @registry._default_primitive_rule
-    def any_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+    def any_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type is not Any:
             return None
-        raise UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
+        return UnsupportedTypeAnnotationError("`Any` is not a parsable type.")
 
     # HACK (json.loads): this is for code that uses
     # `tyro.conf.arg(constructor=json.loads)`. We're going to deprecate this
@@ -280,7 +282,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     @registry._default_primitive_rule
     def vague_container_rule(
         type_info: PrimitiveTypeInfo,
-    ) -> PrimitiveConstructorSpec | None:
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type not in (
             dict,
             Dict,
@@ -313,7 +315,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         )
 
     @registry._default_primitive_rule
-    def sequence_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+    def sequence_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type_origin not in (
             collections.abc.Sequence,
             frozenset,
@@ -341,11 +345,13 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 parent_markers=type_info.markers - {_markers.UseAppendAction},
             )
         )
+        if isinstance(inner_spec, UnsupportedTypeAnnotationError):
+            return inner_spec  # Propagate error message.
 
         if _markers.UseAppendAction not in type_info.markers and not isinstance(
             inner_spec.nargs, int
         ):
-            raise UnsupportedTypeAnnotationError(
+            return UnsupportedTypeAnnotationError(
                 f"{container_type} and {contained_type} are both variable-length sequences."
                 " This causes ambiguity."
                 " For nesting variable-length sequences (example: List[List[int]]),"
@@ -398,7 +404,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             )
 
     @registry._default_primitive_rule
-    def tuple_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+    def tuple_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type_origin is not tuple:
             return None
         types = get_args(type_info.type)
@@ -419,10 +427,12 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             spec = registry.get_primitive_spec(
                 PrimitiveTypeInfo.make(contained_type, type_info.markers)
             )
-            if isinstance(spec.nargs, int):
+            if isinstance(spec, UnsupportedTypeAnnotationError):
+                return spec
+            elif isinstance(spec.nargs, int):
                 total_nargs += spec.nargs
             else:
-                raise UnsupportedTypeAnnotationError(
+                return UnsupportedTypeAnnotationError(
                     f"Tuples containing a variable-length sequences ({contained_type}) are not supported."
                 )
 
@@ -463,7 +473,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         )
 
     @registry._default_primitive_rule
-    def dict_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+    def dict_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type_origin not in (dict, collections.abc.Mapping):
             return None
 
@@ -482,17 +494,21 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 parent_markers=type_info.markers - {_markers.UseAppendAction},
             )
         )
+        if isinstance(key_spec, UnsupportedTypeAnnotationError):
+            return key_spec
+        if isinstance(val_spec, UnsupportedTypeAnnotationError):
+            return val_spec
         pair_metavar = f"{key_spec.metavar} {val_spec.metavar}"
 
         if not isinstance(key_spec.nargs, int):
-            raise UnsupportedTypeAnnotationError(
+            return UnsupportedTypeAnnotationError(
                 "Dictionary keys must have a fixed number of arguments."
             )
 
         if _markers.UseAppendAction not in type_info.markers and not isinstance(
             val_spec.nargs, int
         ):
-            raise UnsupportedTypeAnnotationError(
+            return UnsupportedTypeAnnotationError(
                 "Dictionary values must have a fixed number of arguments."
             )
 
@@ -582,7 +598,9 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         )
 
     @registry._default_primitive_rule
-    def union_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
+    def union_rule(
+        type_info: PrimitiveTypeInfo,
+    ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
         if type_info.type_origin not in (Union, _resolver.UnionType):
             return None
         options = list(get_args(type_info.type))
@@ -607,6 +625,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                     parent_markers=type_info.markers,
                 )
             )
+            if isinstance(option_spec, UnsupportedTypeAnnotationError):
+                return option_spec
             if option_spec.choices is None:
                 choices = None
             elif choices is not None:

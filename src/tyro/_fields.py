@@ -13,10 +13,7 @@ import docstring_parser
 from typing_extensions import Annotated, get_args, get_origin
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
-from ._singleton import (
-    MISSING_AND_MISSING_NONPROP,
-    MISSING_NONPROP,
-)
+from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
@@ -241,11 +238,10 @@ def field_list_from_type_or_callable(
             if spec is not None:
                 return f, [FieldDefinition.from_field_spec(f) for f in spec.fields]
 
-            try:
-                registry.get_primitive_spec(PrimitiveTypeInfo.make(f, set()))
-                is_primitive = True
-            except UnsupportedTypeAnnotationError:
-                is_primitive = False
+            is_primitive = not isinstance(
+                registry.get_primitive_spec(PrimitiveTypeInfo.make(f, set())),
+                UnsupportedTypeAnnotationError,
+            )
 
             if is_primitive and support_single_arg_types:
                 with FieldDefinition.marker_context(
