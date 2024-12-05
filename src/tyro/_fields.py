@@ -228,11 +228,10 @@ def field_list_from_type_or_callable(
     """
 
     f = _resolver.swap_type_using_confstruct(f)
-    registry = ConstructorRegistry._get_active_registry()
     type_info = StructTypeInfo.make(f, default_instance)
 
     with type_info._typevar_context:
-        spec = registry.get_struct_spec(type_info)
+        spec = ConstructorRegistry.get_struct_spec(type_info)
 
         with FieldDefinition.marker_context(type_info.markers):
             if spec is not None:
@@ -240,11 +239,7 @@ def field_list_from_type_or_callable(
                     FieldDefinition.from_field_spec(f) for f in spec.fields
                 ]
 
-            is_primitive = not isinstance(
-                registry.get_primitive_spec(PrimitiveTypeInfo.make(f, set())),
-                UnsupportedTypeAnnotationError,
-            )
-
+            is_primitive = ConstructorRegistry._is_primitive_type(f, set())
             if is_primitive and support_single_arg_types:
                 with FieldDefinition.marker_context(
                     (_markers.Positional, _markers._PositionalCall)

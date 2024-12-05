@@ -131,7 +131,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
 
     from ._registry import ConstructorRegistry
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def any_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
@@ -146,7 +146,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     # not to break it.
     vanilla_types = (int, str, float, complex, bytes, bytearray, json.loads)
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def basics_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type not in vanilla_types:
             return None
@@ -169,7 +169,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
     if "torch" in sys.modules.keys():
         import torch
 
-        @registry._default_primitive_rule
+        @registry.primitive_rule
         def torch_device_rule(
             type_info: PrimitiveTypeInfo,
         ) -> PrimitiveConstructorSpec | None:
@@ -183,7 +183,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 str_from_instance=lambda instance: [str(instance)],
             )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def bool_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type is not bool:
             return None
@@ -196,7 +196,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: ["True" if instance else "False"],
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def nonetype_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type is not type(None):
             return None
@@ -209,7 +209,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: ["None"],
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def path_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if not (
             type_info.type in (os.PathLike, pathlib.Path)
@@ -227,7 +227,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: [str(instance)],
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def enum_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if not (
             inspect.isclass(type_info.type) and issubclass(type_info.type, enum.Enum)
@@ -258,7 +258,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             choices=choices,
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def datetime_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type not in (datetime.datetime, datetime.date, datetime.time):
             return None
@@ -279,7 +279,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             str_from_instance=lambda instance: [instance.isoformat()],
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def vague_container_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
@@ -306,15 +306,14 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         elif typ in (set, Set):
             typ = Set[str]
 
-        registry = ConstructorRegistry._get_active_registry()
-        return registry.get_primitive_spec(
+        return ConstructorRegistry.get_primitive_spec(
             PrimitiveTypeInfo.make(
                 typ,
                 parent_markers=type_info.markers,
             )
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def sequence_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
@@ -338,8 +337,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         else:
             (contained_type,) = get_args(type_info.type)
 
-        registry = ConstructorRegistry._get_active_registry()
-        inner_spec = registry.get_primitive_spec(
+        inner_spec = ConstructorRegistry.get_primitive_spec(
             PrimitiveTypeInfo.make(
                 raw_annotation=contained_type,
                 parent_markers=type_info.markers - {_markers.UseAppendAction},
@@ -403,7 +401,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 choices=inner_spec.choices,
             )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def tuple_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
@@ -419,12 +417,10 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             assert len(typeset_no_ellipsis) == 1
             return sequence_rule(type_info)
 
-        registry = ConstructorRegistry._get_active_registry()
-
         inner_specs = []
         total_nargs = 0
         for contained_type in types:
-            spec = registry.get_primitive_spec(
+            spec = ConstructorRegistry.get_primitive_spec(
                 PrimitiveTypeInfo.make(contained_type, type_info.markers)
             )
             if isinstance(spec, UnsupportedTypeAnnotationError):
@@ -472,23 +468,24 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             and all(spec.is_instance(member) for member, spec in zip(x, inner_specs)),
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def dict_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
-        if type_info.type_origin not in (dict, collections.abc.Mapping):
+        if (
+            type_info.type_origin not in (dict, collections.abc.Mapping)
+            or len(get_args(type_info.type)) != 2
+        ):
             return None
 
-        registry = ConstructorRegistry._get_active_registry()
-
         key_type, val_type = get_args(type_info.type)
-        key_spec = registry.get_primitive_spec(
+        key_spec = ConstructorRegistry.get_primitive_spec(
             PrimitiveTypeInfo.make(
                 raw_annotation=key_type,
                 parent_markers=type_info.markers,
             )
         )
-        val_spec = registry.get_primitive_spec(
+        val_spec = ConstructorRegistry.get_primitive_spec(
             PrimitiveTypeInfo.make(
                 raw_annotation=val_type,
                 parent_markers=type_info.markers - {_markers.UseAppendAction},
@@ -571,7 +568,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
                 str_from_instance=str_from_instance,
             )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def literal_rule(type_info: PrimitiveTypeInfo) -> PrimitiveConstructorSpec | None:
         if type_info.type_origin not in (Literal, LiteralAlternate):
             return None
@@ -597,7 +594,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             choices=str_choices,
         )
 
-    @registry._default_primitive_rule
+    @registry.primitive_rule
     def union_rule(
         type_info: PrimitiveTypeInfo,
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError | None:
@@ -617,9 +614,8 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         choices: tuple[str, ...] | None = ()
         nargs: int | Literal["*"] = 1
         first = True
-        registry = ConstructorRegistry._get_active_registry()
         for t in options:
-            option_spec = registry.get_primitive_spec(
+            option_spec = ConstructorRegistry.get_primitive_spec(
                 PrimitiveTypeInfo.make(
                     raw_annotation=t,
                     parent_markers=type_info.markers,

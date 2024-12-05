@@ -321,8 +321,6 @@ def handle_field(
 ]:
     """Determine what to do with a single field definition."""
 
-    registry = ConstructorRegistry._get_active_registry()
-
     # Check that the default value matches the final resolved type.
     # There's some similar Union-specific logic for this in narrow_union_type(). We
     # may be able to consolidate this.
@@ -351,18 +349,11 @@ def handle_field(
 
     # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
     # a custom primitive exists for the type.
-    force_primitive = False
-
-    if len(_resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]) > 0:
-        force_primitive = True
-    elif len(registry._custom_primitive_rules) > 0:
-        # Can we parse this as a primitive?
-        force_primitive = not isinstance(
-            registry.get_primitive_spec(
-                PrimitiveTypeInfo.make(field.type, field.markers)
-            ),
-            UnsupportedTypeAnnotationError,
-        )
+    force_primitive = (
+        len(_resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]) > 0
+    ) or ConstructorRegistry._is_primitive_type(
+        field.type, field.markers, nondefault_only=True
+    )
 
     if (
         not force_primitive

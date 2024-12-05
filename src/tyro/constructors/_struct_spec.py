@@ -16,6 +16,10 @@ from typing_extensions import (
     get_origin,
     is_typeddict,
 )
+from tyro.constructors._primitive_spec import (
+    PrimitiveConstructorSpec,
+    PrimitiveTypeInfo,
+)
 
 from .. import _docstrings, _resolver
 from .._singleton import (
@@ -383,7 +387,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         contained_type = get_args(info.type)[0] if get_args(info.type) else Any
 
-        if all(not is_struct_type(type(x), x) for x in info.default):
+        # If the inner type is a primitive, we'll just treat the whole type as
+        # a primitive.
+        from ._registry import ConstructorRegistry
+
+        if ConstructorRegistry._is_primitive_type(contained_type, set(info.markers)):
             return None
 
         field_list = []
@@ -442,20 +450,19 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 )
             )
 
-        contains_nested = False
+        from ._registry import ConstructorRegistry
+
+        # If the tuple only contains primitive types, we can just treat the
+        # whole tuple as a primitive.
+        primitive_only = True
         for field in field_list:
-            # Inefficient, since is_struct_type will compute StructTypeInfo again.
-            field_info = StructTypeInfo.make(field.type, field.default)
-            if get_origin(field_info.type) is Union:
-                for option in get_args(field_info.type):
-                    # The second argument here is the default value, which can help with
-                    # narrowing but is generall not necessary.
-                    contains_nested |= is_struct_type(option, MISSING_NONPROP)
-            contains_nested |= is_struct_type(field.type, field.default)
-            if contains_nested:
+            if not ConstructorRegistry._is_primitive_type(
+                field.type, set(info.markers)
+            ):
+                primitive_only = False
                 break
 
-        if not contains_nested:
+        if primitive_only:
             return None
         return StructConstructorSpec(instantiate=tuple, fields=tuple(field_list))
 
