@@ -281,14 +281,14 @@ def _rule_apply_primitive_specs(
     if lowered.instance_from_str is not None:
         return
 
-    try:
-        spec = ConstructorRegistry._get_active_registry().get_primitive_spec(
-            PrimitiveTypeInfo.make(
-                cast(type, arg.field.type),
-                arg.field.markers,
-            )
+    spec = ConstructorRegistry._get_active_registry().get_primitive_spec(
+        PrimitiveTypeInfo.make(
+            cast(type, arg.field.type),
+            arg.field.markers,
         )
-    except UnsupportedTypeAnnotationError as e:
+    )
+    if isinstance(spec, UnsupportedTypeAnnotationError):
+        error = spec
         if arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP:
             field_name = _strings.make_field_name(
                 [arg.extern_prefix, arg.field.extern_name]
@@ -296,14 +296,14 @@ def _rule_apply_primitive_specs(
             if field_name != "":
                 raise UnsupportedTypeAnnotationError(
                     f"Unsupported type annotation for field with name `{field_name}`, which is annotated as `{arg.field.type}`. "
-                    f"{e.args[0]} "
+                    f"{error.args[0]} "
                     "To suppress this error, assign the field either a default value or a different type."
-                ) from e
+                )
             else:
                 # If the field name is empty, it means we're raising an error
                 # for the direct input to `tyro.cli()`. We don't need to write
                 # out which specific field we're complaining about.
-                raise e
+                raise error
         else:
             # For fields with a default, we'll get by even if there's no instantiator
             # available.

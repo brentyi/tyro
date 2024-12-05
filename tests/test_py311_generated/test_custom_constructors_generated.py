@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Annotated, Any, Dict, Literal, get_args
+from typing import Annotated, Any, Dict, List, Literal, get_args
 
 import numpy as np
 
@@ -42,6 +42,17 @@ def test_custom_primitive_registry():
     with primitive_registry:
         assert tyro.cli(main_with_default, args=[]) == {"hello": 5}
         assert tyro.cli(main_with_default, args=["--x", '{"a": 1}']) == {"a": 1}
+
+    def main_with_default_in_list(
+        x: List[Dict[str, Any]] = [{"hello": 5}],
+    ) -> List[Dict[str, Any]]:
+        return x
+
+    with primitive_registry:
+        assert tyro.cli(main_with_default_in_list, args=[]) == [{"hello": 5}]
+        assert tyro.cli(
+            main_with_default_in_list, args=["--x", '{"a": 1}', '{"b": 1}']
+        ) == [{"a": 1}, {"b": 1}]
 
 
 def test_custom_primitive_annotated():
