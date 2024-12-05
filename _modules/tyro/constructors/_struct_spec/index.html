@@ -341,7 +341,7 @@
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The name of the field. This will be used as a keyword argument for the</span>
-<span class="sd">    struct&#39;s associated `instantiate(**kwargs)` function.&quot;&quot;&quot;</span>
+<span class="sd">    struct&#39;s associated ``instantiate(**kwargs)`` function.&quot;&quot;&quot;</span>
     <span class="nb">type</span><span class="p">:</span> <span class="n">TypeForm</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The type of the field. Can be either a primitive or a nested struct type.&quot;&quot;&quot;</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
@@ -365,18 +365,18 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Specification for a struct type, which is broken down into multiple</span>
 <span class="sd">    fields.</span>
 
-<span class="sd">    Each struct type is instantiated by calling an `instantiate(**kwargs)`</span>
+<span class="sd">    Each struct type is instantiated by calling an ``instantiate(**kwargs)``</span>
 <span class="sd">    function with keyword a set of keyword arguments.</span>
 
-<span class="sd">    Unlike `PrimitiveConstructorSpec`, there is only one way to use this class.</span>
-<span class="sd">    It must be returned by a rule in `ConstructorRegistry`.</span>
+<span class="sd">    Unlike :class:`PrimitiveConstructorSpec`, there is only one way to use this class.</span>
+<span class="sd">    It must be returned by a rule in :class:`ConstructorRegistry`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">instantiate</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Function to call to instantiate the struct.&quot;&quot;&quot;</span>
     <span class="n">fields</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">StructFieldSpec</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Fields used to construct the callable. Each field is used as a keyword</span>
-<span class="sd">    argument for the `instantiate(**kwargs)` function.&quot;&quot;&quot;</span></div>
+<span class="sd">    argument for the ``instantiate(**kwargs)`` function.&quot;&quot;&quot;</span></div>
 
 
 
@@ -393,7 +393,7 @@
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The default value of the struct, or a member of</span>
 <span class="sd">    :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function</span>
-<span class="sd">    signature, this is `X` in `def main(x=X): ...`. This can be useful for</span>
+<span class="sd">    signature, this is ``X`` in ``def main(x=X): ...``. This can be useful for</span>
 <span class="sd">    populating the default values of the struct.&quot;&quot;&quot;</span>
     <span class="n">_typevar_context</span><span class="p">:</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamAssignmentContext</span>
 

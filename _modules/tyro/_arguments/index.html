@@ -584,14 +584,14 @@
     <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
-            <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
-                <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-            <span class="p">)</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+        <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+            <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
         <span class="p">)</span>
-    <span class="k">except</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">spec</span>
         <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="n">field_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">extern_name</span><span class="p">]</span>
@@ -599,14 +599,14 @@
             <span class="k">if</span> <span class="n">field_name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Unsupported type annotation for field with name `</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">`, which is annotated as `</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`. &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">error</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
                     <span class="s2">&quot;To suppress this error, assign the field either a default value or a different type.&quot;</span>
-                <span class="p">)</span> <span class="kn">from</span> <span class="nn">e</span>
+                <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># If the field name is empty, it means we&#39;re raising an error</span>
                 <span class="c1"># for the direct input to `tyro.cli()`. We don&#39;t need to write</span>
                 <span class="c1"># out which specific field we&#39;re complaining about.</span>
-                <span class="k">raise</span> <span class="n">e</span>
+                <span class="k">raise</span> <span class="n">error</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># For fields with a default, we&#39;ll get by even if there&#39;s no instantiator</span>
             <span class="c1"># available.</span>

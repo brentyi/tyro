@@ -321,7 +321,7 @@
 <dt class="sig sig-object py" id="tyro.constructors._struct_spec.StructFieldSpec.name">
 <span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro.constructors._struct_spec.StructFieldSpec.name" title="Link to this definition">¶</a></dt>
 <dd><p>The name of the field. This will be used as a keyword argument for the
-struct’s associated <cite>instantiate(**kwargs)</cite> function.</p>
+struct’s associated <code class="docutils literal notranslate"><span class="pre">instantiate(**kwargs)</span></code> function.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -356,10 +356,10 @@ be set to False if the default value was assigned by the field itself.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors._struct_spec.</span></span><span class="sig-name descname"><span class="pre">StructConstructorSpec</span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_struct_spec/#StructConstructorSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._struct_spec.StructConstructorSpec" title="Link to this definition">¶</a></dt>
 <dd><p>Specification for a struct type, which is broken down into multiple
 fields.</p>
-<p>Each struct type is instantiated by calling an <cite>instantiate(**kwargs)</cite>
+<p>Each struct type is instantiated by calling an <code class="docutils literal notranslate"><span class="pre">instantiate(**kwargs)</span></code>
 function with keyword a set of keyword arguments.</p>
-<p>Unlike <cite>PrimitiveConstructorSpec</cite>, there is only one way to use this class.
-It must be returned by a rule in <cite>ConstructorRegistry</cite>.</p>
+<p>Unlike <code class="xref py py-class docutils literal notranslate"><span class="pre">PrimitiveConstructorSpec</span></code>, there is only one way to use this class.
+It must be returned by a rule in <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstructorRegistry</span></code>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors._struct_spec.StructConstructorSpec.instantiate">
 <span class="sig-name descname"><span class="pre">instantiate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors._struct_spec.StructConstructorSpec.instantiate" title="Link to this definition">¶</a></dt>
@@ -370,7 +370,7 @@ It must be returned by a rule in <cite>ConstructorRegistry</cite>.</p>
 <dt class="sig sig-object py" id="tyro.constructors._struct_spec.StructConstructorSpec.fields">
 <span class="sig-name descname"><span class="pre">fields</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#tyro.constructors._struct_spec.StructFieldSpec" title="tyro.constructors._struct_spec.StructFieldSpec"><span class="pre">StructFieldSpec</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#tyro.constructors._struct_spec.StructConstructorSpec.fields" title="Link to this definition">¶</a></dt>
 <dd><p>Fields used to construct the callable. Each field is used as a keyword
-argument for the <cite>instantiate(**kwargs)</cite> function.</p>
+argument for the <code class="docutils literal notranslate"><span class="pre">instantiate(**kwargs)</span></code> function.</p>
 </dd></dl>
 
 </dd></dl>
@@ -396,7 +396,7 @@ argument for the <cite>instantiate(**kwargs)</cite> function.</p>
 <span class="sig-name descname"><span class="pre">default</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Any</span></em><a class="headerlink" href="#tyro.constructors._struct_spec.StructTypeInfo.default" title="Link to this definition">¶</a></dt>
 <dd><p>The default value of the struct, or a member of
 <code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.constructors.MISSING_SINGLETONS</span></code> if not present. In a function
-signature, this is <cite>X</cite> in <cite>def main(x=X): …</cite>. This can be useful for
+signature, this is <code class="docutils literal notranslate"><span class="pre">X</span></code> in <code class="docutils literal notranslate"><span class="pre">def</span> <span class="pre">main(x=X):</span> <span class="pre">...</span></code>. This can be useful for
 populating the default values of the struct.</p>
 </dd></dl>
 

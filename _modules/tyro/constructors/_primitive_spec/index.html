@@ -428,10 +428,12 @@
     <span class="kn">from</span> <span class="nn">._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
-    <span class="k">def</span> <span class="nf">any_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">any_rule</span><span class="p">(</span>
+        <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Any</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="s2">&quot;`Any` is not a parsable type.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span><span class="s2">&quot;`Any` is not a parsable type.&quot;</span><span class="p">)</span>
 
     <span class="c1"># HACK (json.loads): this is for code that uses</span>
     <span class="c1"># `tyro.conf.arg(constructor=json.loads)`. We&#39;re going to deprecate this</span>
@@ -576,7 +578,7 @@
     <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
     <span class="k">def</span> <span class="nf">vague_container_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="nb">dict</span><span class="p">,</span>
             <span class="n">Dict</span><span class="p">,</span>
@@ -609,7 +611,9 @@
         <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
-    <span class="k">def</span> <span class="nf">sequence_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">sequence_rule</span><span class="p">(</span>
+        <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
             <span class="nb">frozenset</span><span class="p">,</span>
@@ -637,11 +641,13 @@
                 <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
             <span class="p">)</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inner_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">inner_spec</span>  <span class="c1"># Propagate error message.</span>
 
         <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">inner_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">container_type</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">contained_type</span><span class="si">}</span><span class="s2"> are both variable-length sequences.&quot;</span>
                 <span class="s2">&quot; This causes ambiguity.&quot;</span>
                 <span class="s2">&quot; For nesting variable-length sequences (example: List[List[int]]),&quot;</span>
@@ -694,7 +700,9 @@
             <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
-    <span class="k">def</span> <span class="nf">tuple_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">tuple_rule</span><span class="p">(</span>
+        <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">tuple</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">types</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
@@ -715,10 +723,12 @@
             <span class="n">spec</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
                 <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">contained_type</span><span class="p">,</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
             <span class="p">)</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">spec</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
                 <span class="n">total_nargs</span> <span class="o">+=</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+                <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;Tuples containing a variable-length sequences (</span><span class="si">{</span><span class="n">contained_type</span><span class="si">}</span><span class="s2">) are not supported.&quot;</span>
                 <span class="p">)</span>
 
@@ -759,7 +769,9 @@
         <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
-    <span class="k">def</span> <span class="nf">dict_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">dict_rule</span><span class="p">(</span>
+        <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
@@ -778,17 +790,21 @@
                 <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
             <span class="p">)</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">key_spec</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">val_spec</span>
         <span class="n">pair_metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">val_spec</span><span class="o">.</span><span class="n">metavar</span><span class="si">}</span><span class="s2">&quot;</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="s2">&quot;Dictionary keys must have a fixed number of arguments.&quot;</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="n">val_spec</span><span class="o">.</span><span class="n">nargs</span><span class="p">,</span> <span class="nb">int</span>
         <span class="p">):</span>
-            <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
+            <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="s2">&quot;Dictionary values must have a fixed number of arguments.&quot;</span>
             <span class="p">)</span>
 
@@ -878,7 +894,9 @@
         <span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
-    <span class="k">def</span> <span class="nf">union_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">union_rule</span><span class="p">(</span>
+        <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Union</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">UnionType</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
@@ -903,6 +921,8 @@
                     <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">option_spec</span>
             <span class="k">if</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">choices</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">elif</span> <span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
