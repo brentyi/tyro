@@ -51,7 +51,7 @@ class StructFieldSpec:
 
     name: str
     """The name of the field. This will be used as a keyword argument for the
-    struct's associated `instantiate(**kwargs)` function."""
+    struct's associated ``instantiate(**kwargs)`` function."""
     type: TypeForm
     """The type of the field. Can be either a primitive or a nested struct type."""
     default: Any
@@ -72,18 +72,18 @@ class StructConstructorSpec:
     """Specification for a struct type, which is broken down into multiple
     fields.
 
-    Each struct type is instantiated by calling an `instantiate(**kwargs)`
+    Each struct type is instantiated by calling an ``instantiate(**kwargs)``
     function with keyword a set of keyword arguments.
 
-    Unlike `PrimitiveConstructorSpec`, there is only one way to use this class.
-    It must be returned by a rule in `ConstructorRegistry`.
+    Unlike :class:`PrimitiveConstructorSpec`, there is only one way to use this class.
+    It must be returned by a rule in :class:`ConstructorRegistry`.
     """
 
     instantiate: Callable[..., Any]
     """Function to call to instantiate the struct."""
     fields: tuple[StructFieldSpec, ...]
     """Fields used to construct the callable. Each field is used as a keyword
-    argument for the `instantiate(**kwargs)` function."""
+    argument for the ``instantiate(**kwargs)`` function."""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -97,7 +97,7 @@ class StructTypeInfo:
     default: Any
     """The default value of the struct, or a member of
     :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function
-    signature, this is `X` in `def main(x=X): ...`. This can be useful for
+    signature, this is ``X`` in ``def main(x=X): ...``. This can be useful for
     populating the default values of the struct."""
     _typevar_context: _resolver.TypeParamAssignmentContext
 

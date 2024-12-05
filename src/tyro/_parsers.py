@@ -350,15 +350,20 @@ def handle_field(
         )
 
     # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
-    force_primitive = len(
-        _resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]
-    ) > 0 or (
-        len(registry._custom_primitive_rules) > 0
-        and registry.get_primitive_spec(
-            PrimitiveTypeInfo.make(field.type, field.markers), rule_mode="custom"
+    # a custom primitive exists for the type.
+    force_primitive = False
+
+    if len(_resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]) > 0:
+        force_primitive = True
+    elif len(registry._custom_primitive_rules) > 0:
+        # Can we parse this as a primitive?
+        force_primitive = not isinstance(
+            registry.get_primitive_spec(
+                PrimitiveTypeInfo.make(field.type, field.markers)
+            ),
+            UnsupportedTypeAnnotationError,
         )
-        is not None
-    )
+
     if (
         not force_primitive
         and _markers.Fixed not in field.markers
