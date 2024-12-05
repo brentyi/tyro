@@ -89,16 +89,6 @@ class ParserSpecification:
         markers = markers | set(_resolver.unwrap_annotated(f, _markers._Marker)[1])
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
-        # Resolve the type of `f`, generate a field list.
-        with _fields.FieldDefinition.marker_context(tuple(markers)):
-            out = _fields.field_list_from_type_or_callable(
-                f=f,
-                default_instance=default_instance,
-                support_single_arg_types=support_single_arg_types,
-            )
-            assert not isinstance(out, UnsupportedStructTypeMessage)
-            f, field_list = out
-
         # Cycle detection.
         #
         # 'parent' here refers to in the nesting hierarchy, not the superclass.
@@ -111,6 +101,16 @@ class ParserSpecification:
         # callables throughout the code. This is mostly for legacy reasons, could be
         # cleaned up.
         parent_classes = parent_classes | {cast(Type, f)}
+
+        # Resolve the type of `f`, generate a field list.
+        with _fields.FieldDefinition.marker_context(tuple(markers)):
+            out = _fields.field_list_from_type_or_callable(
+                f=f,
+                default_instance=default_instance,
+                support_single_arg_types=support_single_arg_types,
+            )
+            assert not isinstance(out, UnsupportedStructTypeMessage)
+            f, field_list = out
 
         has_required_args = False
         args = []
