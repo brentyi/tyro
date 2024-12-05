@@ -5,7 +5,7 @@ import dataclasses
 import enum
 import sys
 import warnings
-from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence
 
 from typing_extensions import (
     Annotated,
@@ -15,10 +15,6 @@ from typing_extensions import (
     get_args,
     get_origin,
     is_typeddict,
-)
-from tyro.constructors._primitive_spec import (
-    PrimitiveConstructorSpec,
-    PrimitiveTypeInfo,
 )
 
 from .. import _docstrings, _resolver

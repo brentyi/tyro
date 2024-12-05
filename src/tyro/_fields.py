@@ -17,7 +17,6 @@ from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
-    PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
 from .constructors._registry import ConstructorRegistry

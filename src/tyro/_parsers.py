@@ -39,7 +39,6 @@ from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
     PrimitiveConstructorSpec,
-    PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
 
