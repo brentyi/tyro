@@ -231,8 +231,6 @@ def callable_with_args(
         )
 
     unwrapped_f = parser_definition.f
-    unwrapped_f = _resolver.narrow_subtypes(unwrapped_f, default_instance)
-
     if unwrapped_f in (tuple, list, set):
         if len(positional_args) > 0:
             # Triggered when support_single_arg_types=True is used.
