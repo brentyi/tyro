@@ -299,7 +299,6 @@
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">.constructors._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span>
@@ -539,27 +538,24 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
-    <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
     <span class="n">type_info</span> <span class="o">=</span> <span class="n">StructTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
 
     <span class="k">with</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_typevar_context</span><span class="p">:</span>
-        <span class="n">spec</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_struct_spec</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_struct_spec</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
 
         <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">f</span><span class="p">,</span> <span class="p">[</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">from_field_spec</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">fields</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">spec</span><span class="o">.</span><span class="n">instantiate</span><span class="p">,</span> <span class="p">[</span>
+                    <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">from_field_spec</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">fields</span>
+                <span class="p">]</span>
 
-            <span class="n">is_primitive</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span><span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">set</span><span class="p">())),</span>
-                <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
-            <span class="p">)</span>
-
+            <span class="n">is_primitive</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
             <span class="k">if</span> <span class="n">is_primitive</span> <span class="ow">and</span> <span class="n">support_single_arg_types</span><span class="p">:</span>
                 <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span>
                     <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">Positional</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_PositionalCall</span><span class="p">)</span>
                 <span class="p">):</span>
                     <span class="k">return</span> <span class="p">(</span>
-                        <span class="n">f</span><span class="p">,</span>
+                        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span>
                         <span class="p">[</span>
                             <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>
@@ -593,6 +589,10 @@
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not get signature for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 
+    <span class="c1"># `f` that is called (output) may be different from what we want to</span>
+    <span class="c1"># inspect.</span>
+    <span class="n">f_out</span> <span class="o">=</span> <span class="n">f</span>
+
     <span class="c1"># Unwrap functools.wraps and functools.partial.</span>
     <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
@@ -608,9 +608,10 @@
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isabstract</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="s2">&quot;Abstract classes cannot be instantiated!&quot;</span><span class="p">)</span>
 
-    <span class="c1"># `f` that is called (output) may be different from what we want to</span>
-    <span class="c1"># inspect.</span>
-    <span class="n">f_out</span> <span class="o">=</span> <span class="n">f</span>
+    <span class="c1"># If `f` is class, we want to inspect its __init__ method for the</span>
+    <span class="c1"># signature. But the docstrings may still be in the class signature itself.</span>
+    <span class="n">f_before_init_unwrap</span> <span class="o">=</span> <span class="n">f</span>
+
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
@@ -640,8 +641,8 @@
         <span class="n">helptext</span> <span class="o">=</span> <span class="n">docstring_from_arg_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="c1"># TODO: re-add.</span>
-        <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f_out</span><span class="p">):</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="n">f_out</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f_before_init_unwrap</span><span class="p">):</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="n">f_before_init_unwrap</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hints</span><span class="p">:</span>
             <span class="n">out</span> <span class="o">=</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span>

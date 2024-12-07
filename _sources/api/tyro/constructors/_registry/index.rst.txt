@@ -97,12 +97,14 @@ Module Contents
       most recently added rule will be applied first.
 
 
-   .. py:method:: get_primitive_spec(type_info: tyro.constructors._primitive_spec.PrimitiveTypeInfo) -> tyro.constructors._primitive_spec.PrimitiveConstructorSpec | tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError
+   .. py:method:: get_primitive_spec(type_info: tyro.constructors._primitive_spec.PrimitiveTypeInfo, nondefault_only: bool = False) -> tyro.constructors._primitive_spec.PrimitiveConstructorSpec | tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError
+      :classmethod:
 
       Get a constructor specification for a given type.
 
 
    .. py:method:: get_struct_spec(type_info: tyro.constructors._struct_spec.StructTypeInfo) -> tyro.constructors._struct_spec.StructConstructorSpec | None
+      :classmethod:
 
       Get a constructor specification for a given type. Returns `None` if
       unsuccessful.

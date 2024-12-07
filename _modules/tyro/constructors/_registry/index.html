@@ -388,17 +388,11 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">_active_registry</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">ConstructorRegistry</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">_old_registry</span><span class="p">:</span> <span class="n">ConstructorRegistry</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">_active_registries</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">ConstructorRegistry</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_default_primitive_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PrimitiveSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_custom_primitive_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PrimitiveSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_primitive_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">PrimitiveSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_struct_rules</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">StructSpecRule</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-
-        <span class="c1"># Apply the default primitive-handling rules.</span>
-        <span class="n">apply_default_primitive_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="n">apply_default_struct_rules</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ConstructorRegistry.primitive_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.primitive_rule">[docs]</a>
@@ -410,13 +404,9 @@
 <span class="sd">        rules and struct rules</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_custom_primitive_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_primitive_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">rule</span></div>
 
-
-    <span class="k">def</span> <span class="nf">_default_primitive_rule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rule</span><span class="p">:</span> <span class="n">PrimitiveSpecRule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveSpecRule</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_default_primitive_rules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">rule</span>
 
 <div class="viewcode-block" id="ConstructorRegistry.struct_rule">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.struct_rule">[docs]</a>
@@ -428,24 +418,38 @@
         <span class="k">return</span> <span class="n">rule</span></div>
 
 
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_is_primitive_type</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">markers</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">nondefault_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if a type is a primitive type.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+                <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">markers</span><span class="p">),</span> <span class="n">nondefault_only</span><span class="o">=</span><span class="n">nondefault_only</span>
+            <span class="p">),</span>
+            <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
+        <span class="p">)</span>
+
 <div class="viewcode-block" id="ConstructorRegistry.get_primitive_spec">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.get_primitive_spec">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">get_primitive_spec</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span> <span class="n">nondefault_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a constructor specification for a given type.&quot;&quot;&quot;</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_ensure_defaults_initialized</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_primitive_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">type_info</span><span class="o">.</span><span class="n">_primitive_spec</span>
 
-        <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_custom_primitive_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">maybe_spec</span>
-        <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default_primitive_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">maybe_spec</span>
+        <span class="k">for</span> <span class="n">registry</span> <span class="ow">in</span> <span class="p">(</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registries</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="n">nondefault_only</span> <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registries</span>
+        <span class="p">)[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">_primitive_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">maybe_spec</span>
 
         <span class="k">return</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Unsupported type annotation: </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -454,11 +458,12 @@
 
 <div class="viewcode-block" id="ConstructorRegistry.get_struct_spec">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.get_struct_spec">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_struct_spec</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">type_info</span><span class="p">:</span> <span class="n">StructTypeInfo</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_struct_spec</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">type_info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a constructor specification for a given type. Returns `None` if</span>
 <span class="sd">        unsuccessful.&quot;&quot;&quot;</span>
+
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_ensure_defaults_initialized</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">check_default_instances</span><span class="p">()</span>
@@ -469,36 +474,42 @@
                 <span class="sa">f</span><span class="s2">&quot;Invalid default instance for type </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">type_info</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_struct_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-            <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">maybe_spec</span>
+        <span class="k">for</span> <span class="n">registry</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registries</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">spec_factory</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">_struct_rules</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+                <span class="n">maybe_spec</span> <span class="o">=</span> <span class="n">spec_factory</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">maybe_spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">maybe_spec</span>
 
         <span class="k">return</span> <span class="kc">None</span></div>
 
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_get_active_registry</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConstructorRegistry</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the active registry. Can be changed by using a</span>
-<span class="sd">        PrimitiveConstructorRegistry object as a context.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="p">()</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registry</span>
-
 <div class="viewcode-block" id="ConstructorRegistry.__enter__">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.__enter__">[docs]</a>
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_ensure_defaults_initialized</span><span class="p">()</span>
+
         <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_old_registry</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registry</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registry</span> <span class="o">=</span> <span class="bp">self</span></div>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ConstructorRegistry.__exit__">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/#tyro.constructors._registry.ConstructorRegistry.__exit__">[docs]</a>
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">cls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_old_registry</span></div>
-</div>
+        <span class="k">assert</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registries</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span> <span class="ow">is</span> <span class="bp">self</span></div>
+
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_ensure_defaults_initialized</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize default registry if needed.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_active_registries</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="p">()</span>
+
+            <span class="c1"># Apply the default rules.</span>
+            <span class="n">apply_default_primitive_rules</span><span class="p">(</span><span class="n">registry</span><span class="p">)</span>
+            <span class="n">apply_default_struct_rules</span><span class="p">(</span><span class="n">registry</span><span class="p">)</span>
+
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_active_registries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">registry</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

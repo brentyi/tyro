@@ -427,7 +427,7 @@
 
     <span class="kn">from</span> <span class="nn">._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">any_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -442,7 +442,7 @@
     <span class="c1"># not to break it.</span>
     <span class="n">vanilla_types</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">complex</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">basics_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vanilla_types</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -465,7 +465,7 @@
     <span class="k">if</span> <span class="s2">&quot;torch&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
         <span class="kn">import</span> <span class="nn">torch</span>
 
-        <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+        <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
         <span class="k">def</span> <span class="nf">torch_device_rule</span><span class="p">(</span>
             <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
         <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -479,7 +479,7 @@
                 <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
             <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">bool_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -492,7 +492,7 @@
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;True&quot;</span> <span class="k">if</span> <span class="n">instance</span> <span class="k">else</span> <span class="s2">&quot;False&quot;</span><span class="p">],</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">nonetype_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -505,7 +505,7 @@
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;None&quot;</span><span class="p">],</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">path_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
             <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span>
@@ -523,7 +523,7 @@
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">instance</span><span class="p">)],</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">enum_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
             <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">)</span>
@@ -554,7 +554,7 @@
             <span class="n">choices</span><span class="o">=</span><span class="n">choices</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">datetime_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">time</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -575,7 +575,7 @@
             <span class="n">str_from_instance</span><span class="o">=</span><span class="k">lambda</span> <span class="n">instance</span><span class="p">:</span> <span class="p">[</span><span class="n">instance</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()],</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">vague_container_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -602,15 +602,14 @@
         <span class="k">elif</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="n">Set</span><span class="p">):</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 
-        <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+        <span class="k">return</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
             <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">typ</span><span class="p">,</span>
                 <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">sequence_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -634,8 +633,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="p">(</span><span class="n">contained_type</span><span class="p">,)</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
 
-        <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
-        <span class="n">inner_spec</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+        <span class="n">inner_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
             <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">raw_annotation</span><span class="o">=</span><span class="n">contained_type</span><span class="p">,</span>
                 <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
@@ -699,7 +697,7 @@
                 <span class="n">choices</span><span class="o">=</span><span class="n">inner_spec</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span>
             <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">tuple_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -715,12 +713,10 @@
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">typeset_no_ellipsis</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
             <span class="k">return</span> <span class="n">sequence_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">)</span>
 
-        <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
-
         <span class="n">inner_specs</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">total_nargs</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">contained_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
-            <span class="n">spec</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
                 <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">contained_type</span><span class="p">,</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
@@ -768,23 +764,24 @@
             <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">is_instance</span><span class="p">(</span><span class="n">member</span><span class="p">)</span> <span class="k">for</span> <span class="n">member</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">inner_specs</span><span class="p">)),</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">dict_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">2</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
-
         <span class="n">key_type</span><span class="p">,</span> <span class="n">val_type</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-        <span class="n">key_spec</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+        <span class="n">key_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
             <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">raw_annotation</span><span class="o">=</span><span class="n">key_type</span><span class="p">,</span>
                 <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">val_spec</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+        <span class="n">val_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
             <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                 <span class="n">raw_annotation</span><span class="o">=</span><span class="n">val_type</span><span class="p">,</span>
                 <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span> <span class="o">-</span> <span class="p">{</span><span class="n">_markers</span><span class="o">.</span><span class="n">UseAppendAction</span><span class="p">},</span>
@@ -867,7 +864,7 @@
                 <span class="n">str_from_instance</span><span class="o">=</span><span class="n">str_from_instance</span><span class="p">,</span>
             <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">literal_rule</span><span class="p">(</span><span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">type_info</span><span class="o">.</span><span class="n">type_origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Literal</span><span class="p">,</span> <span class="n">LiteralAlternate</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -893,7 +890,7 @@
             <span class="n">choices</span><span class="o">=</span><span class="n">str_choices</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">_default_primitive_rule</span>
+    <span class="nd">@registry</span><span class="o">.</span><span class="n">primitive_rule</span>
     <span class="k">def</span> <span class="nf">union_rule</span><span class="p">(</span>
         <span class="n">type_info</span><span class="p">:</span> <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrimitiveConstructorSpec</span> <span class="o">|</span> <span class="n">UnsupportedTypeAnnotationError</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -913,9 +910,8 @@
         <span class="n">choices</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="p">()</span>
         <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-            <span class="n">option_spec</span> <span class="o">=</span> <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+            <span class="n">option_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
                 <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
                     <span class="n">raw_annotation</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
                     <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>

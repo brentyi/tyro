@@ -517,15 +517,7 @@
             <span class="n">field_name_prefix</span><span class="p">,</span>
         <span class="p">)</span>
 
-    <span class="c1"># Note: we unwrap types both before and after narrowing. This is because narrowing</span>
-    <span class="c1"># sometimes produces types like `Tuple[T1, T2, ...]`, where we actually want just</span>
-    <span class="c1"># `tuple`.</span>
-    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">f</span>
-    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">swap_type_using_confstruct</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
-    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
-    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_subtypes</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
-    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">)</span>
-
+    <span class="n">unwrapped_f</span> <span class="o">=</span> <span class="n">parser_definition</span><span class="o">.</span><span class="n">f</span>
     <span class="k">if</span> <span class="n">unwrapped_f</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positional_args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># Triggered when support_single_arg_types=True is used.</span>

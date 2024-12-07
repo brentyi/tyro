@@ -321,7 +321,6 @@
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
-    <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -375,16 +374,6 @@
         <span class="n">markers</span> <span class="o">=</span> <span class="n">markers</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">consolidate_subcommand_args</span> <span class="o">=</span> <span class="n">_markers</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span> <span class="ow">in</span> <span class="n">markers</span>
 
-        <span class="c1"># Resolve the type of `f`, generate a field list.</span>
-        <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
-            <span class="n">out</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
-                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
-                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
-                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">)</span>
-            <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">out</span>
-
         <span class="c1"># Cycle detection.</span>
         <span class="c1">#</span>
         <span class="c1"># &#39;parent&#39; here refers to in the nesting hierarchy, not the superclass.</span>
@@ -397,6 +386,16 @@
         <span class="c1"># callables throughout the code. This is mostly for legacy reasons, could be</span>
         <span class="c1"># cleaned up.</span>
         <span class="n">parent_classes</span> <span class="o">=</span> <span class="n">parent_classes</span> <span class="o">|</span> <span class="p">{</span><span class="n">cast</span><span class="p">(</span><span class="n">Type</span><span class="p">,</span> <span class="n">f</span><span class="p">)}</span>
+
+        <span class="c1"># Resolve the type of `f`, generate a field list.</span>
+        <span class="k">with</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">markers</span><span class="p">)):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">_fields</span><span class="o">.</span><span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
+                <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+                <span class="n">default_instance</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
+                <span class="n">support_single_arg_types</span><span class="o">=</span><span class="n">support_single_arg_types</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">)</span>
+            <span class="n">f</span><span class="p">,</span> <span class="n">field_list</span> <span class="o">=</span> <span class="n">out</span>
 
         <span class="n">has_required_args</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
@@ -617,8 +616,6 @@
 <span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine what to do with a single field definition.&quot;&quot;&quot;</span>
 
-    <span class="n">registry</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_get_active_registry</span><span class="p">()</span>
-
     <span class="c1"># Check that the default value matches the final resolved type.</span>
     <span class="c1"># There&#39;s some similar Union-specific logic for this in narrow_union_type(). We</span>
     <span class="c1"># may be able to consolidate this.</span>
@@ -647,18 +644,11 @@
 
     <span class="c1"># Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if</span>
     <span class="c1"># a custom primitive exists for the type.</span>
-    <span class="n">force_primitive</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">force_primitive</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">registry</span><span class="o">.</span><span class="n">_custom_primitive_rules</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="c1"># Can we parse this as a primitive?</span>
-        <span class="n">force_primitive</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">registry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
-                <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
-            <span class="p">),</span>
-            <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
-        <span class="p">)</span>
+    <span class="n">force_primitive</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">len</span><span class="p">(</span><span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span>
+        <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span> <span class="n">nondefault_only</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="p">(</span>
         <span class="ow">not</span> <span class="n">force_primitive</span>
