@@ -98,17 +98,11 @@ class ConstructorRegistry:
 
     """
 
-    _active_registry: ClassVar[ConstructorRegistry | None] = None
-    _old_registry: ConstructorRegistry | None = None
+    _active_registries: ClassVar[list[ConstructorRegistry]] = []
 
     def __init__(self) -> None:
-        self._default_primitive_rules: list[PrimitiveSpecRule] = []
-        self._custom_primitive_rules: list[PrimitiveSpecRule] = []
+        self._primitive_rules: list[PrimitiveSpecRule] = []
         self._struct_rules: list[StructSpecRule] = []
-
-        # Apply the default primitive-handling rules.
-        apply_default_primitive_rules(self)
-        apply_default_struct_rules(self)
 
     def primitive_rule(self, rule: PrimitiveSpecRule) -> PrimitiveSpecRule:
         """Define a rule for constructing a primitive type from a string. The
@@ -118,11 +112,7 @@ class ConstructorRegistry:
         rules and struct rules
         """
 
-        self._custom_primitive_rules.append(rule)
-        return rule
-
-    def _default_primitive_rule(self, rule: PrimitiveSpecRule) -> PrimitiveSpecRule:
-        self._default_primitive_rules.append(rule)
+        self._primitive_rules.append(rule)
         return rule
 
     def struct_rule(self, rule: StructSpecRule) -> StructSpecRule:
@@ -132,32 +122,47 @@ class ConstructorRegistry:
         self._struct_rules.append(rule)
         return rule
 
+    @classmethod
+    def _is_primitive_type(
+        cls, type: Any, markers: set[Any], nondefault_only: bool = False
+    ) -> bool:
+        """Check if a type is a primitive type."""
+        return isinstance(
+            cls.get_primitive_spec(
+                PrimitiveTypeInfo.make(type, markers), nondefault_only=nondefault_only
+            ),
+            PrimitiveConstructorSpec,
+        )
+
+    @classmethod
     def get_primitive_spec(
-        self, type_info: PrimitiveTypeInfo
+        cls, type_info: PrimitiveTypeInfo, nondefault_only: bool = False
     ) -> PrimitiveConstructorSpec | UnsupportedTypeAnnotationError:
         """Get a constructor specification for a given type."""
+
+        cls._ensure_defaults_initialized()
 
         if type_info._primitive_spec is not None:
             return type_info._primitive_spec
 
-        for spec_factory in self._custom_primitive_rules[::-1]:
-            maybe_spec = spec_factory(type_info)
-            if maybe_spec is not None:
-                return maybe_spec
-        for spec_factory in self._default_primitive_rules[::-1]:
-            maybe_spec = spec_factory(type_info)
-            if maybe_spec is not None:
-                return maybe_spec
+        for registry in (
+            cls._active_registries[1:] if nondefault_only else cls._active_registries
+        )[::-1]:
+            for spec_factory in registry._primitive_rules[::-1]:
+                maybe_spec = spec_factory(type_info)
+                if maybe_spec is not None:
+                    return maybe_spec
 
         return UnsupportedTypeAnnotationError(
             f"Unsupported type annotation: {type_info.type}"
         )
 
-    def get_struct_spec(
-        self, type_info: StructTypeInfo
-    ) -> StructConstructorSpec | None:
+    @classmethod
+    def get_struct_spec(cls, type_info: StructTypeInfo) -> StructConstructorSpec | None:
         """Get a constructor specification for a given type. Returns `None` if
         unsuccessful."""
+
+        cls._ensure_defaults_initialized()
 
         if (
             check_default_instances()
@@ -168,26 +173,32 @@ class ConstructorRegistry:
                 f"Invalid default instance for type {type_info.type}: {type_info.default}"
             )
 
-        for spec_factory in self._struct_rules[::-1]:
-            maybe_spec = spec_factory(type_info)
-            if maybe_spec is not None:
-                return maybe_spec
+        for registry in cls._active_registries[::-1]:
+            for spec_factory in registry._struct_rules[::-1]:
+                maybe_spec = spec_factory(type_info)
+                if maybe_spec is not None:
+                    return maybe_spec
 
         return None
 
-    @classmethod
-    def _get_active_registry(cls) -> ConstructorRegistry:
-        """Get the active registry. Can be changed by using a
-        PrimitiveConstructorRegistry object as a context."""
-        if cls._active_registry is None:
-            cls._active_registry = ConstructorRegistry()
-        return cls._active_registry
-
     def __enter__(self) -> None:
+        self.__class__._ensure_defaults_initialized()
+
         cls = self.__class__
-        self._old_registry = cls._active_registry
-        cls._active_registry = self
+        cls._active_registries.append(self)
 
     def __exit__(self, *args: Any) -> None:
         cls = self.__class__
-        cls._active_registry = self._old_registry
+        assert cls._active_registries.pop() is self
+
+    @classmethod
+    def _ensure_defaults_initialized(cls) -> None:
+        """Initialize default registry if needed."""
+        if len(cls._active_registries) == 0:
+            registry = ConstructorRegistry()
+
+            # Apply the default rules.
+            apply_default_primitive_rules(registry)
+            apply_default_struct_rules(registry)
+
+            cls._active_registries.append(registry)

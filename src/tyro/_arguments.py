@@ -281,7 +281,7 @@ def _rule_apply_primitive_specs(
     if lowered.instance_from_str is not None:
         return
 
-    spec = ConstructorRegistry._get_active_registry().get_primitive_spec(
+    spec = ConstructorRegistry.get_primitive_spec(
         PrimitiveTypeInfo.make(
             cast(type, arg.field.type),
             arg.field.markers,

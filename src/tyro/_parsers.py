@@ -39,7 +39,6 @@ from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
     PrimitiveConstructorSpec,
-    PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
 
@@ -89,16 +88,6 @@ class ParserSpecification:
         markers = markers | set(_resolver.unwrap_annotated(f, _markers._Marker)[1])
         consolidate_subcommand_args = _markers.ConsolidateSubcommandArgs in markers
 
-        # Resolve the type of `f`, generate a field list.
-        with _fields.FieldDefinition.marker_context(tuple(markers)):
-            out = _fields.field_list_from_type_or_callable(
-                f=f,
-                default_instance=default_instance,
-                support_single_arg_types=support_single_arg_types,
-            )
-            assert not isinstance(out, UnsupportedStructTypeMessage)
-            f, field_list = out
-
         # Cycle detection.
         #
         # 'parent' here refers to in the nesting hierarchy, not the superclass.
@@ -111,6 +100,16 @@ class ParserSpecification:
         # callables throughout the code. This is mostly for legacy reasons, could be
         # cleaned up.
         parent_classes = parent_classes | {cast(Type, f)}
+
+        # Resolve the type of `f`, generate a field list.
+        with _fields.FieldDefinition.marker_context(tuple(markers)):
+            out = _fields.field_list_from_type_or_callable(
+                f=f,
+                default_instance=default_instance,
+                support_single_arg_types=support_single_arg_types,
+            )
+            assert not isinstance(out, UnsupportedStructTypeMessage)
+            f, field_list = out
 
         has_required_args = False
         args = []
@@ -321,8 +320,6 @@ def handle_field(
 ]:
     """Determine what to do with a single field definition."""
 
-    registry = ConstructorRegistry._get_active_registry()
-
     # Check that the default value matches the final resolved type.
     # There's some similar Union-specific logic for this in narrow_union_type(). We
     # may be able to consolidate this.
@@ -351,18 +348,11 @@ def handle_field(
 
     # Force primitive if (1) the field is annotated with a primitive constructor spec, or (2) if
     # a custom primitive exists for the type.
-    force_primitive = False
-
-    if len(_resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]) > 0:
-        force_primitive = True
-    elif len(registry._custom_primitive_rules) > 0:
-        # Can we parse this as a primitive?
-        force_primitive = not isinstance(
-            registry.get_primitive_spec(
-                PrimitiveTypeInfo.make(field.type, field.markers)
-            ),
-            UnsupportedTypeAnnotationError,
-        )
+    force_primitive = (
+        len(_resolver.unwrap_annotated(field.type, PrimitiveConstructorSpec)[1]) > 0
+    ) or ConstructorRegistry._is_primitive_type(
+        field.type, field.markers, nondefault_only=True
+    )
 
     if (
         not force_primitive
