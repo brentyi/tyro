@@ -17,7 +17,6 @@ from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import (
-    PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
 from .constructors._registry import ConstructorRegistry
@@ -228,27 +227,24 @@ def field_list_from_type_or_callable(
     """
 
     f = _resolver.swap_type_using_confstruct(f)
-    registry = ConstructorRegistry._get_active_registry()
     type_info = StructTypeInfo.make(f, default_instance)
 
     with type_info._typevar_context:
-        spec = registry.get_struct_spec(type_info)
+        spec = ConstructorRegistry.get_struct_spec(type_info)
 
         with FieldDefinition.marker_context(type_info.markers):
             if spec is not None:
-                return f, [FieldDefinition.from_field_spec(f) for f in spec.fields]
+                return spec.instantiate, [
+                    FieldDefinition.from_field_spec(f) for f in spec.fields
+                ]
 
-            is_primitive = not isinstance(
-                registry.get_primitive_spec(PrimitiveTypeInfo.make(f, set())),
-                UnsupportedTypeAnnotationError,
-            )
-
+            is_primitive = ConstructorRegistry._is_primitive_type(f, set())
             if is_primitive and support_single_arg_types:
                 with FieldDefinition.marker_context(
                     (_markers.Positional, _markers._PositionalCall)
                 ):
                     return (
-                        f,
+                        lambda x: x,
                         [
                             FieldDefinition.make(
                                 name="value",
@@ -281,6 +277,10 @@ def _field_list_from_function(
     except ValueError:
         return UnsupportedStructTypeMessage(f"Could not get signature for {f}!")
 
+    # `f` that is called (output) may be different from what we want to
+    # inspect.
+    f_out = f
+
     # Unwrap functools.wraps and functools.partial.
     done = False
     while not done:
@@ -296,9 +296,10 @@ def _field_list_from_function(
     if inspect.isabstract(f):
         return UnsupportedStructTypeMessage("Abstract classes cannot be instantiated!")
 
-    # `f` that is called (output) may be different from what we want to
-    # inspect.
-    f_out = f
+    # If `f` is class, we want to inspect its __init__ method for the
+    # signature. But the docstrings may still be in the class signature itself.
+    f_before_init_unwrap = f
+
     if inspect.isclass(f):
         if hasattr(f, "__init__") and f.__init__ is not object.__init__:
             f = f.__init__  # type: ignore
@@ -328,8 +329,8 @@ def _field_list_from_function(
         helptext = docstring_from_arg_name.get(param.name)
 
         # TODO: re-add.
-        if helptext is None and inspect.isclass(f_out):
-            helptext = _docstrings.get_field_docstring(f_out, param.name)
+        if helptext is None and inspect.isclass(f_before_init_unwrap):
+            helptext = _docstrings.get_field_docstring(f_before_init_unwrap, param.name)
 
         if param.name not in hints:
             out = UnsupportedStructTypeMessage(

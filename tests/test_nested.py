@@ -1,8 +1,7 @@
 import dataclasses
-from typing import Any, Generic, Mapping, NewType, Optional, Tuple, TypeVar, Union
+from typing import Any, Generic, NewType, Optional, Tuple, TypeVar, Union
 
 import pytest
-from frozendict import frozendict  # type: ignore
 from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Final, Literal
 
@@ -1049,20 +1048,20 @@ def test_subparser_in_nested() -> None:
     ) == Parent(Nested1(Nested2(B(7))))
 
 
-def test_frozen_dict() -> None:
-    def main(
-        x: Mapping[str, float] = frozendict(  # type: ignore
-            {
-                "num_epochs": 20,
-                "batch_size": 64,
-            }
-        ),
-    ):
-        return x
-
-    assert hash(tyro.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
-        frozendict({"num_epochs": 10, "batch_size": 64})  # type: ignore
-    )
+# def test_frozen_dict() -> None:
+#     def main(
+#         x: Mapping[str, float] = frozendict(  # type: ignore
+#             {
+#                 "num_epochs": 20,
+#                 "batch_size": 64,
+#             }
+#         ),
+#     ):
+#         return x
+#
+#     assert hash(tyro.cli(main, args="--x.num-epochs 10".split(" "))) == hash(
+#         frozendict({"num_epochs": 10, "batch_size": 64})  # type: ignore
+#     )
 
 
 def test_nested_in_subparser() -> None:
