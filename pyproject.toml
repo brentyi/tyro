@@ -32,7 +32,7 @@ classifiers = [
 ]
 dependencies = [
     "typeguard>=4.0.0",
-    "docstring-parser>=0.16",
+    "docstring-parser>=0.15",
     "typing-extensions>=4.9.0; python_version>='3.8'",
     "typing-extensions>=4.7.0; python_version<'3.8'",
     "backports.cached-property>=1.0.2; python_version<'3.8'",
