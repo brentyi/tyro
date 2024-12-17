@@ -520,12 +520,14 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    reduce(function, iterable[, initial]) -&gt; value</span>
 
-<span class="sd">    Apply a function of two arguments cumulatively to the items of a sequence</span>
-<span class="sd">    or iterable, from left to right, so as to reduce the iterable to a single</span>
-<span class="sd">    value.  For example, reduce(lambda x, y: x+y, [1, 2, 3, 4, 5]) calculates</span>
-<span class="sd">    ((((1+2)+3)+4)+5).  If initial is present, it is placed before the items</span>
-<span class="sd">    of the iterable in the calculation, and serves as a default when the</span>
-<span class="sd">    iterable is empty.</span>
+<span class="sd">    Apply a function of two arguments cumulatively to the items of an iterable, from left to right.</span>
+
+<span class="sd">    This effectively reduces the iterable to a single value.  If initial is present,</span>
+<span class="sd">    it is placed before the items of the iterable in the calculation, and serves as</span>
+<span class="sd">    a default when the iterable is empty.</span>
+
+<span class="sd">    For example, reduce(lambda x, y: x+y, [1, 2, 3, 4, 5])</span>
+<span class="sd">    calculates ((((1 + 2) + 3) + 4) + 5).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">it</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
