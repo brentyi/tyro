@@ -43,6 +43,6 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
 
 def unsafe_hash(obj: Any) -> Any:
     try:
-        return hash(obj)
+        return type(obj), hash(obj)
     except TypeError:
-        return id(obj)
+        return type(obj), id(obj)
