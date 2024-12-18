@@ -122,9 +122,7 @@ Module Contents
 
 .. py:data:: UseCounterAction
 
-   ``verbose: UseCounterAction[int]``.
-
-   :type: Use "counter" actions for integer arguments. Example usage
+   Use "counter" actions for integer arguments. Should be used with integers, ``UseCounterAction[int]``.
 
 .. py:data:: EnumChoicesFromValues
 

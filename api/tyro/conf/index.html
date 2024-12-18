@@ -289,10 +289,14 @@
           <section id="module-tyro.conf">
 <span id="tyro-conf"></span><h1><a class="reference internal" href="#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a><a class="headerlink" href="#module-tyro.conf" title="Link to this heading">¶</a></h1>
 <p>The <a class="reference internal" href="#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> submodule contains helpers for attaching parsing-specific
-configuration metadata to types via [PEP 593](<a class="reference external" href="https://peps.python.org/pep-0593/">https://peps.python.org/pep-0593/</a>) runtime
+configuration metadata to types via <a class="reference external" href="https://peps.python.org/pep-0593/">PEP 593</a> runtime
 annotations.</p>
-<p>Configuration flags are applied recursively, and should generally be subscripted:
-<code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code>, etc.</p>
+<p>Flags will be applied recursively, and can be used one of multiple ways:</p>
+<ol class="arabic simple">
+<li><p>They can be subscripted: <code class="docutils literal notranslate"><span class="pre">tyro.conf.FlagConversionoff[bool]</span></code>.</p></li>
+<li><p>They can be passed into <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a>: <code class="docutils literal notranslate"><span class="pre">Annotated[str,</span> <span class="pre">tyro.conf.FlagConversionOff]</span></code>.</p></li>
+<li><p>They can be passed into <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>: <code class="docutils literal notranslate"><span class="pre">tyro.cli(Args,</span> <span class="pre">config=(tyro.conf.FlagConversionOff,))</span></code>.</p></li>
+</ol>
 <p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
@@ -528,12 +532,7 @@ otherwise ambiguous annotations like <code class="docutils literal notranslate">
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.UseCounterAction">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">UseCounterAction</span></span><a class="headerlink" href="#tyro.conf.UseCounterAction" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">verbose:</span> <span class="pre">UseCounterAction[int]</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Use “counter” actions for integer arguments. Example usage</p>
-</dd>
-</dl>
+<dd><p>Use “counter” actions for integer arguments. Should be used with integers, <code class="docutils literal notranslate"><span class="pre">UseCounterAction[int]</span></code>.</p>
 </dd></dl>
 
 <dl class="py function">

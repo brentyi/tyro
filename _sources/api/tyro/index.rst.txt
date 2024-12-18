@@ -19,7 +19,7 @@ Package Contents
 ----------------
 
 .. py:data:: __version__
-   :value: '0.9.2'
+   :value: '0.9.3'
 
    
 
@@ -62,7 +62,7 @@ Package Contents
                            main one.
    :param config: Sequence of config marker objects, from :mod:`tyro.conf`. As an
                   alternative to using them locally in annotations
-                  (:class:`tyro.conf.FlagConversionOff`[bool]), we can also pass in a sequence of
+                  (``FlagConversionOff[bool]``), we can also pass in a sequence of
                   them here to apply globally.
 
    :returns: The output of ``f(...)`` or an instance ``f``. If ``f`` is a class, the two are

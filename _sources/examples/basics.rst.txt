@@ -652,7 +652,9 @@ Configuration via typing.Annotated[]
 
 The :mod:`tyro.conf` module contains utilities that can be used in conjunction
 with :py:data:`typing.Annotated` to configure command-line interfaces beyond
-what is expressible via static type annotations.
+what is expressible via static type annotations. To apply options globally,
+these same flags can also be passed via the ``config`` argument of
+:func:`tyro.cli`.
 
 Features here are supported, but generally unnecessary and should be used sparingly.
 
@@ -672,8 +674,8 @@ Features here are supported, but generally unnecessary and should be used sparin
         # A numeric field parsed as a positional argument.
         positional: tyro.conf.Positional[int]
 
-        # A boolean field with flag conversion turned off.
-        boolean: tyro.conf.FlagConversionOff[bool] = False
+        # A boolean field.
+        boolean: bool = False
 
         # A numeric field that can't be changed via the CLI.
         fixed: tyro.conf.Fixed[int] = 5
@@ -689,7 +691,7 @@ Features here are supported, but generally unnecessary and should be used sparin
         ] = "Hello"
 
     if __name__ == "__main__":
-        print(tyro.cli(Args))
+        print(tyro.cli(Args, config=(tyro.conf.FlagConversionOff,)))
 
 
 
@@ -706,8 +708,7 @@ Features here are supported, but generally unnecessary and should be used sparin
     <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────────────────╯</span>
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span>                    <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --boolean <span style="font-weight: bold">{True,False}</span>  <span style="font-weight: lighter">A boolean field with flag conversion turned off.</span>   <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                         <span style="color: #008080">(default: False)</span>                                   <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --boolean <span style="font-weight: bold">{True,False}</span>  <span style="font-weight: lighter">A boolean field.</span> <span style="color: #008080">(default: False)</span>                  <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --fixed <span style="font-weight: bold; color: #800000">{fixed}</span>         <span style="font-weight: lighter">A numeric field that can't be changed via the CLI.</span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>                         <span style="color: #008080">(fixed to: 5)</span>                                      <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --renamed <span style="font-weight: bold">STRING</span>        <span style="font-weight: lighter">A field with manually overridden properties!</span>       <span style="font-weight: lighter">│</span>

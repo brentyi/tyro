@@ -57,7 +57,7 @@ Module Contents
                            main one.
    :param config: Sequence of config marker objects, from :mod:`tyro.conf`. As an
                   alternative to using them locally in annotations
-                  (:class:`tyro.conf.FlagConversionOff`[bool]), we can also pass in a sequence of
+                  (``FlagConversionOff[bool]``), we can also pass in a sequence of
                   them here to apply globally.
 
    :returns: The output of ``f(...)`` or an instance ``f``. If ``f`` is a class, the two are
@@ -65,8 +65,8 @@ Module Contents
              ``f(...)`` and a list of unknown arguments.
 
 
-.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
-                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True) -> tyro._argparse.ArgumentParser
+.. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
+                 get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
 
    Get the ``argparse.ArgumentParser`` object generated under-the-hood by
    :func:`tyro.cli()`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
