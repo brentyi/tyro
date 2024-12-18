@@ -1,4 +1,5 @@
 import functools
+import sys
 from typing import Any, Callable, Dict, List, TypeVar
 
 CallableType = TypeVar("CallableType", bound=Callable)
@@ -28,6 +29,13 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
             )
 
             if key in local_cache:
+                # Fuzzy check for cache collisions if called from a pytest test.
+                if "pytest" in sys.modules:
+                    import random
+
+                    if random.random() < 0.2:
+                        assert str(f(*args, **kwargs)) == str(local_cache[key])
+
                 return local_cache[key]
 
             out = f(*args, **kwargs)
