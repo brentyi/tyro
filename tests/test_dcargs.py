@@ -13,7 +13,6 @@ from typing import (
     Dict,
     List,
     Optional,
-    Protocol,
     Text,
     Tuple,
     TypeVar,
@@ -21,8 +20,16 @@ from typing import (
 )
 
 import pytest
+from typing_extensions import (
+    Annotated,
+    Final,
+    Literal,
+    Protocol,
+    TypeAlias,
+    runtime_checkable,
+)
+
 import tyro
-from typing_extensions import Annotated, Final, Literal, TypeAlias, runtime_checkable
 
 
 def test_no_args() -> None:
