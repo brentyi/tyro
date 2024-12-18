@@ -21,9 +21,8 @@ from typing import (
 )
 
 import pytest
-from typing_extensions import Annotated, Final, Literal, TypeAlias, runtime_checkable
-
 import tyro
+from typing_extensions import Annotated, Final, Literal, TypeAlias, runtime_checkable
 
 
 def test_no_args() -> None:
@@ -957,6 +956,8 @@ def test_numeric_tower() -> None:
 
 
 def test_runtime_checkable_edge_case() -> None:
+    """From Kevin Black: https://github.com/brentyi/tyro/issues/214"""
+
     @runtime_checkable
     class DummyProtocol(Protocol):
         pass

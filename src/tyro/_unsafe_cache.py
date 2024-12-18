@@ -50,6 +50,9 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
 
 
 def unsafe_hash(obj: Any) -> Any:
+    """We include the types to match functools.
+
+    Some context: https://github.com/brentyi/tyro/issues/214"""
     try:
         return type(obj), hash(obj)
     except TypeError:

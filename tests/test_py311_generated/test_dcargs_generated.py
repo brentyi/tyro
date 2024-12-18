@@ -960,6 +960,8 @@ def test_numeric_tower() -> None:
 
 
 def test_runtime_checkable_edge_case() -> None:
+    """From Kevin Black: https://github.com/brentyi/tyro/issues/214"""
+
     @runtime_checkable
     class DummyProtocol(Protocol):
         pass
