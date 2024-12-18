@@ -130,7 +130,7 @@ Can be applied to all variable-length sequences (``list[T]``, ``Sequence[T]``,
 """
 
 UseCounterAction = Annotated[T, None]
-"""Use "counter" actions for integer arguments. Example usage: ``verbose: UseCounterAction[int]``."""
+"""Use "counter" actions for integer arguments. Should be used with integers, ``UseCounterAction[int]``."""
 
 EnumChoicesFromValues = Annotated[T, None]
 """Populate choices from enum values rather than enum names.

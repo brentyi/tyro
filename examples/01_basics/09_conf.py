@@ -2,7 +2,9 @@
 
 The :mod:`tyro.conf` module contains utilities that can be used in conjunction
 with :py:data:`typing.Annotated` to configure command-line interfaces beyond
-what is expressible via static type annotations.
+what is expressible via static type annotations. To apply options globally,
+these same flags can also be passed via the ``config`` argument of
+:func:`tyro.cli`.
 
 Features here are supported, but generally unnecessary and should be used sparingly.
 
@@ -24,8 +26,8 @@ class Args:
     # A numeric field parsed as a positional argument.
     positional: tyro.conf.Positional[int]
 
-    # A boolean field with flag conversion turned off.
-    boolean: tyro.conf.FlagConversionOff[bool] = False
+    # A boolean field.
+    boolean: bool = False
 
     # A numeric field that can't be changed via the CLI.
     fixed: tyro.conf.Fixed[int] = 5
@@ -42,4 +44,4 @@ class Args:
 
 
 if __name__ == "__main__":
-    print(tyro.cli(Args))
+    print(tyro.cli(Args, config=(tyro.conf.FlagConversionOff,)))

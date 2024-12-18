@@ -149,7 +149,7 @@ def cli(
             main one.
         config: Sequence of config marker objects, from :mod:`tyro.conf`. As an
             alternative to using them locally in annotations
-            (:class:`tyro.conf.FlagConversionOff`[bool]), we can also pass in a sequence of
+            (``FlagConversionOff[bool]``), we can also pass in a sequence of
             them here to apply globally.
 
     Returns:
@@ -162,9 +162,6 @@ def cli(
     # memory address conflicts.
     _unsafe_cache.clear_cache()
 
-    if config is not None:
-        f = Annotated[(f, *config)]  # type: ignore
-
     with _strings.delimeter_context("_" if use_underscores else "-"):
         output = _cli_impl(
             f,
@@ -176,6 +173,7 @@ def cli(
             return_unknown_args=return_unknown_args,
             use_underscores=use_underscores,
             console_outputs=console_outputs,
+            config=config,
             **deprecated_kwargs,
         )
 
@@ -200,6 +198,7 @@ def get_parser(
     default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: None | Sequence[conf._markers.Marker] = None,
 ) -> argparse.ArgumentParser: ...
 
 
@@ -212,6 +211,7 @@ def get_parser(
     default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: None | Sequence[conf._markers.Marker] = None,
 ) -> argparse.ArgumentParser: ...
 
 
@@ -225,6 +225,7 @@ def get_parser(
     default: None | OutT = None,
     use_underscores: bool = False,
     console_outputs: bool = True,
+    config: None | Sequence[conf._markers.Marker] = None,
 ) -> argparse.ArgumentParser:
     """Get the ``argparse.ArgumentParser`` object generated under-the-hood by
     :func:`tyro.cli()`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
@@ -244,6 +245,7 @@ def get_parser(
                 return_unknown_args=False,
                 use_underscores=use_underscores,
                 console_outputs=console_outputs,
+                config=config,
             ),
         )
 
@@ -258,6 +260,7 @@ def _cli_impl(
     return_parser: bool,
     return_unknown_args: bool,
     console_outputs: bool,
+    config: None | Sequence[conf._markers.Marker],
     **deprecated_kwargs,
 ) -> (
     OutT
@@ -268,6 +271,10 @@ def _cli_impl(
     ]
 ):
     """Helper for stitching the `tyro` pipeline together."""
+
+    if config is not None:
+        f = Annotated[(f, *config)]  # type: ignore
+
     if "default_instance" in deprecated_kwargs:
         warnings.warn(
             "`default_instance=` is deprecated! use `default=` instead.", stacklevel=2
