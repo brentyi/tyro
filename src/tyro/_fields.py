@@ -16,9 +16,7 @@ from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
-from .constructors._primitive_spec import (
-    UnsupportedTypeAnnotationError,
-)
+from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 from .constructors._registry import ConstructorRegistry
 from .constructors._struct_spec import (
     StructFieldSpec,
@@ -50,14 +48,6 @@ class FieldDefinition:
     # Override the name in our kwargs. Useful whenever the user-facing argument name
     # doesn't match the keyword expected by our callable.
     call_argname: Any
-
-    def __post_init__(self):
-        if (
-            _markers.Fixed in self.markers or _markers.Suppress in self.markers
-        ) and self.default in MISSING_AND_MISSING_NONPROP:
-            raise UnsupportedTypeAnnotationError(
-                f"Field {self.intern_name} is missing a default value!"
-            )
 
     @staticmethod
     @contextlib.contextmanager

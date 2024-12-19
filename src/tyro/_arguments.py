@@ -110,6 +110,15 @@ class ArgumentDefinition:
     subcommand_prefix: str  # Prefix for nesting.
     field: _fields.FieldDefinition
 
+    def __post_init__(self) -> None:
+        if (
+            _markers.Fixed in self.field.markers
+            or _markers.Suppress in self.field.markers
+        ) and self.field.default in _singleton.MISSING_AND_MISSING_NONPROP:
+            raise UnsupportedTypeAnnotationError(
+                f"Field {self.field.intern_name} is missing a default value!"
+            )
+
     def add_argument(
         self, parser: Union[argparse.ArgumentParser, argparse._ArgumentGroup]
     ) -> None:
