@@ -1540,3 +1540,16 @@ def test_counter_action() -> None:
         # Doesn't work in Python 3.7 because of argparse limitations.
         assert tyro.cli(main, args="--verbosity --verbosity -vv".split(" ")) == (2, 2)
         assert tyro.cli(main, args="--verbosity --verbosity -vvv".split(" ")) == (2, 3)
+
+
+def test_nested_suppress() -> None:
+    @dataclasses.dataclass
+    class Bconfig:
+        b: int = 1
+
+    @dataclasses.dataclass
+    class Aconfig:
+        a: str = "hello"
+        b_conf: Bconfig = dataclasses.field(default_factory=Bconfig)
+
+    assert tyro.cli(Aconfig, config=(tyro.conf.Suppress,), args=[]) == Aconfig()
