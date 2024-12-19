@@ -354,11 +354,7 @@ def handle_field(
         field.type, field.markers, nondefault_only=True
     )
 
-    if (
-        not force_primitive
-        and _markers.Fixed not in field.markers
-        and _markers.Suppress not in field.markers
-    ):
+    if not force_primitive:
         # (1) Handle Unions over callables; these result in subparsers.
         subparsers_attempt = SubparsersSpecification.from_field(
             field,
@@ -367,9 +363,9 @@ def handle_field(
             extern_prefix=_strings.make_field_name([extern_prefix, field.extern_name]),
         )
         if subparsers_attempt is not None:
-            if (
-                not subparsers_attempt.required
-                and _markers.AvoidSubcommands in field.markers
+            if not subparsers_attempt.required and (
+                _markers.AvoidSubcommands in field.markers
+                or _markers.Suppress in field.markers
             ):
                 # Don't make a subparser.
                 field = field.with_new_type_stripped(type(field.default))
