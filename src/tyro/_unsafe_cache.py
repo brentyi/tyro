@@ -56,5 +56,5 @@ def _make_key(obj: Any) -> Any:
         hash(obj)
         return obj
     except TypeError:
-        # If the object is not hashable, we'll use some heuristics...
+        # If the object is not hashable, we'll use assume the type/id are unique...
         return type(obj), id(obj)
