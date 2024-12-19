@@ -23,6 +23,3 @@ Module Contents
    out of scope.
 
 
-.. py:function:: unsafe_hash(obj: Any) -> Any
-
-
