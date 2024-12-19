@@ -79,9 +79,6 @@ Module Contents
 
       
 
-   .. py:method:: __post_init__()
-
-
    .. py:method:: marker_context(markers: Tuple[tyro.conf._markers.Marker, Ellipsis])
       :staticmethod:
 

@@ -298,9 +298,7 @@
 <span class="kn">from</span> <span class="nn">._singleton</span> <span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
-<span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
 <span class="kn">from</span> <span class="nn">.constructors._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span>
 <span class="kn">from</span> <span class="nn">.constructors._struct_spec</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">StructFieldSpec</span><span class="p">,</span>
@@ -334,17 +332,6 @@
     <span class="c1"># Override the name in our kwargs. Useful whenever the user-facing argument name</span>
     <span class="c1"># doesn&#39;t match the keyword expected by our callable.</span>
     <span class="n">call_argname</span><span class="p">:</span> <span class="n">Any</span>
-
-<div class="viewcode-block" id="FieldDefinition.__post_init__">
-<a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.__post_init__">[docs]</a>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">markers</span>
-        <span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">intern_name</span><span class="si">}</span><span class="s2"> is missing a default value!&quot;</span>
-            <span class="p">)</span></div>
-
 
 <div class="viewcode-block" id="FieldDefinition.marker_context">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.marker_context">[docs]</a>
