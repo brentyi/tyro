@@ -24,8 +24,8 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
     def inner(f: CallableType) -> CallableType:
         @functools.wraps(f)
         def wrapped_f(*args, **kwargs):
-            key = tuple(unsafe_hash(arg) for arg in args) + tuple(
-                ("__kwarg__", k, unsafe_hash(v)) for k, v in kwargs.items()
+            key = tuple(_make_key(arg) for arg in args) + tuple(
+                ("__kwarg__", k, _make_key(v)) for k, v in kwargs.items()
             )
 
             if key in local_cache:
@@ -49,11 +49,12 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
     return inner
 
 
-def unsafe_hash(obj: Any) -> Any:
-    """We include the types to match functools.
-
-    Some context: https://github.com/brentyi/tyro/issues/214"""
+def _make_key(obj: Any) -> Any:
+    """Some context: https://github.com/brentyi/tyro/issues/214"""
     try:
-        return type(obj), hash(obj)
+        # If the object is hashable, we can use it as a key directly.
+        hash(obj)
+        return obj
     except TypeError:
+        # If the object is not hashable, we'll use some heuristics...
         return type(obj), id(obj)
