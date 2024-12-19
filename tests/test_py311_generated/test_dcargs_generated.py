@@ -16,10 +16,12 @@ from typing import (
     List,
     Literal,
     Optional,
+    Protocol,
     Text,
     Tuple,
     TypeAlias,
     TypeVar,
+    runtime_checkable,
 )
 
 import pytest
@@ -955,3 +957,41 @@ def test_numeric_tower() -> None:
     assert tyro.cli(NumericTower, args="--e 3.2".split(" ")) == NumericTower(e=3.2)
     with pytest.raises(SystemExit):
         tyro.cli(NumericTower, args="--d False".split(" "))
+
+
+def test_runtime_checkable_edge_case() -> None:
+    """From Kevin Black: https://github.com/brentyi/tyro/issues/214"""
+
+    @runtime_checkable
+    class DummyProtocol(Protocol):
+        pass
+
+    @dataclasses.dataclass(frozen=True)
+    class SubConfigA:
+        pass
+
+    @dataclasses.dataclass(frozen=True)
+    class SubConfigB:
+        pass
+
+    @dataclasses.dataclass
+    class Config:
+        subconfig: DummyProtocol
+
+    CONFIGS = {
+        "a": Config(subconfig=SubConfigA()),
+        "b": Config(subconfig=SubConfigB()),
+    }
+
+    assert (
+        tyro.extras.overridable_config_cli(
+            {k: (k, v) for k, v in CONFIGS.items()}, args=["a"]
+        ).subconfig
+        == SubConfigA()
+    )
+    assert (
+        tyro.extras.overridable_config_cli(
+            {k: (k, v) for k, v in CONFIGS.items()}, args=["b"]
+        ).subconfig
+        == SubConfigB()
+    )

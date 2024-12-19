@@ -1,4 +1,5 @@
 import functools
+import sys
 from typing import Any, Callable, Dict, List, TypeVar
 
 CallableType = TypeVar("CallableType", bound=Callable)
@@ -23,11 +24,20 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
     def inner(f: CallableType) -> CallableType:
         @functools.wraps(f)
         def wrapped_f(*args, **kwargs):
-            key = tuple(unsafe_hash(arg) for arg in args) + tuple(
-                ("__kwarg__", k, unsafe_hash(v)) for k, v in kwargs.items()
+            key = tuple(_make_key(arg) for arg in args) + tuple(
+                ("__kwarg__", k, _make_key(v)) for k, v in kwargs.items()
             )
 
             if key in local_cache:
+                # Fuzzy check for cache collisions if called from a pytest test.
+                if "pytest" in sys.modules:
+                    import random
+
+                    if random.random() < 0.5:
+                        a = f(*args, **kwargs)
+                        b = local_cache[key]
+                        assert a == b or str(a) == str(b)
+
                 return local_cache[key]
 
             out = f(*args, **kwargs)
@@ -41,8 +51,12 @@ def unsafe_cache(maxsize: int) -> Callable[[CallableType], CallableType]:
     return inner
 
 
-def unsafe_hash(obj: Any) -> Any:
+def _make_key(obj: Any) -> Any:
+    """Some context: https://github.com/brentyi/tyro/issues/214"""
     try:
-        return hash(obj)
+        # If the object is hashable, we can use it as a key directly.
+        hash(obj)
+        return obj
     except TypeError:
-        return id(obj)
+        # If the object is not hashable, we'll use assume the type/id are unique...
+        return type(obj), id(obj)
