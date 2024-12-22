@@ -1379,7 +1379,7 @@ def test_alias() -> None:
         tyro.cli(Config, args="--x.struct.b 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
-    assert "'--x.struct.a'" in error
+    assert "'--x.struct.a/--all/-d'" in error
     assert "'--x.struct.b'" not in error
 
     assert "--x.struct.a INT, --all INT, -d INT" in get_helptext_with_checks(Config)

@@ -128,9 +128,17 @@ class ArgumentDefinition:
         kwargs = dict(self.lowered.__dict__)  # type: ignore
         kwargs.pop("instance_from_str")
         kwargs = {k: v for k, v in kwargs.items() if v is not None}
-        name_or_flag = kwargs.pop("name_or_flag")
-        if len(name_or_flag) == 0:
-            name_or_flag = _strings.dummy_field_name
+        name_or_flags = kwargs.pop("name_or_flags")
+        if name_or_flags == ("",):
+            name_or_flags = (_strings.dummy_field_name,)
+
+        if self.field.is_positional() and len(name_or_flags) > 1:
+            import warnings
+
+            warnings.warn(
+                f"Aliases were specified, but {name_or_flags} is positional. Aliases will be ignored."
+            )
+            name_or_flags = name_or_flags[:1]
 
         # We're actually going to skip the default field: if an argument is unset, the
         # MISSING value will be detected in _calling.py and the field default will
@@ -144,24 +152,8 @@ class ArgumentDefinition:
         else:
             kwargs["default"] = []
 
-        # Apply overrides in our arg configuration object.
-        # The `name` field is applied when the field object is instantiated!
-        if self.field.argconf.metavar is not None:
-            kwargs["metavar"] = self.field.argconf.metavar
-
         # Add argument, with aliases if available.
-        if self.field.argconf.aliases is not None and not self.field.is_positional():
-            arg = parser.add_argument(
-                name_or_flag, *self.field.argconf.aliases, **kwargs
-            )
-        else:
-            if self.field.argconf.aliases is not None:
-                import warnings
-
-                warnings.warn(
-                    f"Aliases were specified, but {name_or_flag} is positional. Aliases will be ignored."
-                )
-            arg = parser.add_argument(name_or_flag, **kwargs)
+        arg = parser.add_argument(*name_or_flags, **kwargs)
 
         # Do our best to tab complete paths.
         # There will be false positives here, but if choices is unset they should be
@@ -202,6 +194,7 @@ class ArgumentDefinition:
         _rule_generate_helptext(self, lowered)
         _rule_set_name_or_flag_and_dest(self, lowered)
         _rule_positional_special_handling(self, lowered)
+        _rule_apply_argconf(self, lowered)
         return lowered
 
 
@@ -225,7 +218,7 @@ class LoweredArgumentDefinition:
 
     # From here on out, all fields correspond 1:1 to inputs to argparse's
     # add_argument() method.
-    name_or_flag: str = ""
+    name_or_flags: Tuple[str, ...] = ()
     default: Optional[Any] = None
     dest: Optional[str] = None
     required: Optional[bool] = None
@@ -577,7 +570,7 @@ def _rule_set_name_or_flag_and_dest(
     if not arg.field.is_positional():
         name_or_flag = "--" + name_or_flag
 
-    lowered.name_or_flag = name_or_flag
+    lowered.name_or_flags = (name_or_flag,)
     lowered.dest = _strings.make_field_name([arg.intern_prefix, arg.field.intern_name])
 
 
@@ -602,11 +595,21 @@ def _rule_positional_special_handling(
             # If lowered.nargs is either + or an int.
             nargs = "*"
 
-    lowered.name_or_flag = _strings.make_field_name(
-        [arg.intern_prefix, arg.field.intern_name]
+    lowered.name_or_flags = (
+        _strings.make_field_name([arg.intern_prefix, arg.field.intern_name]),
     )
     lowered.dest = None
     lowered.required = None  # Can't be passed in for positionals.
     lowered.metavar = metavar
     lowered.nargs = nargs
     return
+
+
+def _rule_apply_argconf(
+    arg: ArgumentDefinition,
+    lowered: LoweredArgumentDefinition,
+) -> None:
+    if arg.field.argconf.metavar is not None:
+        lowered.metavar = arg.field.argconf.metavar
+    if arg.field.argconf.aliases is not None:
+        lowered.name_or_flags = lowered.name_or_flags + arg.field.argconf.aliases

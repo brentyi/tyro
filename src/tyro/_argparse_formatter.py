@@ -124,7 +124,7 @@ def recursive_arg_search(
             ):
                 continue
 
-            option_strings = (arg.lowered.name_or_flag,)
+            option_strings = arg.lowered.name_or_flags
 
             # Handle actions, eg BooleanOptionalAction will map ("--flag",) to
             # ("--flag", "--no-flag").
@@ -154,7 +154,9 @@ def recursive_arg_search(
 
             # An unrecognized argument.
             nonlocal same_exists
-            if not same_exists and arg.lowered.name_or_flag in unrecognized_arguments:
+            if not same_exists and any(
+                map(lambda x: x in unrecognized_arguments, arg.lowered.name_or_flags)
+            ):
                 same_exists = True
 
         if parser_spec.subparsers is not None:
@@ -775,6 +777,8 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
             info_from_required_arg: Dict[str, Optional[_ArgumentInfo]] = {}
             for arg in message.partition(":")[2].strip().split(", "):
+                if "/" in arg:
+                    arg = arg.split("/")[0]
                 info_from_required_arg[arg] = None
 
             arguments, has_subcommands, same_exists = recursive_arg_search(

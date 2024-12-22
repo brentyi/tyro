@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any, Callable, Sequence, TypeVar, overload
+from typing import Any, Callable, TypeVar, overload
 
 from .._singleton import MISSING_NONPROP
 
@@ -130,7 +130,7 @@ def arg(
     metavar: str | None = None,
     help: str | None = None,
     help_behavior_hint: str | Callable[[str], str] | None = None,
-    aliases: Sequence[str] | None = None,
+    aliases: tuple[str, ...] | list[str] | None = None,
     prefix_name: bool | None = None,
     constructor: None = None,
     constructor_factory: Callable[[], type | Callable] | None = None,
@@ -144,7 +144,7 @@ def arg(
     metavar: str | None = None,
     help: str | None = None,
     help_behavior_hint: str | Callable[[str], str] | None = None,
-    aliases: Sequence[str] | None = None,
+    aliases: tuple[str, ...] | list[str] | None = None,
     prefix_name: bool | None = None,
     constructor: type | Callable | None = None,
     constructor_factory: None = None,
@@ -157,7 +157,7 @@ def arg(
     metavar: str | None = None,
     help: str | None = None,
     help_behavior_hint: str | Callable[[str], str] | None = None,
-    aliases: Sequence[str] | None = None,
+    aliases: tuple[str, ...] | list[str] | None = None,
     prefix_name: bool | None = None,
     constructor: type | Callable | None = None,
     constructor_factory: Callable[[], type | Callable] | None = None,
