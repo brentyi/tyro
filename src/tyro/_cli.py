@@ -483,7 +483,7 @@ def _cli_impl(
                 Panel(
                     Group(
                         "[bright_red][bold]Error parsing"
-                        f" {e.arg.lowered.name_or_flag if isinstance(e.arg, _arguments.ArgumentDefinition) else e.arg}[/bold]:[/bright_red] {e.message}",
+                        f" {'/'.join(e.arg.lowered.name_or_flags) if isinstance(e.arg, _arguments.ArgumentDefinition) else e.arg}[/bold]:[/bright_red] {e.message}",
                         *cast(  # Cast to appease mypy...
                             list,
                             (
@@ -495,7 +495,7 @@ def _cli_impl(
                                     "Argument helptext:",
                                     Padding(
                                         Group(
-                                            f"{e.arg.lowered.name_or_flag} [bold]{e.arg.lowered.metavar}[/bold]",
+                                            f"{'/'.join(e.arg.lowered.name_or_flags)} [bold]{e.arg.lowered.metavar}[/bold]",
                                             e.arg.lowered.help,
                                         ),
                                         pad=(0, 0, 0, 4),
