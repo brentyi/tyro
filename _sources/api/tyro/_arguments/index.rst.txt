@@ -82,9 +82,9 @@ Module Contents
 
       
 
-   .. py:attribute:: name_or_flag
-      :type: str
-      :value: ''
+   .. py:attribute:: name_or_flags
+      :type: Tuple[str, Ellipsis]
+      :value: ()
 
       
 

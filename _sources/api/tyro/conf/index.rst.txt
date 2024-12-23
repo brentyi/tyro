@@ -22,8 +22,8 @@
 Package Contents
 ----------------
 
-.. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
-                 arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: Sequence[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
+.. py:function:: arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: None = None, constructor_factory: Callable[[], type | Callable] | None = None) -> Any
+                 arg(*, name: str | None = None, metavar: str | None = None, help: str | None = None, help_behavior_hint: str | Callable[[str], str] | None = None, aliases: tuple[str, Ellipsis] | list[str] | None = None, prefix_name: bool | None = None, constructor: type | Callable | None = None, constructor_factory: None = None) -> Any
 
    Returns a metadata object for fine-grained argument configuration with
    :py:data:`typing.Annotated`. Should typically not be required.
