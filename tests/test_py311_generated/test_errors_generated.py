@@ -1,7 +1,7 @@
 import contextlib
 import dataclasses
 import io
-from typing import Dict, List, Literal, Tuple, TypeVar
+from typing import Annotated, Dict, List, Literal, Tuple, TypeVar
 
 import pytest
 
@@ -660,3 +660,42 @@ def test_invalid_subcommand_default() -> None:
 
     with pytest.warns(UserWarning):
         assert tyro.cli(A | B, default=C(3), args="b --b 5".split(" ")) == B(5)  # type: ignore
+
+
+def test_metavar_error() -> None:
+    """https://github.com/brentyi/tyro/issues/218"""
+
+    @dataclasses.dataclass
+    class Train:
+        # residual block
+        residual: Annotated[
+            Literal["residual", "ResidualBlock", "double", "DoubleConv"],
+            tyro.conf.arg(metavar="{residual,double}"),
+        ]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Train, args=[])
+
+    error = target.getvalue()
+    assert "--residual {residual,double}" in error
+    assert "DoubleConv" not in error
+
+
+def test_alias_error() -> None:
+    @dataclasses.dataclass
+    class Train:
+        # residual block
+        residual: Annotated[
+            Literal["residual", "ResidualBlock", "double", "DoubleConv"],
+            tyro.conf.arg(aliases=("-r",), metavar="{residual,double}"),
+        ]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(Train, args=[])
+
+    error = target.getvalue()
+    assert "--residual/-r" in error
+    assert "--residual, -r {residual,double}" in error
+    assert "DoubleConv" not in error

@@ -550,14 +550,18 @@ def test_set_narrowing() -> None:
     def main(x: set = {0, 1, 2, "hello"}) -> Any:
         return x
 
-    assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
+    out = tyro.cli(main, args="--x hi there 5".split(" "))
+    # Nondeterministic depending on set iteration order, `int | str` or `str | int`.
+    assert out in ({"hi", "there", 5}, {"hi", "there", "5"})
 
 
 def test_set_narrowing_any() -> None:
     def main(x: Set[Any] = {0, 1, 2, "hello"}) -> Any:
         return x
 
-    assert tyro.cli(main, args="--x hi there 5".split(" ")) == {"hi", "there", 5}
+    out = tyro.cli(main, args="--x hi there 5".split(" "))
+    # Nondeterministic depending on set iteration order, `int | str` or `str | int`.
+    assert out in ({"hi", "there", 5}, {"hi", "there", "5"})
 
 
 def test_set_narrowing_empty() -> None:

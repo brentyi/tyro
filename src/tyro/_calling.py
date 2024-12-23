@@ -118,7 +118,7 @@ def callable_with_args(
                 parsed_value = value_from_prefixed_field_name.get(prefixed_field_name)
                 if parsed_value not in _fields.MISSING_AND_MISSING_NONPROP:
                     raise InstantiationError(
-                        f"{arg.lowered.name_or_flag} was passed in, but"
+                        f"{'/'.join(arg.lowered.name_or_flags)} was passed in, but"
                         " is a fixed argument that cannot be parsed",
                         arg,
                     )
@@ -218,7 +218,7 @@ def callable_with_args(
                 found = False
                 for arg in arg_from_prefixed_field_name.values():
                     if arg.field.call_argname == k:
-                        missing_args.append(arg.lowered.name_or_flag)
+                        missing_args.append("/".join(arg.lowered.name_or_flags))
                         found = True
                         break
                 assert found, "This is likely a bug in tyro."

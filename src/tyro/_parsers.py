@@ -251,7 +251,7 @@ class ParserSpecification:
             return (group_name + " options").strip()
 
         def group_name_from_arg(arg: _arguments.ArgumentDefinition) -> str:
-            prefix = arg.lowered.name_or_flag
+            prefix = arg.lowered.name_or_flags[0]
             if prefix.startswith("--"):
                 prefix = prefix[2:]
             if "." in prefix:
