@@ -145,9 +145,9 @@ Module Contents
 
 
 
-.. py:function:: narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
+.. py:function:: expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable
 
-   Narrow union types.
+   Expand union types if necessary.
 
    This is a shim for failing more gracefully when we we're given a Union type that
    doesn't match the default value.

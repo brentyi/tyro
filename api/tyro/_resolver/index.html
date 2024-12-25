@@ -551,9 +551,9 @@ kept, but the type is swapped.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt class="sig sig-object py" id="tyro._resolver.narrow_union_type">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">narrow_union_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#narrow_union_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.narrow_union_type" title="Link to this definition">¶</a></dt>
-<dd><p>Narrow union types.</p>
+<dt class="sig sig-object py" id="tyro._resolver.expand_union_types">
+<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">expand_union_types</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default_instance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#expand_union_types"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.expand_union_types" title="Link to this definition">¶</a></dt>
+<dd><p>Expand union types if necessary.</p>
 <p>This is a shim for failing more gracefully when we we’re given a Union type that
 doesn’t match the default value.</p>
 <p>In this case, we raise a warning, then add the type of the default value to the
@@ -731,7 +731,7 @@ and generics (list[str]) in older versions of Python.</p>
 <li><a class="reference internal" href="#tyro._resolver.TypeParamAssignmentContext.__exit__"><code class="docutils literal notranslate"><span class="pre">TypeParamAssignmentContext.__exit__()</span></code></a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#tyro._resolver.narrow_union_type"><code class="docutils literal notranslate"><span class="pre">narrow_union_type()</span></code></a></li>
+<li><a class="reference internal" href="#tyro._resolver.expand_union_types"><code class="docutils literal notranslate"><span class="pre">expand_union_types()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.isinstance_with_fuzzy_numeric_tower"><code class="docutils literal notranslate"><span class="pre">isinstance_with_fuzzy_numeric_tower()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.NoneType"><code class="docutils literal notranslate"><span class="pre">NoneType</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.resolve_generic_types"><code class="docutils literal notranslate"><span class="pre">resolve_generic_types()</span></code></a></li>

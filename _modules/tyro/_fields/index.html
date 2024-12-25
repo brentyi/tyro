@@ -299,7 +299,7 @@
 <span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
 <span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
 <span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
-<span class="kn">from</span> <span class="nn">.constructors._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span>
+<span class="kn">from</span> <span class="nn">.constructors._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span><span class="p">,</span> <span class="n">check_default_instances</span>
 <span class="kn">from</span> <span class="nn">.constructors._struct_spec</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">StructFieldSpec</span><span class="p">,</span>
     <span class="n">StructTypeInfo</span><span class="p">,</span>
@@ -384,7 +384,10 @@
             <span class="c1"># called for functions.</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_union_type</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+
+            <span class="c1"># Be forgiving about default instances.</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">check_default_instances</span><span class="p">():</span>
+                <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">expand_union_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
 
         <span class="c1"># Try to extract argconf overrides from type.</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfig</span><span class="p">)</span>

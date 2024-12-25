@@ -369,7 +369,7 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>f</strong> (<em>Callable</em><em>[</em><em>Ellipsis</em><em>, </em><em>T</em><em>]</em>)</p></li>
 <li><p><strong>markers</strong> (<em>Set</em><em>[</em><em>tyro.conf._markers._Marker</em><em>]</em>)</p></li>
-<li><p><strong>description</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em>]</em>)</p></li>
+<li><p><strong>description</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>parent_classes</strong> (<em>Set</em><em>[</em><em>Type</em><em>[</em><em>Any</em><em>]</em><em>]</em>)</p></li>
 <li><p><strong>default_instance</strong> (<em>Union</em><em>[</em><em>T</em><em>, </em><a class="reference internal" href="../_singleton/#tyro._singleton.PropagatingMissingType" title="tyro._singleton.PropagatingMissingType"><em>tyro._singleton.PropagatingMissingType</em></a><em>, </em><a class="reference internal" href="../_singleton/#tyro._singleton.NonpropagatingMissingType" title="tyro._singleton.NonpropagatingMissingType"><em>tyro._singleton.NonpropagatingMissingType</em></a><em>]</em>)</p></li>
 <li><p><strong>intern_prefix</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><em>str</em></a>)</p></li>
@@ -406,7 +406,7 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>parser</strong> (<a class="reference internal" href="../_argparse/#tyro._argparse.ArgumentParser" title="tyro._argparse.ArgumentParser"><em>tyro._argparse.ArgumentParser</em></a>)</p></li>
-<li><p><strong>parent</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>ParserSpecification</em></a><em>]</em>)</p></li>
+<li><p><strong>parent</strong> (<a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><em>ParserSpecification</em></a><em> | </em><em>None</em>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -457,6 +457,11 @@
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.default_parser">
+<span class="sig-name descname"><span class="pre">default_parser</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#tyro._parsers.ParserSpecification" title="tyro._parsers.ParserSpecification"><span class="pre">ParserSpecification</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></em><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.default_parser" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="tyro._parsers.SubparsersSpecification.intern_prefix">
 <span class="sig-name descname"><span class="pre">intern_prefix</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a></em><a class="headerlink" href="#tyro._parsers.SubparsersSpecification.intern_prefix" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -489,7 +494,7 @@
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>Optional[<a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification">SubparsersSpecification</a>]</p>
+<dd class="field-even"><p><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification">SubparsersSpecification</a> | None</p>
 </dd>
 </dl>
 </dd></dl>
@@ -515,7 +520,7 @@
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>root</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><em>SubparsersSpecification</em></a><em>]</em>)</p></li>
+<li><p><strong>root</strong> (<a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><em>SubparsersSpecification</em></a><em> | </em><em>None</em>)</p></li>
 <li><p><strong>leaf</strong> (<a class="reference internal" href="#tyro._parsers.SubparsersSpecification" title="tyro._parsers.SubparsersSpecification"><em>SubparsersSpecification</em></a>)</p></li>
 </ul>
 </dd>
@@ -608,6 +613,7 @@
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.name"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.name</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.description"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.description</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.parser_from_name"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.parser_from_name</span></code></a></li>
+<li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.default_parser"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.default_parser</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.intern_prefix"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.intern_prefix</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.required"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.required</span></code></a></li>
 <li><a class="reference internal" href="#tyro._parsers.SubparsersSpecification.default_instance"><code class="docutils literal notranslate"><span class="pre">SubparsersSpecification.default_instance</span></code></a></li>

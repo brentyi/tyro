@@ -49,12 +49,12 @@ Module Contents
       
 
    .. py:attribute:: helptext_from_intern_prefixed_field_name
-      :type: Dict[str, Optional[str]]
+      :type: Dict[str, str | None]
 
       
 
    .. py:attribute:: subparsers
-      :type: Optional[SubparsersSpecification]
+      :type: SubparsersSpecification | None
 
       
 
@@ -83,7 +83,7 @@ Module Contents
 
       
 
-   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: Optional[str], parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str = '', support_single_arg_types: bool = False) -> ParserSpecification
+   .. py:method:: from_callable_or_type(f: Callable[Ellipsis, T], markers: Set[tyro.conf._markers._Marker], description: str | None, parent_classes: Set[Type[Any]], default_instance: Union[T, tyro._singleton.PropagatingMissingType, tyro._singleton.NonpropagatingMissingType], intern_prefix: str, extern_prefix: str, subcommand_prefix: str = '', support_single_arg_types: bool = False) -> ParserSpecification
       :staticmethod:
 
       Create a parser definition from a callable or type.
@@ -94,7 +94,7 @@ Module Contents
       Create defined arguments and subparsers.
 
 
-   .. py:method:: apply_args(parser: tyro._argparse.ArgumentParser, parent: Optional[ParserSpecification] = None) -> None
+   .. py:method:: apply_args(parser: tyro._argparse.ArgumentParser, parent: ParserSpecification | None = None) -> None
 
       Create defined arguments and subparsers.
 
@@ -116,12 +116,17 @@ Module Contents
       
 
    .. py:attribute:: description
-      :type: Optional[str]
+      :type: str | None
 
       
 
    .. py:attribute:: parser_from_name
       :type: Dict[str, ParserSpecification]
+
+      
+
+   .. py:attribute:: default_parser
+      :type: ParserSpecification | None
 
       
 
@@ -145,7 +150,7 @@ Module Contents
 
       
 
-   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str) -> Optional[SubparsersSpecification]
+   .. py:method:: from_field(field: tyro._fields.FieldDefinition, parent_classes: Set[Type[Any]], intern_prefix: str, extern_prefix: str) -> SubparsersSpecification | None
       :staticmethod:
 
 
@@ -153,7 +158,7 @@ Module Contents
 
 
 
-.. py:function:: add_subparsers_to_leaves(root: Optional[SubparsersSpecification], leaf: SubparsersSpecification) -> SubparsersSpecification
+.. py:function:: add_subparsers_to_leaves(root: SubparsersSpecification | None, leaf: SubparsersSpecification) -> SubparsersSpecification
 
 
 .. py:function:: none_proxy() -> None
