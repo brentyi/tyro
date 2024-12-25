@@ -5,11 +5,11 @@ import io
 import json as json_
 import shlex
 import sys
-from typing import Any, Dict, Generic, List, Tuple, Type, TypedDict, TypeVar, Union
+from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext_with_checks
-from typing_extensions import Annotated
+from typing_extensions import Annotated, TypedDict
 
 import tyro
 
