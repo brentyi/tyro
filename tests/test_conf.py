@@ -1573,8 +1573,10 @@ def test_suppressed_subcommand() -> None:
 
 
 def test_avoid_subcommands_with_generics() -> None:
+    T = TypeVar("T")
+
     @dataclasses.dataclass(frozen=True)
-    class Person[T]:
+    class Person(Generic[T]):
         field: T | bool
 
     @dataclasses.dataclass
