@@ -17,7 +17,7 @@ from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
 from .constructors._primitive_spec import UnsupportedTypeAnnotationError
-from .constructors._registry import ConstructorRegistry
+from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
     StructFieldSpec,
     StructTypeInfo,
@@ -92,7 +92,10 @@ class FieldDefinition:
             # called for functions.
             typ = _resolver.type_from_typevar_constraints(typ)
             typ = _resolver.narrow_collection_types(typ, default)
-            typ = _resolver.narrow_union_type(typ, default)
+
+            # Be forgiving about default instances.
+            if not check_default_instances():
+                typ = _resolver.expand_union_types(typ, default)
 
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated(typ, _confstruct._ArgConfig)

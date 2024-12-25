@@ -1579,7 +1579,9 @@ def test_avoid_subcommands_with_generics() -> None:
 
     @dataclasses.dataclass
     class Train:
-        person: Person[str] | Person[int] = Person("hello")
+        person: Person[int] | Person[bool] | Person[str] | Person[float] = Person(
+            "hello"
+        )
 
     assert tyro.cli(Train, config=(tyro.conf.AvoidSubcommands,), args=[]) == Train(
         person=Person("hello")
