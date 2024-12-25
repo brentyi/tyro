@@ -1567,7 +1567,7 @@ def test_suppressed_subcommand() -> None:
 
     @dataclasses.dataclass
     class Train:
-        person: tyro.conf.Suppress[Person | None] = None
+        person: tyro.conf.Suppress[Union[Person, None]] = None
 
     assert tyro.cli(Train, args=[]) == Train(None)
 
@@ -1577,11 +1577,11 @@ def test_avoid_subcommands_with_generics() -> None:
 
     @dataclasses.dataclass(frozen=True)
     class Person(Generic[T]):
-        field: T | bool
+        field: Union[T, bool]
 
     @dataclasses.dataclass
     class Train:
-        person: Person[int] | Person[bool] | Person[str] | Person[float] = Person(
+        person: Union[Person[int], Person[bool], Person[str], Person[float]] = Person(
             "hello"
         )
 
