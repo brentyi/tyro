@@ -5,7 +5,17 @@ import io
 import json as json_
 import shlex
 import sys
-from typing import Annotated, Any, Dict, Generic, List, Tuple, Type, TypeVar
+from typing import (
+    Annotated,
+    Any,
+    Dict,
+    Generic,
+    List,
+    Tuple,
+    Type,
+    TypedDict,
+    TypeVar,
+)
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -1553,3 +1563,45 @@ def test_nested_suppress() -> None:
         b_conf: Bconfig = dataclasses.field(default_factory=Bconfig)
 
     assert tyro.cli(Aconfig, config=(tyro.conf.Suppress,), args=[]) == Aconfig()
+
+
+def test_suppressed_subcommand() -> None:
+    class Person(TypedDict):
+        name: str
+        age: int
+
+    @dataclasses.dataclass
+    class Train:
+        person: tyro.conf.Suppress[Person | None] = None
+
+    assert tyro.cli(Train, args=[]) == Train(None)
+
+
+def test_avoid_subcommands_with_generics() -> None:
+    T = TypeVar("T")
+
+    @dataclasses.dataclass(frozen=True)
+    class Person(Generic[T]):
+        field: T | bool
+
+    @dataclasses.dataclass
+    class Train:
+        person: Person[int] | Person[bool] | Person[str] | Person[float] = Person(
+            "hello"
+        )
+
+    assert tyro.cli(Train, config=(tyro.conf.AvoidSubcommands,), args=[]) == Train(
+        person=Person("hello")
+    )
+
+    # No subcommand should be created.
+    assert "STR|{True,False}" in get_helptext_with_checks(
+        tyro.conf.AvoidSubcommands[Train]
+    )
+    assert "person:person-str" not in get_helptext_with_checks(
+        tyro.conf.AvoidSubcommands[Train]
+    )
+
+    # Subcommand should be created.
+    assert "STR|{True,False}" not in get_helptext_with_checks(Train)
+    assert "person:person-str" in get_helptext_with_checks(Train)

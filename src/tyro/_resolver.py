@@ -457,8 +457,8 @@ class TypeParamAssignmentContext:
 
 
 @_unsafe_cache.unsafe_cache(maxsize=1024)
-def narrow_union_type(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
-    """Narrow union types.
+def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCallable:
+    """Expand union types if necessary.
 
     This is a shim for failing more gracefully when we we're given a Union type that
     doesn't match the default value.

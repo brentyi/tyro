@@ -38,7 +38,7 @@
 <br />
 
 <strong><code>tyro.cli()</code></strong> is a tool for generating CLI
-interfaces in Python.
+interfaces from type-annotated Python.
 
 We can define configurable scripts using functions:
 
