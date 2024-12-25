@@ -2,7 +2,7 @@
 
 |ruff| |nbsp| |mypy| |nbsp| |pyright| |nbsp| |coverage| |nbsp| |versions|
 
-:func:`tyro.cli()` is a tool for generating CLI interfaces in Python.
+:func:`tyro.cli()` is a tool for generating CLI interfaces from type-annotated Python.
 
 We can define configurable scripts using functions:
 
