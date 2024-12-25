@@ -5,19 +5,7 @@ from __future__ import annotations
 import dataclasses
 import numbers
 import warnings
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Type,
-    TypeVar,
-    Union,
-    cast,
-)
+from typing import Any, Callable, Dict, List, Set, Tuple, Type, TypeVar, Union, cast
 
 from typing_extensions import Annotated, get_args, get_origin
 
@@ -54,12 +42,12 @@ class ParserSpecification:
     args: List[_arguments.ArgumentDefinition]
     field_list: List[_fields.FieldDefinition]
     child_from_prefix: Dict[str, ParserSpecification]
-    helptext_from_intern_prefixed_field_name: Dict[str, Optional[str]]
+    helptext_from_intern_prefixed_field_name: Dict[str, str | None]
 
     # We have two mechanics for tracking subparser groups:
     # - A single subparser group, which is what gets added in the tree structure built
     # by the argparse parser.
-    subparsers: Optional[SubparsersSpecification]
+    subparsers: SubparsersSpecification | None
     # - A set of subparser groups, which reflect the tree structure built by the
     # hierarchy of a nested config structure.
     subparsers_from_intern_prefix: Dict[str, SubparsersSpecification]
@@ -72,7 +60,7 @@ class ParserSpecification:
     def from_callable_or_type(
         f: Callable[..., T],
         markers: Set[_markers._Marker],
-        description: Optional[str],
+        description: str | None,
         parent_classes: Set[Type[Any]],
         default_instance: Union[
             T, _singleton.PropagatingMissingType, _singleton.NonpropagatingMissingType
@@ -113,7 +101,7 @@ class ParserSpecification:
 
         has_required_args = False
         args = []
-        helptext_from_intern_prefixed_field_name: Dict[str, Optional[str]] = {}
+        helptext_from_intern_prefixed_field_name: Dict[str, str | None] = {}
 
         child_from_prefix: Dict[str, ParserSpecification] = {}
 
@@ -242,7 +230,7 @@ class ParserSpecification:
     def apply_args(
         self,
         parser: argparse.ArgumentParser,
-        parent: Optional[ParserSpecification] = None,
+        parent: ParserSpecification | None = None,
     ) -> None:
         """Create defined arguments and subparsers."""
 
@@ -356,21 +344,25 @@ def handle_field(
 
     if not force_primitive:
         # (1) Handle Unions over callables; these result in subparsers.
-        subparsers_attempt = SubparsersSpecification.from_field(
-            field,
-            parent_classes=parent_classes,
-            intern_prefix=_strings.make_field_name([intern_prefix, field.intern_name]),
-            extern_prefix=_strings.make_field_name([extern_prefix, field.extern_name]),
-        )
-        if subparsers_attempt is not None:
-            if not subparsers_attempt.required and (
-                _markers.AvoidSubcommands in field.markers
-                or _markers.Suppress in field.markers
-            ):
-                # Don't make a subparser.
-                field = field.with_new_type_stripped(type(field.default))
-            else:
-                return subparsers_attempt
+        if _markers.Suppress not in field.markers:
+            subparsers_attempt = SubparsersSpecification.from_field(
+                field,
+                parent_classes=parent_classes,
+                intern_prefix=_strings.make_field_name(
+                    [intern_prefix, field.intern_name]
+                ),
+                extern_prefix=_strings.make_field_name(
+                    [extern_prefix, field.extern_name]
+                ),
+            )
+            if subparsers_attempt is not None:
+                if subparsers_attempt.default_parser is not None and (
+                    _markers.AvoidSubcommands in field.markers
+                ):
+                    # Don't make a subparser, just use the default subcommand.
+                    return subparsers_attempt.default_parser
+                else:
+                    return subparsers_attempt
 
         # (2) Handle nested callables.
         if force_primitive == "struct" or _fields.is_struct_type(
@@ -414,8 +406,9 @@ class SubparsersSpecification:
     """Structure for defining subparsers. Each subparser is a parser with a name."""
 
     name: str
-    description: Optional[str]
+    description: str | None
     parser_from_name: Dict[str, ParserSpecification]
+    default_parser: ParserSpecification | None
     intern_prefix: str
     required: bool
     default_instance: Any
@@ -427,7 +420,7 @@ class SubparsersSpecification:
         parent_classes: Set[Type[Any]],
         intern_prefix: str,
         extern_prefix: str,
-    ) -> Optional[SubparsersSpecification]:
+    ) -> SubparsersSpecification | None:
         # Union of classes should create subparsers.
         typ = _resolver.unwrap_annotated(field.type_stripped)
         if get_origin(typ) not in (Union, _resolver.UnionType):
@@ -593,6 +586,7 @@ class SubparsersSpecification:
 
         # Required if a default is passed in, but the default value has missing
         # parameters.
+        default_parser = None
         if default_name is not None:
             default_parser = parser_from_name[default_name]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
@@ -626,6 +620,7 @@ class SubparsersSpecification:
             # the user to include it in the docstring.
             description=description,
             parser_from_name=parser_from_name,
+            default_parser=default_parser,
             intern_prefix=intern_prefix,
             required=required,
             default_instance=field.default,
@@ -678,7 +673,7 @@ class SubparsersSpecification:
 
 
 def add_subparsers_to_leaves(
-    root: Optional[SubparsersSpecification], leaf: SubparsersSpecification
+    root: SubparsersSpecification | None, leaf: SubparsersSpecification
 ) -> SubparsersSpecification:
     if root is None:
         return leaf
