@@ -2,10 +2,10 @@ import dataclasses
 from typing import Any, Generic, NewType, Optional, Tuple, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, Final, Literal
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_nested() -> None:
@@ -1353,7 +1353,7 @@ def test_subcommand_default_with_conf_annotation() -> None:
     class SGDConfig(OptimizerConfig):
         sgd_foo: float = 1.0
 
-    def _constructor() -> type[OptimizerConfig]:
+    def _constructor() -> Any:
         cfgs = [
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
