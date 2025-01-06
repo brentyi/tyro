@@ -2,10 +2,10 @@ import dataclasses
 from typing import Any, Generic, NewType, Optional, Tuple, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, Final, Literal
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_nested() -> None:
@@ -1333,3 +1333,49 @@ def test_union_with_tuple_autoexpand() -> None:
     assert tyro.cli(
         main, args="config:config --config.name world --config.age 27".split(" ")
     ) == Config(name="world", age=27)
+
+
+def test_subcommand_default_with_conf_annotation() -> None:
+    """Adapted from @mirceamironenco.
+
+    https://github.com/brentyi/tyro/issues/221#issuecomment-2572850582
+    """
+
+    @dataclasses.dataclass(frozen=True)
+    class OptimizerConfig:
+        lr: float = 1e-1
+
+    @dataclasses.dataclass(frozen=True)
+    class AdamConfig(OptimizerConfig):
+        adam_foo: float = 1.0
+
+    @dataclasses.dataclass(frozen=True)
+    class SGDConfig(OptimizerConfig):
+        sgd_foo: float = 1.0
+
+    def _constructor() -> type[OptimizerConfig]:
+        cfgs = [
+            Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
+            Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
+        ]
+        return Union[*cfgs]  # type: ignore
+
+    @dataclasses.dataclass(frozen=True)
+    class Config1:
+        optimizer: Annotated[
+            OptimizerConfig, tyro.conf.arg(constructor_factory=_constructor)
+        ] = AdamConfig()
+        foo: int = 1
+        bar: str = "abc"
+
+    assert "(default: optimizer:adam)" in get_helptext_with_checks(Config1)
+
+    @dataclasses.dataclass(frozen=True)
+    class Config2:
+        optimizer: Annotated[
+            OptimizerConfig, tyro.conf.arg(constructor_factory=_constructor)
+        ] = SGDConfig()
+        foo: int = 1
+        bar: str = "abc"
+
+    assert "(default: optimizer:sgd)" in get_helptext_with_checks(Config2)
