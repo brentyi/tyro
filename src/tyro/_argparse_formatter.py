@@ -1027,7 +1027,6 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     )
                 else:
                     column_width = None
-
                 column_lines = [0 for i in range(column_count)]
                 column_parts_grouped = [[] for i in range(column_count)]
                 for p, l in zip(column_parts, column_parts_lines):
