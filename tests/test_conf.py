@@ -8,10 +8,10 @@ import sys
 from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, TypedDict
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_suppress_subcommand() -> None:
@@ -830,9 +830,11 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )
 
-    # Despite all defaults being set, a subcommand should be required.
-    with pytest.raises(SystemExit):
+    # All defaults are set, not default is needed.
+    assert (
         tyro.cli(tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser], args=[])
+        == DefaultInstanceSubparser(3)
+    )
 
 
 def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() -> None:
