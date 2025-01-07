@@ -1040,11 +1040,11 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     column_lines_ratio = [l / column_lines_max for l in column_lines]
 
                     # Done if we're down to one column or all columns are
-                    # within 40% of the maximum height.
+                    # within 60% of the maximum height.
                     #
                     # We use these ratios to prevent large hanging columns: https://github.com/brentyi/tyro/issues/222
                     if column_count == 1 or all(
-                        [ratio > 0.4 for ratio in column_lines_ratio]
+                        [ratio > 0.6 for ratio in column_lines_ratio]
                     ):
                         break
                     column_count -= 1
