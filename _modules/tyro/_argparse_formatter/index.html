@@ -1331,25 +1331,42 @@
                         <span class="nb">len</span><span class="p">(</span><span class="n">column_parts</span><span class="p">),</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
-                <span class="k">if</span> <span class="n">column_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-                    <span class="n">column_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span> <span class="o">//</span> <span class="n">column_count</span> <span class="o">-</span> <span class="mi">1</span>
-                    <span class="c1"># Correct the line count for each panel using the known column</span>
-                    <span class="c1"># width. This will account for word wrap.</span>
-                    <span class="n">column_parts_lines</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span>
-                        <span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">str_from_rich</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">column_width</span><span class="p">)</span>
-                        <span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                        <span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-                        <span class="n">column_parts</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">column_width</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">column_lines</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
-                <span class="n">column_parts_grouped</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
-                <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">column_parts</span><span class="p">,</span> <span class="n">column_parts_lines</span><span class="p">):</span>
-                    <span class="n">chosen_column</span> <span class="o">=</span> <span class="n">column_lines</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">column_lines</span><span class="p">))</span>
-                    <span class="n">column_parts_grouped</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-                    <span class="n">column_lines</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span> <span class="o">+=</span> <span class="n">l</span>
+                <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">column_parts_grouped</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">column_width</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">column_count</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                        <span class="n">column_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span> <span class="o">//</span> <span class="n">column_count</span> <span class="o">-</span> <span class="mi">1</span>
+                        <span class="c1"># Correct the line count for each panel using the known column</span>
+                        <span class="c1"># width. This will account for word wrap.</span>
+                        <span class="n">column_parts_lines</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="n">str_from_rich</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">column_width</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">column_parts</span>
+                        <span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">column_width</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="n">column_lines</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
+                    <span class="n">column_parts_grouped</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
+                    <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">column_parts</span><span class="p">,</span> <span class="n">column_parts_lines</span><span class="p">):</span>
+                        <span class="n">chosen_column</span> <span class="o">=</span> <span class="n">column_lines</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">column_lines</span><span class="p">))</span>
+                        <span class="n">column_parts_grouped</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                        <span class="n">column_lines</span><span class="p">[</span><span class="n">chosen_column</span><span class="p">]</span> <span class="o">+=</span> <span class="n">l</span>
+
+                    <span class="n">column_lines_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="o">*</span><span class="n">column_lines</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># Prevent divide-by-zero.</span>
+                    <span class="n">column_lines_ratio</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span> <span class="o">/</span> <span class="n">column_lines_max</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">column_lines</span><span class="p">]</span>
+
+                    <span class="c1"># Done if we&#39;re down to one column or all columns are</span>
+                    <span class="c1"># within 60% of the maximum height.</span>
+                    <span class="c1">#</span>
+                    <span class="c1"># We use these ratios to prevent large hanging columns: https://github.com/brentyi/tyro/issues/222</span>
+                    <span class="k">if</span> <span class="n">column_count</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">all</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">ratio</span> <span class="o">&gt;</span> <span class="mf">0.6</span> <span class="k">for</span> <span class="n">ratio</span> <span class="ow">in</span> <span class="n">column_lines_ratio</span><span class="p">]</span>
+                    <span class="p">):</span>
+                        <span class="k">break</span>
+                    <span class="n">column_count</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># pragma: no cover</span>
+
+                <span class="k">assert</span> <span class="n">column_parts_grouped</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="n">columns</span> <span class="o">=</span> <span class="n">Columns</span><span class="p">(</span>
                     <span class="p">[</span><span class="n">Group</span><span class="p">(</span><span class="o">*</span><span class="n">g</span><span class="p">)</span> <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="n">column_parts_grouped</span><span class="p">],</span>
                     <span class="n">column_first</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
