@@ -1619,7 +1619,7 @@ def test_consolidate_subcommand_args_optional() -> None:
     class SGDConfig(OptimizerConfig):
         sgd_foo: float = 1.0
 
-    def _constructor() -> type[OptimizerConfig]:
+    def _constructor() -> Type[OptimizerConfig]:
         cfgs = [
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
