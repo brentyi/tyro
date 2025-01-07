@@ -283,7 +283,7 @@ def _cli_impl(
     if deprecated_kwargs.get("avoid_subparsers", False):
         f = conf.AvoidSubcommands[f]  # type: ignore
         warnings.warn(
-            "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubparsers[]`"
+            "`avoid_subparsers=` is deprecated! use `tyro.conf.AvoidSubcommands[]`"
             " instead.",
             stacklevel=2,
         )
@@ -398,7 +398,7 @@ def _cli_impl(
         parser._parsing_known_args = return_unknown_args
         parser._console_outputs = console_outputs
         parser._args = args
-        parser_spec.apply(parser)
+        parser_spec.apply(parser, force_required_subparsers=False)
 
         # Print help message when no arguments are passed in. (but arguments are
         # expected)
