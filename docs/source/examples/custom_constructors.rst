@@ -326,7 +326,6 @@ structs.
         if isinstance(type_info.default, Bounds):
             # If the default value is a `Bounds` instance, we don't need to generate a constructor.
             default = (type_info.default.bounds[0], type_info.default.bounds[1])
-            is_default_overridden = True
         else:
             # Otherwise, the default value is missing. We'll mark the child defaults as missing as well.
             assert type_info.default in (
@@ -334,7 +333,6 @@ structs.
                 tyro.constructors.MISSING_NONPROP,
             )
             default = (tyro.MISSING, tyro.MISSING)
-            is_default_overridden = False
 
         # If the rule applies, we return the constructor spec.
         return tyro.constructors.StructConstructorSpec(
@@ -345,14 +343,12 @@ structs.
                     name="lower",
                     type=int,
                     default=default[0],
-                    is_default_overridden=is_default_overridden,
                     helptext="Lower bound." "",
                 ),
                 tyro.constructors.StructFieldSpec(
                     name="upper",
                     type=int,
                     default=default[1],
-                    is_default_overridden=is_default_overridden,
                     helptext="Upper bound." "",
                 ),
             ),

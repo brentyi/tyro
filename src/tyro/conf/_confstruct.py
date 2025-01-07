@@ -89,15 +89,15 @@ def subcommand(
 
     .. code-block:: python
 
-        # For the first subcommand, StructType(1) will be used as the default.
+        # For the first subcommand, StructTypeA(1) will be used as the default.
         # The second subcommand, whose type is inconsistent with the field
         # default, will be unaffected.
         x: Union[
             Annotated[
-                StructTypeA, subcommand(default=StructTypeA(0)
+                StructTypeA, subcommand(default=StructTypeA(0))
             ],
             Annotated[
-                StructTypeB, subcommand(default=StructTypeB(0)
+                StructTypeB, subcommand(default=StructTypeB(0))
             ],
         ] = StructTypeA(1)
 
