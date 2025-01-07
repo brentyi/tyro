@@ -64,7 +64,7 @@ applied to nested types."""
 
 ConsolidateSubcommandArgs = Annotated[T, None]
 """Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
-ordering, at the cost of support for optional subcommands.
+ordering, with some tradeoffs.
 
 By default, :mod:`tyro` will generate a traditional CLI interface where args are applied to
 the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``:
@@ -87,6 +87,14 @@ To consolidate subcommands, we push arguments to the end, after all subcommands:
 
 This is more robust to reordering of options, ensuring that any new options can simply
 be placed at the end of the command.
+
+The tradeoff is in required arguments. In the above example, if any ``--root.*`` options
+are required (no default is specified), all subcommands will need to be specified in order to
+provide the required argument.
+
+.. code-block:: bash
+
+   python x.py s1 s2 {required --root.* arguments}
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]

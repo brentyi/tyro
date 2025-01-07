@@ -47,13 +47,30 @@ def callable_with_args(
     kwargs: Dict[str, Any] = {}
     consumed_keywords: Set[str] = set()
 
-    def get_value_from_arg(prefixed_field_name: str) -> Any:
+    def get_value_from_arg(
+        prefixed_field_name: str, field_def: _fields.FieldDefinition
+    ) -> tuple[Any, bool]:
         """Helper for getting values from `value_from_arg` + doing some extra
-        asserts."""
-        assert (
-            prefixed_field_name in value_from_prefixed_field_name
-        ), f"{prefixed_field_name} not in {value_from_prefixed_field_name}"
-        return value_from_prefixed_field_name[prefixed_field_name]
+        asserts.
+
+        Returns:
+            - The value from `value_from_prefixed_field_name`.
+            - If the value was found. If True, we found the value (and it will
+              be returned as a string or list of strings). If False, we've just
+              returned the default.
+        """
+
+        if prefixed_field_name not in value_from_prefixed_field_name:
+            # When would the value not be found? Only if we have
+            # `tyro.conf.ConslidateSubcommandArgs` for one of the contained
+            # subparsers.
+            assert (
+                parser_definition.subparsers is not None
+                and parser_definition.consolidate_subcommand_args
+            ), "Field value is unexpectedly missing. This is likely a bug in tyro."
+            return field_def.default, False
+        else:
+            return value_from_prefixed_field_name[prefixed_field_name], True
 
     arg_from_prefixed_field_name: Dict[str, _arguments.ArgumentDefinition] = {}
     for arg in parser_definition.args:
@@ -79,7 +96,7 @@ def callable_with_args(
             name_maybe_prefixed = prefixed_field_name
             consumed_keywords.add(name_maybe_prefixed)
             if not arg.lowered.is_fixed():
-                value = get_value_from_arg(name_maybe_prefixed)
+                value, value_found = get_value_from_arg(name_maybe_prefixed, field)
 
                 if value in _fields.MISSING_AND_MISSING_NONPROP:
                     value = arg.field.default
@@ -97,7 +114,8 @@ def callable_with_args(
                         and arg.lowered.nargs in ("?", "*")
                     ):
                         value = []
-                else:
+                elif value_found:
+                    # Value was found from the CLI, so we need to cast it with instance_from_str.
                     any_arguments_provided = True
                     if arg.lowered.nargs == "?":
                         # Special case for optional positional arguments: this is the
@@ -144,7 +162,10 @@ def callable_with_args(
             subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)
             consumed_keywords.add(subparser_dest)
             if subparser_dest in value_from_prefixed_field_name:
-                subparser_name = get_value_from_arg(subparser_dest)
+                subparser_name, subparser_name_found = get_value_from_arg(
+                    subparser_dest, field
+                )
+                assert subparser_name_found
             else:
                 assert (
                     subparser_def.default_instance
