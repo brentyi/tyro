@@ -553,8 +553,7 @@ class SubparsersSpecification:
 
             # If names match, borrow subcommand default from field default.
             if default_name == subcommand_name and (
-                field.is_default_from_default_instance
-                or subcommand_config.default in _singleton.MISSING_AND_MISSING_NONPROP
+                field.default not in _singleton.MISSING_AND_MISSING_NONPROP
             ):
                 subcommand_config = dataclasses.replace(
                     subcommand_config, default=field.default

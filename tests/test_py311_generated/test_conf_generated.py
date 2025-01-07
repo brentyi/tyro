@@ -1625,7 +1625,7 @@ def test_consolidate_subcommand_args_optional() -> None:
     class SGDConfig(OptimizerConfig):
         sgd_foo: float = 1.0
 
-    def _constructor() -> type[OptimizerConfig]:
+    def _constructor() -> Type[OptimizerConfig]:
         cfgs = [
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
@@ -1637,7 +1637,8 @@ def test_consolidate_subcommand_args_optional() -> None:
     class Config1:
         x: int
         optimizer: Annotated[
-            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+            AdamConfig | SGDConfig,
+            tyro.conf.arg(constructor_factory=_constructor),
         ] = AdamConfig()
 
     with pytest.raises(SystemExit):
@@ -1647,7 +1648,8 @@ def test_consolidate_subcommand_args_optional() -> None:
     @dataclasses.dataclass
     class Config2:
         optimizer: Annotated[
-            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+            AdamConfig | SGDConfig,
+            tyro.conf.arg(constructor_factory=_constructor),
         ]
 
     with pytest.raises(SystemExit):
@@ -1658,7 +1660,8 @@ def test_consolidate_subcommand_args_optional() -> None:
     class Config3:
         x: int = 3
         optimizer: Annotated[
-            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+            AdamConfig | SGDConfig,
+            tyro.conf.arg(constructor_factory=_constructor),
         ] = AdamConfig()
 
     assert (
@@ -1709,3 +1712,54 @@ def test_consolidate_subcommand_args_optional_harder() -> None:
     assert tyro.cli(
         Trunk, default=Trunk(Branch2(x=tyro.MISSING)), args=["branch:branch1"]
     ) == Trunk(Branch1())
+
+
+def test_default_subcommand_consistency() -> None:
+    """https://github.com/brentyi/tyro/issues/221"""
+
+    @dataclasses.dataclass(frozen=True)
+    class OptimizerConfig:
+        lr: float = 1e-1
+
+    @dataclasses.dataclass(frozen=True)
+    class AdamConfig(OptimizerConfig):
+        adam_foo: float = 1.0
+
+    @dataclasses.dataclass(frozen=True)
+    class SGDConfig(OptimizerConfig):
+        sgd_foo: float = 1.0
+
+    def _constructor() -> Any:
+        cfgs = [
+            Annotated[SGDConfig, tyro.conf.subcommand(name="sgd", default=SGDConfig())],
+            Annotated[
+                AdamConfig, tyro.conf.subcommand(name="adam", default=AdamConfig())
+            ],
+        ]
+        return Union.__getitem__(tuple(cfgs))  # type: ignore
+
+    CLIOptimizer = Annotated[
+        OptimizerConfig,
+        tyro.conf.arg(constructor_factory=_constructor),
+    ]
+
+    @dataclasses.dataclass
+    class Config:
+        optimizer: CLIOptimizer = AdamConfig(adam_foo=0.5)  # type: ignore
+        foo: int = 1
+        bar: str = "abc"
+
+    assert tyro.cli(Config, args=[]) == Config()
+    assert (
+        tyro.cli(
+            Config,
+            config=(tyro.conf.ConsolidateSubcommandArgs,),
+            args=["optimizer:adam"],
+        )
+        == Config()
+    )
+    assert (
+        tyro.cli(Config, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        == Config()
+    )
+    assert tyro.cli(Config, args=["optimizer:adam"]) == Config()
