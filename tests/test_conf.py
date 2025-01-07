@@ -1631,7 +1631,8 @@ def test_consolidate_subcommand_args_optional() -> None:
     class Config1:
         x: int
         optimizer: Annotated[
-            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+            Union[AdamConfig, SGDConfig],
+            tyro.conf.arg(constructor_factory=_constructor),
         ] = AdamConfig()
 
     with pytest.raises(SystemExit):
@@ -1641,7 +1642,8 @@ def test_consolidate_subcommand_args_optional() -> None:
     @dataclasses.dataclass
     class Config2:
         optimizer: Annotated[
-            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+            Union[AdamConfig, SGDConfig],
+            tyro.conf.arg(constructor_factory=_constructor),
         ]
 
     with pytest.raises(SystemExit):
@@ -1652,7 +1654,8 @@ def test_consolidate_subcommand_args_optional() -> None:
     class Config3:
         x: int = 3
         optimizer: Annotated[
-            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+            Union[AdamConfig, SGDConfig],
+            tyro.conf.arg(constructor_factory=_constructor),
         ] = AdamConfig()
 
     assert (
