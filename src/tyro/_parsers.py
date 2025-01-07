@@ -190,17 +190,24 @@ class ParserSpecification:
         )
 
     def apply(
-        self, parser: argparse.ArgumentParser
+        self, parser: argparse.ArgumentParser, force_required_subparsers: bool
     ) -> Tuple[argparse.ArgumentParser, ...]:
         """Create defined arguments and subparsers."""
 
         # Generate helptext.
         parser.description = self.description
 
+        # `force_required_subparsers`: if we have required arguments and we're
+        # consolidating all arguments into the leaves of the subparser trees, a
+        # required argument in one node of this tree means that all of its
+        # descendants are required.
+        if self.consolidate_subcommand_args and self.has_required_args:
+            force_required_subparsers = True
+
         # Create subparser tree.
         subparser_group = None
         if self.subparsers is not None:
-            leaves = self.subparsers.apply(parser)
+            leaves = self.subparsers.apply(parser, force_required_subparsers)
             subparser_group = parser._action_groups.pop()
         else:
             leaves = (parser,)
@@ -408,6 +415,7 @@ class SubparsersSpecification:
     name: str
     description: str | None
     parser_from_name: Dict[str, ParserSpecification]
+    default_name: str | None
     default_parser: ParserSpecification | None
     intern_prefix: str
     required: bool
@@ -581,13 +589,13 @@ class SubparsersSpecification:
             )
             parser_from_name[subcommand_name] = subparser
 
-        # Required if a default is missing.
-        required = field.default in _fields.MISSING_AND_MISSING_NONPROP
-
         # Required if a default is passed in, but the default value has missing
         # parameters.
         default_parser = None
-        if default_name is not None:
+        if default_name is None:
+            required = True
+        else:
+            required = False
             default_parser = parser_from_name[default_name]
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
                 required = True
@@ -597,33 +605,14 @@ class SubparsersSpecification:
             ):
                 required = True
 
-        # Required if all args are pushed to the final subcommand.
-        if (
-            _markers.ConsolidateSubcommandArgs in field.markers
-            and default_parser is not None
-            and default_parser.has_required_args
-        ):
-            required = True
-
-        # Make description.
-        description_parts = []
-        if field.helptext is not None:
-            description_parts.append(field.helptext)
-        if not required and field.default not in _fields.MISSING_AND_MISSING_NONPROP:
-            description_parts.append(f" (default: {default_name})")
-        description = (
-            # We use `None` instead of an empty string to prevent a line break from
-            # being created where the description would be.
-            " ".join(description_parts) if len(description_parts) > 0 else None
-        )
-
         return SubparsersSpecification(
             name=field.intern_name,
             # If we wanted, we could add information about the default instance
             # automatically, as is done for normal fields. But for now we just rely on
             # the user to include it in the docstring.
-            description=description,
+            description=field.helptext,
             parser_from_name=parser_from_name,
+            default_name=default_name,
             default_parser=default_parser,
             intern_prefix=intern_prefix,
             required=required,
@@ -632,19 +621,42 @@ class SubparsersSpecification:
         )
 
     def apply(
-        self, parent_parser: argparse.ArgumentParser
+        self,
+        parent_parser: argparse.ArgumentParser,
+        force_required_subparsers: bool,
     ) -> Tuple[argparse.ArgumentParser, ...]:
         title = "subcommands"
         metavar = "{" + ",".join(self.parser_from_name.keys()) + "}"
-        if not self.required:
+
+        required = self.required or force_required_subparsers
+
+        if not required:
             title = "optional " + title
             metavar = f"[{metavar}]"
+
+        # Make description.
+        description_parts = []
+        if self.description is not None:
+            description_parts.append(self.description)
+        if not required and self.default_name is not None:
+            description_parts.append(f"(default: {self.default_name})")
+
+        # If this subparser is required because of a required argument in a
+        # parent (tyro.conf.ConsolidateSubcommandArgs).
+        if not self.required and force_required_subparsers:
+            description_parts.append("(required to specify parent argument)")
+
+        description = (
+            # We use `None` instead of an empty string to prevent a line break from
+            # being created where the description would be.
+            " ".join(description_parts) if len(description_parts) > 0 else None
+        )
 
         # Add subparsers to every node in previous level of the tree.
         argparse_subparsers = parent_parser.add_subparsers(
             dest=_strings.make_subparser_dest(self.intern_prefix),
-            description=self.description,
-            required=self.required,
+            description=description,
+            required=required,
             title=title,
             metavar=metavar,
         )
@@ -671,7 +683,9 @@ class SubparsersSpecification:
             subparser._console_outputs = parent_parser._console_outputs
             subparser._args = parent_parser._args
 
-            subparser_tree_leaves.extend(subparser_def.apply(subparser))
+            subparser_tree_leaves.extend(
+                subparser_def.apply(subparser, force_required_subparsers)
+            )
 
         return tuple(subparser_tree_leaves)
 

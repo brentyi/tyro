@@ -8,10 +8,10 @@ import sys
 from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
-import tyro
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, TypedDict
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 
 def test_suppress_subcommand() -> None:
@@ -830,11 +830,11 @@ def test_omit_subcommand_prefix_and_consolidate_subcommand_args() -> None:
         == DefaultInstanceSubparser(x=1, bc=DefaultInstanceHTTPServer(y=8))
     )
 
-    # All defaults are set, not default is needed.
-    assert (
-        tyro.cli(tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser], args=[])
-        == DefaultInstanceSubparser(3)
-    )
+    # Missing a default for --x.
+    with pytest.raises(SystemExit):
+        assert tyro.cli(
+            tyro.conf.ConsolidateSubcommandArgs[DefaultInstanceSubparser], args=[]
+        )
 
 
 def test_omit_subcommand_prefix_and_consolidate_subcommand_args_in_function() -> None:
@@ -1602,3 +1602,104 @@ def test_avoid_subcommands_with_generics() -> None:
     # Subcommand should be created.
     assert "STR|{True,False}" not in get_helptext_with_checks(Train)
     assert "person:person-str" in get_helptext_with_checks(Train)
+
+
+def test_consolidate_subcommand_args_optional() -> None:
+    """Adapted from @mirceamironenco: https://github.com/brentyi/tyro/issues/221"""
+
+    @dataclasses.dataclass(frozen=True)
+    class OptimizerConfig:
+        lr: float = 1e-1
+
+    @dataclasses.dataclass(frozen=True)
+    class AdamConfig(OptimizerConfig):
+        adam_foo: float = 1.0
+
+    @dataclasses.dataclass(frozen=True)
+    class SGDConfig(OptimizerConfig):
+        sgd_foo: float = 1.0
+
+    def _constructor() -> type[OptimizerConfig]:
+        cfgs = [
+            Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
+            Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
+        ]
+        return Union.__getitem__(tuple(cfgs))  # type: ignore
+
+    # Required because of --x.
+    @dataclasses.dataclass
+    class Config1:
+        x: int
+        optimizer: Annotated[
+            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+        ] = AdamConfig()
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Config1, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+
+    # Required because of optimizer.
+    @dataclasses.dataclass
+    class Config2:
+        optimizer: Annotated[
+            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+        ]
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Config2, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+
+    # Optional!
+    @dataclasses.dataclass
+    class Config3:
+        x: int = 3
+        optimizer: Annotated[
+            AdamConfig | SGDConfig, tyro.conf.arg(constructor_factory=_constructor)
+        ] = AdamConfig()
+
+    assert (
+        tyro.cli(Config3, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        == Config3()
+    )
+
+
+def test_consolidate_subcommand_args_optional_harder() -> None:
+    """Adapted from @mirceamironenco: https://github.com/brentyi/tyro/issues/221"""
+
+    @dataclasses.dataclass(frozen=True)
+    class Leaf1:
+        x: int = 5
+
+    @dataclasses.dataclass(frozen=True)
+    class Leaf2:
+        x: int = 5
+
+    @dataclasses.dataclass(frozen=True)
+    class Branch1:
+        x: int = 5
+        leaf: Union[Leaf1, Leaf2] = Leaf2()
+
+    @dataclasses.dataclass(frozen=True)
+    class Branch2:
+        x: int = 5
+        leaf: Union[Leaf1, Leaf2] = Leaf2()
+
+    @dataclasses.dataclass(frozen=True)
+    class Trunk:
+        branch: Union[Branch1, Branch2] = Branch2()
+
+    assert (
+        tyro.cli(Trunk, config=(tyro.conf.ConsolidateSubcommandArgs,), args=[])
+        == Trunk()
+    )
+
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Trunk,
+            default=Trunk(Branch2(leaf=Leaf1(x=tyro.MISSING))),
+        )
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Trunk, default=Trunk(Branch2(x=tyro.MISSING)), args=["branch:branch2"])
+
+    assert tyro.cli(
+        Trunk, default=Trunk(Branch2(x=tyro.MISSING)), args=["branch:branch1"]
+    ) == Trunk(Branch1())
