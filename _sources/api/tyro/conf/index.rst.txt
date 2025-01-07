@@ -103,7 +103,7 @@ Package Contents
 
    .. code-block:: python
 
-       # For the first subcommand, StructType(1) will be used as the default.
+       # For the first subcommand, StructTypeA(1) will be used as the default.
        # The second subcommand, whose type is inconsistent with the field
        # default, will be unaffected.
        x: Union[
