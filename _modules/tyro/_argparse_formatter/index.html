@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._argparse_formatter - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -291,40 +291,40 @@
 <span class="sd">chaotic as a result; for stability we mirror argparse at _argparse.py.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">argparse</span> <span class="k">as</span> <span class="nn">argparse_sys</span>
-<span class="kn">import</span> <span class="nn">contextlib</span>
-<span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">difflib</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">import</span> <span class="nn">re</span> <span class="k">as</span> <span class="nn">_re</span>
-<span class="kn">import</span> <span class="nn">shlex</span>
-<span class="kn">import</span> <span class="nn">shutil</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">gettext</span> <span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">argparse_sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">difflib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">_re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">gettext</span><span class="w"> </span><span class="kn">import</span> <span class="n">gettext</span> <span class="k">as</span> <span class="n">_</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">from</span> <span class="nn">rich.columns</span> <span class="kn">import</span> <span class="n">Columns</span>
-<span class="kn">from</span> <span class="nn">rich.console</span> <span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
-<span class="kn">from</span> <span class="nn">rich.padding</span> <span class="kn">import</span> <span class="n">Padding</span>
-<span class="kn">from</span> <span class="nn">rich.panel</span> <span class="kn">import</span> <span class="n">Panel</span>
-<span class="kn">from</span> <span class="nn">rich.rule</span> <span class="kn">import</span> <span class="n">Rule</span>
-<span class="kn">from</span> <span class="nn">rich.style</span> <span class="kn">import</span> <span class="n">Style</span>
-<span class="kn">from</span> <span class="nn">rich.table</span> <span class="kn">import</span> <span class="n">Table</span>
-<span class="kn">from</span> <span class="nn">rich.text</span> <span class="kn">import</span> <span class="n">Text</span>
-<span class="kn">from</span> <span class="nn">rich.theme</span> <span class="kn">import</span> <span class="n">Theme</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">override</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.columns</span><span class="w"> </span><span class="kn">import</span> <span class="n">Columns</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.console</span><span class="w"> </span><span class="kn">import</span> <span class="n">Console</span><span class="p">,</span> <span class="n">Group</span><span class="p">,</span> <span class="n">RenderableType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.padding</span><span class="w"> </span><span class="kn">import</span> <span class="n">Padding</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.panel</span><span class="w"> </span><span class="kn">import</span> <span class="n">Panel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.rule</span><span class="w"> </span><span class="kn">import</span> <span class="n">Rule</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.style</span><span class="w"> </span><span class="kn">import</span> <span class="n">Style</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.table</span><span class="w"> </span><span class="kn">import</span> <span class="n">Table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.text</span><span class="w"> </span><span class="kn">import</span> <span class="n">Text</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">rich.theme</span><span class="w"> </span><span class="kn">import</span> <span class="n">Theme</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">override</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
-<span class="kn">from</span> <span class="nn">._parsers</span> <span class="kn">import</span> <span class="n">ParserSpecification</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">conf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._parsers</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParserSpecification</span>
 
 
 <div class="viewcode-block" id="TyroTheme">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="k">class</span> <span class="nc">TyroTheme</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TyroTheme</span><span class="p">:</span>
     <span class="n">border</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
     <span class="n">description</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
     <span class="n">invocation</span><span class="p">:</span> <span class="n">Style</span> <span class="o">=</span> <span class="n">Style</span><span class="p">()</span>
@@ -336,7 +336,7 @@
 
 <div class="viewcode-block" id="TyroTheme.as_rich_theme">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroTheme.as_rich_theme">[docs]</a>
-    <span class="k">def</span> <span class="nf">as_rich_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Theme</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">as_rich_theme</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Theme</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">Theme</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
 </div>
 
@@ -344,7 +344,7 @@
 
 <div class="viewcode-block" id="set_accent_color">
 <a class="viewcode-back" href="../../../api/tyro/extras/#tyro._argparse_formatter.set_accent_color">[docs]</a>
-<span class="k">def</span> <span class="nf">set_accent_color</span><span class="p">(</span><span class="n">accent_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">set_accent_color</span><span class="p">(</span><span class="n">accent_color</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set an accent color to use in help messages. Takes any color supported by ``rich``,</span>
 <span class="sd">    see ``python -m rich.color``. Experimental.&quot;&quot;&quot;</span>
     <span class="n">THEME</span><span class="o">.</span><span class="n">border</span> <span class="o">=</span> <span class="n">Style</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="n">accent_color</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -366,7 +366,7 @@
 
 <div class="viewcode-block" id="recursive_arg_search">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.recursive_arg_search">[docs]</a>
-<span class="k">def</span> <span class="nf">recursive_arg_search</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">recursive_arg_search</span><span class="p">(</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -390,7 +390,7 @@
     <span class="n">has_subcommands</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">same_exists</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_recursive_arg_search</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_recursive_arg_search</span><span class="p">(</span>
         <span class="n">parser_spec</span><span class="p">:</span> <span class="n">ParserSpecification</span><span class="p">,</span>
         <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">subcommand_match_score</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
@@ -484,7 +484,7 @@
 
 <div class="viewcode-block" id="monkeypatch_len">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.monkeypatch_len">[docs]</a>
-<span class="k">def</span> <span class="nf">monkeypatch_len</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">monkeypatch_len</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
@@ -495,7 +495,7 @@
 <div class="viewcode-block" id="ansi_context">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.ansi_context">[docs]</a>
 <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span> <span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">ansi_context</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Context for working with ANSI codes + argparse:</span>
 <span class="sd">    - Applies a temporary monkey patch for making argparse ignore ANSI codes when</span>
 <span class="sd">      wrapping usage text.</span>
@@ -507,7 +507,7 @@
         <span class="n">argparse</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
         <span class="k">try</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
             <span class="c1"># Use Colorama to support coloring in Windows shells.</span>
-            <span class="kn">import</span> <span class="nn">colorama</span>  <span class="c1"># type: ignore</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">colorama</span>  <span class="c1"># type: ignore</span>
 
             <span class="c1"># Notes:</span>
             <span class="c1">#</span>
@@ -537,7 +537,7 @@
 
 <div class="viewcode-block" id="str_from_rich">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.str_from_rich">[docs]</a>
-<span class="k">def</span> <span class="nf">str_from_rich</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">str_from_rich</span><span class="p">(</span>
     <span class="n">renderable</span><span class="p">:</span> <span class="n">RenderableType</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">soft_wrap</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">dummy_console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span><span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">())</span>
@@ -548,7 +548,7 @@
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">_ArgumentInfo</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_ArgumentInfo</span><span class="p">:</span>
     <span class="n">option_strings</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
     <span class="n">metavar</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">usage_hint</span><span class="p">:</span> <span class="nb">str</span>
@@ -576,30 +576,30 @@
 <span class="c1"># Including the latter is purely for `isinstance()`-style checks.</span>
 <div class="viewcode-block" id="TyroArgumentParser">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgumentParser">[docs]</a>
-<span class="k">class</span> <span class="nc">TyroArgumentParser</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">argparse_sys</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TyroArgumentParser</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">argparse_sys</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
     <span class="n">_parser_specification</span><span class="p">:</span> <span class="n">ParserSpecification</span>
     <span class="n">_parsing_known_args</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">_console_outputs</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">_args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">_check_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_check_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;We override _check_value to ignore sentinel values defined by tyro.</span>
 
 <span class="sd">        This solves a choices error raised by argparse in a very specific edge case:</span>
 <span class="sd">        literals in containers as positional arguments.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">._fields</span> <span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._fields</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
 
         <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_check_value</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">_print_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_print_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">message</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_console_outputs</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="n">file</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
             <span class="k">try</span><span class="p">:</span>
@@ -608,7 +608,7 @@
                 <span class="k">pass</span>
 
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">_parse_known_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_strings</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_parse_known_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg_strings</span><span class="p">,</span> <span class="n">namespace</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;We override _parse_known_args() to improve error messages in the presence of</span>
 <span class="sd">        subcommands. Difference is marked with &lt;new&gt;...&lt;/new&gt; below.&quot;&quot;&quot;</span>
 
@@ -665,7 +665,7 @@
         <span class="n">seen_actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="n">seen_non_default_actions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-        <span class="k">def</span> <span class="nf">take_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argument_strings</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">take_action</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argument_strings</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
             <span class="n">seen_actions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
             <span class="n">argument_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_values</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">argument_strings</span><span class="p">)</span>
 
@@ -686,7 +686,7 @@
                 <span class="n">action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">argument_values</span><span class="p">,</span> <span class="n">option_string</span><span class="p">)</span>
 
         <span class="c1"># function to convert arg_strings into an optional action</span>
-        <span class="k">def</span> <span class="nf">consume_optional</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">consume_optional</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
             <span class="c1"># get the optional identified at this index</span>
             <span class="n">option_tuple</span> <span class="o">=</span> <span class="n">option_string_indices</span><span class="p">[</span><span class="n">start_index</span><span class="p">]</span>
             <span class="n">action</span><span class="p">,</span> <span class="n">option_string</span><span class="p">,</span> <span class="n">sep</span><span class="p">,</span> <span class="n">explicit_arg</span> <span class="o">=</span> <span class="n">option_tuple</span>
@@ -782,7 +782,7 @@
         <span class="n">positionals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_positional_actions</span><span class="p">()</span>
 
         <span class="c1"># function to convert arg_strings into positional actions</span>
-        <span class="k">def</span> <span class="nf">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">consume_positionals</span><span class="p">(</span><span class="n">start_index</span><span class="p">):</span>
             <span class="c1"># match as many Positionals as possible</span>
             <span class="n">match_partial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_match_arguments_partial</span>
             <span class="n">selected_pattern</span> <span class="o">=</span> <span class="n">arg_strings_pattern</span><span class="p">[</span><span class="n">start_index</span><span class="p">:]</span>
@@ -893,7 +893,7 @@
 <div class="viewcode-block" id="TyroArgumentParser.error">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgumentParser.error">[docs]</a>
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NoReturn</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Improve error messages from argparse.</span>
 
 <span class="sd">        error(message: string)</span>
@@ -939,7 +939,7 @@
                     <span class="c1"># Compute a score for each argument.</span>
                     <span class="k">assert</span> <span class="n">unrecognized_argument</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">)</span>
 
-                    <span class="k">def</span> <span class="nf">get_score</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+                    <span class="k">def</span><span class="w"> </span><span class="nf">get_score</span><span class="p">(</span><span class="n">option_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">option_string</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span>
                             <span class="n">unrecognized_argument</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
                         <span class="p">)</span> <span class="ow">or</span> <span class="n">option_string</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">unrecognized_argument</span><span class="p">[</span><span class="mi">2</span><span class="p">:]):</span>
@@ -1185,8 +1185,8 @@
 
 <div class="viewcode-block" id="TyroArgparseHelpFormatter">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter">[docs]</a>
-<span class="k">class</span> <span class="nc">TyroArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TyroArgparseHelpFormatter</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">RawDescriptionHelpFormatter</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prog</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">indent_increment</span> <span class="o">=</span> <span class="mi">4</span>
         <span class="n">width</span> <span class="o">=</span> <span class="n">shutil</span><span class="o">.</span><span class="n">get_terminal_size</span><span class="p">()</span><span class="o">.</span><span class="n">columns</span> <span class="o">-</span> <span class="mi">2</span>
         <span class="n">max_help_position</span> <span class="o">=</span> <span class="mi">24</span>
@@ -1198,7 +1198,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">prog</span><span class="p">,</span> <span class="n">indent_increment</span><span class="p">,</span> <span class="n">max_help_position</span><span class="p">,</span> <span class="n">width</span><span class="p">)</span>
 
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Override _format_args() to ignore nargs and always expect single string</span>
 <span class="sd">        metavars.&quot;&quot;&quot;</span>
         <span class="n">get_metavar</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_metavar_formatter</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">default_metavar</span><span class="p">)</span>
@@ -1224,7 +1224,7 @@
 <div class="viewcode-block" id="TyroArgparseHelpFormatter.add_argument">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter.add_argument">[docs]</a>
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_argument</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="c1"># Patch to avoid super long arguments from shifting the helptext of all of the</span>
         <span class="c1"># fields.</span>
         <span class="n">prev_max_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span>
@@ -1233,11 +1233,11 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_action_max_length</span> <span class="o">=</span> <span class="n">prev_max_length</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_split_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_split_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
         <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_whitespace_matcher</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="c1"># The textwrap module is used only for formatting help.</span>
         <span class="c1"># Delay its import for speeding up the common usage of argparse.</span>
-        <span class="kn">import</span> <span class="nn">textwrap</span> <span class="k">as</span> <span class="nn">textwrap</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">textwrap</span>
 
         <span class="c1"># Sketchy, but seems to work.</span>
         <span class="n">textwrap</span><span class="o">.</span><span class="n">len</span> <span class="o">=</span> <span class="n">monkeypatch_len</span>  <span class="c1"># type: ignore</span>
@@ -1246,13 +1246,13 @@
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">_fill_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">indent</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_fill_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">indent</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">indent</span> <span class="o">+</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="n">keepends</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
 <div class="viewcode-block" id="TyroArgparseHelpFormatter.format_help">
 <a class="viewcode-back" href="../../../api/tyro/_argparse_formatter/#tyro._argparse_formatter.TyroArgparseHelpFormatter.format_help">[docs]</a>
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Try with and without a fixed help position, then return the shorter help</span>
         <span class="c1"># message.</span>
         <span class="c1"># For dense multi-column layouts, the fixed help position is often shorter.</span>
@@ -1275,21 +1275,21 @@
 
 
     <span class="nd">@override</span>
-    <span class="k">class</span> <span class="nc">_Section</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
-        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">_Section</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formatter</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">heading</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">formatter</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">heading</span> <span class="o">=</span> <span class="n">heading</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_tyro_rule</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">def</span> <span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">format_help</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tyro_format_root</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tyro_format_nonroot</span><span class="p">()</span>
 
-        <span class="k">def</span> <span class="nf">_tyro_format_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_tyro_format_root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="n">dummy_console</span> <span class="o">=</span> <span class="n">Console</span><span class="p">(</span>
                 <span class="n">width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_width</span><span class="p">,</span> <span class="n">theme</span><span class="o">=</span><span class="n">THEME</span><span class="o">.</span><span class="n">as_rich_theme</span><span class="p">()</span>
             <span class="p">)</span>
@@ -1344,7 +1344,6 @@
                     <span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">column_width</span> <span class="o">=</span> <span class="kc">None</span>
-
                 <span class="n">column_lines</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
                 <span class="n">column_parts_grouped</span> <span class="o">=</span> <span class="p">[[]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">column_count</span><span class="p">)]</span>
                 <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">column_parts</span><span class="p">,</span> <span class="n">column_parts_lines</span><span class="p">):</span>
@@ -1361,7 +1360,7 @@
                 <span class="n">dummy_console</span><span class="o">.</span><span class="n">print</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">capture</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 
-        <span class="k">def</span> <span class="nf">_format_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_format_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
             <span class="n">invocation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_format_action_invocation</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
             <span class="n">indent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">_current_indent</span>
             <span class="n">help_position</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
@@ -1446,7 +1445,7 @@
 
             <span class="k">return</span> <span class="n">item_parts</span>
 
-        <span class="k">def</span> <span class="nf">_tyro_format_nonroot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">_tyro_format_nonroot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="c1"># Add each child item as a rich renderable.</span>
             <span class="n">description_part</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">item_parts</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1530,7 +1529,7 @@
                 <span class="c1"># padding=(1, 1, 0, 1),</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_format_actions_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>  <span class="c1">#  pragma: no cover</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format_actions_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">groups</span><span class="p">):</span>  <span class="c1">#  pragma: no cover</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Backporting from Python 3.10, primarily to call format_usage() on actions.&quot;&quot;&quot;</span>
 
         <span class="c1"># find group indices and identify actions in groups</span>
@@ -1650,7 +1649,7 @@
         <span class="k">return</span> <span class="n">text</span>
 
     <span class="nd">@override</span>
-    <span class="k">def</span> <span class="nf">_format_usage</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_format_usage</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">usage</span><span class="p">,</span> <span class="n">actions</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">],</span> <span class="n">groups</span><span class="p">,</span> <span class="n">prefix</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">actions</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span>

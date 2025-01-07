@@ -16,7 +16,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>PyTorch / JAX - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -306,9 +306,9 @@ to print helptext from the main process:</p>
 </pre></div>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos">1</span><span class="c1"># 01_pytorch_parallelism.py</span>
-<span class="linenos">2</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos">2</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos">3</span>
-<span class="linenos">4</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bar</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">4</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">foo</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">bar</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos">5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description. This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">6</span>
 <span class="linenos">7</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
@@ -324,12 +324,12 @@ to print helptext from the main process:</p>
 <p>If you use <a class="reference external" href="https://github.com/google/flax">flax.linen</a>, modules can be instantiated
 directly from <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 02_flax.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">flax</span> <span class="kn">import</span> <span class="n">linen</span> <span class="k">as</span> <span class="n">nn</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">jax</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">linen</span> <span class="k">as</span> <span class="n">nn</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">jax</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">jnp</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Classifier</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+<span class="linenos"> 7</span><span class="k">class</span><span class="w"> </span><span class="nc">Classifier</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
 <span class="linenos"> 8</span>    <span class="n">layers</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Layers in our network.&quot;&quot;&quot;</span>
 <span class="linenos">10</span>    <span class="n">units</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span>
@@ -338,7 +338,7 @@ directly from <a class="reference internal" href="../../api/tyro/#tyro.cli" titl
 <span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Number of classes.&quot;&quot;&quot;</span>
 <span class="linenos">14</span>
 <span class="linenos">15</span>    <span class="nd">@nn</span><span class="o">.</span><span class="n">compact</span>
-<span class="linenos">16</span>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+<span class="linenos">16</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">jnp</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
 <span class="linenos">17</span>        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
 <span class="linenos">18</span>            <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span>
 <span class="linenos">19</span>                <span class="bp">self</span><span class="o">.</span><span class="n">units</span><span class="p">,</span>
@@ -353,7 +353,7 @@ directly from <a class="reference internal" href="../../api/tyro/#tyro.cli" titl
 <span class="linenos">28</span>        <span class="n">x</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 <span class="linenos">29</span>        <span class="k">return</span> <span class="n">x</span>
 <span class="linenos">30</span>
-<span class="linenos">31</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Classifier</span><span class="p">,</span> <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">31</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Classifier</span><span class="p">,</span> <span class="n">num_iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos">32</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.</span>
 <span class="linenos">33</span>
 <span class="linenos">34</span><span class="sd">    Args:</span>

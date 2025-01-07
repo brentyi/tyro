@@ -16,7 +16,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Subcommands - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -301,20 +301,20 @@ the union; arguments are then populated from the chosen type.</p>
 <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.subcommand" title="tyro.conf.subcommand"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.subcommand()</span></code></a>.</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 01_subcommands.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">Checkout</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Checkout</span><span class="p">:</span>
 <span class="linenos">10</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Checkout a branch.&quot;&quot;&quot;</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">15</span><span class="k">class</span> <span class="nc">Commit</span><span class="p">:</span>
+<span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Commit</span><span class="p">:</span>
 <span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Commit changes.&quot;&quot;&quot;</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
@@ -382,25 +382,25 @@ use <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.AvoidSubc
 alleviating this, see <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.ConsolidateSubcommandArgs" title="tyro.conf.ConsolidateSubcommandArgs"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.ConsolidateSubcommandArgs</span></code></a>.</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 02_subcommands_in_func.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">Checkout</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Checkout</span><span class="p">:</span>
 <span class="linenos">10</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Checkout a branch.&quot;&quot;&quot;</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span>    <span class="n">branch</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">15</span><span class="k">class</span> <span class="nc">Commit</span><span class="p">:</span>
+<span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Commit</span><span class="p">:</span>
 <span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Commit changes.&quot;&quot;&quot;</span>
 <span class="linenos">17</span>
 <span class="linenos">18</span>    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos">20</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos">21</span>    <span class="n">shared_arg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
 <span class="linenos">22</span>    <span class="n">cmd</span><span class="p">:</span> <span class="n">Checkout</span> <span class="o">|</span> <span class="n">Commit</span> <span class="o">=</span> <span class="n">Checkout</span><span class="p">(</span><span class="n">branch</span><span class="o">=</span><span class="s2">&quot;default&quot;</span><span class="p">),</span>
 <span class="linenos">23</span><span class="p">):</span>
@@ -443,39 +443,39 @@ Commit(message='Hello!')
 <span id="example-03-multiple-subcommands"></span><h2>Sequenced Subcommands<a class="headerlink" href="#sequenced-subcommands" title="Link to this heading">¶</a></h2>
 <p>Multiple unions over struct types are populated using a series of subcommands.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 03_multiple_subcommands.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 5</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 7</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 8</span>
 <span class="linenos"> 9</span><span class="c1"># Possible dataset configurations.</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">12</span><span class="k">class</span> <span class="nc">Mnist</span><span class="p">:</span>
+<span class="linenos">12</span><span class="k">class</span><span class="w"> </span><span class="nc">Mnist</span><span class="p">:</span>
 <span class="linenos">13</span>    <span class="n">binary</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="linenos">14</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Set to load binary version of MNIST dataset.&quot;&quot;&quot;</span>
 <span class="linenos">15</span>
 <span class="linenos">16</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">17</span><span class="k">class</span> <span class="nc">ImageNet</span><span class="p">:</span>
+<span class="linenos">17</span><span class="k">class</span><span class="w"> </span><span class="nc">ImageNet</span><span class="p">:</span>
 <span class="linenos">18</span>    <span class="n">subset</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span>
 <span class="linenos">19</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Choose between ImageNet-50, ImageNet-100, ImageNet-1000, etc.&quot;&quot;&quot;</span>
 <span class="linenos">20</span>
 <span class="linenos">21</span><span class="c1"># Possible optimizer configurations.</span>
 <span class="linenos">22</span>
 <span class="linenos">23</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">24</span><span class="k">class</span> <span class="nc">Adam</span><span class="p">:</span>
+<span class="linenos">24</span><span class="k">class</span><span class="w"> </span><span class="nc">Adam</span><span class="p">:</span>
 <span class="linenos">25</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span>
 <span class="linenos">26</span>    <span class="n">betas</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">)</span>
 <span class="linenos">27</span>
 <span class="linenos">28</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">29</span><span class="k">class</span> <span class="nc">Sgd</span><span class="p">:</span>
+<span class="linenos">29</span><span class="k">class</span><span class="w"> </span><span class="nc">Sgd</span><span class="p">:</span>
 <span class="linenos">30</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3e-4</span>
 <span class="linenos">31</span>
 <span class="linenos">32</span><span class="c1"># Train script.</span>
 <span class="linenos">33</span>
-<span class="linenos">34</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+<span class="linenos">34</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span>
 <span class="linenos">35</span>    <span class="n">dataset</span><span class="p">:</span> <span class="n">Mnist</span> <span class="o">|</span> <span class="n">ImageNet</span> <span class="o">=</span> <span class="n">Mnist</span><span class="p">(),</span>
 <span class="linenos">36</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">Adam</span> <span class="o">|</span> <span class="n">Sgd</span> <span class="o">=</span> <span class="n">Adam</span><span class="p">(),</span>
 <span class="linenos">37</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -558,12 +558,12 @@ Adam(learning_rate=0.0003, betas=(0.9, 0.999))
 <p><a class="reference internal" href="../../api/tyro/extras/#tyro.extras.SubcommandApp" title="tyro.extras.SubcommandApp"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.SubcommandApp()</span></code></a> provides a decorator-based API for
 subcommands, which is inspired by <a class="reference external" href="https://click.palletsprojects.com/">click</a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 04_decorator_subcommands.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">tyro.extras</span> <span class="kn">import</span> <span class="n">SubcommandApp</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">tyro.extras</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubcommandApp</span>
 <span class="linenos"> 3</span>
 <span class="linenos"> 4</span><span class="n">app</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span>
-<span class="linenos"> 7</span><span class="k">def</span> <span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 7</span><span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos"> 8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Greet someone.&quot;&quot;&quot;</span>
 <span class="linenos"> 9</span>    <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
 <span class="linenos">10</span>    <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
@@ -571,7 +571,7 @@ subcommands, which is inspired by <a class="reference external" href="https://cl
 <span class="linenos">12</span>    <span class="nb">print</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;addition&quot;</span><span class="p">)</span>
-<span class="linenos">15</span><span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">15</span><span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Add two numbers.&quot;&quot;&quot;</span>
 <span class="linenos">17</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="linenos">18</span>
@@ -630,13 +630,13 @@ is a thin wrapper around <a class="reference internal" href="../../api/tyro/#tyr
 more generality is needed, the internal working are explained in the docs for
 <a class="reference internal" href="../../api/tyro/extras/#tyro.extras.subcommand_cli_from_dict" title="tyro.extras.subcommand_cli_from_dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.subcommand_cli_from_dict()</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 05_subcommands_func.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">checkout</span><span class="p">(</span><span class="n">branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 4</span><span class="k">def</span><span class="w"> </span><span class="nf">checkout</span><span class="p">(</span><span class="n">branch</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check out a branch.&quot;&quot;&quot;</span>
 <span class="linenos"> 6</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">branch</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">commit</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">all</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Make a commit.&quot;&quot;&quot;</span>
 <span class="linenos">10</span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">message</span><span class="si">=}</span><span class="s2"> </span><span class="si">{</span><span class="nb">all</span><span class="si">=}</span><span class="s2">&quot;</span><span class="p">)</span>
 <span class="linenos">11</span>

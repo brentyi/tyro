@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._singleton - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -280,15 +280,15 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._singleton</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 
 <div class="viewcode-block" id="Singleton">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.Singleton">[docs]</a>
-<span class="k">class</span> <span class="nc">Singleton</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Singleton</span><span class="p">:</span>
     <span class="c1"># Singleton pattern.</span>
     <span class="c1"># https://www.python.org/download/releases/2.2/descrintro/#__new__</span>
-    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="n">it</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__it__&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">it</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">it</span>
@@ -298,7 +298,7 @@
 
 <div class="viewcode-block" id="Singleton.init">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.Singleton.init">[docs]</a>
-    <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
         <span class="k">pass</span></div>
 </div>
 
@@ -306,28 +306,28 @@
 
 <div class="viewcode-block" id="PropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.PropagatingMissingType">[docs]</a>
-<span class="k">class</span> <span class="nc">PropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="NonpropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.NonpropagatingMissingType">[docs]</a>
-<span class="k">class</span> <span class="nc">NonpropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NonpropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="ExcludeFromCallType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.ExcludeFromCallType">[docs]</a>
-<span class="k">class</span> <span class="nc">ExcludeFromCallType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ExcludeFromCallType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="NotRequiredButWeDontKnowTheValueType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.NotRequiredButWeDontKnowTheValueType">[docs]</a>
-<span class="k">class</span> <span class="nc">NotRequiredButWeDontKnowTheValueType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NotRequiredButWeDontKnowTheValueType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 

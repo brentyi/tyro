@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._resolver - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -282,16 +282,16 @@
           <h1>Source code for tyro._resolver</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Utilities for resolving types and forward references.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">collections.abc</span>
-<span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">types</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
     <span class="n">ClassVar</span><span class="p">,</span>
@@ -307,8 +307,8 @@
     <span class="n">overload</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">typeguard</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typeguard</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Annotated</span><span class="p">,</span>
     <span class="n">Final</span><span class="p">,</span>
     <span class="n">ForwardRef</span><span class="p">,</span>
@@ -320,9 +320,9 @@
     <span class="n">get_type_hints</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
-<span class="kn">from</span> <span class="nn">._singleton</span> <span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
-<span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 
 <span class="n">UnionType</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Same as types.UnionType, but points to typing.Union for older versions of</span>
@@ -335,7 +335,7 @@
 <div class="viewcode-block" id="TyroTypeAliasBreadCrumb">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TyroTypeAliasBreadCrumb">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">TyroTypeAliasBreadCrumb</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TyroTypeAliasBreadCrumb</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A breadcrumb we can leave behind to track names of type aliases and</span>
 <span class="sd">    `NewType` types. We can use type alias names to auto-populate</span>
 <span class="sd">    subcommands.&quot;&quot;&quot;</span>
@@ -346,7 +346,7 @@
 
 <div class="viewcode-block" id="unwrap_origin_strip_extras">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_origin_strip_extras">[docs]</a>
-<span class="k">def</span> <span class="nf">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns the origin, ignoring typing.Annotated, of typ if it exists. Otherwise,</span>
 <span class="sd">    returns typ.&quot;&quot;&quot;</span>
     <span class="n">typ</span> <span class="o">=</span> <span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -361,7 +361,7 @@
 
 <div class="viewcode-block" id="is_dataclass">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_dataclass">[docs]</a>
-<span class="k">def</span> <span class="nf">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">Callable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_dataclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">,</span> <span class="n">Callable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as `dataclasses.is_dataclass`, but also handles generic aliases.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>  <span class="c1"># type: ignore</span></div>
 
@@ -370,7 +370,7 @@
 <div class="viewcode-block" id="resolved_fields">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolved_fields">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolved_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Similar to dataclasses.fields(), but includes dataclasses.InitVar types and</span>
 <span class="sd">    resolves forward references.&quot;&quot;&quot;</span>
 
@@ -402,7 +402,7 @@
 
 <div class="viewcode-block" id="is_namedtuple">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_namedtuple">[docs]</a>
-<span class="k">def</span> <span class="nf">is_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_namedtuple</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_fields&quot;</span><span class="p">)</span>
         <span class="c1"># `_field_types` was removed in Python &gt;=3.9.</span>
@@ -414,7 +414,7 @@
 
 <div class="viewcode-block" id="type_from_typevar_constraints">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.type_from_typevar_constraints">[docs]</a>
-<span class="k">def</span> <span class="nf">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Try to concretize a type from a TypeVar&#39;s bounds or constraints. Identity if</span>
 <span class="sd">    unsuccessful.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
@@ -435,7 +435,7 @@
 
 <div class="viewcode-block" id="resolve_newtype_and_aliases">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolve_newtype_and_aliases">[docs]</a>
-<span class="k">def</span> <span class="nf">resolve_newtype_and_aliases</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_newtype_and_aliases</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallableOrNone</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallableOrNone</span><span class="p">:</span>
     <span class="c1"># Handle type aliases, eg via the `type` statement in Python 3.12.</span>
@@ -468,7 +468,7 @@
 <div class="viewcode-block" id="narrow_subtypes">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_subtypes">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">narrow_subtypes</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">narrow_subtypes</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
@@ -514,7 +514,7 @@
 
 <div class="viewcode-block" id="swap_type_using_confstruct">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.swap_type_using_confstruct">[docs]</a>
-<span class="k">def</span> <span class="nf">swap_type_using_confstruct</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">swap_type_using_confstruct</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Swap types using the `constructor_factory` attribute from</span>
 <span class="sd">    `tyro.conf.arg` and `tyro.conf.subcommand`. Runtime annotations are</span>
 <span class="sd">    kept, but the type is swapped.&quot;&quot;&quot;</span>
@@ -538,7 +538,7 @@
 
 <div class="viewcode-block" id="narrow_collection_types">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.narrow_collection_types">[docs]</a>
-<span class="k">def</span> <span class="nf">narrow_collection_types</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">narrow_collection_types</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;TypeForm narrowing for containers. Infers types of container contents.&quot;&quot;&quot;</span>
@@ -573,7 +573,7 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="c1"># Can only import ReadOnly in typing_extensions&gt;=4.9.0, which isn&#39;t</span>
     <span class="c1"># supported by Python 3.7.</span>
-    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">ReadOnly</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReadOnly</span>
 
     <span class="n">STRIP_WRAPPER_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">,</span> <span class="n">ReadOnly</span><span class="p">}</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -583,21 +583,21 @@
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">]]:</span> <span class="o">...</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span> <span class="o">...</span>
@@ -605,7 +605,7 @@
 
 <div class="viewcode-block" id="unwrap_annotated">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.unwrap_annotated">[docs]</a>
-<span class="k">def</span> <span class="nf">unwrap_annotated</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">unwrap_annotated</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
     <span class="n">search_type</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">],</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;all&quot;</span><span class="p">],</span> <span class="nb">object</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">MetadataType</span><span class="p">,</span> <span class="o">...</span><span class="p">]],</span> <span class="n">TypeOrCallable</span><span class="p">]:</span>
@@ -671,13 +671,13 @@
 
 <div class="viewcode-block" id="TypeParamResolver">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamResolver">[docs]</a>
-<span class="k">class</span> <span class="nc">TypeParamResolver</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TypeParamResolver</span><span class="p">:</span>
     <span class="n">param_assignments</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="TypeParamResolver.get_assignment_context">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamResolver.get_assignment_context">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">get_assignment_context</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeParamAssignmentContext</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_assignment_context</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeParamAssignmentContext</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Context manager for resolving type parameters.&quot;&quot;&quot;</span>
         <span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span> <span class="o">=</span> <span class="n">resolve_generic_types</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">TypeParamAssignmentContext</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">type_from_typevar</span><span class="p">)</span></div>
@@ -686,7 +686,7 @@
 <div class="viewcode-block" id="TypeParamResolver.concretize_type_params">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamResolver.concretize_type_params">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">concretize_type_params</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">concretize_type_params</span><span class="p">(</span>
         <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply type parameter assignments based on the current context.&quot;&quot;&quot;</span>
@@ -721,7 +721,7 @@
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">seen</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">type_from_typevar</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">type_from_typevar</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">type_from_typevar</span><span class="p">[</span><span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
@@ -765,8 +765,8 @@
 
 <div class="viewcode-block" id="TypeParamAssignmentContext">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext">[docs]</a>
-<span class="k">class</span> <span class="nc">TypeParamAssignmentContext</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TypeParamAssignmentContext</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">origin_type</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
         <span class="n">type_from_typevar</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
@@ -777,13 +777,13 @@
 
 <div class="viewcode-block" id="TypeParamAssignmentContext.__enter__">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext.__enter__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type_from_typevar</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="TypeParamAssignmentContext.__exit__">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.TypeParamAssignmentContext.__exit__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
         <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">param_assignments</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
 </div>
 
@@ -792,7 +792,7 @@
 <div class="viewcode-block" id="expand_union_types">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.expand_union_types">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">expand_union_types</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">expand_union_types</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Expand union types if necessary.</span>
 
 <span class="sd">    This is a shim for failing more gracefully when we we&#39;re given a Union type that</span>
@@ -826,7 +826,7 @@
 
 <div class="viewcode-block" id="isinstance_with_fuzzy_numeric_tower">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.isinstance_with_fuzzy_numeric_tower">[docs]</a>
-<span class="k">def</span> <span class="nf">isinstance_with_fuzzy_numeric_tower</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">isinstance_with_fuzzy_numeric_tower</span><span class="p">(</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">classinfo</span><span class="p">:</span> <span class="n">Type</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;~&quot;</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -866,7 +866,7 @@
 
 <div class="viewcode-block" id="resolve_generic_types">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.resolve_generic_types">[docs]</a>
-<span class="k">def</span> <span class="nf">resolve_generic_types</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve_generic_types</span><span class="p">(</span>
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="n">TypeVar</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;If the input is a class: no-op. If it&#39;s a generic alias: returns the origin</span>
@@ -938,7 +938,7 @@
 
 <div class="viewcode-block" id="get_type_hints_with_backported_syntax">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.get_type_hints_with_backported_syntax">[docs]</a>
-<span class="k">def</span> <span class="nf">get_type_hints_with_backported_syntax</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_type_hints_with_backported_syntax</span><span class="p">(</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">include_extras</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)</span>
@@ -981,7 +981,7 @@
         <span class="c1"># Resolve new type syntax using eval_type_backport.</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">eval_type_backport</span> <span class="kn">import</span> <span class="n">eval_type_backport</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">eval_type_backport</span><span class="w"> </span><span class="kn">import</span> <span class="n">eval_type_backport</span>
 
                 <span class="c1"># Get global namespace for functions.</span>
                 <span class="n">globalns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__globals__&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -1003,7 +1003,7 @@
 
 <div class="viewcode-block" id="is_instance">
 <a class="viewcode-back" href="../../../api/tyro/_resolver/#tyro._resolver.is_instance">[docs]</a>
-<span class="k">def</span> <span class="nf">is_instance</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_instance</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Typeguard-based alternative for `isinstance()`.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">typeguard</span><span class="o">.</span><span class="n">check_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>

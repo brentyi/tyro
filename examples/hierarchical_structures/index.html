@@ -16,7 +16,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Hierarchical Structures - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -296,17 +296,17 @@ interfaces.</p>
 <p>Structures (typically <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.dataclass()</span></code></a>) can be nested to build hierarchical configuration
 objects. This helps with modularity and grouping in larger projects.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 01_nesting.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">OptimizerConfig</span><span class="p">:</span>
+<span class="linenos"> 7</span><span class="k">class</span><span class="w"> </span><span class="nc">OptimizerConfig</span><span class="p">:</span>
 <span class="linenos"> 8</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3e-4</span>
 <span class="linenos"> 9</span>    <span class="n">weight_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span>
 <span class="linenos">10</span>
 <span class="linenos">11</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">12</span><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="linenos">12</span><span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
 <span class="linenos">13</span>    <span class="c1"># Optimizer options.</span>
 <span class="linenos">14</span>    <span class="n">opt</span><span class="p">:</span> <span class="n">OptimizerConfig</span>
 <span class="linenos">15</span>
@@ -346,25 +346,25 @@ objects. This helps with modularity and grouping in larger projects.</p>
 <span id="example-02-nesting-in-func"></span><h2>Structures as Function Arguments<a class="headerlink" href="#structures-as-function-arguments" title="Link to this heading">¶</a></h2>
 <p>Structures can be used as input to functions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 02_nesting_in_func.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="linenos"> 3</span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">OptimizerConfig</span><span class="p">:</span>
+<span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">OptimizerConfig</span><span class="p">:</span>
 <span class="linenos"> 9</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3e-4</span>
 <span class="linenos">10</span>    <span class="n">weight_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-2</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">13</span><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="linenos">13</span><span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
 <span class="linenos">14</span>    <span class="c1"># Optimizer options.</span>
 <span class="linenos">15</span>    <span class="n">optimizer</span><span class="p">:</span> <span class="n">OptimizerConfig</span>
 <span class="linenos">16</span>
 <span class="linenos">17</span>    <span class="c1"># Random seed.</span>
 <span class="linenos">18</span>    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="linenos">19</span>
-<span class="linenos">20</span><span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+<span class="linenos">20</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span>
 <span class="linenos">21</span>    <span class="n">out_dir</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
 <span class="linenos">22</span>    <span class="n">config</span><span class="p">:</span> <span class="n">Config</span><span class="p">,</span>
 <span class="linenos">23</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -423,18 +423,18 @@ length of the container must be inferrable from the annotation or default
 value.</p>
 </div>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 03_nesting_containers.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">RGB</span><span class="p">:</span>
+<span class="linenos"> 7</span><span class="k">class</span><span class="w"> </span><span class="nc">RGB</span><span class="p">:</span>
 <span class="linenos"> 8</span>    <span class="n">r</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos"> 9</span>    <span class="n">g</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos">10</span>    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">13</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos">13</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">14</span>    <span class="n">color_tuple</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">RGB</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span>
 <span class="linenos">15</span>    <span class="n">color_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">RGB</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span>
 <span class="linenos">16</span>        <span class="c1"># We can&#39;t use mutable values as defaults directly.</span>
@@ -496,13 +496,13 @@ annotation, or a <code class="xref py py-class docutils literal notranslate"><sp
 <p>For configuring <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code>, we also support <code class="code docutils literal notranslate"><span class="pre">total={True/False}</span></code>,
 <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Required" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Required</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NotRequired" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.NotRequired</span></code></a>. See the <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict">Python docs</a> for all <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code> features.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 04_dictionaries.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypedDict</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">NotRequired</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">NotRequired</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">DictionarySchemaA</span><span class="p">(</span>
+<span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">DictionarySchemaA</span><span class="p">(</span>
 <span class="linenos"> 9</span>    <span class="n">TypedDict</span><span class="p">,</span>
 <span class="linenos">10</span>    <span class="c1"># Setting `total=False` specifies that not all keys need to exist.</span>
 <span class="linenos">11</span>    <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -510,12 +510,12 @@ annotation, or a <code class="xref py py-class docutils literal notranslate"><sp
 <span class="linenos">13</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span>
 <span class="linenos">14</span>    <span class="n">betas</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="linenos">15</span>
-<span class="linenos">16</span><span class="k">class</span> <span class="nc">DictionarySchemaB</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+<span class="linenos">16</span><span class="k">class</span><span class="w"> </span><span class="nc">DictionarySchemaB</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
 <span class="linenos">17</span>    <span class="n">learning_rate</span><span class="p">:</span> <span class="n">NotRequired</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span>
 <span class="linenos">18</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;NotRequired[] specifies that a particular key doesn&#39;t need to exist.&quot;&quot;&quot;</span>
 <span class="linenos">19</span>    <span class="n">betas</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="linenos">20</span>
-<span class="linenos">21</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos">21</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos">22</span>    <span class="n">typed_dict_a</span><span class="p">:</span> <span class="n">DictionarySchemaA</span><span class="p">,</span>
 <span class="linenos">23</span>    <span class="n">typed_dict_b</span><span class="p">:</span> <span class="n">DictionarySchemaB</span><span class="p">,</span>
 <span class="linenos">24</span>    <span class="n">standard_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
@@ -579,17 +579,17 @@ Standard dict: {'learning_rate': 0.0003, 'beta1': 0.9, 'beta2': 0.999}
 <p>Example using <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> to instantiate tuple types. <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>,
 <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Tuple</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NamedTuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code></a> are all supported.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 05_tuples.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">NamedTuple</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NamedTuple</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="c1"># Named tuples are interpreted as nested structures.</span>
-<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="linenos"> 7</span><span class="k">class</span><span class="w"> </span><span class="nc">Color</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
 <span class="linenos"> 8</span>    <span class="n">r</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos"> 9</span>    <span class="n">g</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos">10</span>    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos">11</span>
-<span class="linenos">12</span><span class="k">class</span> <span class="nc">TupleType</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
+<span class="linenos">12</span><span class="k">class</span><span class="w"> </span><span class="nc">TupleType</span><span class="p">(</span><span class="n">NamedTuple</span><span class="p">):</span>
 <span class="linenos">13</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
 <span class="linenos">14</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">15</span>
@@ -638,11 +638,11 @@ TupleType(color=(255, 0, 0), two_colors=(Color(r=255, g=0, b=0), Color(r=127, g=
 <p>In addition to standard dataclasses, <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> also supports
 <a class="reference external" href="https://github.com/pydantic/pydantic">Pydantic</a> models.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 06_pydantic.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Field</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="k">class</span> <span class="nc">Args</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<span class="linenos"> 6</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 <span class="linenos"> 7</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
 <span class="linenos"> 8</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos"> 9</span>
@@ -677,12 +677,12 @@ field1='hello' field2=5
 <p>In addition to standard dataclasses, <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> also supports
 <a class="reference external" href="https://www.attrs.org/">attrs</a> classes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 07_attrs.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">attr</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">attr</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="nd">@attr</span><span class="o">.</span><span class="n">s</span>
-<span class="linenos"> 7</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 7</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos"> 8</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
 <span class="linenos"> 9</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">10</span>

@@ -105,9 +105,9 @@ Module Contents
       :type: Any
 
       The default value of the struct, or a member of
-      :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function
-      signature, this is ``X`` in ``def main(x=X): ...``. This can be useful for
-      populating the default values of the struct.
+      :data:`tyro.constructors.MISSING_AND_MISSING_NONPROP` if not present. In a
+      function signature, this is ``X`` in ``def main(x=X): ...``. This can be
+      useful for populating the default values of the struct.
 
    .. py:method:: make(f: tyro._typing.TypeForm | Callable, default: Any) -> StructTypeInfo
       :staticmethod:

@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro.conf._markers - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -280,11 +280,11 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro.conf._markers</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_singleton</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_singleton</span>
 
 <span class="c1"># Current design issue: markers are applied recursively to nested structures, but can&#39;t</span>
 <span class="c1"># be unapplied.</span>
@@ -450,8 +450,8 @@
 <span class="c1"># - Annotated[T, Marker]</span>
 
 
-<span class="k">class</span> <span class="nc">_Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">_Marker</span><span class="p">(</span><span class="n">_singleton</span><span class="o">.</span><span class="n">Singleton</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
 
 
@@ -460,7 +460,7 @@
 
 <div class="viewcode-block" id="configure">
 <a class="viewcode-back" href="../../../../api/tyro/conf/#tyro.conf._markers.configure">[docs]</a>
-<span class="k">def</span> <span class="nf">configure</span><span class="p">(</span><span class="o">*</span><span class="n">markers</span><span class="p">:</span> <span class="n">Marker</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">CallableType</span><span class="p">],</span> <span class="n">CallableType</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">configure</span><span class="p">(</span><span class="o">*</span><span class="n">markers</span><span class="p">:</span> <span class="n">Marker</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">CallableType</span><span class="p">],</span> <span class="n">CallableType</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Decorator for applying configuration options.</span>
 
 <span class="sd">    Consider using the ``config=`` argument of :func:`tyro.cli()` instead,</span>
@@ -486,7 +486,7 @@
 <span class="sd">        markers: Options to apply.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_inner</span><span class="p">(</span><span class="nb">callable</span><span class="p">:</span> <span class="n">CallableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableType</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_inner</span><span class="p">(</span><span class="nb">callable</span><span class="p">:</span> <span class="n">CallableType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CallableType</span><span class="p">:</span>
         <span class="c1"># We&#39;ll read from __tyro_markers__ in `_resolver.unwrap_annotated()`.</span>
         <span class="nb">callable</span><span class="o">.</span><span class="n">__tyro_markers__</span> <span class="o">=</span> <span class="n">markers</span>  <span class="c1"># type: ignore</span>
         <span class="k">return</span> <span class="nb">callable</span>
@@ -497,9 +497,9 @@
 
 <span class="k">if</span> <span class="ow">not</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
 
-    <span class="k">def</span> <span class="nf">_make_marker</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Marker</span><span class="p">:</span>
-        <span class="k">class</span> <span class="nc">_InnerMarker</span><span class="p">(</span><span class="n">_Marker</span><span class="p">):</span>
-            <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_marker</span><span class="p">(</span><span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Marker</span><span class="p">:</span>
+        <span class="k">class</span><span class="w"> </span><span class="nc">_InnerMarker</span><span class="p">(</span><span class="n">_Marker</span><span class="p">):</span>
+            <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">description</span>
 
         <span class="k">return</span> <span class="n">_InnerMarker</span><span class="p">()</span>

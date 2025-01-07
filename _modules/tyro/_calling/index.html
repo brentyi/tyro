@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._calling - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -283,23 +283,23 @@
 <span></span><span class="sd">&quot;&quot;&quot;Core functionality for calling functions with arguments specified by argparse</span>
 <span class="sd">namespaces.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">itertools</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">itertools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_args</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
-<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_arguments</span><span class="p">,</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_parsers</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 
 
 <div class="viewcode-block" id="InstantiationError">
 <a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.InstantiationError">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">InstantiationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">InstantiationError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception raised when instantiation fail; this typically means that values from</span>
 <span class="sd">    the CLI are invalid.&quot;&quot;&quot;</span>
 
@@ -313,7 +313,7 @@
 
 <div class="viewcode-block" id="callable_with_args">
 <a class="viewcode-back" href="../../../api/tyro/_calling/#tyro._calling.callable_with_args">[docs]</a>
-<span class="k">def</span> <span class="nf">callable_with_args</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">callable_with_args</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
     <span class="n">parser_definition</span><span class="p">:</span> <span class="n">_parsers</span><span class="o">.</span><span class="n">ParserSpecification</span><span class="p">,</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">NonpropagatingMissingType</span><span class="p">],</span>
@@ -334,7 +334,7 @@
     <span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">consumed_keywords</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">get_value_from_arg</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_value_from_arg</span><span class="p">(</span><span class="n">prefixed_field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Helper for getting values from `value_from_arg` + doing some extra</span>
 <span class="sd">        asserts.&quot;&quot;&quot;</span>
         <span class="k">assert</span> <span class="p">(</span>
@@ -543,7 +543,7 @@
             <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">unwrapped_f</span><span class="p">,</span> <span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="n">consumed_keywords</span>  <span class="c1"># type: ignore</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Try to catch ValueErrors raised by field constructors.</span>
-            <span class="k">def</span> <span class="nf">with_instantiation_error</span><span class="p">():</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">with_instantiation_error</span><span class="p">():</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">unwrapped_f</span><span class="p">(</span><span class="o">*</span><span class="n">positional_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
                 <span class="c1"># If unwrapped_f raises a ValueError, wrap the message with a more informative</span>

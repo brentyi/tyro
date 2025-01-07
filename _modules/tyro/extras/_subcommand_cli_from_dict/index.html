@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro.extras._subcommand_cli_from_dict - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -280,20 +280,20 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro.extras._subcommand_cli_from_dict</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 
-<span class="kn">from</span> <span class="nn">tyro.conf._markers</span> <span class="kn">import</span> <span class="n">Marker</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._markers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Marker</span>
 
-<span class="kn">from</span> <span class="nn">.._cli</span> <span class="kn">import</span> <span class="n">cli</span>
-<span class="kn">from</span> <span class="nn">..conf</span> <span class="kn">import</span> <span class="n">subcommand</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.._cli</span><span class="w"> </span><span class="kn">import</span> <span class="n">cli</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">subcommand</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
 
 
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">subcommand_cli_from_dict</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">subcommand_cli_from_dict</span><span class="p">(</span>
     <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -308,7 +308,7 @@
 <span class="c1"># TODO: hack. We prefer the above signature, which Pyright understands, but as of 1.6.1</span>
 <span class="c1"># mypy doesn&#39;t reason about the generics properly.</span>
 <span class="nd">@overload</span>
-<span class="k">def</span> <span class="nf">subcommand_cli_from_dict</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">subcommand_cli_from_dict</span><span class="p">(</span>
     <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -322,7 +322,7 @@
 
 <div class="viewcode-block" id="subcommand_cli_from_dict">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._subcommand_cli_from_dict.subcommand_cli_from_dict">[docs]</a>
-<span class="k">def</span> <span class="nf">subcommand_cli_from_dict</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">subcommand_cli_from_dict</span><span class="p">(</span>
     <span class="n">subcommands</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">prog</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>

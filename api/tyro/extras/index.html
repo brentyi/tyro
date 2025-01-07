@@ -16,7 +16,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro.extras - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -332,13 +332,13 @@ config object.</p>
 arguments populated. Also see
 <a class="reference internal" href="#tyro.extras.subcommand_type_from_defaults" title="tyro.extras.subcommand_type_from_defaults"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.extras.subcommand_type_from_defaults()</span></code></a>.</p>
 <p>Example usage:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 
-<span class="kn">import</span> <span class="nn">tyro</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 
 
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
     <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">b</span><span class="p">:</span> <span class="nb">str</span>
 
@@ -402,7 +402,7 @@ preferred, but this function can be helpful for succinctness.</p>
 <p>The type returned by this function can be safely used as an input to
 <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, but for static analysis when used for annotations we
 recommend applying a <cite>TYPE_CHECKING</cite> guard:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
@@ -441,7 +441,7 @@ helpful when choices are generated dynamically.</p>
 <p>The type returned by this function can be safely used as an input to
 <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>, but for static analysis when used for annotations we
 recommend applying a <cite>TYPE_CHECKING</cite> guard:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="c1"># Static type seen by language servers, type checkers, etc.</span>
@@ -535,12 +535,12 @@ refactor, while a PyYAML backend enables serialization of arbitrary Python objec
 <a class="reference internal" href="../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a>, inspired by click. Under-the-hood, this is a light wrapper
 over <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.</p>
 <p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tyro.extras</span> <span class="kn">import</span> <span class="n">SubcommandApp</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">tyro.extras</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubcommandApp</span>
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">SubcommandApp</span><span class="p">()</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">command</span>
-<span class="k">def</span> <span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">greet</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Greet someone.&#39;&#39;&#39;</span>
     <span class="n">greeting</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;Hello, </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">!&quot;</span>
     <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
@@ -548,7 +548,7 @@ over <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code cl
     <span class="nb">print</span><span class="p">(</span><span class="n">greeting</span><span class="p">)</span>
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;addition&quot;</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;Add two numbers.&#39;&#39;&#39;</span>
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2"> + </span><span class="si">{</span><span class="n">b</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -631,8 +631,8 @@ suppressed.</p></li>
 </pre></div>
 </div>
 <p>This is internally accomplished by generating and calling:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">import</span> <span class="nn">tyro</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 
 <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
     <span class="n">Union</span><span class="p">[</span>

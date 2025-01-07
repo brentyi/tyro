@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._parsers - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -282,20 +282,20 @@
           <h1>Source code for tyro._parsers</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Interface for generating `argparse.ArgumentParser()` definitions from callables.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">numbers</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numbers</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
-<span class="kn">from</span> <span class="nn">tyro.constructors._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span>
-<span class="kn">from</span> <span class="nn">tyro.constructors._struct_spec</span> <span class="kn">import</span> <span class="n">UnsupportedStructTypeMessage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedStructTypeMessage</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">_argparse_formatter</span><span class="p">,</span>
     <span class="n">_arguments</span><span class="p">,</span>
     <span class="n">_docstrings</span><span class="p">,</span>
@@ -305,9 +305,9 @@
     <span class="n">_strings</span><span class="p">,</span>
     <span class="n">_subcommand_matching</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
-<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
-<span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
 <span class="p">)</span>
@@ -318,7 +318,7 @@
 <div class="viewcode-block" id="ParserSpecification">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">ParserSpecification</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ParserSpecification</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Each parser contains a list of arguments and optionally some subparsers.&quot;&quot;&quot;</span>
 
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span>
@@ -343,7 +343,7 @@
 <div class="viewcode-block" id="ParserSpecification.from_callable_or_type">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification.from_callable_or_type">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_callable_or_type</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_callable_or_type</span><span class="p">(</span>
         <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">T</span><span class="p">],</span>
         <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">],</span>
         <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -478,7 +478,7 @@
 
 <div class="viewcode-block" id="ParserSpecification.apply">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification.apply">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create defined arguments and subparsers.&quot;&quot;&quot;</span>
@@ -519,7 +519,7 @@
 
 <div class="viewcode-block" id="ParserSpecification.apply_args">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification.apply_args">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply_args</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply_args</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
         <span class="n">parent</span><span class="p">:</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -527,10 +527,10 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create defined arguments and subparsers.&quot;&quot;&quot;</span>
 
         <span class="c1"># Make argument groups.</span>
-        <span class="k">def</span> <span class="nf">format_group_name</span><span class="p">(</span><span class="n">group_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">format_group_name</span><span class="p">(</span><span class="n">group_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">group_name</span> <span class="o">+</span> <span class="s2">&quot; options&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
-        <span class="k">def</span> <span class="nf">group_name_from_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">group_name_from_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
             <span class="n">prefix</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">prefix</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;--&quot;</span><span class="p">):</span>
                 <span class="n">prefix</span> <span class="o">=</span> <span class="n">prefix</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span>
@@ -591,7 +591,7 @@
 
 <div class="viewcode-block" id="handle_field">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.handle_field">[docs]</a>
-<span class="k">def</span> <span class="nf">handle_field</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">handle_field</span><span class="p">(</span>
     <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
     <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -701,7 +701,7 @@
 <div class="viewcode-block" id="SubparsersSpecification">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">SubparsersSpecification</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SubparsersSpecification</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Structure for defining subparsers. Each subparser is a parser with a name.&quot;&quot;&quot;</span>
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
@@ -716,7 +716,7 @@
 <div class="viewcode-block" id="SubparsersSpecification.from_field">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.from_field">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_field</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_field</span><span class="p">(</span>
         <span class="n">field</span><span class="p">:</span> <span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">,</span>
         <span class="n">parent_classes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
         <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -931,7 +931,7 @@
 
 <div class="viewcode-block" id="SubparsersSpecification.apply">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.apply">[docs]</a>
-    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">parent_parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;subcommands&quot;</span>
@@ -980,7 +980,7 @@
 
 <div class="viewcode-block" id="add_subparsers_to_leaves">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.add_subparsers_to_leaves">[docs]</a>
-<span class="k">def</span> <span class="nf">add_subparsers_to_leaves</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_subparsers_to_leaves</span><span class="p">(</span>
     <span class="n">root</span><span class="p">:</span> <span class="n">SubparsersSpecification</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">leaf</span><span class="p">:</span> <span class="n">SubparsersSpecification</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubparsersSpecification</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">root</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1002,7 +1002,7 @@
 
 <div class="viewcode-block" id="none_proxy">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.none_proxy">[docs]</a>
-<span class="k">def</span> <span class="nf">none_proxy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">none_proxy</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="k">return</span> <span class="kc">None</span></div>
 
 </pre></div>

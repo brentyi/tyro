@@ -16,7 +16,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Basics - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -295,9 +295,9 @@ dataclasses, supported annotations, and configuration.</p>
 <p>In the simplest case, <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can be used to run a function with
 arguments populated from the CLI.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 01_functions.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos"> 4</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos"> 5</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Function, whose arguments will be populated from a CLI interface.</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="sd">    Args:</span>
@@ -334,13 +334,13 @@ hello 10
 <span id="example-02-dataclasses"></span><h2>Dataclasses<a class="headerlink" href="#dataclasses" title="Link to this heading">¶</a></h2>
 <p>In addition to functions, <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> can also take dataclasses as input.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 02_dataclasses.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="nd">@dataclass</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
 <span class="linenos">10</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">11</span>
@@ -382,14 +382,14 @@ Python collection types. For Python 3.7 and 3.8, we can use either <code class="
 <span class="pre">__future__</span> <span class="pre">import</span> <span class="pre">annotations</span></code> to support <code class="docutils literal notranslate"><span class="pre">list[T]</span></code> and <code class="docutils literal notranslate"><span class="pre">tuple[T]</span></code>,
 or the older <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.List</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Tuple</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 03_multivalue.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">pathlib</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@dataclass</span>
-<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="c1"># Example of a variable-length tuple. `list[T]`, `set[T]`,</span>
 <span class="linenos">11</span>    <span class="c1"># `dict[K, V]`, etc are supported as well.</span>
 <span class="linenos">12</span>    <span class="n">source_paths</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
@@ -431,13 +431,13 @@ Config(source_paths=(PosixPath('data1'), PosixPath('data2')),
 value, automatically converted to flags.</p>
 <p>To turn off conversion, see <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.FlagConversionOff" title="tyro.conf.FlagConversionOff"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.FlagConversionOff</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 04_flags.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
 <span class="linenos"> 4</span>
-<span class="linenos"> 5</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 5</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 6</span>
 <span class="linenos"> 7</span><span class="nd">@dataclass</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos"> 9</span>    <span class="c1"># Boolean. This expects an explicit &quot;True&quot; or &quot;False&quot;.</span>
 <span class="linenos">10</span>    <span class="n">boolean</span><span class="p">:</span> <span class="nb">bool</span>
 <span class="linenos">11</span>
@@ -485,14 +485,14 @@ Args(boolean=False, optional_boolean=None, flag_a=False, flag_b=False)
 <span id="example-05-choices"></span><h2>Choices<a class="headerlink" href="#choices" title="Link to this heading">¶</a></h2>
 <p><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Literal[]</span></code> can be used to restrict inputs to a fixed set of literal choices.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 05_choices.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="c1"># We can use Literal[] to restrict the set of allowable inputs, for example, over</span>
 <span class="linenos">11</span>    <span class="c1"># a set of strings.</span>
 <span class="linenos">12</span>    <span class="n">string</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
@@ -533,18 +533,18 @@ Args(string='red', number=0)
 <p>In addition to literals, enums can also be used to provide a fixed set of
 choices.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 06_enums.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">enum</span>
-<span class="linenos"> 3</span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="linenos"> 3</span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="linenos"> 8</span><span class="k">class</span><span class="w"> </span><span class="nc">Color</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
 <span class="linenos"> 9</span>    <span class="n">RED</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 <span class="linenos">10</span>    <span class="n">BLUE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 <span class="linenos">11</span>
 <span class="linenos">12</span><span class="nd">@dataclass</span>
-<span class="linenos">13</span><span class="k">class</span> <span class="nc">Config</span><span class="p">:</span>
+<span class="linenos">13</span><span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
 <span class="linenos">14</span>    <span class="n">color</span><span class="p">:</span> <span class="n">Color</span> <span class="o">=</span> <span class="n">Color</span><span class="o">.</span><span class="n">RED</span>
 <span class="linenos">15</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Color argument.&quot;&quot;&quot;</span>
 <span class="linenos">16</span>
@@ -577,20 +577,20 @@ Config(color=&lt;Color.BLUE: 2&gt;, opacity=0.75)
 <p><code class="code docutils literal notranslate"><span class="pre">X</span> <span class="pre">|</span> <span class="pre">Y</span></code> or <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Union</span></code></a> can be used to expand inputs to
 multiple types.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 07_unions.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="linenos"> 3</span><span class="kn">import</span> <span class="nn">enum</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
-<span class="linenos"> 5</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="linenos"> 3</span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 7</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 8</span>
-<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">Color</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+<span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Color</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
 <span class="linenos">10</span>    <span class="n">RED</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 <span class="linenos">11</span>    <span class="n">GREEN</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 <span class="linenos">12</span>    <span class="n">BLUE</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">15</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">16</span>    <span class="c1"># Unions can be used to specify multiple allowable types.</span>
 <span class="linenos">17</span>    <span class="n">union_over_types</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="linenos">18</span>    <span class="n">string_or_enum</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;green&quot;</span><span class="p">]</span> <span class="o">|</span> <span class="n">Color</span> <span class="o">=</span> <span class="s2">&quot;red&quot;</span>
@@ -665,13 +665,13 @@ Args(union_over_types=0,
 <p>Positional-only arguments in functions are converted to positional CLI arguments.</p>
 <p>For more general positional arguments, see <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.Positional" title="tyro.conf.Positional"><code class="xref py py-class docutils literal notranslate"><span class="pre">tyro.conf.Positional</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 08_positional.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">pathlib</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
-<span class="linenos"> 8</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos"> 9</span>    <span class="n">source</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
 <span class="linenos">10</span>    <span class="n">dest</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
 <span class="linenos">11</span>    <span class="o">/</span><span class="p">,</span>  <span class="c1"># Mark the end of positional arguments.</span>
@@ -727,14 +727,14 @@ these same flags can also be passed via the <code class="docutils literal notran
 <a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>.</p>
 <p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 09_conf.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 7</span>
 <span class="linenos"> 8</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos"> 9</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 9</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">10</span>    <span class="c1"># A numeric field parsed as a positional argument.</span>
 <span class="linenos">11</span>    <span class="n">positional</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">Positional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
 <span class="linenos">12</span>
@@ -782,11 +782,11 @@ Args(positional=5, boolean=True, fixed=5, manual='Hello')
 <span id="example-10-aliases"></span><h2>Argument Aliases<a class="headerlink" href="#argument-aliases" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="../../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> can be used to attach aliases to arguments.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 10_aliases.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
-<span class="linenos"> 6</span><span class="k">def</span> <span class="nf">checkout</span><span class="p">(</span>
+<span class="linenos"> 6</span><span class="k">def</span><span class="w"> </span><span class="nf">checkout</span><span class="p">(</span>
 <span class="linenos"> 7</span>    <span class="n">branch</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-b&quot;</span><span class="p">])],</span>
 <span class="linenos"> 8</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="linenos"> 9</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Check out a branch.&quot;&quot;&quot;</span>
@@ -817,20 +817,20 @@ branch='main'
 <span id="example-11-type-aliases-py312"></span><h2>Type Aliases (3.12+)<a class="headerlink" href="#type-aliases-3-12" title="Link to this heading">¶</a></h2>
 <p>In Python 3.12, the <code class="code docutils literal notranslate"><span class="pre">type</span></code> statement is introduced to create type aliases.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 11_type_aliases_py312.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 5</span>
 <span class="linenos"> 6</span><span class="c1"># Lazily-evaluated type alias.</span>
 <span class="linenos"> 7</span><span class="nb">type</span> <span class="n">Field1Type</span> <span class="o">=</span> <span class="n">Inner</span>
 <span class="linenos"> 8</span>
 <span class="linenos"> 9</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">10</span><span class="k">class</span> <span class="nc">Inner</span><span class="p">:</span>
+<span class="linenos">10</span><span class="k">class</span><span class="w"> </span><span class="nc">Inner</span><span class="p">:</span>
 <span class="linenos">11</span>    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>
 <span class="linenos">12</span>    <span class="n">b</span><span class="p">:</span> <span class="nb">str</span>
 <span class="linenos">13</span>
 <span class="linenos">14</span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="linenos">15</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
+<span class="linenos">15</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
 <span class="linenos">16</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Description.</span>
 <span class="linenos">17</span><span class="sd">    This should show up in the helptext!&quot;&quot;&quot;</span>
 <span class="linenos">18</span>
@@ -867,12 +867,12 @@ Description. This should show up in the helptext!
 <span id="example-12-counters"></span><h2>Counters<a class="headerlink" href="#counters" title="Link to this heading">¶</a></h2>
 <p>Repeatable ‘counter’ arguments can be specified via <a class="reference internal" href="../../api/tyro/conf/#tyro.conf.UseCounterAction" title="tyro.conf.UseCounterAction"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.UseCounterAction</span></code></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 12_counters.py</span>
-<span class="linenos"> 2</span><span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="kn">import</span> <span class="nn">tyro</span>
-<span class="linenos"> 5</span><span class="kn">from</span> <span class="nn">tyro.conf</span> <span class="kn">import</span> <span class="n">UseCounterAction</span>
+<span class="linenos"> 4</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+<span class="linenos"> 5</span><span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">UseCounterAction</span>
 <span class="linenos"> 6</span>
-<span class="linenos"> 7</span><span class="k">def</span> <span class="nf">main</span><span class="p">(</span>
+<span class="linenos"> 7</span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span>
 <span class="linenos"> 8</span>    <span class="n">verbosity</span><span class="p">:</span> <span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
 <span class="linenos"> 9</span>    <span class="n">aliased_verbosity</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">aliases</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;-v&quot;</span><span class="p">])],</span>
 <span class="linenos">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -920,10 +920,10 @@ Verbosity level (aliased): 3
 <p>In addition to functions and dataclasses, we can also generate CLIs from the
 constructors of standard Python classes.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 13_classes.py</span>
-<span class="linenos"> 2</span><span class="kn">import</span> <span class="nn">tyro</span>
+<span class="linenos"> 2</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 <span class="linenos"> 3</span>
-<span class="linenos"> 4</span><span class="k">class</span> <span class="nc">Args</span><span class="p">:</span>
-<span class="linenos"> 5</span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="linenos"> 4</span><span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
+<span class="linenos"> 5</span>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
 <span class="linenos"> 6</span>        <span class="bp">self</span><span class="p">,</span>
 <span class="linenos"> 7</span>        <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 <span class="linenos"> 8</span>        <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>

@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._arguments - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -283,12 +283,12 @@
 <span></span><span class="sd">&quot;&quot;&quot;Rules for taking high-level field definitions and lowering them into inputs for</span>
 <span class="sd">argparse&#39;s `add_argument()`.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">shlex</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shlex</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">TYPE_CHECKING</span><span class="p">,</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">Callable</span><span class="p">,</span>
@@ -301,14 +301,14 @@
     <span class="n">cast</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">rich.markup</span>
-<span class="kn">import</span> <span class="nn">shtab</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_origin</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">rich.markup</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">shtab</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_origin</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
-<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_markers</span>
-<span class="kn">from</span> <span class="nn">.constructors</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_argparse</span> <span class="k">as</span> <span class="n">argparse</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_fields</span><span class="p">,</span> <span class="n">_singleton</span><span class="p">,</span> <span class="n">_strings</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constructors</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">ConstructorRegistry</span><span class="p">,</span>
     <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
     <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
@@ -319,10 +319,10 @@
 <span class="k">else</span><span class="p">:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># Python &gt;=3.8.</span>
-        <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
         <span class="c1"># Python 3.7.</span>
-        <span class="kn">from</span> <span class="nn">backports.cached_property</span> <span class="kn">import</span> <span class="n">cached_property</span>  <span class="c1"># type: ignore</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">backports.cached_property</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>  <span class="c1"># type: ignore</span>
 
 
 <span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_T&quot;</span><span class="p">)</span>
@@ -330,10 +330,10 @@
 
 <div class="viewcode-block" id="BooleanOptionalAction">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.BooleanOptionalAction">[docs]</a>
-<span class="k">class</span> <span class="nc">BooleanOptionalAction</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">BooleanOptionalAction</span><span class="p">(</span><span class="n">argparse</span><span class="o">.</span><span class="n">Action</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adapted from https://github.com/python/cpython/pull/27672&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">option_strings</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">dest</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -376,7 +376,7 @@
 
 <div class="viewcode-block" id="BooleanOptionalAction.__call__">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.BooleanOptionalAction.__call__">[docs]</a>
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">,</span> <span class="n">namespace</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">option_string</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">option_string</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">option_strings</span><span class="p">:</span>
             <span class="k">assert</span> <span class="n">option_string</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="n">namespace</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dest</span><span class="p">,</span> <span class="n">option_string</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_strings</span><span class="p">)</span></div>
@@ -386,7 +386,7 @@
     <span class="c1"># _argparse_formatters.py</span>
 <div class="viewcode-block" id="BooleanOptionalAction.format_usage">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.BooleanOptionalAction.format_usage">[docs]</a>
-    <span class="k">def</span> <span class="nf">format_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">format_usage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot; | &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">option_strings</span><span class="p">)</span></div>
 </div>
 
@@ -395,7 +395,7 @@
 <div class="viewcode-block" id="ArgumentDefinition">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">ArgumentDefinition</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ArgumentDefinition</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Structure containing everything needed to define an argument.&quot;&quot;&quot;</span>
 
     <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># True prefix. (eg for the argument&#39;s dest field)</span>
@@ -405,7 +405,7 @@
 
 <div class="viewcode-block" id="ArgumentDefinition.__post_init__">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.__post_init__">[docs]</a>
-    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="n">_markers</span><span class="o">.</span><span class="n">Fixed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
             <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
@@ -417,7 +417,7 @@
 
 <div class="viewcode-block" id="ArgumentDefinition.add_argument">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.add_argument">[docs]</a>
-    <span class="k">def</span> <span class="nf">add_argument</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_argument</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">argparse</span><span class="o">.</span><span class="n">_ArgumentGroup</span><span class="p">]</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a defined argument to a parser.&quot;&quot;&quot;</span>
@@ -431,7 +431,7 @@
             <span class="n">name_or_flags</span> <span class="o">=</span> <span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">dummy_field_name</span><span class="p">,)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">name_or_flags</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="kn">import</span> <span class="nn">warnings</span>
+            <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Aliases were specified, but </span><span class="si">{</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is positional. Aliases will be ignored.&quot;</span>
@@ -482,7 +482,7 @@
 
 
     <span class="nd">@cached_property</span>
-    <span class="k">def</span> <span class="nf">lowered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoweredArgumentDefinition</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">lowered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LoweredArgumentDefinition</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lowered argument definition, generated by applying a sequence of rules.&quot;&quot;&quot;</span>
         <span class="c1"># Each rule will mutate the lowered object. This is (unfortunately)</span>
         <span class="c1"># much faster than a functional approach.</span>
@@ -501,7 +501,7 @@
 <div class="viewcode-block" id="LoweredArgumentDefinition">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="k">class</span> <span class="nc">LoweredArgumentDefinition</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">LoweredArgumentDefinition</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Contains fields meant to be passed directly into argparse.&quot;&quot;&quot;</span>
 
     <span class="c1"># Action that is called on parsed arguments. This handles conversions from strings</span>
@@ -513,7 +513,7 @@
 
 <div class="viewcode-block" id="LoweredArgumentDefinition.is_fixed">
 <a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.LoweredArgumentDefinition.is_fixed">[docs]</a>
-    <span class="k">def</span> <span class="nf">is_fixed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_fixed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;If the instantiator is set to `None`, even after all argument</span>
 <span class="sd">        transformations, it means that we don&#39;t have a valid instantiator for an</span>
 <span class="sd">        argument. We then mark the argument as &#39;fixed&#39;, with a value always equal to the</span>
@@ -537,7 +537,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_rule_handle_boolean_flags</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_handle_boolean_flags</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -567,7 +567,7 @@
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_rule_apply_primitive_specs</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_apply_primitive_specs</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -638,7 +638,7 @@
 
     <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">_action</span> <span class="o">==</span> <span class="s2">&quot;append&quot;</span><span class="p">:</span>
 
-        <span class="k">def</span> <span class="nf">append_instantiator</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">append_instantiator</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;Handle UseAppendAction effects.&quot;&quot;&quot;</span>
             <span class="c1"># We&#39;ll assume that the type is annotated as Dict[...], Tuple[...], List[...], etc.</span>
             <span class="n">container_type</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">)</span>
@@ -701,12 +701,12 @@
 
 
 <span class="c1"># TODO: this function is also called outside of _arguments.py. Should be revisited.</span>
-<span class="k">def</span> <span class="nf">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rich_tag_if_enabled</span><span class="p">(</span><span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">rich</span><span class="o">.</span><span class="n">markup</span><span class="o">.</span><span class="n">escape</span><span class="p">(</span><span class="n">_strings</span><span class="o">.</span><span class="n">strip_ansi_sequences</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">x</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">USE_RICH</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">[/</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">]&quot;</span>
 
 
-<span class="k">def</span> <span class="nf">_rule_counters</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_counters</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -727,7 +727,7 @@
         <span class="k">return</span>
 
 
-<span class="k">def</span> <span class="nf">_rule_generate_helptext</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_generate_helptext</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -834,7 +834,7 @@
     <span class="k">return</span>
 
 
-<span class="k">def</span> <span class="nf">_rule_set_name_or_flag_and_dest</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_set_name_or_flag_and_dest</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -880,7 +880,7 @@
     <span class="n">lowered</span><span class="o">.</span><span class="n">dest</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">])</span>
 
 
-<span class="k">def</span> <span class="nf">_rule_positional_special_handling</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_positional_special_handling</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -911,7 +911,7 @@
     <span class="k">return</span>
 
 
-<span class="k">def</span> <span class="nf">_rule_apply_argconf</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_rule_apply_argconf</span><span class="p">(</span>
     <span class="n">arg</span><span class="p">:</span> <span class="n">ArgumentDefinition</span><span class="p">,</span>
     <span class="n">lowered</span><span class="p">:</span> <span class="n">LoweredArgumentDefinition</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

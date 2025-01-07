@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro._fields - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -283,24 +283,24 @@
 <span></span><span class="sd">&quot;&quot;&quot;Abstractions for pulling out &#39;field&#39; definitions, which specify inputs, types, and # type: ignore</span>
 <span class="sd">defaults, from general callables.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">contextlib</span>
-<span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">docstring_parser</span>
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
-<span class="kn">from</span> <span class="nn">._singleton</span> <span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
-<span class="kn">from</span> <span class="nn">._typing</span> <span class="kn">import</span> <span class="n">TypeForm</span>
-<span class="kn">from</span> <span class="nn">.conf</span> <span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
-<span class="kn">from</span> <span class="nn">.constructors._primitive_spec</span> <span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
-<span class="kn">from</span> <span class="nn">.constructors._registry</span> <span class="kn">import</span> <span class="n">ConstructorRegistry</span><span class="p">,</span> <span class="n">check_default_instances</span>
-<span class="kn">from</span> <span class="nn">.constructors._struct_spec</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_confstruct</span><span class="p">,</span> <span class="n">_markers</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnsupportedTypeAnnotationError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span><span class="p">,</span> <span class="n">check_default_instances</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">StructFieldSpec</span><span class="p">,</span>
     <span class="n">StructTypeInfo</span><span class="p">,</span>
     <span class="n">UnsupportedStructTypeMessage</span><span class="p">,</span>
@@ -312,7 +312,7 @@
 <div class="viewcode-block" id="FieldDefinition">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition">[docs]</a>
 <span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="k">class</span> <span class="nc">FieldDefinition</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">FieldDefinition</span><span class="p">:</span>
     <span class="n">intern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">extern_name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="nb">type</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
@@ -337,7 +337,7 @@
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.marker_context">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-    <span class="k">def</span> <span class="nf">marker_context</span><span class="p">(</span><span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">marker_context</span><span class="p">(</span><span class="n">markers</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">,</span> <span class="o">...</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Context for setting markers on fields. All fields created within the</span>
 <span class="sd">        context will have the specified markers.&quot;&quot;&quot;</span>
         <span class="n">global_context_markers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">markers</span><span class="p">)</span>
@@ -350,7 +350,7 @@
 <div class="viewcode-block" id="FieldDefinition.from_field_spec">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.from_field_spec">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">from_field_spec</span><span class="p">(</span><span class="n">field_spec</span><span class="p">:</span> <span class="n">StructFieldSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_field_spec</span><span class="p">(</span><span class="n">field_spec</span><span class="p">:</span> <span class="n">StructFieldSpec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">typ</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -364,7 +364,7 @@
 <div class="viewcode-block" id="FieldDefinition.make">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.make">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make</span><span class="p">(</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span>
         <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -443,7 +443,7 @@
 
 <div class="viewcode-block" id="FieldDefinition.with_new_type_stripped">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.with_new_type_stripped">[docs]</a>
-    <span class="k">def</span> <span class="nf">with_new_type_stripped</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">with_new_type_stripped</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">new_type_stripped</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FieldDefinition</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
@@ -459,7 +459,7 @@
 
 <div class="viewcode-block" id="FieldDefinition.is_positional">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional">[docs]</a>
-    <span class="k">def</span> <span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_positional</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in the commandline.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># Explicit positionals.</span>
@@ -476,7 +476,7 @@
 
 <div class="viewcode-block" id="FieldDefinition.is_positional_call">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.FieldDefinition.is_positional_call">[docs]</a>
-    <span class="k">def</span> <span class="nf">is_positional_call</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_positional_call</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns True if the argument should be positional in underlying Python call.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="c1"># Explicit positionals.</span>
@@ -491,7 +491,7 @@
 <div class="viewcode-block" id="is_struct_type">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.is_struct_type">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;struct type&#39;, where a single</span>
 <span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
 <span class="sd">    classes).</span>
@@ -511,7 +511,7 @@
 
 <div class="viewcode-block" id="field_list_from_type_or_callable">
 <a class="viewcode-back" href="../../../api/tyro/_fields/#tyro._fields.field_list_from_type_or_callable">[docs]</a>
-<span class="k">def</span> <span class="nf">field_list_from_type_or_callable</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">field_list_from_type_or_callable</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]],</span>
     <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">support_single_arg_types</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -566,7 +566,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_field_list_from_function</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_field_list_from_function</span><span class="p">(</span>
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnsupportedStructTypeMessage</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">FieldDefinition</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate field lists from non-class callables.&quot;&quot;&quot;</span>

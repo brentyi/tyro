@@ -15,7 +15,7 @@
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>tyro.extras._serialization - tyro</title>
-      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/css/compact_table_header.css?v=932cb7ac" />
@@ -282,21 +282,21 @@
           <h1>Source code for tyro.extras._serialization</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;Type-safe, human-readable serialization helpers for dataclasses.&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">dataclasses</span>
-<span class="kn">import</span> <span class="nn">enum</span>
-<span class="kn">import</span> <span class="nn">functools</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="c1"># Since serialization functionality is deprecated, the yaml dependency is optional.</span>
-    <span class="kn">import</span> <span class="nn">yaml</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
-<span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
 
-<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">_resolver</span>
-<span class="kn">from</span> <span class="nn">..constructors._struct_spec</span> <span class="kn">import</span> <span class="n">MISSING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_resolver</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..constructors._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING</span>
 
 <span class="n">ENUM_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;!enum:&quot;</span>
 <span class="n">DATACLASS_YAML_TAG_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;!dataclass:&quot;</span>
@@ -305,7 +305,7 @@
 <span class="n">DataclassType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;DataclassType&quot;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_get_contained_special_types_from_type</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_contained_special_types_from_type</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">_parent_contained_dataclasses</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
@@ -323,7 +323,7 @@
 
     <span class="n">contained_special_types</span> <span class="o">=</span> <span class="p">{</span><span class="bp">cls</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">handle_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">handle_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]]:</span>
         <span class="c1"># Handle dataclasses.</span>
         <span class="k">if</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span> <span class="ow">and</span> <span class="n">typ</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent_contained_dataclasses</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_get_contained_special_types_from_type</span><span class="p">(</span>
@@ -358,10 +358,10 @@
     <span class="k">return</span> <span class="n">contained_special_types</span>
 
 
-<span class="k">def</span> <span class="nf">_make_loader</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">]:</span>
-    <span class="kn">import</span> <span class="nn">yaml</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_loader</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">]:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
-    <span class="k">class</span> <span class="nc">DataclassLoader</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">DataclassLoader</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">Loader</span><span class="p">):</span>
         <span class="k">pass</span>
 
     <span class="c1"># Design Q: do we want to support multiple dataclass types with the same name?</span>
@@ -379,10 +379,10 @@
         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">make_dataclass_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_dataclass_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">Any</span><span class="p">]):</span>
         <span class="k">return</span> <span class="k">lambda</span> <span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">typ</span><span class="p">(</span><span class="o">**</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_mapping</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">make_enum_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">]):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_enum_constructor</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">]):</span>
         <span class="k">return</span> <span class="k">lambda</span> <span class="n">loader</span><span class="p">,</span> <span class="n">node</span><span class="p">:</span> <span class="n">typ</span><span class="p">[</span><span class="n">loader</span><span class="o">.</span><span class="n">construct_python_str</span><span class="p">(</span><span class="n">node</span><span class="p">)]</span>
 
     <span class="k">for</span> <span class="n">typ</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">contained_types</span><span class="p">,</span> <span class="n">contained_type_names</span><span class="p">):</span>
@@ -407,11 +407,11 @@
     <span class="k">return</span> <span class="n">DataclassLoader</span>
 
 
-<span class="k">def</span> <span class="nf">_make_dumper</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">yaml</span><span class="o">.</span><span class="n">Dumper</span><span class="p">]:</span>
-    <span class="kn">import</span> <span class="nn">yaml</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_make_dumper</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">[</span><span class="n">yaml</span><span class="o">.</span><span class="n">Dumper</span><span class="p">]:</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
-    <span class="k">class</span> <span class="nc">DataclassDumper</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">ignore_aliases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="k">class</span><span class="w"> </span><span class="nc">DataclassDumper</span><span class="p">(</span><span class="n">yaml</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ignore_aliases</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">ignore_aliases</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="n">data</span> <span class="ow">is</span> <span class="n">MISSING</span>
 
     <span class="n">contained_types</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_get_contained_special_types_from_type</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">instance</span><span class="p">)))</span>
@@ -423,8 +423,8 @@
         <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">contained_type_names</span><span class="si">}</span><span class="s2">&quot;</span>
     <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">make_representer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">def</span> <span class="nf">representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">:</span> <span class="n">DataclassDumper</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">yaml</span><span class="o">.</span><span class="n">Node</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">make_representer</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">representer</span><span class="p">(</span><span class="n">dumper</span><span class="p">:</span> <span class="n">DataclassDumper</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">yaml</span><span class="o">.</span><span class="n">Node</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">dumper</span><span class="o">.</span><span class="n">represent_mapping</span><span class="p">(</span>
                     <span class="n">tag</span><span class="o">=</span><span class="n">DATACLASS_YAML_TAG_PREFIX</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span>
@@ -456,7 +456,7 @@
 
 <div class="viewcode-block" id="from_yaml">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._serialization.from_yaml">[docs]</a>
-<span class="k">def</span> <span class="nf">from_yaml</span><span class="p">(</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">from_yaml</span><span class="p">(</span>
     <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">DataclassType</span><span class="p">],</span>
     <span class="n">stream</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">IO</span><span class="p">[</span><span class="nb">bytes</span><span class="p">]],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataclassType</span><span class="p">:</span>
@@ -483,7 +483,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Instantiated dataclass.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">yaml</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
     <span class="n">out</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">stream</span><span class="p">,</span> <span class="n">Loader</span><span class="o">=</span><span class="n">_make_loader</span><span class="p">(</span><span class="bp">cls</span><span class="p">))</span>
     <span class="n">origin_cls</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
@@ -494,7 +494,7 @@
 
 <div class="viewcode-block" id="to_yaml">
 <a class="viewcode-back" href="../../../../api/tyro/extras/#tyro.extras._serialization.to_yaml">[docs]</a>
-<span class="k">def</span> <span class="nf">to_yaml</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">to_yaml</span><span class="p">(</span><span class="n">instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Serialize a dataclass; returns a yaml-compatible string that can be deserialized</span>
 <span class="sd">    via :func:`tyro.extras.from_yaml()`.</span>
 
@@ -517,7 +517,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        YAML string.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">import</span> <span class="nn">yaml</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">yaml</span>
 
     <span class="k">return</span> <span class="s2">&quot;# tyro YAML.</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">yaml</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="n">Dumper</span><span class="o">=</span><span class="n">_make_dumper</span><span class="p">(</span><span class="n">instance</span><span class="p">))</span></div>
 
