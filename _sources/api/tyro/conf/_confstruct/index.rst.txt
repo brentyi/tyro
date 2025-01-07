@@ -57,10 +57,10 @@ Module Contents
        # default, will be unaffected.
        x: Union[
            Annotated[
-               StructTypeA, subcommand(default=StructTypeA(0)
+               StructTypeA, subcommand(default=StructTypeA(0))
            ],
            Annotated[
-               StructTypeB, subcommand(default=StructTypeB(0)
+               StructTypeB, subcommand(default=StructTypeB(0))
            ],
        ] = StructTypeA(1)
 
