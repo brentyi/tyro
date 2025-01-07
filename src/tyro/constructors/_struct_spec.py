@@ -96,9 +96,9 @@ class StructTypeInfo:
     """Markers from :mod:`tyro.conf` that are associated with this field."""
     default: Any
     """The default value of the struct, or a member of
-    :data:`tyro.constructors.MISSING_SINGLETONS` if not present. In a function
-    signature, this is ``X`` in ``def main(x=X): ...``. This can be useful for
-    populating the default values of the struct."""
+    :data:`tyro.constructors.MISSING_AND_MISSING_NONPROP` if not present. In a
+    function signature, this is ``X`` in ``def main(x=X): ...``. This can be
+    useful for populating the default values of the struct."""
     _typevar_context: _resolver.TypeParamAssignmentContext
 
     @staticmethod
@@ -108,7 +108,27 @@ class StructTypeInfo:
         f, found_subcommand_configs = _resolver.unwrap_annotated(
             f, _confstruct._SubcommandConfig
         )
-        if len(found_subcommand_configs) > 0:
+
+        # Apply default from subcommand config, but only if no default was passed in to `StructTypeInfo.make()`.
+        #
+        # If we have a subcommand that's annotated with:
+        #
+        #     x: (
+        #       Annotated[SomeType1, subcommand(default=SomeType1("default1"))]
+        #       | Annotated[SomeType2, subcommand(default=SomeType2("default2"))]
+        #     ) = SomeType1("assignment1")
+        #
+        # The assigned default "assignment1" will be routed the `default`
+        # argument of this function. The annotated defaults should be captured
+        # in `found_subcommand_configs`.
+        #
+        # For the first subcommand, we should use the default from
+        # "assignment1" and not "default1".
+        #
+        # We'll also use StructTypeInfo for default subcommand matching. This
+        # won't work if we always overwrite the assigned default with the one
+        # in the annotation.
+        if default in MISSING_AND_MISSING_NONPROP and len(found_subcommand_configs) > 0:
             default = found_subcommand_configs[0].default
 
         # Handle generics.
