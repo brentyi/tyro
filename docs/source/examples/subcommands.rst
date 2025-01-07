@@ -284,17 +284,17 @@ pushes all arguments to the end of the command:
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_multiple_subcommands.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 03_multiple_subcommands.py [-h] <span style="font-weight: bold">{dataset:mnist,dataset:image-net}</span>
+    <span style="font-weight: bold">usage</span>: 03_multiple_subcommands.py [-h] <span style="font-weight: bold">[{dataset:mnist,dataset:image-net}]</span>
     
     Example training script.
     
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> subcommands </span><span style="font-weight: lighter">────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Dataset to train on.                             </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">─────────────────────────────────                </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> {dataset:mnist,dataset:image-net}                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> optional subcommands </span><span style="font-weight: lighter">───────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Dataset to train on. (default: dataset:mnist)    </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">─────────────────────────────────────────────    </span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> [{dataset:mnist,dataset:image-net}]               <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>     dataset:mnist                                 <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>     dataset:image-net                             <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
@@ -307,18 +307,19 @@ pushes all arguments to the end of the command:
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_multiple_subcommands.py dataset:mnist --help</strong>
     <span style="font-weight: bold">usage</span>: 03_multiple_subcommands.py dataset:mnist [-h]
-                                                    <span style="font-weight: bold">{optimizer:adam,optimizer:sgd}</span>
+                                                    <span style="font-weight: bold">[{optimizer:adam,optimizer:sgd</span>
+    <span style="font-weight: bold">}]</span>
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> subcommands </span><span style="font-weight: lighter">────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Optimizer to train with.                         </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────                   </span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> {optimizer:adam,optimizer:sgd}                    <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     optimizer:adam                                <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>     optimizer:sgd                                 <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>  <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> optional subcommands </span><span style="font-weight: lighter">────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: bold">Optimizer to train with. (default: optimizer:adam)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> <span style="font-weight: lighter">──────────────────────────────────────────────────</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> [{optimizer:adam,optimizer:sgd}]                   <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     optimizer:adam                                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>     optimizer:sgd                                  <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
     </pre>
 
 
