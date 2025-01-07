@@ -498,17 +498,24 @@ class SubparsersSpecification:
             subcommand_type_from_name[subcommand_name] = cast(type, option)
 
         # If a field default is provided, try to find a matching subcommand name.
-        if (
-            field.default is None
-            or field.default in _singleton.MISSING_AND_MISSING_NONPROP
-        ):
-            default_name = None
-        else:
-            default_name = _subcommand_matching.match_subcommand(
-                field.default,
-                subcommand_config_from_name,
-                subcommand_type_from_name,
-            )
+        default_name = None
+        if field.default not in _singleton.MISSING_AND_MISSING_NONPROP:
+            # Subcommand matcher won't work with `none_proxy`.
+            if field.default is None:
+                default_name = next(
+                    iter(
+                        filter(
+                            lambda pair: pair[1] is none_proxy,
+                            subcommand_type_from_name.items(),
+                        )
+                    )
+                )[0]
+            else:
+                default_name = _subcommand_matching.match_subcommand(
+                    field.default,
+                    subcommand_config_from_name,
+                    subcommand_type_from_name,
+                )
 
             assert default_name is not None, (
                 f"`{extern_prefix}` was provided a default value of type"
