@@ -61,7 +61,7 @@ def subcommand(
     .. code-block:: python
 
         tyro.cli(
-            Union[NestedTypeA, NestedTypeB]
+            Union[StructTypeA, StructTypeB]
         )
 
     This will create two subcommands: `nested-type-a` and `nested-type-b`.
@@ -75,18 +75,36 @@ def subcommand(
         tyro.cli(
             Union[
                 Annotated[
-                    NestedTypeA, subcommand("a", ...)
+                    StructTypeA, subcommand("a", ...)
                 ],
                 Annotated[
-                    NestedTypeB, subcommand("b", ...)
+                    StructTypeB, subcommand("b", ...)
                 ],
             ]
         )
 
+    If we have a default value both in the annotation and attached to the field
+    itself (eg, RHS of `=` within function or dataclass signature), the field
+    default will take precedence.
+
+    .. code-block:: python
+
+        # For the first subcommand, StructType(1) will be used as the default.
+        # The second subcommand, whose type is inconsistent with the field
+        # default, will be unaffected.
+        x: Union[
+            Annotated[
+                StructTypeA, subcommand(default=StructTypeA(0)
+            ],
+            Annotated[
+                StructTypeB, subcommand(default=StructTypeB(0)
+            ],
+        ] = StructTypeA(1)
+
     Arguments:
         name: The name of the subcommand in the CLI.
         default: A default value for the subcommand, for struct-like types. (eg
-             dataclasses)
+             dataclasses).
         description: Description of this option to use in the helptext. Defaults to
             docstring.
         prefix_name: Whether to prefix the name of the subcommand based on where it
