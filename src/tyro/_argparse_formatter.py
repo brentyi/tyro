@@ -1047,7 +1047,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         [ratio > 0.6 for ratio in column_lines_ratio]
                     ):
                         break
-                    column_count -= 1
+                    column_count -= 1  # pragma: no cover
 
                 assert column_parts_grouped is not None
                 columns = Columns(
