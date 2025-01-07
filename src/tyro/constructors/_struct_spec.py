@@ -62,8 +62,8 @@ class StructFieldSpec:
     _call_argname: Any = None
     """Private: the name of the argument to pass to the callable. This is used
     for dictionary types."""
-    is_default_overriden: None = None
-    """*Deprecated.*"""
+    is_default_overridden: None = None
+    """Deprecated. No longer used."""
 
 
 @dataclasses.dataclass(frozen=True)
