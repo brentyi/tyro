@@ -89,7 +89,7 @@ Module Contents
       Create a parser definition from a callable or type.
 
 
-   .. py:method:: apply(parser: tyro._argparse.ArgumentParser) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
+   .. py:method:: apply(parser: tyro._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
 
       Create defined arguments and subparsers.
 
@@ -125,6 +125,11 @@ Module Contents
 
       
 
+   .. py:attribute:: default_name
+      :type: str | None
+
+      
+
    .. py:attribute:: default_parser
       :type: ParserSpecification | None
 
@@ -154,7 +159,7 @@ Module Contents
       :staticmethod:
 
 
-   .. py:method:: apply(parent_parser: tyro._argparse.ArgumentParser) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
+   .. py:method:: apply(parent_parser: tyro._argparse.ArgumentParser, force_required_subparsers: bool) -> Tuple[tyro._argparse.ArgumentParser, Ellipsis]
 
 
 

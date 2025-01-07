@@ -346,7 +346,7 @@
 
 <span class="n">ConsolidateSubcommandArgs</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 <span class="sd">&quot;&quot;&quot;Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument</span>
-<span class="sd">ordering, at the cost of support for optional subcommands.</span>
+<span class="sd">ordering, with some tradeoffs.</span>
 
 <span class="sd">By default, :mod:`tyro` will generate a traditional CLI interface where args are applied to</span>
 <span class="sd">the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``:</span>
@@ -369,6 +369,14 @@
 
 <span class="sd">This is more robust to reordering of options, ensuring that any new options can simply</span>
 <span class="sd">be placed at the end of the command.</span>
+
+<span class="sd">The tradeoff is in required arguments. In the above example, if any ``--root.*`` options</span>
+<span class="sd">are required (no default is specified), all subcommands will need to be specified in order to</span>
+<span class="sd">provide the required argument.</span>
+
+<span class="sd">.. code-block:: bash</span>
+
+<span class="sd">   python x.py s1 s2 {required --root.* arguments}</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="n">OmitSubcommandPrefixes</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>

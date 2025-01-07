@@ -351,7 +351,7 @@ applied to nested types.</p>
 <dt class="sig sig-object py" id="tyro.conf._markers.ConsolidateSubcommandArgs">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">ConsolidateSubcommandArgs</span></span><a class="headerlink" href="#tyro.conf._markers.ConsolidateSubcommandArgs" title="Link to this definition">¶</a></dt>
 <dd><p>Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
-ordering, at the cost of support for optional subcommands.</p>
+ordering, with some tradeoffs.</p>
 <p>By default, <a class="reference internal" href="../../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> will generate a traditional CLI interface where args are applied to
 the directly preceding subcommand. When we have two subcommands <code class="docutils literal notranslate"><span class="pre">s1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>x.py<span class="w"> </span><span class="o">{</span>--root<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s1<span class="w"> </span><span class="o">{</span>--s1<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>--s2<span class="w"> </span>options<span class="o">}</span>
@@ -365,6 +365,12 @@ options.</p>
 </div>
 <p>This is more robust to reordering of options, ensuring that any new options can simply
 be placed at the end of the command.</p>
+<p>The tradeoff is in required arguments. In the above example, if any <code class="docutils literal notranslate"><span class="pre">--root.*</span></code> options
+are required (no default is specified), all subcommands will need to be specified in order to
+provide the required argument.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>x.py<span class="w"> </span>s1<span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>required<span class="w"> </span>--root.*<span class="w"> </span>arguments<span class="o">}</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py data">

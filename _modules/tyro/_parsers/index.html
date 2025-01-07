@@ -479,17 +479,24 @@
 <div class="viewcode-block" id="ParserSpecification.apply">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.ParserSpecification.apply">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="n">force_required_subparsers</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create defined arguments and subparsers.&quot;&quot;&quot;</span>
 
         <span class="c1"># Generate helptext.</span>
         <span class="n">parser</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span>
 
+        <span class="c1"># `force_required_subparsers`: if we have required arguments and we&#39;re</span>
+        <span class="c1"># consolidating all arguments into the leaves of the subparser trees, a</span>
+        <span class="c1"># required argument in one node of this tree means that all of its</span>
+        <span class="c1"># descendants are required.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">consolidate_subcommand_args</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">has_required_args</span><span class="p">:</span>
+            <span class="n">force_required_subparsers</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="c1"># Create subparser tree.</span>
         <span class="n">subparser_group</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">leaves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+            <span class="n">leaves</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">force_required_subparsers</span><span class="p">)</span>
             <span class="n">subparser_group</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">_action_groups</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">leaves</span> <span class="o">=</span> <span class="p">(</span><span class="n">parser</span><span class="p">,)</span>
@@ -707,6 +714,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">parser_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">ParserSpecification</span><span class="p">]</span>
+    <span class="n">default_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">default_parser</span><span class="p">:</span> <span class="n">ParserSpecification</span> <span class="o">|</span> <span class="kc">None</span>
     <span class="n">intern_prefix</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span>
@@ -791,17 +799,24 @@
             <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">)</span>
 
         <span class="c1"># If a field default is provided, try to find a matching subcommand name.</span>
-        <span class="k">if</span> <span class="p">(</span>
-            <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="ow">or</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
-        <span class="p">):</span>
-            <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">default_name</span> <span class="o">=</span> <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
-                <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                <span class="n">subcommand_config_from_name</span><span class="p">,</span>
-                <span class="n">subcommand_type_from_name</span><span class="p">,</span>
-            <span class="p">)</span>
+        <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+            <span class="c1"># Subcommand matcher won&#39;t work with `none_proxy`.</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">default_name</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
+                    <span class="nb">iter</span><span class="p">(</span>
+                        <span class="nb">filter</span><span class="p">(</span>
+                            <span class="k">lambda</span> <span class="n">pair</span><span class="p">:</span> <span class="n">pair</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="n">none_proxy</span><span class="p">,</span>
+                            <span class="n">subcommand_type_from_name</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">default_name</span> <span class="o">=</span> <span class="n">_subcommand_matching</span><span class="o">.</span><span class="n">match_subcommand</span><span class="p">(</span>
+                    <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
+                    <span class="n">subcommand_config_from_name</span><span class="p">,</span>
+                    <span class="n">subcommand_type_from_name</span><span class="p">,</span>
+                <span class="p">)</span>
 
             <span class="k">assert</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">extern_prefix</span><span class="si">}</span><span class="s2">` was provided a default value of type&quot;</span>
@@ -882,13 +897,13 @@
             <span class="p">)</span>
             <span class="n">parser_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser</span>
 
-        <span class="c1"># Required if a default is missing.</span>
-        <span class="n">required</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
-
         <span class="c1"># Required if a default is passed in, but the default value has missing</span>
         <span class="c1"># parameters.</span>
         <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">default_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">default_parser</span> <span class="o">=</span> <span class="n">parser_from_name</span><span class="p">[</span><span class="n">default_name</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">arg</span><span class="p">:</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">,</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)):</span>
                 <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
@@ -898,29 +913,14 @@
             <span class="p">):</span>
                 <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="c1"># Required if all args are pushed to the final subcommand.</span>
-        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-            <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="c1"># Make description.</span>
-        <span class="n">description_parts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">helptext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
-            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (default: </span><span class="si">{</span><span class="n">default_name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
-        <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="c1"># We use `None` instead of an empty string to prevent a line break from</span>
-            <span class="c1"># being created where the description would be.</span>
-            <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">description_parts</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">description_parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
-        <span class="p">)</span>
-
         <span class="k">return</span> <span class="n">SubparsersSpecification</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">,</span>
             <span class="c1"># If we wanted, we could add information about the default instance</span>
             <span class="c1"># automatically, as is done for normal fields. But for now we just rely on</span>
             <span class="c1"># the user to include it in the docstring.</span>
-            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
             <span class="n">parser_from_name</span><span class="o">=</span><span class="n">parser_from_name</span><span class="p">,</span>
+            <span class="n">default_name</span><span class="o">=</span><span class="n">default_name</span><span class="p">,</span>
             <span class="n">default_parser</span><span class="o">=</span><span class="n">default_parser</span><span class="p">,</span>
             <span class="n">intern_prefix</span><span class="o">=</span><span class="n">intern_prefix</span><span class="p">,</span>
             <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span>
@@ -932,19 +932,42 @@
 <div class="viewcode-block" id="SubparsersSpecification.apply">
 <a class="viewcode-back" href="../../../api/tyro/_parsers/#tyro._parsers.SubparsersSpecification.apply">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">apply</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">parent_parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_parser</span><span class="p">:</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span>
+        <span class="n">force_required_subparsers</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;subcommands&quot;</span>
         <span class="n">metavar</span> <span class="o">=</span> <span class="s2">&quot;{&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parser_from_name</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> <span class="s2">&quot;}&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+
+        <span class="n">required</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="ow">or</span> <span class="n">force_required_subparsers</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span><span class="p">:</span>
             <span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;optional &quot;</span> <span class="o">+</span> <span class="n">title</span>
             <span class="n">metavar</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;[</span><span class="si">{</span><span class="n">metavar</span><span class="si">}</span><span class="s2">]&quot;</span>
+
+        <span class="c1"># Make description.</span>
+        <span class="n">description_parts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">required</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(default: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">default_name</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+        <span class="c1"># If this subparser is required because of a required argument in a</span>
+        <span class="c1"># parent (tyro.conf.ConsolidateSubcommandArgs).</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="n">force_required_subparsers</span><span class="p">:</span>
+            <span class="n">description_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;(required to specify parent argument)&quot;</span><span class="p">)</span>
+
+        <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c1"># We use `None` instead of an empty string to prevent a line break from</span>
+            <span class="c1"># being created where the description would be.</span>
+            <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">description_parts</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">description_parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
 
         <span class="c1"># Add subparsers to every node in previous level of the tree.</span>
         <span class="n">argparse_subparsers</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span>
             <span class="n">dest</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">make_subparser_dest</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">intern_prefix</span><span class="p">),</span>
-            <span class="n">description</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-            <span class="n">required</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">required</span><span class="o">=</span><span class="n">required</span><span class="p">,</span>
             <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
             <span class="n">metavar</span><span class="o">=</span><span class="n">metavar</span><span class="p">,</span>
         <span class="p">)</span>
@@ -971,7 +994,9 @@
             <span class="n">subparser</span><span class="o">.</span><span class="n">_console_outputs</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_console_outputs</span>
             <span class="n">subparser</span><span class="o">.</span><span class="n">_args</span> <span class="o">=</span> <span class="n">parent_parser</span><span class="o">.</span><span class="n">_args</span>
 
-            <span class="n">subparser_tree_leaves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">subparser_def</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">subparser</span><span class="p">))</span>
+            <span class="n">subparser_tree_leaves</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">subparser_def</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">subparser</span><span class="p">,</span> <span class="n">force_required_subparsers</span><span class="p">)</span>
+            <span class="p">)</span>
 
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">subparser_tree_leaves</span><span class="p">)</span></div>
 </div>
