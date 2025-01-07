@@ -345,7 +345,7 @@
 <span class="sd">    .. code-block:: python</span>
 
 <span class="sd">        tyro.cli(</span>
-<span class="sd">            Union[NestedTypeA, NestedTypeB]</span>
+<span class="sd">            Union[StructTypeA, StructTypeB]</span>
 <span class="sd">        )</span>
 
 <span class="sd">    This will create two subcommands: `nested-type-a` and `nested-type-b`.</span>
@@ -359,18 +359,36 @@
 <span class="sd">        tyro.cli(</span>
 <span class="sd">            Union[</span>
 <span class="sd">                Annotated[</span>
-<span class="sd">                    NestedTypeA, subcommand(&quot;a&quot;, ...)</span>
+<span class="sd">                    StructTypeA, subcommand(&quot;a&quot;, ...)</span>
 <span class="sd">                ],</span>
 <span class="sd">                Annotated[</span>
-<span class="sd">                    NestedTypeB, subcommand(&quot;b&quot;, ...)</span>
+<span class="sd">                    StructTypeB, subcommand(&quot;b&quot;, ...)</span>
 <span class="sd">                ],</span>
 <span class="sd">            ]</span>
 <span class="sd">        )</span>
 
+<span class="sd">    If we have a default value both in the annotation and attached to the field</span>
+<span class="sd">    itself (eg, RHS of `=` within function or dataclass signature), the field</span>
+<span class="sd">    default will take precedence.</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        # For the first subcommand, StructType(1) will be used as the default.</span>
+<span class="sd">        # The second subcommand, whose type is inconsistent with the field</span>
+<span class="sd">        # default, will be unaffected.</span>
+<span class="sd">        x: Union[</span>
+<span class="sd">            Annotated[</span>
+<span class="sd">                StructTypeA, subcommand(default=StructTypeA(0)</span>
+<span class="sd">            ],</span>
+<span class="sd">            Annotated[</span>
+<span class="sd">                StructTypeB, subcommand(default=StructTypeB(0)</span>
+<span class="sd">            ],</span>
+<span class="sd">        ] = StructTypeA(1)</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        name: The name of the subcommand in the CLI.</span>
 <span class="sd">        default: A default value for the subcommand, for struct-like types. (eg</span>
-<span class="sd">             dataclasses)</span>
+<span class="sd">             dataclasses).</span>
 <span class="sd">        description: Description of this option to use in the helptext. Defaults to</span>
 <span class="sd">            docstring.</span>
 <span class="sd">        prefix_name: Whether to prefix the name of the subcommand based on where it</span>

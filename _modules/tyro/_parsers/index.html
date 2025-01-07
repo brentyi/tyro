@@ -854,8 +854,7 @@
 
             <span class="c1"># If names match, borrow subcommand default from field default.</span>
             <span class="k">if</span> <span class="n">default_name</span> <span class="o">==</span> <span class="n">subcommand_name</span> <span class="ow">and</span> <span class="p">(</span>
-                <span class="n">field</span><span class="o">.</span><span class="n">is_default_from_default_instance</span>
-                <span class="ow">or</span> <span class="n">subcommand_config</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_singleton</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
             <span class="p">):</span>
                 <span class="n">subcommand_config</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                     <span class="n">subcommand_config</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>

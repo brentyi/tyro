@@ -319,10 +319,6 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Full type, including runtime annotations.&quot;&quot;&quot;</span>
     <span class="n">type_stripped</span><span class="p">:</span> <span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="n">Callable</span>
     <span class="n">default</span><span class="p">:</span> <span class="n">Any</span>
-    <span class="c1"># We need to record whether defaults are from default instances to</span>
-    <span class="c1"># determine if they should override the default in</span>
-    <span class="c1"># tyro.conf.subcommand(default=...).</span>
-    <span class="n">is_default_from_default_instance</span><span class="p">:</span> <span class="nb">bool</span>
     <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
     <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
     <span class="n">custom_constructor</span><span class="p">:</span> <span class="nb">bool</span>
@@ -355,7 +351,6 @@
             <span class="n">name</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">typ</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">default</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-            <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">is_default_overridden</span><span class="p">,</span>
             <span class="n">helptext</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">helptext</span><span class="p">,</span>
             <span class="n">call_argname_override</span><span class="o">=</span><span class="n">field_spec</span><span class="o">.</span><span class="n">_call_argname</span><span class="p">,</span>
         <span class="p">)</span></div>
@@ -368,7 +363,6 @@
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span>
         <span class="n">default</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-        <span class="n">is_default_from_default_instance</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
         <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">call_argname_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
@@ -425,7 +419,6 @@
             <span class="nb">type</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
             <span class="n">type_stripped</span><span class="o">=</span><span class="n">type_stripped</span><span class="p">,</span>
             <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-            <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="n">is_default_from_default_instance</span><span class="p">,</span>
             <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
             <span class="n">markers</span><span class="o">=</span><span class="nb">set</span><span class="p">(</span><span class="n">markers</span><span class="p">),</span>
             <span class="n">custom_constructor</span><span class="o">=</span><span class="n">argconf</span><span class="o">.</span><span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span>
@@ -551,7 +544,6 @@
                                 <span class="n">name</span><span class="o">=</span><span class="s2">&quot;value&quot;</span><span class="p">,</span>
                                 <span class="n">typ</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
                                 <span class="n">default</span><span class="o">=</span><span class="n">default_instance</span><span class="p">,</span>
-                                <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                 <span class="n">helptext</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
                             <span class="p">)</span>
                         <span class="p">],</span>
@@ -680,7 +672,6 @@
                     <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
                     <span class="k">else</span> <span class="n">Annotated</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_OPTIONAL_GROUP</span><span class="p">)],</span>  <span class="c1"># type: ignore</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span> <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">param</span><span class="o">.</span><span class="n">empty</span> <span class="k">else</span> <span class="n">MISSING_NONPROP</span><span class="p">,</span>
-                    <span class="n">is_default_from_default_instance</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="p">)</span>

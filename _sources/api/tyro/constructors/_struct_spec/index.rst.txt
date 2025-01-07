@@ -49,17 +49,15 @@ Module Contents
 
       The default value of the field.
 
-   .. py:attribute:: is_default_overridden
-      :type: bool
-      :value: False
-
-      Whether the default value was overridden by the default instance. Should
-      be set to False if the default value was assigned by the field itself.
-
    .. py:attribute:: helptext
       :type: str | None
 
       Helpjext for the field.
+
+   .. py:attribute:: is_default_overridden
+      :type: None
+
+      Deprecated. No longer used.
 
 
 .. py:class:: StructConstructorSpec

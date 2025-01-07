@@ -354,7 +354,7 @@ For more configurability, see <a class="reference internal" href="../constructor
 <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a>. Useful for aesthetics.</p>
 <p>Consider the standard approach for creating subcommands:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-    <span class="n">Union</span><span class="p">[</span><span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">NestedTypeB</span><span class="p">]</span>
+    <span class="n">Union</span><span class="p">[</span><span class="n">StructTypeA</span><span class="p">,</span> <span class="n">StructTypeB</span><span class="p">]</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -365,13 +365,29 @@ override for each subcommand the (a) name, (b) defaults, (c) helptext, and
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
     <span class="n">Union</span><span class="p">[</span>
         <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">NestedTypeA</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+            <span class="n">StructTypeA</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
         <span class="p">],</span>
         <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">NestedTypeB</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+            <span class="n">StructTypeB</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
         <span class="p">],</span>
     <span class="p">]</span>
 <span class="p">)</span>
+</pre></div>
+</div>
+<p>If we have a default value both in the annotation and attached to the field
+itself (eg, RHS of <cite>=</cite> within function or dataclass signature), the field
+default will take precedence.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># For the first subcommand, StructType(1) will be used as the default.</span>
+<span class="c1"># The second subcommand, whose type is inconsistent with the field</span>
+<span class="c1"># default, will be unaffected.</span>
+<span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">Annotated</span><span class="p">[</span>
+        <span class="n">StructTypeA</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">StructTypeA</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">],</span>
+    <span class="n">Annotated</span><span class="p">[</span>
+        <span class="n">StructTypeB</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">StructTypeB</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="p">],</span>
+<span class="p">]</span> <span class="o">=</span> <span class="n">StructTypeA</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <dl class="field-list simple">
@@ -379,7 +395,7 @@ override for each subcommand the (a) name, (b) defaults, (c) helptext, and
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> – The name of the subcommand in the CLI.</p></li>
 <li><p><strong>default</strong> – A default value for the subcommand, for struct-like types. (eg
-dataclasses)</p></li>
+dataclasses).</p></li>
 <li><p><strong>description</strong> – Description of this option to use in the helptext. Defaults to
 docstring.</p></li>
 <li><p><strong>prefix_name</strong> – Whether to prefix the name of the subcommand based on where it

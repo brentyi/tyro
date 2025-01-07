@@ -49,11 +49,6 @@ Module Contents
 
       
 
-   .. py:attribute:: is_default_from_default_instance
-      :type: bool
-
-      
-
    .. py:attribute:: helptext
       :type: Optional[str]
 
@@ -90,7 +85,7 @@ Module Contents
       :staticmethod:
 
 
-   .. py:method:: make(name: str, typ: Union[tyro._typing.TypeForm[Any], Callable], default: Any, is_default_from_default_instance: bool, helptext: Optional[str], call_argname_override: Optional[Any] = None)
+   .. py:method:: make(name: str, typ: Union[tyro._typing.TypeForm[Any], Callable], default: Any, helptext: Optional[str], call_argname_override: Optional[Any] = None)
       :staticmethod:
 
 
