@@ -117,7 +117,8 @@ class BaseConfig:
     experiment_config: AnnotatedExperimentParserUnion
 
     # The experiment configuration.
-    data_config: AnnotatedDataParserUnion = DataConfig()
+    # The default should get matched to small-data.
+    data_config: AnnotatedDataParserUnion = DataConfig(test=0)
 
 
 def test_base_configs_nested() -> None:
@@ -158,7 +159,7 @@ def test_base_configs_nested() -> None:
             seed=0,
             activation=nn.ReLU,
         ),
-        DataConfig(2221),
+        DataConfig(0),
     )
     assert tyro.cli(
         main,
