@@ -1036,7 +1036,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         column_parts_grouped[chosen_column].append(p)
                         column_lines[chosen_column] += l
 
-                    column_lines_max = max(column_lines)
+                    column_lines_max = max(*column_lines, 1)  # Prevent divide-by-zero.
                     column_lines_ratio = [l / column_lines_max for l in column_lines]
 
                     # Done if we're down to one column or all columns are
