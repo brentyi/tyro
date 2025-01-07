@@ -56,15 +56,14 @@ class StructFieldSpec:
     """The type of the field. Can be either a primitive or a nested struct type."""
     default: Any
     """The default value of the field."""
-    is_default_overridden: bool = False
-    """Whether the default value was overridden by the default instance. Should
-    be set to False if the default value was assigned by the field itself."""
     helptext: str | None = None
     """Helpjext for the field."""
     # TODO: it's theoretically possible to override the argname with `None`.
     _call_argname: Any = None
     """Private: the name of the argument to pass to the callable. This is used
     for dictionary types."""
+    is_default_overriden: None = None
+    """*Deprecated.*"""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -174,9 +173,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             if is_flax_module and dc_field.name in ("name", "parent"):
                 continue
 
-            default, is_default_from_default_instance = _get_dataclass_field_default(
-                dc_field, info.default
-            )
+            default = _get_dataclass_field_default(dc_field, info.default)
 
             # Try to get helptext from field metadata. This is also intended to be
             # compatible with HuggingFace-style config objects.
@@ -194,7 +191,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=dc_field.name,
                     type=dc_field.type,
                     default=default,
-                    is_default_overridden=is_default_from_default_instance,
                     helptext=helptext,
                 )
             )
@@ -222,10 +218,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             cls, include_extras=True
         ).items():
             typ_origin = get_origin(typ)
-            is_default_from_default_instance = False
             if valid_default_instance and name in cast(dict, info.default):
                 default = cast(dict, info.default)[name]
-                is_default_from_default_instance = True
             elif typ_origin is Required and total is False:
                 # Support total=False.
                 default = MISSING
@@ -261,7 +255,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=typ,
                     default=default,
-                    is_default_overridden=is_default_from_default_instance,
                     helptext=_docstrings.get_field_docstring(cls, name),
                 )
             )
@@ -296,11 +289,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             # Default handling.
             name = attr_field.name
             default = attr_field.default
-            is_default_from_default_instance = False
             if info.default not in MISSING_AND_MISSING_NONPROP:
                 assert hasattr(info.default, name)
                 default = getattr(info.default, name)
-                is_default_from_default_instance = True
             elif default is attr.NOTHING:
                 default = MISSING_NONPROP
             elif isinstance(default, attr.Factory):  # type: ignore
@@ -312,7 +303,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=attr_field.type,
                     default=default,
-                    is_default_overridden=is_default_from_default_instance,
                     helptext=_docstrings.get_field_docstring(info.type, name),
                 )
             )
@@ -345,7 +335,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=str(k) if not isinstance(k, enum.Enum) else k.name,
                     type=type(v),
                     default=v,
-                    is_default_overridden=True,
                     helptext=None,
                     _call_argname=k,
                 )
@@ -368,13 +357,11 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             info.type, include_extras=True
         ).items():
             default = field_defaults.get(name, MISSING_NONPROP)
-            is_default_from_default_instance = False
 
             if info.default not in MISSING_AND_MISSING_NONPROP and hasattr(
                 info.default, name
             ):
                 default = getattr(info.default, name)
-                is_default_from_default_instance = True
             elif info.default is MISSING:
                 default = MISSING
 
@@ -383,7 +370,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=typ,
                     default=default,
-                    is_default_overridden=is_default_from_default_instance,
                     helptext=_docstrings.get_field_docstring(info.type, name),
                 )
             )
@@ -417,7 +403,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=str(i),
                     type=cast(type, contained_type),
                     default=default_i,
-                    is_default_overridden=True,
                     helptext="",
                 )
             )
@@ -461,7 +446,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=str(i),
                     type=child,
                     default=default_i,
-                    is_default_overridden=True,
                     helptext="",
                 )
             )
@@ -537,17 +521,14 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                         info.type, pd1_field.name
                     )
 
-                default, is_default_from_default_instance = (
-                    _get_pydantic_v1_field_default(
-                        pd1_field.name, pd1_field, info.default
-                    )
+                default = _get_pydantic_v1_field_default(
+                    pd1_field.name, pd1_field, info.default
                 )
                 field_list.append(
                     StructFieldSpec(
                         name=pd1_field.name,
                         type=hints[pd1_field.name],
                         default=default,
-                        is_default_overridden=is_default_from_default_instance,
                         helptext=helptext,
                     )
                 )
@@ -558,9 +539,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 if helptext is None:
                     helptext = _docstrings.get_field_docstring(info.type, name)
 
-                default, is_default_from_default_instance = (
-                    _get_pydantic_v2_field_default(name, pd2_field, info.default)
-                )
+                default = _get_pydantic_v2_field_default(name, pd2_field, info.default)
                 field_list.append(
                     StructFieldSpec(
                         name=name,
@@ -572,7 +551,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                             else pd2_field.annotation
                         ),
                         default=default,
-                        is_default_overridden=is_default_from_default_instance,
                         helptext=helptext,
                     )
                 )
@@ -597,12 +575,12 @@ def _ensure_dataclass_instance_used_as_default_is_frozen(
 
 def _get_dataclass_field_default(
     field: dataclasses.Field, parent_default_instance: Any
-) -> tuple[Any, bool]:
+) -> Any:
     """Helper for getting the default instance for a dataclass field."""
     # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
     # as well.
     if parent_default_instance is MISSING:
-        return MISSING, False
+        return MISSING
 
     # Try grabbing default from parent instance.
     if (
@@ -611,7 +589,7 @@ def _get_dataclass_field_default(
     ):
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, field.name):
-            return getattr(parent_default_instance, field.name), True
+            return getattr(parent_default_instance, field.name)
 
     # Try grabbing default from dataclass field.
     if (
@@ -623,7 +601,7 @@ def _get_dataclass_field_default(
         # _types_, not just instances.
         if type(default) is not type and dataclasses.is_dataclass(default):
             _ensure_dataclass_instance_used_as_default_is_frozen(field, default)
-        return default, False
+        return default
 
     # Populate default from `dataclasses.field(default_factory=...)`.
     if field.default_factory is not dataclasses.MISSING and not (
@@ -637,10 +615,10 @@ def _get_dataclass_field_default(
         # before this method is called.
         dataclasses.is_dataclass(field.type) and field.default_factory is field.type
     ):
-        return field.default_factory(), False
+        return field.default_factory()
 
     # Otherwise, no default.
-    return MISSING_NONPROP, False
+    return MISSING_NONPROP
 
 
 if TYPE_CHECKING:
@@ -662,20 +640,20 @@ def _get_pydantic_v1_field_default(
     ):
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, name):
-            return getattr(parent_default_instance, name), True
+            return getattr(parent_default_instance, name)
 
     if not field.required:
-        return field.get_default(), False
+        return field.get_default()
 
     # Otherwise, no default.
-    return MISSING_NONPROP, False
+    return MISSING_NONPROP
 
 
 def _get_pydantic_v2_field_default(
     name: str,
     field: pydantic.fields.FieldInfo,
     parent_default_instance: Any,
-) -> tuple[Any, bool]:
+) -> Any:
     """Helper for getting the default instance for a Pydantic field."""
 
     # Try grabbing default from parent instance.
@@ -685,10 +663,10 @@ def _get_pydantic_v2_field_default(
     ):
         # Populate default from some parent, eg `default=` in `tyro.cli()`.
         if hasattr(parent_default_instance, name):
-            return getattr(parent_default_instance, name), True
+            return getattr(parent_default_instance, name)
 
     if not field.is_required():
-        return field.get_default(call_default_factory=True), False
+        return field.get_default(call_default_factory=True)
 
     # Otherwise, no default.
-    return MISSING_NONPROP, False
+    return MISSING_NONPROP

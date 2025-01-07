@@ -35,10 +35,6 @@ class FieldDefinition:
     """Full type, including runtime annotations."""
     type_stripped: TypeForm[Any] | Callable
     default: Any
-    # We need to record whether defaults are from default instances to
-    # determine if they should override the default in
-    # tyro.conf.subcommand(default=...).
-    is_default_from_default_instance: bool
     helptext: Optional[str]
     markers: Set[Any]
     custom_constructor: bool
@@ -66,7 +62,6 @@ class FieldDefinition:
             name=field_spec.name,
             typ=field_spec.type,
             default=field_spec.default,
-            is_default_from_default_instance=field_spec.is_default_overridden,
             helptext=field_spec.helptext,
             call_argname_override=field_spec._call_argname,
         )
@@ -76,7 +71,6 @@ class FieldDefinition:
         name: str,
         typ: Union[TypeForm[Any], Callable],
         default: Any,
-        is_default_from_default_instance: bool,
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
     ):
@@ -133,7 +127,6 @@ class FieldDefinition:
             type=typ,
             type_stripped=type_stripped,
             default=default,
-            is_default_from_default_instance=is_default_from_default_instance,
             helptext=helptext,
             markers=set(markers),
             custom_constructor=argconf.constructor_factory is not None,
@@ -243,7 +236,6 @@ def field_list_from_type_or_callable(
                                 name="value",
                                 typ=f,
                                 default=default_instance,
-                                is_default_from_default_instance=True,
                                 helptext="",
                             )
                         ],
@@ -371,7 +363,6 @@ def _field_list_from_function(
                     if default_instance in MISSING_AND_MISSING_NONPROP
                     else Annotated[(typ, _markers._OPTIONAL_GROUP)],  # type: ignore
                     default=default if default is not param.empty else MISSING_NONPROP,
-                    is_default_from_default_instance=False,
                     helptext=helptext,
                 )
             )
