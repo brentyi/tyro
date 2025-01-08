@@ -127,16 +127,14 @@ class ParserSpecification:
             # Helptext for this field; used as description for grouping
             # arguments and not needed for fields that are handled via
             # ArgumentDefinition.
+            #
+            # This should happen for both subparsers and nested parsers.
             class_field_name = _strings.make_field_name(
                 [intern_prefix, field.intern_name]
             )
             if field.helptext is not None:
                 helptext_from_intern_prefixed_field_name[class_field_name] = (
                     field.helptext
-                )
-            else:
-                helptext_from_intern_prefixed_field_name[class_field_name] = (
-                    _docstrings.get_callable_description(f)
                 )
 
             if isinstance(field_out, SubparsersSpecification):
@@ -147,6 +145,13 @@ class ParserSpecification:
                 # Handle nested parsers.
                 nested_parser = field_out
                 child_from_prefix[field_out.intern_prefix] = nested_parser
+
+                # If there's no helptext from the field, we can grab it from
+                # the callable (docstring) itself.
+                if field.helptext is None:
+                    helptext_from_intern_prefixed_field_name[class_field_name] = (
+                        _docstrings.get_callable_description(nested_parser.f)
+                    )
 
                 if nested_parser.has_required_args:
                     has_required_args = True
