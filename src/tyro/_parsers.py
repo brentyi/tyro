@@ -116,12 +116,30 @@ class ParserSpecification:
                 extern_prefix=extern_prefix,
                 subcommand_prefix=subcommand_prefix,
             )
+
             if isinstance(field_out, _arguments.ArgumentDefinition):
                 # Handle single arguments.
                 args.append(field_out)
                 if field_out.lowered.required:
                     has_required_args = True
-            elif isinstance(field_out, SubparsersSpecification):
+                continue
+
+            # Helptext for this field; used as description for grouping
+            # arguments and not needed for fields that are handled via
+            # ArgumentDefinition.
+            class_field_name = _strings.make_field_name(
+                [intern_prefix, field.intern_name]
+            )
+            if field.helptext is not None:
+                helptext_from_intern_prefixed_field_name[class_field_name] = (
+                    field.helptext
+                )
+            else:
+                helptext_from_intern_prefixed_field_name[class_field_name] = (
+                    _docstrings.get_callable_description(f)
+                )
+
+            if isinstance(field_out, SubparsersSpecification):
                 # Handle subparsers.
                 subparsers_from_prefix[field_out.intern_prefix] = field_out
                 subparsers = add_subparsers_to_leaves(subparsers, field_out)
@@ -140,19 +158,6 @@ class ParserSpecification:
                     )
                     subparsers = add_subparsers_to_leaves(
                         subparsers, nested_parser.subparsers
-                    )
-
-                # Helptext for this field; used as description for grouping arguments.
-                class_field_name = _strings.make_field_name(
-                    [intern_prefix, field.intern_name]
-                )
-                if field.helptext is not None:
-                    helptext_from_intern_prefixed_field_name[class_field_name] = (
-                        field.helptext
-                    )
-                else:
-                    helptext_from_intern_prefixed_field_name[class_field_name] = (
-                        _docstrings.get_callable_description(nested_parser.f)
                     )
 
                 # If arguments are in an optional group, it indicates that the default_instance
@@ -190,7 +195,10 @@ class ParserSpecification:
         )
 
     def apply(
-        self, parser: argparse.ArgumentParser, force_required_subparsers: bool
+        self,
+        parser: argparse.ArgumentParser,
+        force_required_subparsers: bool,
+        parent: ParserSpecification | None,
     ) -> Tuple[argparse.ArgumentParser, ...]:
         """Create defined arguments and subparsers."""
 
@@ -207,7 +215,7 @@ class ParserSpecification:
         # Create subparser tree.
         subparser_group = None
         if self.subparsers is not None:
-            leaves = self.subparsers.apply(parser, force_required_subparsers)
+            leaves = self.subparsers.apply(parser, self, force_required_subparsers)
             subparser_group = parser._action_groups.pop()
         else:
             leaves = (parser,)
@@ -216,9 +224,9 @@ class ParserSpecification:
         # apply arguments to the intermediate parser or only on the leaves.
         if self.consolidate_subcommand_args:
             for leaf in leaves:
-                self.apply_args(leaf)
+                self.apply_args(leaf, parent=parent)
         else:
-            self.apply_args(parser)
+            self.apply_args(parser, parent=parent)
 
         if subparser_group is not None:
             parser._action_groups.append(subparser_group)
@@ -237,7 +245,7 @@ class ParserSpecification:
     def apply_args(
         self,
         parser: argparse.ArgumentParser,
-        parent: ParserSpecification | None = None,
+        parent: ParserSpecification | None,
     ) -> None:
         """Create defined arguments and subparsers."""
 
@@ -629,6 +637,7 @@ class SubparsersSpecification:
     def apply(
         self,
         parent_parser: argparse.ArgumentParser,
+        parent: ParserSpecification | None,
         force_required_subparsers: bool,
     ) -> Tuple[argparse.ArgumentParser, ...]:
         title = "subcommands"
@@ -690,7 +699,7 @@ class SubparsersSpecification:
             subparser._args = parent_parser._args
 
             subparser_tree_leaves.extend(
-                subparser_def.apply(subparser, force_required_subparsers)
+                subparser_def.apply(subparser, force_required_subparsers, parent=parent)
             )
 
         return tuple(subparser_tree_leaves)
