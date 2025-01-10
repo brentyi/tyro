@@ -387,7 +387,10 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ) or not isinstance(info.default, Iterable):
             return None
 
-        contained_type = get_args(info.type)[0] if get_args(info.type) else Any
+        # Cast is for mypy.
+        contained_type = cast(
+            type, get_args(info.type)[0] if get_args(info.type) else Any
+        )
 
         # If the inner type is a primitive, we'll just treat the whole type as
         # a primitive.
