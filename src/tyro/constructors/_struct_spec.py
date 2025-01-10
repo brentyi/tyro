@@ -406,8 +406,21 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             # Because for primitives, we can't nest variable-length primitives inside of variable-length primitives.
             #
             # For example, list[list[str]] can't be parsed as a single primitive.
-            # However, list[list[str]] can be parsed if the outer type is handled as a struct.
-            and contained_primitive_spec.nargs != "*"
+            # However, list[list[str]] can be parsed if the outer type is
+            # handled as a struct (and a default value is provided, which we
+            # check above).
+            #
+            # The exception is when we use `append_action` to handle
+            # variable-length primitives. In that case, list[list[str]] can be
+            # handled because the argument can be repeated to handle the inner
+            # list.
+            #
+            # This logic is leaky if we have `UseAppendAction` and
+            # tripled-nested types, like `list[list[list[str]]]`.
+            and (
+                contained_primitive_spec.nargs != "*"
+                or _markers.UseAppendAction not in info.markers
+            )
         ):
             return None
 
