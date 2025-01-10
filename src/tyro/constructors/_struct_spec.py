@@ -377,7 +377,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
 
     @registry.struct_rule
-    def sequence_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+    def variable_length_sequence_rule(
+        info: StructTypeInfo,
+    ) -> StructConstructorSpec | None:
         if get_origin(info.type) not in (
             list,
             set,
@@ -406,9 +408,10 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         if (
             isinstance(contained_primitive_spec, PrimitiveConstructorSpec)
             # Why do we check nargs?
-            # Because for primitives, we can't nest variable-length primitives inside of variable-length primitives.
+            # Because for primitives, we can't nest variable-length collections.
             #
             # For example, list[list[str]] can't be parsed as a single primitive.
+            #
             # However, list[list[str]] can be parsed if the outer type is
             # handled as a struct (and a default value is provided, which we
             # check above).
