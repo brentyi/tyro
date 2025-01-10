@@ -182,10 +182,7 @@ class FieldDefinition:
 def is_struct_type(typ: Union[TypeForm[Any], Callable], default_instance: Any) -> bool:
     """Determine whether a type should be treated as a 'struct type', where a single
     type can be broken down into multiple fields (eg for nested dataclasses or
-    classes).
-
-    TODO: we should come up with a better name than 'struct type', which is a little bit
-    misleading."""
+    classes)."""
 
     list_or_error = field_list_from_type_or_callable(
         typ, default_instance, support_single_arg_types=False

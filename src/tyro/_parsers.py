@@ -373,7 +373,7 @@ def handle_field(
 
         # (2) Handle nested callables.
         if force_primitive == "struct" or _fields.is_struct_type(
-            field.type_stripped, field.default
+            field.type, field.default
         ):
             field = field.with_new_type_stripped(
                 _resolver.narrow_subtypes(
