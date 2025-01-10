@@ -244,9 +244,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
             if typ_origin in (Required, NotRequired):
                 args = get_args(typ)
-                assert (
-                    len(args) == 1
-                ), "typing.Required[] and typing.NotRequired[T] require a concrete type T."
+                assert len(args) == 1, (
+                    "typing.Required[] and typing.NotRequired[T] require a concrete type T."
+                )
                 typ = args[0]
                 del args
 
@@ -377,7 +377,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
 
     @registry.struct_rule
-    def sequence_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
+    def variable_length_sequence_rule(
+        info: StructTypeInfo,
+    ) -> StructConstructorSpec | None:
         if get_origin(info.type) not in (
             list,
             set,
@@ -387,13 +389,34 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ) or not isinstance(info.default, Iterable):
             return None
 
-        contained_type = get_args(info.type)[0] if get_args(info.type) else Any
+        # Cast is for mypy.
+        contained_type = cast(
+            type, get_args(info.type)[0] if get_args(info.type) else Any
+        )
 
         # If the inner type is a primitive, we'll just treat the whole type as
         # a primitive.
-        from ._registry import ConstructorRegistry
+        from ._registry import (
+            ConstructorRegistry,
+            PrimitiveConstructorSpec,
+            PrimitiveTypeInfo,
+        )
 
-        if ConstructorRegistry._is_primitive_type(contained_type, set(info.markers)):
+        contained_primitive_spec = ConstructorRegistry.get_primitive_spec(
+            PrimitiveTypeInfo.make(contained_type, set(info.markers))
+        )
+        if (
+            isinstance(contained_primitive_spec, PrimitiveConstructorSpec)
+            # Why do we check nargs?
+            # Because for primitives, we can't nest variable-length collections.
+            #
+            # For example, list[list[str]] can't be parsed as a single primitive.
+            #
+            # However, list[list[str]] can be parsed if the outer type is
+            # handled as a struct (and a default value is provided, which we
+            # check above).
+            and contained_primitive_spec.nargs != "*"
+        ):
             return None
 
         field_list = []

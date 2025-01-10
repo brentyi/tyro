@@ -282,7 +282,7 @@ def test_optional_nested_multiple() -> None:
         tyro.conf.OmitSubcommandPrefixes[
             tyro.conf.ConsolidateSubcommandArgs[ModelSettings]
         ],
-        args=("output-head-settings None" " --number-of-outputs 5".split(" ")),
+        args=("output-head-settings None --number-of-outputs 5".split(" ")),
     ) == ModelSettings(OutputHeadSettings(5), None)
 
     assert tyro.cli(

@@ -652,3 +652,56 @@ def test_list_narrowing_direct() -> None:
 def test_tuple_direct() -> None:
     assert tyro.cli(Tuple[int, ...], args="1 2".split(" ")) == (1, 2)  # type: ignore
     assert tyro.cli(Tuple[int, int], args="1 2".split(" ")) == (1, 2)  # type: ignore
+
+
+def test_nested_dict_in_list() -> None:
+    """https://github.com/nerfstudio-project/nerfstudio/pull/3567"""
+
+    @dataclasses.dataclass
+    class Args:
+        proposal_net_args_list: List[Dict] = dataclasses.field(
+            default_factory=lambda: [
+                {
+                    "hidden_dim": 16,
+                },
+                {
+                    "hidden_dim": 16,
+                },
+            ]
+        )
+        proposal_net_args_list2: Tuple[Dict[str, List], Dict[str, List]] = (
+            dataclasses.field(
+                default_factory=lambda: (
+                    {
+                        "hidden_dim": [16, 32],
+                    },
+                    {
+                        "hidden_dim": [16, 32],
+                    },
+                )
+            )
+        )
+
+    assert tyro.cli(Args, args=[]) == Args()
+    assert tyro.cli(
+        Args, args=["--proposal-net-args-list.0.hidden-dim", "32"]
+    ).proposal_net_args_list == (
+        [
+            {
+                "hidden_dim": 32,
+            },
+            {
+                "hidden_dim": 16,
+            },
+        ]
+    )
+    assert tyro.cli(
+        Args, args=["--proposal-net-args-list2.1.hidden-dim", "32", "64"]
+    ).proposal_net_args_list2 == (
+        {
+            "hidden_dim": [16, 32],
+        },
+        {
+            "hidden_dim": [32, 64],
+        },
+    )
