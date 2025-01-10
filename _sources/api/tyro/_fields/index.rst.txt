@@ -109,9 +109,6 @@ Module Contents
    type can be broken down into multiple fields (eg for nested dataclasses or
    classes).
 
-   TODO: we should come up with a better name than 'struct type', which is a little bit
-   misleading.
-
 
 .. py:function:: field_list_from_type_or_callable(f: Union[Callable, tyro._typing.TypeForm[Any]], default_instance: Any, support_single_arg_types: bool) -> tyro.constructors._struct_spec.UnsupportedStructTypeMessage | tuple[Callable | tyro._typing.TypeForm[Any], list[FieldDefinition]]
 

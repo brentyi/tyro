@@ -487,10 +487,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">is_struct_type</span><span class="p">(</span><span class="n">typ</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TypeForm</span><span class="p">[</span><span class="n">Any</span><span class="p">],</span> <span class="n">Callable</span><span class="p">],</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine whether a type should be treated as a &#39;struct type&#39;, where a single</span>
 <span class="sd">    type can be broken down into multiple fields (eg for nested dataclasses or</span>
-<span class="sd">    classes).</span>
-
-<span class="sd">    TODO: we should come up with a better name than &#39;struct type&#39;, which is a little bit</span>
-<span class="sd">    misleading.&quot;&quot;&quot;</span>
+<span class="sd">    classes).&quot;&quot;&quot;</span>
 
     <span class="n">list_or_error</span> <span class="o">=</span> <span class="n">field_list_from_type_or_callable</span><span class="p">(</span>
         <span class="n">typ</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">,</span> <span class="n">support_single_arg_types</span><span class="o">=</span><span class="kc">False</span>

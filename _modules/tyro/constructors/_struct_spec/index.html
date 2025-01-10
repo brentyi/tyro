@@ -546,9 +546,9 @@
 
             <span class="k">if</span> <span class="n">typ_origin</span> <span class="ow">in</span> <span class="p">(</span><span class="n">Required</span><span class="p">,</span> <span class="n">NotRequired</span><span class="p">):</span>
                 <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-                <span class="k">assert</span> <span class="p">(</span>
-                    <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-                <span class="p">),</span> <span class="s2">&quot;typing.Required[] and typing.NotRequired[T] require a concrete type T.&quot;</span>
+                <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="s2">&quot;typing.Required[] and typing.NotRequired[T] require a concrete type T.&quot;</span>
+                <span class="p">)</span>
                 <span class="n">typ</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">del</span> <span class="n">args</span>
 
@@ -679,7 +679,9 @@
         <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">sequence_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">variable_length_sequence_rule</span><span class="p">(</span>
+        <span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
             <span class="nb">list</span><span class="p">,</span>
             <span class="nb">set</span><span class="p">,</span>
@@ -689,13 +691,34 @@
         <span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">contained_type</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="k">else</span> <span class="n">Any</span>
+        <span class="c1"># Cast is for mypy.</span>
+        <span class="n">contained_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span>
+            <span class="nb">type</span><span class="p">,</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">get_args</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="k">else</span> <span class="n">Any</span>
+        <span class="p">)</span>
 
         <span class="c1"># If the inner type is a primitive, we&#39;ll just treat the whole type as</span>
         <span class="c1"># a primitive.</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConstructorRegistry</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">._registry</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+            <span class="n">ConstructorRegistry</span><span class="p">,</span>
+            <span class="n">PrimitiveConstructorSpec</span><span class="p">,</span>
+            <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+        <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span><span class="n">contained_type</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">)):</span>
+        <span class="n">contained_primitive_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+            <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">contained_type</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">contained_primitive_spec</span><span class="p">,</span> <span class="n">PrimitiveConstructorSpec</span><span class="p">)</span>
+            <span class="c1"># Why do we check nargs?</span>
+            <span class="c1"># Because for primitives, we can&#39;t nest variable-length collections.</span>
+            <span class="c1">#</span>
+            <span class="c1"># For example, list[list[str]] can&#39;t be parsed as a single primitive.</span>
+            <span class="c1">#</span>
+            <span class="c1"># However, list[list[str]] can be parsed if the outer type is</span>
+            <span class="c1"># handled as a struct (and a default value is provided, which we</span>
+            <span class="c1"># check above).</span>
+            <span class="ow">and</span> <span class="n">contained_primitive_spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">!=</span> <span class="s2">&quot;*&quot;</span>
+        <span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>

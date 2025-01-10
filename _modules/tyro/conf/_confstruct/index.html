@@ -400,9 +400,9 @@
 <span class="sd">            will be used in place of the argument&#39;s type for parsing arguments.</span>
 <span class="sd">            For more configurability, see :mod:`tyro.constructors`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
-        <span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="p">),</span> <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span>
+        <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">_SubcommandConfig</span><span class="p">(</span>
         <span class="n">name</span><span class="p">,</span>
         <span class="n">default</span><span class="p">,</span>
@@ -507,9 +507,9 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        Object to attach via `typing.Annotated[]`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span>
-        <span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="p">),</span> <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
+    <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span>
+        <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">alias</span> <span class="ow">in</span> <span class="n">aliases</span><span class="p">:</span>
