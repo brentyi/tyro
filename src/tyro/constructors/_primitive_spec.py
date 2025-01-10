@@ -331,11 +331,15 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         if container_type is collections.abc.Sequence:
             container_type = list
 
+        args = get_args(type_info.type)
         if container_type is tuple:
-            (contained_type, ell) = get_args(type_info.type)
+            assert len(args) == 2
+            (contained_type, ell) = args
             assert ell == Ellipsis
+        elif len(args) == 1:
+            (contained_type,) = args
         else:
-            (contained_type,) = get_args(type_info.type)
+            contained_type = Any
 
         inner_spec = ConstructorRegistry.get_primitive_spec(
             PrimitiveTypeInfo.make(

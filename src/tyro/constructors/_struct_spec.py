@@ -391,9 +391,24 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         # If the inner type is a primitive, we'll just treat the whole type as
         # a primitive.
-        from ._registry import ConstructorRegistry
+        from ._registry import (
+            ConstructorRegistry,
+            PrimitiveConstructorSpec,
+            PrimitiveTypeInfo,
+        )
 
-        if ConstructorRegistry._is_primitive_type(contained_type, set(info.markers)):
+        contained_primitive_spec = ConstructorRegistry.get_primitive_spec(
+            PrimitiveTypeInfo.make(contained_type, set(info.markers))
+        )
+        if (
+            isinstance(contained_primitive_spec, PrimitiveConstructorSpec)
+            # Why do we check nargs?
+            # Because for primitives, we can't nest variable-length primitives inside of variable-length primitives.
+            #
+            # For example, list[list[str]] can't be parsed as a single primitive.
+            # However, list[list[str]] can be parsed if the outer type is handled as a struct.
+            and contained_primitive_spec.nargs != "*"
+        ):
             return None
 
         field_list = []
