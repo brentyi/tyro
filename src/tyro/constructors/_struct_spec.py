@@ -244,9 +244,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
             if typ_origin in (Required, NotRequired):
                 args = get_args(typ)
-                assert len(args) == 1, (
-                    "typing.Required[] and typing.NotRequired[T] require a concrete type T."
-                )
+                assert (
+                    len(args) == 1
+                ), "typing.Required[] and typing.NotRequired[T] require a concrete type T."
                 typ = args[0]
                 del args
 
@@ -409,18 +409,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             # However, list[list[str]] can be parsed if the outer type is
             # handled as a struct (and a default value is provided, which we
             # check above).
-            #
-            # The exception is when we use `append_action` to handle
-            # variable-length primitives. In that case, list[list[str]] can be
-            # handled because the argument can be repeated to handle the inner
-            # list.
-            #
-            # This logic is leaky if we have `UseAppendAction` and
-            # tripled-nested types, like `list[list[list[str]]]`.
-            and (
-                contained_primitive_spec.nargs != "*"
-                or _markers.UseAppendAction not in info.markers
-            )
+            and contained_primitive_spec.nargs != "*"
         ):
             return None
 
