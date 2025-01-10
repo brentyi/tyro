@@ -60,13 +60,13 @@ def _(
                 name="lower",
                 type=int,
                 default=default[0],
-                helptext="Lower bound." "",
+                helptext="Lower bound.",
             ),
             tyro.constructors.StructFieldSpec(
                 name="upper",
                 type=int,
                 default=default[1],
-                helptext="Upper bound." "",
+                helptext="Upper bound.",
             ),
         ),
     )
