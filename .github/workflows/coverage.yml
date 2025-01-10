@@ -9,6 +9,7 @@ on:
 jobs:
   coverage:
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'brentyi'
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python 3.12
