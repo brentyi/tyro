@@ -116,9 +116,9 @@ def subcommand(
             will be used in place of the argument's type for parsing arguments.
             For more configurability, see :mod:`tyro.constructors`.
     """
-    assert not (constructor is not None and constructor_factory is not None), (
-        "`constructor` and `constructor_factory` cannot both be set."
-    )
+    assert not (
+        constructor is not None and constructor_factory is not None
+    ), "`constructor` and `constructor_factory` cannot both be set."
     return _SubcommandConfig(
         name,
         default,
@@ -220,9 +220,9 @@ def arg(
     Returns:
         Object to attach via `typing.Annotated[]`.
     """
-    assert not (constructor is not None and constructor_factory is not None), (
-        "`constructor` and `constructor_factory` cannot both be set."
-    )
+    assert not (
+        constructor is not None and constructor_factory is not None
+    ), "`constructor` and `constructor_factory` cannot both be set."
 
     if aliases is not None:
         for alias in aliases:

@@ -244,9 +244,9 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
             if typ_origin in (Required, NotRequired):
                 args = get_args(typ)
-                assert len(args) == 1, (
-                    "typing.Required[] and typing.NotRequired[T] require a concrete type T."
-                )
+                assert (
+                    len(args) == 1
+                ), "typing.Required[] and typing.NotRequired[T] require a concrete type T."
                 typ = args[0]
                 del args
 

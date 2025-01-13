@@ -691,9 +691,7 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
             if fuzzy_match is not None:
                 return fuzzy_match.str_from_instance(instance)
 
-            assert False, (
-                f"could not match default value {instance} with any types in union {options}"
-            )
+            assert False, f"could not match default value {instance} with any types in union {options}"
 
         return PrimitiveConstructorSpec(
             nargs=nargs,

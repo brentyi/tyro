@@ -572,6 +572,10 @@ class SubparsersSpecification:
             else:
                 option = Annotated[(option_origin,) + annotations]  # type: ignore
 
+            # Suppress this subcommand.
+            if _markers.Suppress in annotations:
+                continue
+
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
                     option,  # type: ignore
