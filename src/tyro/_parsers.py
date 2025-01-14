@@ -475,16 +475,16 @@ class SubparsersSpecification:
         subcommand_config_from_name: Dict[str, _confstruct._SubcommandConfig] = {}
         subcommand_type_from_name: Dict[str, type] = {}
         for option in options:
+            option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
+                option, _confstruct._SubcommandConfig
+            )
             subcommand_name = _strings.subparser_name_from_type(
                 (
                     ""
                     if _markers.OmitSubcommandPrefixes in field.markers
                     else extern_prefix
                 ),
-                type(None) if option is none_proxy else cast(type, option),
-            )
-            option_unwrapped, found_subcommand_configs = _resolver.unwrap_annotated(
-                option, _confstruct._SubcommandConfig
+                type(None) if option_unwrapped is none_proxy else cast(type, option),
             )
             if len(found_subcommand_configs) != 0:
                 # Explicitly annotated default.
@@ -571,10 +571,6 @@ class SubparsersSpecification:
                 option = option_origin
             else:
                 option = Annotated[(option_origin,) + annotations]  # type: ignore
-
-            # Suppress this subcommand.
-            if _markers.Suppress in annotations:
-                continue
 
             with _fields.FieldDefinition.marker_context(tuple(field.markers)):
                 subparser = ParserSpecification.from_callable_or_type(
