@@ -8,10 +8,10 @@ import sys
 from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, TypedDict
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_suppress_subcommand() -> None:
@@ -1760,3 +1760,36 @@ def test_default_subcommand_consistency() -> None:
         == Config()
     )
     assert tyro.cli(Config, args=["optimizer:adam"]) == Config()
+
+
+def test_suppress_in_union() -> None:
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int
+
+    @dataclasses.dataclass
+    class ConfigB:
+        y: int | Annotated[str, tyro.conf.Suppress]
+        z: Annotated[str | int, tyro.conf.Suppress] = 3
+
+    # def main(x: Annotated[int, tyro.conf.Suppress] | str) -> None: ...
+    def main(x: Annotated[ConfigA, tyro.conf.Suppress] | ConfigB = ConfigA(3)) -> Any:
+        return x
+
+    assert tyro.cli(main, args="x:config-b --x.y 5".split(" ")) == ConfigB(5)
+
+    with pytest.raises(SystemExit):
+        # ConfigA is suppressed, so there'll be no default.
+        tyro.cli(main, args=[])
+    with pytest.raises(SystemExit):
+        # ConfigB needs an int, since str is suppressed.
+        tyro.cli(main, args="x:config-b --x.y five".split(" "))
+    with pytest.raises(SystemExit):
+        # The z argument is suppressed.
+        tyro.cli(main, args="x:config-b --x.y 5 --x.z 3".split(" "))
+    with pytest.raises(SystemExit):
+        # ConfigA is suppressed.
+        assert tyro.cli(main, args=["x:config-a"])
+    with pytest.raises(SystemExit):
+        # ConfigB has a required argument.
+        assert tyro.cli(main, args=["x:config-b"])
