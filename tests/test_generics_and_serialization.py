@@ -6,6 +6,7 @@ from typing import Generic, List, NewType, Tuple, Type, TypeVar, Union
 
 import pytest
 import yaml
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
 import tyro
@@ -458,3 +459,75 @@ def test_superclass() -> None:
 
     wrapper1 = Wrapper(TypeASubclass(3))  # Create Wrapper object.
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
+
+
+@dataclasses.dataclass(frozen=True)
+class A(Generic[T]):
+    x: T
+
+
+@dataclasses.dataclass(frozen=True)
+class B(A[int], Generic[T]):
+    y: T
+
+
+def test_inheritance_with_same_typevar() -> None:
+    """In this example, the same TypeVar should resolve to a different type depending on context."""
+    assert "INT" in get_helptext_with_checks(B[int])
+    assert "STR" not in get_helptext_with_checks(B[int])
+    assert "STR" in get_helptext_with_checks(B[str])
+    assert "INT" in get_helptext_with_checks(B[str])
+
+    assert tyro.cli(B[str], args=["--x", "1", "--y", "2"]) == B(1, "2")
+    assert tyro.cli(B[int], args=["--x", "1", "--y", "2"]) == B(1, 2)
+
+
+def test_deeply_inherited_init() -> None:
+    @dataclasses.dataclass
+    class AConfig:
+        a: int
+
+    TContainsAConfig = TypeVar("TContainsAConfig", bound=AConfig)
+
+    class AModel(Generic[TContainsAConfig]):
+        def __init__(self, config: TContainsAConfig):
+            self.config = config
+
+    @dataclasses.dataclass
+    class ABConfig(AConfig):
+        b: int
+
+    TContainsABConfig = TypeVar("TContainsABConfig", bound=ABConfig)
+
+    class ABModel(AModel[TContainsABConfig], Generic[TContainsABConfig]):
+        pass
+
+    @dataclasses.dataclass
+    class ABCConfig(ABConfig):
+        c: int
+
+    class Dummy: ...
+
+    class ABCModel(Dummy, ABModel[ABCConfig]):
+        pass
+
+    def a(model: ABCModel):
+        print(model.config)
+
+    def b(model: ABModel[ABConfig]):
+        print(model.config)
+
+    def c(model: ABModel[ABCConfig]):
+        print(model.config)
+
+    assert "--model.config.a" in get_helptext_with_checks(a)
+    assert "--model.config.b" in get_helptext_with_checks(a)
+    assert "--model.config.c" in get_helptext_with_checks(a)
+
+    assert "--model.config.a" in get_helptext_with_checks(b)
+    assert "--model.config.b" in get_helptext_with_checks(b)
+    assert "--model.config.c" not in get_helptext_with_checks(b)
+
+    assert "--model.config.a" in get_helptext_with_checks(c)
+    assert "--model.config.b" in get_helptext_with_checks(c)
+    assert "--model.config.c" in get_helptext_with_checks(c)

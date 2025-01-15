@@ -10,14 +10,14 @@ class SomeEnum(enum.StrEnum):
     B = enum.auto()
 
 
-def test_str_enum():
+def test_str_enum() -> None:
     def main(x: SomeEnum) -> SomeEnum:
         return x
 
     assert tyro.cli(main, args="--x A".split(" ")) == SomeEnum.A
 
 
-def test_str_enum_value_config():
+def test_str_enum_value_config() -> None:
     def main(x: SomeEnum) -> SomeEnum:
         return x
 
@@ -29,7 +29,7 @@ def test_str_enum_value_config():
     )
 
 
-def test_str_enum_default():
+def test_str_enum_default() -> None:
     def main(x: SomeEnum = SomeEnum.A) -> SomeEnum:
         return x
 
@@ -37,14 +37,14 @@ def test_str_enum_default():
     assert tyro.cli(main, args="--x A".split(" ")) == SomeEnum.A
 
 
-def test_pydantic():
+def test_pydantic() -> None:
     class Model(BaseModel):
         x: SomeEnum = Field(default=SomeEnum.A)
 
     assert tyro.cli(Model, args=[]).x == SomeEnum.A
 
 
-def test_pydantic_use_enum_values():
+def test_pydantic_use_enum_values() -> None:
     class Model(BaseModel):
         model_config = ConfigDict(use_enum_values=True)
         x: SomeEnum = Field(default=SomeEnum.A)
