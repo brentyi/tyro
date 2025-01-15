@@ -5,10 +5,11 @@ import io
 from typing import Generic, List, NewType, Tuple, Type, TypeVar, Union
 
 import pytest
+import tyro
 import yaml
 from typing_extensions import Annotated
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 T = TypeVar("T")
 
@@ -458,3 +459,24 @@ def test_superclass() -> None:
 
     wrapper1 = Wrapper(TypeASubclass(3))  # Create Wrapper object.
     assert wrapper1 == tyro.extras.from_yaml(Wrapper, tyro.extras.to_yaml(wrapper1))
+
+
+@dataclasses.dataclass(frozen=True)
+class A(Generic[T]):
+    x: T
+
+
+@dataclasses.dataclass(frozen=True)
+class B(A[int], Generic[T]):
+    y: T
+
+
+def test_inheritance_with_same_typevar() -> None:
+    """In this example, the same TypeVar should resolve to a different type depending on context."""
+    assert "INT" in get_helptext_with_checks(B[int])
+    assert "STR" not in get_helptext_with_checks(B[int])
+    assert "STR" in get_helptext_with_checks(B[str])
+    assert "INT" in get_helptext_with_checks(B[str])
+
+    assert tyro.cli(B[str], args=["--x", "1", "--y", "2"]) == B(1, "2")
+    assert tyro.cli(B[int], args=["--x", "1", "--y", "2"]) == B(1, 2)

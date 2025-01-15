@@ -74,9 +74,6 @@ class FieldDefinition:
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
     ):
-        # Resolve generics.
-        typ = _resolver.TypeParamResolver.concretize_type_params(typ)
-
         # Narrow types.
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
             typ = type(default)
@@ -298,7 +295,7 @@ def _field_list_from_function(
 
     # This will throw a type error for torch.device, typing.Dict, etc.
     try:
-        hints = _resolver.get_type_hints_with_backported_syntax(f, include_extras=True)
+        hints = _resolver.get_type_hints_resolve_generics(f, include_extras=True)
     except TypeError:
         return UnsupportedStructTypeMessage(f"Could not get hints for {f}!")
 
