@@ -48,7 +48,7 @@ def callable_with_args(
     consumed_keywords: Set[str] = set()
 
     def get_value_from_arg(
-        prefixed_field_name: str, field_def: _fields.FieldDefinition
+        prefixed_field_name: str, arg: _arguments.ArgumentDefinition
     ) -> tuple[Any, bool]:
         """Helper for getting values from `value_from_arg` + doing some extra
         asserts.
@@ -64,11 +64,11 @@ def callable_with_args(
             # When would the value not be found? Only if we have
             # `tyro.conf.ConslidateSubcommandArgs` for one of the contained
             # subparsers.
-            assert (
+            assert arg.is_suppressed() or (
                 parser_definition.subparsers is not None
                 and parser_definition.consolidate_subcommand_args
             ), "Field value is unexpectedly missing. This is likely a bug in tyro."
-            return field_def.default, False
+            return arg.field.default, False
         else:
             return value_from_prefixed_field_name[prefixed_field_name], True
 
@@ -96,7 +96,7 @@ def callable_with_args(
             name_maybe_prefixed = prefixed_field_name
             consumed_keywords.add(name_maybe_prefixed)
             if not arg.lowered.is_fixed():
-                value, value_found = get_value_from_arg(name_maybe_prefixed, field)
+                value, value_found = get_value_from_arg(name_maybe_prefixed, arg)
 
                 if value in _fields.MISSING_AND_MISSING_NONPROP:
                     value = arg.field.default
@@ -133,7 +133,9 @@ def callable_with_args(
             else:
                 assert arg.field.default not in _fields.MISSING_AND_MISSING_NONPROP
                 value = arg.field.default
-                parsed_value = value_from_prefixed_field_name.get(prefixed_field_name)
+                parsed_value = value_from_prefixed_field_name.get(
+                    prefixed_field_name, _singleton.MISSING_NONPROP
+                )
                 if parsed_value not in _fields.MISSING_AND_MISSING_NONPROP:
                     raise InstantiationError(
                         f"{'/'.join(arg.lowered.name_or_flags)} was passed in, but"

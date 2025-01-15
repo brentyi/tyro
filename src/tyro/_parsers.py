@@ -38,6 +38,7 @@ class ParserSpecification:
     """Each parser contains a list of arguments and optionally some subparsers."""
 
     f: Callable
+    markers: Set[_markers._Marker]
     description: str
     args: List[_arguments.ArgumentDefinition]
     field_list: List[_fields.FieldDefinition]
@@ -172,6 +173,7 @@ class ParserSpecification:
 
         return ParserSpecification(
             f=f,
+            markers=markers,
             description=_strings.remove_single_line_breaks(
                 description
                 if description is not None
@@ -268,11 +270,12 @@ class ParserSpecification:
         # Add each argument group. Groups with only suppressed arguments won't
         # be added.
         for arg in self.args:
+            # Don't add suppressed arguments to the parser.
+            if arg.is_suppressed():
+                continue
+
             group_name = group_name_from_arg(arg)
-            if (
-                arg.lowered.help is not argparse.SUPPRESS
-                and group_name not in group_from_group_name
-            ):
+            if group_name not in group_from_group_name:
                 description = (
                     parent.helptext_from_intern_prefixed_field_name.get(
                         arg.intern_prefix
@@ -290,13 +293,8 @@ class ParserSpecification:
                 arg.add_argument(positional_group)
                 continue
 
-            if group_name in group_from_group_name:
-                arg.add_argument(group_from_group_name[group_name])
-            else:
-                # Suppressed argument: still need to add them, but they won't show up in
-                # the helptext so it doesn't matter which group.
-                assert arg.lowered.help is argparse.SUPPRESS
-                arg.add_argument(group_from_group_name[""])
+            assert group_name in group_from_group_name
+            arg.add_argument(group_from_group_name[group_name])
 
         for child in self.child_from_prefix.values():
             child.apply_args(parser, parent=self)
@@ -567,6 +565,9 @@ class SubparsersSpecification:
                 for a in annotations
                 if not isinstance(a, _confstruct._SubcommandConfig)
             )
+            if _markers.Suppress in annotations:
+                continue
+
             if len(annotations) == 0:
                 option = option_origin
             else:
@@ -595,6 +596,10 @@ class SubparsersSpecification:
             )
             parser_from_name[subcommand_name] = subparser
 
+        # Default parser was suppressed!
+        if default_name not in parser_from_name:
+            default_name = None
+
         # Required if a default is passed in, but the default value has missing
         # parameters.
         default_parser = None
@@ -603,13 +608,19 @@ class SubparsersSpecification:
         else:
             required = False
             default_parser = parser_from_name[default_name]
+
+            # If there are any required arguments.
             if any(map(lambda arg: arg.lowered.required, default_parser.args)):
                 required = True
-            if (
+                default_parser = None
+
+            # If there are any required subparsers.
+            elif (
                 default_parser.subparsers is not None
                 and default_parser.subparsers.required
             ):
                 required = True
+                default_parser = None
 
         return SubparsersSpecification(
             name=field.intern_name,

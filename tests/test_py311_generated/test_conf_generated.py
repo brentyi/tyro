@@ -270,14 +270,17 @@ def test_subparser_in_nested_with_metadata_suppressed() -> None:
         Parent,
         args="nested1.nested2.subcommand:command-a".split(" "),
     ) == Parent(Nested1(Nested2(A(7))))
-    assert tyro.cli(
-        Parent,
-        args=(
-            "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
-                " "
-            )
-        ),
-    ) == Parent(Nested1(Nested2(A(3))))
+
+    # The `a` argument is suppresed.
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Parent,
+            args=(
+                "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
+                    " "
+                )
+            ),
+        )
 
     assert tyro.cli(
         Parent,
