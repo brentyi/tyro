@@ -582,7 +582,12 @@ def get_type_hints_resolve_type_params(
 ) -> Dict[str, Any]:
     """Variant of `typing.get_type_hints()` that resolves type parameters."""
     if not inspect.isclass(obj):
-        return _get_type_hints_backported_syntax(obj, include_extras=include_extras)
+        return {
+            k: TypeParamResolver.concretize_type_params(v)
+            for k, v in _get_type_hints_backported_syntax(
+                obj, include_extras=include_extras
+            ).items()
+        }
 
     typevar_context = TypeParamResolver.get_assignment_context(obj)
     obj = typevar_context.origin_type

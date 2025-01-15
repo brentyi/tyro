@@ -74,6 +74,9 @@ class FieldDefinition:
         helptext: Optional[str],
         call_argname_override: Optional[Any] = None,
     ):
+        # Resolve type parameters.
+        typ = _resolver.TypeParamResolver.concretize_type_params(typ)
+
         # Narrow types.
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
             typ = type(default)
@@ -279,11 +282,63 @@ def _field_list_from_function(
     # signature. But the docstrings may still be in the class signature itself.
     f_before_init_unwrap = f
 
+    hints = None
+
     if inspect.isclass(f):
+        signature_func = None
         if hasattr(f, "__init__") and f.__init__ is not object.__init__:
-            f = f.__init__  # type: ignore
+            signature_func = "__init__"
         elif hasattr(f, "__new__") and f.__new__ is not object.__new__:
-            f = f.__new__
+            signature_func = "__new__"
+
+        if signature_func is not None:
+            # Get the __init__ / __new__ method from the class, as well as the
+            # class that contains it.
+            #
+            # We call this the "signature function", because it's the function
+            # that we use to instantiate the class.
+            orig_cls = f
+            base_cls_with_signature = None
+            for base_cls_with_signature in inspect.getmro(f):
+                if signature_func in base_cls_with_signature.__dict__:
+                    f = getattr(base_cls_with_signature, signature_func)
+                    break
+            assert base_cls_with_signature is not None
+            assert f is not orig_cls
+
+            # Get hints for the signature function by recursing through the
+            # inheritance tree. This is needed to correctly resolve type
+            # parameters, which can be set anywhere between the input class and
+            # the class where the __init__ or __new__ method is defined.
+            def get_hints_for_signature_func(cls):
+                typevar_context = _resolver.TypeParamResolver.get_assignment_context(
+                    cls
+                )
+                cls = typevar_context.origin_type
+                with typevar_context:
+                    if cls is base_cls_with_signature:
+                        return _resolver.get_type_hints_resolve_type_params(
+                            f, include_extras=True
+                        )
+                    for base_cls in (
+                        cls.__orig_bases__
+                        if hasattr(cls, "__orig_bases__")
+                        else cls.__bases__
+                    ):
+                        if not issubclass(
+                            _resolver.unwrap_origin_strip_extras(base_cls),
+                            base_cls_with_signature,
+                        ):
+                            continue
+                        return get_hints_for_signature_func(
+                            _resolver.TypeParamResolver.concretize_type_params(base_cls)
+                        )
+
+                assert (
+                    False
+                ), "We couldn't find the base class. This seems like a bug in tyro."
+
+            hints = get_hints_for_signature_func(orig_cls)
 
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)
@@ -293,11 +348,13 @@ def _field_list_from_function(
             docstring_from_arg_name[param_doc.arg_name] = param_doc.description
     del docstring
 
+    # Get hints if we haven't done it already.
     # This will throw a type error for torch.device, typing.Dict, etc.
-    try:
-        hints = _resolver.get_type_hints_resolve_type_params(f, include_extras=True)
-    except TypeError:
-        return UnsupportedStructTypeMessage(f"Could not get hints for {f}!")
+    if hints is None:
+        try:
+            hints = _resolver.get_type_hints_resolve_type_params(f, include_extras=True)
+        except TypeError:
+            return UnsupportedStructTypeMessage(f"Could not get hints for {f}!")
 
     field_list = []
     for param in params:
