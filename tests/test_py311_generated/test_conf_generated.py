@@ -1778,8 +1778,9 @@ def test_suppress_in_union() -> None:
         y: int | Annotated[str, tyro.conf.Suppress]
         z: Annotated[str | int, tyro.conf.Suppress] = 3
 
-    # def main(x: Annotated[int, tyro.conf.Suppress] | str) -> None: ...
-    def main(x: Annotated[ConfigA, tyro.conf.Suppress] | ConfigB = ConfigA(3)) -> Any:
+    def main(
+        x: Annotated[ConfigA, tyro.conf.Suppress] | ConfigB = ConfigA(3),
+    ) -> Any:
         return x
 
     assert tyro.cli(main, args="x:config-b --x.y 5".split(" ")) == ConfigB(5)
