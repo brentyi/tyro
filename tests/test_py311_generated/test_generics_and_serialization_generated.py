@@ -491,8 +491,6 @@ def test_deeply_inherited_init() -> None:
         def __init__(self, config: TContainsAConfig):
             self.config = config
 
-        config: TContainsAConfig
-
     @dataclasses.dataclass
     class ABConfig(AConfig):
         b: int
