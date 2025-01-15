@@ -315,7 +315,7 @@ def _field_list_from_function(
             # **kwargs).
             #
             # This is a hack. We can remove it if we deprecate Python 3.8 support.
-            if sys.version_info < (3, 9) and not functools_marker:
+            if sys.version_info < (3, 9) and not functools_marker:  # pragma: no cover
                 params = list(inspect.signature(f).parameters.values())[1:]
 
             # Get hints for the signature function by recursing through the
