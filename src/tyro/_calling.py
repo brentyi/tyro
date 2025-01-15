@@ -164,10 +164,7 @@ def callable_with_args(
             subparser_dest = _strings.make_subparser_dest(name=prefixed_field_name)
             consumed_keywords.add(subparser_dest)
             if subparser_dest in value_from_prefixed_field_name:
-                subparser_name, subparser_name_found = get_value_from_arg(
-                    subparser_dest, field
-                )
-                assert subparser_name_found
+                subparser_name = value_from_prefixed_field_name[subparser_dest]
             else:
                 assert (
                     subparser_def.default_instance
