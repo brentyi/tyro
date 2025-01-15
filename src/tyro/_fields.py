@@ -7,6 +7,7 @@ import contextlib
 import dataclasses
 import functools
 import inspect
+import sys
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import docstring_parser
@@ -265,14 +266,17 @@ def _field_list_from_function(
 
     # Unwrap functools.wraps and functools.partial.
     done = False
+    functools_marker = False
     while not done:
         done = True
         if hasattr(f, "__wrapped__"):
             f = f.__wrapped__  # type: ignore
             done = False
+            functools_marker = True
         if isinstance(f, functools.partial):
             f = f.func
             done = False
+            functools_marker = True
 
     # Check for abstract classes.
     if inspect.isabstract(f):
@@ -305,6 +309,14 @@ def _field_list_from_function(
                     break
             assert base_cls_with_signature is not None
             assert f is not orig_cls
+
+            # For older versions of Python, the signature returned above (when
+            # passed through generics base classes) will sometimes be (*args,
+            # **kwargs).
+            #
+            # This is a hack. We can remove it if we deprecate Python 3.8 support.
+            if sys.version_info < (3, 9) and not functools_marker:
+                params = list(inspect.signature(f).parameters.values())[1:]
 
             # Get hints for the signature function by recursing through the
             # inheritance tree. This is needed to correctly resolve type
