@@ -277,7 +277,13 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Resolve forward references in-place, if any exist.
-        attr.resolve_types(info.type)
+        # attr.resolve_types(info.type)
+
+        # We'll use our own type resolution system instead of attr's. This is
+        # primarily to improve generics support.
+        our_hints = _resolver.get_type_hints_resolve_type_params(
+            info.type, include_extras=True
+        )
 
         # Handle attr classes.
         field_list = []
@@ -301,7 +307,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             field_list.append(
                 StructFieldSpec(
                     name=name,
-                    type=attr_field.type,
+                    type=our_hints[name],
                     default=default,
                     helptext=_docstrings.get_field_docstring(info.type, name),
                 )
