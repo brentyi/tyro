@@ -506,7 +506,9 @@ def test_deeply_inherited_init() -> None:
     class ABCConfig(ABConfig):
         c: int
 
-    class ABCModel(ABModel[ABCConfig]):
+    class Dummy: ...
+
+    class ABCModel(Dummy, ABModel[ABCConfig]):
         pass
 
     def a(model: ABCModel):
