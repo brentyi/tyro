@@ -322,6 +322,7 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Each parser contains a list of arguments and optionally some subparsers.&quot;&quot;&quot;</span>
 
     <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span>
+    <span class="n">markers</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">]</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_arguments</span><span class="o">.</span><span class="n">ArgumentDefinition</span><span class="p">]</span>
     <span class="n">field_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">_fields</span><span class="o">.</span><span class="n">FieldDefinition</span><span class="p">]</span>
@@ -458,6 +459,7 @@
 
         <span class="k">return</span> <span class="n">ParserSpecification</span><span class="p">(</span>
             <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span>
+            <span class="n">markers</span><span class="o">=</span><span class="n">markers</span><span class="p">,</span>
             <span class="n">description</span><span class="o">=</span><span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span>
                 <span class="n">description</span>
                 <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -560,11 +562,12 @@
         <span class="c1"># Add each argument group. Groups with only suppressed arguments won&#39;t</span>
         <span class="c1"># be added.</span>
         <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="c1"># Don&#39;t add suppressed arguments to the parser.</span>
+            <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_suppressed</span><span class="p">():</span>
+                <span class="k">continue</span>
+
             <span class="n">group_name</span> <span class="o">=</span> <span class="n">group_name_from_arg</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
-                <span class="ow">and</span> <span class="n">group_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_group_name</span>
-            <span class="p">):</span>
+            <span class="k">if</span> <span class="n">group_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_group_name</span><span class="p">:</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">parent</span><span class="o">.</span><span class="n">helptext_from_intern_prefixed_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
                         <span class="n">arg</span><span class="o">.</span><span class="n">intern_prefix</span>
@@ -582,13 +585,8 @@
                 <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">positional_group</span><span class="p">)</span>
                 <span class="k">continue</span>
 
-            <span class="k">if</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="n">group_from_group_name</span><span class="p">:</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_group_name</span><span class="p">[</span><span class="n">group_name</span><span class="p">])</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># Suppressed argument: still need to add them, but they won&#39;t show up in</span>
-                <span class="c1"># the helptext so it doesn&#39;t matter which group.</span>
-                <span class="k">assert</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
-                <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_group_name</span><span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">])</span>
+            <span class="k">assert</span> <span class="n">group_name</span> <span class="ow">in</span> <span class="n">group_from_group_name</span>
+            <span class="n">arg</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">group_from_group_name</span><span class="p">[</span><span class="n">group_name</span><span class="p">])</span>
 
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">child_from_prefix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
             <span class="n">child</span><span class="o">.</span><span class="n">apply_args</span><span class="p">(</span><span class="n">parser</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div>
@@ -776,16 +774,16 @@
         <span class="n">subcommand_config_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">subcommand_type_from_name</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="n">option_unwrapped</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
+                <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span>
+            <span class="p">)</span>
             <span class="n">subcommand_name</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">subparser_name_from_type</span><span class="p">(</span>
                 <span class="p">(</span>
                     <span class="s2">&quot;&quot;</span>
                     <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitSubcommandPrefixes</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">markers</span>
                     <span class="k">else</span> <span class="n">extern_prefix</span>
                 <span class="p">),</span>
-                <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">),</span>
-            <span class="p">)</span>
-            <span class="n">option_unwrapped</span><span class="p">,</span> <span class="n">found_subcommand_configs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span>
-                <span class="n">option</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span>
+                <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option_unwrapped</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">),</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Explicitly annotated default.</span>
@@ -868,6 +866,9 @@
                 <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">annotations</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_SubcommandConfig</span><span class="p">)</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">annotations</span><span class="p">:</span>
+                <span class="k">continue</span>
+
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">annotations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">option</span> <span class="o">=</span> <span class="n">option_origin</span>
             <span class="k">else</span><span class="p">:</span>
@@ -896,6 +897,10 @@
             <span class="p">)</span>
             <span class="n">parser_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">subparser</span>
 
+        <span class="c1"># Default parser was suppressed!</span>
+        <span class="k">if</span> <span class="n">default_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parser_from_name</span><span class="p">:</span>
+            <span class="n">default_name</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="c1"># Required if a default is passed in, but the default value has missing</span>
         <span class="c1"># parameters.</span>
         <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
@@ -904,13 +909,19 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">required</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">default_parser</span> <span class="o">=</span> <span class="n">parser_from_name</span><span class="p">[</span><span class="n">default_name</span><span class="p">]</span>
+
+            <span class="c1"># If there are any required arguments.</span>
             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">arg</span><span class="p">:</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">required</span><span class="p">,</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">args</span><span class="p">)):</span>
                 <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
-            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># If there are any required subparsers.</span>
+            <span class="k">elif</span> <span class="p">(</span>
                 <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="ow">and</span> <span class="n">default_parser</span><span class="o">.</span><span class="n">subparsers</span><span class="o">.</span><span class="n">required</span>
             <span class="p">):</span>
                 <span class="n">required</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">default_parser</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="n">SubparsersSpecification</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="p">,</span>

@@ -494,7 +494,17 @@
         <span class="n">_rule_set_name_or_flag_and_dest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lowered</span><span class="p">)</span>
         <span class="n">_rule_positional_special_handling</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lowered</span><span class="p">)</span>
         <span class="n">_rule_apply_argconf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lowered</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">lowered</span></div>
+        <span class="k">return</span> <span class="n">lowered</span>
+
+<div class="viewcode-block" id="ArgumentDefinition.is_suppressed">
+<a class="viewcode-back" href="../../../api/tyro/_arguments/#tyro._arguments.ArgumentDefinition.is_suppressed">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_suppressed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns if the argument is suppressed. Suppressed arguments won&#39;t be</span>
+<span class="sd">        added to the parser.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
+            <span class="n">_markers</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span>
+        <span class="p">)</span></div>
+</div>
 
 
 
@@ -733,13 +743,6 @@
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate helptext from docstring, argument name, default values.&quot;&quot;&quot;</span>
 
-    <span class="c1"># If the suppress marker is attached, hide the argument.</span>
-    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">or</span> <span class="p">(</span>
-        <span class="n">_markers</span><span class="o">.</span><span class="n">SuppressFixed</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span> <span class="ow">and</span> <span class="n">lowered</span><span class="o">.</span><span class="n">is_fixed</span><span class="p">()</span>
-    <span class="p">):</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span>
-        <span class="k">return</span>
-
     <span class="n">help_parts</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="n">primary_help</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">helptext</span>
@@ -831,7 +834,6 @@
     <span class="c1"># The percent symbol needs some extra handling in argparse.</span>
     <span class="c1"># https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string</span>
     <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">help_parts</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;%&quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="si">%%</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">return</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_rule_set_name_or_flag_and_dest</span><span class="p">(</span>

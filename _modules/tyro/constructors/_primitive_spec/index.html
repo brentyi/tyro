@@ -915,12 +915,20 @@
         <span class="n">nargs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;*&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="n">first</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
-            <span class="n">option_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
-                <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
-                    <span class="n">raw_annotation</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
-                    <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                <span class="p">)</span>
+            <span class="n">option_type_info</span> <span class="o">=</span> <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span>
+                <span class="n">raw_annotation</span><span class="o">=</span><span class="n">t</span><span class="p">,</span>
+                <span class="n">parent_markers</span><span class="o">=</span><span class="n">type_info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
             <span class="p">)</span>
+
+            <span class="c1"># If the argument is not suppressed, we can add the ability to</span>
+            <span class="c1"># suppress individual options.</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">type_info</span><span class="o">.</span><span class="n">markers</span>
+                <span class="ow">and</span> <span class="n">_markers</span><span class="o">.</span><span class="n">Suppress</span> <span class="ow">in</span> <span class="n">option_type_info</span><span class="o">.</span><span class="n">markers</span>
+            <span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">option_spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span><span class="n">option_type_info</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option_spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">option_spec</span>
             <span class="k">if</span> <span class="n">option_spec</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

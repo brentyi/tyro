@@ -71,6 +71,12 @@ Module Contents
       Add a defined argument to a parser.
 
 
+   .. py:method:: is_suppressed() -> bool
+
+      Returns if the argument is suppressed. Suppressed arguments won't be
+      added to the parser.
+
+
 
 .. py:class:: LoweredArgumentDefinition
 

@@ -28,6 +28,11 @@ Module Contents
 
       
 
+   .. py:attribute:: markers
+      :type: Set[tyro.conf._markers._Marker]
+
+      
+
    .. py:attribute:: description
       :type: str
 
