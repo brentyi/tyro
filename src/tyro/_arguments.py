@@ -197,6 +197,13 @@ class ArgumentDefinition:
         _rule_apply_argconf(self, lowered)
         return lowered
 
+    def is_suppressed(self) -> bool:
+        """Returns if the argument is suppressed. Suppressed arguments won't be
+        added to the parser."""
+        return _markers.Suppress in self.field.markers or (
+            _markers.SuppressFixed in self.field.markers and self.lowered.is_fixed()
+        )
+
 
 @dataclasses.dataclass
 class LoweredArgumentDefinition:
@@ -427,13 +434,6 @@ def _rule_generate_helptext(
 ) -> None:
     """Generate helptext from docstring, argument name, default values."""
 
-    # If the suppress marker is attached, hide the argument.
-    if _markers.Suppress in arg.field.markers or (
-        _markers.SuppressFixed in arg.field.markers and lowered.is_fixed()
-    ):
-        lowered.help = argparse.SUPPRESS
-        return
-
     help_parts = []
 
     primary_help = arg.field.helptext
@@ -525,7 +525,6 @@ def _rule_generate_helptext(
     # The percent symbol needs some extra handling in argparse.
     # https://stackoverflow.com/questions/21168120/python-argparse-errors-with-in-help-string
     lowered.help = " ".join([p for p in help_parts if len(p) > 0]).replace("%", "%%")
-    return
 
 
 def _rule_set_name_or_flag_and_dest(

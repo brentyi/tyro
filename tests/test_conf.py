@@ -260,14 +260,17 @@ def test_subparser_in_nested_with_metadata_suppressed() -> None:
         Parent,
         args="nested1.nested2.subcommand:command-a".split(" "),
     ) == Parent(Nested1(Nested2(A(7))))
-    assert tyro.cli(
-        Parent,
-        args=(
-            "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
-                " "
-            )
-        ),
-    ) == Parent(Nested1(Nested2(A(3))))
+
+    # The `a` argument is suppresed.
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            Parent,
+            args=(
+                "nested1.nested2.subcommand:command-a --nested1.nested2.subcommand.a 3".split(
+                    " "
+                )
+            ),
+        )
 
     assert tyro.cli(
         Parent,
@@ -1757,3 +1760,37 @@ def test_default_subcommand_consistency() -> None:
         == Config()
     )
     assert tyro.cli(Config, args=["optimizer:adam"]) == Config()
+
+
+def test_suppress_in_union() -> None:
+    @dataclasses.dataclass
+    class ConfigA:
+        x: int
+
+    @dataclasses.dataclass
+    class ConfigB:
+        y: Union[int, Annotated[str, tyro.conf.Suppress]]
+        z: Annotated[Union[str, int], tyro.conf.Suppress] = 3
+
+    def main(
+        x: Union[Annotated[ConfigA, tyro.conf.Suppress], ConfigB] = ConfigA(3),
+    ) -> Any:
+        return x
+
+    assert tyro.cli(main, args="x:config-b --x.y 5".split(" ")) == ConfigB(5)
+
+    with pytest.raises(SystemExit):
+        # ConfigA is suppressed, so there'll be no default.
+        tyro.cli(main, args=[])
+    with pytest.raises(SystemExit):
+        # ConfigB needs an int, since str is suppressed.
+        tyro.cli(main, args="x:config-b --x.y five".split(" "))
+    with pytest.raises(SystemExit):
+        # The z argument is suppressed.
+        tyro.cli(main, args="x:config-b --x.y 5 --x.z 3".split(" "))
+    with pytest.raises(SystemExit):
+        # ConfigA is suppressed.
+        assert tyro.cli(main, args=["x:config-a"])
+    with pytest.raises(SystemExit):
+        # ConfigB has a required argument.
+        assert tyro.cli(main, args=["x:config-b"])

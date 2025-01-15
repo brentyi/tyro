@@ -28,8 +28,14 @@ def test_app_just_one_cli(capsys):
         app_just_one.cli(args=["--help"])
     captured = capsys.readouterr()
     assert "usage: " in captured.out
-    assert "greet-person" not in captured.out
-    assert "addition" not in captured.out
+    assert "greet-person" in captured.out
+    assert "--name" not in captured.out
+
+    # Test: `python my_script.py greet-person --help`
+    with pytest.raises(SystemExit):
+        app_just_one.cli(args=["greet-person", "--help"], sort_subcommands=False)
+    captured = capsys.readouterr()
+    assert "usage: " in captured.out
     assert "--name" in captured.out
 
 

@@ -619,12 +619,20 @@ def apply_default_primitive_rules(registry: ConstructorRegistry) -> None:
         nargs: int | Literal["*"] = 1
         first = True
         for t in options:
-            option_spec = ConstructorRegistry.get_primitive_spec(
-                PrimitiveTypeInfo.make(
-                    raw_annotation=t,
-                    parent_markers=type_info.markers,
-                )
+            option_type_info = PrimitiveTypeInfo.make(
+                raw_annotation=t,
+                parent_markers=type_info.markers,
             )
+
+            # If the argument is not suppressed, we can add the ability to
+            # suppress individual options.
+            if (
+                _markers.Suppress not in type_info.markers
+                and _markers.Suppress in option_type_info.markers
+            ):
+                continue
+
+            option_spec = ConstructorRegistry.get_primitive_spec(option_type_info)
             if isinstance(option_spec, UnsupportedTypeAnnotationError):
                 return option_spec
             if option_spec.choices is None:
