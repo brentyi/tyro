@@ -478,3 +478,54 @@ def test_inheritance_with_same_typevar() -> None:
 
     assert tyro.cli(B[str], args=["--x", "1", "--y", "2"]) == B(1, "2")
     assert tyro.cli(B[int], args=["--x", "1", "--y", "2"]) == B(1, 2)
+
+
+def test_deeply_inherited_init() -> None:
+    @dataclasses.dataclass
+    class AConfig:
+        a: int
+
+    TContainsAConfig = TypeVar("TContainsAConfig", bound=AConfig)
+
+    class AModel(Generic[TContainsAConfig]):
+        def __init__(self, config: TContainsAConfig):
+            self.config = config
+
+        config: TContainsAConfig
+
+    @dataclasses.dataclass
+    class ABConfig(AConfig):
+        b: int
+
+    TContainsABConfig = TypeVar("TContainsABConfig", bound=ABConfig)
+
+    class ABModel(AModel[TContainsABConfig], Generic[TContainsABConfig]):
+        pass
+
+    @dataclasses.dataclass
+    class ABCConfig(ABConfig):
+        c: int
+
+    class ABCModel(ABModel[ABCConfig]):
+        pass
+
+    def a(model: ABCModel):
+        print(model.config)
+
+    def b(model: ABModel[ABConfig]):
+        print(model.config)
+
+    def c(model: ABModel[ABCConfig]):
+        print(model.config)
+
+    assert "--model.config.a" in get_helptext_with_checks(a)
+    assert "--model.config.b" in get_helptext_with_checks(a)
+    assert "--model.config.c" in get_helptext_with_checks(a)
+
+    assert "--model.config.a" in get_helptext_with_checks(b)
+    assert "--model.config.b" in get_helptext_with_checks(b)
+    assert "--model.config.c" not in get_helptext_with_checks(b)
+
+    assert "--model.config.a" in get_helptext_with_checks(c)
+    assert "--model.config.b" in get_helptext_with_checks(c)
+    assert "--model.config.c" in get_helptext_with_checks(c)

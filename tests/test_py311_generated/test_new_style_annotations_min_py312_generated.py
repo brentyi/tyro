@@ -6,6 +6,7 @@ from typing import Annotated, Any, Literal, NewType
 
 import pytest
 from helptext_utils import get_helptext_with_checks
+from pydantic import BaseModel
 
 import tyro
 from tyro.conf._markers import OmitArgPrefixes
@@ -359,3 +360,47 @@ def test_generic_config_subcommand_matching_tuple_variable() -> None:
         Container[tuple[str, ...]] | Container[tuple[int, ...]],  # type: ignore
         default=Container((1, 2, 3)),
     )
+
+
+def test_deeply_inherited_init() -> None:
+    class AConfig(BaseModel):
+        a: int
+
+    class AModel[TContainsAConfig: AConfig]:
+        def __init__(self, config: TContainsAConfig):
+            self.config = config
+
+        config: TContainsAConfig
+
+    class ABConfig(AConfig):
+        b: int
+
+    class ABModel[TContainsABConfig: ABConfig](AModel[TContainsABConfig]):
+        pass
+
+    class ABCConfig(ABConfig):
+        c: int
+
+    class ABCModel(ABModel[ABCConfig]):
+        pass
+
+    def a(model: ABCModel):
+        print(model.config)
+
+    def b(model: ABModel[ABConfig]):
+        print(model.config)
+
+    def c(model: ABModel[ABCConfig]):
+        print(model.config)
+
+    assert "--model.config.a" in get_helptext_with_checks(a)
+    assert "--model.config.b" in get_helptext_with_checks(a)
+    assert "--model.config.c" in get_helptext_with_checks(a)
+
+    assert "--model.config.a" in get_helptext_with_checks(b)
+    assert "--model.config.b" in get_helptext_with_checks(b)
+    assert "--model.config.c" not in get_helptext_with_checks(b)
+
+    assert "--model.config.a" in get_helptext_with_checks(c)
+    assert "--model.config.b" in get_helptext_with_checks(c)
+    assert "--model.config.c" in get_helptext_with_checks(c)
