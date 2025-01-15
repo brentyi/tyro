@@ -2,7 +2,7 @@ from typing import Any, Callable, Dict, Optional, Sequence, TypeVar, Union, over
 
 from typing_extensions import Annotated
 
-from tyro.conf._markers import Marker
+from tyro.conf._markers import Marker, Suppress
 
 from .._cli import cli
 from ..conf import subcommand
@@ -101,7 +101,6 @@ def subcommand_cli_from_dict(
         config: Sequence of config marker objects, from :mod:`tyro.conf`.
     """
     # We need to form a union type, which requires at least two elements.
-    assert len(subcommands) >= 2, "At least two subcommands are required."
     return cli(
         Union.__getitem__(  # type: ignore
             tuple(
@@ -115,6 +114,10 @@ def subcommand_cli_from_dict(
                     ]
                     for k, v in subcommands.items()
                 ]
+                # Union types need at least two types. To support the case
+                # where we only pass one subcommand in, we'll pad with `None`
+                # but suppress it.
+                + [Annotated[None, Suppress]]
             )
         ),
         prog=prog,

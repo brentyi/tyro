@@ -138,23 +138,12 @@ class SubcommandApp:
             for orig_name in orig_subcommand_names:
                 subcommands[swap_delimeters(orig_name)] = subcommands.pop(orig_name)
 
-        if len(subcommands) == 1:
-            return tyro.cli(
-                next(iter(subcommands.values())),
-                prog=prog,
-                description=description,
-                args=args,
-                use_underscores=use_underscores,
-                console_outputs=console_outputs,
-                config=config,
-            )
-        else:
-            return tyro.extras.subcommand_cli_from_dict(
-                subcommands,
-                prog=prog,
-                description=description,
-                args=args,
-                use_underscores=use_underscores,
-                console_outputs=console_outputs,
-                config=config,
-            )
+        return tyro.extras.subcommand_cli_from_dict(
+            subcommands,
+            prog=prog,
+            description=description,
+            args=args,
+            use_underscores=use_underscores,
+            console_outputs=console_outputs,
+            config=config,
+        )
