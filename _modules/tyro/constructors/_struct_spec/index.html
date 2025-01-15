@@ -516,7 +516,7 @@
         <span class="n">total</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__total__&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="nb">bool</span><span class="p">)</span>
         <span class="k">assert</span> <span class="ow">not</span> <span class="n">valid_default_instance</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
             <span class="bp">cls</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">typ_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
@@ -579,7 +579,13 @@
             <span class="k">return</span> <span class="kc">None</span>
 
         <span class="c1"># Resolve forward references in-place, if any exist.</span>
-        <span class="n">attr</span><span class="o">.</span><span class="n">resolve_types</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="c1"># attr.resolve_types(info.type)</span>
+
+        <span class="c1"># We&#39;ll use our own type resolution system instead of attr&#39;s. This is</span>
+        <span class="c1"># primarily to improve generics support.</span>
+        <span class="n">our_hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
 
         <span class="c1"># Handle attr classes.</span>
         <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
@@ -603,7 +609,7 @@
             <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">StructFieldSpec</span><span class="p">(</span>
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                    <span class="nb">type</span><span class="o">=</span><span class="n">attr_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="n">our_hints</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
                 <span class="p">)</span>
@@ -655,7 +661,7 @@
         <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">field_defaults</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="s2">&quot;_field_defaults&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">typ</span> <span class="ow">in</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
             <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
         <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">field_defaults</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span><span class="p">)</span>
@@ -836,7 +842,7 @@
         <span class="p">):</span>
             <span class="c1"># Pydantic 1.xx</span>
             <span class="n">cls_cast</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span>
+            <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
                 <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">pd1_field</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">cls_cast</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>

@@ -289,6 +289,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
@@ -366,7 +367,7 @@
         <span class="n">helptext</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">call_argname_override</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="c1"># Resolve generics.</span>
+        <span class="c1"># Resolve type parameters.</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
 
         <span class="c1"># Narrow types.</span>
@@ -574,14 +575,17 @@
 
     <span class="c1"># Unwrap functools.wraps and functools.partial.</span>
     <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">functools_marker</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">while</span> <span class="ow">not</span> <span class="n">done</span><span class="p">:</span>
         <span class="n">done</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__wrapped__&quot;</span><span class="p">):</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">__wrapped__</span>  <span class="c1"># type: ignore</span>
             <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">functools_marker</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">):</span>
             <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">func</span>
             <span class="n">done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">functools_marker</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># Check for abstract classes.</span>
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isabstract</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
@@ -591,11 +595,71 @@
     <span class="c1"># signature. But the docstrings may still be in the class signature itself.</span>
     <span class="n">f_before_init_unwrap</span> <span class="o">=</span> <span class="n">f</span>
 
+    <span class="n">hints</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+        <span class="n">signature_func</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__init__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__init__</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="fm">__init__</span>  <span class="c1"># type: ignore</span>
+            <span class="n">signature_func</span> <span class="o">=</span> <span class="s2">&quot;__init__&quot;</span>
         <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;__new__&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">f</span><span class="o">.</span><span class="fm">__new__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">object</span><span class="o">.</span><span class="fm">__new__</span><span class="p">:</span>
-            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="fm">__new__</span>
+            <span class="n">signature_func</span> <span class="o">=</span> <span class="s2">&quot;__new__&quot;</span>
+
+        <span class="k">if</span> <span class="n">signature_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Get the __init__ / __new__ method from the class, as well as the</span>
+            <span class="c1"># class that contains it.</span>
+            <span class="c1">#</span>
+            <span class="c1"># We call this the &quot;signature function&quot;, because it&#39;s the function</span>
+            <span class="c1"># that we use to instantiate the class.</span>
+            <span class="n">orig_cls</span> <span class="o">=</span> <span class="n">f</span>
+            <span class="n">base_cls_with_signature</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">base_cls_with_signature</span> <span class="ow">in</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getmro</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">signature_func</span> <span class="ow">in</span> <span class="n">base_cls_with_signature</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
+                    <span class="n">f</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">base_cls_with_signature</span><span class="p">,</span> <span class="n">signature_func</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">assert</span> <span class="n">base_cls_with_signature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">assert</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">orig_cls</span>
+
+            <span class="c1"># For older versions of Python, the signature returned above (when</span>
+            <span class="c1"># passed through generics base classes) will sometimes be (*args,</span>
+            <span class="c1"># **kwargs).</span>
+            <span class="c1">#</span>
+            <span class="c1"># This is a hack. We can remove it if we deprecate Python 3.8 support.</span>
+            <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">functools_marker</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="c1"># Get hints for the signature function by recursing through the</span>
+            <span class="c1"># inheritance tree. This is needed to correctly resolve type</span>
+            <span class="c1"># parameters, which can be set anywhere between the input class and</span>
+            <span class="c1"># the class where the __init__ or __new__ method is defined.</span>
+            <span class="k">def</span><span class="w"> </span><span class="nf">get_hints_for_signature_func</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+                <span class="n">typevar_context</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span>
+                    <span class="bp">cls</span>
+                <span class="p">)</span>
+                <span class="bp">cls</span> <span class="o">=</span> <span class="n">typevar_context</span><span class="o">.</span><span class="n">origin_type</span>
+                <span class="k">with</span> <span class="n">typevar_context</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="n">base_cls_with_signature</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
+                            <span class="n">f</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
+                        <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">base_cls</span> <span class="ow">in</span> <span class="p">(</span>
+                        <span class="bp">cls</span><span class="o">.</span><span class="n">__orig_bases__</span>
+                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">)</span>
+                        <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__bases__</span>
+                    <span class="p">):</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span>
+                            <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">base_cls</span><span class="p">),</span>
+                            <span class="n">base_cls_with_signature</span><span class="p">,</span>
+                        <span class="p">):</span>
+                            <span class="k">continue</span>
+                        <span class="k">return</span> <span class="n">get_hints_for_signature_func</span><span class="p">(</span>
+                            <span class="n">_resolver</span><span class="o">.</span><span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">base_cls</span><span class="p">)</span>
+                        <span class="p">)</span>
+
+                <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="p">(</span>
+                    <span class="s2">&quot;We couldn&#39;t find the base class. This seems like a bug in tyro.&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">hints</span> <span class="o">=</span> <span class="n">get_hints_for_signature_func</span><span class="p">(</span><span class="n">orig_cls</span><span class="p">)</span>
 
     <span class="c1"># Get type annotations, docstrings.</span>
     <span class="n">docstring</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">getdoc</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
@@ -605,11 +669,13 @@
             <span class="n">docstring_from_arg_name</span><span class="p">[</span><span class="n">param_doc</span><span class="o">.</span><span class="n">arg_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">param_doc</span><span class="o">.</span><span class="n">description</span>
     <span class="k">del</span> <span class="n">docstring</span>
 
+    <span class="c1"># Get hints if we haven&#39;t done it already.</span>
     <span class="c1"># This will throw a type error for torch.device, typing.Dict, etc.</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_with_backported_syntax</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not get hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hints</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">UnsupportedStructTypeMessage</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not get hints for </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 
     <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>

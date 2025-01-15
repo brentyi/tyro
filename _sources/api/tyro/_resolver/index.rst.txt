@@ -181,10 +181,9 @@ Module Contents
    class, and a mapping from typevars to concrete types.
 
 
-.. py:function:: get_type_hints_with_backported_syntax(obj: Callable[Ellipsis, Any], include_extras: bool = False) -> Dict[str, Any]
+.. py:function:: get_type_hints_resolve_type_params(obj: Callable[Ellipsis, Any], include_extras: bool = False) -> Dict[str, Any]
 
-   Same as `typing.get_type_hints()`, but supports new union syntax (X | Y)
-   and generics (list[str]) in older versions of Python.
+   Variant of `typing.get_type_hints()` that resolves type parameters.
 
 
 .. py:function:: is_instance(typ: Any, value: Any) -> bool
