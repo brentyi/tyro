@@ -3,11 +3,12 @@ from __future__ import annotations
 import contextlib
 import io
 import pathlib
-from typing import cast
+from typing import Generic, TypeVar, cast
 
 import attr
 import pytest
 from attrs import define, field
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 import tyro._strings
@@ -129,3 +130,24 @@ def test_attrs_default_instance() -> None:
         args=["--i", "5"],
         default=ManyTypesB(i=5, s="5", f=2.0),
     ) == ManyTypesB(i=5, s="5", f=2.0)
+
+
+T = TypeVar("T")
+
+
+def test_attrs_inheritance_with_same_typevar() -> None:
+    @attr.s
+    class A(Generic[T]):
+        x: T = attr.ib()
+
+    @attr.s
+    class B(A[int], Generic[T]):
+        y: T = attr.ib()
+
+    assert "INT" in get_helptext_with_checks(B[int])
+    assert "STR" not in get_helptext_with_checks(B[int])
+    assert "STR" in get_helptext_with_checks(B[str])
+    assert "INT" in get_helptext_with_checks(B[str])
+
+    assert tyro.cli(B[str], args=["--x", "1", "--y", "2"]) == B(x=1, y="2")
+    assert tyro.cli(B[int], args=["--x", "1", "--y", "2"]) == B(x=1, y=2)

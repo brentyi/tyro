@@ -214,7 +214,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         total = getattr(cls, "__total__", True)
         assert isinstance(total, bool)
         assert not valid_default_instance or isinstance(info.default, dict)
-        for name, typ in _resolver.get_type_hints_with_backported_syntax(
+        for name, typ in _resolver.get_type_hints_resolve_type_params(
             cls, include_extras=True
         ).items():
             typ_origin = get_origin(typ)
@@ -277,7 +277,13 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
 
         # Resolve forward references in-place, if any exist.
-        attr.resolve_types(info.type)
+        # attr.resolve_types(info.type)
+
+        # We'll use our own type resolution system instead of attr's. This is
+        # primarily to improve generics support.
+        our_hints = _resolver.get_type_hints_resolve_type_params(
+            info.type, include_extras=True
+        )
 
         # Handle attr classes.
         field_list = []
@@ -301,7 +307,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             field_list.append(
                 StructFieldSpec(
                     name=name,
-                    type=attr_field.type,
+                    type=our_hints[name],
                     default=default,
                     helptext=_docstrings.get_field_docstring(info.type, name),
                 )
@@ -353,7 +359,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         field_list = []
         field_defaults = getattr(info.type, "_field_defaults", {})
 
-        for name, typ in _resolver.get_type_hints_with_backported_syntax(
+        for name, typ in _resolver.get_type_hints_resolve_type_params(
             info.type, include_extras=True
         ).items():
             default = field_defaults.get(name, MISSING_NONPROP)
@@ -534,7 +540,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         ):
             # Pydantic 1.xx
             cls_cast = info.type
-            hints = _resolver.get_type_hints_with_backported_syntax(
+            hints = _resolver.get_type_hints_resolve_type_params(
                 info.type, include_extras=True
             )
             for pd1_field in cast(Dict[str, Any], cls_cast.__fields__).values():

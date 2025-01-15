@@ -173,11 +173,12 @@ class ConstructorRegistry:
                 f"Invalid default instance for type {type_info.type}: {type_info.default}"
             )
 
-        for registry in cls._active_registries[::-1]:
-            for spec_factory in registry._struct_rules[::-1]:
-                maybe_spec = spec_factory(type_info)
-                if maybe_spec is not None:
-                    return maybe_spec
+        with type_info._typevar_context:
+            for registry in cls._active_registries[::-1]:
+                for spec_factory in registry._struct_rules[::-1]:
+                    maybe_spec = spec_factory(type_info)
+                    if maybe_spec is not None:
+                        return maybe_spec
 
         return None
 
