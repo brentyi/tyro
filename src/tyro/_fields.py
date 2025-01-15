@@ -295,7 +295,7 @@ def _field_list_from_function(
 
     # This will throw a type error for torch.device, typing.Dict, etc.
     try:
-        hints = _resolver.get_type_hints_resolve_generics(f, include_extras=True)
+        hints = _resolver.get_type_hints_resolve_type_params(f, include_extras=True)
     except TypeError:
         return UnsupportedStructTypeMessage(f"Could not get hints for {f}!")
 

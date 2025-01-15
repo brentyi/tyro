@@ -84,7 +84,7 @@ def resolved_fields(cls: TypeForm) -> List[dataclasses.Field]:
 
     assert dataclasses.is_dataclass(cls)
     fields = []
-    annotations = get_type_hints_resolve_generics(
+    annotations = get_type_hints_resolve_type_params(
         cast(Callable, cls), include_extras=True
     )
     for field in getattr(cls, "__dataclass_fields__").values():
@@ -577,35 +577,42 @@ def resolve_generic_types(
         )
 
 
-def get_type_hints_resolve_generics(
+def get_type_hints_resolve_type_params(
     obj: Callable[..., Any], include_extras: bool = False
 ) -> Dict[str, Any]:
+    """Variant of `typing.get_type_hints()` that resolves type parameters."""
     if not inspect.isclass(obj):
         return _get_type_hints_backported_syntax(obj, include_extras=include_extras)
 
     typevar_context = TypeParamResolver.get_assignment_context(obj)
     obj = typevar_context.origin_type
     with typevar_context:
+        # Only include type hints that are explicitly defined in this class.
+        # The follow loop will handle superclasses.
         out = {
             x: TypeParamResolver.concretize_type_params(t)
             for x, t in _get_type_hints_backported_syntax(
                 obj, include_extras=include_extras
             ).items()
+            if x in obj.__annotations__
         }
-        for base in getattr(obj, "__orig_bases__", []):
-            base_typevar_context = TypeParamResolver.get_assignment_context(base)
-            if get_origin(base_typevar_context.origin_type) is Generic:
-                continue
-            with base_typevar_context:
-                base_hints = get_type_hints_resolve_generics(
-                    base_typevar_context.origin_type, include_extras=include_extras
-                )
-                out.update(
-                    {
-                        x: TypeParamResolver.concretize_type_params(t)
-                        for x, t in base_hints.items()
-                    }
-                )
+
+    # We need to recurse into base classes in order to correctly resolve superclass parameters.
+    for base in obj.__orig_bases__ if hasattr(obj, "__orig_bases__") else obj.__bases__:  # type: ignore
+        base_typevar_context = TypeParamResolver.get_assignment_context(base)
+        if get_origin(base_typevar_context.origin_type) is Generic:
+            continue
+        with base_typevar_context:
+            base_hints = get_type_hints_resolve_type_params(
+                base_typevar_context.origin_type, include_extras=include_extras
+            )
+            out.update(
+                {
+                    x: TypeParamResolver.concretize_type_params(t)
+                    for x, t in base_hints.items()
+                }
+            )
+
     return out
 
 
