@@ -582,15 +582,7 @@ def get_type_hints_resolve_type_params(
 ) -> Dict[str, Any]:
     """Variant of `typing.get_type_hints()` that resolves type parameters."""
     if not inspect.isclass(obj):
-        if not hasattr(obj, "__self__") or not hasattr(obj, "__func__"):
-            # Normal function.
-            return {
-                k: TypeParamResolver.concretize_type_params(v)
-                for k, v in _get_type_hints_backported_syntax(
-                    obj, include_extras=include_extras
-                ).items()
-            }
-        else:
+        if inspect.ismethod(obj) and not inspect.isclass(obj.__self__):
             # Method is bound to a particular instance of a class.
             bound_instance = getattr(obj, "__self__")
             if hasattr(bound_instance, "__orig_class__"):
@@ -639,9 +631,20 @@ def get_type_hints_resolve_type_params(
                             TypeParamResolver.concretize_type_params(base_cls)
                         )
 
-                assert False, "Could not find base class containing method definition. This is likely a bug in tyro."
+                assert False, (
+                    "Could not find base class containing method definition. This is likely a bug in tyro."
+                )
 
-            return get_hints_for_bound_method(cls)
+            out = get_hints_for_bound_method(cls)
+            return out
+        else:
+            # Normal function.
+            return {
+                k: TypeParamResolver.concretize_type_params(v)
+                for k, v in _get_type_hints_backported_syntax(
+                    obj, include_extras=include_extras
+                ).items()
+            }
 
     typevar_context = TypeParamResolver.get_assignment_context(obj)
     obj = typevar_context.origin_type

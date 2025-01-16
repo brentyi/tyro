@@ -5,11 +5,11 @@ import io
 from typing import Generic, List, NewType, Tuple, Type, TypeVar, Union
 
 import pytest
-import tyro
 import yaml
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 T = TypeVar("T")
 
