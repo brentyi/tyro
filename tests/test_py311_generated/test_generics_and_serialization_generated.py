@@ -532,7 +532,9 @@ def test_deeply_inherited_init() -> None:
 
 
 def test_simple_bound_method() -> None:
-    class Config[T]:
+    T = TypeVar("T")
+
+    class Config(Generic[T]):
         def __init__(self, a: T) -> None: ...
         def method(self, a: T) -> T:
             return a
@@ -556,8 +558,6 @@ def test_inherited_bound_method() -> None:
         def __init__(self, config: TContainsAConfig):
             self.config = config
 
-        config: TContainsAConfig
-
     TContainsAModel = TypeVar("TContainsAModel", bound=AModel)
 
     @dataclasses.dataclass
@@ -571,8 +571,6 @@ def test_inherited_bound_method() -> None:
         def spam(self, model: TContainsAModel) -> TContainsAModel:
             self.model = model
             return model
-
-        model: TContainsAModel
 
     class ABHelper(AHelper[ABModel]):
         def print_model(self) -> None:

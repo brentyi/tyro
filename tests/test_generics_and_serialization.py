@@ -574,8 +574,6 @@ def test_inherited_bound_method() -> None:
             self.model = model
             return model
 
-        model: TContainsAModel
-
     class ABHelper(AHelper[ABModel]):
         def print_model(self) -> None:
             print(self.model.config)
