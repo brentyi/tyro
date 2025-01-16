@@ -30,15 +30,29 @@ What's not supported
 
 There are some limitations. We currently *do not* support:
 
-- Variable-length sequences over nested structures, unless a default is
+- **Self-referential types.** For example, ``type RecursiveList[T] = T | list[RecursiveList[T]]``.
+- **Variable-length sequences over nested structures**, unless a default is
   provided. For types like ``list[Dataclass]``, we require a default value to
   infer length from. The length of the corresponding field cannot be changed
   from the CLI interface.
-- Nesting variable-length sequences in other sequences. ``tuple[int, ...]`` and
+- **Nesting variable-length sequences in other sequences.** ``tuple[int, ...]`` and
   ``tuple[tuple[int, int, int], ...]`` are supported, as the variable-length
   sequence is the outermost type. However, ``tuple[tuple[int, ...], ...]`` is
   ambiguous to parse and not supported.
-- Self-referential types, like ``type RecursiveList[T] = T | list[RecursiveList[T]]``.
+- **Generic types in class methods.** For example:
 
-In each of these cases, a :ref:`custom constructor
+  .. code-block:: python
+
+      class MyClass[T: int | str]:
+        @classmethod
+        def my_method(cls, arg: T) -> T:
+          return arg
+
+      # The `int` type parameter will be ignored.
+      tyro.cli(MyClass[int].my_method)
+
+  This is because ``MyClass[int].my_method`` cannot be distinguished from
+  ``MyClass.my_method`` at runtime.
+
+For some of these cases, a :ref:`custom constructor
 <example-category-custom_constructors>` can be defined as a workaround.
