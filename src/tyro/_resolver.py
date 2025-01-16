@@ -582,12 +582,66 @@ def get_type_hints_resolve_type_params(
 ) -> Dict[str, Any]:
     """Variant of `typing.get_type_hints()` that resolves type parameters."""
     if not inspect.isclass(obj):
-        return {
-            k: TypeParamResolver.concretize_type_params(v)
-            for k, v in _get_type_hints_backported_syntax(
-                obj, include_extras=include_extras
-            ).items()
-        }
+        if not hasattr(obj, "__self__") or not hasattr(obj, "__func__"):
+            # Normal function.
+            return {
+                k: TypeParamResolver.concretize_type_params(v)
+                for k, v in _get_type_hints_backported_syntax(
+                    obj, include_extras=include_extras
+                ).items()
+            }
+        else:
+            # Method is bound to a particular instance of a class.
+            bound_instance = getattr(obj, "__self__")
+            if hasattr(bound_instance, "__orig_class__"):
+                # Generic class with bound type parameters.
+                cls = bound_instance.__orig_class__
+            else:
+                # No bound type parameters.
+                cls = bound_instance.__class__
+            unbound_func = getattr(obj, "__func__")
+            unbound_func_name = unbound_func.__name__
+
+            # Get class that method was defined in.
+            unbound_func_context_cls = None
+            for base_cls in cls.mro():
+                if unbound_func_name in base_cls.__dict__:
+                    unbound_func_context_cls = base_cls
+                    break
+            assert unbound_func_context_cls is not None
+
+            # Recursively resolve type parameters, until we reach the class
+            # that the method is defined in.
+            #
+            # This is very similar to the type parameter resolution logic that
+            # we use for __init__ methods in _fields.py.
+            #
+            # We should consider refactoring.
+            def get_hints_for_bound_method(cls) -> Dict[str, Any]:
+                typevar_context = TypeParamResolver.get_assignment_context(cls)
+                cls = typevar_context.origin_type
+                with typevar_context:
+                    if cls is unbound_func_context_cls:
+                        return get_type_hints_resolve_type_params(
+                            unbound_func, include_extras=include_extras
+                        )
+                    for base_cls in (
+                        cls.__orig_bases__
+                        if hasattr(cls, "__orig_bases__")
+                        else cls.__bases__
+                    ):
+                        if not issubclass(
+                            unwrap_origin_strip_extras(base_cls),
+                            unbound_func_context_cls,
+                        ):
+                            continue
+                        return get_hints_for_bound_method(
+                            TypeParamResolver.concretize_type_params(base_cls)
+                        )
+
+                assert False, "Could not find base class containing method definition. This is likely a bug in tyro."
+
+            return get_hints_for_bound_method(cls)
 
     typevar_context = TypeParamResolver.get_assignment_context(obj)
     obj = typevar_context.origin_type

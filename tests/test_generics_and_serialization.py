@@ -5,11 +5,11 @@ import io
 from typing import Generic, List, NewType, Tuple, Type, TypeVar, Union
 
 import pytest
+import tyro
 import yaml
-from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 T = TypeVar("T")
 
@@ -531,3 +531,15 @@ def test_deeply_inherited_init() -> None:
     assert "--model.config.a" in get_helptext_with_checks(c)
     assert "--model.config.b" in get_helptext_with_checks(c)
     assert "--model.config.c" in get_helptext_with_checks(c)
+
+
+def test_simple_bound_method() -> None:
+    class Config[T]:
+        def __init__(self, a: T) -> None: ...
+        def method(self, a: T) -> T:
+            return a
+
+    assert tyro.cli(Config[int], args="--a 5".split(" ")).method(3) == 3
+    assert tyro.cli(Config[int](3).method, args="--a 5".split(" ")) == 5
+    with pytest.raises(tyro.constructors.UnsupportedTypeAnnotationError):
+        tyro.cli(Config(3).method, args="--a 5".split(" "))
