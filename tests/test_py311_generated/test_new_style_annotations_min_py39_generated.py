@@ -3,6 +3,7 @@ from typing import Any, Literal, Optional, Type
 
 import pytest
 from helptext_utils import get_helptext_with_checks
+from torch.optim.lr_scheduler import LinearLR, LRScheduler
 
 import tyro
 
@@ -72,7 +73,6 @@ def test_tuple_direct() -> None:
 
 def test_type_with_init_false() -> None:
     """https://github.com/brentyi/tyro/issues/235"""
-    from torch.optim.lr_scheduler import LinearLR, LRScheduler
 
     @dataclasses.dataclass(frozen=True)
     class LinearLRConfig:

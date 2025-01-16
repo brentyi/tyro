@@ -2,9 +2,9 @@ import dataclasses
 from typing import Any, Literal, Optional, Type, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
-
 import tyro
+
+from helptext_utils import get_helptext_with_checks
 
 
 def test_list() -> None:
@@ -70,24 +70,31 @@ def test_tuple_direct() -> None:
     assert tyro.cli(tuple[int, int], args="1 2".split(" ")) == (1, 2)  # type: ignore
 
 
-def test_type_with_init_false() -> None:
-    """https://github.com/brentyi/tyro/issues/235"""
+try:
     from torch.optim.lr_scheduler import LinearLR, LRScheduler
 
-    @dataclasses.dataclass(frozen=True)
-    class LinearLRConfig:
-        _target: type[LRScheduler] = dataclasses.field(
-            init=False, default_factory=lambda: LinearLR
-        )
-        _target2: Type[LRScheduler] = dataclasses.field(
-            init=False, default_factory=lambda: LinearLR
-        )
-        start_factor: float = 1.0 / 3
-        end_factor: float = 1.0
-        total_iters: Optional[int] = None
+    def test_type_with_init_false() -> None:
+        """https://github.com/brentyi/tyro/issues/235"""
 
-    def main(config: LinearLRConfig) -> LinearLRConfig:
-        return config
+        @dataclasses.dataclass(frozen=True)
+        class LinearLRConfig:
+            _target: type[LRScheduler] = dataclasses.field(
+                init=False, default_factory=lambda: LinearLR
+            )
+            _target2: Type[LRScheduler] = dataclasses.field(
+                init=False, default_factory=lambda: LinearLR
+            )
+            start_factor: float = 1.0 / 3
+            end_factor: float = 1.0
+            total_iters: Optional[int] = None
 
-    assert tyro.cli(main, args=[]) == LinearLRConfig()
-    assert "_target" not in get_helptext_with_checks(LinearLRConfig)
+        def main(config: LinearLRConfig) -> LinearLRConfig:
+            return config
+
+        assert tyro.cli(main, args=[]) == LinearLRConfig()
+        assert "_target" not in get_helptext_with_checks(LinearLRConfig)
+except ImportError:
+    # We can't install PyTorch in Python 3.13.
+    import sys
+
+    assert sys.version_info >= (3, 13)
