@@ -2,9 +2,9 @@ import dataclasses
 from typing import Any, Literal, Optional, Type, Union
 
 import pytest
-import tyro
-
 from helptext_utils import get_helptext_with_checks
+
+import tyro
 
 
 def test_list() -> None:
