@@ -613,7 +613,7 @@
             <span class="p">)</span>
             <span class="k">if</span> <span class="n">field_name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Unsupported type annotation for field with name `</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">`, which is annotated as `</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Unsupported type annotation for field with name `</span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2">`, which is resolved to `</span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">`. &quot;</span>
                     <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">error</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> &quot;</span>
                     <span class="s2">&quot;To suppress this error, assign the field either a default value or a different type.&quot;</span>
                 <span class="p">)</span>

@@ -311,18 +311,31 @@ Python’s standard <a class="reference external" href="https://docs.python.org/
 <section id="what-s-not-supported">
 <h2>What’s not supported<a class="headerlink" href="#what-s-not-supported" title="Link to this heading">¶</a></h2>
 <p>There are some limitations. We currently <em>do not</em> support:</p>
-<ul class="simple">
-<li><p>Variable-length sequences over nested structures, unless a default is
+<ul>
+<li><p><strong>Self-referential types.</strong> For example, <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">RecursiveList[T]</span> <span class="pre">=</span> <span class="pre">T</span> <span class="pre">|</span> <span class="pre">list[RecursiveList[T]]</span></code>.</p></li>
+<li><p><strong>Variable-length sequences over nested structures</strong>, unless a default is
 provided. For types like <code class="docutils literal notranslate"><span class="pre">list[Dataclass]</span></code>, we require a default value to
 infer length from. The length of the corresponding field cannot be changed
 from the CLI interface.</p></li>
-<li><p>Nesting variable-length sequences in other sequences. <code class="docutils literal notranslate"><span class="pre">tuple[int,</span> <span class="pre">...]</span></code> and
+<li><p><strong>Nesting variable-length sequences in other sequences.</strong> <code class="docutils literal notranslate"><span class="pre">tuple[int,</span> <span class="pre">...]</span></code> and
 <code class="docutils literal notranslate"><span class="pre">tuple[tuple[int,</span> <span class="pre">int,</span> <span class="pre">int],</span> <span class="pre">...]</span></code> are supported, as the variable-length
 sequence is the outermost type. However, <code class="docutils literal notranslate"><span class="pre">tuple[tuple[int,</span> <span class="pre">...],</span> <span class="pre">...]</span></code> is
 ambiguous to parse and not supported.</p></li>
-<li><p>Self-referential types, like <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">RecursiveList[T]</span> <span class="pre">=</span> <span class="pre">T</span> <span class="pre">|</span> <span class="pre">list[RecursiveList[T]]</span></code>.</p></li>
+<li><p><strong>Generic types in class methods.</strong> For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">arg</span>
+
+<span class="c1"># The `int` type parameter will be ignored.</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">MyClass</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">my_method</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This is because <code class="docutils literal notranslate"><span class="pre">MyClass[int].my_method</span></code> cannot be distinguished from
+<code class="docutils literal notranslate"><span class="pre">MyClass.my_method</span></code> at runtime.</p>
+</li>
 </ul>
-<p>In each of these cases, a <a class="reference internal" href="../examples/custom_constructors/#example-category-custom-constructors"><span class="std std-ref">custom constructor</span></a> can be defined as a workaround.</p>
+<p>For some of these cases, a <a class="reference internal" href="../examples/custom_constructors/#example-category-custom-constructors"><span class="std std-ref">custom constructor</span></a> can be defined as a workaround.</p>
 </section>
 </section>
 
