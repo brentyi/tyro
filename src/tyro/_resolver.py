@@ -381,12 +381,14 @@ class TypeParamResolver:
         typ = resolve_newtype_and_aliases(typ)
         type_from_typevar = {}
         GenericAlias = getattr(types, "GenericAlias", None)
-        while (
-            GenericAlias is not None
-            and isinstance(typ, GenericAlias)
-            and len(getattr(typ, "__type_params__", ())) > 0
-        ):
-            for k, v in zip(typ.__type_params__, get_args(typ)):  # type: ignore
+        while GenericAlias is not None and isinstance(typ, GenericAlias):
+            type_params = getattr(typ, "__type_params__", ())
+            # The __len__ check is for a bug in Python 3.12.0:
+            # https://github.com/brentyi/tyro/issues/235
+            if not hasattr(type_params, "__len__") or len(type_params) == 0:
+                break
+
+            for k, v in zip(type_params, get_args(typ)):
                 type_from_typevar[k] = TypeParamResolver.concretize_type_params(
                     v, seen=seen
                 )
