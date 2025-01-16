@@ -5,11 +5,11 @@ import io
 from typing import Generic, List, NewType, Tuple, Type, TypeVar, Union
 
 import pytest
-import tyro
 import yaml
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
-from helptext_utils import get_helptext_with_checks
+import tyro
 
 T = TypeVar("T")
 
@@ -534,7 +534,9 @@ def test_deeply_inherited_init() -> None:
 
 
 def test_simple_bound_method() -> None:
-    class Config[T]:
+    T = TypeVar("T")
+
+    class Config(Generic[T]):
         def __init__(self, a: T) -> None: ...
         def method(self, a: T) -> T:
             return a
@@ -557,8 +559,6 @@ def test_inherited_bound_method() -> None:
     class AModel(Generic[TContainsAConfig]):
         def __init__(self, config: TContainsAConfig):
             self.config = config
-
-        config: TContainsAConfig
 
     TContainsAModel = TypeVar("TContainsAModel", bound=AModel)
 
