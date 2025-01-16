@@ -5,11 +5,11 @@ import io
 from typing import Generic, List, NewType, Tuple, Type, TypeVar, Union
 
 import pytest
+import tyro
 import yaml
-from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 T = TypeVar("T")
 
@@ -543,3 +543,43 @@ def test_simple_bound_method() -> None:
     assert tyro.cli(Config[int](3).method, args="--a 5".split(" ")) == 5
     with pytest.raises(tyro.constructors.UnsupportedTypeAnnotationError):
         tyro.cli(Config(3).method, args="--a 5".split(" "))
+
+
+def test_inherited_bound_method() -> None:
+    """From @deeptoaster: https://github.com/brentyi/tyro/issues/233"""
+
+    @dataclasses.dataclass
+    class AConfig:
+        a: int
+
+    TContainsAConfig = TypeVar("TContainsAConfig", bound=AConfig)
+
+    class AModel(Generic[TContainsAConfig]):
+        def __init__(self, config: TContainsAConfig):
+            self.config = config
+
+        config: TContainsAConfig
+
+    TContainsAModel = TypeVar("TContainsAModel", bound=AModel)
+
+    @dataclasses.dataclass
+    class ABConfig(AConfig):
+        b: int
+
+    class ABModel(AModel[ABConfig]):
+        pass
+
+    class AHelper(Generic[TContainsAModel]):
+        def spam(self, model: TContainsAModel) -> TContainsAModel:
+            self.model = model
+            return model
+
+        model: TContainsAModel
+
+    class ABHelper(AHelper[ABModel]):
+        def print_model(self) -> None:
+            print(self.model.config)
+
+    assert tyro.cli(
+        ABHelper().spam, args="--model.config.a 5 --model.config.b 7".split(" ")
+    ).config == ABConfig(5, 7)
