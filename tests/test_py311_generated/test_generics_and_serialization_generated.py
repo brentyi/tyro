@@ -602,6 +602,8 @@ def test_inherited_class_method() -> None:
         pass
 
     class AHelper(Generic[TContainsAModel]):
+        model: TContainsAModel
+
         @classmethod
         def spam(cls, model: TContainsAModel):
             cls.model = model

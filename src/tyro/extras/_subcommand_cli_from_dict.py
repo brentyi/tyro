@@ -102,7 +102,7 @@ def subcommand_cli_from_dict(
     """
     # We need to form a union type, which requires at least two elements.
     return cli(
-        Union.__getitem__(  # type: ignore
+        Union[  # type: ignore
             tuple(
                 [
                     Annotated[
@@ -119,7 +119,7 @@ def subcommand_cli_from_dict(
                 # but suppress it.
                 + [Annotated[None, Suppress]]
             )
-        ),
+        ],
         prog=prog,
         description=description,
         args=args,

@@ -227,19 +227,19 @@ def narrow_collection_types(
     ):
         if len(default_instance) == 0:
             return typ
-        typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
+        typ = List[Union[tuple(map(type, default_instance))]]  # type: ignore
     elif typ in (set, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, set
     ):
         if len(default_instance) == 0:
             return typ
-        typ = Set.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
+        typ = Set[Union[tuple(map(type, default_instance))]]  # type: ignore
     elif typ in (tuple, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, tuple
     ):
         if len(default_instance) == 0:
             return typ
-        typ = Tuple.__getitem__(tuple(map(type, default_instance)))  # type: ignore
+        typ = Tuple[tuple(map(type, default_instance))]  # type: ignore
     return cast(TypeOrCallable, typ)
 
 
@@ -393,24 +393,27 @@ class TypeParamResolver:
                 return type_from_typevar[typ]  # type: ignore
 
         # Found a TypeVar that isn't bound.
-        if isinstance(typ, TypeVar):
-            if typ.__bound__ is not None:
+        if isinstance(cast(Any, typ), TypeVar):
+            bound = getattr(typ, "__bound__", None)
+            if bound is not None:
                 # Try to infer type from TypeVar bound.
                 warnings.warn(
                     f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
                 )
-                return typ.__bound__
-            elif len(typ.__constraints__) > 0:
+                return bound
+
+            constraints = getattr(typ, "__constraints__", ())
+            if len(constraints) > 0:
                 # Try to infer type from TypeVar constraints.
                 warnings.warn(
                     f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
                 )
-                return Union.__getitem__(typ.__constraints__)  # type: ignore
-            else:
-                warnings.warn(
-                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
-                )
-                return Any
+                return Union[constraints]  # type: ignore
+
+            warnings.warn(
+                f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+            )
+            return Any  # type: ignore
 
         origin = get_origin(typ)
         args = get_args(typ)
@@ -436,7 +439,7 @@ class TypeParamResolver:
 
             # Standard generic aliases have a `copy_with()`!
             if origin is UnionType:
-                return Union.__getitem__(new_args)  # type: ignore
+                return Union[new_args]  # type: ignore
             elif hasattr(typ, "copy_with"):
                 # typing.List, typing.Dict, etc.
                 return typ.copy_with(new_args)  # type: ignore
@@ -490,7 +493,7 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
                 f"{type(default_instance)} does not match any type in Union:"
                 f" {options_unwrapped}"
             )
-            return Union.__getitem__(options + (type(default_instance),))  # type: ignore
+            return Union[options + (type(default_instance),)]  # type: ignore
     except TypeError:
         pass
 
@@ -726,7 +729,7 @@ def _get_type_hints_backported_syntax(
                         annotated_args = get_args(non_none)
                         out[k] = Annotated[  # type: ignore
                             (
-                                Union.__getitem__((annotated_args[0], None)),  # type: ignore
+                                Union[(annotated_args[0], None)],  # type: ignore
                                 *annotated_args[1:],
                             )
                         ]

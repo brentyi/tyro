@@ -9,7 +9,6 @@ from typing import (
     Optional,
     Tuple,
     TypeVar,
-    Union,
 )
 
 import pytest
@@ -1364,7 +1363,7 @@ def test_subcommand_default_with_conf_annotation() -> None:
             Annotated[SGDConfig, tyro.conf.subcommand(name="sgd")],
             Annotated[AdamConfig, tyro.conf.subcommand(name="adam")],
         ]
-        return Union.__getitem__(tuple(cfgs))  # type: ignore
+        return tuple(cfgs)  # type: ignore
 
     @dataclasses.dataclass(frozen=True)
     class Config1:

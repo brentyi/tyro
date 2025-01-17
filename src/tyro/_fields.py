@@ -397,7 +397,7 @@ def _field_list_from_function(
             #
             # This will create a `--args T [T ...]` CLI argument.
             markers = (_markers._UnpackArgsCall,)
-            typ = Tuple.__getitem__((typ, ...))  # type: ignore
+            typ = Tuple[(typ, ...)]  # type: ignore
             default = ()
         elif param.kind is inspect.Parameter.VAR_KEYWORD:
             # Handle *kwargs signatures.
@@ -409,7 +409,7 @@ def _field_list_from_function(
             # choosing not to because it would make *args and **kwargs
             # difficult to use in conjunction.
             markers = (_markers._UnpackKwargsCall,)
-            typ = Dict.__getitem__((str, typ))  # type: ignore
+            typ = Dict[str, typ]  # type: ignore
             default = {}
 
         with FieldDefinition.marker_context(markers):
