@@ -306,11 +306,11 @@ Python’s standard <a class="reference external" href="https://docs.python.org/
 <li><p><a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.dataclass()</span></code></a>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">attrs</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>, and <code class="docutils literal notranslate"><span class="pre">flax.linen</span></code> models.</p></li>
 <li><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NamedTuple" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.NamedTuple</span></code></a>.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypedDict</span></code></a>, flags like <code class="docutils literal notranslate"><span class="pre">total=</span></code>, and associated annotations like <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Required" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Required</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NotRequired" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.NotRequired</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ReadOnly" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.ReadOnly</span></code></a>,</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypedDict" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">typing.TypedDict</span></code></a>, flags like <code class="docutils literal notranslate"><span class="pre">total=</span></code>, and associated annotations like <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Required" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Required</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NotRequired" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.NotRequired</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ReadOnly" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.ReadOnly</span></code></a>.</p></li>
 </ul>
 <section id="what-s-not-supported">
 <h2>What’s not supported<a class="headerlink" href="#what-s-not-supported" title="Link to this heading">¶</a></h2>
-<p>There are some limitations. We currently <em>do not</em> support:</p>
+<p>There are some limitations. We currently do not fully support:</p>
 <ul>
 <li><p><strong>Self-referential types.</strong> For example, <code class="docutils literal notranslate"><span class="pre">type</span> <span class="pre">RecursiveList[T]</span> <span class="pre">=</span> <span class="pre">T</span> <span class="pre">|</span> <span class="pre">list[RecursiveList[T]]</span></code>.</p></li>
 <li><p><strong>Variable-length sequences over nested structures</strong>, unless a default is
@@ -321,18 +321,23 @@ from the CLI interface.</p></li>
 <code class="docutils literal notranslate"><span class="pre">tuple[tuple[int,</span> <span class="pre">int,</span> <span class="pre">int],</span> <span class="pre">...]</span></code> are supported, as the variable-length
 sequence is the outermost type. However, <code class="docutils literal notranslate"><span class="pre">tuple[tuple[int,</span> <span class="pre">...],</span> <span class="pre">...]</span></code> is
 ambiguous to parse and not supported.</p></li>
-<li><p><strong>Generic types in class methods.</strong> For example:</p>
+<li><p><strong>Type parameters in class and static methods.</strong> For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MyClass</span><span class="p">[</span><span class="n">T</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]:</span>
+  <span class="nd">@static_method</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">method1</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">arg</span>
+
   <span class="nd">@classmethod</span>
-  <span class="k">def</span><span class="w"> </span><span class="nf">my_method</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
+  <span class="k">def</span><span class="w"> </span><span class="nf">method2</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">arg</span><span class="p">:</span> <span class="n">T</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">arg</span>
 
 <span class="c1"># The `int` type parameter will be ignored.</span>
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">MyClass</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">my_method</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">MyClass</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">method1</span><span class="p">)</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">MyClass</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span><span class="o">.</span><span class="n">method2</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This is because <code class="docutils literal notranslate"><span class="pre">MyClass[int].my_method</span></code> cannot be distinguished from
-<code class="docutils literal notranslate"><span class="pre">MyClass.my_method</span></code> at runtime.</p>
+<p>This is because <code class="docutils literal notranslate"><span class="pre">MyClass[int].method1</span></code> / <code class="docutils literal notranslate"><span class="pre">MyClass[int].method2</span></code> cannot be
+distinguished from <code class="docutils literal notranslate"><span class="pre">MyClass.method1</span></code> / <code class="docutils literal notranslate"><span class="pre">MyClass.method2</span></code> at runtime.</p>
 </li>
 </ul>
 <p>For some of these cases, a <a class="reference internal" href="../examples/custom_constructors/#example-category-custom-constructors"><span class="std std-ref">custom constructor</span></a> can be defined as a workaround.</p>

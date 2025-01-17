@@ -57,12 +57,6 @@ Module Contents
 .. py:function:: is_namedtuple(cls: tyro._typing.TypeForm) -> bool
 
 
-.. py:function:: type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable
-
-   Try to concretize a type from a TypeVar's bounds or constraints. Identity if
-   unsuccessful.
-
-
 .. py:data:: TypeOrCallableOrNone
 
    

@@ -386,7 +386,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># We need to form a union type, which requires at least two elements.</span>
     <span class="k">return</span> <span class="n">cli</span><span class="p">(</span>
-        <span class="n">Union</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
+        <span class="n">Union</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
             <span class="nb">tuple</span><span class="p">(</span>
                 <span class="p">[</span>
                     <span class="n">Annotated</span><span class="p">[</span>
@@ -403,7 +403,7 @@
                 <span class="c1"># but suppress it.</span>
                 <span class="o">+</span> <span class="p">[</span><span class="n">Annotated</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Suppress</span><span class="p">]]</span>
             <span class="p">)</span>
-        <span class="p">),</span>
+        <span class="p">],</span>
         <span class="n">prog</span><span class="o">=</span><span class="n">prog</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
         <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>

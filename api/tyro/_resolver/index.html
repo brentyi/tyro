@@ -374,21 +374,6 @@ resolves forward references.</p>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="tyro._resolver.type_from_typevar_constraints">
-<span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">type_from_typevar_constraints</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">typ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TypeOrCallable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">TypeOrCallable</span></span></span><a class="reference internal" href="../../../_modules/tyro/_resolver/#type_from_typevar_constraints"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro._resolver.type_from_typevar_constraints" title="Link to this definition">¶</a></dt>
-<dd><p>Try to concretize a type from a TypeVar’s bounds or constraints. Identity if
-unsuccessful.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>typ</strong> (<em>TypeOrCallable</em>)</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>TypeOrCallable</p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro._resolver.TypeOrCallableOrNone">
 <span class="sig-prename descclassname"><span class="pre">tyro._resolver.</span></span><span class="sig-name descname"><span class="pre">TypeOrCallableOrNone</span></span><a class="headerlink" href="#tyro._resolver.TypeOrCallableOrNone" title="Link to this definition">¶</a></dt>
@@ -710,7 +695,6 @@ class, and a mapping from typevars to concrete types.</p>
 <li><a class="reference internal" href="#tyro._resolver.is_dataclass"><code class="docutils literal notranslate"><span class="pre">is_dataclass()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.resolved_fields"><code class="docutils literal notranslate"><span class="pre">resolved_fields()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.is_namedtuple"><code class="docutils literal notranslate"><span class="pre">is_namedtuple()</span></code></a></li>
-<li><a class="reference internal" href="#tyro._resolver.type_from_typevar_constraints"><code class="docutils literal notranslate"><span class="pre">type_from_typevar_constraints()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.TypeOrCallableOrNone"><code class="docutils literal notranslate"><span class="pre">TypeOrCallableOrNone</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.resolve_newtype_and_aliases"><code class="docutils literal notranslate"><span class="pre">resolve_newtype_and_aliases()</span></code></a></li>
 <li><a class="reference internal" href="#tyro._resolver.narrow_subtypes"><code class="docutils literal notranslate"><span class="pre">narrow_subtypes()</span></code></a></li>

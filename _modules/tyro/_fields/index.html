@@ -374,13 +374,8 @@
         <span class="k">if</span> <span class="n">typ</span> <span class="ow">is</span> <span class="n">Any</span> <span class="ow">and</span> <span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># TypeVar constraints are already applied in</span>
-            <span class="c1"># TypeParamResolver.concretize_type_params(), but that won&#39;t be</span>
-            <span class="c1"># called for functions.</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">type_from_typevar_constraints</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-
             <span class="c1"># Be forgiving about default instances.</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">check_default_instances</span><span class="p">():</span>
                 <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">expand_union_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
 
@@ -711,7 +706,7 @@
             <span class="c1">#</span>
             <span class="c1"># This will create a `--args T [T ...]` CLI argument.</span>
             <span class="n">markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackArgsCall</span><span class="p">,)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">((</span><span class="n">typ</span><span class="p">,</span> <span class="o">...</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[(</span><span class="n">typ</span><span class="p">,</span> <span class="o">...</span><span class="p">)]</span>  <span class="c1"># type: ignore</span>
             <span class="n">default</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">elif</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="ow">is</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Parameter</span><span class="o">.</span><span class="n">VAR_KEYWORD</span><span class="p">:</span>
             <span class="c1"># Handle *kwargs signatures.</span>
@@ -723,7 +718,7 @@
             <span class="c1"># choosing not to because it would make *args and **kwargs</span>
             <span class="c1"># difficult to use in conjunction.</span>
             <span class="n">markers</span> <span class="o">=</span> <span class="p">(</span><span class="n">_markers</span><span class="o">.</span><span class="n">_UnpackKwargsCall</span><span class="p">,)</span>
-            <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">((</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typ</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
             <span class="n">default</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="k">with</span> <span class="n">FieldDefinition</span><span class="o">.</span><span class="n">marker_context</span><span class="p">(</span><span class="n">markers</span><span class="p">):</span>
