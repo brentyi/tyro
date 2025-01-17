@@ -21,7 +21,7 @@ Types can also be placed and nested in various structures, such as:
 - :func:`dataclasses.dataclass`.
 - ``attrs``, ``pydantic``, and ``flax.linen`` models.
 - :py:class:`typing.NamedTuple`.
-- :py:class:`typing.TypedDict`, flags like ``total=``, and associated annotations like :py:data:`typing.Required`, :py:data:`typing.NotRequired`, :py:data:`typing.ReadOnly`,
+- :py:class:`typing.TypedDict`, flags like ``total=``, and associated annotations like :py:data:`typing.Required`, :py:data:`typing.NotRequired`, and :py:data:`typing.ReadOnly`.
 
 
 What's not supported
