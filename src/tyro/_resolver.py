@@ -116,21 +116,6 @@ def is_namedtuple(cls: TypeForm) -> bool:
     )
 
 
-def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
-    """Try to concretize a type from a TypeVar's bounds or constraints. Identity if
-    unsuccessful."""
-    if isinstance(typ, TypeVar):
-        if typ.__bound__ is not None:
-            # Try to infer type from TypeVar bound.
-            return typ.__bound__
-        elif len(typ.__constraints__) > 0:
-            # Try to infer type from TypeVar constraints.
-            return Union.__getitem__(typ.__constraints__)  # type: ignore
-        else:
-            return Any
-    return typ
-
-
 TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
 
 
@@ -242,19 +227,19 @@ def narrow_collection_types(
     ):
         if len(default_instance) == 0:
             return typ
-        typ = List.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
+        typ = List[Union[tuple(map(type, default_instance))]]  # type: ignore
     elif typ in (set, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, set
     ):
         if len(default_instance) == 0:
             return typ
-        typ = Set.__getitem__(Union.__getitem__(tuple(map(type, default_instance))))  # type: ignore
+        typ = Set[Union[tuple(map(type, default_instance))]]  # type: ignore
     elif typ in (tuple, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, tuple
     ):
         if len(default_instance) == 0:
             return typ
-        typ = Tuple.__getitem__(tuple(map(type, default_instance)))  # type: ignore
+        typ = Tuple[tuple(map(type, default_instance))]  # type: ignore
     return cast(TypeOrCallable, typ)
 
 
@@ -370,6 +355,7 @@ class TypeParamResolver:
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
 
+        # Search for cycles.
         if seen is None:
             seen = set()
         elif seen is not None and typ in seen:
@@ -378,33 +364,56 @@ class TypeParamResolver:
         else:
             seen.add(typ)
 
-        typ = resolve_newtype_and_aliases(typ)
-        type_from_typevar = {}
-        GenericAlias = getattr(types, "GenericAlias", None)
-        while GenericAlias is not None and isinstance(typ, GenericAlias):
-            type_params = getattr(typ, "__type_params__", ())
-            # The __len__ check is for a bug in Python 3.12.0:
-            # https://github.com/brentyi/tyro/issues/235
-            if not hasattr(type_params, "__len__") or len(type_params) == 0:
-                break
-
-            for k, v in zip(type_params, get_args(typ)):
-                type_from_typevar[k] = TypeParamResolver.concretize_type_params(
-                    v, seen=seen
-                )
-            typ = typ.__value__  # type: ignore
-
-        if len(type_from_typevar) == 0:
-            return TypeParamResolver._concretize_type_params(typ, seen=seen)
-        else:
-            with TypeParamAssignmentContext(typ, type_from_typevar):
-                return TypeParamResolver._concretize_type_params(typ, seen=seen)
+        # Resolve types recursively.
+        return TypeParamResolver._concretize_type_params(typ, seen=seen)
 
     @staticmethod
     def _concretize_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
+        """Implementation of concretize_type_params(), which doesn't consider cycles."""
+        # Handle aliases.
+        typ = resolve_newtype_and_aliases(typ)
+        GenericAlias = getattr(types, "GenericAlias", None)
+        if GenericAlias is not None and isinstance(typ, GenericAlias):
+            type_params = getattr(typ, "__type_params__", ())
+            # The __len__ check is for a bug in Python 3.12.0:
+            # https://github.com/brentyi/tyro/issues/235
+            if hasattr(type_params, "__len__") and len(type_params) != 0:
+                type_from_typevar = {}
+                for k, v in zip(type_params, get_args(typ)):
+                    type_from_typevar[k] = TypeParamResolver._concretize_type_params(
+                        v, seen=seen
+                    )
+                typ = typ.__value__  # type: ignore
+                with TypeParamAssignmentContext(typ, type_from_typevar):
+                    return TypeParamResolver._concretize_type_params(typ, seen=seen)
+
+        # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
             if typ in type_from_typevar:
                 return type_from_typevar[typ]  # type: ignore
+
+        # Found a TypeVar that isn't bound.
+        if isinstance(cast(Any, typ), TypeVar):
+            bound = getattr(typ, "__bound__", None)
+            if bound is not None:
+                # Try to infer type from TypeVar bound.
+                warnings.warn(
+                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                )
+                return bound
+
+            constraints = getattr(typ, "__constraints__", ())
+            if len(constraints) > 0:
+                # Try to infer type from TypeVar constraints.
+                warnings.warn(
+                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                )
+                return Union[constraints]  # type: ignore
+
+            warnings.warn(
+                f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+            )
+            return Any  # type: ignore
 
         origin = get_origin(typ)
         args = get_args(typ)
@@ -430,7 +439,7 @@ class TypeParamResolver:
 
             # Standard generic aliases have a `copy_with()`!
             if origin is UnionType:
-                return Union.__getitem__(new_args)  # type: ignore
+                return Union[new_args]  # type: ignore
             elif hasattr(typ, "copy_with"):
                 # typing.List, typing.Dict, etc.
                 return typ.copy_with(new_args)  # type: ignore
@@ -484,7 +493,7 @@ def expand_union_types(typ: TypeOrCallable, default_instance: Any) -> TypeOrCall
                 f"{type(default_instance)} does not match any type in Union:"
                 f" {options_unwrapped}"
             )
-            return Union.__getitem__(options + (type(default_instance),))  # type: ignore
+            return Union[options + (type(default_instance),)]  # type: ignore
     except TypeError:
         pass
 
@@ -580,19 +589,25 @@ def resolve_generic_types(
 
 
 def get_type_hints_resolve_type_params(
-    obj: Callable[..., Any], include_extras: bool = False
+    obj: Callable[..., Any],
+    include_extras: bool = False,
 ) -> Dict[str, Any]:
     """Variant of `typing.get_type_hints()` that resolves type parameters."""
     if not inspect.isclass(obj):
-        if inspect.ismethod(obj) and not inspect.isclass(obj.__self__):
-            # Method is bound to a particular instance of a class.
+        if inspect.ismethod(obj):
             bound_instance = getattr(obj, "__self__")
-            if hasattr(bound_instance, "__orig_class__"):
-                # Generic class with bound type parameters.
-                cls = bound_instance.__orig_class__
+            if inspect.isclass(bound_instance):
+                # Class method.
+                cls = bound_instance
             else:
-                # No bound type parameters.
-                cls = bound_instance.__class__
+                # Instance method.
+                if hasattr(bound_instance, "__orig_class__"):
+                    # Generic class with bound type parameters.
+                    cls = bound_instance.__orig_class__
+                else:
+                    # No bound type parameters.
+                    cls = bound_instance.__class__
+            del bound_instance
             unbound_func = getattr(obj, "__func__")
             unbound_func_name = unbound_func.__name__
 
@@ -644,7 +659,7 @@ def get_type_hints_resolve_type_params(
             return {
                 k: TypeParamResolver.concretize_type_params(v)
                 for k, v in _get_type_hints_backported_syntax(
-                    obj, include_extras=include_extras
+                    obj, include_extras
                 ).items()
             }
 
@@ -714,7 +729,7 @@ def _get_type_hints_backported_syntax(
                         annotated_args = get_args(non_none)
                         out[k] = Annotated[  # type: ignore
                             (
-                                Union.__getitem__((annotated_args[0], None)),  # type: ignore
+                                Union[(annotated_args[0], None)],  # type: ignore
                                 *annotated_args[1:],
                             )
                         ]

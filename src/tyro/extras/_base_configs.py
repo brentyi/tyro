@@ -132,7 +132,7 @@ def subcommand_type_from_defaults(
 
     # We need to form a union type, which requires at least two elements.
     assert len(defaults) >= 2, "At least two subcommands are required."
-    return Union.__getitem__(  # type: ignore
+    return Union[  # type: ignore
         tuple(
             Annotated[  # type: ignore
                 (
@@ -147,4 +147,4 @@ def subcommand_type_from_defaults(
             ]
             for k, v in defaults.items()
         )
-    )
+    ]

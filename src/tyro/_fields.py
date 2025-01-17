@@ -82,13 +82,8 @@ class FieldDefinition:
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
             typ = type(default)
         else:
-            # TypeVar constraints are already applied in
-            # TypeParamResolver.concretize_type_params(), but that won't be
-            # called for functions.
-            typ = _resolver.type_from_typevar_constraints(typ)
-            typ = _resolver.narrow_collection_types(typ, default)
-
             # Be forgiving about default instances.
+            typ = _resolver.narrow_collection_types(typ, default)
             if not check_default_instances():
                 typ = _resolver.expand_union_types(typ, default)
 
@@ -402,7 +397,7 @@ def _field_list_from_function(
             #
             # This will create a `--args T [T ...]` CLI argument.
             markers = (_markers._UnpackArgsCall,)
-            typ = Tuple.__getitem__((typ, ...))  # type: ignore
+            typ = Tuple[(typ, ...)]  # type: ignore
             default = ()
         elif param.kind is inspect.Parameter.VAR_KEYWORD:
             # Handle *kwargs signatures.
@@ -414,7 +409,7 @@ def _field_list_from_function(
             # choosing not to because it would make *args and **kwargs
             # difficult to use in conjunction.
             markers = (_markers._UnpackKwargsCall,)
-            typ = Dict.__getitem__((str, typ))  # type: ignore
+            typ = Dict[str, typ]  # type: ignore
             default = {}
 
         with FieldDefinition.marker_context(markers):

@@ -21,14 +21,14 @@ Types can also be placed and nested in various structures, such as:
 - :func:`dataclasses.dataclass`.
 - ``attrs``, ``pydantic``, and ``flax.linen`` models.
 - :py:class:`typing.NamedTuple`.
-- :py:class:`typing.TypedDict`, flags like ``total=``, and associated annotations like :py:data:`typing.Required`, :py:data:`typing.NotRequired`, :py:data:`typing.ReadOnly`,
+- :py:class:`typing.TypedDict`, flags like ``total=``, and associated annotations like :py:data:`typing.Required`, :py:data:`typing.NotRequired`, and :py:data:`typing.ReadOnly`.
 
 
 What's not supported
 --------------------
 
 
-There are some limitations. We currently *do not* support:
+There are some limitations. We currently do not fully support:
 
 - **Self-referential types.** For example, ``type RecursiveList[T] = T | list[RecursiveList[T]]``.
 - **Variable-length sequences over nested structures**, unless a default is
@@ -39,20 +39,25 @@ There are some limitations. We currently *do not* support:
   ``tuple[tuple[int, int, int], ...]`` are supported, as the variable-length
   sequence is the outermost type. However, ``tuple[tuple[int, ...], ...]`` is
   ambiguous to parse and not supported.
-- **Generic types in class methods.** For example:
+- **Type parameters in class and static methods.** For example:
 
   .. code-block:: python
 
       class MyClass[T: int | str]:
+        @static_method
+        def method1(arg: T) -> T:
+          return arg
+
         @classmethod
-        def my_method(cls, arg: T) -> T:
+        def method2(cls, arg: T) -> T:
           return arg
 
       # The `int` type parameter will be ignored.
-      tyro.cli(MyClass[int].my_method)
+      tyro.cli(MyClass[int].method1)
+      tyro.cli(MyClass[int].method2)
 
-  This is because ``MyClass[int].my_method`` cannot be distinguished from
-  ``MyClass.my_method`` at runtime.
+  This is because ``MyClass[int].method1`` / ``MyClass[int].method2`` cannot be
+  distinguished from ``MyClass.method1`` / ``MyClass.method2`` at runtime.
 
 For some of these cases, a :ref:`custom constructor
 <example-category-custom_constructors>` can be defined as a workaround.
