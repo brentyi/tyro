@@ -116,21 +116,6 @@ def is_namedtuple(cls: TypeForm) -> bool:
     )
 
 
-def type_from_typevar_constraints(typ: TypeOrCallable) -> TypeOrCallable:
-    """Try to concretize a type from a TypeVar's bounds or constraints. Identity if
-    unsuccessful."""
-    if isinstance(typ, TypeVar):
-        if typ.__bound__ is not None:
-            # Try to infer type from TypeVar bound.
-            return typ.__bound__
-        elif len(typ.__constraints__) > 0:
-            # Try to infer type from TypeVar constraints.
-            return Union.__getitem__(typ.__constraints__)  # type: ignore
-        else:
-            return Any
-    return typ
-
-
 TypeOrCallableOrNone = TypeVar("TypeOrCallableOrNone", Callable, TypeForm[Any], None)
 
 
@@ -389,15 +374,17 @@ class TypeParamResolver:
                 break
 
             for k, v in zip(type_params, get_args(typ)):
-                type_from_typevar[k] = TypeParamResolver.concretize_type_params(
-                    v, seen=seen
-                )
+                type_from_typevar[k] = v
             typ = typ.__value__  # type: ignore
 
         if len(type_from_typevar) == 0:
             return TypeParamResolver._concretize_type_params(typ, seen=seen)
         else:
             with TypeParamAssignmentContext(typ, type_from_typevar):
+                type_from_typevar = {
+                    k: TypeParamResolver.concretize_type_params(v, seen=seen)
+                    for k, v in type_from_typevar.items()
+                }
                 return TypeParamResolver._concretize_type_params(typ, seen=seen)
 
     @staticmethod
@@ -405,6 +392,26 @@ class TypeParamResolver:
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
             if typ in type_from_typevar:
                 return type_from_typevar[typ]  # type: ignore
+
+        # Found a TypeVar that isn't bound.
+        if isinstance(typ, TypeVar):
+            if typ.__bound__ is not None:
+                # Try to infer type from TypeVar bound.
+                warnings.warn(
+                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                )
+                return typ.__bound__
+            elif len(typ.__constraints__) > 0:
+                # Try to infer type from TypeVar constraints.
+                warnings.warn(
+                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                )
+                return Union.__getitem__(typ.__constraints__)  # type: ignore
+            else:
+                warnings.warn(
+                    f"Could not resolve type parameter {typ}. Type parameter resolution is not always possible in @staticmethod or @classmethod."
+                )
+                return Any
 
         origin = get_origin(typ)
         args = get_args(typ)
@@ -580,19 +587,25 @@ def resolve_generic_types(
 
 
 def get_type_hints_resolve_type_params(
-    obj: Callable[..., Any], include_extras: bool = False
+    obj: Callable[..., Any],
+    include_extras: bool = False,
 ) -> Dict[str, Any]:
     """Variant of `typing.get_type_hints()` that resolves type parameters."""
     if not inspect.isclass(obj):
-        if inspect.ismethod(obj) and not inspect.isclass(obj.__self__):
-            # Method is bound to a particular instance of a class.
+        if inspect.ismethod(obj):
             bound_instance = getattr(obj, "__self__")
-            if hasattr(bound_instance, "__orig_class__"):
-                # Generic class with bound type parameters.
-                cls = bound_instance.__orig_class__
+            if inspect.isclass(bound_instance):
+                # Class method.
+                cls = bound_instance
             else:
-                # No bound type parameters.
-                cls = bound_instance.__class__
+                # Instance method.
+                if hasattr(bound_instance, "__orig_class__"):
+                    # Generic class with bound type parameters.
+                    cls = bound_instance.__orig_class__
+                else:
+                    # No bound type parameters.
+                    cls = bound_instance.__class__
+            del bound_instance
             unbound_func = getattr(obj, "__func__")
             unbound_func_name = unbound_func.__name__
 
@@ -644,7 +657,7 @@ def get_type_hints_resolve_type_params(
             return {
                 k: TypeParamResolver.concretize_type_params(v)
                 for k, v in _get_type_hints_backported_syntax(
-                    obj, include_extras=include_extras
+                    obj, include_extras
                 ).items()
             }
 

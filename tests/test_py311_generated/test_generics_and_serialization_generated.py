@@ -579,3 +579,37 @@ def test_inherited_bound_method() -> None:
     assert tyro.cli(
         ABHelper().spam, args="--model.config.a 5 --model.config.b 7".split(" ")
     ).config == ABConfig(5, 7)
+
+
+def test_inherited_class_method() -> None:
+    @dataclasses.dataclass
+    class AConfig:
+        a: int
+
+    TContainsAConfig = TypeVar("TContainsAConfig", bound=AConfig)
+
+    class AModel(Generic[TContainsAConfig]):
+        def __init__(self, config: TContainsAConfig):
+            self.config = config
+
+    TContainsAModel = TypeVar("TContainsAModel", bound=AModel)
+
+    @dataclasses.dataclass
+    class ABConfig(AConfig):
+        b: int
+
+    class ABModel(AModel[ABConfig]):
+        pass
+
+    class AHelper(Generic[TContainsAModel]):
+        @classmethod
+        def spam(cls, model: TContainsAModel):
+            cls.model = model
+
+    class ABHelper(AHelper[ABModel]):
+        @classmethod
+        def print_model(cls):
+            print(cls.model)
+
+    tyro.cli(ABHelper.spam, args="--model.config.a 5 --model.config.b 7".split(" "))
+    assert ABHelper.model.config == ABConfig(5, 7)
