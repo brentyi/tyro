@@ -37,4 +37,4 @@ def literal_type_from_choices(choices: Iterable[T]) -> TypeForm[T]:
     Returns:
         A type that can be passed to :func:`tyro.cli()`.
     """
-    return Literal.__getitem__(tuple(choices))  # type: ignore
+    return Literal[tuple(choices)]  # type: ignore
