@@ -616,4 +616,4 @@ def test_inherited_class_method() -> None:
             print(cls.model)
 
     tyro.cli(ABHelper.spam, args="--model.config.a 5 --model.config.b 7".split(" "))
-    assert ABHelper.model.config == ABConfig(5, 7)
+    assert ABHelper.model.config == ABConfig(5, 7)  # type: ignore
