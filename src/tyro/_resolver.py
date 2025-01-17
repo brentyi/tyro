@@ -355,6 +355,7 @@ class TypeParamResolver:
     ) -> TypeOrCallable:
         """Apply type parameter assignments based on the current context."""
 
+        # Search for cycles.
         if seen is None:
             seen = set()
         elif seen is not None and typ in seen:
@@ -363,32 +364,30 @@ class TypeParamResolver:
         else:
             seen.add(typ)
 
-        typ = resolve_newtype_and_aliases(typ)
-        type_from_typevar = {}
-        GenericAlias = getattr(types, "GenericAlias", None)
-        while GenericAlias is not None and isinstance(typ, GenericAlias):
-            type_params = getattr(typ, "__type_params__", ())
-            # The __len__ check is for a bug in Python 3.12.0:
-            # https://github.com/brentyi/tyro/issues/235
-            if not hasattr(type_params, "__len__") or len(type_params) == 0:
-                break
-
-            for k, v in zip(type_params, get_args(typ)):
-                type_from_typevar[k] = v
-            typ = typ.__value__  # type: ignore
-
-        if len(type_from_typevar) == 0:
-            return TypeParamResolver._concretize_type_params(typ, seen=seen)
-        else:
-            with TypeParamAssignmentContext(typ, type_from_typevar):
-                type_from_typevar = {
-                    k: TypeParamResolver.concretize_type_params(v, seen=seen)
-                    for k, v in type_from_typevar.items()
-                }
-                return TypeParamResolver._concretize_type_params(typ, seen=seen)
+        # Resolve types recursively.
+        return TypeParamResolver._concretize_type_params(typ, seen=seen)
 
     @staticmethod
     def _concretize_type_params(typ: TypeOrCallable, seen: set[Any]) -> TypeOrCallable:
+        """Implementation of concretize_type_params(), which doesn't consider cycles."""
+        # Handle aliases.
+        typ = resolve_newtype_and_aliases(typ)
+        GenericAlias = getattr(types, "GenericAlias", None)
+        if GenericAlias is not None and isinstance(typ, GenericAlias):
+            type_params = getattr(typ, "__type_params__", ())
+            # The __len__ check is for a bug in Python 3.12.0:
+            # https://github.com/brentyi/tyro/issues/235
+            if hasattr(type_params, "__len__") and len(type_params) != 0:
+                type_from_typevar = {}
+                for k, v in zip(type_params, get_args(typ)):
+                    type_from_typevar[k] = TypeParamResolver._concretize_type_params(
+                        v, seen=seen
+                    )
+                typ = typ.__value__  # type: ignore
+                with TypeParamAssignmentContext(typ, type_from_typevar):
+                    return TypeParamResolver._concretize_type_params(typ, seen=seen)
+
+        # Search for type parameter assignments.
         for type_from_typevar in reversed(TypeParamResolver.param_assignments):
             if typ in type_from_typevar:
                 return type_from_typevar[typ]  # type: ignore
