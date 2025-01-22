@@ -1800,3 +1800,50 @@ def test_suppress_in_union() -> None:
     with pytest.raises(SystemExit):
         # ConfigB has a required argument.
         assert tyro.cli(main, args=["x:config-b"])
+
+
+_dataset_map = {
+    "alpaca": "tatsu-lab/alpaca",
+    "alpaca_clean": "yahma/alpaca-cleaned",
+    "alpaca_gpt4": "vicgalle/alpaca-gpt4",
+}
+_inv_dataset_map = {value: key for key, value in _dataset_map.items()}
+_datasets = list(_dataset_map.keys())
+
+HFDataset = Annotated[
+    str,
+    tyro.constructors.PrimitiveConstructorSpec(
+        nargs=1,
+        metavar="{" + ",".join(_datasets) + "}",
+        instance_from_str=lambda args: _dataset_map[args[0]],
+        is_instance=lambda instance: isinstance(instance, str)
+        and instance in _inv_dataset_map,
+        str_from_instance=lambda instance: [_inv_dataset_map[instance]],
+        choices=tuple(_datasets),
+    ),
+    tyro.conf.arg(
+        help_behavior_hint=lambda df: f"(default: {df}, run datasets.py for full options)"
+    ),
+]
+
+
+def test_annotated_attribute_inheritance() -> None:
+    """From @mirceamironenco.
+
+    https://github.com/brentyi/tyro/issues/239"""
+
+    @dataclasses.dataclass(frozen=True)
+    class TrainConfig:
+        dataset: str = "vicgalle/alpaca-gpt4"
+
+    @dataclasses.dataclass(frozen=True)
+    class CLITrainerConfig(TrainConfig):
+        dataset: HFDataset = "vicgalle/alpaca-gpt4"
+
+    assert "{alpaca,alpaca_clean,alpaca_gpt4}" in get_helptext_with_checks(
+        CLITrainerConfig
+    )
+    assert (
+        "default: alpaca_gpt4, run datasets.py for full options"
+        in get_helptext_with_checks(CLITrainerConfig)
+    )
