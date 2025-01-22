@@ -648,9 +648,7 @@ def get_type_hints_resolve_type_params(
                             TypeParamResolver.concretize_type_params(base_cls)
                         )
 
-                assert False, (
-                    "Could not find base class containing method definition. This is likely a bug in tyro."
-                )
+                assert False, "Could not find base class containing method definition. This is likely a bug in tyro."
 
             out = get_hints_for_bound_method(cls)
             return out
@@ -673,7 +671,13 @@ def get_type_hints_resolve_type_params(
             for x, t in _get_type_hints_backported_syntax(
                 obj, include_extras=include_extras
             ).items()
-            if x in obj.__annotations__
+            # Only include type hints that are explicitly defined in this class.
+            #
+            # Why `cls.__dict__.__annotations__` instead of `cls.__annotations__`?
+            # Because in Python 3.8 and earlier, `cls.__annotations__`
+            # recursively merges parent class annotations.
+            # See this issue: https://github.com/python/cpython/issues/99535
+            if x in obj.__dict__.get("__annotations__", {})
         }
 
     # We need to recurse into base classes in order to correctly resolve superclass parameters.
@@ -689,8 +693,13 @@ def get_type_hints_resolve_type_params(
                 {
                     x: TypeParamResolver.concretize_type_params(t)
                     for x, t in base_hints.items()
-                    # Superclass annotations should not overwrite subclass annotations.
-                    if x not in out
+                    # Include type hints that are (1) explicitly defined in
+                    # this class and (2) not assigned earlier in the MRO.
+                    if x
+                    in base_typevar_context.origin_type.__dict__.get(
+                        "__annotations__", {}
+                    )
+                    and x not in out
                 }
             )
 
