@@ -648,7 +648,9 @@ def get_type_hints_resolve_type_params(
                             TypeParamResolver.concretize_type_params(base_cls)
                         )
 
-                assert False, "Could not find base class containing method definition. This is likely a bug in tyro."
+                assert False, (
+                    "Could not find base class containing method definition. This is likely a bug in tyro."
+                )
 
             out = get_hints_for_bound_method(cls)
             return out
