@@ -673,7 +673,13 @@ def get_type_hints_resolve_type_params(
             for x, t in _get_type_hints_backported_syntax(
                 obj, include_extras=include_extras
             ).items()
-            if x in obj.__annotations__
+            # Only include type hints that are explicitly defined in this class.
+            #
+            # Why `cls.__dict__.__annotations__` instead of `cls.__annotations__`?
+            # Because in Python 3.8 and earlier, `cls.__annotations__`
+            # recursively merges parent class annotations.
+            # See this issue: https://github.com/python/cpython/issues/99535
+            if x in obj.__dict__.get("__annotations__", {})
         }
 
     # We need to recurse into base classes in order to correctly resolve superclass parameters.
@@ -689,6 +695,11 @@ def get_type_hints_resolve_type_params(
                 {
                     x: TypeParamResolver.concretize_type_params(t)
                     for x, t in base_hints.items()
+                    # Include type hints that are not assigned earlier in the MRO.
+                    #
+                    # This needs to be recursive (include parents of parents),
+                    # so we shouldn't filter by local __annotations__.
+                    if x not in out
                 }
             )
 
