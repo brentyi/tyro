@@ -693,13 +693,11 @@ def get_type_hints_resolve_type_params(
                 {
                     x: TypeParamResolver.concretize_type_params(t)
                     for x, t in base_hints.items()
-                    # Include type hints that are (1) explicitly defined in
-                    # this class and (2) not assigned earlier in the MRO.
-                    if x
-                    in base_typevar_context.origin_type.__dict__.get(
-                        "__annotations__", {}
-                    )
-                    and x not in out
+                    # Include type hints that are not assigned earlier in the MRO.
+                    #
+                    # This needs to be recursive (include parents of parents),
+                    # so we shouldn't filter by local __annotations__.
+                    if x not in out
                 }
             )
 
