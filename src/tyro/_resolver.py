@@ -689,6 +689,8 @@ def get_type_hints_resolve_type_params(
                 {
                     x: TypeParamResolver.concretize_type_params(t)
                     for x, t in base_hints.items()
+                    # Superclass annotations should not overwrite subclass annotations.
+                    if x not in out
                 }
             )
 
