@@ -1847,3 +1847,47 @@ def test_annotated_attribute_inheritance() -> None:
         "default: alpaca_gpt4, run datasets.py for full options"
         in get_helptext_with_checks(CLITrainerConfig)
     )
+
+
+@dataclasses.dataclass(frozen=True)
+class OptimizerConfig:
+    lr: float = 1e-1
+
+
+@dataclasses.dataclass(frozen=True)
+class AdamConfig(OptimizerConfig):
+    adam_foo: float = 1.0
+
+
+@dataclasses.dataclass(frozen=True)
+class SGDConfig(OptimizerConfig):
+    sgd_foo: float = 1.0
+
+
+@dataclasses.dataclass
+class TrainConfig:
+    optimizer: OptimizerConfig = AdamConfig()
+
+
+def _dummy_constructor() -> Type[OptimizerConfig]:
+    return AdamConfig | SGDConfig  # type: ignore
+
+
+CLIOptimizerConfig = Annotated[
+    OptimizerConfig,
+    tyro.conf.arg(constructor_factory=_dummy_constructor),
+]
+
+
+def test_attribute_inheritance_2() -> None:
+    """From @mirceamironenco.
+
+    https://github.com/brentyi/tyro/issues/239"""
+
+    @dataclasses.dataclass
+    class CLITrainerConfig(TrainConfig):
+        optimizer: CLIOptimizerConfig = SGDConfig()
+
+    assert "[{optimizer:adam-config,optimizer:sgd-config}]" in get_helptext_with_checks(
+        CLITrainerConfig
+    )
