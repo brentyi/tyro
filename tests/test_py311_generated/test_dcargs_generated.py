@@ -25,6 +25,7 @@ from typing import (
 )
 
 import pytest
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 
@@ -995,3 +996,54 @@ def test_runtime_checkable_edge_case() -> None:
         ).subconfig
         == SubConfigB()
     )
+
+
+def test_linear_inheritance() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class A:
+        field: str | int = 5
+
+    @dataclasses.dataclass(frozen=True)
+    class B(A):
+        field: int = 10
+
+    @dataclasses.dataclass(frozen=True)
+    class C(B):
+        pass
+
+    helptext = get_helptext_with_checks(C)
+    assert "5" not in helptext
+    assert "10" in helptext
+    assert "INT" in helptext
+    assert tyro.cli(C, args=[]) == C(10)
+    assert tyro.cli(C, args=["--field", "3"]) == C(3)
+    assert tyro.cli(A, args=["--field", "3"]) == A("3")
+
+
+def test_diamond_inheritance() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class A:
+        field: int | str = 5
+
+    @dataclasses.dataclass(frozen=True)
+    class B(A):
+        pass
+
+    @dataclasses.dataclass(frozen=True)
+    class C(A):
+        field: int = 10
+
+    @dataclasses.dataclass(frozen=True)
+    class D(B, C):
+        pass
+
+    helptext = get_helptext_with_checks(D)
+    # Despite C coming earlier in the MRO than A, the field is inherited from
+    # A. This appears to be a Python bug.
+    # https://github.com/python/cpython/issues/108611
+    assert "5" in helptext
+    assert "10" not in helptext
+
+    # The type, however, currently comes from C. This matches the MRO and the
+    # behavior of pyright and mypy but not of dataclasses.fields().
+    assert "INT|STR" not in helptext
