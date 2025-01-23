@@ -998,6 +998,28 @@ def test_runtime_checkable_edge_case() -> None:
     )
 
 
+def test_linear_inheritance() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class A:
+        field: str | int = 5
+
+    @dataclasses.dataclass(frozen=True)
+    class B(A):
+        field: int = 10
+
+    @dataclasses.dataclass(frozen=True)
+    class C(B):
+        pass
+
+    helptext = get_helptext_with_checks(C)
+    assert "5" not in helptext
+    assert "10" in helptext
+    assert "INT" in helptext
+    assert tyro.cli(C, args=[]) == C(10)
+    assert tyro.cli(C, args=["--field", "3"]) == C(3)
+    assert tyro.cli(A, args=["--field", "3"]) == A("3")
+
+
 def test_diamond_inheritance() -> None:
     @dataclasses.dataclass(frozen=True)
     class A:
