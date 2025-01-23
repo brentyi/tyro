@@ -1004,7 +1004,7 @@ def test_runtime_checkable_edge_case() -> None:
 def test_diamond_inheritance() -> None:
     @dataclasses.dataclass(frozen=True)
     class A:
-        field: int | str = 5
+        field: Union[int, str] = 5
 
     @dataclasses.dataclass(frozen=True)
     class B(A):
