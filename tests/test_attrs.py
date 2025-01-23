@@ -7,11 +7,11 @@ from typing import Generic, TypeVar, cast
 
 import attr
 import pytest
+from attrs import define, field
+from helptext_utils import get_helptext_with_checks
+
 import tyro
 import tyro._strings
-from attrs import define, field
-
-from helptext_utils import get_helptext_with_checks
 
 
 def test_attrs_basic() -> None:

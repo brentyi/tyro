@@ -337,9 +337,9 @@ def _field_list_from_function(
                             _resolver.TypeParamResolver.concretize_type_params(base_cls)
                         )
 
-                assert (
-                    False
-                ), "We couldn't find the base class. This seems like a bug in tyro."
+                assert False, (
+                    "We couldn't find the base class. This seems like a bug in tyro."
+                )
 
             hints = get_hints_for_signature_func(orig_cls)
 

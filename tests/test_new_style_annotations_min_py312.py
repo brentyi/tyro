@@ -5,12 +5,12 @@ from dataclasses import dataclass
 from typing import Annotated, Any, Literal, NewType
 
 import pytest
-import tyro
+from helptext_utils import get_helptext_with_checks
 from pydantic import BaseModel
+
+import tyro
 from tyro.conf._markers import OmitArgPrefixes
 from tyro.constructors import UnsupportedTypeAnnotationError
-
-from helptext_utils import get_helptext_with_checks
 
 
 def test_simple_generic() -> None:
