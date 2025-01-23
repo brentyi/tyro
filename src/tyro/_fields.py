@@ -11,7 +11,7 @@ import sys
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import docstring_parser
-from typing_extensions import Annotated, get_args, get_origin
+from typing_extensions import Annotated, get_args, get_origin, get_original_bases
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
@@ -327,11 +327,7 @@ def _field_list_from_function(
                         return _resolver.get_type_hints_resolve_type_params(
                             f, include_extras=True
                         )
-                    for base_cls in (
-                        cls.__orig_bases__
-                        if hasattr(cls, "__orig_bases__")
-                        else cls.__bases__
-                    ):
+                    for base_cls in get_original_bases(cls):
                         if not issubclass(
                             _resolver.unwrap_origin_strip_extras(base_cls),
                             base_cls_with_signature,

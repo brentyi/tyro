@@ -36,6 +36,7 @@ from typing_extensions import (
     TypeAliasType,
     get_args,
     get_origin,
+    get_original_bases,
     get_type_hints,
 )
 
@@ -634,11 +635,7 @@ def get_type_hints_resolve_type_params(
                         return get_type_hints_resolve_type_params(
                             unbound_func, include_extras=include_extras
                         )
-                    for base_cls in (
-                        cls.__orig_bases__
-                        if hasattr(cls, "__orig_bases__")
-                        else cls.__bases__
-                    ):
+                    for base_cls in get_original_bases(cls):
                         if not issubclass(
                             unwrap_origin_strip_extras(base_cls),
                             unbound_func_context_cls,
@@ -663,43 +660,55 @@ def get_type_hints_resolve_type_params(
                 ).items()
             }
 
-    typevar_context = TypeParamResolver.get_assignment_context(obj)
-    obj = typevar_context.origin_type
-    with typevar_context:
-        # Only include type hints that are explicitly defined in this class.
-        # The follow loop will handle superclasses.
-        out = {
-            x: TypeParamResolver.concretize_type_params(t)
-            for x, t in _get_type_hints_backported_syntax(
-                obj, include_extras=include_extras
-            ).items()
-            # Only include type hints that are explicitly defined in this class.
-            #
-            # Why `cls.__dict__.__annotations__` instead of `cls.__annotations__`?
-            # Because in Python 3.8 and earlier, `cls.__annotations__`
-            # recursively merges parent class annotations.
-            # See this issue: https://github.com/python/cpython/issues/99535
-            if x in obj.__dict__.get("__annotations__", {})
-        }
+    # Get type parameter contexts for all superclasses.
+    context_from_origin_type: dict[Any, TypeParamAssignmentContext] = {}
 
-    # We need to recurse into base classes in order to correctly resolve superclass parameters.
-    for base in obj.__orig_bases__ if hasattr(obj, "__orig_bases__") else obj.__bases__:  # type: ignore
-        base_typevar_context = TypeParamResolver.get_assignment_context(base)
-        if get_origin(base_typevar_context.origin_type) is Generic:
+    def recurse_superclass_context(obj: Any) -> None:
+        if get_origin(obj) is Generic or obj is object:
+            return
+        context = TypeParamResolver.get_assignment_context(obj)
+        if context.origin_type in context_from_origin_type:
+            # Already visited. This should be compatible with diamond
+            # inheritance patterns like:
+            #
+            #   object
+            #      |
+            #      A
+            #     / \
+            #    B   C
+            #     \ /
+            #      D
+            #
+            # A will be visited twice. For consistency with the mro, only the
+            # earlier visit will be used. This is relevant when `A` is a
+            # parameterized type (A[T]).
+            return
+        context_from_origin_type[context.origin_type] = context
+
+        try:
+            bases = get_original_bases(context.origin_type)
+        except TypeError:
+            # For example, `TypedDict`.
+            return
+        for base in bases:  # type: ignore
+            recurse_superclass_context(base)
+
+    recurse_superclass_context(obj)
+
+    # Next, we'll resolve type parameters for each class in the mro. We go in
+    # reverse order to ensure that earlier classes take precedence.
+    out = {}
+    for origin_type in reversed(obj.mro()):
+        if origin_type not in context_from_origin_type:
             continue
-        with base_typevar_context:
-            base_hints = get_type_hints_resolve_type_params(
-                base_typevar_context.origin_type, include_extras=include_extras
-            )
+        with context_from_origin_type[origin_type]:
             out.update(
                 {
-                    x: TypeParamResolver.concretize_type_params(t)
-                    for x, t in base_hints.items()
-                    # Include type hints that are not assigned earlier in the MRO.
-                    #
-                    # This needs to be recursive (include parents of parents),
-                    # so we shouldn't filter by local __annotations__.
-                    if x not in out
+                    k: TypeParamResolver.concretize_type_params(v)
+                    for k, v in _get_type_hints_backported_syntax(
+                        origin_type, include_extras=include_extras
+                    ).items()
+                    if k in origin_type.__dict__.get("__annotations__", {})
                 }
             )
 

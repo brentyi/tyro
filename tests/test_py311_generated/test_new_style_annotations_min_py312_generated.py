@@ -402,3 +402,24 @@ def test_deeply_inherited_init() -> None:
     assert "--model.config.a" in get_helptext_with_checks(c)
     assert "--model.config.b" in get_helptext_with_checks(c)
     assert "--model.config.c" in get_helptext_with_checks(c)
+
+
+def test_bad_orig_bases() -> None:
+    @dataclass(frozen=True)
+    class A[T]:
+        a: T
+
+    @dataclass(frozen=True)
+    class B(A[int | str | bool]):
+        x: int
+
+    @dataclass(frozen=True)
+    class C(A[int | str | bool]):
+        a: str
+
+    @dataclass(frozen=True)
+    class D(B, C): ...  # , C): ...
+
+    assert "--a" in get_helptext_with_checks(D)
+    assert "STR" in get_helptext_with_checks(D)
+    assert "INT|STR" not in get_helptext_with_checks(D)
