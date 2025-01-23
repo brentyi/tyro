@@ -318,6 +318,7 @@
     <span class="n">TypeAliasType</span><span class="p">,</span>
     <span class="n">get_args</span><span class="p">,</span>
     <span class="n">get_origin</span><span class="p">,</span>
+    <span class="n">get_original_bases</span><span class="p">,</span>
     <span class="n">get_type_hints</span><span class="p">,</span>
 <span class="p">)</span>
 
@@ -975,11 +976,7 @@
                         <span class="k">return</span> <span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
                             <span class="n">unbound_func</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span>
                         <span class="p">)</span>
-                    <span class="k">for</span> <span class="n">base_cls</span> <span class="ow">in</span> <span class="p">(</span>
-                        <span class="bp">cls</span><span class="o">.</span><span class="n">__orig_bases__</span>
-                        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">)</span>
-                        <span class="k">else</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__bases__</span>
-                    <span class="p">):</span>
+                    <span class="k">for</span> <span class="n">base_cls</span> <span class="ow">in</span> <span class="n">get_original_bases</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span>
                             <span class="n">unwrap_origin_strip_extras</span><span class="p">(</span><span class="n">base_cls</span><span class="p">),</span>
                             <span class="n">unbound_func_context_cls</span><span class="p">,</span>
@@ -1004,43 +1001,55 @@
                 <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
             <span class="p">}</span>
 
-    <span class="n">typevar_context</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">typevar_context</span><span class="o">.</span><span class="n">origin_type</span>
-    <span class="k">with</span> <span class="n">typevar_context</span><span class="p">:</span>
-        <span class="c1"># Only include type hints that are explicitly defined in this class.</span>
-        <span class="c1"># The follow loop will handle superclasses.</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">x</span><span class="p">:</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">_get_type_hints_backported_syntax</span><span class="p">(</span>
-                <span class="n">obj</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="c1"># Only include type hints that are explicitly defined in this class.</span>
-            <span class="c1">#</span>
-            <span class="c1"># Why `cls.__dict__.__annotations__` instead of `cls.__annotations__`?</span>
-            <span class="c1"># Because in Python 3.8 and earlier, `cls.__annotations__`</span>
-            <span class="c1"># recursively merges parent class annotations.</span>
-            <span class="c1"># See this issue: https://github.com/python/cpython/issues/99535</span>
-            <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__annotations__&quot;</span><span class="p">,</span> <span class="p">{})</span>
-        <span class="p">}</span>
+    <span class="c1"># Get type parameter contexts for all superclasses.</span>
+    <span class="n">context_from_origin_type</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">TypeParamAssignmentContext</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="c1"># We need to recurse into base classes in order to correctly resolve superclass parameters.</span>
-    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__orig_bases__</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;__orig_bases__&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__bases__</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
-        <span class="n">base_typevar_context</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">base_typevar_context</span><span class="o">.</span><span class="n">origin_type</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Generic</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">recurse_superclass_context</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Generic</span> <span class="ow">or</span> <span class="n">obj</span> <span class="ow">is</span> <span class="nb">object</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="n">context</span> <span class="o">=</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">get_assignment_context</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span><span class="o">.</span><span class="n">origin_type</span> <span class="ow">in</span> <span class="n">context_from_origin_type</span><span class="p">:</span>
+            <span class="c1"># Already visited. This should be compatible with diamond</span>
+            <span class="c1"># inheritance patterns like:</span>
+            <span class="c1">#</span>
+            <span class="c1">#   object</span>
+            <span class="c1">#      |</span>
+            <span class="c1">#      A</span>
+            <span class="c1">#     / \</span>
+            <span class="c1">#    B   C</span>
+            <span class="c1">#     \ /</span>
+            <span class="c1">#      D</span>
+            <span class="c1">#</span>
+            <span class="c1"># A will be visited twice. For consistency with the mro, only the</span>
+            <span class="c1"># earlier visit will be used. This is relevant when `A` is a</span>
+            <span class="c1"># parameterized type (A[T]).</span>
+            <span class="k">return</span>
+        <span class="n">context_from_origin_type</span><span class="p">[</span><span class="n">context</span><span class="o">.</span><span class="n">origin_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">context</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bases</span> <span class="o">=</span> <span class="n">get_original_bases</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">origin_type</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># For example, `TypedDict`.</span>
+            <span class="k">return</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+            <span class="n">recurse_superclass_context</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+    <span class="n">recurse_superclass_context</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="c1"># Next, we&#39;ll resolve type parameters for each class in the mro. We go in</span>
+    <span class="c1"># reverse order to ensure that earlier classes take precedence.</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">origin_type</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">mro</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">origin_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">context_from_origin_type</span><span class="p">:</span>
             <span class="k">continue</span>
-        <span class="k">with</span> <span class="n">base_typevar_context</span><span class="p">:</span>
-            <span class="n">base_hints</span> <span class="o">=</span> <span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
-                <span class="n">base_typevar_context</span><span class="o">.</span><span class="n">origin_type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span>
-            <span class="p">)</span>
+        <span class="k">with</span> <span class="n">context_from_origin_type</span><span class="p">[</span><span class="n">origin_type</span><span class="p">]:</span>
             <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                 <span class="p">{</span>
-                    <span class="n">x</span><span class="p">:</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">base_hints</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                    <span class="c1"># Include type hints that are not assigned earlier in the MRO.</span>
-                    <span class="c1">#</span>
-                    <span class="c1"># This needs to be recursive (include parents of parents),</span>
-                    <span class="c1"># so we shouldn&#39;t filter by local __annotations__.</span>
-                    <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">out</span>
+                    <span class="n">k</span><span class="p">:</span> <span class="n">TypeParamResolver</span><span class="o">.</span><span class="n">concretize_type_params</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_get_type_hints_backported_syntax</span><span class="p">(</span>
+                        <span class="n">origin_type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span>
+                    <span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">origin_type</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;__annotations__&quot;</span><span class="p">,</span> <span class="p">{})</span>
                 <span class="p">}</span>
             <span class="p">)</span>
 
