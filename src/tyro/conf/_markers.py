@@ -167,6 +167,23 @@ Enum aliases are not relevant when this marker is present. The first entry match
 chosen value will be selected.
 """
 
+HelptextFromCommentsOff = Annotated[T, None]
+"""For helptext generation, ignore comments in the source code.
+
+By default, tyro will treat comments that precede field definitions as
+docstrings:
+
+.. code-block:: python
+
+    # Dataclass field.
+    field: str
+
+This will produce a helptext entry for ``field`` with the comment as the
+description. If you have code with a lot of comments, however, this behavior
+can be annoying. ``HelptextIgnoreComments`` will turn this behavior off.
+Triple-quoted docstrings are unaffected.
+"""
+
 
 CallableType = TypeVar("CallableType", bound=Callable)
 
