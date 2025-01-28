@@ -138,7 +138,7 @@ class ArgumentDefinition:
             warnings.warn(
                 f"Aliases were specified, but {name_or_flags} is positional. Aliases will be ignored."
             )
-            name_or_flags = name_or_flags[:1]
+            name_or_flags = name_or_flags[-1:]
 
         # We're actually going to skip the default field: if an argument is unset, the
         # MISSING value will be detected in _calling.py and the field default will

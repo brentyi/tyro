@@ -8,10 +8,10 @@ import sys
 from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, TypedDict
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_suppress_subcommand() -> None:
@@ -1387,10 +1387,10 @@ def test_alias() -> None:
         tyro.cli(Config, args="--x.struct.b 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
-    assert "'--x.struct.a/--all/-d'" in error
+    assert "'--all/-d/--x.struct.a'" in error
     assert "'--x.struct.b'" not in error
 
-    assert "--x.struct.a INT, --all INT, -d INT" in get_helptext_with_checks(Config)
+    assert "--all INT, -d INT, --x.struct.a INT" in get_helptext_with_checks(Config)
 
 
 def test_positional_alias() -> None:
