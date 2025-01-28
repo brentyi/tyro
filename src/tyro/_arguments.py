@@ -611,4 +611,4 @@ def _rule_apply_argconf(
     if arg.field.argconf.metavar is not None:
         lowered.metavar = arg.field.argconf.metavar
     if arg.field.argconf.aliases is not None:
-        lowered.name_or_flags = lowered.name_or_flags + arg.field.argconf.aliases
+        lowered.name_or_flags = arg.field.argconf.aliases + lowered.name_or_flags
