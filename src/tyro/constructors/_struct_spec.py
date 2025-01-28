@@ -568,7 +568,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 if helptext is None:
                     helptext = _docstrings.get_field_docstring(
                         info.type,
-                        pd1_field.nam,
+                        pd1_field.name,
                         helptext_from_comments=_markers.HelptextFromCommentsOff
                         not in info.markers,
                     )
