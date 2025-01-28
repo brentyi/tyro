@@ -685,6 +685,6 @@ def test_alias_error() -> None:
         tyro.cli(Train, args=[])
 
     error = target.getvalue()
-    assert "--residual/-r" in error
-    assert "--residual, -r {residual,double}" in error
+    assert "-r/--residual" in error
+    assert "-r, --residual {residual,double}" in error
     assert "DoubleConv" not in error
