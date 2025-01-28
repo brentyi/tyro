@@ -237,13 +237,14 @@ def field_list_from_type_or_callable(
                 return _field_list_from_function(
                     type_info.type,  # This will have typing.Annotated metadata stripped.
                     default_instance,
+                    markers=type_info.markers,
                 )
 
     return UnsupportedStructTypeMessage(f"{f} is not a valid struct type!")
 
 
 def _field_list_from_function(
-    f: Callable, default_instance: Any
+    f: Callable, default_instance: Any, markers: tuple[_markers.Marker, ...]
 ) -> UnsupportedStructTypeMessage | tuple[Callable, list[FieldDefinition]]:
     """Generate field lists from non-class callables."""
 
@@ -369,7 +370,11 @@ def _field_list_from_function(
 
         # TODO: re-add.
         if helptext is None and inspect.isclass(f_before_init_unwrap):
-            helptext = _docstrings.get_field_docstring(f_before_init_unwrap, param.name)
+            helptext = _docstrings.get_field_docstring(
+                f_before_init_unwrap,
+                param.name,
+                helptext_from_comments=_markers.HelptextFromCommentsOff not in markers,
+            )
 
         if param.name not in hints:
             out = UnsupportedStructTypeMessage(
@@ -384,15 +389,15 @@ def _field_list_from_function(
             return out
 
         # Set markers for positional + variadic arguments.
-        markers: Tuple[Any, ...] = ()
+        func_markers: Tuple[Any, ...] = ()
         typ: Any = hints[param.name]
         if param.kind is inspect.Parameter.POSITIONAL_ONLY:
-            markers = (_markers.Positional, _markers._PositionalCall)
+            func_markers = (_markers.Positional, _markers._PositionalCall)
         elif param.kind is inspect.Parameter.VAR_POSITIONAL:
             # Handle *args signatures.
             #
             # This will create a `--args T [T ...]` CLI argument.
-            markers = (_markers._UnpackArgsCall,)
+            func_markers = (_markers._UnpackArgsCall,)
             typ = Tuple[(typ, ...)]  # type: ignore
             default = ()
         elif param.kind is inspect.Parameter.VAR_KEYWORD:
@@ -404,11 +409,11 @@ def _field_list_from_function(
             # positional, omitting the --args/--kwargs prefix, but we are
             # choosing not to because it would make *args and **kwargs
             # difficult to use in conjunction.
-            markers = (_markers._UnpackKwargsCall,)
+            func_markers = (_markers._UnpackKwargsCall,)
             typ = Dict[str, typ]  # type: ignore
             default = {}
 
-        with FieldDefinition.marker_context(markers):
+        with FieldDefinition.marker_context(func_markers):
             field_list.append(
                 FieldDefinition.make(
                     name=param.name,
