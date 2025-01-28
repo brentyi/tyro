@@ -183,7 +183,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             # Try to get helptext from docstrings. This can't be generated
             # dynamically.
             if helptext is None:
-                helptext = _docstrings.get_field_docstring(info.type, dc_field.name)
+                helptext = _docstrings.get_field_docstring(
+                    info.type,
+                    dc_field.name,
+                    helptext_from_comments=_markers.HelptextFromCommentsOff
+                    not in info.markers,
+                )
 
             assert not isinstance(dc_field.type, str)
             field_list.append(
@@ -255,7 +260,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=typ,
                     default=default,
-                    helptext=_docstrings.get_field_docstring(cls, name),
+                    helptext=_docstrings.get_field_docstring(
+                        cls,
+                        name,
+                        helptext_from_comments=_markers.HelptextFromCommentsOff
+                        not in info.markers,
+                    ),
                 )
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
@@ -309,7 +319,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=our_hints[name],
                     default=default,
-                    helptext=_docstrings.get_field_docstring(info.type, name),
+                    helptext=_docstrings.get_field_docstring(
+                        info.type,
+                        name,
+                        helptext_from_comments=_markers.HelptextFromCommentsOff
+                        not in info.markers,
+                    ),
                 )
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
@@ -376,7 +391,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=typ,
                     default=default,
-                    helptext=_docstrings.get_field_docstring(info.type, name),
+                    helptext=_docstrings.get_field_docstring(
+                        info.type,
+                        name,
+                        helptext_from_comments=_markers.HelptextFromCommentsOff
+                        not in info.markers,
+                    ),
                 )
             )
 
@@ -547,7 +567,10 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 helptext = pd1_field.field_info.description
                 if helptext is None:
                     helptext = _docstrings.get_field_docstring(
-                        info.type, pd1_field.name
+                        info.type,
+                        pd1_field.nam,
+                        helptext_from_comments=_markers.HelptextFromCommentsOff
+                        not in info.markers,
                     )
 
                 default = _get_pydantic_v1_field_default(
@@ -566,7 +589,12 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             for name, pd2_field in cast(Any, info.type).model_fields.items():
                 helptext = pd2_field.description
                 if helptext is None:
-                    helptext = _docstrings.get_field_docstring(info.type, name)
+                    helptext = _docstrings.get_field_docstring(
+                        info.type,
+                        name,
+                        helptext_from_comments=_markers.HelptextFromCommentsOff
+                        not in info.markers,
+                    )
 
                 default = _get_pydantic_v2_field_default(name, pd2_field, info.default)
                 field_list.append(
