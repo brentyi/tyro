@@ -1,3 +1,4 @@
+import collections.abc
 import dataclasses
 from typing import Any, Literal, Optional, Type, Union
 
@@ -68,6 +69,20 @@ def test_super_nested() -> None:
 def test_tuple_direct() -> None:
     assert tyro.cli(tuple[int, ...], args="1 2".split(" ")) == (1, 2)  # type: ignore
     assert tyro.cli(tuple[int, int], args="1 2".split(" ")) == (1, 2)  # type: ignore
+
+
+def test_append_abc_sequence() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[collections.abc.Sequence[int]]
+
+    assert tyro.cli(A, args=[]) == A(x=[])
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
 
 
 try:
