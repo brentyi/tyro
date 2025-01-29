@@ -1,5 +1,4 @@
 import argparse
-import collections.abc
 import contextlib
 import dataclasses
 import io
@@ -908,20 +907,6 @@ def test_append_sequence() -> None:
     @dataclasses.dataclass
     class A:
         x: tyro.conf.UseAppendAction[Sequence[int]]
-
-    assert tyro.cli(A, args=[]) == A(x=[])
-    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
-    assert tyro.cli(A, args=[]) == A(x=[])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x"])
-    with pytest.raises(SystemExit):
-        tyro.cli(A, args=["--x", "1", "2", "3"])
-
-
-def test_append_abc_sequence() -> None:
-    @dataclasses.dataclass
-    class A:
-        x: tyro.conf.UseAppendAction[collections.abc.Sequence[int]]
 
     assert tyro.cli(A, args=[]) == A(x=[])
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
