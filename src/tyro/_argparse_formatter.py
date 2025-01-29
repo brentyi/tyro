@@ -303,7 +303,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 pass
 
     @override
-    def _parse_known_args(self, arg_strings, namespace):  # pragma: no cover
+    def _parse_known_args(self, arg_strings, namespace):  # pragma: no cover, type: ignore
         """We override _parse_known_args() to improve error messages in the presence of
         subcommands. Difference is marked with <new>...</new> below."""
 
