@@ -5,7 +5,7 @@ import io
 import json as json_
 import shlex
 import sys
-from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Sequence, Tuple, Type, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -893,6 +893,20 @@ def test_append_lists() -> None:
     @dataclasses.dataclass
     class A:
         x: tyro.conf.UseAppendAction[List[int]]
+
+    assert tyro.cli(A, args=[]) == A(x=[])
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
+def test_append_sequence() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Sequence[int]]
 
     assert tyro.cli(A, args=[]) == A(x=[])
     assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
