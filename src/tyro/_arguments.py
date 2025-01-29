@@ -3,6 +3,7 @@ argparse's `add_argument()`."""
 
 from __future__ import annotations
 
+import collections.abc
 import dataclasses
 import json
 import shlex
@@ -372,7 +373,7 @@ def _rule_apply_primitive_specs(
                     out.append(part)
 
             # Return output with correct type.
-            if isinstance(out, dict):
+            if container_type in (dict, Sequence, collections.abc.Sequence):
                 return out
             else:
                 return container_type(out)
