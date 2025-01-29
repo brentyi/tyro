@@ -139,7 +139,7 @@ class ArgumentDefinition:
             warnings.warn(
                 f"Aliases were specified, but {name_or_flags} is positional. Aliases will be ignored."
             )
-            name_or_flags = name_or_flags[:1]
+            name_or_flags = name_or_flags[-1:]
 
         # We're actually going to skip the default field: if an argument is unset, the
         # MISSING value will be detected in _calling.py and the field default will
@@ -612,4 +612,4 @@ def _rule_apply_argconf(
     if arg.field.argconf.metavar is not None:
         lowered.metavar = arg.field.argconf.metavar
     if arg.field.argconf.aliases is not None:
-        lowered.name_or_flags = lowered.name_or_flags + arg.field.argconf.aliases
+        lowered.name_or_flags = arg.field.argconf.aliases + lowered.name_or_flags
