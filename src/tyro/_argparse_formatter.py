@@ -302,8 +302,10 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
             except (AttributeError, OSError):  # pragma: no cover
                 pass
 
-    @override
-    def _parse_known_args(self, arg_strings, namespace):  # pragma: no cover
+    # @override
+    def _parse_known_args(  # type: ignore
+        self, arg_strings, namespace
+    ):  # pragma: no cover
         """We override _parse_known_args() to improve error messages in the presence of
         subcommands. Difference is marked with <new>...</new> below."""
 

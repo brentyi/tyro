@@ -5,7 +5,7 @@ import io
 import json as json_
 import shlex
 import sys
-from typing import Any, Dict, Generic, List, Tuple, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Sequence, Tuple, Type, TypeVar, Union
 
 import pytest
 from helptext_utils import get_helptext_with_checks
@@ -903,6 +903,20 @@ def test_append_lists() -> None:
         tyro.cli(A, args=["--x", "1", "2", "3"])
 
 
+def test_append_sequence() -> None:
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.UseAppendAction[Sequence[int]]
+
+    assert tyro.cli(A, args=[]) == A(x=[])
+    assert tyro.cli(A, args="--x 1 --x 2 --x 3".split(" ")) == A(x=[1, 2, 3])
+    assert tyro.cli(A, args=[]) == A(x=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x"])
+    with pytest.raises(SystemExit):
+        tyro.cli(A, args=["--x", "1", "2", "3"])
+
+
 def test_append_tuple() -> None:
     @dataclasses.dataclass
     class A:
@@ -1387,10 +1401,10 @@ def test_alias() -> None:
         tyro.cli(Config, args="--x.struct.b 5".split(" "))
     error = target.getvalue()
     assert "We're missing arguments" in error
-    assert "'--x.struct.a/--all/-d'" in error
+    assert "'--all/-d/--x.struct.a'" in error
     assert "'--x.struct.b'" not in error
 
-    assert "--x.struct.a INT, --all INT, -d INT" in get_helptext_with_checks(Config)
+    assert "--all INT, -d INT, --x.struct.a INT" in get_helptext_with_checks(Config)
 
 
 def test_positional_alias() -> None:
