@@ -437,7 +437,7 @@
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Aliases were specified, but </span><span class="si">{</span><span class="n">name_or_flags</span><span class="si">}</span><span class="s2"> is positional. Aliases will be ignored.&quot;</span>
             <span class="p">)</span>
-            <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">name_or_flags</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">name_or_flags</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
 
         <span class="c1"># We&#39;re actually going to skip the default field: if an argument is unset, the</span>
         <span class="c1"># MISSING value will be detected in _calling.py and the field default will</span>
@@ -921,7 +921,7 @@
     <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">lowered</span><span class="o">.</span><span class="n">metavar</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">metavar</span>
     <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">+</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">aliases</span> <span class="o">+</span> <span class="n">lowered</span><span class="o">.</span><span class="n">name_or_flags</span>
 </pre></div>
         </article>
       </div>
