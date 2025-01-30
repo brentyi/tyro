@@ -171,7 +171,9 @@ def parse_docstring_from_object(obj: object) -> Dict[str, str]:
 
 
 @_unsafe_cache.unsafe_cache(1024)
-def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
+def get_field_docstring(
+    cls: Type, field_name: str, helptext_from_comments: bool
+) -> Optional[str]:
     """Get docstring for a field in a class."""
 
     # NoneType will break docstring_parser.
@@ -189,6 +191,8 @@ def get_field_docstring(cls: Type, field_name: str) -> Optional[str]:
             ).strip()
 
     # If docstring_parser failed, let's try looking for comments.
+    if not helptext_from_comments:
+        return None
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
         return None
