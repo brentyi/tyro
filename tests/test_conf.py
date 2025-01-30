@@ -1901,7 +1901,7 @@ def test_attribute_inheritance_2() -> None:
     )
 
 
-def test_conf_helptext() -> None:
+def test_helptext_from_contents_off() -> None:
     @dataclasses.dataclass
     class Config:
         # Comment in helptext.
