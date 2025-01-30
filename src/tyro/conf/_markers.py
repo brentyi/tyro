@@ -175,13 +175,14 @@ docstrings:
 
 .. code-block:: python
 
-    # Dataclass field.
-    field: str
+    # Comment.
+    field1: str
+    field2: str # Other comment.
 
-This will produce a helptext entry for ``field`` with the comment as the
-description. If you have code with a lot of comments, however, this behavior
-can be annoying. ``HelptextIgnoreComments`` will turn this behavior off.
-Triple-quoted docstrings are unaffected.
+This will produce CLI arguments with the comments as helptext. If you have code
+with a lot of comments, however, this behavior can be annoying.
+``HelptextIgnoreComments`` will turn this behavior off. Triple-quoted
+docstrings are unaffected.
 """
 
 

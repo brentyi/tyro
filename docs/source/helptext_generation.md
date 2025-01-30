@@ -55,6 +55,8 @@ class Args:
     field2: int = 3  # A numeric field, with a default value.
 ```
 
+This can be turned off using :data:`tyro.conf.HelptextFromCommentsOff`.
+
 **(3) Preceding comments**
 
 These can also be handy for semantically grouping fields, such as the two string
@@ -71,3 +73,5 @@ class Args:
     # Multi-line comments are supported.
     field3: int
 ```
+
+This can be turned off using :data:`tyro.conf.HelptextFromCommentsOff`.

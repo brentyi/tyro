@@ -1906,3 +1906,15 @@ def test_attribute_inheritance_2() -> None:
     assert "[{optimizer:adam-config,optimizer:sgd-config}]" in get_helptext_with_checks(
         CLITrainerConfig
     )
+
+
+def test_conf_helptext() -> None:
+    @dataclasses.dataclass
+    class Config:
+        # Comment in helptext.
+        y: int = 0
+
+    assert "Comment in helptext." in get_helptext_with_checks(Config)
+    assert "Comment in helptext." not in get_helptext_with_checks(
+        tyro.conf.HelptextFromCommentsOff[Config]
+    )
