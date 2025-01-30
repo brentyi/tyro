@@ -12,7 +12,7 @@ import tyro._strings
 
 
 def get_helptext_with_checks(
-    f: Callable,
+    f: Callable[..., Any],
     args: List[str] = ["--help"],
     use_underscores: bool = False,
     default: Any = None,
