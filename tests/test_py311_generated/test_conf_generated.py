@@ -1908,12 +1908,13 @@ def test_attribute_inheritance_2() -> None:
     )
 
 
-def test_conf_helptext() -> None:
-    @dataclasses.dataclass
-    class Config:
-        # Comment in helptext.
-        y: int = 0
+@dataclasses.dataclass
+class Config:
+    # Comment in helptext.
+    y: int = 0
 
+
+def test_helptext_from_contents_off() -> None:
     assert "Comment in helptext." in get_helptext_with_checks(Config)
     assert "Comment in helptext." not in get_helptext_with_checks(
         tyro.conf.HelptextFromCommentsOff[Config]

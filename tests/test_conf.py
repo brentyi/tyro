@@ -8,10 +8,10 @@ import sys
 from typing import Any, Dict, Generic, List, Sequence, Tuple, Type, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
+import tyro
 from typing_extensions import Annotated, TypedDict
 
-import tyro
+from helptext_utils import get_helptext_with_checks
 
 
 def test_suppress_subcommand() -> None:
@@ -1901,12 +1901,13 @@ def test_attribute_inheritance_2() -> None:
     )
 
 
-def test_helptext_from_contents_off() -> None:
-    @dataclasses.dataclass
-    class Config:
-        # Comment in helptext.
-        y: int = 0
+@dataclasses.dataclass
+class Config:
+    # Comment in helptext.
+    y: int = 0
 
+
+def test_helptext_from_contents_off() -> None:
     assert "Comment in helptext." in get_helptext_with_checks(Config)
     assert "Comment in helptext." not in get_helptext_with_checks(
         tyro.conf.HelptextFromCommentsOff[Config]
