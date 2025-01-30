@@ -138,7 +138,7 @@ class _ArgConfig:
     help_behavior_hint: str | Callable[[str], str] | None
     aliases: tuple[str, ...] | None
     prefix_name: bool | None
-    constructor_factory: Callable[[], type | Callable] | None
+    constructor_factory: Callable[[], type | Callable[..., Any]] | None
 
 
 @overload
@@ -151,7 +151,7 @@ def arg(
     aliases: tuple[str, ...] | list[str] | None = None,
     prefix_name: bool | None = None,
     constructor: None = None,
-    constructor_factory: Callable[[], type | Callable] | None = None,
+    constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
 ) -> Any: ...
 
 
@@ -164,7 +164,7 @@ def arg(
     help_behavior_hint: str | Callable[[str], str] | None = None,
     aliases: tuple[str, ...] | list[str] | None = None,
     prefix_name: bool | None = None,
-    constructor: type | Callable | None = None,
+    constructor: type | Callable[..., Any] | None = None,
     constructor_factory: None = None,
 ) -> Any: ...
 
@@ -177,8 +177,8 @@ def arg(
     help_behavior_hint: str | Callable[[str], str] | None = None,
     aliases: tuple[str, ...] | list[str] | None = None,
     prefix_name: bool | None = None,
-    constructor: type | Callable | None = None,
-    constructor_factory: Callable[[], type | Callable] | None = None,
+    constructor: type | Callable[..., Any] | None = None,
+    constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
 ) -> Any:
     """Returns a metadata object for fine-grained argument configuration with
     :py:data:`typing.Annotated`. Should typically not be required.
