@@ -449,6 +449,24 @@
 <span class="sd">chosen value will be selected.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">HelptextFromCommentsOff</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="sd">&quot;&quot;&quot;For helptext generation, ignore comments in the source code.</span>
+
+<span class="sd">By default, tyro will treat comments that precede field definitions as</span>
+<span class="sd">docstrings:</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    # Comment.</span>
+<span class="sd">    field1: str</span>
+<span class="sd">    field2: str # Other comment.</span>
+
+<span class="sd">This will produce CLI arguments with the comments as helptext. If you have code</span>
+<span class="sd">with a lot of comments, however, this behavior can be annoying.</span>
+<span class="sd">``HelptextIgnoreComments`` will turn this behavior off. Triple-quoted</span>
+<span class="sd">docstrings are unaffected.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
 
 <span class="n">CallableType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;CallableType&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">)</span>
 

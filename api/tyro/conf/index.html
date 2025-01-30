@@ -489,6 +489,23 @@ applied to nested types.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf.HelptextFromCommentsOff">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">HelptextFromCommentsOff</span></span><a class="headerlink" href="#tyro.conf.HelptextFromCommentsOff" title="Link to this definition">¶</a></dt>
+<dd><p>For helptext generation, ignore comments in the source code.</p>
+<p>By default, tyro will treat comments that precede field definitions as
+docstrings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Comment.</span>
+<span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
+<span class="n">field2</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># Other comment.</span>
+</pre></div>
+</div>
+<p>This will produce CLI arguments with the comments as helptext. If you have code
+with a lot of comments, however, this behavior can be annoying.
+<code class="docutils literal notranslate"><span class="pre">HelptextIgnoreComments</span></code> will turn this behavior off. Triple-quoted
+docstrings are unaffected.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.OmitArgPrefixes">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitArgPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitArgPrefixes" title="Link to this definition">¶</a></dt>
 <dd><p>Make flags used for keyword arguments shorter by omitting prefixes.</p>
@@ -659,6 +676,7 @@ to apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf.EnumChoicesFromValues"><code class="docutils literal notranslate"><span class="pre">EnumChoicesFromValues</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.Fixed"><code class="docutils literal notranslate"><span class="pre">Fixed</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.FlagConversionOff"><code class="docutils literal notranslate"><span class="pre">FlagConversionOff</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf.HelptextFromCommentsOff"><code class="docutils literal notranslate"><span class="pre">HelptextFromCommentsOff</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.OmitArgPrefixes"><code class="docutils literal notranslate"><span class="pre">OmitArgPrefixes</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.OmitSubcommandPrefixes"><code class="docutils literal notranslate"><span class="pre">OmitSubcommandPrefixes</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf.Positional"><code class="docutils literal notranslate"><span class="pre">Positional</span></code></a></li>

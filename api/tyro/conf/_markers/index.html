@@ -442,6 +442,23 @@ chosen value will be selected.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf._markers.HelptextFromCommentsOff">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">HelptextFromCommentsOff</span></span><a class="headerlink" href="#tyro.conf._markers.HelptextFromCommentsOff" title="Link to this definition">¶</a></dt>
+<dd><p>For helptext generation, ignore comments in the source code.</p>
+<p>By default, tyro will treat comments that precede field definitions as
+docstrings:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Comment.</span>
+<span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
+<span class="n">field2</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># Other comment.</span>
+</pre></div>
+</div>
+<p>This will produce CLI arguments with the comments as helptext. If you have code
+with a lot of comments, however, this behavior can be annoying.
+<code class="docutils literal notranslate"><span class="pre">HelptextIgnoreComments</span></code> will turn this behavior off. Triple-quoted
+docstrings are unaffected.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.CallableType">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">CallableType</span></span><a class="headerlink" href="#tyro.conf._markers.CallableType" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -542,6 +559,7 @@ to apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf._markers.UseAppendAction"><code class="docutils literal notranslate"><span class="pre">UseAppendAction</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.UseCounterAction"><code class="docutils literal notranslate"><span class="pre">UseCounterAction</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.EnumChoicesFromValues"><code class="docutils literal notranslate"><span class="pre">EnumChoicesFromValues</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf._markers.HelptextFromCommentsOff"><code class="docutils literal notranslate"><span class="pre">HelptextFromCommentsOff</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.CallableType"><code class="docutils literal notranslate"><span class="pre">CallableType</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.Marker"><code class="docutils literal notranslate"><span class="pre">Marker</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.configure"><code class="docutils literal notranslate"><span class="pre">configure()</span></code></a></li>

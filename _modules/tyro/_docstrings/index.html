@@ -461,7 +461,9 @@
 <div class="viewcode-block" id="get_field_docstring">
 <a class="viewcode-back" href="../../../api/tyro/_docstrings/#tyro._docstrings.get_field_docstring">[docs]</a>
 <span class="nd">@_unsafe_cache</span><span class="o">.</span><span class="n">unsafe_cache</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_field_docstring</span><span class="p">(</span>
+    <span class="bp">cls</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">helptext_from_comments</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Get docstring for a field in a class.&quot;&quot;&quot;</span>
 
     <span class="c1"># NoneType will break docstring_parser.</span>
@@ -479,6 +481,8 @@
             <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
     <span class="c1"># If docstring_parser failed, let&#39;s try looking for comments.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">helptext_from_comments</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
     <span class="n">tokenization</span> <span class="o">=</span> <span class="n">get_class_tokenization_with_field</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">field_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">tokenization</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Currently only happens for dynamic dataclasses.</span>
         <span class="k">return</span> <span class="kc">None</span>
