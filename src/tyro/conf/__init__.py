@@ -18,6 +18,7 @@ from ._markers import ConsolidateSubcommandArgs as ConsolidateSubcommandArgs
 from ._markers import EnumChoicesFromValues as EnumChoicesFromValues
 from ._markers import Fixed as Fixed
 from ._markers import FlagConversionOff as FlagConversionOff
+from ._markers import FlagNegationOff as FlagNegationOff
 from ._markers import HelptextFromCommentsOff as HelptextFromCommentsOff
 from ._markers import OmitArgPrefixes as OmitArgPrefixes
 from ._markers import OmitSubcommandPrefixes as OmitSubcommandPrefixes

@@ -47,7 +47,24 @@ else:
 _T = TypeVar("_T")
 
 
-class BooleanOptionalAction(argparse.Action):
+class BooleanOptionalActionBase(argparse.Action):
+    # Typically only supported in Python 3.10, but we backport some functionality in
+    # _argparse_formatters.py
+    def format_usage(self):
+        return " | ".join(self.option_strings)
+
+
+class BooleanNoConverionAction(BooleanOptionalActionBase):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, nargs=0, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        if option_string in self.option_strings:
+            assert option_string is not None
+            setattr(namespace, self.dest, True)
+
+
+class BooleanOptionalAction(BooleanOptionalActionBase):
     """Adapted from https://github.com/python/cpython/pull/27672"""
 
     def __init__(
@@ -96,11 +113,6 @@ class BooleanOptionalAction(argparse.Action):
             assert option_string is not None
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
-    # Typically only supported in Python 3.10, but we backport some functionality in
-    # _argparse_formatters.py
-    def format_usage(self):
-        return " | ".join(self.option_strings)
-
 
 @dataclasses.dataclass(frozen=True)
 class ArgumentDefinition:
@@ -148,7 +160,7 @@ class ArgumentDefinition:
         action = kwargs.get("action", None)
         if action not in {"append", "count"}:
             kwargs["default"] = _singleton.MISSING_NONPROP
-        elif action in {BooleanOptionalAction, "count"}:
+        elif action in {BooleanOptionalActionBase, "count"}:
             pass
         else:
             kwargs["default"] = []
@@ -256,7 +268,7 @@ def _rule_handle_boolean_flags(
         return
     elif arg.field.default in (True, False):
         # Default `False` => --flag passed in flips to `True`.
-        lowered.action = BooleanOptionalAction
+        lowered.action = BooleanNoConverionAction if _markers.FlagNegationOff in arg.field.markers else BooleanOptionalAction
         lowered.instance_from_str = (
             lambda x: x
         )  # argparse will directly give us a bool!
@@ -305,7 +317,8 @@ def _rule_apply_primitive_specs(
             )
             if field_name != "":
                 raise UnsupportedTypeAnnotationError(
-                    f"Unsupported type annotation for field with name `{field_name}`, which is resolved to `{arg.field.type}`. "
+                    f"Unsupported type annotation for field with name `{
+                        field_name}`, which is resolved to `{arg.field.type}`. "
                     f"{error.args[0]} "
                     "To suppress this error, assign the field either a default value or a different type."
                 )
@@ -559,7 +572,7 @@ def _rule_set_name_or_flag_and_dest(
         )
         strip_prefix = arg.subcommand_prefix + "."
         assert name_or_flag.startswith(strip_prefix), name_or_flag
-        name_or_flag = name_or_flag[len(strip_prefix) :]
+        name_or_flag = name_or_flag[len(strip_prefix):]
     else:
         # Standard prefixed name.
         name_or_flag = _strings.make_field_name(

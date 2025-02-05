@@ -55,6 +55,12 @@ with `bool` will expect an explicit True or False.
 Can be used directly on boolean annotations, ``FlagConversionOff[bool]``, or recursively
 applied to nested types."""
 
+FlagNegationOff = Annotated[T, None]
+"""Turn off automatic --no-flag creation
+
+Can be used directly on boolean annotations, ``FlagNegationOff[bool]``, or recursively
+applied to nested types."""
+
 AvoidSubcommands = Annotated[T, None]
 """Avoid creating subcommands when a default is provided for unions over nested types.
 This simplifies CLI interfaces, but makes them less expressive.

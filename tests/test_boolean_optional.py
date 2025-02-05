@@ -83,3 +83,39 @@ def test_flag_default_true_helptext() -> None:
     assert "(default: True)" in get_helptext_with_checks(A)
     assert "(default: False)" not in get_helptext_with_checks(A)
     assert "(default: None)" not in get_helptext_with_checks(A)
+
+
+def test_flag_no_negation() -> None:
+    """Test for argparse.BooleanOptionalAction-style usage."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.FlagNegationOff[bool] = False
+
+    @dataclasses.dataclass
+    class B:
+        x: bool = True
+
+    # import pdb
+    # pdb.set_trace()
+    assert tyro.cli(
+        A,
+        args=["--x"],
+        default=A(True),
+    ) == A(True)
+
+    # no pair --no-x flag is generated
+    try:
+        tyro.cli(
+            A,
+            args=["--no-x"],
+            default=A(True),
+        )
+        assert False
+    except SystemExit:
+        pass
+
+    assert tyro.cli(
+        A,
+        args=[]
+    ) == A(False)
