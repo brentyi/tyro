@@ -124,6 +124,19 @@ By default, ``--cmd.arg`` may be generated as a flag. If prefixes are omitted, w
 instead simply have ``--arg``.
 """
 
+OmitArgPrefixesKeepGrouping = Annotated[T, None]
+"""Make flags used for keyword arguments shorter by omitting prefixes.
+
+If we have a structure with the field:
+
+.. code-block:: python
+
+    cmd: NestedType
+
+By default, ``--cmd.arg`` may be generated as a flag. If prefixes are omitted, we would
+instead simply have ``--arg``. But the groups would still be printed.
+"""
+
 UseAppendAction = Annotated[T, None]
 """Use "append" actions for variable-length arguments.
 

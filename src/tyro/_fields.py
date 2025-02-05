@@ -46,6 +46,8 @@ class FieldDefinition:
     # doesn't match the keyword expected by our callable.
     call_argname: Any
 
+    group: str = ""
+
     @staticmethod
     @contextlib.contextmanager
     def marker_context(markers: Tuple[_markers.Marker, ...]):

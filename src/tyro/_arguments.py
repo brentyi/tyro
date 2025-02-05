@@ -541,11 +541,14 @@ def _rule_set_name_or_flag_and_dest(
     elif (
         arg.field.argconf.prefix_name is False
         or _markers.OmitArgPrefixes in arg.field.markers
+        or _markers.OmitArgPrefixesKeepGrouping in arg.field.markers
     ):
         # Strip prefixes when the argument is suppressed.
         # Still need to call make_field_name() because it converts underscores
         # to hyphens, etc.
         name_or_flag = _strings.make_field_name([arg.field.extern_name])
+        if _markers.OmitArgPrefixesKeepGrouping in arg.field.markers:
+            arg.field.group = arg.extern_prefix
     elif (
         _markers.OmitSubcommandPrefixes in arg.field.markers
         and arg.subcommand_prefix != ""
