@@ -311,9 +311,7 @@ def _rule_apply_primitive_specs(
             )
             if field_name != "":
                 raise UnsupportedTypeAnnotationError(
-                    f"Unsupported type annotation for field with name `{
-                        field_name
-                    }`, which is resolved to `{arg.field.type}`. "
+                    f"Unsupported type annotation for field with name `{field_name}`, which is resolved to `{arg.field.type}`. "
                     f"{error.args[0]} "
                     "To suppress this error, assign the field either a default value or a different type."
                 )
