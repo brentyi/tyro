@@ -146,7 +146,7 @@ class ArgumentDefinition:
         action = kwargs.get("action", None)
         if action not in {"append", "count"}:
             kwargs["default"] = _singleton.MISSING_NONPROP
-        elif action in {BooleanOptionalAction, "store_true", "count"}:
+        elif action in {BooleanOptionalAction, "store_true", "store_false", "count"}:
             pass
         else:
             kwargs["default"] = []
