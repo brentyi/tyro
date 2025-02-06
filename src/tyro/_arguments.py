@@ -96,6 +96,8 @@ class BooleanOptionalAction(argparse.Action):
             assert option_string is not None
             setattr(namespace, self.dest, option_string not in self._no_strings)
 
+    # Typically only supported in Python 3.10, but we backport some functionality in
+    # _argparse_formatters.py
     def format_usage(self):
         return " | ".join(self.option_strings)
 
@@ -254,7 +256,7 @@ def _rule_handle_boolean_flags(
         return
     elif arg.field.default in (True, False):
         # Default `False` => --flag passed in flips to `True`.
-        if _markers.FlagPairOff in arg.field.markers:
+        if _markers.FlagCreatePairsOff in arg.field.markers:
             # If default is True, --flag will flip to `False`.
             # If default is False, --no-flag will flip to `True`.
             lowered.action = "store_false" if arg.field.default else "store_true"

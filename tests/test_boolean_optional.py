@@ -91,9 +91,9 @@ def test_flag_no_pairs() -> None:
 
     @dataclasses.dataclass
     class A:
-        x: tyro.conf.FlagPairOff[bool]
-        y: tyro.conf.FlagPairOff[bool] = False
-        z: tyro.conf.FlagPairOff[bool] = True
+        x: tyro.conf.FlagCreatePairsOff[bool]
+        y: tyro.conf.FlagCreatePairsOff[bool] = False
+        z: tyro.conf.FlagCreatePairsOff[bool] = True
 
     assert tyro.cli(
         A,

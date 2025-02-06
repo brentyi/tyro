@@ -55,7 +55,7 @@ with `bool` will expect an explicit True or False.
 Can be used directly on boolean annotations, ``FlagConversionOff[bool]``, or recursively
 applied to nested types."""
 
-FlagPairOff = Annotated[T, None]
+FlagCreatePairsOff = Annotated[T, None]
 """Turn off creation of ``{--flag,--no-flag}`` pairs. Instead, only one flag will be
 created. ``--flag`` if the field default is ``False``, and ``--no-flag`` if the field default is
 ``True``.
