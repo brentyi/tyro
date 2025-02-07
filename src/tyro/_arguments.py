@@ -542,11 +542,7 @@ def _rule_set_name_or_flag_and_dest(
     if lowered.action == "store_false":
         extern_name = "no_" + extern_name
 
-    if lowered.help is argparse.SUPPRESS:
-        # Use standard name for suppressed arguments.
-        # Relevant: https://github.com/brentyi/tyro/issues/170
-        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
-    elif (
+    if (
         arg.field.argconf.prefix_name is False
         or _markers.OmitArgPrefixes in arg.field.markers
     ):
