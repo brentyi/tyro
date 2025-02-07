@@ -1,5 +1,6 @@
 import dataclasses
 
+import pytest
 from helptext_utils import get_helptext_with_checks
 
 import tyro
@@ -83,3 +84,52 @@ def test_flag_default_true_helptext() -> None:
     assert "(default: True)" in get_helptext_with_checks(A)
     assert "(default: False)" not in get_helptext_with_checks(A)
     assert "(default: None)" not in get_helptext_with_checks(A)
+
+
+def test_flag_no_pairs() -> None:
+    """Test for tyro.conf.FlagPairOff."""
+
+    @dataclasses.dataclass
+    class A:
+        x: tyro.conf.FlagCreatePairsOff[bool]
+        y: tyro.conf.FlagCreatePairsOff[bool] = False
+        z: tyro.conf.FlagCreatePairsOff[bool] = True
+
+    assert tyro.cli(
+        A,
+        args=["--x", "True"],
+    ) == A(True)
+    assert tyro.cli(
+        A,
+        args=["--x", "True", "--y"],
+    ) == A(True, True)
+    assert tyro.cli(
+        A,
+        args=["--x", "True", "--y", "--no-z"],
+    ) == A(True, True, False)
+
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            A,
+            args=["--x", "True", "--y", "True"],
+        )
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            A,
+            args=["--x", "True", "--no-y"],
+        )
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            A,
+            args=["--x", "True", "--z"],
+        )
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            A,
+            args=["--x"],
+        )
+    with pytest.raises(SystemExit):
+        tyro.cli(
+            A,
+            args=["--no-x"],
+        )

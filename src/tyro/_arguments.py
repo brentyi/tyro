@@ -148,7 +148,7 @@ class ArgumentDefinition:
         action = kwargs.get("action", None)
         if action not in {"append", "count"}:
             kwargs["default"] = _singleton.MISSING_NONPROP
-        elif action in {BooleanOptionalAction, "count"}:
+        elif action in {BooleanOptionalAction, "store_true", "store_false", "count"}:
             pass
         else:
             kwargs["default"] = []
@@ -256,7 +256,13 @@ def _rule_handle_boolean_flags(
         return
     elif arg.field.default in (True, False):
         # Default `False` => --flag passed in flips to `True`.
-        lowered.action = BooleanOptionalAction
+        if _markers.FlagCreatePairsOff in arg.field.markers:
+            # If default is True, --flag will flip to `False`.
+            # If default is False, --no-flag will flip to `True`.
+            lowered.action = "store_false" if arg.field.default else "store_true"
+        else:
+            # Create both --flag and --no-flag.
+            lowered.action = BooleanOptionalAction
         lowered.instance_from_str = (
             lambda x: x
         )  # argparse will directly give us a bool!
@@ -532,12 +538,14 @@ def _rule_set_name_or_flag_and_dest(
     arg: ArgumentDefinition,
     lowered: LoweredArgumentDefinition,
 ) -> None:
+    extern_name = arg.field.extern_name
+    if lowered.action == "store_false":
+        extern_name = "no_" + extern_name
+
     if lowered.help is argparse.SUPPRESS:
         # Use standard name for suppressed arguments.
         # Relevant: https://github.com/brentyi/tyro/issues/170
-        name_or_flag = _strings.make_field_name(
-            [arg.extern_prefix, arg.field.extern_name]
-        )
+        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
     elif (
         arg.field.argconf.prefix_name is False
         or _markers.OmitArgPrefixes in arg.field.markers
@@ -545,7 +553,7 @@ def _rule_set_name_or_flag_and_dest(
         # Strip prefixes when the argument is suppressed.
         # Still need to call make_field_name() because it converts underscores
         # to hyphens, etc.
-        name_or_flag = _strings.make_field_name([arg.field.extern_name])
+        name_or_flag = _strings.make_field_name([extern_name])
     elif (
         _markers.OmitSubcommandPrefixes in arg.field.markers
         and arg.subcommand_prefix != ""
@@ -554,17 +562,13 @@ def _rule_set_name_or_flag_and_dest(
         # prefixes.`extern_prefix` can start with the prefix corresponding to
         # the parent subcommand, but end with other prefixes correspondeding to
         # nested structures within the subcommand.
-        name_or_flag = _strings.make_field_name(
-            [arg.extern_prefix, arg.field.extern_name]
-        )
+        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
         strip_prefix = arg.subcommand_prefix + "."
         assert name_or_flag.startswith(strip_prefix), name_or_flag
         name_or_flag = name_or_flag[len(strip_prefix) :]
     else:
         # Standard prefixed name.
-        name_or_flag = _strings.make_field_name(
-            [arg.extern_prefix, arg.field.extern_name]
-        )
+        name_or_flag = _strings.make_field_name([arg.extern_prefix, extern_name])
 
     # Prefix keyword arguments with --.
     if not arg.field.is_positional():
