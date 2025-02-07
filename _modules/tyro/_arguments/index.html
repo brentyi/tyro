@@ -851,11 +851,7 @@
     <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;store_false&quot;</span><span class="p">:</span>
         <span class="n">extern_name</span> <span class="o">=</span> <span class="s2">&quot;no_&quot;</span> <span class="o">+</span> <span class="n">extern_name</span>
 
-    <span class="k">if</span> <span class="n">lowered</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="n">argparse</span><span class="o">.</span><span class="n">SUPPRESS</span><span class="p">:</span>
-        <span class="c1"># Use standard name for suppressed arguments.</span>
-        <span class="c1"># Relevant: https://github.com/brentyi/tyro/issues/170</span>
-        <span class="n">name_or_flag</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">make_field_name</span><span class="p">([</span><span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="p">,</span> <span class="n">extern_name</span><span class="p">])</span>
-    <span class="k">elif</span> <span class="p">(</span>
+    <span class="k">if</span> <span class="p">(</span>
         <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">prefix_name</span> <span class="ow">is</span> <span class="kc">False</span>
         <span class="ow">or</span> <span class="n">_markers</span><span class="o">.</span><span class="n">OmitArgPrefixes</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span>
     <span class="p">):</span>
