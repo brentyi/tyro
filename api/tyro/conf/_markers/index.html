@@ -298,8 +298,8 @@
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.Positional">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Positional</span></span><a class="headerlink" href="#tyro.conf._markers.Positional" title="Link to this definition">¶</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Positional[T]</span></code> if we want to parse it as a positional
-argument.</p>
+<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Positional[T]</span></code> if we want to parse it as a
+positional argument.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -319,8 +319,8 @@ parsed with defaults will also be marked as fixed automatically.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.Suppress">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">Suppress</span></span><a class="headerlink" href="#tyro.conf._markers.Suppress" title="Link to this definition">¶</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code> to prevent <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> from parsing it, and
-to prevent it from showing up in helptext.</p>
+<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code> to prevent <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> from
+parsing it, and to prevent it from showing up in helptext.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -339,6 +339,18 @@ applied to nested types.</p>
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="tyro.conf._markers.FlagCreatePairsOff">
+<span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">FlagCreatePairsOff</span></span><a class="headerlink" href="#tyro.conf._markers.FlagCreatePairsOff" title="Link to this definition">¶</a></dt>
+<dd><p>Turn off creation of <code class="docutils literal notranslate"><span class="pre">{--flag,--no-flag}</span></code> pairs for boolean types. Instead, only
+one flag will be created. <code class="docutils literal notranslate"><span class="pre">--flag</span></code> if the field default is <code class="docutils literal notranslate"><span class="pre">False</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">--no-flag</span></code> if the field default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<p>The default ‘pair’ behavior is more robust to changes in the default value, but might
+feel cluttered. This option provides an alternative.</p>
+<p>Can be used directly on boolean annotations, <code class="docutils literal notranslate"><span class="pre">FlagNegationOff[bool]</span></code>, or recursively
+applied to nested types.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.AvoidSubcommands">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">AvoidSubcommands</span></span><a class="headerlink" href="#tyro.conf._markers.AvoidSubcommands" title="Link to this definition">¶</a></dt>
 <dd><p>Avoid creating subcommands when a default is provided for unions over nested types.
@@ -352,8 +364,8 @@ applied to nested types.</p>
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">ConsolidateSubcommandArgs</span></span><a class="headerlink" href="#tyro.conf._markers.ConsolidateSubcommandArgs" title="Link to this definition">¶</a></dt>
 <dd><p>Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
 ordering, with some tradeoffs.</p>
-<p>By default, <a class="reference internal" href="../../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> will generate a traditional CLI interface where args are applied to
-the directly preceding subcommand. When we have two subcommands <code class="docutils literal notranslate"><span class="pre">s1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2</span></code>:</p>
+<p>By default, <a class="reference internal" href="../../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> will generate a traditional CLI interface where args are applied
+to the directly preceding subcommand. When we have two subcommands <code class="docutils literal notranslate"><span class="pre">s1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2</span></code>:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>x.py<span class="w"> </span><span class="o">{</span>--root<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s1<span class="w"> </span><span class="o">{</span>--s1<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>--s2<span class="w"> </span>options<span class="o">}</span>
 </pre></div>
 </div>
@@ -366,8 +378,8 @@ options.</p>
 <p>This is more robust to reordering of options, ensuring that any new options can simply
 be placed at the end of the command.</p>
 <p>The tradeoff is in required arguments. In the above example, if any <code class="docutils literal notranslate"><span class="pre">--root.*</span></code> options
-are required (no default is specified), all subcommands will need to be specified in order to
-provide the required argument.</p>
+are required (no default is specified), all subcommands will need to be specified in
+order to provide the required argument.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>x.py<span class="w"> </span>s1<span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>required<span class="w"> </span>--root.*<span class="w"> </span>arguments<span class="o">}</span>
 </pre></div>
 </div>
@@ -402,10 +414,10 @@ instead simply have <code class="docutils literal notranslate"><span class="pre"
 <dt class="sig sig-object py" id="tyro.conf._markers.UseAppendAction">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">UseAppendAction</span></span><a class="headerlink" href="#tyro.conf._markers.UseAppendAction" title="Link to this definition">¶</a></dt>
 <dd><p>Use “append” actions for variable-length arguments.</p>
-<p>Given an annotation like <code class="docutils literal notranslate"><span class="pre">x:</span> <span class="pre">list[int]</span></code>, this means that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></code> can be set via
-the CLI syntax <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">--x</span> <span class="pre">1</span> <span class="pre">--x</span> <span class="pre">2</span></code> instead of the default of <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">2</span></code>.</p>
-<p>The resulting syntax may be more user-friendly; for <a class="reference internal" href="../../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a>, it also enables support for
-otherwise ambiguous annotations like <code class="docutils literal notranslate"><span class="pre">list[list[int]]</span></code>.</p>
+<p>Given an annotation like <code class="docutils literal notranslate"><span class="pre">x:</span> <span class="pre">list[int]</span></code>, this means that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></code> can be set
+via the CLI syntax <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">--x</span> <span class="pre">1</span> <span class="pre">--x</span> <span class="pre">2</span></code> instead of the default of <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">2</span></code>.</p>
+<p>The resulting syntax may be more user-friendly; for <a class="reference internal" href="../../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a>, it also enables support
+for otherwise ambiguous annotations like <code class="docutils literal notranslate"><span class="pre">list[list[int]]</span></code>.</p>
 <p>Can be applied to all variable-length sequences (<code class="docutils literal notranslate"><span class="pre">list[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Sequence[T]</span></code>,
 <code class="docutils literal notranslate"><span class="pre">tuple[T,</span> <span class="pre">...]</span></code>, etc), including dictionaries without default values.</p>
 </dd></dl>
@@ -413,7 +425,8 @@ otherwise ambiguous annotations like <code class="docutils literal notranslate">
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf._markers.UseCounterAction">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">UseCounterAction</span></span><a class="headerlink" href="#tyro.conf._markers.UseCounterAction" title="Link to this definition">¶</a></dt>
-<dd><p>Use “counter” actions for integer arguments. Should be used with integers, <code class="docutils literal notranslate"><span class="pre">UseCounterAction[int]</span></code>.</p>
+<dd><p>Use “counter” actions for integer arguments. Should be used with integers,
+<code class="docutils literal notranslate"><span class="pre">UseCounterAction[int]</span></code>.</p>
 </dd></dl>
 
 <dl class="py data">
@@ -434,9 +447,10 @@ otherwise ambiguous annotations like <code class="docutils literal notranslate">
     <span class="p">]</span> <span class="o">=</span> <span class="n">OutputFormats</span><span class="o">.</span><span class="n">PRETTY</span>
 </pre></div>
 </div>
-<p>The above will result in <code class="docutils literal notranslate"><span class="pre">json</span></code>, <code class="docutils literal notranslate"><span class="pre">pretty</span></code>, <code class="docutils literal notranslate"><span class="pre">rich</span></code>, and <code class="docutils literal notranslate"><span class="pre">toml</span></code> (all lowercase) as choices,
-since the auto values for <cite>StrEnum</cite> (Python 3.11+) are lowercase transformations of the
-names. Without this marker, the choices would be <code class="docutils literal notranslate"><span class="pre">JSON</span></code>, <code class="docutils literal notranslate"><span class="pre">PRETTY</span></code>, <code class="docutils literal notranslate"><span class="pre">RICH</span></code>, and <code class="docutils literal notranslate"><span class="pre">TOML</span></code>.</p>
+<p>The above will result in <code class="docutils literal notranslate"><span class="pre">json</span></code>, <code class="docutils literal notranslate"><span class="pre">pretty</span></code>, <code class="docutils literal notranslate"><span class="pre">rich</span></code>, and <code class="docutils literal notranslate"><span class="pre">toml</span></code> (all lowercase) as
+choices, since the auto values for <cite>StrEnum</cite> (Python 3.11+) are lowercase
+transformations of the names. Without this marker, the choices would be <code class="docutils literal notranslate"><span class="pre">JSON</span></code>,
+<code class="docutils literal notranslate"><span class="pre">PRETTY</span></code>, <code class="docutils literal notranslate"><span class="pre">RICH</span></code>, and <code class="docutils literal notranslate"><span class="pre">TOML</span></code>.</p>
 <p>Enum aliases are not relevant when this marker is present. The first entry matching the
 chosen value will be selected.</p>
 </dd></dl>
@@ -472,10 +486,10 @@ docstrings are unaffected.</p>
 <dt class="sig sig-object py" id="tyro.conf._markers.configure">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf._markers.</span></span><span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Marker</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../../_modules/tyro/conf/_markers/#configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf._markers.configure" title="Link to this definition">¶</a></dt>
 <dd><p>Decorator for applying configuration options.</p>
-<p>Consider using the <code class="docutils literal notranslate"><span class="pre">config=</span></code> argument of <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> instead,
-which takes the same config marker objects as inputs.</p>
-<p>Configuration markers are implemented via <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> and straightforward
-to apply to types, for example:</p>
+<p>Consider using the <code class="docutils literal notranslate"><span class="pre">config=</span></code> argument of <a class="reference internal" href="../../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> instead, which takes
+the same config marker objects as inputs.</p>
+<p>Configuration markers are implemented via <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> and
+straightforward to apply to types, for example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">field</span><span class="p">:</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span>
 </pre></div>
 </div>
@@ -552,6 +566,7 @@ to apply to types, for example:</p>
 <li><a class="reference internal" href="#tyro.conf._markers.Suppress"><code class="docutils literal notranslate"><span class="pre">Suppress</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.SuppressFixed"><code class="docutils literal notranslate"><span class="pre">SuppressFixed</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.FlagConversionOff"><code class="docutils literal notranslate"><span class="pre">FlagConversionOff</span></code></a></li>
+<li><a class="reference internal" href="#tyro.conf._markers.FlagCreatePairsOff"><code class="docutils literal notranslate"><span class="pre">FlagCreatePairsOff</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.AvoidSubcommands"><code class="docutils literal notranslate"><span class="pre">AvoidSubcommands</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.ConsolidateSubcommandArgs"><code class="docutils literal notranslate"><span class="pre">ConsolidateSubcommandArgs</span></code></a></li>
 <li><a class="reference internal" href="#tyro.conf._markers.OmitSubcommandPrefixes"><code class="docutils literal notranslate"><span class="pre">OmitSubcommandPrefixes</span></code></a></li>

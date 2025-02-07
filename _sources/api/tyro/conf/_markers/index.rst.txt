@@ -15,8 +15,8 @@ Module Contents
 
 .. py:data:: Positional
 
-   A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a positional
-   argument.
+   A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a
+   positional argument.
 
 .. py:data:: PositionalRequiredArgs
 
@@ -30,8 +30,8 @@ Module Contents
 
 .. py:data:: Suppress
 
-   A type ``T`` can be annotated as ``Suppress[T]`` to prevent :func:`tyro.cli` from parsing it, and
-   to prevent it from showing up in helptext.
+   A type ``T`` can be annotated as ``Suppress[T]`` to prevent :func:`tyro.cli` from
+   parsing it, and to prevent it from showing up in helptext.
 
 .. py:data:: SuppressFixed
 
@@ -43,6 +43,18 @@ Module Contents
    with `bool` will expect an explicit True or False.
 
    Can be used directly on boolean annotations, ``FlagConversionOff[bool]``, or recursively
+   applied to nested types.
+
+.. py:data:: FlagCreatePairsOff
+
+   Turn off creation of ``{--flag,--no-flag}`` pairs for boolean types. Instead, only
+   one flag will be created. ``--flag`` if the field default is ``False``, and
+   ``--no-flag`` if the field default is ``True``.
+
+   The default 'pair' behavior is more robust to changes in the default value, but might
+   feel cluttered. This option provides an alternative.
+
+   Can be used directly on boolean annotations, ``FlagNegationOff[bool]``, or recursively
    applied to nested types.
 
 .. py:data:: AvoidSubcommands
@@ -58,8 +70,8 @@ Module Contents
    Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
    ordering, with some tradeoffs.
 
-   By default, :mod:`tyro` will generate a traditional CLI interface where args are applied to
-   the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``:
+   By default, :mod:`tyro` will generate a traditional CLI interface where args are applied
+   to the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``:
 
 
    .. code-block:: bash
@@ -81,8 +93,8 @@ Module Contents
    be placed at the end of the command.
 
    The tradeoff is in required arguments. In the above example, if any ``--root.*`` options
-   are required (no default is specified), all subcommands will need to be specified in order to
-   provide the required argument.
+   are required (no default is specified), all subcommands will need to be specified in
+   order to provide the required argument.
 
    .. code-block:: bash
 
@@ -119,18 +131,19 @@ Module Contents
 
    Use "append" actions for variable-length arguments.
 
-   Given an annotation like ``x: list[int]``, this means that ``x = [0, 1, 2]`` can be set via
-   the CLI syntax ``--x 0 --x 1 --x 2`` instead of the default of ``--x 0 1 2``.
+   Given an annotation like ``x: list[int]``, this means that ``x = [0, 1, 2]`` can be set
+   via the CLI syntax ``--x 0 --x 1 --x 2`` instead of the default of ``--x 0 1 2``.
 
-   The resulting syntax may be more user-friendly; for :mod:`tyro`, it also enables support for
-   otherwise ambiguous annotations like ``list[list[int]]``.
+   The resulting syntax may be more user-friendly; for :mod:`tyro`, it also enables support
+   for otherwise ambiguous annotations like ``list[list[int]]``.
 
    Can be applied to all variable-length sequences (``list[T]``, ``Sequence[T]``,
    ``tuple[T, ...]``, etc), including dictionaries without default values.
 
 .. py:data:: UseCounterAction
 
-   Use "counter" actions for integer arguments. Should be used with integers, ``UseCounterAction[int]``.
+   Use "counter" actions for integer arguments. Should be used with integers,
+   ``UseCounterAction[int]``.
 
 .. py:data:: EnumChoicesFromValues
 
@@ -152,9 +165,10 @@ Module Contents
                OutputFormats, tyro.conf.EnumChoicesFromValues
            ] = OutputFormats.PRETTY
 
-   The above will result in ``json``, ``pretty``, ``rich``, and ``toml`` (all lowercase) as choices,
-   since the auto values for `StrEnum` (Python 3.11+) are lowercase transformations of the
-   names. Without this marker, the choices would be ``JSON``, ``PRETTY``, ``RICH``, and ``TOML``.
+   The above will result in ``json``, ``pretty``, ``rich``, and ``toml`` (all lowercase) as
+   choices, since the auto values for `StrEnum` (Python 3.11+) are lowercase
+   transformations of the names. Without this marker, the choices would be ``JSON``,
+   ``PRETTY``, ``RICH``, and ``TOML``.
 
    Enum aliases are not relevant when this marker is present. The first entry matching the
    chosen value will be selected.
@@ -189,11 +203,11 @@ Module Contents
 
    Decorator for applying configuration options.
 
-   Consider using the ``config=`` argument of :func:`tyro.cli()` instead,
-   which takes the same config marker objects as inputs.
+   Consider using the ``config=`` argument of :func:`tyro.cli()` instead, which takes
+   the same config marker objects as inputs.
 
-   Configuration markers are implemented via :py:data:`typing.Annotated` and straightforward
-   to apply to types, for example:
+   Configuration markers are implemented via :py:data:`typing.Annotated` and
+   straightforward to apply to types, for example:
 
    .. code-block:: python
 
