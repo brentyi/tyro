@@ -1112,9 +1112,15 @@ def test_omit_arg_prefixes() -> None:
         args="--model.num-slots 3".split(" "),
     ) == TrainConfig(ModelConfig(num_slots=3))
 
-    assert tyro.cli(
-        tyro.conf.OmitArgPrefixes[TrainConfig], args="--num-slots 3".split(" ")
-    ) == TrainConfig(ModelConfig(num_slots=3))
+    annot = tyro.conf.OmitArgPrefixes[TrainConfig]
+    assert tyro.cli(annot, args="--num-slots 3".split(" ")) == TrainConfig(
+        ModelConfig(num_slots=3)
+    )
+
+    # groups are still printed in the help text
+    help_text = get_helptext_with_checks(annot)
+    assert "model options" in help_text
+    assert "--num-slots" in help_text
 
 
 def test_custom_constructor_0() -> None:
@@ -1539,8 +1545,8 @@ def test_merge() -> None:
     with pytest.raises(SystemExit), contextlib.redirect_stdout(target):
         instantiate_dataclasses((OptimizerConfig, DatasetConfig), args=["--help"])
     helptext = target.getvalue()
-    assert "OptimizerConfig options" not in helptext
-    assert "DatasetConfig options" not in helptext
+    assert "OptimizerConfig options" in helptext
+    assert "DatasetConfig options" in helptext
 
 
 def test_counter_action() -> None:
