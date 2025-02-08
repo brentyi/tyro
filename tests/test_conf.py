@@ -1113,9 +1113,9 @@ def test_omit_arg_prefixes() -> None:
     ) == TrainConfig(ModelConfig(num_slots=3))
 
     annot = tyro.conf.OmitArgPrefixes[TrainConfig]
-    assert tyro.cli(
-        annot, args="--num-slots 3".split(" ")
-    ) == TrainConfig(ModelConfig(num_slots=3))
+    assert tyro.cli(annot, args="--num-slots 3".split(" ")) == TrainConfig(
+        ModelConfig(num_slots=3)
+    )
 
     # groups are still printed in the help text
     help_text = get_helptext_with_checks(annot)
