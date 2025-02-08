@@ -247,16 +247,6 @@ class ParserSpecification:
         def format_group_name(group_name: str) -> str:
             return (group_name + " options").strip()
 
-        def group_name_from_arg(arg: _arguments.ArgumentDefinition) -> str:
-            prefix = arg.lowered.name_or_flags[0]
-            if prefix.startswith("--"):
-                prefix = prefix[2:]
-            if "." in prefix:
-                prefix = prefix.rpartition(".")[0]
-            else:
-                prefix = ""
-            return prefix
-
         group_from_group_name: Dict[str, argparse._ArgumentGroup] = {
             "": parser._action_groups[1],
             **{
@@ -274,7 +264,7 @@ class ParserSpecification:
             if arg.is_suppressed():
                 continue
 
-            group_name = group_name_from_arg(arg)
+            group_name = arg.extern_prefix
             if group_name not in group_from_group_name:
                 description = (
                     parent.helptext_from_intern_prefixed_field_name.get(
