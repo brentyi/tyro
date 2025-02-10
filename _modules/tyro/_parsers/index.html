@@ -556,7 +556,19 @@
             <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">is_suppressed</span><span class="p">():</span>
                 <span class="k">continue</span>
 
-            <span class="n">group_name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span>
+            <span class="n">group_name</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span>
+                <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">argconf</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+                <span class="c1"># If the field name is &quot;erased&quot;, we&#39;ll place the argument in</span>
+                <span class="c1"># the parent&#39;s group.</span>
+                <span class="c1">#</span>
+                <span class="c1"># This is to avoid &quot;issue 1&quot; in:</span>
+                <span class="c1"># https://github.com/brentyi/tyro/issues/183</span>
+                <span class="c1">#</span>
+                <span class="c1"># Setting `tyro.conf.arg(name=&quot;&quot;)` should generally be</span>
+                <span class="c1"># discouraged, so this will rarely matter.</span>
+                <span class="k">else</span> <span class="n">arg</span><span class="o">.</span><span class="n">extern_prefix</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
             <span class="k">if</span> <span class="n">group_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">group_from_group_name</span><span class="p">:</span>
                 <span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="n">parent</span><span class="o">.</span><span class="n">helptext_from_intern_prefixed_field_name</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
