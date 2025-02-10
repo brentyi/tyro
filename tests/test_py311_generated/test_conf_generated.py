@@ -1121,9 +1121,15 @@ def test_omit_arg_prefixes() -> None:
         args="--model.num-slots 3".split(" "),
     ) == TrainConfig(ModelConfig(num_slots=3))
 
-    assert tyro.cli(
-        tyro.conf.OmitArgPrefixes[TrainConfig], args="--num-slots 3".split(" ")
-    ) == TrainConfig(ModelConfig(num_slots=3))
+    annot = tyro.conf.OmitArgPrefixes[TrainConfig]
+    assert tyro.cli(annot, args="--num-slots 3".split(" ")) == TrainConfig(
+        ModelConfig(num_slots=3)
+    )
+
+    # Groups are still printed in the helptext.
+    help_text = get_helptext_with_checks(annot)
+    assert "model options" in help_text
+    assert "--num-slots" in help_text
 
 
 def test_custom_constructor_0() -> None:
