@@ -1117,7 +1117,7 @@ def test_omit_arg_prefixes() -> None:
         ModelConfig(num_slots=3)
     )
 
-    # groups are still printed in the help text
+    # Groups are still printed in the helptext.
     help_text = get_helptext_with_checks(annot)
     assert "model options" in help_text
     assert "--num-slots" in help_text

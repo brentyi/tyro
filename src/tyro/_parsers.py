@@ -264,7 +264,19 @@ class ParserSpecification:
             if arg.is_suppressed():
                 continue
 
-            group_name = arg.extern_prefix
+            group_name = (
+                arg.extern_prefix
+                if arg.field.argconf.name != ""
+                # If the field name is "erased", we'll place the argument in
+                # the parent's group.
+                #
+                # This is to avoid "issue 1" in:
+                # https://github.com/brentyi/tyro/issues/183
+                #
+                # Setting `tyro.conf.arg(name="")` should generally be
+                # discouraged, so this will rarely matter.
+                else arg.extern_prefix.rpartition(".")[0]
+            )
             if group_name not in group_from_group_name:
                 description = (
                     parent.helptext_from_intern_prefixed_field_name.get(

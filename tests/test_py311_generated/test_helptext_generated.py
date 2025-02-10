@@ -960,3 +960,20 @@ def test_typeddict_exclude() -> None:
 
     help = get_helptext_with_checks(Special)
     assert "unset by default" in help, help
+
+
+def test_conf_erased_argname() -> None:
+    @dataclasses.dataclass(frozen=True)
+    class Verbose:
+        is_verbose: bool = True
+
+    @dataclasses.dataclass(frozen=True)
+    class Args:
+        verbose: Annotated[Verbose, tyro.conf.arg(name="")]
+
+    def main(args: Args) -> None:
+        print(args)
+
+    helptext = get_helptext_with_checks(main)
+    assert "args options" in helptext
+    assert "args.verbose options" not in helptext
