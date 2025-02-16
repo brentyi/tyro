@@ -1,6 +1,7 @@
 from typing import Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
 from typing_extensions import Annotated
+from tyro.conf._markers import Suppress
 
 from .._typing import TypeForm
 
@@ -130,8 +131,6 @@ def subcommand_type_from_defaults(
     """
     import tyro
 
-    # We need to form a union type, which requires at least two elements.
-    assert len(defaults) >= 2, "At least two subcommands are required."
     return Union[  # type: ignore
         tuple(
             Annotated[  # type: ignore
@@ -147,4 +146,8 @@ def subcommand_type_from_defaults(
             ]
             for k, v in defaults.items()
         )
+        # Union types need at least two types. To support the case
+        # where we only pass one subcommand in, we'll pad with `None`
+        # but suppress it.
+        + (Annotated[None, Suppress],)
     ]
