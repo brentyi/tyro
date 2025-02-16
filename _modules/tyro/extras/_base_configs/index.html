@@ -284,6 +284,8 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.conf._markers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Suppress</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
@@ -417,8 +419,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 
-    <span class="c1"># We need to form a union type, which requires at least two elements.</span>
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">defaults</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;At least two subcommands are required.&quot;</span>
     <span class="k">return</span> <span class="n">Union</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
         <span class="nb">tuple</span><span class="p">(</span>
             <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
@@ -434,6 +434,10 @@
             <span class="p">]</span>
             <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">defaults</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">)</span>
+        <span class="c1"># Union types need at least two types. To support the case</span>
+        <span class="c1"># where we only pass one subcommand in, we&#39;ll pad with `None`</span>
+        <span class="c1"># but suppress it.</span>
+        <span class="o">+</span> <span class="p">(</span><span class="n">Annotated</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="n">Suppress</span><span class="p">],)</span>
     <span class="p">]</span></div>
 
 </pre></div>
