@@ -1,6 +1,7 @@
 from typing import Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
 from typing_extensions import Annotated
+
 from tyro.conf._markers import Suppress
 
 from .._typing import TypeForm
