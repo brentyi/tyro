@@ -81,13 +81,11 @@ def overridable_config_cli(
     import tyro
 
     keys = configs.keys()
-    if sort_subcommands:
-        keys = sorted(keys)
-
     return tyro.cli(
         tyro.extras.subcommand_type_from_defaults(
             defaults={k: configs[k][1] for k in keys},
             descriptions={k: configs[k][0] for k in keys},
+            sort_subcommands=sort_subcommands,
         ),
         prog=prog,
         description=description,
@@ -105,6 +103,7 @@ def subcommand_type_from_defaults(
     descriptions: Mapping[str, str] = {},
     *,
     prefix_names: bool = True,
+    sort_subcommands: bool = False,
 ) -> TypeForm[T]:
     """Construct a Union type for defining subcommands that choose between defaults.
 
@@ -156,26 +155,30 @@ def subcommand_type_from_defaults(
         defaults: A dictionary of default subcommand instances.
         descriptions: A dictionary conttaining descriptions for helptext.
         prefix_names: Whether to prefix subcommand names.
+        sort_subcommands: If True, sort the subcommands alphabetically by name.
 
     Returns:
         A subcommand type, which can be passed to :func:`tyro.cli`.
     """
     import tyro
 
+    keys = defaults.keys()
+    if sort_subcommands:
+        keys = sorted(keys)
     return Union[  # type: ignore
         tuple(
             Annotated[  # type: ignore
                 (
-                    type(v),
+                    type(defaults[k]),
                     tyro.conf.subcommand(
                         k,
-                        default=v,
+                        default=defaults[k],
                         description=descriptions.get(k, ""),
                         prefix_name=prefix_names,
                     ),
                 )
             ]
-            for k, v in defaults.items()
+            for k in keys
         )
         # Union types need at least two types. To support the case
         # where we only pass one subcommand in, we'll pad with `None`
