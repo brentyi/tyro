@@ -1,4 +1,4 @@
-from typing import Mapping, Optional, Sequence, Tuple, TypeVar, Union
+from typing import Any, Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
 from typing_extensions import Annotated
 
@@ -12,7 +12,13 @@ T = TypeVar("T")
 def overridable_config_cli(
     configs: Mapping[str, Tuple[str, T]],
     *,
+    prog: Optional[str] = None,
+    description: Optional[str] = None,
     args: Optional[Sequence[str]] = None,
+    use_underscores: bool = False,
+    console_outputs: bool = True,
+    config: Optional[Sequence[Any]] = None,
+    sort_subcommands: bool = False,
 ) -> T:
     """Helper function for creating a CLI interface that allows us to choose
     between default config objects (typically dataclasses) and override values
@@ -55,18 +61,40 @@ def overridable_config_cli(
     Args:
         configs: A dictionary of config names mapped to a tuple of
             (description, config object).
-        args: Optional arguments to pass to the CLI.
+        prog: The name of the program printed in helptext. Mirrors argument from
+            `argparse.ArgumentParser()`.
+        description: Description text for the parser, displayed when the --help flag is
+            passed in. If not specified, the class docstring is used. Mirrors argument from
+            `argparse.ArgumentParser()`.
+        args: If set, parse arguments from a sequence of strings instead of the
+            commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
+        use_underscores: If True, use underscores as a word delimiter instead of hyphens.
+            This primarily impacts helptext; underscores and hyphens are treated equivalently
+            when parsing happens. We default helptext to hyphens to follow the GNU style guide.
+            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+        console_outputs: If set to `False`, parsing errors and help messages will be
+            suppressed.
+        config: Sequence of config marker objects, from `tyro.conf`. We include
+            :class:`tyro.conf.AvoidSubcommands` by default.
+        sort_subcommands: If True, sort the subcommands alphabetically by name.
     """
     import tyro
 
+    keys = list(configs.keys())
     return tyro.cli(
         tyro.extras.subcommand_type_from_defaults(
-            defaults={k: v[1] for k, v in configs.items()},
-            descriptions={k: v[0] for k, v in configs.items()},
+            defaults={k: configs[k][1] for k in keys},
+            descriptions={k: configs[k][0] for k in keys},
+            sort_subcommands=sort_subcommands,
         ),
-        # Don't create subcommands for union types within the config object.
-        config=(tyro.conf.AvoidSubcommands,),
+        prog=prog,
+        description=description,
         args=args,
+        use_underscores=use_underscores,
+        console_outputs=console_outputs,
+        # Don't create subcommands for union types within the config object.
+        config=(tyro.conf.AvoidSubcommands,)
+        + (tuple() if config is None else tuple(config)),
     )
 
 
@@ -75,6 +103,7 @@ def subcommand_type_from_defaults(
     descriptions: Mapping[str, str] = {},
     *,
     prefix_names: bool = True,
+    sort_subcommands: bool = False,
 ) -> TypeForm[T]:
     """Construct a Union type for defining subcommands that choose between defaults.
 
@@ -126,26 +155,30 @@ def subcommand_type_from_defaults(
         defaults: A dictionary of default subcommand instances.
         descriptions: A dictionary conttaining descriptions for helptext.
         prefix_names: Whether to prefix subcommand names.
+        sort_subcommands: If True, sort the subcommands alphabetically by name.
 
     Returns:
         A subcommand type, which can be passed to :func:`tyro.cli`.
     """
     import tyro
 
+    keys = list(defaults.keys())
+    if sort_subcommands:
+        keys = sorted(keys)
     return Union[  # type: ignore
         tuple(
             Annotated[  # type: ignore
                 (
-                    type(v),
+                    type(defaults[k]),
                     tyro.conf.subcommand(
                         k,
-                        default=v,
+                        default=defaults[k],
                         description=descriptions.get(k, ""),
                         prefix_name=prefix_names,
                     ),
                 )
             ]
-            for k, v in defaults.items()
+            for k in keys
         )
         # Union types need at least two types. To support the case
         # where we only pass one subcommand in, we'll pad with `None`
