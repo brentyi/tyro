@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Callable, Literal, Tuple
 
+from helptext_utils import get_helptext_with_checks
 from torch import nn
 
 import tyro
@@ -89,6 +90,7 @@ ExperimentConfigDataParserUnion = tyro.extras.subcommand_type_from_defaults(
         ),
     },
     prefix_names=False,  # Omit prefixes in subcommands themselves.
+    sort_subcommands=True,  # Sort subcommands alphabetically.
 )
 
 
@@ -118,6 +120,10 @@ class BaseConfig:
     # The experiment configuration.
     # The default should get matched to small-data.
     data_config: AnnotatedDataParserUnion = DataConfig(test=0)
+
+
+def test_sorted_alphabetically() -> None:
+    assert "{big,small}" in get_helptext_with_checks(ExperimentConfigDataParserUnion)
 
 
 def test_base_configs_nested() -> None:
@@ -225,6 +231,20 @@ def test_overridable_config_helper():
                 "Big data",
                 DataConfig(
                     test=2,
+                ),
+            ),
+        },
+        args=["small-data", "--test", "100"],
+    ) == DataConfig(100)
+
+
+def test_overridable_config_helper_single():
+    assert tyro.extras.overridable_config_cli(
+        {
+            "small-data": (
+                "Small data",
+                DataConfig(
+                    test=2221,
                 ),
             ),
         },

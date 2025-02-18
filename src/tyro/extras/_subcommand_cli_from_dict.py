@@ -20,6 +20,7 @@ def subcommand_cli_from_dict(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[Marker]] = None,
+    sort_subcommands: bool = False,
 ) -> T: ...
 
 
@@ -35,6 +36,7 @@ def subcommand_cli_from_dict(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[Marker]] = None,
+    sort_subcommands: bool = False,
 ) -> Any: ...
 
 
@@ -47,6 +49,7 @@ def subcommand_cli_from_dict(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: Optional[Sequence[Marker]] = None,
+    sort_subcommands: bool = False,
 ) -> Any:
     """Generate a subcommand CLI from a dictionary of functions.
 
@@ -100,6 +103,11 @@ def subcommand_cli_from_dict(
             main one.
         config: Sequence of config marker objects, from :mod:`tyro.conf`.
     """
+
+    keys = list(subcommands.keys())
+    if sort_subcommands:
+        keys = sorted(keys)
+
     # We need to form a union type, which requires at least two elements.
     return cli(
         Union[  # type: ignore
@@ -110,9 +118,9 @@ def subcommand_cli_from_dict(
                         Any,
                         # We'll instantiate this object by invoking a subcommand with
                         # name k, via a constructor.
-                        subcommand(name=k, constructor=v),
+                        subcommand(name=k, constructor=subcommands[k]),
                     ]
-                    for k, v in subcommands.items()
+                    for k in keys
                 ]
                 # Union types need at least two types. To support the case
                 # where we only pass one subcommand in, we'll pad with `None`
