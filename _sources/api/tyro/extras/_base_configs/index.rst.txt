@@ -13,7 +13,7 @@ Module Contents
 
    
 
-.. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, args: Optional[Sequence[str]] = None) -> T
+.. py:function:: overridable_config_cli(configs: Mapping[str, Tuple[str, T]], *, prog: Optional[str] = None, description: Optional[str] = None, args: Optional[Sequence[str]] = None, use_underscores: bool = False, console_outputs: bool = True, config: Optional[Sequence[Any]] = None, sort_subcommands: bool = False) -> T
 
    Helper function for creating a CLI interface that allows us to choose
    between default config objects (typically dataclasses) and override values
@@ -55,10 +55,25 @@ Module Contents
 
    :param configs: A dictionary of config names mapped to a tuple of
                    (description, config object).
-   :param args: Optional arguments to pass to the CLI.
+   :param prog: The name of the program printed in helptext. Mirrors argument from
+                `argparse.ArgumentParser()`.
+   :param description: Description text for the parser, displayed when the --help flag is
+                       passed in. If not specified, the class docstring is used. Mirrors argument from
+                       `argparse.ArgumentParser()`.
+   :param args: If set, parse arguments from a sequence of strings instead of the
+                commandline. Mirrors argument from `argparse.ArgumentParser.parse_args()`.
+   :param use_underscores: If True, use underscores as a word delimiter instead of hyphens.
+                           This primarily impacts helptext; underscores and hyphens are treated equivalently
+                           when parsing happens. We default helptext to hyphens to follow the GNU style guide.
+                           https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+   :param console_outputs: If set to `False`, parsing errors and help messages will be
+                           suppressed.
+   :param config: Sequence of config marker objects, from `tyro.conf`. We include
+                  :class:`tyro.conf.AvoidSubcommands` by default.
+   :param sort_subcommands: If True, sort the subcommands alphabetically by name.
 
 
-.. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True) -> tyro._typing.TypeForm[T]
+.. py:function:: subcommand_type_from_defaults(defaults: Mapping[str, T], descriptions: Mapping[str, str] = {}, *, prefix_names: bool = True, sort_subcommands: bool = False) -> tyro._typing.TypeForm[T]
 
    Construct a Union type for defining subcommands that choose between defaults.
 
@@ -109,6 +124,7 @@ Module Contents
    :param defaults: A dictionary of default subcommand instances.
    :param descriptions: A dictionary conttaining descriptions for helptext.
    :param prefix_names: Whether to prefix subcommand names.
+   :param sort_subcommands: If True, sort the subcommands alphabetically by name.
 
    :returns: A subcommand type, which can be passed to :func:`tyro.cli`.
 
