@@ -1,7 +1,6 @@
 from typing import Any, Callable, Dict, Optional, Sequence, TypeVar, Union, overload
 
 from typing_extensions import Annotated
-
 from tyro.conf._markers import Marker, Suppress
 
 from .._cli import cli
@@ -104,7 +103,7 @@ def subcommand_cli_from_dict(
         config: Sequence of config marker objects, from :mod:`tyro.conf`.
     """
 
-    keys = subcommands.keys()
+    keys = list(subcommands.keys())
     if sort_subcommands:
         keys = sorted(keys)
 

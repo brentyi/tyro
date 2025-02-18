@@ -1,7 +1,6 @@
 from typing import Any, Mapping, Optional, Sequence, Tuple, TypeVar, Union
 
 from typing_extensions import Annotated
-
 from tyro.conf._markers import Suppress
 
 from .._typing import TypeForm
@@ -80,7 +79,7 @@ def overridable_config_cli(
     """
     import tyro
 
-    keys = configs.keys()
+    keys = list(configs.keys())
     return tyro.cli(
         tyro.extras.subcommand_type_from_defaults(
             defaults={k: configs[k][1] for k in keys},
@@ -162,7 +161,7 @@ def subcommand_type_from_defaults(
     """
     import tyro
 
-    keys = defaults.keys()
+    keys = list(defaults.keys())
     if sort_subcommands:
         keys = sorted(keys)
     return Union[  # type: ignore
