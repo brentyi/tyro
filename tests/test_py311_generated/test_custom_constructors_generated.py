@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Annotated, Any, Dict, List, Literal, get_args
+from typing import Annotated, Any, Dict, List, Literal, Tuple, get_args
 
 import numpy as np
 import pytest
@@ -151,7 +151,7 @@ def test_min_length_custom_constructor_positional() -> None:
 
 
 TupleCustomConstructor = Annotated[
-    tuple[str, ...],
+    Tuple[str, ...],
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="A TUPLE METAVAR",

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from typing import List, Optional, Tuple
 
 import pytest
@@ -192,17 +193,21 @@ TupleCustomConstructor2 = Annotated[
 ]
 
 
-def test_tuple_custom_constructors_positional_default_none() -> None:
-    def main(
-        field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
-    ) -> Tuple[str, ...] | None:
-        del field2
-        return field1
+if sys.version_info >= (3, 11):
 
-    assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
-    assert tyro.cli(main, args=["a"]) == ("a",)
-    assert tyro.cli(main, args=[]) is None
-    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+    def test_tuple_custom_constructors_positional_default_none() -> None:
+        # Waiting for typing_extensions with this fixed:
+        # https://github.com/python/typing_extensions/issues/310
+        def main(
+            field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
+        ) -> Tuple[str, ...] | None:
+            del field2
+            return field1
+
+        assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
+        assert tyro.cli(main, args=["a"]) == ("a",)
+        assert tyro.cli(main, args=[]) is None
+        assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
 
 
 def test_tuple_custom_constructors_positional_default_five() -> None:

@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+import sys
 from typing import Annotated, List, Optional, Tuple
 
 import pytest
@@ -32,11 +35,12 @@ def test_positional():
         assert tyro.cli(main, args="--x 1 --y 2 --z 3".split(" ")) == (1, 2, 3)
 
 
-def test_nested_positional():
-    class A:
-        def __init__(self, a: int, hello_world: int, /, c: int):
-            self.hello_world = hello_world
+class A:
+    def __init__(self, a: int, hello_world: int, /, c: int):
+        self.hello_world = hello_world
 
+
+def test_nested_positional():
     def nest1(a: int, b: int, thing: A, /, c: int) -> A:
         return thing
 
@@ -46,11 +50,12 @@ def test_nested_positional():
         tyro.cli(nest1, args="0 1 2 3 4 4 --c 4".split(" "))
 
 
-def test_nested_positional_alt():
-    class B:
-        def __init__(self, a: int, b: int, /, c: int):
-            pass
+class B:
+    def __init__(self, a: int, b: int, /, c: int):
+        pass
 
+
+def test_nested_positional_alt():
     def nest2(a: int, b: int, /, thing: B, c: int):
         return thing
 
@@ -151,7 +156,7 @@ def test_min_length_custom_constructor_positional() -> None:
 
 
 TupleCustomConstructor = Annotated[
-    tuple[str, ...],
+    Tuple[str, ...],
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="A TUPLE METAVAR",
@@ -164,7 +169,7 @@ TupleCustomConstructor = Annotated[
 
 
 def test_tuple_custom_constructors_positional() -> None:
-    def main(field1: TupleCustomConstructor, /, field2: int = 3) -> tuple[str, ...]:
+    def main(field1: TupleCustomConstructor, /, field2: int = 3) -> Tuple[str, ...]:
         del field2
         return field1
 
@@ -175,7 +180,7 @@ def test_tuple_custom_constructors_positional() -> None:
 
 
 TupleCustomConstructor2 = Annotated[
-    tuple[str, ...],
+    Tuple[str, ...],
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="A TUPLE METAVAR",
@@ -187,23 +192,27 @@ TupleCustomConstructor2 = Annotated[
 ]
 
 
-def test_tuple_custom_constructors_positional_default_none() -> None:
-    def main(
-        field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
-    ) -> tuple[str, ...] | None:
-        del field2
-        return field1
+if sys.version_info >= (3, 11):
 
-    assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
-    assert tyro.cli(main, args=["a"]) == ("a",)
-    assert tyro.cli(main, args=[]) is None
-    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+    def test_tuple_custom_constructors_positional_default_none() -> None:
+        # Waiting for typing with this fixed:
+        # https://github.com/python/typing/issues/310
+        def main(
+            field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
+        ) -> Tuple[str, ...] | None:
+            del field2
+            return field1
+
+        assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
+        assert tyro.cli(main, args=["a"]) == ("a",)
+        assert tyro.cli(main, args=[]) is None
+        assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
 
 
 def test_tuple_custom_constructors_positional_default_five() -> None:
     def main(
         field1: TupleCustomConstructor2 | int = 5, /, field2: int = 3
-    ) -> tuple[str, ...] | int:
+    ) -> Tuple[str, ...] | int:
         del field2
         return field1
 
