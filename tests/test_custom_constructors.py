@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Union
 
 import numpy as np
 import pytest
+from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Literal, get_args
 
 import tyro
@@ -136,3 +137,27 @@ def test_min_length_custom_constructor() -> None:
     with pytest.raises(SystemExit):
         tyro.cli(main, args=["--field1"])
     assert tyro.cli(main, args=["--field1", "a", "b"]) == ["a", "b"]
+
+
+TupleCustomConstructor = Annotated[
+    tuple[str, ...],
+    tyro.constructors.PrimitiveConstructorSpec(
+        nargs="*",
+        metavar="A TUPLE METAVAR",
+        is_instance=lambda x: isinstance(x, tuple)
+        and all(isinstance(i, str) for i in x),
+        instance_from_str=lambda args: tuple(args),
+        str_from_instance=lambda args: list(args),
+    ),
+]
+
+
+def test_tuple_custom_constructors() -> None:
+    def main(field1: TupleCustomConstructor, field2: int = 3) -> tuple[str, ...]:
+        del field2
+        return field1
+
+    assert tyro.cli(main, args=["--field1", "a", "b"]) == ("a", "b")
+    assert tyro.cli(main, args=["--field1", "a"]) == ("a",)
+    assert tyro.cli(main, args=["--field1"]) == ()
+    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
