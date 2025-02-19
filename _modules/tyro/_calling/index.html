@@ -398,8 +398,11 @@
                     <span class="c1"># value, and the field default will be inspect.Parameter.empty.</span>
                     <span class="k">if</span> <span class="p">(</span>
                         <span class="n">value</span> <span class="ow">in</span> <span class="n">_fields</span><span class="o">.</span><span class="n">MISSING_AND_MISSING_NONPROP</span>
-                        <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">is_positional_call</span><span class="p">()</span>
-                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">)</span>
+                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">is_positional</span><span class="p">()</span>
+                        <span class="c1"># nargs=&quot;?&quot; is currently only used for optional positional</span>
+                        <span class="c1"># arguments when the underlying nargs for the primitive</span>
+                        <span class="c1"># constructor is 1. Logic for this is in _arguments.py.</span>
+                        <span class="ow">and</span> <span class="n">arg</span><span class="o">.</span><span class="n">lowered</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span>
                     <span class="p">):</span>
                         <span class="n">value</span> <span class="o">=</span> <span class="p">[]</span>
                         <span class="n">should_cast</span> <span class="o">=</span> <span class="kc">True</span>
