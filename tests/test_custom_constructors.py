@@ -105,14 +105,14 @@ def test_custom_constructor_numpy() -> None:
     )
 
 
-def make_list_of_strings_with_minimum_length(args: list[str]) -> list[str]:
+def make_list_of_strings_with_minimum_length(args: List[str]) -> List[str]:
     if len(args) == 0:
         raise ValueError("Expected at least one string")
     return args
 
 
 ListOfStringsWithMinimumLength = Annotated[
-    list[str],
+    List[str],
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="STR [STR ...]",
@@ -128,6 +128,7 @@ def test_min_length_custom_constructor() -> None:
     def main(
         field1: ListOfStringsWithMinimumLength, field2: int = 3
     ) -> ListOfStringsWithMinimumLength:
+        del field2
         return field1
 
     with pytest.raises(SystemExit):
