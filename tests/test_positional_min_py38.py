@@ -1,7 +1,8 @@
-from typing import Annotated, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import pytest
 from helptext_utils import get_helptext_with_checks
+from typing_extensions import Annotated
 
 import tyro
 
@@ -151,7 +152,7 @@ def test_min_length_custom_constructor_positional() -> None:
 
 
 TupleCustomConstructor = Annotated[
-    tuple[str, ...],
+    Tuple[str, ...],
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="A TUPLE METAVAR",
@@ -164,7 +165,7 @@ TupleCustomConstructor = Annotated[
 
 
 def test_tuple_custom_constructors_positional() -> None:
-    def main(field1: TupleCustomConstructor, /, field2: int = 3) -> tuple[str, ...]:
+    def main(field1: TupleCustomConstructor, /, field2: int = 3) -> Tuple[str, ...]:
         del field2
         return field1
 
@@ -175,7 +176,7 @@ def test_tuple_custom_constructors_positional() -> None:
 
 
 TupleCustomConstructor2 = Annotated[
-    tuple[str, ...],
+    Tuple[str, ...],
     tyro.constructors.PrimitiveConstructorSpec(
         nargs="*",
         metavar="A TUPLE METAVAR",
@@ -190,7 +191,7 @@ TupleCustomConstructor2 = Annotated[
 def test_tuple_custom_constructors_positional_default_none() -> None:
     def main(
         field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
-    ) -> tuple[str, ...] | None:
+    ) -> Tuple[str, ...] | None:
         del field2
         return field1
 
@@ -203,7 +204,7 @@ def test_tuple_custom_constructors_positional_default_none() -> None:
 def test_tuple_custom_constructors_positional_default_five() -> None:
     def main(
         field1: TupleCustomConstructor2 | int = 5, /, field2: int = 3
-    ) -> tuple[str, ...] | int:
+    ) -> Tuple[str, ...] | int:
         del field2
         return field1
 
