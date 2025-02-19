@@ -111,6 +111,7 @@ def callable_with_args(
                     # value, and the field default will be inspect.Parameter.empty.
                     if (
                         value in _fields.MISSING_AND_MISSING_NONPROP
+                        and arg.field.is_positional()
                         # nargs="?" is currently only used for optional positional
                         # arguments when the underlying nargs for the primitive
                         # constructor is 1. Logic for this is in _arguments.py.
