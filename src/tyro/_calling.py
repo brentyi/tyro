@@ -79,7 +79,6 @@ def callable_with_args(
         ] = arg
 
     any_arguments_provided = False
-    value_founds = []
 
     for field in parser_definition.field_list:
         value: Any
