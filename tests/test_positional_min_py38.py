@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List, Optional, Tuple
 
 import pytest
@@ -33,11 +35,12 @@ def test_positional():
         assert tyro.cli(main, args="--x 1 --y 2 --z 3".split(" ")) == (1, 2, 3)
 
 
-def test_nested_positional():
-    class A:
-        def __init__(self, a: int, hello_world: int, /, c: int):
-            self.hello_world = hello_world
+class A:
+    def __init__(self, a: int, hello_world: int, /, c: int):
+        self.hello_world = hello_world
 
+
+def test_nested_positional():
     def nest1(a: int, b: int, thing: A, /, c: int) -> A:
         return thing
 
@@ -47,11 +50,12 @@ def test_nested_positional():
         tyro.cli(nest1, args="0 1 2 3 4 4 --c 4".split(" "))
 
 
-def test_nested_positional_alt():
-    class B:
-        def __init__(self, a: int, b: int, /, c: int):
-            pass
+class B:
+    def __init__(self, a: int, b: int, /, c: int):
+        pass
 
+
+def test_nested_positional_alt():
     def nest2(a: int, b: int, /, thing: B, c: int):
         return thing
 
