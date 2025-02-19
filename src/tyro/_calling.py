@@ -79,6 +79,7 @@ def callable_with_args(
         ] = arg
 
     any_arguments_provided = False
+    value_founds = []
 
     for field in parser_definition.field_list:
         value: Any
@@ -111,8 +112,9 @@ def callable_with_args(
                     # value, and the field default will be inspect.Parameter.empty.
                     if (
                         value in _fields.MISSING_AND_MISSING_NONPROP
-                        and field.is_positional_call()
-                        and arg.lowered.nargs in ("?", "*")
+                        # nargs="?" is currently only used for optional positional arguments when
+                        # nargs="*".
+                        and arg.lowered.nargs == "*"
                     ):
                         value = []
                         should_cast = True

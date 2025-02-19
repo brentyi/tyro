@@ -1,6 +1,7 @@
-from typing import List, Optional, Tuple
+from typing import Annotated, List, Optional, Tuple
 
 import pytest
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 
@@ -116,3 +117,97 @@ def test_positional_tuple():
         return x, y
 
     assert tyro.cli(main, args="1 2 3 4".split(" ")) == ((1, 2), ("3", "4"))
+
+
+def make_list_of_strings_with_minimum_length(args: List[str]) -> List[str]:
+    if len(args) == 0:
+        raise ValueError("Expected at least one string")
+    return args
+
+
+ListOfStringsWithMinimumLength = Annotated[
+    List[str],
+    tyro.constructors.PrimitiveConstructorSpec(
+        nargs="*",
+        metavar="STR [STR ...]",
+        is_instance=lambda x: isinstance(x, list)
+        and all(isinstance(i, str) for i in x),
+        instance_from_str=make_list_of_strings_with_minimum_length,
+        str_from_instance=lambda args: args,
+    ),
+]
+
+
+def test_min_length_custom_constructor_positional() -> None:
+    def main(
+        field1: ListOfStringsWithMinimumLength, /, field2: int = 3
+    ) -> ListOfStringsWithMinimumLength:
+        del field2
+        return field1
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=[])
+    assert tyro.cli(main, args=["a", "b"]) == ["a", "b"]
+
+
+TupleCustomConstructor = Annotated[
+    tuple[str, ...],
+    tyro.constructors.PrimitiveConstructorSpec(
+        nargs="*",
+        metavar="A TUPLE METAVAR",
+        is_instance=lambda x: isinstance(x, tuple)
+        and all(isinstance(i, str) for i in x),
+        instance_from_str=lambda args: tuple(args),
+        str_from_instance=lambda args: list(args),
+    ),
+]
+
+
+def test_tuple_custom_constructors_positional() -> None:
+    def main(field1: TupleCustomConstructor, /, field2: int = 3) -> tuple[str, ...]:
+        del field2
+        return field1
+
+    assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
+    assert tyro.cli(main, args=["a"]) == ("a",)
+    assert tyro.cli(main, args=[]) == ()
+    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+
+
+TupleCustomConstructor2 = Annotated[
+    tuple[str, ...],
+    tyro.constructors.PrimitiveConstructorSpec(
+        nargs="*",
+        metavar="A TUPLE METAVAR",
+        is_instance=lambda x: isinstance(x, tuple)
+        and all(isinstance(i, str) for i in x),
+        instance_from_str=lambda args: tuple(args),
+        str_from_instance=lambda args: list(args),
+    ),
+]
+
+
+def test_tuple_custom_constructors_positional_default_none() -> None:
+    def main(
+        field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
+    ) -> tuple[str, ...] | None:
+        del field2
+        return field1
+
+    assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
+    assert tyro.cli(main, args=["a"]) == ("a",)
+    assert tyro.cli(main, args=[]) is None
+    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+
+
+def test_tuple_custom_constructors_positional_default_five() -> None:
+    def main(
+        field1: TupleCustomConstructor2 | int = 5, /, field2: int = 3
+    ) -> tuple[str, ...] | int:
+        del field2
+        return field1
+
+    assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
+    assert tyro.cli(main, args=["a"]) == ("a",)
+    assert tyro.cli(main, args=[]) == 5
+    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)

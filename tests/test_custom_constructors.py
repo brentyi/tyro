@@ -139,6 +139,18 @@ def test_min_length_custom_constructor() -> None:
     assert tyro.cli(main, args=["--field1", "a", "b"]) == ["a", "b"]
 
 
+def test_min_length_custom_constructor_positional() -> None:
+    def main(
+        field1: tyro.conf.Positional[ListOfStringsWithMinimumLength], field2: int = 3
+    ) -> ListOfStringsWithMinimumLength:
+        del field2
+        return field1
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=[])
+    assert tyro.cli(main, args=["a", "b"]) == ["a", "b"]
+
+
 TupleCustomConstructor = Annotated[
     tuple[str, ...],
     tyro.constructors.PrimitiveConstructorSpec(
@@ -160,4 +172,17 @@ def test_tuple_custom_constructors() -> None:
     assert tyro.cli(main, args=["--field1", "a", "b"]) == ("a", "b")
     assert tyro.cli(main, args=["--field1", "a"]) == ("a",)
     assert tyro.cli(main, args=["--field1"]) == ()
+    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+
+
+def test_tuple_custom_constructors_positional() -> None:
+    def main(
+        field1: tyro.conf.Positional[TupleCustomConstructor], field2: int = 3
+    ) -> tuple[str, ...]:
+        del field2
+        return field1
+
+    assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
+    assert tyro.cli(main, args=["a"]) == ("a",)
+    assert tyro.cli(main, args=[]) == ()
     assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
