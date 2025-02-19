@@ -4,6 +4,7 @@ import json
 from typing import Any, Dict, List, Union
 
 import numpy as np
+import pytest
 from typing_extensions import Annotated, Literal, get_args
 
 import tyro
@@ -102,3 +103,36 @@ def test_custom_constructor_numpy() -> None:
         ).dtype
         == np.float32
     )
+
+
+def make_list_of_strings_with_minimum_length(args: List[str]) -> List[str]:
+    if len(args) == 0:
+        raise ValueError("Expected at least one string")
+    return args
+
+
+ListOfStringsWithMinimumLength = Annotated[
+    List[str],
+    tyro.constructors.PrimitiveConstructorSpec(
+        nargs="*",
+        metavar="STR [STR ...]",
+        is_instance=lambda x: isinstance(x, list)
+        and all(isinstance(i, str) for i in x),
+        instance_from_str=make_list_of_strings_with_minimum_length,
+        str_from_instance=lambda args: args,
+    ),
+]
+
+
+def test_min_length_custom_constructor() -> None:
+    def main(
+        field1: ListOfStringsWithMinimumLength, field2: int = 3
+    ) -> ListOfStringsWithMinimumLength:
+        del field2
+        return field1
+
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(main, args=["--field1"])
+    assert tyro.cli(main, args=["--field1", "a", "b"]) == ["a", "b"]

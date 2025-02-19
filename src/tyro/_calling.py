@@ -97,6 +97,7 @@ def callable_with_args(
             consumed_keywords.add(name_maybe_prefixed)
             if not arg.lowered.is_fixed():
                 value, value_found = get_value_from_arg(name_maybe_prefixed, arg)
+                should_cast = False
 
                 if value in _fields.MISSING_AND_MISSING_NONPROP:
                     value = arg.field.default
@@ -114,14 +115,18 @@ def callable_with_args(
                         and arg.lowered.nargs in ("?", "*")
                     ):
                         value = []
+                        should_cast = True
                 elif value_found:
                     # Value was found from the CLI, so we need to cast it with instance_from_str.
+                    should_cast = True
                     any_arguments_provided = True
                     if arg.lowered.nargs == "?":
                         # Special case for optional positional arguments: this is the
                         # only time that arguments don't come back as a list.
                         value = [value]
 
+                # Attempt to cast the value to the correct type.
+                if should_cast:
                     try:
                         assert arg.lowered.instance_from_str is not None
                         value = arg.lowered.instance_from_str(value)
