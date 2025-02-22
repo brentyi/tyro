@@ -280,7 +280,8 @@
         </div>
         <article role="main" id="furo-main-content">
           <h1>Source code for tyro._singleton</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">unittest.mock</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
 
 <div class="viewcode-block" id="Singleton">
@@ -304,16 +305,21 @@
 
 
 
+<span class="c1"># We&#39;ll inherit from unittest.mock.Mock for MISSING types to help with</span>
+<span class="c1"># typeguard error suppression.</span>
+<span class="c1"># https://typeguard.readthedocs.io/en/latest/features.html#support-for-mock-objects</span>
+
+
 <div class="viewcode-block" id="PropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.PropagatingMissingType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">PropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">PropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">,</span> <span class="n">unittest</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
 
 <div class="viewcode-block" id="NonpropagatingMissingType">
 <a class="viewcode-back" href="../../../api/tyro/_singleton/#tyro._singleton.NonpropagatingMissingType">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">NonpropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">):</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NonpropagatingMissingType</span><span class="p">(</span><span class="n">Singleton</span><span class="p">,</span> <span class="n">unittest</span><span class="o">.</span><span class="n">mock</span><span class="o">.</span><span class="n">Mock</span><span class="p">):</span>
     <span class="k">pass</span></div>
 
 
