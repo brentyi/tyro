@@ -649,10 +649,7 @@ def _get_dataclass_field_default(
             return getattr(parent_default_instance, field.name)
 
     # Try grabbing default from dataclass field.
-    if (
-        field.default not in MISSING_AND_MISSING_NONPROP
-        and field.default is not dataclasses.MISSING
-    ):
+    if field.default is not dataclasses.MISSING:
         default = field.default
         # dataclasses.is_dataclass() will also return true for dataclass
         # _types_, not just instances.

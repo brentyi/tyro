@@ -1,3 +1,4 @@
+import unittest.mock
 from typing import Any
 
 
@@ -16,11 +17,16 @@ class Singleton:
         pass
 
 
-class PropagatingMissingType(Singleton):
+# We'll inherit from unittest.mock.Mock for MISSING types to help with
+# typeguard error suppression.
+# https://typeguard.readthedocs.io/en/latest/features.html#support-for-mock-objects
+
+
+class PropagatingMissingType(Singleton, unittest.mock.Mock):
     pass
 
 
-class NonpropagatingMissingType(Singleton):
+class NonpropagatingMissingType(Singleton, unittest.mock.Mock):
     pass
 
 
