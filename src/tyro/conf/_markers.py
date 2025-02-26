@@ -16,11 +16,32 @@ from .. import _singleton
 T = TypeVar("T")
 
 Positional = Annotated[T, None]
-"""A type ``T`` can be annotated as ``Positional[T]`` if we want to parse it as a
-positional argument."""
+"""Mark a parameter to be parsed as a positional argument rather than a keyword argument.
+
+Example::
+
+    @dataclass
+    class Args:
+        input_file: Positional[str]  # Will be a positional arg
+        output_file: str  # Will be a keyword arg (--output-file)
+
+With this configuration, the CLI would accept: `python script.py input.txt --output-file output.txt`
+"""
 
 PositionalRequiredArgs = Annotated[T, None]
-"""Make all arguments without defaults positional."""
+"""Make all required arguments (those without default values) positional.
+
+This marker applies to an entire interface when passed to the `config` parameter of `tyro.cli()`.
+
+Example::
+
+    @dataclass
+    class Args:
+        input_file: str  # No default, will be positional
+        output_file: str = "output.txt"  # Has default, will be a keyword arg
+    
+    args = tyro.cli(Args, config=(tyro.conf.PositionalRequiredArgs,))
+"""
 
 # Private marker. For when an argument is not only positional in the CLI, but also in
 # the callable.
@@ -37,165 +58,301 @@ _OPTIONAL_GROUP = Annotated[T, None]
 # Perhaps Suppress should be Suppressed? But SuppressedFixed would be weird.
 
 Fixed = Annotated[T, None]
-"""A type ``T`` can be annotated as ``Fixed[T]`` to prevent :func:`tyro.cli`
-from parsing it; a default value should be set instead. Fields that can't be
-parsed with defaults will also be marked as fixed automatically."""
+"""Mark a field as fixed, preventing it from being modified through the CLI.
+
+When a field is marked as Fixed, tyro will always use the default value and will not
+create a CLI option for it. This is useful for fields that should not be configurable
+via command line arguments.
+
+Example::
+
+    @dataclass
+    class Config:
+        input_path: str
+        debug_mode: Fixed[bool] = False  # Cannot be changed via CLI
+        version: Fixed[str] = "1.0.0"    # Cannot be changed via CLI
+
+Fields that can't be parsed but have defaults will also be automatically marked as fixed.
+"""
 
 Suppress = Annotated[T, None]
-"""A type ``T`` can be annotated as ``Suppress[T]`` to prevent :func:`tyro.cli` from
-parsing it, and to prevent it from showing up in helptext."""
+"""Completely remove a field from the CLI interface and helptext.
+
+Unlike Fixed, which shows the field in the helptext but prevents modification,
+Suppress completely hides the field from both the CLI and the helptext.
+
+Example::
+
+    @dataclass
+    class Config:
+        input_path: str
+        # Internal fields that users don't need to see
+        _cached_data: Suppress[dict] = dataclasses.field(default_factory=dict)
+        _debug_level: Suppress[int] = 0
+"""
 
 SuppressFixed = Annotated[T, None]
-"""Hide fields that are either manually or automatically marked as fixed."""
+"""Hide fields that are marked as fixed from the helptext.
+
+This marker can be applied globally to hide all fixed fields from the helptext,
+making the interface cleaner by showing only fields that can be modified via CLI.
+
+Example::
+
+    tyro.cli(Config, config=(tyro.conf.SuppressFixed,))
+"""
 
 FlagConversionOff = Annotated[T, None]
-"""Turn off flag conversion for booleans with default values. Instead, types annotated
-with `bool` will expect an explicit True or False.
+"""Disable automatic flag-style conversion for boolean fields.
 
-Can be used directly on boolean annotations, ``FlagConversionOff[bool]``, or recursively
-applied to nested types."""
+By default, boolean fields with default values are converted to flags that can be enabled
+or disabled with command-line options. With FlagConversionOff, the boolean fields will 
+instead expect an explicit True or False value.
+
+Example::
+
+    # Default behavior (with flag conversion)
+    debug: bool = False  
+    # Usage: python script.py --debug      # Sets to True
+    #        python script.py --no-debug   # Sets to False
+    
+    # With FlagConversionOff
+    debug: FlagConversionOff[bool] = False
+    # Usage: python script.py --debug True  # Explicit value required
+    #        python script.py --debug False
+
+This marker can be applied to specific boolean fields or globally using the config parameter.
+"""
 
 FlagCreatePairsOff = Annotated[T, None]
-"""Turn off creation of ``{--flag,--no-flag}`` pairs for boolean types. Instead, only
-one flag will be created. ``--flag`` if the field default is ``False``, and
-``--no-flag`` if the field default is ``True``.
+"""Disable creation of matching flag pairs for boolean types.
 
-The default 'pair' behavior is more robust to changes in the default value, but might
-feel cluttered. This option provides an alternative.
+By default, tyro creates both positive and negative flags for boolean values 
+(like `--flag` and `--no-flag`). With this marker, only one flag will be created:
+- `--flag` if the default is False
+- `--no-flag` if the default is True
 
-Can be used directly on boolean annotations, ``FlagNegationOff[bool]``, or recursively
-applied to nested types."""
+Example::
+
+    # Default behavior (with flag pairs)
+    debug: bool = False
+    # Usage: python script.py --debug      # Sets to True
+    #        python script.py --no-debug   # Sets to False
+    
+    # With FlagCreatePairsOff
+    debug: FlagCreatePairsOff[bool] = False
+    # Usage: python script.py --debug      # Sets to True
+    #        (--no-debug flag is not created)
+
+This can make the helptext less cluttered but is less robust if default values change.
+"""
 
 AvoidSubcommands = Annotated[T, None]
-"""Avoid creating subcommands when a default is provided for unions over nested types.
-This simplifies CLI interfaces, but makes them less expressive.
+"""Avoid creating subcommands for union types that have a default value.
 
-Can be used directly on union types, ``AvoidSubcommands[Union[...]]``, or recursively
-applied to nested types."""
+When a union type has a default value, tyro normally creates a subcommand interface.
+With this marker, tyro will instead use the default value and not create subcommands,
+simplifying the CLI interface (but making it less expressive).
+
+Example::
+
+    # Without AvoidSubcommands
+    @dataclass
+    class Config:
+        mode: Union[ClassA, ClassB] = ClassA()
+        # CLI would have subcommands: python script.py mode:class-a ... or mode:class-b ...
+    
+    # With AvoidSubcommands
+    @dataclass
+    class Config:
+        mode: AvoidSubcommands[Union[ClassA, ClassB]] = ClassA()
+        # CLI would not have subcommands, would use ClassA() as default
+
+This can be applied to specific union fields or globally with the config parameter.
+"""
 
 ConsolidateSubcommandArgs = Annotated[T, None]
-"""Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
-ordering, with some tradeoffs.
+"""Consolidate arguments for nested subcommands to make CLI less position-sensitive.
 
-By default, :mod:`tyro` will generate a traditional CLI interface where args are applied
-to the directly preceding subcommand. When we have two subcommands ``s1`` and ``s2``:
-
+By default, tyro generates CLI interfaces where arguments apply to the directly preceding 
+subcommand, which creates position-dependent behavior:
 
 .. code-block:: bash
 
-    python x.py {--root options} s1 {--s1 options} s2 {--s2 options}
+    # Default behavior - position matters
+    python script.py --root-opt value sub1 --sub1-opt value sub2 --sub2-opt value
 
-This can be frustrating because the resulting CLI is sensitive to the positioning of
-options.
-
-To consolidate subcommands, we push arguments to the end, after all subcommands:
-
+With ConsolidateSubcommandArgs, all arguments are moved to the end, after all subcommands:
 
 .. code-block:: bash
 
-    python x.py s1 s2 {--root, s1, and s2 options}
+    # With ConsolidateSubcommandArgs - all options at the end
+    python script.py sub1 sub2 --root-opt value --sub1-opt value --sub2-opt value
 
+This makes the interface more robust to argument reordering and easier to use with
+command completion, but has a tradeoff: if root options are required (have no defaults),
+all subcommands must be specified first before providing those required arguments.
 
-This is more robust to reordering of options, ensuring that any new options can simply
-be placed at the end of the command.
+Example::
 
-The tradeoff is in required arguments. In the above example, if any ``--root.*`` options
-are required (no default is specified), all subcommands will need to be specified in
-order to provide the required argument.
-
-.. code-block:: bash
-
-   python x.py s1 s2 {required --root.* arguments}
+    tyro.cli(NestedConfig, config=(tyro.conf.ConsolidateSubcommandArgs,))
 """
 
 OmitSubcommandPrefixes = Annotated[T, None]
-"""Make CLI inputs used for subcommands shorter by omitting the subcommand-specific
-portion of the prefix.
+"""Simplify subcommand names by removing parent field prefixes from subcommands.
 
-If we have a structure with the field ``cmd: Union[NestedTypeA, NestedTypeB]``:
+By default, tyro uses prefixes to create namespaced subcommands and arguments.
+With this marker, subcommand prefixes are omitted, making CLI commands shorter.
 
-By default, ``--cmd.arg`` may be generated as a flag for each dataclass in the union.
-If subcommand prefixes are omitted, we would instead have ``--arg``.
+Example::
 
-By default, ``cmd:nested-type-a`` and ``cmd:nested-type-b`` may be generated as subcommand.
-If subcommand prefixes are omitted, we would instead have ``nested-type-a`` and
-``nested-type-b``.
+    @dataclass
+    class Config:
+        mode: Union[ProcessorA, ProcessorB]
+    
+    # Default CLI (with prefixes):
+    # python script.py mode:processor-a --mode.option value
+    
+    # With OmitSubcommandPrefixes:
+    # python script.py processor-a --option value
+
+This is especially useful for deeply nested structures where the fully prefixed arguments
+would become unwieldy.
 """
 
 OmitArgPrefixes = Annotated[T, None]
-"""Make flags used for keyword arguments shorter by omitting prefixes.
+"""Simplify argument names by removing parent field prefixes from flags.
 
-If we have a structure with the field:
+By default, tyro creates namespaced flags for nested structures (like --parent.child.option).
+With this marker, the prefixes are omitted, resulting in shorter argument names.
 
-.. code-block:: python
+Example::
 
-    cmd: NestedType
+    @dataclass
+    class NestedConfig:
+        option: str = "value"
+    
+    @dataclass
+    class Config:
+        nested: OmitArgPrefixes[NestedConfig]
+    
+    # Default CLI (with prefixes):
+    # python script.py --nested.option value
+    
+    # With OmitArgPrefixes:
+    # python script.py --option value
 
-By default, ``--cmd.arg`` may be generated as a flag. If prefixes are omitted, we would
-instead simply have ``--arg``.
+This can simplify command lines but may cause name conflicts if multiple nested 
+structures have fields with the same name.
 """
 
 UseAppendAction = Annotated[T, None]
-"""Use "append" actions for variable-length arguments.
+"""Enable specifying list elements through repeated flag usage rather than space-separated values.
 
-Given an annotation like ``x: list[int]``, this means that ``x = [0, 1, 2]`` can be set
-via the CLI syntax ``--x 0 --x 1 --x 2`` instead of the default of ``--x 0 1 2``.
+By default, tyro expects list elements to be provided as space-separated values after a single flag.
+With UseAppendAction, each element is provided by repeating the flag multiple times.
 
-The resulting syntax may be more user-friendly; for :mod:`tyro`, it also enables support
-for otherwise ambiguous annotations like ``list[list[int]]``.
+Example::
 
-Can be applied to all variable-length sequences (``list[T]``, ``Sequence[T]``,
-``tuple[T, ...]``, etc), including dictionaries without default values.
+    @dataclass
+    class Config:
+        # Default list behavior
+        numbers: list[int]
+        # With UseAppendAction
+        tags: UseAppendAction[list[str]]
+    
+    # Default list usage:
+    # python script.py --numbers 1 2 3
+    
+    # UseAppendAction usage:
+    # python script.py --tags red --tags green --tags blue
+
+This provides two benefits:
+1. More intuitive for some users who prefer repeating arguments
+2. Enables support for nested lists like `list[list[int]]` that would otherwise be ambiguous
 """
 
 UseCounterAction = Annotated[T, None]
-"""Use "counter" actions for integer arguments. Should be used with integers,
-``UseCounterAction[int]``."""
+"""Create a counter-style flag that increments an integer each time it appears.
+
+This marker converts an integer parameter into a counter where each occurrence of the flag
+increases the value by 1, similar to common CLI tools like `-v`, `-vv`, `-vvv` for verbosity.
+
+Example::
+
+    @dataclass
+    class Config:
+        verbose: UseCounterAction[int] = 0
+    
+    # Usage:
+    # python script.py            # verbose = 0
+    # python script.py --verbose  # verbose = 1
+    # python script.py --verbose --verbose  # verbose = 2
+    # python script.py --verbose --verbose --verbose  # verbose = 3
+
+This is especially useful for verbosity levels or similar numeric settings where
+repeated flags are more intuitive than explicit values.
+"""
 
 EnumChoicesFromValues = Annotated[T, None]
-"""Populate choices from enum values rather than enum names.
+"""Use enum values instead of enum names for command-line choices.
 
-Example:
+By default, tyro uses enum member names as the choices shown in the CLI.
+With EnumChoicesFromValues, the enum values are used as choices instead.
 
-.. code-block:: python
+Example::
 
-    class OutputFormats(enum.StrEnum):
-        JSON = enum.auto()
-        PRETTY = enum.auto()
-        RICH = enum.auto()
-        TOML = enum.auto()
+    import enum
+    from dataclasses import dataclass
+    import tyro
+    
+    class OutputFormat(enum.StrEnum):
+        JSON = enum.auto()      # value is "json"
+        PRETTY = enum.auto()    # value is "pretty"
+        RICH = enum.auto()      # value is "rich"
+        TOML = enum.auto()      # value is "toml"
+    
+    @dataclass
+    class Config:
+        # Default behavior: choices would be JSON, PRETTY, RICH, TOML
+        format: OutputFormat = OutputFormat.PRETTY
+        
+        # With EnumChoicesFromValues: choices are json, pretty, rich, toml
+        alt_format: EnumChoicesFromValues[OutputFormat] = OutputFormat.PRETTY
+    
+This is particularly useful with auto-generated enum values like those in StrEnum,
+where the values may be more user-friendly than the internal names.
 
-    @dataclasses.dataclass
-    class Args:
-        display_format: Annotated[
-            OutputFormats, tyro.conf.EnumChoicesFromValues
-        ] = OutputFormats.PRETTY
-
-The above will result in ``json``, ``pretty``, ``rich``, and ``toml`` (all lowercase) as
-choices, since the auto values for `StrEnum` (Python 3.11+) are lowercase
-transformations of the names. Without this marker, the choices would be ``JSON``,
-``PRETTY``, ``RICH``, and ``TOML``.
-
-Enum aliases are not relevant when this marker is present. The first entry matching the
-chosen value will be selected.
+Note: When this marker is used, enum aliases aren't considered. The first enum member
+with a matching value will be selected.
 """
 
 HelptextFromCommentsOff = Annotated[T, None]
-"""For helptext generation, ignore comments in the source code.
+"""Disable automatic helptext generation from code comments.
 
-By default, tyro will treat comments that precede field definitions as
-docstrings:
+By default, tyro extracts helptext from comments in the source code:
+- Comments before a field definition are used as helptext
+- Inline comments following a field definition are used as helptext
 
-.. code-block:: python
+Example::
 
-    # Comment.
-    field1: str
-    field2: str # Other comment.
+    @dataclass
+    class Config:
+        # This comment becomes helptext for input_file
+        input_file: str
+        
+        output_file: str  # This inline comment becomes helptext for output_file
 
-This will produce CLI arguments with the comments as helptext. If you have code
-with a lot of comments, however, this behavior can be annoying.
-``HelptextIgnoreComments`` will turn this behavior off. Triple-quoted
-docstrings are unaffected.
+If you have code with many organizational or implementation comments that shouldn't
+appear in the CLI help, this automatic extraction might be unhelpful. This marker
+disables comment extraction while still preserving proper docstring extraction.
+
+Example::
+
+    tyro.cli(Config, config=(tyro.conf.HelptextFromCommentsOff,))
+
+Triple-quoted docstrings ("""docstring""") on fields are still used for helptext
+even when this marker is applied.
 """
 
 
