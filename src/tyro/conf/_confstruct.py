@@ -67,28 +67,28 @@ def subcommand(
         @dataclass
         class TrainConfig:
             learning_rate: float = 0.01
-            
+
         @dataclass
         class EvalConfig:
             checkpoint_path: str
-        
+
         @dataclass
         class MainConfig:
             # Default subcommand behavior:
             mode1: Union[TrainConfig, EvalConfig]
-            
+
             # Customized subcommands:
             mode2: Union[
                 Annotated[TrainConfig, tyro.conf.subcommand("train")],
                 Annotated[EvalConfig, tyro.conf.subcommand("evaluate")]
             ]
-        
+
         # CLI usage:
         # Default: python script.py mode1:train-config --mode1.learning-rate 0.02
         # Custom:  python script.py mode2:train --mode2.learning-rate 0.02
 
     You can customize several aspects of subcommands:
-    
+
     1. Name: You can use a simpler, more intuitive name than the auto-generated one.
     2. Default: You can provide a default instance to use.
     3. Description: You can specify custom helptext for the subcommand.
@@ -176,8 +176,8 @@ def arg(
 ) -> Any:
     """Provides fine-grained control over individual CLI argument properties.
 
-    The `arg()` function allows you to customize how individual arguments appear and 
-    behave in the command-line interface. This provides more control than relying on 
+    The `arg()` function allows you to customize how individual arguments appear and
+    behave in the command-line interface. This provides more control than relying on
     the automatic argument generation.
 
     Example::
@@ -190,7 +190,7 @@ def arg(
         class Config:
             # Default argument appearance
             regular_option: int = 1
-            
+
             # Customized argument
             custom_option: Annotated[
                 str,
@@ -201,12 +201,12 @@ def arg(
                     metavar="VALUE"                 # Display in help
                 )
             ] = "default"
-            
-        # Usage: 
+
+        # Usage:
         # python script.py --regular-option 5 --opt custom_value
         # python script.py --regular-option 5 -o custom_value
 
-    The `arg()` function should be used at the root level of annotations and not 
+    The `arg()` function should be used at the root level of annotations and not
     nested within container types like lists.
 
     Args:
@@ -222,7 +222,7 @@ def arg(
             not supported for positional arguments.
         prefix_name: Controls whether to prefix the argument name based on its position
             in a nested structure. Arguments are prefixed by default.
-        constructor: A custom constructor type or function to use in place of the 
+        constructor: A custom constructor type or function to use in place of the
             argument's type for parsing. See :mod:`tyro.constructors` for more details.
         constructor_factory: A function that returns a constructor type for parsing.
             This cannot be used together with the constructor parameter.

@@ -115,17 +115,17 @@ def cli(
     **deprecated_kwargs,
 ) -> OutT | tuple[OutT, list[str]]:
     """Generate a command-line interface from type annotations and populate the target with arguments.
-    
+
     The `cli()` function is the core of tyro. It takes a type-annotated function or class
     and automatically generates a command-line interface to populate it from user arguments.
-    
+
     Two main usage patterns are supported:
-    
+
     1. With a function (CLI arguments become function parameters):
-    
+
        ```python
        import tyro
-       
+
        def train(
            learning_rate: float = 0.01,
            batch_size: int = 32,
@@ -133,24 +133,24 @@ def cli(
        ) -> None:
            # Function implementation that uses the CLI arguments
            print(f"Training with lr={learning_rate}, batch_size={batch_size}, epochs={epochs}")
-           
+
        # In script: python script.py --learning-rate 0.02 --epochs 20
        if __name__ == "__main__":
            tyro.cli(train)  # Parses CLI args, calls train() with them
        ```
-       
+
     2. With a class (CLI arguments become object attributes):
-    
+
        ```python
        from dataclasses import dataclass
        import tyro
-       
+
        @dataclass
        class TrainConfig:
            learning_rate: float = 0.01
            batch_size: int = 32
            epochs: int = 10
-           
+
        # In script: python script.py --learning-rate 0.02 --epochs 20
        if __name__ == "__main__":
            config = tyro.cli(TrainConfig)  # Parses CLI args, returns populated TrainConfig
@@ -166,19 +166,19 @@ def cli(
         description: The description text shown at the top of the help output. If not
             specified, the docstring of `f` is used. This mirrors the argument from
             :py:class:`argparse.ArgumentParser()`.
-        args: If provided, parse arguments from this sequence of strings instead of 
+        args: If provided, parse arguments from this sequence of strings instead of
             the command line. This is useful for testing or programmatic usage. This mirrors
             the argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
         default: An instance to use for default values. This is only supported if `f` is a
-            type like a dataclass or dictionary, not if `f` is a general callable like a 
-            function. This is useful for merging CLI arguments with values loaded from 
+            type like a dataclass or dictionary, not if `f` is a general callable like a
+            function. This is useful for merging CLI arguments with values loaded from
             elsewhere, such as a config file.
         return_unknown_args: If True, returns a tuple of the output and a list of unknown
             arguments that weren't consumed by the parser. This mirrors the behavior of
             :py:meth:`argparse.ArgumentParser.parse_known_args()`.
-        use_underscores: If True, uses underscores as word delimiters in the help text 
-            instead of hyphens. This only affects the displayed help; both underscores and 
-            hyphens are treated equivalently during parsing. The default (False) follows the 
+        use_underscores: If True, uses underscores as word delimiters in the help text
+            instead of hyphens. This only affects the displayed help; both underscores and
+            hyphens are treated equivalently during parsing. The default (False) follows the
             GNU style guide for command-line options.
             https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
         console_outputs: If set to False, suppresses parsing errors and help messages.
