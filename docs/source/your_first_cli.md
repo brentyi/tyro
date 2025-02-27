@@ -63,14 +63,15 @@ $ python script.py --a 5 --b 7
 12
 
 $ python script.py --help
-usage: script.py [-h] --a A [--b B]
+usage: script.py [-h] --a INT [--b INT]
 
 Add two numbers together.
 
-options:
-  -h, --help  show this help message and exit
-  --a A       First number to add.
-  --b B       Second number to add. Defaults to 3. (default: 3)
+╭─ options ───────────────────────────────────────────────────────────╮
+│ -h, --help        show this help message and exit                   │
+│ --a INT           First number to add. (required)                   │
+│ --b INT           Second number to add. Defaults to 3. (default: 3) │
+╰─────────────────────────────────────────────────────────────────────╯
 ```
 
 A more succinct version that combines the function call with printing:
@@ -115,14 +116,15 @@ $ python script.py --a 5
 8
 
 $ python script.py --help
-usage: script.py [-h] --a A [--b B]
+usage: script.py [-h] --a INT [--b INT]
 
 Configuration for adding two numbers.
 
-options:
-  -h, --help  show this help message and exit
-  --a A       First number to add
-  --b B       Second number to add (default: 3) (default: 3)
+╭─ options ────────────────────────────────────────────────────────╮
+│ -h, --help        show this help message and exit                │
+│ --a INT           First number to add (required)                 │
+│ --b INT           Second number to add (default: 3) (default: 3) │
+╰──────────────────────────────────────────────────────────────────╯
 ```
 
 ## Benefits over argparse
