@@ -351,7 +351,7 @@ Example::
 
     tyro.cli(Config, config=(tyro.conf.HelptextFromCommentsOff,))
 
-Triple-quoted docstrings ("""docstring""") on fields are still used for helptext
+Triple-quoted docstrings on fields are still used for helptext
 even when this marker is applied.
 """
 

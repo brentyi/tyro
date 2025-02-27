@@ -53,68 +53,62 @@ def subcommand(
     constructor: type | Callable | None = None,
     constructor_factory: Callable[[], type | Callable] | None = None,
 ) -> Any:
-    """Returns a metadata object for configuring subcommands with
-    :py:data:`typing.Annotated`. Useful for aesthetics.
+    """Configure subcommand behavior for Union types in the CLI.
 
-    Consider the standard approach for creating subcommands:
+    When tyro encounters a Union type, it creates subcommands in the CLI. The `subcommand()`
+    function allows you to customize the appearance and behavior of these subcommands.
 
-    .. code-block:: python
+    Example::
 
-        tyro.cli(
-            Union[StructTypeA, StructTypeB]
-        )
+        from dataclasses import dataclass
+        from typing import Annotated, Union
+        import tyro
 
-    This will create two subcommands: `nested-type-a` and `nested-type-b`.
-
-    Annotating each type with :func:`tyro.conf.subcommand()` allows us to
-    override for each subcommand the (a) name, (b) defaults, (c) helptext, and
-    (d) whether to prefix the name or not.
-
-    .. code-block:: python
-
-        tyro.cli(
-            Union[
-                Annotated[
-                    StructTypeA, subcommand("a", ...)
-                ],
-                Annotated[
-                    StructTypeB, subcommand("b", ...)
-                ],
+        @dataclass
+        class TrainConfig:
+            learning_rate: float = 0.01
+            
+        @dataclass
+        class EvalConfig:
+            checkpoint_path: str
+        
+        @dataclass
+        class MainConfig:
+            # Default subcommand behavior:
+            mode1: Union[TrainConfig, EvalConfig]
+            
+            # Customized subcommands:
+            mode2: Union[
+                Annotated[TrainConfig, tyro.conf.subcommand("train")],
+                Annotated[EvalConfig, tyro.conf.subcommand("evaluate")]
             ]
-        )
+        
+        # CLI usage:
+        # Default: python script.py mode1:train-config --mode1.learning-rate 0.02
+        # Custom:  python script.py mode2:train --mode2.learning-rate 0.02
 
-    If we have a default value both in the annotation and attached to the field
-    itself (eg, RHS of `=` within function or dataclass signature), the field
-    default will take precedence.
+    You can customize several aspects of subcommands:
+    
+    1. Name: You can use a simpler, more intuitive name than the auto-generated one.
+    2. Default: You can provide a default instance to use.
+    3. Description: You can specify custom helptext for the subcommand.
+    4. Prefix behavior: You can control whether the subcommand name includes the parent field name.
 
-    .. code-block:: python
+    If a default value is provided both via `subcommand(default=...)` and in the field
+    definition itself (`field = default`), the field default will take precedence.
 
-        # For the first subcommand, StructTypeA(1) will be used as the default.
-        # The second subcommand, whose type is inconsistent with the field
-        # default, will be unaffected.
-        x: Union[
-            Annotated[
-                StructTypeA, subcommand(default=StructTypeA(0))
-            ],
-            Annotated[
-                StructTypeB, subcommand(default=StructTypeB(0))
-            ],
-        ] = StructTypeA(1)
+    Args:
+        name: Custom name for the subcommand in the CLI.
+        default: Default instance to use for this subcommand.
+        description: Custom helptext for this subcommand.
+        prefix_name: Whether to include the parent field name as a prefix in the subcommand
+            name (default: True).
+        constructor: Custom constructor type or function for parsing arguments.
+        constructor_factory: Function that returns a constructor type for parsing arguments
+            (cannot be used with constructor).
 
-    Arguments:
-        name: The name of the subcommand in the CLI.
-        default: A default value for the subcommand, for struct-like types. (eg
-             dataclasses).
-        description: Description of this option to use in the helptext. Defaults to
-            docstring.
-        prefix_name: Whether to prefix the name of the subcommand based on where it
-            is in a nested structure.
-        constructor: A constructor type or function. This will be used in
-            place of the argument's type for parsing arguments. For more
-            configurability, see :mod:`tyro.constructors`.
-        constructor_factory: A function that returns a constructor type. This
-            will be used in place of the argument's type for parsing arguments.
-            For more configurability, see :mod:`tyro.constructors`.
+    Returns:
+        A configuration object that should be attached to a type using `Annotated[]`.
     """
     assert not (constructor is not None and constructor_factory is not None), (
         "`constructor` and `constructor_factory` cannot both be set."
@@ -180,45 +174,61 @@ def arg(
     constructor: type | Callable[..., Any] | None = None,
     constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
 ) -> Any:
-    """Returns a metadata object for fine-grained argument configuration with
-    :py:data:`typing.Annotated`. Should typically not be required.
+    """Provides fine-grained control over individual CLI argument properties.
 
-    We support using :func:`arg()` at the root of arguments. For example:
+    The `arg()` function allows you to customize how individual arguments appear and 
+    behave in the command-line interface. This provides more control than relying on 
+    the automatic argument generation.
 
-    .. code-block:: python
+    Example::
 
-        x: Annotated[int, tyro.conf.arg(...)]
+        from dataclasses import dataclass
+        from typing import Annotated
+        import tyro
 
-    Nesting :func:`arg()` within other types is generally not supported:
+        @dataclass
+        class Config:
+            # Default argument appearance
+            regular_option: int = 1
+            
+            # Customized argument
+            custom_option: Annotated[
+                str,
+                tyro.conf.arg(
+                    name="opt",                     # Shorter name
+                    help="Custom help message",     # Override docstring
+                    aliases=("-o", "--short-opt"),  # Alternative flags
+                    metavar="VALUE"                 # Display in help
+                )
+            ] = "default"
+            
+        # Usage: 
+        # python script.py --regular-option 5 --opt custom_value
+        # python script.py --regular-option 5 -o custom_value
 
-    .. code-block:: python
+    The `arg()` function should be used at the root level of annotations and not 
+    nested within container types like lists.
 
-        # Not supported.
-        x: list[Annotated[int, tyro.conf.arg(...)]]
-
-
-    Arguments:
-        name: A new name for the argument in the CLI.
-        metavar: Argument name in usage messages. The type is used by default.
-        help: Override helptext for this argument. The docstring is used by default.
-        help_behavior_hint: Override highlighted text that follows the helptext.
-            Typically used for behavior hints like the `(default: XXX)` or
-            `(optional)`. Can either be a string or a lambda function whose
-            input is a formatted default value.
-        aliases: Aliases for this argument. All strings in the sequence should start
-            with a hyphen (-). Aliases will _not_ currently be prefixed in a nested
-            structure, and are not supported for positional arguments.
-        prefix_name: Whether or not to prefix the name of the argument based on where
-            it is in a nested structure. Arguments are prefixed by default.
-        constructor: A constructor type or function. This will be used in
-            place of the argument's type for parsing arguments. For more
-            configurability, see :mod:`tyro.constructors`.
-        constructor_factory: A function that returns a constructor type. This
-            will be used in place of the argument's type for parsing arguments.
-            For more configurability, see :mod:`tyro.constructors`.
+    Args:
+        name: A custom name for the argument in the CLI.
+        metavar: Argument placeholder shown in usage messages. The type is used by default.
+        help: Custom helptext for this argument. The docstring is used by default.
+        help_behavior_hint: Override the highlighted hint text that follows the helptext.
+            This is typically used for hints like "(default: XXX)" or "(optional)".
+            You can provide either a string or a lambda function that takes a formatted
+            default value as input.
+        aliases: Alternative flag names for this argument. All strings must start
+            with a hyphen (-). Aliases are not prefixed in nested structures and are
+            not supported for positional arguments.
+        prefix_name: Controls whether to prefix the argument name based on its position
+            in a nested structure. Arguments are prefixed by default.
+        constructor: A custom constructor type or function to use in place of the 
+            argument's type for parsing. See :mod:`tyro.constructors` for more details.
+        constructor_factory: A function that returns a constructor type for parsing.
+            This cannot be used together with the constructor parameter.
 
     Returns:
-        Object to attach via `typing.Annotated[]`.
+        A configuration object that should be attached to a type using `Annotated[]`.
     """
     assert not (constructor is not None and constructor_factory is not None), (
         "`constructor` and `constructor_factory` cannot both be set."
