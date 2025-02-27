@@ -10,15 +10,6 @@ pip install tyro
 
 This will install the minimal dependencies required for tyro to function properly.
 
-## Optional Dependencies
-
-Tyro has optional integrations with several popular libraries. To install tyro with
-all optional dependencies for full functionality:
-
-```bash
-pip install "tyro[dev]"
-```
-
 ## Development Installation
 
 If you'd like to contribute to tyro, here's how to set up a development environment:
