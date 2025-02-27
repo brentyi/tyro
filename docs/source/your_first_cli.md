@@ -4,7 +4,7 @@ To get started with `tyro`, let's compare it with a traditional `argparse`-based
 interface:
 
 ```python
-'''Sum two numbers from argparse.'''
+"""Sum two numbers from argparse."""
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -32,11 +32,11 @@ issues:
 We can write the same script as above using `tyro.cli()`:
 
 ```python
-'''Sum two numbers by calling a function with tyro.'''
+"""Sum two numbers by calling a function with tyro."""
 import tyro
 
 def add(a: int, b: int = 3) -> int:
-    '''Add two numbers together.
+    """Add two numbers together.
     
     Args:
         a: First number to add.
@@ -44,7 +44,7 @@ def add(a: int, b: int = 3) -> int:
     
     Returns:
         The sum of the two numbers.
-    '''
+    """
     return a + b
 
 # Populate the inputs of add(), call it, then return the output.
@@ -76,11 +76,11 @@ options:
 A more succinct version that combines the function call with printing:
 
 ```python
-'''Sum two numbers by calling a function with tyro.'''
+"""Sum two numbers by calling a function with tyro."""
 import tyro
 
 def add(a: int, b: int = 3) -> None:
-    '''Add two numbers together and print the result.'''
+    """Add two numbers together and print the result."""
     print(a + b)
 
 tyro.cli(add)  # Parses arguments, calls add(), and returns None.
@@ -92,14 +92,14 @@ A class in Python can be treated as a function that returns an instance. This is
 particularly useful for more complex configurations:
 
 ```python
-'''Sum two numbers by instantiating a dataclass with tyro.'''
+"""Sum two numbers by instantiating a dataclass with tyro."""
 from dataclasses import dataclass
 
 import tyro
 
 @dataclass
 class Args:
-    '''Configuration for adding two numbers.'''
+    """Configuration for adding two numbers."""
     
     a: int  # First number to add
     b: int = 3  # Second number to add (default: 3)
