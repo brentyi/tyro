@@ -2,9 +2,8 @@
 configuration metadata to types via `PEP 593 <https://peps.python.org/pep-0593/>`_ runtime
 annotations.
 
-These configuration markers allow you to customize how tyro generates CLI interfaces,
-such as modifying positional arguments, suppressing fields, or changing how
-boolean flags work.
+Configuration markers allow you to customize generated CLI interfaces, such as
+to set positional arguments, suppress fields, or change boolean flag behaviors.
 
 Markers can be applied in three ways:
 
@@ -12,9 +11,10 @@ Markers can be applied in three ways:
 2. They can be passed into :py:data:`typing.Annotated`: ``Annotated[str, tyro.conf.Positional]``
 3. They can be passed into :func:`tyro.cli`: ``tyro.cli(Args, config=(tyro.conf.FlagConversionOff,))``
 
-Most markers are applied recursively to nested structures when appropriate. These features
-are fully supported but should be used sparingly, as they can make interfaces less intuitive.
-Prefer using standard Python type annotations whenever possible.
+Markers are applied recursively to nested structures.
+
+These features are fully supported but should be used sparingly. Prefer using
+standard Python type annotations whenever possible.
 
 See :doc:`/examples/basics` for examples of using configuration markers.
 """

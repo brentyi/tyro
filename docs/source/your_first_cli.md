@@ -19,6 +19,7 @@ print(total)
 
 This is dramatically cleaner than manually parsing `sys.argv`, but has several
 issues:
+
 - It requires significant parsing-specific boilerplate.
 - It lacks type checking and IDE support (no jumping to definitions, finding
   references, docstrings, refactoring or renaming tools).
@@ -37,13 +38,10 @@ import tyro
 
 def add(a: int, b: int = 3) -> int:
     """Add two numbers together.
-    
+
     Args:
         a: First number to add.
         b: Second number to add. Defaults to 3.
-    
-    Returns:
-        The sum of the two numbers.
     """
     return a + b
 
@@ -101,7 +99,7 @@ import tyro
 @dataclass
 class Args:
     """Configuration for adding two numbers."""
-    
+
     a: int  # First number to add
     b: int = 3  # Second number to add (default: 3)
 

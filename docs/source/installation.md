@@ -8,8 +8,6 @@ Tyro supports Python 3.7 through 3.13 and can be installed via pip:
 pip install tyro
 ```
 
-This will install the minimal dependencies required for tyro to function properly.
-
 ## Development Installation
 
 If you'd like to contribute to tyro, here's how to set up a development environment:
@@ -20,16 +18,16 @@ git clone git@github.com:brentyi/tyro.git
 cd tyro
 
 # Install in development mode with all dependencies
-python -m pip install -e ".[dev]"
+pip install -e ".[dev]"
 
 # Run tests
 pytest
 
 # Check types
-pyright .
+pyright
 
 # Run linters
-ruff check
+ruff check --fix
 ruff format
 ```
 

@@ -116,50 +116,44 @@ def cli(
 ) -> OutT | tuple[OutT, list[str]]:
     """Generate a command-line interface from type annotations and populate the target with arguments.
 
-    The `cli()` function is the core of tyro. It takes a type-annotated function or class
+    :func:`cli()` is the core function of tyro. It takes a type-annotated function or class
     and automatically generates a command-line interface to populate it from user arguments.
 
     Two main usage patterns are supported:
 
     1. With a function (CLI arguments become function parameters):
 
-       ```python
-       import tyro
+       .. code-block:: python
 
-       def train(
-           learning_rate: float = 0.01,
-           batch_size: int = 32,
-           epochs: int = 10,
-       ) -> None:
-           # Function implementation that uses the CLI arguments
-           print(f"Training with lr={learning_rate}, batch_size={batch_size}, epochs={epochs}")
+          import tyro
 
-       # In script: python script.py --learning-rate 0.02 --epochs 20
-       if __name__ == "__main__":
-           tyro.cli(train)  # Parses CLI args, calls train() with them
-       ```
+          def main(a: str, b: str) -> None:
+              print(a, b)
+
+          if __name__ == "__main__":
+              tyro.cli(main)  # Parses CLI args, calls main() with them
 
     2. With a class (CLI arguments become object attributes):
 
-       ```python
-       from dataclasses import dataclass
-       import tyro
+       .. code-block:: python
 
-       @dataclass
-       class TrainConfig:
-           learning_rate: float = 0.01
-           batch_size: int = 32
-           epochs: int = 10
+          from dataclasses import dataclass
+          from pathlib import Path
 
-       # In script: python script.py --learning-rate 0.02 --epochs 20
-       if __name__ == "__main__":
-           config = tyro.cli(TrainConfig)  # Parses CLI args, returns populated TrainConfig
-           print(f"Config: {config}")
-       ```
+          import tyro
+
+          @dataclass
+          class Config:
+              a: str
+              b: str
+
+          if __name__ == "__main__":
+              config = tyro.cli(Config)  # Parses CLI args, returns populated AppConfig
+              print(f"Config: {config}")
 
     Args:
         f: The function or type to populate from command-line arguments. This must have
-           properly type-annotated inputs for tyro to work correctly.
+            type-annotated inputs for tyro to work correctly.
         prog: The name of the program to display in the help text. If not specified, the
             script filename is used. This mirrors the argument from
             :py:class:`argparse.ArgumentParser()`.
@@ -169,8 +163,8 @@ def cli(
         args: If provided, parse arguments from this sequence of strings instead of
             the command line. This is useful for testing or programmatic usage. This mirrors
             the argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
-        default: An instance to use for default values. This is only supported if `f` is a
-            type like a dataclass or dictionary, not if `f` is a general callable like a
+        default: An instance to use for default values. This is only supported if ``f`` is a
+            type like a dataclass or dictionary, not if ``f`` is a general callable like a
             function. This is useful for merging CLI arguments with values loaded from
             elsewhere, such as a config file.
         return_unknown_args: If True, returns a tuple of the output and a list of unknown
@@ -186,12 +180,12 @@ def cli(
             workers but console output is only desired from the main process.
         config: A sequence of configuration marker objects from :mod:`tyro.conf`. This
             allows applying markers globally instead of annotating individual fields.
-            For example: `tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))`
+            For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
 
     Returns:
-        If `f` is a type (like a dataclass), returns an instance of that type populated
-        with values from the command line. If `f` is a function, calls the function with
-        arguments from the command line and returns its result. If `return_unknown_args`
+        If ``f`` is a type (like a dataclass), returns an instance of that type populated
+        with values from the command line. If ``f`` is a function, calls the function with
+        arguments from the command line and returns its result. If ``return_unknown_args``
         is True, returns a tuple of the result and a list of unused command-line arguments.
     """
 
@@ -264,10 +258,10 @@ def get_parser(
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
 ) -> argparse.ArgumentParser:
-    """Get the ``argparse.ArgumentParser`` object generated under-the-hood by
-    :func:`tyro.cli()`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+    """Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
+    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
 
-    For tab completion, we recommend using :func:`tyro.cli()`'s built-in
+    For tab completion, we recommend using :func:`tyro.cli`'s built-in
     ``--tyro-write-completion`` flag."""
     with _strings.delimeter_context("_" if use_underscores else "-"):
         return cast(

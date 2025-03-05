@@ -55,8 +55,9 @@ def subcommand(
 ) -> Any:
     """Configure subcommand behavior for Union types in the CLI.
 
-    When tyro encounters a Union type, it creates subcommands in the CLI. The `subcommand()`
-    function allows you to customize the appearance and behavior of these subcommands.
+    When tyro encounters a Union type over structures, it creates subcommands in the
+    CLI. The `subcommand()` function allows you to customize the appearance and behavior
+    of these subcommands.
 
     Example::
 
@@ -74,25 +75,13 @@ def subcommand(
 
         @dataclass
         class MainConfig:
-            # Default subcommand behavior:
-            mode1: Union[TrainConfig, EvalConfig]
-
             # Customized subcommands:
-            mode2: Union[
+            mode: Union[
                 Annotated[TrainConfig, tyro.conf.subcommand("train")],
                 Annotated[EvalConfig, tyro.conf.subcommand("evaluate")]
             ]
 
-        # CLI usage:
-        # Default: python script.py mode1:train-config --mode1.learning-rate 0.02
-        # Custom:  python script.py mode2:train --mode2.learning-rate 0.02
-
-    You can customize several aspects of subcommands:
-
-    1. Name: You can use a simpler, more intuitive name than the auto-generated one.
-    2. Default: You can provide a default instance to use.
-    3. Description: You can specify custom helptext for the subcommand.
-    4. Prefix behavior: You can control whether the subcommand name includes the parent field name.
+        # CLI usage: python script.py mode:train --mode.learning-rate 0.02
 
     If a default value is provided both via `subcommand(default=...)` and in the field
     definition itself (`field = default`), the field default will take precedence.
