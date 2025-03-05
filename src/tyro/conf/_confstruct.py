@@ -14,7 +14,7 @@ class _SubcommandConfig:
     default: Any
     description: str | None
     prefix_name: bool
-    constructor_factory: Callable[[], type | Callable] | None
+    constructor_factory: Callable[[], type | Callable[..., Any]] | None
 
     def __hash__(self) -> int:
         return object.__hash__(self)
@@ -28,7 +28,7 @@ def subcommand(
     description: str | None = None,
     prefix_name: bool = True,
     constructor: None = None,
-    constructor_factory: Callable[[], type | Callable] | None = None,
+    constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
 ) -> Any: ...
 
 
@@ -39,7 +39,7 @@ def subcommand(
     default: Any = MISSING_NONPROP,
     description: str | None = None,
     prefix_name: bool = True,
-    constructor: type | Callable | None = None,
+    constructor: type | Callable[..., Any] | None = None,
     constructor_factory: None = None,
 ) -> Any: ...
 
@@ -50,8 +50,8 @@ def subcommand(
     default: Any = MISSING_NONPROP,
     description: str | None = None,
     prefix_name: bool = True,
-    constructor: type | Callable | None = None,
-    constructor_factory: Callable[[], type | Callable] | None = None,
+    constructor: type | Callable[..., Any] | None = None,
+    constructor_factory: Callable[[], type | Callable[..., Any]] | None = None,
 ) -> Any:
     """Configure subcommand behavior for Union types in the CLI.
 

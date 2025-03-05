@@ -30,3 +30,6 @@ Tyro focuses on generating CLI interfaces from type-annotated Python. The codeba
 - Include examples in docstrings for complex functionality.
 - For markers and config options, show both the feature and its effect on CLI usage.
 - Update the docstrings when changing any public API.
+
+## Architecture
+Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.7-3.13 with conditional imports and version-specific features.
