@@ -2,13 +2,21 @@
 configuration metadata to types via `PEP 593 <https://peps.python.org/pep-0593/>`_ runtime
 annotations.
 
-Flags will be applied recursively, and can be used one of multiple ways:
+Configuration markers allow you to customize generated CLI interfaces, such as
+to set positional arguments, suppress fields, or change boolean flag behaviors.
 
-1. They can be subscripted: ``tyro.conf.FlagConversionoff[bool]``.
-2. They can be passed into :py:data:`typing.Annotated`: ``Annotated[str, tyro.conf.FlagConversionOff]``.
-3. They can be passed into :func:`tyro.cli`: ``tyro.cli(Args, config=(tyro.conf.FlagConversionOff,))``.
+Markers can be applied in three ways:
 
-Features here are supported, but generally unnecessary and should be used sparingly.
+1. They can be subscripted directly: ``tyro.conf.FlagConversionOff[bool]``
+2. They can be passed into :py:data:`typing.Annotated`: ``Annotated[str, tyro.conf.Positional]``
+3. They can be passed into :func:`tyro.cli`: ``tyro.cli(Args, config=(tyro.conf.FlagConversionOff,))``
+
+Markers are applied recursively to nested structures.
+
+These features are fully supported but should be used sparingly. Prefer using
+standard Python type annotations whenever possible.
+
+See :doc:`/examples/basics` for examples of using configuration markers.
 """
 
 from ._confstruct import arg as arg
