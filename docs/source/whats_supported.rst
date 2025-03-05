@@ -4,7 +4,7 @@ What's supported
 For minimum-boilerplate CLIs, :mod:`tyro` aims to maximize support of
 Python's standard :mod:`typing` features.
 
-As a partial list, inputs can be annotated with:
+Inputs can be annotated with:
 
 - Basic types like :class:`int`, :class:`str`, :class:`float`, :class:`bool`, :class:`pathlib.Path`, :data:`None`.
 - :class:`datetime.date`, :class:`datetime.datetime`, and :class:`datetime.time`.
@@ -21,7 +21,7 @@ Types can also be placed and nested in various structures, such as:
 - :func:`dataclasses.dataclass`.
 - ``attrs``, ``pydantic``, and ``flax.linen`` models.
 - :py:class:`typing.NamedTuple`.
-- :py:class:`typing.TypedDict`, flags like ``total=``, and associated annotations like :py:data:`typing.Required`, :py:data:`typing.NotRequired`, and :py:data:`typing.ReadOnly`.
+- :py:class:`typing.TypedDict`, including with flags like ``total=`` and associated annotations like :py:data:`typing.Required`, :py:data:`typing.NotRequired`, and :py:data:`typing.ReadOnly`.
 
 
 What's not supported
