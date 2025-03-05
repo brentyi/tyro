@@ -25,10 +25,10 @@ Package Contents
 .. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
                  get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
 
-   Get the ``argparse.ArgumentParser`` object generated under-the-hood by
-   :func:`tyro.cli()`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+   Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
+   :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
 
-   For tab completion, we recommend using :func:`tyro.cli()`'s built-in
+   For tab completion, we recommend using :func:`tyro.cli`'s built-in
    ``--tyro-write-completion`` flag.
 
 

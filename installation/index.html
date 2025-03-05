@@ -12,7 +12,7 @@
         gtag('js', new Date());
         gtag('config', 'G-624W9VWZWK');
     </script>
-    <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Your first CLI" href="../your_first_cli/" /><link rel="prev" title="tyro" href="../" />
+    <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="Your First CLI" href="../your_first_cli/" /><link rel="prev" title="tyro" href="../" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
         <title>Installation - tyro</title>
@@ -219,7 +219,7 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="current">
 <li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
@@ -288,26 +288,35 @@
         <article role="main" id="furo-main-content">
           <section id="installation">
 <h1>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h1>
-<section id="standard">
-<h2>Standard<a class="headerlink" href="#standard" title="Link to this heading">¶</a></h2>
-<p>Installation is supported on Python &gt;=3.7 via pip.</p>
+<section id="standard-installation">
+<h2>Standard Installation<a class="headerlink" href="#standard-installation" title="Link to this heading">¶</a></h2>
+<p>Tyro supports Python 3.7 through 3.13 and can be installed via pip:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>tyro
 </pre></div>
 </div>
 </section>
-<section id="development">
-<h2>Development<a class="headerlink" href="#development" title="Link to this heading">¶</a></h2>
-<p>If you’re interested in development, the recommended way to install <code class="docutils literal notranslate"><span class="pre">tyro</span></code> is
-via <code class="docutils literal notranslate"><span class="pre">pip</span></code>.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository and install.</span>
+<section id="development-installation">
+<h2>Development Installation<a class="headerlink" href="#development-installation" title="Link to this heading">¶</a></h2>
+<p>If you’d like to contribute to tyro, here’s how to set up a development environment:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Clone repository</span>
 git<span class="w"> </span>clone<span class="w"> </span>git@github.com:brentyi/tyro.git
 <span class="nb">cd</span><span class="w"> </span>tyro
-python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
 
-<span class="c1"># Run tests.</span>
+<span class="c1"># Install in development mode with all dependencies</span>
+pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;.[dev]&quot;</span>
+
+<span class="c1"># Run tests</span>
 pytest
+
+<span class="c1"># Check types</span>
+pyright
+
+<span class="c1"># Run linters</span>
+ruff<span class="w"> </span>check<span class="w"> </span>--fix
+ruff<span class="w"> </span>format
 </pre></div>
 </div>
+<p>The development installation includes additional tools for testing, type checking, and code quality.</p>
 </section>
 </section>
 
@@ -321,7 +330,7 @@ pytest
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Your first CLI</div>
+                <div class="title">Your First CLI</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -374,8 +383,8 @@ pytest
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
-<li><a class="reference internal" href="#standard">Standard</a></li>
-<li><a class="reference internal" href="#development">Development</a></li>
+<li><a class="reference internal" href="#standard-installation">Standard Installation</a></li>
+<li><a class="reference internal" href="#development-installation">Development Installation</a></li>
 </ul>
 </li>
 </ul>

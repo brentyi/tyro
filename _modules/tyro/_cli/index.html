@@ -218,7 +218,7 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
@@ -398,48 +398,79 @@
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">deprecated_kwargs</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">OutT</span> <span class="o">|</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">OutT</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Instantiate or call ``f``, with inputs populated from an automatically</span>
-<span class="sd">    generated CLI interface.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate a command-line interface from type annotations and populate the target with arguments.</span>
 
-<span class="sd">    `f` should have type-annotated inputs, and can be a function or type. If</span>
-<span class="sd">    ``f`` is a type, ``tyro.cli()`` returns an instance. If ``f`` is a</span>
-<span class="sd">    function, ``tyro.cli()`` returns the output of calling the function.</span>
+<span class="sd">    :func:`cli()` is the core function of tyro. It takes a type-annotated function or class</span>
+<span class="sd">    and automatically generates a command-line interface to populate it from user arguments.</span>
+
+<span class="sd">    Two main usage patterns are supported:</span>
+
+<span class="sd">    1. With a function (CLI arguments become function parameters):</span>
+
+<span class="sd">       .. code-block:: python</span>
+
+<span class="sd">          import tyro</span>
+
+<span class="sd">          def main(a: str, b: str) -&gt; None:</span>
+<span class="sd">              print(a, b)</span>
+
+<span class="sd">          if __name__ == &quot;__main__&quot;:</span>
+<span class="sd">              tyro.cli(main)  # Parses CLI args, calls main() with them</span>
+
+<span class="sd">    2. With a class (CLI arguments become object attributes):</span>
+
+<span class="sd">       .. code-block:: python</span>
+
+<span class="sd">          from dataclasses import dataclass</span>
+<span class="sd">          from pathlib import Path</span>
+
+<span class="sd">          import tyro</span>
+
+<span class="sd">          @dataclass</span>
+<span class="sd">          class Config:</span>
+<span class="sd">              a: str</span>
+<span class="sd">              b: str</span>
+
+<span class="sd">          if __name__ == &quot;__main__&quot;:</span>
+<span class="sd">              config = tyro.cli(Config)  # Parses CLI args, returns populated AppConfig</span>
+<span class="sd">              print(f&quot;Config: {config}&quot;)</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        f: Function or type.</span>
-<span class="sd">        prog: The name of the program printed in helptext. Mirrors argument from</span>
+<span class="sd">        f: The function or type to populate from command-line arguments. This must have</span>
+<span class="sd">            type-annotated inputs for tyro to work correctly.</span>
+<span class="sd">        prog: The name of the program to display in the help text. If not specified, the</span>
+<span class="sd">            script filename is used. This mirrors the argument from</span>
 <span class="sd">            :py:class:`argparse.ArgumentParser()`.</span>
-<span class="sd">        description: Description text for the parser, displayed when the --help flag is</span>
-<span class="sd">            passed in. If not specified, ``f``&#39;s docstring is used. Mirrors argument from</span>
+<span class="sd">        description: The description text shown at the top of the help output. If not</span>
+<span class="sd">            specified, the docstring of `f` is used. This mirrors the argument from</span>
 <span class="sd">            :py:class:`argparse.ArgumentParser()`.</span>
-<span class="sd">        args: If set, parse arguments from a sequence of strings instead of the</span>
-<span class="sd">            commandline. Mirrors argument from :py:meth:`argparse.ArgumentParser.parse_args()`.</span>
-<span class="sd">        default: An instance of ``OutT`` to use for default values; supported if ``f`` is a</span>
-<span class="sd">            type like a dataclass or dictionary, but not if ``f`` is a general callable</span>
-<span class="sd">            like a function or standard class. Helpful for merging CLI arguments with</span>
-<span class="sd">            values loaded from elsewhere. (for example, a config object loaded from a</span>
-<span class="sd">            yaml file)</span>
-<span class="sd">        return_unknown_args: If True, return a tuple of the output of ``f`` and a list of</span>
-<span class="sd">            unknown arguments. Mirrors the unknown arguments returned from</span>
+<span class="sd">        args: If provided, parse arguments from this sequence of strings instead of</span>
+<span class="sd">            the command line. This is useful for testing or programmatic usage. This mirrors</span>
+<span class="sd">            the argument from :py:meth:`argparse.ArgumentParser.parse_args()`.</span>
+<span class="sd">        default: An instance to use for default values. This is only supported if ``f`` is a</span>
+<span class="sd">            type like a dataclass or dictionary, not if ``f`` is a general callable like a</span>
+<span class="sd">            function. This is useful for merging CLI arguments with values loaded from</span>
+<span class="sd">            elsewhere, such as a config file.</span>
+<span class="sd">        return_unknown_args: If True, returns a tuple of the output and a list of unknown</span>
+<span class="sd">            arguments that weren&#39;t consumed by the parser. This mirrors the behavior of</span>
 <span class="sd">            :py:meth:`argparse.ArgumentParser.parse_known_args()`.</span>
-<span class="sd">        use_underscores: If True, use underscores as a word delimeter instead of hyphens.</span>
-<span class="sd">            This primarily impacts helptext; underscores and hyphens are treated</span>
-<span class="sd">            equivalently when parsing happens. We default helptext to hyphens to follow</span>
-<span class="sd">            the GNU style guide.</span>
+<span class="sd">        use_underscores: If True, uses underscores as word delimiters in the help text</span>
+<span class="sd">            instead of hyphens. This only affects the displayed help; both underscores and</span>
+<span class="sd">            hyphens are treated equivalently during parsing. The default (False) follows the</span>
+<span class="sd">            GNU style guide for command-line options.</span>
 <span class="sd">            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html</span>
-<span class="sd">        console_outputs: If set to ``False``, parsing errors and help messages will be</span>
-<span class="sd">            supressed. This can be useful for distributed settings, where ``tyro.cli()``</span>
-<span class="sd">            is called from multiple workers but we only want console outputs from the</span>
-<span class="sd">            main one.</span>
-<span class="sd">        config: Sequence of config marker objects, from :mod:`tyro.conf`. As an</span>
-<span class="sd">            alternative to using them locally in annotations</span>
-<span class="sd">            (``FlagConversionOff[bool]``), we can also pass in a sequence of</span>
-<span class="sd">            them here to apply globally.</span>
+<span class="sd">        console_outputs: If set to False, suppresses parsing errors and help messages.</span>
+<span class="sd">            This is useful in distributed settings where tyro.cli() is called from multiple</span>
+<span class="sd">            workers but console output is only desired from the main process.</span>
+<span class="sd">        config: A sequence of configuration marker objects from :mod:`tyro.conf`. This</span>
+<span class="sd">            allows applying markers globally instead of annotating individual fields.</span>
+<span class="sd">            For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The output of ``f(...)`` or an instance ``f``. If ``f`` is a class, the two are</span>
-<span class="sd">        equivalent. If ``return_unknown_args`` is True, returns a tuple of the output of</span>
-<span class="sd">        ``f(...)`` and a list of unknown arguments.</span>
+<span class="sd">        If ``f`` is a type (like a dataclass), returns an instance of that type populated</span>
+<span class="sd">        with values from the command line. If ``f`` is a function, calls the function with</span>
+<span class="sd">        arguments from the command line and returns its result. If ``return_unknown_args``</span>
+<span class="sd">        is True, returns a tuple of the result and a list of unused command-line arguments.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="c1"># Make sure we start on a clean slate. Some tests may fail without this due to</span>
@@ -514,10 +545,10 @@
     <span class="n">console_outputs</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">config</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">conf</span><span class="o">.</span><span class="n">_markers</span><span class="o">.</span><span class="n">Marker</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the ``argparse.ArgumentParser`` object generated under-the-hood by</span>
-<span class="sd">    :func:`tyro.cli()`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by</span>
+<span class="sd">    :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.</span>
 
-<span class="sd">    For tab completion, we recommend using :func:`tyro.cli()`&#39;s built-in</span>
+<span class="sd">    For tab completion, we recommend using :func:`tyro.cli`&#39;s built-in</span>
 <span class="sd">    ``--tyro-write-completion`` flag.&quot;&quot;&quot;</span>
     <span class="k">with</span> <span class="n">_strings</span><span class="o">.</span><span class="n">delimeter_context</span><span class="p">(</span><span class="s2">&quot;_&quot;</span> <span class="k">if</span> <span class="n">use_underscores</span> <span class="k">else</span> <span class="s2">&quot;-&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span>

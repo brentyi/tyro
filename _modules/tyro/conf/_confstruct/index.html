@@ -218,7 +218,7 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
@@ -337,68 +337,51 @@
     <span class="n">constructor</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for configuring subcommands with</span>
-<span class="sd">    :py:data:`typing.Annotated`. Useful for aesthetics.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configure subcommand behavior for Union types in the CLI.</span>
 
-<span class="sd">    Consider the standard approach for creating subcommands:</span>
+<span class="sd">    When tyro encounters a Union type over structures, it creates subcommands in the</span>
+<span class="sd">    CLI. The `subcommand()` function allows you to customize the appearance and behavior</span>
+<span class="sd">    of these subcommands.</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    Example::</span>
 
-<span class="sd">        tyro.cli(</span>
-<span class="sd">            Union[StructTypeA, StructTypeB]</span>
-<span class="sd">        )</span>
+<span class="sd">        from dataclasses import dataclass</span>
+<span class="sd">        from typing import Annotated, Union</span>
+<span class="sd">        import tyro</span>
 
-<span class="sd">    This will create two subcommands: `nested-type-a` and `nested-type-b`.</span>
+<span class="sd">        @dataclass</span>
+<span class="sd">        class TrainConfig:</span>
+<span class="sd">            learning_rate: float = 0.01</span>
 
-<span class="sd">    Annotating each type with :func:`tyro.conf.subcommand()` allows us to</span>
-<span class="sd">    override for each subcommand the (a) name, (b) defaults, (c) helptext, and</span>
-<span class="sd">    (d) whether to prefix the name or not.</span>
+<span class="sd">        @dataclass</span>
+<span class="sd">        class EvalConfig:</span>
+<span class="sd">            checkpoint_path: str</span>
 
-<span class="sd">    .. code-block:: python</span>
-
-<span class="sd">        tyro.cli(</span>
-<span class="sd">            Union[</span>
-<span class="sd">                Annotated[</span>
-<span class="sd">                    StructTypeA, subcommand(&quot;a&quot;, ...)</span>
-<span class="sd">                ],</span>
-<span class="sd">                Annotated[</span>
-<span class="sd">                    StructTypeB, subcommand(&quot;b&quot;, ...)</span>
-<span class="sd">                ],</span>
+<span class="sd">        @dataclass</span>
+<span class="sd">        class MainConfig:</span>
+<span class="sd">            # Customized subcommands:</span>
+<span class="sd">            mode: Union[</span>
+<span class="sd">                Annotated[TrainConfig, tyro.conf.subcommand(&quot;train&quot;)],</span>
+<span class="sd">                Annotated[EvalConfig, tyro.conf.subcommand(&quot;evaluate&quot;)]</span>
 <span class="sd">            ]</span>
-<span class="sd">        )</span>
 
-<span class="sd">    If we have a default value both in the annotation and attached to the field</span>
-<span class="sd">    itself (eg, RHS of `=` within function or dataclass signature), the field</span>
-<span class="sd">    default will take precedence.</span>
+<span class="sd">        # CLI usage: python script.py mode:train --mode.learning-rate 0.02</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    If a default value is provided both via `subcommand(default=...)` and in the field</span>
+<span class="sd">    definition itself (`field = default`), the field default will take precedence.</span>
 
-<span class="sd">        # For the first subcommand, StructTypeA(1) will be used as the default.</span>
-<span class="sd">        # The second subcommand, whose type is inconsistent with the field</span>
-<span class="sd">        # default, will be unaffected.</span>
-<span class="sd">        x: Union[</span>
-<span class="sd">            Annotated[</span>
-<span class="sd">                StructTypeA, subcommand(default=StructTypeA(0))</span>
-<span class="sd">            ],</span>
-<span class="sd">            Annotated[</span>
-<span class="sd">                StructTypeB, subcommand(default=StructTypeB(0))</span>
-<span class="sd">            ],</span>
-<span class="sd">        ] = StructTypeA(1)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        name: Custom name for the subcommand in the CLI.</span>
+<span class="sd">        default: Default instance to use for this subcommand.</span>
+<span class="sd">        description: Custom helptext for this subcommand.</span>
+<span class="sd">        prefix_name: Whether to include the parent field name as a prefix in the subcommand</span>
+<span class="sd">            name (default: True).</span>
+<span class="sd">        constructor: Custom constructor type or function for parsing arguments.</span>
+<span class="sd">        constructor_factory: Function that returns a constructor type for parsing arguments</span>
+<span class="sd">            (cannot be used with constructor).</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        name: The name of the subcommand in the CLI.</span>
-<span class="sd">        default: A default value for the subcommand, for struct-like types. (eg</span>
-<span class="sd">             dataclasses).</span>
-<span class="sd">        description: Description of this option to use in the helptext. Defaults to</span>
-<span class="sd">            docstring.</span>
-<span class="sd">        prefix_name: Whether to prefix the name of the subcommand based on where it</span>
-<span class="sd">            is in a nested structure.</span>
-<span class="sd">        constructor: A constructor type or function. This will be used in</span>
-<span class="sd">            place of the argument&#39;s type for parsing arguments. For more</span>
-<span class="sd">            configurability, see :mod:`tyro.constructors`.</span>
-<span class="sd">        constructor_factory: A function that returns a constructor type. This</span>
-<span class="sd">            will be used in place of the argument&#39;s type for parsing arguments.</span>
-<span class="sd">            For more configurability, see :mod:`tyro.constructors`.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        A configuration object that should be attached to a type using `Annotated[]`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span>
         <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>
@@ -467,45 +450,61 @@
     <span class="n">constructor</span><span class="p">:</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">constructor_factory</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">type</span> <span class="o">|</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Returns a metadata object for fine-grained argument configuration with</span>
-<span class="sd">    :py:data:`typing.Annotated`. Should typically not be required.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provides fine-grained control over individual CLI argument properties.</span>
 
-<span class="sd">    We support using :func:`arg()` at the root of arguments. For example:</span>
+<span class="sd">    The `arg()` function allows you to customize how individual arguments appear and</span>
+<span class="sd">    behave in the command-line interface. This provides more control than relying on</span>
+<span class="sd">    the automatic argument generation.</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">    Example::</span>
 
-<span class="sd">        x: Annotated[int, tyro.conf.arg(...)]</span>
+<span class="sd">        from dataclasses import dataclass</span>
+<span class="sd">        from typing import Annotated</span>
+<span class="sd">        import tyro</span>
 
-<span class="sd">    Nesting :func:`arg()` within other types is generally not supported:</span>
+<span class="sd">        @dataclass</span>
+<span class="sd">        class Config:</span>
+<span class="sd">            # Default argument appearance</span>
+<span class="sd">            regular_option: int = 1</span>
 
-<span class="sd">    .. code-block:: python</span>
+<span class="sd">            # Customized argument</span>
+<span class="sd">            custom_option: Annotated[</span>
+<span class="sd">                str,</span>
+<span class="sd">                tyro.conf.arg(</span>
+<span class="sd">                    name=&quot;opt&quot;,                     # Shorter name</span>
+<span class="sd">                    help=&quot;Custom help message&quot;,     # Override docstring</span>
+<span class="sd">                    aliases=(&quot;-o&quot;, &quot;--short-opt&quot;),  # Alternative flags</span>
+<span class="sd">                    metavar=&quot;VALUE&quot;                 # Display in help</span>
+<span class="sd">                )</span>
+<span class="sd">            ] = &quot;default&quot;</span>
 
-<span class="sd">        # Not supported.</span>
-<span class="sd">        x: list[Annotated[int, tyro.conf.arg(...)]]</span>
+<span class="sd">        # Usage:</span>
+<span class="sd">        # python script.py --regular-option 5 --opt custom_value</span>
+<span class="sd">        # python script.py --regular-option 5 -o custom_value</span>
 
+<span class="sd">    The `arg()` function should be used at the root level of annotations and not</span>
+<span class="sd">    nested within container types like lists.</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        name: A new name for the argument in the CLI.</span>
-<span class="sd">        metavar: Argument name in usage messages. The type is used by default.</span>
-<span class="sd">        help: Override helptext for this argument. The docstring is used by default.</span>
-<span class="sd">        help_behavior_hint: Override highlighted text that follows the helptext.</span>
-<span class="sd">            Typically used for behavior hints like the `(default: XXX)` or</span>
-<span class="sd">            `(optional)`. Can either be a string or a lambda function whose</span>
-<span class="sd">            input is a formatted default value.</span>
-<span class="sd">        aliases: Aliases for this argument. All strings in the sequence should start</span>
-<span class="sd">            with a hyphen (-). Aliases will _not_ currently be prefixed in a nested</span>
-<span class="sd">            structure, and are not supported for positional arguments.</span>
-<span class="sd">        prefix_name: Whether or not to prefix the name of the argument based on where</span>
-<span class="sd">            it is in a nested structure. Arguments are prefixed by default.</span>
-<span class="sd">        constructor: A constructor type or function. This will be used in</span>
-<span class="sd">            place of the argument&#39;s type for parsing arguments. For more</span>
-<span class="sd">            configurability, see :mod:`tyro.constructors`.</span>
-<span class="sd">        constructor_factory: A function that returns a constructor type. This</span>
-<span class="sd">            will be used in place of the argument&#39;s type for parsing arguments.</span>
-<span class="sd">            For more configurability, see :mod:`tyro.constructors`.</span>
+<span class="sd">    Args:</span>
+<span class="sd">        name: A custom name for the argument in the CLI.</span>
+<span class="sd">        metavar: Argument placeholder shown in usage messages. The type is used by default.</span>
+<span class="sd">        help: Custom helptext for this argument. The docstring is used by default.</span>
+<span class="sd">        help_behavior_hint: Override the highlighted hint text that follows the helptext.</span>
+<span class="sd">            This is typically used for hints like &quot;(default: XXX)&quot; or &quot;(optional)&quot;.</span>
+<span class="sd">            You can provide either a string or a lambda function that takes a formatted</span>
+<span class="sd">            default value as input.</span>
+<span class="sd">        aliases: Alternative flag names for this argument. All strings must start</span>
+<span class="sd">            with a hyphen (-). Aliases are not prefixed in nested structures and are</span>
+<span class="sd">            not supported for positional arguments.</span>
+<span class="sd">        prefix_name: Controls whether to prefix the argument name based on its position</span>
+<span class="sd">            in a nested structure. Arguments are prefixed by default.</span>
+<span class="sd">        constructor: A custom constructor type or function to use in place of the</span>
+<span class="sd">            argument&#39;s type for parsing. See :mod:`tyro.constructors` for more details.</span>
+<span class="sd">        constructor_factory: A function that returns a constructor type for parsing.</span>
+<span class="sd">            This cannot be used together with the constructor parameter.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Object to attach via `typing.Annotated[]`.</span>
+<span class="sd">        A configuration object that should be attached to a type using `Annotated[]`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="ow">not</span> <span class="p">(</span><span class="n">constructor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">constructor_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">),</span> <span class="p">(</span>
         <span class="s2">&quot;`constructor` and `constructor_factory` cannot both be set.&quot;</span>

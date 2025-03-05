@@ -23,55 +23,86 @@ Module Contents
                  cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: None = None, return_unknown_args: typing_extensions.Literal[False] = False, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> OutT
                  cli(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, args: None | Sequence[str] = None, default: None = None, return_unknown_args: typing_extensions.Literal[True], use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tuple[OutT, list[str]]
 
-   Instantiate or call ``f``, with inputs populated from an automatically
-   generated CLI interface.
+   Generate a command-line interface from type annotations and populate the target with arguments.
 
-   `f` should have type-annotated inputs, and can be a function or type. If
-   ``f`` is a type, ``tyro.cli()`` returns an instance. If ``f`` is a
-   function, ``tyro.cli()`` returns the output of calling the function.
+   :func:`cli()` is the core function of tyro. It takes a type-annotated function or class
+   and automatically generates a command-line interface to populate it from user arguments.
 
-   :param f: Function or type.
-   :param prog: The name of the program printed in helptext. Mirrors argument from
+   Two main usage patterns are supported:
+
+   1. With a function (CLI arguments become function parameters):
+
+      .. code-block:: python
+
+         import tyro
+
+         def main(a: str, b: str) -> None:
+             print(a, b)
+
+         if __name__ == "__main__":
+             tyro.cli(main)  # Parses CLI args, calls main() with them
+
+   2. With a class (CLI arguments become object attributes):
+
+      .. code-block:: python
+
+         from dataclasses import dataclass
+         from pathlib import Path
+
+         import tyro
+
+         @dataclass
+         class Config:
+             a: str
+             b: str
+
+         if __name__ == "__main__":
+             config = tyro.cli(Config)  # Parses CLI args, returns populated AppConfig
+             print(f"Config: {config}")
+
+   :param f: The function or type to populate from command-line arguments. This must have
+             type-annotated inputs for tyro to work correctly.
+   :param prog: The name of the program to display in the help text. If not specified, the
+                script filename is used. This mirrors the argument from
                 :py:class:`argparse.ArgumentParser()`.
-   :param description: Description text for the parser, displayed when the --help flag is
-                       passed in. If not specified, ``f``'s docstring is used. Mirrors argument from
+   :param description: The description text shown at the top of the help output. If not
+                       specified, the docstring of `f` is used. This mirrors the argument from
                        :py:class:`argparse.ArgumentParser()`.
-   :param args: If set, parse arguments from a sequence of strings instead of the
-                commandline. Mirrors argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
-   :param default: An instance of ``OutT`` to use for default values; supported if ``f`` is a
-                   type like a dataclass or dictionary, but not if ``f`` is a general callable
-                   like a function or standard class. Helpful for merging CLI arguments with
-                   values loaded from elsewhere. (for example, a config object loaded from a
-                   yaml file)
-   :param return_unknown_args: If True, return a tuple of the output of ``f`` and a list of
-                               unknown arguments. Mirrors the unknown arguments returned from
+   :param args: If provided, parse arguments from this sequence of strings instead of
+                the command line. This is useful for testing or programmatic usage. This mirrors
+                the argument from :py:meth:`argparse.ArgumentParser.parse_args()`.
+   :param default: An instance to use for default values. This is only supported if ``f`` is a
+                   type like a dataclass or dictionary, not if ``f`` is a general callable like a
+                   function. This is useful for merging CLI arguments with values loaded from
+                   elsewhere, such as a config file.
+   :param return_unknown_args: If True, returns a tuple of the output and a list of unknown
+                               arguments that weren't consumed by the parser. This mirrors the behavior of
                                :py:meth:`argparse.ArgumentParser.parse_known_args()`.
-   :param use_underscores: If True, use underscores as a word delimeter instead of hyphens.
-                           This primarily impacts helptext; underscores and hyphens are treated
-                           equivalently when parsing happens. We default helptext to hyphens to follow
-                           the GNU style guide.
+   :param use_underscores: If True, uses underscores as word delimiters in the help text
+                           instead of hyphens. This only affects the displayed help; both underscores and
+                           hyphens are treated equivalently during parsing. The default (False) follows the
+                           GNU style guide for command-line options.
                            https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
-   :param console_outputs: If set to ``False``, parsing errors and help messages will be
-                           supressed. This can be useful for distributed settings, where ``tyro.cli()``
-                           is called from multiple workers but we only want console outputs from the
-                           main one.
-   :param config: Sequence of config marker objects, from :mod:`tyro.conf`. As an
-                  alternative to using them locally in annotations
-                  (``FlagConversionOff[bool]``), we can also pass in a sequence of
-                  them here to apply globally.
+   :param console_outputs: If set to False, suppresses parsing errors and help messages.
+                           This is useful in distributed settings where tyro.cli() is called from multiple
+                           workers but console output is only desired from the main process.
+   :param config: A sequence of configuration marker objects from :mod:`tyro.conf`. This
+                  allows applying markers globally instead of annotating individual fields.
+                  For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
 
-   :returns: The output of ``f(...)`` or an instance ``f``. If ``f`` is a class, the two are
-             equivalent. If ``return_unknown_args`` is True, returns a tuple of the output of
-             ``f(...)`` and a list of unknown arguments.
+   :returns: If ``f`` is a type (like a dataclass), returns an instance of that type populated
+             with values from the command line. If ``f`` is a function, calls the function with
+             arguments from the command line and returns its result. If ``return_unknown_args``
+             is True, returns a tuple of the result and a list of unused command-line arguments.
 
 
 .. py:function:: get_parser(f: tyro._typing.TypeForm[OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
                  get_parser(f: Callable[Ellipsis, OutT], *, prog: None | str = None, description: None | str = None, default: None | OutT = None, use_underscores: bool = False, console_outputs: bool = True, config: None | Sequence[tyro.conf._markers.Marker] = None) -> tyro._argparse.ArgumentParser
 
-   Get the ``argparse.ArgumentParser`` object generated under-the-hood by
-   :func:`tyro.cli()`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
+   Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
+   :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
 
-   For tab completion, we recommend using :func:`tyro.cli()`'s built-in
+   For tab completion, we recommend using :func:`tyro.cli`'s built-in
    ``--tyro-write-completion`` flag.
 
 

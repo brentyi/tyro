@@ -15,7 +15,7 @@
     <link rel="index" title="Index" href="../genindex/" /><link rel="search" title="Search" href="../search/" /><link rel="next" title="What’s supported" href="../whats_supported/" /><link rel="prev" title="Installation" href="../installation/" />
 
     <!-- Generated with Sphinx 8.0.2 and Furo 2024.08.06 -->
-        <title>Your first CLI - tyro</title>
+        <title>Your First CLI - tyro</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
     <link rel="stylesheet" type="text/css" href="../_static/styles/furo.css?v=354aac6f" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
@@ -192,7 +192,7 @@
           <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
         </button>
       </div>
-      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
         <div class="visually-hidden">Toggle table of contents sidebar</div>
         <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
       </label>
@@ -219,7 +219,7 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a></li>
-<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Your first CLI</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
@@ -280,15 +280,15 @@
               <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
             </button>
           </div>
-          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
             <div class="visually-hidden">Toggle table of contents sidebar</div>
             <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
           </label>
         </div>
         <article role="main" id="furo-main-content">
           <section id="your-first-cli">
-<h1>Your first CLI<a class="headerlink" href="#your-first-cli" title="Link to this heading">¶</a></h1>
-<p>To get started with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, consider the simple <code class="docutils literal notranslate"><span class="pre">argparse</span></code>-based command-line
+<h1>Your First CLI<a class="headerlink" href="#your-first-cli" title="Link to this heading">¶</a></h1>
+<p>To get started with <code class="docutils literal notranslate"><span class="pre">tyro</span></code>, let’s compare it with a traditional <code class="docutils literal notranslate"><span class="pre">argparse</span></code>-based command-line
 interface:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers from argparse.&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">argparse</span>
@@ -304,17 +304,28 @@ interface:</p>
 </pre></div>
 </div>
 <p>This is dramatically cleaner than manually parsing <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code>, but has several
-issues: it requires a significant amount of parsing-specific boilerplate, lacks
-type checking and IDE support (consider: jumping to definitions, finding
-references, docstrings, refactoring and renaming tools), and becomes difficult
-to manage for larger projects.</p>
-<p><a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> aims to solve these issues.</p>
-<p><strong>(1) Command-line interfaces from functions.</strong></p>
+issues:</p>
+<ul class="simple">
+<li><p>It requires significant parsing-specific boilerplate.</p></li>
+<li><p>It lacks type checking and IDE support (no jumping to definitions, finding
+references, docstrings, refactoring or renaming tools).</p></li>
+<li><p>It becomes difficult to manage for larger projects with many parameters.</p></li>
+<li><p>It doesn’t automatically generate comprehensive help text.</p></li>
+</ul>
+<p><a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> aims to solve these issues by building CLIs directly from type annotations.</p>
+<section id="command-line-interfaces-from-functions">
+<h2>Command-line interfaces from functions<a class="headerlink" href="#command-line-interfaces-from-functions" title="Link to this heading">¶</a></h2>
 <p>We can write the same script as above using <code class="docutils literal notranslate"><span class="pre">tyro.cli()</span></code>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by calling a function with tyro.&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add two numbers together.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a: First number to add.</span>
+<span class="sd">        b: Second number to add. Defaults to 3.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
 
 <span class="c1"># Populate the inputs of add(), call it, then return the output.</span>
@@ -323,18 +334,41 @@ to manage for larger projects.</p>
 <span class="nb">print</span><span class="p">(</span><span class="n">total</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Or, more succinctly:</p>
+<p>Using this script from the command line would look like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python script.py --a 5
+8
+
+$ python script.py --a 5 --b 7
+12
+
+$ python script.py --help
+usage: script.py [-h] --a INT [--b INT]
+
+Add two numbers together.
+
+╭─ options ───────────────────────────────────────────────────────────╮
+│ -h, --help        show this help message and exit                   │
+│ --a INT           First number to add. (required)                   │
+│ --b INT           Second number to add. Defaults to 3. (default: 3) │
+╰─────────────────────────────────────────────────────────────────────╯
+</pre></div>
+</div>
+<p>A more succinct version that combines the function call with printing:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by calling a function with tyro.&quot;&quot;&quot;</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 
 <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add two numbers together and print the result.&quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">)</span>
 
-<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>  <span class="c1"># Returns `None`.</span>
+<span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">add</span><span class="p">)</span>  <span class="c1"># Parses arguments, calls add(), and returns None.</span>
 </pre></div>
 </div>
-<p><strong>(2) Command-line interfaces from config objects.</strong></p>
-<p>A class in Python can be treated as a function that returns an instance:</p>
+</section>
+<section id="command-line-interfaces-from-config-objects">
+<h2>Command-line interfaces from config objects<a class="headerlink" href="#command-line-interfaces-from-config-objects" title="Link to this heading">¶</a></h2>
+<p>A class in Python can be treated as a function that returns an instance. This is
+particularly useful for more complex configurations:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;Sum two numbers by instantiating a dataclass with tyro.&quot;&quot;&quot;</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
 
@@ -342,20 +376,47 @@ to manage for larger projects.</p>
 
 <span class="nd">@dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration for adding two numbers.&quot;&quot;&quot;</span>
+
+    <span class="n">a</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># First number to add</span>
+    <span class="n">b</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Second number to add (default: 3)</span>
 
 <span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">args</span><span class="o">.</span><span class="n">b</span><span class="p">)</span>
 </pre></div>
 </div>
+<p>From the command line, this would look identical to the function example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python script.py --a 5
+8
+
+$ python script.py --help
+usage: script.py [-h] --a INT [--b INT]
+
+Configuration for adding two numbers.
+
+╭─ options ────────────────────────────────────────────────────────╮
+│ -h, --help        show this help message and exit                │
+│ --a INT           First number to add (required)                 │
+│ --b INT           Second number to add (default: 3) (default: 3) │
+╰──────────────────────────────────────────────────────────────────╯
+</pre></div>
+</div>
+</section>
+<section id="benefits-over-argparse">
+<h2>Benefits over argparse<a class="headerlink" href="#benefits-over-argparse" title="Link to this heading">¶</a></h2>
 <p>Unlike directly using <code class="docutils literal notranslate"><span class="pre">argparse</span></code>, both the function-based and dataclass-based
-approaches are compatible with static analysis; tab completion and type checking
-will work out-of-the-box.</p>
-<p>And that’s it! By incorporating more standard type annotations, we can specify a
-broad range of more advanced behaviors: nested structures, variable-length
-inputs, unions over types, subcommands, and more. Our examples walk through a
-selection of these features.</p>
+approaches provide:</p>
+<ol class="arabic simple">
+<li><p><strong>Static type checking</strong> - Parameters have real types that can be checked.</p></li>
+<li><p><strong>IDE support</strong> - Jump to definitions, find references, see docstrings, and use refactoring tools.</p></li>
+<li><p><strong>Automatic helptext</strong> - Generated from docstrings and comments.</p></li>
+<li><p><strong>Less boilerplate</strong> - No need to manually define every argument.</p></li>
+<li><p><strong>Hierarchical configuration</strong> - Easily nest parameters in complex structures.</p></li>
+</ol>
+<p>By incorporating standard type annotations, tyro can handle a broad range of advanced behaviors:
+nested structures, variable-length inputs, unions over types, subcommands, and more.
+Our examples walk through these features in detail.</p>
+</section>
 </section>
 
         </article>
@@ -408,8 +469,29 @@ selection of these features.</p>
         
       </footer>
     </div>
-    <aside class="toc-drawer no-toc">
+    <aside class="toc-drawer">
       
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Your First CLI</a><ul>
+<li><a class="reference internal" href="#command-line-interfaces-from-functions">Command-line interfaces from functions</a></li>
+<li><a class="reference internal" href="#command-line-interfaces-from-config-objects">Command-line interfaces from config objects</a></li>
+<li><a class="reference internal" href="#benefits-over-argparse">Benefits over argparse</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
       
       
     </aside>

@@ -219,7 +219,7 @@
   <p class="caption" role="heading"><span class="caption-text">Getting started</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation/">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your first CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../your_first_cli/">Your First CLI</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../whats_supported/">What’s supported</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
@@ -291,13 +291,18 @@
 <p>The <a class="reference internal" href="#module-tyro.conf" title="tyro.conf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.conf</span></code></a> submodule contains helpers for attaching parsing-specific
 configuration metadata to types via <a class="reference external" href="https://peps.python.org/pep-0593/">PEP 593</a> runtime
 annotations.</p>
-<p>Flags will be applied recursively, and can be used one of multiple ways:</p>
+<p>Configuration markers allow you to customize generated CLI interfaces, such as
+to set positional arguments, suppress fields, or change boolean flag behaviors.</p>
+<p>Markers can be applied in three ways:</p>
 <ol class="arabic simple">
-<li><p>They can be subscripted: <code class="docutils literal notranslate"><span class="pre">tyro.conf.FlagConversionoff[bool]</span></code>.</p></li>
-<li><p>They can be passed into <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a>: <code class="docutils literal notranslate"><span class="pre">Annotated[str,</span> <span class="pre">tyro.conf.FlagConversionOff]</span></code>.</p></li>
-<li><p>They can be passed into <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>: <code class="docutils literal notranslate"><span class="pre">tyro.cli(Args,</span> <span class="pre">config=(tyro.conf.FlagConversionOff,))</span></code>.</p></li>
+<li><p>They can be subscripted directly: <code class="docutils literal notranslate"><span class="pre">tyro.conf.FlagConversionOff[bool]</span></code></p></li>
+<li><p>They can be passed into <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a>: <code class="docutils literal notranslate"><span class="pre">Annotated[str,</span> <span class="pre">tyro.conf.Positional]</span></code></p></li>
+<li><p>They can be passed into <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>: <code class="docutils literal notranslate"><span class="pre">tyro.cli(Args,</span> <span class="pre">config=(tyro.conf.FlagConversionOff,))</span></code></p></li>
 </ol>
-<p>Features here are supported, but generally unnecessary and should be used sparingly.</p>
+<p>Markers are applied recursively to nested structures.</p>
+<p>These features are fully supported but should be used sparingly. Prefer using
+standard Python type annotations whenever possible.</p>
+<p>See <a class="reference internal" href="../../../examples/basics/"><span class="doc">Basics</span></a> for examples of using configuration markers.</p>
 <section id="package-contents">
 <h2>Package Contents<a class="headerlink" href="#package-contents" title="Link to this heading">¶</a></h2>
 <dl class="py function">
@@ -305,42 +310,61 @@ annotations.</p>
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">arg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metavar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help_behavior_hint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor_factory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_confstruct/#arg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.arg" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">arg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metavar</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">help_behavior_hint</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">aliases</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.13)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Ellipsis</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.13)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor_factory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span></dt>
-<dd><p>Returns a metadata object for fine-grained argument configuration with
-<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a>. Should typically not be required.</p>
-<p>We support using <a class="reference internal" href="#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">arg()</span></code></a> at the root of arguments. For example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">x</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="o">...</span><span class="p">)]</span>
+<dd><p>Provides fine-grained control over individual CLI argument properties.</p>
+<p>The <cite>arg()</cite> function allows you to customize how individual arguments appear and
+behave in the command-line interface. This provides more control than relying on
+the automatic argument generation.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="c1"># Default argument appearance</span>
+    <span class="n">regular_option</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1"># Customized argument</span>
+    <span class="n">custom_option</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+        <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;opt&quot;</span><span class="p">,</span>                     <span class="c1"># Shorter name</span>
+            <span class="n">help</span><span class="o">=</span><span class="s2">&quot;Custom help message&quot;</span><span class="p">,</span>     <span class="c1"># Override docstring</span>
+            <span class="n">aliases</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;-o&quot;</span><span class="p">,</span> <span class="s2">&quot;--short-opt&quot;</span><span class="p">),</span>  <span class="c1"># Alternative flags</span>
+            <span class="n">metavar</span><span class="o">=</span><span class="s2">&quot;VALUE&quot;</span>                 <span class="c1"># Display in help</span>
+        <span class="p">)</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span>
+
+<span class="c1"># Usage:</span>
+<span class="c1"># python script.py --regular-option 5 --opt custom_value</span>
+<span class="c1"># python script.py --regular-option 5 -o custom_value</span>
 </pre></div>
 </div>
-<p>Nesting <a class="reference internal" href="#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">arg()</span></code></a> within other types is generally not supported:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Not supported.</span>
-<span class="n">x</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Annotated</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="o">...</span><span class="p">)]]</span>
-</pre></div>
-</div>
+<p>The <cite>arg()</cite> function should be used at the root level of annotations and not
+nested within container types like lists.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> – A new name for the argument in the CLI.</p></li>
-<li><p><strong>metavar</strong> – Argument name in usage messages. The type is used by default.</p></li>
-<li><p><strong>help</strong> – Override helptext for this argument. The docstring is used by default.</p></li>
-<li><p><strong>help_behavior_hint</strong> – Override highlighted text that follows the helptext.
-Typically used for behavior hints like the <cite>(default: XXX)</cite> or
-<cite>(optional)</cite>. Can either be a string or a lambda function whose
-input is a formatted default value.</p></li>
-<li><p><strong>aliases</strong> – Aliases for this argument. All strings in the sequence should start
-with a hyphen (-). Aliases will _not_ currently be prefixed in a nested
-structure, and are not supported for positional arguments.</p></li>
-<li><p><strong>prefix_name</strong> – Whether or not to prefix the name of the argument based on where
-it is in a nested structure. Arguments are prefixed by default.</p></li>
-<li><p><strong>constructor</strong> – A constructor type or function. This will be used in
-place of the argument’s type for parsing arguments. For more
-configurability, see <a class="reference internal" href="../constructors/#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a>.</p></li>
-<li><p><strong>constructor_factory</strong> – A function that returns a constructor type. This
-will be used in place of the argument’s type for parsing arguments.
-For more configurability, see <a class="reference internal" href="../constructors/#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a>.</p></li>
+<li><p><strong>name</strong> – A custom name for the argument in the CLI.</p></li>
+<li><p><strong>metavar</strong> – Argument placeholder shown in usage messages. The type is used by default.</p></li>
+<li><p><strong>help</strong> – Custom helptext for this argument. The docstring is used by default.</p></li>
+<li><p><strong>help_behavior_hint</strong> – Override the highlighted hint text that follows the helptext.
+This is typically used for hints like “(default: XXX)” or “(optional)”.
+You can provide either a string or a lambda function that takes a formatted
+default value as input.</p></li>
+<li><p><strong>aliases</strong> – Alternative flag names for this argument. All strings must start
+with a hyphen (-). Aliases are not prefixed in nested structures and are
+not supported for positional arguments.</p></li>
+<li><p><strong>prefix_name</strong> – Controls whether to prefix the argument name based on its position
+in a nested structure. Arguments are prefixed by default.</p></li>
+<li><p><strong>constructor</strong> – A custom constructor type or function to use in place of the
+argument’s type for parsing. See <a class="reference internal" href="../constructors/#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a> for more details.</p></li>
+<li><p><strong>constructor_factory</strong> – A function that returns a constructor type for parsing.
+This cannot be used together with the constructor parameter.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Object to attach via <cite>typing.Annotated[]</cite>.</p>
+<dd class="field-even"><p>A configuration object that should be attached to a type using <cite>Annotated[]</cite>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -350,63 +374,51 @@ For more configurability, see <a class="reference internal" href="../constructor
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">subcommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MISSING_NONPROP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor_factory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_confstruct/#subcommand"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.subcommand" title="Link to this definition">¶</a></dt>
 <dt class="sig sig-object py">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">subcommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">MISSING_NONPROP</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.13)"><span class="pre">str</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.13)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.13)"><span class="pre">type</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="pre">Ellipsis</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constructor_factory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span></dt>
-<dd><p>Returns a metadata object for configuring subcommands with
-<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a>. Useful for aesthetics.</p>
-<p>Consider the standard approach for creating subcommands:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-    <span class="n">Union</span><span class="p">[</span><span class="n">StructTypeA</span><span class="p">,</span> <span class="n">StructTypeB</span><span class="p">]</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-<p>This will create two subcommands: <cite>nested-type-a</cite> and <cite>nested-type-b</cite>.</p>
-<p>Annotating each type with <a class="reference internal" href="#tyro.conf.subcommand" title="tyro.conf.subcommand"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.subcommand()</span></code></a> allows us to
-override for each subcommand the (a) name, (b) defaults, (c) helptext, and
-(d) whether to prefix the name or not.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span>
-    <span class="n">Union</span><span class="p">[</span>
-        <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">StructTypeA</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="n">Annotated</span><span class="p">[</span>
-            <span class="n">StructTypeB</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
-        <span class="p">],</span>
+<dd><p>Configure subcommand behavior for Union types in the CLI.</p>
+<p>When tyro encounters a Union type over structures, it creates subcommands in the
+CLI. The <cite>subcommand()</cite> function allows you to customize the appearance and behavior
+of these subcommands.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">TrainConfig</span><span class="p">:</span>
+    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">EvalConfig</span><span class="p">:</span>
+    <span class="n">checkpoint_path</span><span class="p">:</span> <span class="nb">str</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MainConfig</span><span class="p">:</span>
+    <span class="c1"># Customized subcommands:</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
+        <span class="n">Annotated</span><span class="p">[</span><span class="n">TrainConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;train&quot;</span><span class="p">)],</span>
+        <span class="n">Annotated</span><span class="p">[</span><span class="n">EvalConfig</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">subcommand</span><span class="p">(</span><span class="s2">&quot;evaluate&quot;</span><span class="p">)]</span>
     <span class="p">]</span>
-<span class="p">)</span>
+
+<span class="c1"># CLI usage: python script.py mode:train --mode.learning-rate 0.02</span>
 </pre></div>
 </div>
-<p>If we have a default value both in the annotation and attached to the field
-itself (eg, RHS of <cite>=</cite> within function or dataclass signature), the field
-default will take precedence.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># For the first subcommand, StructTypeA(1) will be used as the default.</span>
-<span class="c1"># The second subcommand, whose type is inconsistent with the field</span>
-<span class="c1"># default, will be unaffected.</span>
-<span class="n">x</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span>
-    <span class="n">Annotated</span><span class="p">[</span>
-        <span class="n">StructTypeA</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">StructTypeA</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-    <span class="p">],</span>
-    <span class="n">Annotated</span><span class="p">[</span>
-        <span class="n">StructTypeB</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">(</span><span class="n">default</span><span class="o">=</span><span class="n">StructTypeB</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-    <span class="p">],</span>
-<span class="p">]</span> <span class="o">=</span> <span class="n">StructTypeA</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</pre></div>
-</div>
+<p>If a default value is provided both via <cite>subcommand(default=…)</cite> and in the field
+definition itself (<cite>field = default</cite>), the field default will take precedence.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>name</strong> – The name of the subcommand in the CLI.</p></li>
-<li><p><strong>default</strong> – A default value for the subcommand, for struct-like types. (eg
-dataclasses).</p></li>
-<li><p><strong>description</strong> – Description of this option to use in the helptext. Defaults to
-docstring.</p></li>
-<li><p><strong>prefix_name</strong> – Whether to prefix the name of the subcommand based on where it
-is in a nested structure.</p></li>
-<li><p><strong>constructor</strong> – A constructor type or function. This will be used in
-place of the argument’s type for parsing arguments. For more
-configurability, see <a class="reference internal" href="../constructors/#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a>.</p></li>
-<li><p><strong>constructor_factory</strong> – A function that returns a constructor type. This
-will be used in place of the argument’s type for parsing arguments.
-For more configurability, see <a class="reference internal" href="../constructors/#module-tyro.constructors" title="tyro.constructors"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors</span></code></a>.</p></li>
+<li><p><strong>name</strong> – Custom name for the subcommand in the CLI.</p></li>
+<li><p><strong>default</strong> – Default instance to use for this subcommand.</p></li>
+<li><p><strong>description</strong> – Custom helptext for this subcommand.</p></li>
+<li><p><strong>prefix_name</strong> – Whether to include the parent field name as a prefix in the subcommand
+name (default: True).</p></li>
+<li><p><strong>constructor</strong> – Custom constructor type or function for parsing arguments.</p></li>
+<li><p><strong>constructor_factory</strong> – Function that returns a constructor type for parsing arguments
+(cannot be used with constructor).</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A configuration object that should be attached to a type using <cite>Annotated[]</cite>.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -414,34 +426,47 @@ For more configurability, see <a class="reference internal" href="../constructor
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.AvoidSubcommands">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">AvoidSubcommands</span></span><a class="headerlink" href="#tyro.conf.AvoidSubcommands" title="Link to this definition">¶</a></dt>
-<dd><p>Avoid creating subcommands when a default is provided for unions over nested types.
-This simplifies CLI interfaces, but makes them less expressive.</p>
-<p>Can be used directly on union types, <code class="docutils literal notranslate"><span class="pre">AvoidSubcommands[Union[...]]</span></code>, or recursively
-applied to nested types.</p>
+<dd><p>Avoid creating subcommands for union types that have a default value.</p>
+<p>When a union type has a default value, tyro creates a subcommand interface.
+With <a class="reference internal" href="#tyro.conf.AvoidSubcommands" title="tyro.conf.AvoidSubcommands"><code class="xref py py-data docutils literal notranslate"><span class="pre">AvoidSubcommands</span></code></a>, tyro will use the default value and not create subcommands,
+simplifying the CLI interface (but making it less expressive).</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Without AvoidSubcommands</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ClassA</span><span class="p">,</span> <span class="n">ClassB</span><span class="p">]</span> <span class="o">=</span> <span class="n">ClassA</span><span class="p">()</span>
+    <span class="c1"># CLI would have subcommands: python script.py mode:class-a ... or mode:class-b ...</span>
+
+<span class="c1"># With AvoidSubcommands</span>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">AvoidSubcommands</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ClassA</span><span class="p">,</span> <span class="n">ClassB</span><span class="p">]]</span> <span class="o">=</span> <span class="n">ClassA</span><span class="p">()</span>
+    <span class="c1"># CLI would not have subcommands, would use ClassA() as default</span>
+</pre></div>
+</div>
+<p>This can be applied to specific union fields or globally with the config parameter.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.ConsolidateSubcommandArgs">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">ConsolidateSubcommandArgs</span></span><a class="headerlink" href="#tyro.conf.ConsolidateSubcommandArgs" title="Link to this definition">¶</a></dt>
-<dd><p>Consolidate arguments applied to subcommands. Makes CLI less sensitive to argument
-ordering, with some tradeoffs.</p>
-<p>By default, <a class="reference internal" href="../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a> will generate a traditional CLI interface where args are applied
-to the directly preceding subcommand. When we have two subcommands <code class="docutils literal notranslate"><span class="pre">s1</span></code> and <code class="docutils literal notranslate"><span class="pre">s2</span></code>:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>x.py<span class="w"> </span><span class="o">{</span>--root<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s1<span class="w"> </span><span class="o">{</span>--s1<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>--s2<span class="w"> </span>options<span class="o">}</span>
+<dd><p>Consolidate arguments for nested subcommands to make CLI less position-sensitive.</p>
+<p>By default, tyro generates CLI interfaces where arguments apply to the directly preceding
+subcommand, which creates position-dependent behavior:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default behavior - position matters</span>
+python<span class="w"> </span>x.py<span class="w"> </span><span class="o">{</span>--root<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s1<span class="w"> </span><span class="o">{</span>--s1<span class="w"> </span>options<span class="o">}</span><span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>--s2<span class="w"> </span>options<span class="o">}</span>
 </pre></div>
 </div>
-<p>This can be frustrating because the resulting CLI is sensitive to the positioning of
-options.</p>
-<p>To consolidate subcommands, we push arguments to the end, after all subcommands:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>x.py<span class="w"> </span>s1<span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>--root,<span class="w"> </span>s1,<span class="w"> </span>and<span class="w"> </span>s2<span class="w"> </span>options<span class="o">}</span>
+<p>With <a class="reference internal" href="#tyro.conf.ConsolidateSubcommandArgs" title="tyro.conf.ConsolidateSubcommandArgs"><code class="xref py py-data docutils literal notranslate"><span class="pre">ConsolidateSubcommandArgs</span></code></a>, all arguments are moved to the end, after all subcommands:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># With ConsolidateSubcommandArgs - all options at the end</span>
+python<span class="w"> </span>x.py<span class="w"> </span>s1<span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>--root,<span class="w"> </span>s1,<span class="w"> </span>and<span class="w"> </span>s2<span class="w"> </span>options<span class="o">}</span>
 </pre></div>
 </div>
-<p>This is more robust to reordering of options, ensuring that any new options can simply
-be placed at the end of the command.</p>
-<p>The tradeoff is in required arguments. In the above example, if any <code class="docutils literal notranslate"><span class="pre">--root.*</span></code> options
-are required (no default is specified), all subcommands will need to be specified in
-order to provide the required argument.</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>x.py<span class="w"> </span>s1<span class="w"> </span>s2<span class="w"> </span><span class="o">{</span>required<span class="w"> </span>--root.*<span class="w"> </span>arguments<span class="o">}</span>
+<p>This makes the interface more robust to argument reordering, but has a tradeoff: if
+root options are required (have no defaults), all subcommands must be specified
+before providing those required arguments.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">NestedConfig</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">ConsolidateSubcommandArgs</span><span class="p">,))</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -449,149 +474,292 @@ order to provide the required argument.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.EnumChoicesFromValues">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">EnumChoicesFromValues</span></span><a class="headerlink" href="#tyro.conf.EnumChoicesFromValues" title="Link to this definition">¶</a></dt>
-<dd><p>Populate choices from enum values rather than enum names.</p>
+<dd><p>Use enum values instead of enum names for command-line choices.</p>
+<p>By default, tyro uses enum member names as the choices shown in the CLI.
+With <a class="reference internal" href="#tyro.conf.EnumChoicesFromValues" title="tyro.conf.EnumChoicesFromValues"><code class="xref py py-data docutils literal notranslate"><span class="pre">EnumChoicesFromValues</span></code></a>, the enum values are used as choices instead.</p>
 <p>Example:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">OutputFormats</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
-    <span class="n">JSON</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-    <span class="n">PRETTY</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-    <span class="n">RICH</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
-    <span class="n">TOML</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
 
-<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
-<span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-    <span class="n">display_format</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
-        <span class="n">OutputFormats</span><span class="p">,</span> <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">EnumChoicesFromValues</span>
-    <span class="p">]</span> <span class="o">=</span> <span class="n">OutputFormats</span><span class="o">.</span><span class="n">PRETTY</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">OutputFormat</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">StrEnum</span><span class="p">):</span>
+    <span class="n">JSON</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>      <span class="c1"># value is &quot;json&quot;</span>
+    <span class="n">PRETTY</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>    <span class="c1"># value is &quot;pretty&quot;</span>
+    <span class="n">RICH</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>      <span class="c1"># value is &quot;rich&quot;</span>
+    <span class="n">TOML</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>      <span class="c1"># value is &quot;toml&quot;</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="c1"># Default behavior: choices would be JSON, PRETTY, RICH, TOML</span>
+    <span class="nb">format</span><span class="p">:</span> <span class="n">OutputFormat</span> <span class="o">=</span> <span class="n">OutputFormat</span><span class="o">.</span><span class="n">PRETTY</span>
+
+    <span class="c1"># With EnumChoicesFromValues: choices are json, pretty, rich, toml</span>
+    <span class="n">alt_format</span><span class="p">:</span> <span class="n">EnumChoicesFromValues</span><span class="p">[</span><span class="n">OutputFormat</span><span class="p">]</span> <span class="o">=</span> <span class="n">OutputFormat</span><span class="o">.</span><span class="n">PRETTY</span>
 </pre></div>
 </div>
-<p>The above will result in <code class="docutils literal notranslate"><span class="pre">json</span></code>, <code class="docutils literal notranslate"><span class="pre">pretty</span></code>, <code class="docutils literal notranslate"><span class="pre">rich</span></code>, and <code class="docutils literal notranslate"><span class="pre">toml</span></code> (all lowercase) as
-choices, since the auto values for <cite>StrEnum</cite> (Python 3.11+) are lowercase
-transformations of the names. Without this marker, the choices would be <code class="docutils literal notranslate"><span class="pre">JSON</span></code>,
-<code class="docutils literal notranslate"><span class="pre">PRETTY</span></code>, <code class="docutils literal notranslate"><span class="pre">RICH</span></code>, and <code class="docutils literal notranslate"><span class="pre">TOML</span></code>.</p>
-<p>Enum aliases are not relevant when this marker is present. The first entry matching the
-chosen value will be selected.</p>
+<p>This is useful with auto-generated enum values like those in
+<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.StrEnum" title="(in Python v3.13)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.StrEnum</span></code></a>, where the values may be more user-friendly than the internal
+names.</p>
+<p>When <a class="reference internal" href="#tyro.conf.EnumChoicesFromValues" title="tyro.conf.EnumChoicesFromValues"><code class="xref py py-data docutils literal notranslate"><span class="pre">EnumChoicesFromValues</span></code></a> is used, enum aliases aren’t considered. The first enum member with a
+matching value will be selected.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.Fixed">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Fixed</span></span><a class="headerlink" href="#tyro.conf.Fixed" title="Link to this definition">¶</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Fixed[T]</span></code> to prevent <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a>
-from parsing it; a default value should be set instead. Fields that can’t be
-parsed with defaults will also be marked as fixed automatically.</p>
+<dd><p>Mark a field as fixed, preventing it from being modified through the CLI.</p>
+<p>When a field is marked as Fixed, tyro will use the default value and will not
+create a CLI option for it. This is useful for fields that should not be configurable
+via command line arguments.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">input_path</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">debug_mode</span><span class="p">:</span> <span class="n">Fixed</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Cannot be changed via CLI</span>
+    <span class="n">version</span><span class="p">:</span> <span class="n">Fixed</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;1.0.0&quot;</span>    <span class="c1"># Cannot be changed via CLI</span>
+</pre></div>
+</div>
+<p>Fields that aren’t support by tyro but have defaults will be automatically marked as fixed.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.FlagConversionOff">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">FlagConversionOff</span></span><a class="headerlink" href="#tyro.conf.FlagConversionOff" title="Link to this definition">¶</a></dt>
-<dd><p>Turn off flag conversion for booleans with default values. Instead, types annotated
-with <cite>bool</cite> will expect an explicit True or False.</p>
-<p>Can be used directly on boolean annotations, <code class="docutils literal notranslate"><span class="pre">FlagConversionOff[bool]</span></code>, or recursively
-applied to nested types.</p>
+<dd><p>Disable automatic flag-style conversion for boolean fields.</p>
+<p>By default, boolean fields with default values are converted to flags that can be enabled
+or disabled with command-line options. With <a class="reference internal" href="#tyro.conf.FlagConversionOff" title="tyro.conf.FlagConversionOff"><code class="xref py py-data docutils literal notranslate"><span class="pre">FlagConversionOff</span></code></a>, the boolean fields will
+expect an explicit True or False value.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default behavior (with flag conversion)</span>
+<span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1"># Usage: python script.py --debug      # Sets to True</span>
+<span class="c1">#        python script.py --no-debug   # Sets to False</span>
+
+<span class="c1"># With FlagConversionOff</span>
+<span class="n">debug</span><span class="p">:</span> <span class="n">FlagConversionOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1"># Usage: python script.py --debug True  # Explicit value required</span>
+<span class="c1">#        python script.py --debug False</span>
+</pre></div>
+</div>
+<p>This marker can be applied to specific boolean fields or globally using the config parameter.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.FlagCreatePairsOff">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">FlagCreatePairsOff</span></span><a class="headerlink" href="#tyro.conf.FlagCreatePairsOff" title="Link to this definition">¶</a></dt>
-<dd><p>Turn off creation of <code class="docutils literal notranslate"><span class="pre">{--flag,--no-flag}</span></code> pairs for boolean types. Instead, only
-one flag will be created. <code class="docutils literal notranslate"><span class="pre">--flag</span></code> if the field default is <code class="docutils literal notranslate"><span class="pre">False</span></code>, and
-<code class="docutils literal notranslate"><span class="pre">--no-flag</span></code> if the field default is <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
-<p>The default ‘pair’ behavior is more robust to changes in the default value, but might
-feel cluttered. This option provides an alternative.</p>
-<p>Can be used directly on boolean annotations, <code class="docutils literal notranslate"><span class="pre">FlagNegationOff[bool]</span></code>, or recursively
-applied to nested types.</p>
+<dd><p>Disable creation of matching flag pairs for boolean types.</p>
+<p>By default, tyro creates both positive and negative flags for boolean values
+(like <code class="docutils literal notranslate"><span class="pre">--flag</span></code> and <code class="docutils literal notranslate"><span class="pre">--no-flag</span></code>). With <a class="reference internal" href="#tyro.conf.FlagCreatePairsOff" title="tyro.conf.FlagCreatePairsOff"><code class="xref py py-data docutils literal notranslate"><span class="pre">FlagCreatePairsOff</span></code></a>, only one flag will be created:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--flag</span></code> if the default is False</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--no-flag</span></code> if the default is True</p></li>
+</ul>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="c1"># Default behavior (with flag pairs)</span>
+<span class="n">debug</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1"># Usage: python script.py --debug      # Sets to True</span>
+<span class="c1">#        python script.py --no-debug   # Sets to False</span>
+
+<span class="c1"># With FlagCreatePairsOff</span>
+<span class="n">debug</span><span class="p">:</span> <span class="n">FlagCreatePairsOff</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1"># Usage: python script.py --debug      # Sets to True</span>
+<span class="c1">#        (--no-debug flag is not created)</span>
+</pre></div>
+</div>
+<p>This can make the helptext less cluttered but is less robust if default values change.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.HelptextFromCommentsOff">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">HelptextFromCommentsOff</span></span><a class="headerlink" href="#tyro.conf.HelptextFromCommentsOff" title="Link to this definition">¶</a></dt>
-<dd><p>For helptext generation, ignore comments in the source code.</p>
-<p>By default, tyro will treat comments that precede field definitions as
-docstrings:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Comment.</span>
-<span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
-<span class="n">field2</span><span class="p">:</span> <span class="nb">str</span> <span class="c1"># Other comment.</span>
+<dd><p>Disable automatic helptext generation from code comments.</p>
+<p>By default, tyro extracts helptext from comments in the source code:
+- Comments before a field definition are used as helptext
+- Inline comments following a field definition are used as helptext</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="c1"># This comment becomes helptext for input_file</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span>
+
+    <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># This inline comment becomes helptext for output_file</span>
 </pre></div>
 </div>
-<p>This will produce CLI arguments with the comments as helptext. If you have code
-with a lot of comments, however, this behavior can be annoying.
-<code class="docutils literal notranslate"><span class="pre">HelptextIgnoreComments</span></code> will turn this behavior off. Triple-quoted
-docstrings are unaffected.</p>
+<p>If you have code with many organizational or implementation comments that shouldn’t
+appear in the CLI help, this automatic extraction might be unhelpful. This marker
+disables comment extraction while preserving docstring extraction.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span><span class="p">,))</span>
+</pre></div>
+</div>
+<p>Triple-quoted docstrings on fields are still used for helptext
+even when this marker is applied.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.OmitArgPrefixes">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitArgPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitArgPrefixes" title="Link to this definition">¶</a></dt>
-<dd><p>Make flags used for keyword arguments shorter by omitting prefixes.</p>
-<p>If we have a structure with the field:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">cmd</span><span class="p">:</span> <span class="n">NestedType</span>
+<dd><p>Simplify argument names by removing parent field prefixes from flags.</p>
+<p>By default, tyro creates namespaced flags for nested structures (like <code class="docutils literal notranslate"><span class="pre">--parent.child.option</span></code>).
+With <a class="reference internal" href="#tyro.conf.OmitArgPrefixes" title="tyro.conf.OmitArgPrefixes"><code class="xref py py-data docutils literal notranslate"><span class="pre">OmitArgPrefixes</span></code></a>, the prefixes are omitted, resulting in shorter argument names.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">NestedConfig</span><span class="p">:</span>
+    <span class="n">option</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;value&quot;</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">nested</span><span class="p">:</span> <span class="n">OmitArgPrefixes</span><span class="p">[</span><span class="n">NestedConfig</span><span class="p">]</span>
+
+<span class="c1"># Default CLI (with prefixes):</span>
+<span class="c1"># python script.py --nested.option value</span>
+
+<span class="c1"># With OmitArgPrefixes:</span>
+<span class="c1"># python script.py --option value</span>
 </pre></div>
 </div>
-<p>By default, <code class="docutils literal notranslate"><span class="pre">--cmd.arg</span></code> may be generated as a flag. If prefixes are omitted, we would
-instead simply have <code class="docutils literal notranslate"><span class="pre">--arg</span></code>.</p>
+<p>This can simplify command lines but may cause name conflicts if multiple nested
+structures have fields with the same name.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.OmitSubcommandPrefixes">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">OmitSubcommandPrefixes</span></span><a class="headerlink" href="#tyro.conf.OmitSubcommandPrefixes" title="Link to this definition">¶</a></dt>
-<dd><p>Make CLI inputs used for subcommands shorter by omitting the subcommand-specific
-portion of the prefix.</p>
-<p>If we have a structure with the field <code class="docutils literal notranslate"><span class="pre">cmd:</span> <span class="pre">Union[NestedTypeA,</span> <span class="pre">NestedTypeB]</span></code>:</p>
-<p>By default, <code class="docutils literal notranslate"><span class="pre">--cmd.arg</span></code> may be generated as a flag for each dataclass in the union.
-If subcommand prefixes are omitted, we would instead have <code class="docutils literal notranslate"><span class="pre">--arg</span></code>.</p>
-<p>By default, <code class="docutils literal notranslate"><span class="pre">cmd:nested-type-a</span></code> and <code class="docutils literal notranslate"><span class="pre">cmd:nested-type-b</span></code> may be generated as subcommand.
-If subcommand prefixes are omitted, we would instead have <code class="docutils literal notranslate"><span class="pre">nested-type-a</span></code> and
-<code class="docutils literal notranslate"><span class="pre">nested-type-b</span></code>.</p>
+<dd><p>Simplify subcommand names by removing parent field prefixes from subcommands.</p>
+<p>By default, tyro uses prefixes to create namespaced subcommands and arguments.
+With <a class="reference internal" href="#tyro.conf.OmitSubcommandPrefixes" title="tyro.conf.OmitSubcommandPrefixes"><code class="xref py py-data docutils literal notranslate"><span class="pre">OmitSubcommandPrefixes</span></code></a>, subcommand prefixes are omitted, making CLI commands shorter.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ProcessorA</span><span class="p">,</span> <span class="n">ProcessorB</span><span class="p">]</span>
+
+<span class="c1"># Default CLI (with prefixes):</span>
+<span class="c1"># python script.py mode:processor-a --mode.option value</span>
+
+<span class="c1"># With OmitSubcommandPrefixes:</span>
+<span class="c1"># python script.py processor-a --option value</span>
+</pre></div>
+</div>
+<p>This is useful for deeply nested structures where the fully prefixed arguments would
+become unwieldy.</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.Positional">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Positional</span></span><a class="headerlink" href="#tyro.conf.Positional" title="Link to this definition">¶</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Positional[T]</span></code> if we want to parse it as a
-positional argument.</p>
+<dd><p>Mark a parameter to be parsed as a positional argument rather than a keyword argument.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="n">Positional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>  <span class="c1"># Will be a positional arg</span>
+    <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># Will be a keyword arg (--output-file)</span>
+</pre></div>
+</div>
+<p>With this configuration, the CLI would accept: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">script.py</span> <span class="pre">input.txt</span> <span class="pre">--output-file</span> <span class="pre">output.txt</span></code></p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.PositionalRequiredArgs">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">PositionalRequiredArgs</span></span><a class="headerlink" href="#tyro.conf.PositionalRequiredArgs" title="Link to this definition">¶</a></dt>
-<dd><p>Make all arguments without defaults positional.</p>
+<dd><p>Make all required arguments (those without default values) positional.</p>
+<p>This marker applies to an entire interface when passed to the <cite>config</cite> parameter of <cite>tyro.cli()</cite>.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># No default, will be positional</span>
+    <span class="n">output_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;output.txt&quot;</span>  <span class="c1"># Has default, will be a keyword arg</span>
+
+<span class="n">args</span> <span class="o">=</span> <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Args</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">PositionalRequiredArgs</span><span class="p">,))</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.Suppress">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">Suppress</span></span><a class="headerlink" href="#tyro.conf.Suppress" title="Link to this definition">¶</a></dt>
-<dd><p>A type <code class="docutils literal notranslate"><span class="pre">T</span></code> can be annotated as <code class="docutils literal notranslate"><span class="pre">Suppress[T]</span></code> to prevent <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> from
-parsing it, and to prevent it from showing up in helptext.</p>
+<dd><p>Remove a field from the CLI interface and helptext.</p>
+<p>Unlike <a class="reference internal" href="#tyro.conf.Fixed" title="tyro.conf.Fixed"><code class="xref py py-data docutils literal notranslate"><span class="pre">Fixed</span></code></a>, which shows the field in the helptext but prevents modification,
+<a class="reference internal" href="#tyro.conf.Suppress" title="tyro.conf.Suppress"><code class="xref py py-data docutils literal notranslate"><span class="pre">Suppress</span></code></a> hides the field from both the CLI and the helptext.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">input_path</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="c1"># Internal fields that users don&#39;t need to see</span>
+    <span class="n">_cached_data</span><span class="p">:</span> <span class="n">Suppress</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+    <span class="n">_debug_level</span><span class="p">:</span> <span class="n">Suppress</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.SuppressFixed">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">SuppressFixed</span></span><a class="headerlink" href="#tyro.conf.SuppressFixed" title="Link to this definition">¶</a></dt>
-<dd><p>Hide fields that are either manually or automatically marked as fixed.</p>
+<dd><p>Hide fields that are marked as <a class="reference internal" href="#tyro.conf.Fixed" title="tyro.conf.Fixed"><code class="xref py py-data docutils literal notranslate"><span class="pre">Fixed</span></code></a> from the helptext.</p>
+<p>This marker can be applied globally to hide all fixed fields from the helptext,
+making the interface cleaner by showing only fields that can be modified via CLI.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">Config</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="p">(</span><span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">SuppressFixed</span><span class="p">,))</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.UseAppendAction">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">UseAppendAction</span></span><a class="headerlink" href="#tyro.conf.UseAppendAction" title="Link to this definition">¶</a></dt>
-<dd><p>Use “append” actions for variable-length arguments.</p>
-<p>Given an annotation like <code class="docutils literal notranslate"><span class="pre">x:</span> <span class="pre">list[int]</span></code>, this means that <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2]</span></code> can be set
-via the CLI syntax <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">--x</span> <span class="pre">1</span> <span class="pre">--x</span> <span class="pre">2</span></code> instead of the default of <code class="docutils literal notranslate"><span class="pre">--x</span> <span class="pre">0</span> <span class="pre">1</span> <span class="pre">2</span></code>.</p>
-<p>The resulting syntax may be more user-friendly; for <a class="reference internal" href="../#module-tyro" title="tyro"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro</span></code></a>, it also enables support
-for otherwise ambiguous annotations like <code class="docutils literal notranslate"><span class="pre">list[list[int]]</span></code>.</p>
-<p>Can be applied to all variable-length sequences (<code class="docutils literal notranslate"><span class="pre">list[T]</span></code>, <code class="docutils literal notranslate"><span class="pre">Sequence[T]</span></code>,
-<code class="docutils literal notranslate"><span class="pre">tuple[T,</span> <span class="pre">...]</span></code>, etc), including dictionaries without default values.</p>
+<dd><p>Enable specifying list elements through repeated flag usage rather than space-separated values.</p>
+<p>By default, tyro expects list elements to be provided as space-separated values after a single flag.
+With <a class="reference internal" href="#tyro.conf.UseAppendAction" title="tyro.conf.UseAppendAction"><code class="xref py py-data docutils literal notranslate"><span class="pre">UseAppendAction</span></code></a>, each element is provided by repeating the flag multiple times.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="c1"># Default list behavior</span>
+    <span class="n">numbers</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="c1"># With UseAppendAction</span>
+    <span class="n">tags</span><span class="p">:</span> <span class="n">UseAppendAction</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span>
+
+<span class="c1"># Default list usage:</span>
+<span class="c1"># python script.py --numbers 1 2 3</span>
+
+<span class="c1"># UseAppendAction usage:</span>
+<span class="c1"># python script.py --tags red --tags green --tags blue</span>
+</pre></div>
+</div>
+<p>This provides two benefits:
+1. More intuitive for some users who prefer repeating arguments
+2. Enables support for nested lists like <cite>list[list[int]]</cite> that would otherwise be ambiguous</p>
 </dd></dl>
 
 <dl class="py data">
 <dt class="sig sig-object py" id="tyro.conf.UseCounterAction">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">UseCounterAction</span></span><a class="headerlink" href="#tyro.conf.UseCounterAction" title="Link to this definition">¶</a></dt>
-<dd><p>Use “counter” actions for integer arguments. Should be used with integers,
-<code class="docutils literal notranslate"><span class="pre">UseCounterAction[int]</span></code>.</p>
+<dd><p>Create a counter-style flag that increments an integer each time it appears.</p>
+<p>This marker converts an integer parameter into a counter where each occurrence of the flag
+increases the value by 1, similar to common CLI tools like <code class="docutils literal notranslate"><span class="pre">-v</span></code>, <code class="docutils literal notranslate"><span class="pre">-vv</span></code>, <code class="docutils literal notranslate"><span class="pre">-vvv</span></code> for verbosity.</p>
+<p>Example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">verbose</span><span class="p">:</span> <span class="n">UseCounterAction</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># Usage:</span>
+<span class="c1"># python script.py            # verbose = 0</span>
+<span class="c1"># python script.py --verbose  # verbose = 1</span>
+<span class="c1"># python script.py --verbose --verbose  # verbose = 2</span>
+<span class="c1"># python script.py --verbose --verbose --verbose  # verbose = 3</span>
+</pre></div>
+</div>
+<p>This is useful for verbosity levels or similar numeric settings where repeated flags
+are more intuitive than explicit values.</p>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.conf.configure">
 <span class="sig-prename descclassname"><span class="pre">tyro.conf.</span></span><span class="sig-name descname"><span class="pre">configure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">markers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Marker</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">CallableType</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/tyro/conf/_markers/#configure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.conf.configure" title="Link to this definition">¶</a></dt>
 <dd><p>Decorator for applying configuration options.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>We recommend avoiding this function if possible. For global flags,
+prefer passing <code class="docutils literal notranslate"><span class="pre">config=</span></code> to <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> instead.</p>
+</div>
 <p>Consider using the <code class="docutils literal notranslate"><span class="pre">config=</span></code> argument of <a class="reference internal" href="../#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> instead, which takes
 the same config marker objects as inputs.</p>
 <p>Configuration markers are implemented via <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Annotated" title="(in Python v3.13)"><code class="xref py py-data docutils literal notranslate"><span class="pre">typing.Annotated</span></code></a> and
