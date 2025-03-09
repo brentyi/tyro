@@ -980,7 +980,7 @@ def test_conf_erased_argname() -> None:
 
 def test_long_literal_options() -> None:
     """Test that long literal options don't get truncated in helptext."""
-    
+
     def main(
         x: Literal[
             "one",
@@ -1008,14 +1008,31 @@ def test_long_literal_options() -> None:
         print(x)
 
     helptext = get_helptext_with_checks(main)
-    
+
     # Check that the helptext contains all options without truncation
     for option in [
-        "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten",
-        "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
-        "eighteen", "nineteen", "twenty"
+        "one",
+        "two",
+        "three",
+        "four",
+        "five",
+        "six",
+        "seven",
+        "eight",
+        "nine",
+        "ten",
+        "eleven",
+        "twelve",
+        "thirteen",
+        "fourteen",
+        "fifteen",
+        "sixteen",
+        "seventeen",
+        "eighteen",
+        "nineteen",
+        "twenty",
     ]:
         assert option in helptext
-    
+
     # Check that there's no ellipsis character in the helptext
     assert "…" not in helptext

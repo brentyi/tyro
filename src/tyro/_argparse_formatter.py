@@ -1091,7 +1091,9 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 helptext = (
                     Text.from_ansi(action.help.replace("%%", "%"), overflow="fold")
                     if _strings.strip_ansi_sequences(action.help) != action.help
-                    else Text.from_markup(action.help.replace("%%", "%"), overflow="fold")
+                    else Text.from_markup(
+                        action.help.replace("%%", "%"), overflow="fold"
+                    )
                 )
             else:
                 helptext = Text("")
