@@ -80,3 +80,124 @@ def test_missing_nested_default() -> None:
         args=["--child.a", "5", "--child.b", "7", "--child.c", "3"],
         default=Parent(child=tyro.MISSING),
     ) == Parent(Child(5, 7, 3))
+
+
+def test_missing_in_dataclass_def() -> None:
+    @dataclasses.dataclass
+    class Child:
+        a: int = 5
+        b: int = 3
+        c: int = 7
+
+    @dataclasses.dataclass
+    class Parent:
+        child: Child = tyro.MISSING
+
+    assert tyro.cli(
+        Parent, args=["--child.a", "5", "--child.b", "7", "--child.c", "3"]
+    ) == Parent(Child(5, 7, 3))
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Parent, args=[], default=tyro.MISSING)
+
+    # tyro.MISSING in dataclass definition should propagate to child fields, which makes all arguments required.
+    with pytest.raises(SystemExit):
+        tyro.cli(Parent, args=[])
+    with pytest.raises(SystemExit):
+        tyro.cli(Parent, args=["--child.a", "5"])
+
+
+def test_missing_in_tuple() -> None:
+    @dataclasses.dataclass
+    class Child:
+        a: int = 5
+        b: int = 3
+        c: int = 7
+
+    @dataclasses.dataclass
+    class Parent:
+        child: Tuple[Child, Child] = tyro.MISSING
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Parent, args=[])
+
+    assert tyro.cli(
+        Parent,
+        args=[
+            "--child.0.a",
+            "5",
+            "--child.0.b",
+            "7",
+            "--child.0.c",
+            "3",
+            "--child.1.a",
+            "5",
+            "--child.1.b",
+            "7",
+            "--child.1.c",
+            "3",
+        ],
+    ) == Parent((Child(5, 7, 3), Child(5, 7, 3)))
+
+
+def test_missing_in_tuple_pair() -> None:
+    @dataclasses.dataclass
+    class Child:
+        a: int = 5
+        b: int = 3
+        c: int = 7
+
+    @dataclasses.dataclass
+    class Parent:
+        child: Tuple[Child, Child] = (tyro.MISSING, tyro.MISSING)
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Parent, args=[])
+
+    assert tyro.cli(
+        Parent,
+        args=[
+            "--child.0.a",
+            "5",
+            "--child.0.b",
+            "7",
+            "--child.0.c",
+            "3",
+            "--child.1.a",
+            "5",
+            "--child.1.b",
+            "7",
+            "--child.1.c",
+            "3",
+        ],
+    ) == Parent((Child(5, 7, 3), Child(5, 7, 3)))
+
+
+def test_missing_in_tuple_pair_subcommands() -> None:
+    @dataclasses.dataclass
+    class Child1:
+        a: int = 5
+
+    @dataclasses.dataclass
+    class Child2:
+        b: int = 3
+
+    @dataclasses.dataclass
+    class Parent:
+        children: Tuple[Child1 | Child2, Child1 | Child2] = (
+            tyro.MISSING,
+            Child2(2),
+        )
+
+    with pytest.raises(SystemExit):
+        tyro.cli(Parent, args=[])
+
+    assert tyro.cli(
+        Parent,
+        args=["children.0:child1", "--children.0.a", "5"],
+    ) == Parent((Child1(5), Child2(2)))
+
+    assert tyro.cli(
+        Parent,
+        args=["children.0:child2", "--children.0.b", "5"],
+    ) == Parent((Child2(5), Child2(2)))

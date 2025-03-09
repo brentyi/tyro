@@ -47,6 +47,7 @@ dev = [
     "PyYAML>=6.0",
     "pytest>=7.1.2",
     "pytest-cov>=3.0.0",
+    "pytest-xdist>=3.5.0",
     "omegaconf>=2.2.2",
     "attrs>=21.4.0",
     "torch>=1.10.0;python_version<='3.12'",
