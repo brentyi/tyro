@@ -906,6 +906,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         style=(
                             THEME.metavar_fixed if out == "{fixed}" else THEME.metavar
                         ),
+                        overflow="fold",
                     ),
                     soft_wrap=True,
                 )
@@ -992,7 +993,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     elif isinstance(item_content, str):
                         if item_content.strip() == "":
                             continue
-                        top_parts.append(Text.from_ansi(item_content))
+                        top_parts.append(Text.from_ansi(item_content, overflow="fold"))
 
                     # Add panels. (argument groups, subcommands, etc)
                     else:
@@ -1088,9 +1089,11 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
             if action.help is not None:
                 assert isinstance(action.help, str)
                 helptext = (
-                    Text.from_ansi(action.help.replace("%%", "%"))
+                    Text.from_ansi(action.help.replace("%%", "%"), overflow="fold")
                     if _strings.strip_ansi_sequences(action.help) != action.help
-                    else Text.from_markup(action.help.replace("%%", "%"))
+                    else Text.from_markup(
+                        action.help.replace("%%", "%"), overflow="fold"
+                    )
                 )
             else:
                 helptext = Text("")
@@ -1108,6 +1111,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     Text.from_ansi(
                         invocation,
                         style=THEME.invocation,
+                        overflow="fold",
                     ),
                     helptext,
                 )
@@ -1119,6 +1123,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                     Text.from_ansi(
                         invocation + "\n",
                         style=THEME.invocation,
+                        overflow="fold",
                     )
                 )
                 if action.help:
@@ -1170,6 +1175,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                         description_part = Text.from_ansi(
                             item_content.strip() + "\n",
                             style=THEME.description,
+                            overflow="fold",
                         )
 
             if len(item_parts) == 0:
@@ -1211,7 +1217,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # expand to fill the full width of the console. This only impacts
                 # single-column layouts.
                 self.formatter._tyro_rule = Text.from_ansi(
-                    "─" * max_width, style=THEME.border, overflow="crop"
+                    "─" * max_width, style=THEME.border, overflow="fold"
                 )
             elif len(self.formatter._tyro_rule._text[0]) < max_width:
                 self.formatter._tyro_rule._text = ["─" * max_width]

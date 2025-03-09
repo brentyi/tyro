@@ -2,8 +2,10 @@
 
 ## Build & Test Commands
 - Install dev dependencies: `pip install -e ".[dev]"`
-- Run all tests: `pytest`
+- Run all tests: `pytest -n auto` (parallel execution)
+- Run all tests: `pytest` (sequential execution)
 - Run specific test: `pytest tests/test_file.py -v` or `pytest tests/test_file.py::test_name -v`
+- When modifying tests, regenerate the Py311 test variants: `python tests/test_py311_generated/_generate.py`
 - Prefer pyright for type checking: `pyright .`
 - Run linting: `ruff check`
 - Fix linting issues: `ruff check --fix` (some fixes require `--unsafe-fixes` option)
