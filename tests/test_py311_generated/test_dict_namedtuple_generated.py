@@ -598,8 +598,8 @@ def test_not_required_bool() -> None:
     class NotRequiredBool(TypedDict):
         x: NotRequired[bool]
 
-    assert tyro.cli(NotRequiredBool, args="--x True".split(" ")) == {"x": True}
-    assert tyro.cli(NotRequiredBool, args="--x False".split(" ")) == {"x": False}
+    assert tyro.cli(NotRequiredBool, args="--x".split(" ")) == {"x": True}
+    assert tyro.cli(NotRequiredBool, args="--no-x".split(" ")) == {"x": False}
     assert tyro.cli(NotRequiredBool, args=[]) == {}
 
 
