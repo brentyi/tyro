@@ -3,12 +3,9 @@ from __future__ import annotations
 import collections.abc
 import dataclasses
 import enum
-import sys
-import warnings
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, Sequence
 
 from typing_extensions import (
-    Annotated,
     NotRequired,
     Required,
     cast,
@@ -147,64 +144,25 @@ class StructTypeInfo:
 
 
 def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
+    """Apply default struct rules to the registry.
+
+    This function registers all the struct rules for different types:
+    - Dataclasses
+    - TypedDict
+    - Attrs classes
+    - Dict
+    - NamedTuple
+    - Sequences
+    - Tuples
+    - Pydantic models
+    """
     from .._fields import is_struct_type
+    from ._struct_spec_attrs import attrs_rule
+    from ._struct_spec_dataclass import dataclass_rule
+    from ._struct_spec_pydantic import pydantic_rule
 
-    @registry.struct_rule
-    def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        if not dataclasses.is_dataclass(info.type):
-            return None
-
-        is_flax_module = False
-        try:
-            # Check if dataclass is a flax module. This is only possible if flax is already
-            # loaded.
-            #
-            # We generally want to avoid importing flax, since it requires a lot of heavy
-            # imports.
-            if "flax.linen" in sys.modules.keys():
-                import flax.linen
-
-                if issubclass(info.type, flax.linen.Module):
-                    is_flax_module = True
-        except ImportError:
-            pass
-
-        # Handle dataclasses.
-        field_list = []
-        for dc_field in filter(
-            lambda field: field.init, _resolver.resolved_fields(info.type)
-        ):
-            # For flax modules, we ignore the built-in "name" and "parent" fields.
-            if is_flax_module and dc_field.name in ("name", "parent"):
-                continue
-
-            default = _get_dataclass_field_default(dc_field, info.default)
-
-            # Try to get helptext from field metadata. This is also intended to be
-            # compatible with HuggingFace-style config objects.
-            helptext = dc_field.metadata.get("help", None)
-            assert isinstance(helptext, (str, type(None)))
-
-            # Try to get helptext from docstrings. This can't be generated
-            # dynamically.
-            if helptext is None:
-                helptext = _docstrings.get_field_docstring(
-                    info.type,
-                    dc_field.name,
-                    helptext_from_comments=_markers.HelptextFromCommentsOff
-                    not in info.markers,
-                )
-
-            assert not isinstance(dc_field.type, str)
-            field_list.append(
-                StructFieldSpec(
-                    name=dc_field.name,
-                    type=dc_field.type,
-                    default=default,
-                    helptext=helptext,
-                )
-            )
-        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+    # Register the dataclass rule
+    registry.struct_rule(dataclass_rule)
 
     @registry.struct_rule
     def typeddict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
@@ -275,64 +233,8 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
 
-    @registry.struct_rule
-    def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        # attr will already be imported if it's used.
-        if "attr" not in sys.modules.keys():  # pragma: no cover
-            return None
-
-        try:
-            import attr
-        except ImportError:
-            # This is needed for the mock import test in
-            # test_missing_optional_packages.py to pass.
-            return None
-
-        if not attr.has(info.type):
-            return None
-
-        # Resolve forward references in-place, if any exist.
-        # attr.resolve_types(info.type)
-
-        # We'll use our own type resolution system instead of attr's. This is
-        # primarily to improve generics support.
-        our_hints = _resolver.get_type_hints_resolve_type_params(
-            info.type, include_extras=True
-        )
-
-        # Handle attr classes.
-        field_list = []
-        for attr_field in attr.fields(info.type):
-            # Skip fields with init=False.
-            if not attr_field.init:
-                continue
-
-            # Default handling.
-            name = attr_field.name
-            default = attr_field.default
-            if info.default not in MISSING_AND_MISSING_NONPROP:
-                assert hasattr(info.default, name)
-                default = getattr(info.default, name)
-            elif default is attr.NOTHING:
-                default = MISSING_NONPROP
-            elif isinstance(default, attr.Factory):  # type: ignore
-                default = default.factory()  # type: ignore
-
-            assert attr_field.type is not None, attr_field
-            field_list.append(
-                StructFieldSpec(
-                    name=name,
-                    type=our_hints[name],
-                    default=default,
-                    helptext=_docstrings.get_field_docstring(
-                        info.type,
-                        name,
-                        helptext_from_comments=_markers.HelptextFromCommentsOff
-                        not in info.markers,
-                    ),
-                )
-            )
-        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
+    # Register the attrs rule
+    registry.struct_rule(attrs_rule)
 
     @registry.struct_rule
     def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
@@ -524,212 +426,5 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
             return None
         return StructConstructorSpec(instantiate=tuple, fields=tuple(field_list))
 
-    @registry.struct_rule
-    def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
-        # Check if pydantic is imported
-        if "pydantic" not in sys.modules.keys():  # pragma: no cover
-            return None
-
-        try:
-            import pydantic
-        except ImportError:
-            # Needed for the mock import test in
-            # test_missing_optional_packages.py to pass.
-            return None
-
-        try:
-            if "pydantic.v1" in sys.modules.keys():
-                from pydantic import v1 as pydantic_v1
-            else:  # pragma: no cover
-                pydantic_v1 = None  # type: ignore
-        except ImportError:
-            pydantic_v1 = None  # type: ignore
-
-        # Check if the type is a Pydantic model
-        try:
-            if not (
-                issubclass(info.type, pydantic.BaseModel)
-                or (
-                    pydantic_v1 is not None
-                    and issubclass(info.type, pydantic_v1.BaseModel)
-                )
-            ):
-                return None
-        except TypeError:
-            # issubclass failed!
-            return None
-
-        field_list = []
-        pydantic_version = int(
-            getattr(pydantic, "__version__", "1.0.0").partition(".")[0]
-        )
-
-        if pydantic_version < 2 or (
-            pydantic_v1 is not None and issubclass(info.type, pydantic_v1.BaseModel)
-        ):
-            # Pydantic 1.xx
-            cls_cast = info.type
-            hints = _resolver.get_type_hints_resolve_type_params(
-                info.type, include_extras=True
-            )
-            for pd1_field in cast(Dict[str, Any], cls_cast.__fields__).values():
-                helptext = pd1_field.field_info.description
-                if helptext is None:
-                    helptext = _docstrings.get_field_docstring(
-                        info.type,
-                        pd1_field.name,
-                        helptext_from_comments=_markers.HelptextFromCommentsOff
-                        not in info.markers,
-                    )
-
-                default = _get_pydantic_v1_field_default(
-                    pd1_field.name, pd1_field, info.default
-                )
-                field_list.append(
-                    StructFieldSpec(
-                        name=pd1_field.name,
-                        type=hints[pd1_field.name],
-                        default=default,
-                        helptext=helptext,
-                    )
-                )
-        else:
-            # Pydantic 2.xx
-            for name, pd2_field in cast(Any, info.type).model_fields.items():
-                helptext = pd2_field.description
-                if helptext is None:
-                    helptext = _docstrings.get_field_docstring(
-                        info.type,
-                        name,
-                        helptext_from_comments=_markers.HelptextFromCommentsOff
-                        not in info.markers,
-                    )
-
-                default = _get_pydantic_v2_field_default(name, pd2_field, info.default)
-                field_list.append(
-                    StructFieldSpec(
-                        name=name,
-                        type=(
-                            Annotated[  # type: ignore
-                                (pd2_field.annotation,) + tuple(pd2_field.metadata)
-                            ]
-                            if len(pd2_field.metadata) > 0
-                            else pd2_field.annotation
-                        ),
-                        default=default,
-                        helptext=helptext,
-                    )
-                )
-
-        return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
-
-
-def _ensure_dataclass_instance_used_as_default_is_frozen(
-    field: dataclasses.Field, default_instance: Any
-) -> None:
-    """Ensure that a dataclass type used directly as a default value is marked as
-    frozen."""
-    assert dataclasses.is_dataclass(default_instance)
-    cls = type(default_instance)
-    if not cls.__dataclass_params__.frozen:  # type: ignore
-        warnings.warn(
-            f"Mutable type {cls} is used as a default value for `{field.name}`. This is"
-            " dangerous! Consider using `dataclasses.field(default_factory=...)` or"
-            f" marking {cls} as frozen."
-        )
-
-
-def _get_dataclass_field_default(
-    field: dataclasses.Field, parent_default_instance: Any
-) -> Any:
-    """Helper for getting the default instance for a dataclass field."""
-    # If the dataclass's parent is explicitly marked MISSING, mark this field as missing
-    # as well.
-    if parent_default_instance is MISSING:
-        return MISSING
-
-    # Try grabbing default from parent instance.
-    if (
-        parent_default_instance not in MISSING_AND_MISSING_NONPROP
-        and parent_default_instance is not None
-    ):
-        # Populate default from some parent, eg `default=` in `tyro.cli()`.
-        if hasattr(parent_default_instance, field.name):
-            return getattr(parent_default_instance, field.name)
-
-    # Try grabbing default from dataclass field.
-    if field.default is not dataclasses.MISSING:
-        default = field.default
-        # dataclasses.is_dataclass() will also return true for dataclass
-        # _types_, not just instances.
-        if type(default) is not type and dataclasses.is_dataclass(default):
-            _ensure_dataclass_instance_used_as_default_is_frozen(field, default)
-        return default
-
-    # Populate default from `dataclasses.field(default_factory=...)`.
-    if field.default_factory is not dataclasses.MISSING and not (
-        # Special case to ignore default_factory if we write:
-        # `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.
-        #
-        # In other words, treat it the same way as: `field: Dataclass`.
-        #
-        # The only time this matters is when we our dataclass has a `__post_init__`
-        # function that mutates the dataclass. We choose here to use the default values
-        # before this method is called.
-        dataclasses.is_dataclass(field.type) and field.default_factory is field.type
-    ):
-        return field.default_factory()
-
-    # Otherwise, no default.
-    return MISSING_NONPROP
-
-
-if TYPE_CHECKING:
-    import pydantic as pydantic
-    import pydantic.v1.fields as pydantic_v1_fields
-
-
-def _get_pydantic_v1_field_default(
-    name: str,
-    field: pydantic_v1_fields.ModelField,
-    parent_default_instance: Any,
-) -> tuple[Any, bool]:
-    """Helper for getting the default instance for a Pydantic field."""
-
-    # Try grabbing default from parent instance.
-    if (
-        parent_default_instance not in MISSING_AND_MISSING_NONPROP
-        and parent_default_instance is not None
-    ):
-        # Populate default from some parent, eg `default=` in `tyro.cli()`.
-        if hasattr(parent_default_instance, name):
-            return getattr(parent_default_instance, name)
-
-    if not field.required:
-        return field.get_default()
-
-    # Otherwise, no default.
-    return MISSING_NONPROP
-
-
-def _get_pydantic_v2_field_default(
-    name: str,
-    field: pydantic.fields.FieldInfo,
-    parent_default_instance: Any,
-) -> Any:
-    """Helper for getting the default instance for a Pydantic field."""
-
-    # Try grabbing default from parent instance.
-    if (
-        parent_default_instance not in MISSING_AND_MISSING_NONPROP
-        and parent_default_instance is not None
-    ):
-        # Populate default from some parent, eg `default=` in `tyro.cli()`.
-        if hasattr(parent_default_instance, name):
-            return getattr(parent_default_instance, name)
-
-    if not field.is_required():
-        return field.get_default(call_default_factory=True)
-
-    # Otherwise, no default.
-    return MISSING_NONPROP
+    # Register the pydantic rule
+    registry.struct_rule(pydantic_rule)
