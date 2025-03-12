@@ -563,25 +563,18 @@
     <span class="p">):</span>
         <span class="c1"># Treat bools as a normal parameter.</span>
         <span class="k">return</span>
-    <span class="k">elif</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="c1"># Default `False` =&gt; --flag passed in flips to `True`.</span>
-        <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FlagCreatePairsOff</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
-            <span class="c1"># If default is True, --flag will flip to `False`.</span>
-            <span class="c1"># If default is False, --no-flag will flip to `True`.</span>
-            <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;store_false&quot;</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="k">else</span> <span class="s2">&quot;store_true&quot;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Create both --flag and --no-flag.</span>
-            <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">BooleanOptionalAction</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
-        <span class="p">)</span>  <span class="c1"># argparse will directly give us a bool!</span>
-        <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
-        <span class="k">return</span>
 
-    <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="p">(</span>
-        <span class="sa">f</span><span class="s2">&quot;Expected a boolean as a default for </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">intern_name</span><span class="si">}</span><span class="s2">, but got&quot;</span>
-        <span class="sa">f</span><span class="s2">&quot; </span><span class="si">{</span><span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="si">}</span><span class="s2">.&quot;</span>
-    <span class="p">)</span>
+    <span class="c1"># Default `False` =&gt; --flag passed in flips to `True`.</span>
+    <span class="k">if</span> <span class="n">_markers</span><span class="o">.</span><span class="n">FlagCreatePairsOff</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">:</span>
+        <span class="c1"># If default is True, --flag will flip to `False`.</span>
+        <span class="c1"># If default is False, --no-flag will flip to `True`.</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="s2">&quot;store_false&quot;</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="k">else</span> <span class="s2">&quot;store_true&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Create both --flag and --no-flag.</span>
+        <span class="n">lowered</span><span class="o">.</span><span class="n">action</span> <span class="o">=</span> <span class="n">BooleanOptionalAction</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">instance_from_str</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>  <span class="c1"># argparse will directly give us a bool!</span>
+    <span class="n">lowered</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">field</span><span class="o">.</span><span class="n">default</span>
+    <span class="k">return</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_rule_apply_primitive_specs</span><span class="p">(</span>
