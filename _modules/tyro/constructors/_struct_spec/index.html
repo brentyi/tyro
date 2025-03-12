@@ -461,10 +461,14 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._fields</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_struct_type</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_attrs</span><span class="w"> </span><span class="kn">import</span> <span class="n">attrs_rule</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_dataclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass_rule</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_ml_collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ml_collections_rule</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">pydantic_rule</span>
 
-    <span class="c1"># Register the dataclass rule</span>
+    <span class="c1"># Register imported rules.</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">attrs_rule</span><span class="p">)</span>
     <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">dataclass_rule</span><span class="p">)</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">pydantic_rule</span><span class="p">)</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">ml_collections_rule</span><span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">typeddict_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -534,9 +538,6 @@
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
-
-    <span class="c1"># Register the attrs rule</span>
-    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">attrs_rule</span><span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dict_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -726,10 +727,7 @@
 
         <span class="k">if</span> <span class="n">primitive_only</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
-
-    <span class="c1"># Register the pydantic rule</span>
-    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">pydantic_rule</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span></div>
 
 </pre></div>
         </article>

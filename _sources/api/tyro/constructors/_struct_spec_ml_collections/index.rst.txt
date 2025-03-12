@@ -1,0 +1,14 @@
+:orphan:
+
+:py:mod:`tyro.constructors._struct_spec_ml_collections`
+=======================================================
+
+.. py:module:: tyro.constructors._struct_spec_ml_collections
+
+
+Module Contents
+---------------
+
+.. py:function:: ml_collections_rule(info: tyro.constructors._struct_spec.StructTypeInfo) -> tyro.constructors._struct_spec.StructConstructorSpec | None
+
+

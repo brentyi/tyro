@@ -715,6 +715,165 @@ Args(field1='hello', field2=5)
 <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./07_attrs.py --field1 hello --field2 5</strong>
 Args(field1='hello', field2=5)
 </pre></section>
+<section id="ml-collections">
+<span id="example-08-ml-collections"></span><h2>ML Collections<a class="headerlink" href="#ml-collections" title="Link to this heading">¶</a></h2>
+<p><a class="reference internal" href="../../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> understands and can populate config objects implemented using
+<a class="reference external" href="https://github.com/google/ml_collections/">ml_collections</a>, which is an
+excellent library from folks at Google.</p>
+<p><code class="docutils literal notranslate"><span class="pre">ml_collections</span></code> structures aren’t statically typed, so we infer field types
+based on value.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 08_ml_collections.py</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">ml_collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigDict</span>  <span class="c1"># type: ignore</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ConfigDict</span><span class="p">:</span>
+<span class="linenos"> 9</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>    <span class="c1"># Wandb config.</span>
+<span class="linenos">12</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
+<span class="linenos">13</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;online&quot;</span>  <span class="c1"># online, offline, disabled.</span>
+<span class="linenos">14</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;robot-sandbox&quot;</span>
+<span class="linenos">15</span>
+<span class="linenos">16</span>    <span class="c1"># Network config.</span>
+<span class="linenos">17</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
+<span class="linenos">18</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_layer_dims</span> <span class="o">=</span> <span class="p">(</span><span class="mi">128</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">3</span>
+<span class="linenos">19</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_layer_dims</span> <span class="o">=</span> <span class="p">(</span><span class="mi">256</span><span class="p">,)</span> <span class="o">*</span> <span class="mi">5</span>
+<span class="linenos">20</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
+<span class="linenos">21</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
+<span class="linenos">22</span>
+<span class="linenos">23</span>    <span class="k">return</span> <span class="n">config</span>
+<span class="linenos">24</span>
+<span class="linenos">25</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigDict</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">26</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.&quot;&quot;&quot;</span>
+<span class="linenos">27</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">30</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./08_ml_collections.py --help</strong>
+<span style="font-weight: bold">usage</span>: 08_ml_collections.py [-h] [OPTIONS]
+
+Train a model.
+
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>  <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.network options </span><span style="font-weight: lighter">──────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --config.network.policy-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: 128 128 128)</span>           <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.network.policy-obs-key <span style="font-weight: bold">STR</span>                <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                 <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.network.value-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>  <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: 256 256 256 256 256)</span>   <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.network.value-obs-key <span style="font-weight: bold">STR</span>                 <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                 <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.wandb options </span><span style="font-weight: lighter">────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --config.wandb.mode <span style="font-weight: bold">STR</span>                            <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: online)</span>                <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.wandb.project <span style="font-weight: bold">STR</span>                         <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: robot-sandbox)</span>         <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
+</pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./08_ml_collections.py --config.network.policy-layer-dims 64 64 64</strong>
+{'network': {'policy_layer_dims': (64, 64, 64),
+             'policy_obs_key': 'state',
+             'value_layer_dims': (256, 256, 256, 256, 256),
+             'value_obs_key': 'state'},
+ 'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
+</pre></section>
+<section id="ml-collections-field-references">
+<span id="example-09-ml-collections-refs"></span><h2>ML Collections + Field References<a class="headerlink" href="#ml-collections-field-references" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">ml_collections</span></code> supports references for sharing values across multiple fields.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="linenos"> 1</span><span class="c1"># 09_ml_collections_refs.py</span>
+<span class="linenos"> 2</span><span class="kn">from</span><span class="w"> </span><span class="nn">pprint</span><span class="w"> </span><span class="kn">import</span> <span class="n">pprint</span>
+<span class="linenos"> 3</span>
+<span class="linenos"> 4</span><span class="kn">from</span><span class="w"> </span><span class="nn">ml_collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfigDict</span><span class="p">,</span> <span class="n">FieldReference</span>  <span class="c1"># type: ignore</span>
+<span class="linenos"> 5</span>
+<span class="linenos"> 6</span><span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
+<span class="linenos"> 7</span>
+<span class="linenos"> 8</span><span class="k">def</span><span class="w"> </span><span class="nf">get_config</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">ConfigDict</span><span class="p">:</span>
+<span class="linenos"> 9</span>    <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
+<span class="linenos">10</span>
+<span class="linenos">11</span>    <span class="c1"># Placeholder.</span>
+<span class="linenos">12</span>    <span class="n">hidden_dim_ref</span> <span class="o">=</span> <span class="n">FieldReference</span><span class="p">(</span><span class="mi">128</span><span class="p">)</span>
+<span class="linenos">13</span>    <span class="n">config</span><span class="o">.</span><span class="n">hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim_ref</span>
+<span class="linenos">14</span>
+<span class="linenos">15</span>    <span class="c1"># Wandb config.</span>
+<span class="linenos">16</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
+<span class="linenos">17</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="s2">&quot;online&quot;</span>  <span class="c1"># online, offline, disabled.</span>
+<span class="linenos">18</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;robot-sandbox&quot;</span>
+<span class="linenos">19</span>
+<span class="linenos">20</span>    <span class="c1"># Network config.</span>
+<span class="linenos">21</span>    <span class="c1"># Updating `policy_hidden_dim` will update `value_hidden_dim`, but not</span>
+<span class="linenos">22</span>    <span class="c1"># updating `value_hidden_dim` will not update `policy_hidden_dim`.</span>
+<span class="linenos">23</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
+<span class="linenos">24</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim_ref</span>
+<span class="linenos">25</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim_ref</span> <span class="o">*</span> <span class="mi">2</span>
+<span class="linenos">26</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
+<span class="linenos">27</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">value_obs_key</span> <span class="o">=</span> <span class="s2">&quot;state&quot;</span>
+<span class="linenos">28</span>
+<span class="linenos">29</span>    <span class="k">return</span> <span class="n">config</span>
+<span class="linenos">30</span>
+<span class="linenos">31</span><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">ConfigDict</span> <span class="o">=</span> <span class="n">get_config</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="linenos">32</span><span class="w">    </span><span class="sd">&quot;&quot;&quot;Train a model.&quot;&quot;&quot;</span>
+<span class="linenos">33</span>    <span class="n">pprint</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>  <span class="c1"># type: ignore</span>
+<span class="linenos">34</span>
+<span class="linenos">35</span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+<span class="linenos">36</span>    <span class="n">tyro</span><span class="o">.</span><span class="n">cli</span><span class="p">(</span><span class="n">train</span><span class="p">)</span>
+</pre></div>
+</div>
+<pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./09_ml_collections_refs.py --help</strong>
+<span style="font-weight: bold">usage</span>: 09_ml_collections_refs.py [-h] [OPTIONS]
+
+Train a model.
+
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>             <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config options </span><span style="font-weight: lighter">─────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --config.hidden-dim <span style="font-weight: bold">INT</span>                                       <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: 128.</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.network options </span><span style="font-weight: lighter">─────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --config.network.policy-hidden-dim <span style="font-weight: bold">INT</span>                        <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: 128.</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.network.policy-obs-key <span style="font-weight: bold">STR</span>                           <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                            <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.network.value-hidden-dim <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: 256.</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.network.value-obs-key <span style="font-weight: bold">STR</span>                            <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                            <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+<span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.wandb options </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+<span style="font-weight: lighter">│</span> --config.wandb.mode <span style="font-weight: bold">STR</span>                                       <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: online)</span>                           <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span> --config.wandb.project <span style="font-weight: bold">STR</span>                                    <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: robot-sandbox)</span>                    <span style="font-weight: lighter">│</span>
+<span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+</pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./09_ml_collections_refs.py --config.hidden-dim 32</strong>
+{'hidden_dim': 32,
+ 'network': {'policy_hidden_dim': 32,
+             'policy_obs_key': 'state',
+             'value_hidden_dim': 64,
+             'value_obs_key': 'state'},
+ 'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
+</pre><pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+<strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./09_ml_collections_refs.py --config.network.policy-hidden-dim 64</strong>
+{'hidden_dim': 64,
+ 'network': {'policy_hidden_dim': 64,
+             'policy_obs_key': 'state',
+             'value_hidden_dim': 128,
+             'value_obs_key': 'state'},
+ 'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
+</pre></section>
 </section>
 
         </article>
@@ -787,6 +946,8 @@ Args(field1='hello', field2=5)
 <li><a class="reference internal" href="#tuples-and-namedtuple">Tuples and NamedTuple</a></li>
 <li><a class="reference internal" href="#pydantic-integration">Pydantic Integration</a></li>
 <li><a class="reference internal" href="#attrs-integration">Attrs Integration</a></li>
+<li><a class="reference internal" href="#ml-collections">ML Collections</a></li>
+<li><a class="reference internal" href="#ml-collections-field-references">ML Collections + Field References</a></li>
 </ul>
 </li>
 </ul>
