@@ -1,6 +1,8 @@
 import dataclasses
 from typing import Any
 
+from helptext_utils import get_helptext_with_checks
+
 import tyro
 
 
@@ -20,6 +22,14 @@ def test_recursive_tuple_narrowing():
         fn,
         args="--w 6 7 8 --x 9 10 11 twelve 13 --y.0 14 --y.1 15 --y.2 16 17 18 --z 19 20 21 hello 23".split(),
     )
+
+    helptext = get_helptext_with_checks(fn)
+    assert "--w [INT [INT ...]" in helptext
+    assert "--x INT INT INT STR INT" in helptext
+    assert "--y.0 INT" in helptext
+    assert "--y.1 INT" in helptext
+    assert "--y.2 [INT [INT ...]]" in helptext
+    assert "--z INT INT INT STR INT" in helptext
 
     # Simple tuple
     assert result[0] == (6, 7, 8)
