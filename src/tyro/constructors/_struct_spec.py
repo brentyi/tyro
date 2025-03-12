@@ -17,6 +17,11 @@ from typing_extensions import (
     is_typeddict,
 )
 
+from tyro.constructors._primitive_spec import (
+    PrimitiveTypeInfo,
+    UnsupportedTypeAnnotationError,
+)
+
 from .. import _docstrings, _resolver
 from .._singleton import (
     EXCLUDE_FROM_CALL,
@@ -503,11 +508,15 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
 
         # If the tuple only contains primitive types, we can just treat the
         # whole tuple as a primitive.
+        #
+        # We carve an exception when there are variable-length inner types, like
+        # `tuple[list[int], list[str]]`.
         primitive_only = True
         for field in field_list:
-            if not ConstructorRegistry._is_primitive_type(
-                field.type, set(info.markers)
-            ):
+            spec = ConstructorRegistry.get_primitive_spec(
+                PrimitiveTypeInfo.make(field.type, set(info.markers))
+            )
+            if isinstance(spec, UnsupportedTypeAnnotationError) or spec.nargs == "*":
                 primitive_only = False
                 break
 

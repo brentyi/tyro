@@ -20,6 +20,7 @@ from typing import (
 )
 
 import pytest
+from helptext_utils import get_helptext_with_checks
 
 import tyro
 
@@ -705,3 +706,13 @@ def test_nested_dict_in_list() -> None:
             "hidden_dim": [32, 64],
         },
     )
+
+
+def test_double_list_in_tuple() -> None:
+    def main(x: Tuple[List[str], List[str]]) -> None:
+        del x
+
+    # This used to be ambiguous, we now break it into two separate arguments!
+    helptext = get_helptext_with_checks(main)
+    assert "--x.0 [STR [STR ...]]" in helptext
+    assert "--x.1 [STR [STR ...]]" in helptext

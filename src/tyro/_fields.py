@@ -81,11 +81,11 @@ class FieldDefinition:
         # Narrow types.
         if typ is Any and default not in MISSING_AND_MISSING_NONPROP:
             typ = type(default)
-        else:
-            # Be forgiving about default instances.
-            typ = _resolver.narrow_collection_types(typ, default)
-            if not check_default_instances():
-                typ = _resolver.expand_union_types(typ, default)
+
+        # Be forgiving about default instances.
+        typ = _resolver.narrow_collection_types(typ, default)
+        if not check_default_instances():
+            typ = _resolver.expand_union_types(typ, default)
 
         # Try to extract argconf overrides from type.
         _, argconfs = _resolver.unwrap_annotated(typ, _confstruct._ArgConfig)
