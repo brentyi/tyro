@@ -247,11 +247,10 @@ def _rule_handle_boolean_flags(
         return
 
     if (
-        arg.field.default not in (True, False)
+        arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
         or arg.field.is_positional()
         or _markers.FlagConversionOff in arg.field.markers
         or _markers.Fixed in arg.field.markers
-        or arg.field.default not in (True, False)
     ):
         # Treat bools as a normal parameter.
         return
