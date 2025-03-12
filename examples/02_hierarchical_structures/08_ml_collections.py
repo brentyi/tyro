@@ -9,8 +9,8 @@ based on value.
 
 Usage:
 
-    python ./03_ml_collections.py --help
-    python ./03_ml_collections.py --config.network.policy-layer-dims 64 64 64
+    python ./08_ml_collections.py --help
+    python ./08_ml_collections.py --config.network.policy-layer-dims 64 64 64
 """
 
 from pprint import pprint

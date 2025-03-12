@@ -3,9 +3,9 @@
 ``ml_collections`` supports references for sharing values across multiple fields.
 
 Usage:
-    python ./04_ml_collections_refs.py --help
-    python ./04_ml_collections_refs.py --config.hidden-dim 32
-    python ./04_ml_collections_refs.py --config.network.policy-hidden-dim 64
+    python ./09_ml_collections_refs.py --help
+    python ./09_ml_collections_refs.py --config.hidden-dim 32
+    python ./09_ml_collections_refs.py --config.network.policy-hidden-dim 64
 """
 
 from pprint import pprint
