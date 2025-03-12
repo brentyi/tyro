@@ -218,8 +218,20 @@ def narrow_collection_types(
     typ: TypeOrCallable, default_instance: Any
 ) -> TypeOrCallable:
     """TypeForm narrowing for containers. Infers types of container contents."""
+
+    # Can't narrow if we don't have a default value!
+    if default_instance in MISSING_AND_MISSING_NONPROP:
+        return typ
+
+    # We'll recursively narrow contained types too!
+    def _get_type(val: Any) -> TypeForm:
+        return narrow_collection_types(type(val), val)
+
     args = get_args(typ)
     origin = get_origin(typ)
+
+    # We should attempt to narrow if we see `list[Any]`, `tuple[Any]`,
+    # `tuple[Any, ...]`, etc.
     if args == (Any,) or (origin is tuple and args == (Any, Ellipsis)):
         typ = origin  # type: ignore
 
@@ -228,19 +240,34 @@ def narrow_collection_types(
     ):
         if len(default_instance) == 0:
             return typ
-        typ = List[Union[tuple(map(type, default_instance))]]  # type: ignore
+        typ = List[Union[tuple(map(_get_type, default_instance))]]  # type: ignore
     elif typ in (set, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, set
     ):
         if len(default_instance) == 0:
             return typ
-        typ = Set[Union[tuple(map(type, default_instance))]]  # type: ignore
+        typ = Set[Union[tuple(map(_get_type, default_instance))]]  # type: ignore
     elif typ in (tuple, Sequence, collections.abc.Sequence) and isinstance(
         default_instance, tuple
     ):
         if len(default_instance) == 0:
             return typ
-        typ = Tuple[tuple(map(type, default_instance))]  # type: ignore
+        default_types = tuple(map(_get_type, default_instance))
+        if len(set(default_types)) == 1:
+            typ = Tuple[default_types[0], Ellipsis]  # type: ignore
+        else:
+            typ = Tuple[default_types]  # type: ignore
+    elif (
+        origin is tuple
+        and isinstance(default_instance, tuple)
+        and len(args) == len(default_instance)
+    ):
+        typ = Tuple[
+            tuple(
+                _get_type(val_i) if typ_i is Any else typ_i
+                for typ_i, val_i in zip(args, default_instance)
+            )
+        ]  # type: ignore
     return cast(TypeOrCallable, typ)
 
 
