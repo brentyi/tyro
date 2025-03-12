@@ -3,9 +3,9 @@ from __future__ import annotations
 import dataclasses
 from typing import Any
 
-import tyro
-
 from helptext_utils import get_helptext_with_checks
+
+import tyro
 
 
 def test_recursive_tuple_narrowing():

@@ -4,11 +4,11 @@ import io
 from typing import Dict, List, Tuple, TypeVar, Union
 
 import pytest
-import tyro
-from typing_extensions import Annotated, Literal
-from tyro.constructors import UnsupportedTypeAnnotationError
-
 from helptext_utils import get_helptext_with_checks
+from typing_extensions import Annotated, Literal
+
+import tyro
+from tyro.constructors import UnsupportedTypeAnnotationError
 
 
 def test_ambiguous_collection_0() -> None:
