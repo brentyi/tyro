@@ -247,32 +247,26 @@ def _rule_handle_boolean_flags(
         return
 
     if (
-        arg.field.default in _singleton.MISSING_AND_MISSING_NONPROP
+        arg.field.default not in (True, False)
         or arg.field.is_positional()
         or _markers.FlagConversionOff in arg.field.markers
         or _markers.Fixed in arg.field.markers
+        or arg.field.default not in (True, False)
     ):
         # Treat bools as a normal parameter.
         return
-    elif arg.field.default in (True, False):
-        # Default `False` => --flag passed in flips to `True`.
-        if _markers.FlagCreatePairsOff in arg.field.markers:
-            # If default is True, --flag will flip to `False`.
-            # If default is False, --no-flag will flip to `True`.
-            lowered.action = "store_false" if arg.field.default else "store_true"
-        else:
-            # Create both --flag and --no-flag.
-            lowered.action = BooleanOptionalAction
-        lowered.instance_from_str = (
-            lambda x: x
-        )  # argparse will directly give us a bool!
-        lowered.default = arg.field.default
-        return
 
-    assert False, (
-        f"Expected a boolean as a default for {arg.field.intern_name}, but got"
-        f" {arg.field.default}."
-    )
+    # Default `False` => --flag passed in flips to `True`.
+    if _markers.FlagCreatePairsOff in arg.field.markers:
+        # If default is True, --flag will flip to `False`.
+        # If default is False, --no-flag will flip to `True`.
+        lowered.action = "store_false" if arg.field.default else "store_true"
+    else:
+        # Create both --flag and --no-flag.
+        lowered.action = BooleanOptionalAction
+    lowered.instance_from_str = lambda x: x  # argparse will directly give us a bool!
+    lowered.default = arg.field.default
+    return
 
 
 def _rule_apply_primitive_specs(
