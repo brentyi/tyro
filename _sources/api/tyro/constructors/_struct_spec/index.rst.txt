@@ -114,4 +114,16 @@ Module Contents
 
 .. py:function:: apply_default_struct_rules(registry: tyro.constructors._registry.ConstructorRegistry) -> None
 
+   Apply default struct rules to the registry.
+
+   This function registers all the struct rules for different types:
+   - Dataclasses
+   - TypedDict
+   - Attrs classes
+   - Dict
+   - NamedTuple
+   - Sequences
+   - Tuples
+   - Pydantic models
+
 

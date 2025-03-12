@@ -1,0 +1,16 @@
+:orphan:
+
+:py:mod:`tyro.constructors._struct_spec_attrs`
+==============================================
+
+.. py:module:: tyro.constructors._struct_spec_attrs
+
+
+Module Contents
+---------------
+
+.. py:function:: attrs_rule(info: tyro.constructors._struct_spec.StructTypeInfo) -> tyro.constructors._struct_spec.StructConstructorSpec | None
+
+   Rule for handling attrs classes.
+
+

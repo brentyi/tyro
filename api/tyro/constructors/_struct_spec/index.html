@@ -420,7 +420,17 @@ useful for populating the default values of the struct.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="tyro.constructors._struct_spec.apply_default_struct_rules">
 <span class="sig-prename descclassname"><span class="pre">tyro.constructors._struct_spec.</span></span><span class="sig-name descname"><span class="pre">apply_default_struct_rules</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../_registry/#tyro.constructors._registry.ConstructorRegistry" title="tyro.constructors._registry.ConstructorRegistry"><span class="pre">tyro.constructors._registry.ConstructorRegistry</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.13)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_struct_spec/#apply_default_struct_rules"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._struct_spec.apply_default_struct_rules" title="Link to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>Apply default struct rules to the registry.</p>
+<p>This function registers all the struct rules for different types:
+- Dataclasses
+- TypedDict
+- Attrs classes
+- Dict
+- NamedTuple
+- Sequences
+- Tuples
+- Pydantic models</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>registry</strong> (<a class="reference internal" href="../_registry/#tyro.constructors._registry.ConstructorRegistry" title="tyro.constructors._registry.ConstructorRegistry"><em>tyro.constructors._registry.ConstructorRegistry</em></a>)</p>
 </dd>

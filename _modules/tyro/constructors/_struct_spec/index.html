@@ -285,12 +285,9 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections.abc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">Annotated</span><span class="p">,</span>
     <span class="n">NotRequired</span><span class="p">,</span>
     <span class="n">Required</span><span class="p">,</span>
     <span class="n">cast</span><span class="p">,</span>
@@ -449,64 +446,25 @@
 <div class="viewcode-block" id="apply_default_struct_rules">
 <a class="viewcode-back" href="../../../../api/tyro/constructors/_struct_spec/#tyro.constructors._struct_spec.apply_default_struct_rules">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">apply_default_struct_rules</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="n">ConstructorRegistry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply default struct rules to the registry.</span>
+
+<span class="sd">    This function registers all the struct rules for different types:</span>
+<span class="sd">    - Dataclasses</span>
+<span class="sd">    - TypedDict</span>
+<span class="sd">    - Attrs classes</span>
+<span class="sd">    - Dict</span>
+<span class="sd">    - NamedTuple</span>
+<span class="sd">    - Sequences</span>
+<span class="sd">    - Tuples</span>
+<span class="sd">    - Pydantic models</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">.._fields</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_struct_type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_attrs</span><span class="w"> </span><span class="kn">import</span> <span class="n">attrs_rule</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_dataclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass_rule</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">pydantic_rule</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">dataclass_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># Check if dataclass is a flax module. This is only possible if flax is already</span>
-            <span class="c1"># loaded.</span>
-            <span class="c1">#</span>
-            <span class="c1"># We generally want to avoid importing flax, since it requires a lot of heavy</span>
-            <span class="c1"># imports.</span>
-            <span class="k">if</span> <span class="s2">&quot;flax.linen&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="kn">import</span><span class="w"> </span><span class="nn">flax.linen</span>
-
-                <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">flax</span><span class="o">.</span><span class="n">linen</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-                    <span class="n">is_flax_module</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="k">pass</span>
-
-        <span class="c1"># Handle dataclasses.</span>
-        <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">dc_field</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span>
-            <span class="k">lambda</span> <span class="n">field</span><span class="p">:</span> <span class="n">field</span><span class="o">.</span><span class="n">init</span><span class="p">,</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">resolved_fields</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="c1"># For flax modules, we ignore the built-in &quot;name&quot; and &quot;parent&quot; fields.</span>
-            <span class="k">if</span> <span class="n">is_flax_module</span> <span class="ow">and</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">):</span>
-                <span class="k">continue</span>
-
-            <span class="n">default</span> <span class="o">=</span> <span class="n">_get_dataclass_field_default</span><span class="p">(</span><span class="n">dc_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-
-            <span class="c1"># Try to get helptext from field metadata. This is also intended to be</span>
-            <span class="c1"># compatible with HuggingFace-style config objects.</span>
-            <span class="n">helptext</span> <span class="o">=</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;help&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">helptext</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))</span>
-
-            <span class="c1"># Try to get helptext from docstrings. This can&#39;t be generated</span>
-            <span class="c1"># dynamically.</span>
-            <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                    <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                    <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span>
-                    <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                <span class="p">)</span>
-
-            <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
-            <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">StructFieldSpec</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                    <span class="nb">type</span><span class="o">=</span><span class="n">dc_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                    <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-                    <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
+    <span class="c1"># Register the dataclass rule</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">dataclass_rule</span><span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">typeddict_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -577,64 +535,8 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">attrs_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># attr will already be imported if it&#39;s used.</span>
-        <span class="k">if</span> <span class="s2">&quot;attr&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">attr</span>
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="c1"># This is needed for the mock import test in</span>
-            <span class="c1"># test_missing_optional_packages.py to pass.</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="c1"># Resolve forward references in-place, if any exist.</span>
-        <span class="c1"># attr.resolve_types(info.type)</span>
-
-        <span class="c1"># We&#39;ll use our own type resolution system instead of attr&#39;s. This is</span>
-        <span class="c1"># primarily to improve generics support.</span>
-        <span class="n">our_hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
-            <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
-        <span class="p">)</span>
-
-        <span class="c1"># Handle attr classes.</span>
-        <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">attr_field</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">fields</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">):</span>
-            <span class="c1"># Skip fields with init=False.</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">init</span><span class="p">:</span>
-                <span class="k">continue</span>
-
-            <span class="c1"># Default handling.</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">name</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">default</span>
-            <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">default</span> <span class="ow">is</span> <span class="n">attr</span><span class="o">.</span><span class="n">NOTHING</span><span class="p">:</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="n">MISSING_NONPROP</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default</span><span class="p">,</span> <span class="n">attr</span><span class="o">.</span><span class="n">Factory</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
-                <span class="n">default</span> <span class="o">=</span> <span class="n">default</span><span class="o">.</span><span class="n">factory</span><span class="p">()</span>  <span class="c1"># type: ignore</span>
-
-            <span class="k">assert</span> <span class="n">attr_field</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="n">attr_field</span>
-            <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">StructFieldSpec</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                    <span class="nb">type</span><span class="o">=</span><span class="n">our_hints</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
-                    <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-                    <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                        <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                        <span class="n">name</span><span class="p">,</span>
-                        <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span>
-                        <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                    <span class="p">),</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
-        <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
+    <span class="c1"># Register the attrs rule</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">attrs_rule</span><span class="p">)</span>
 
     <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">dict_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
@@ -826,216 +728,9 @@
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
 
-    <span class="nd">@registry</span><span class="o">.</span><span class="n">struct_rule</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">pydantic_rule</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="n">StructTypeInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructConstructorSpec</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Check if pydantic is imported</span>
-        <span class="k">if</span> <span class="s2">&quot;pydantic&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>  <span class="c1"># pragma: no cover</span>
-            <span class="k">return</span> <span class="kc">None</span>
+    <span class="c1"># Register the pydantic rule</span>
+    <span class="n">registry</span><span class="o">.</span><span class="n">struct_rule</span><span class="p">(</span><span class="n">pydantic_rule</span><span class="p">)</span></div>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="kn">import</span><span class="w"> </span><span class="nn">pydantic</span>
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="c1"># Needed for the mock import test in</span>
-            <span class="c1"># test_missing_optional_packages.py to pass.</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="s2">&quot;pydantic.v1&quot;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="kn">from</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="kn">import</span> <span class="n">v1</span> <span class="k">as</span> <span class="n">pydantic_v1</span>
-            <span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-                <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
-        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-            <span class="n">pydantic_v1</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore</span>
-
-        <span class="c1"># Check if the type is a Pydantic model</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-                <span class="nb">issubclass</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">)</span>
-                <span class="ow">or</span> <span class="p">(</span>
-                    <span class="n">pydantic_v1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-                    <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">)</span>
-                <span class="p">)</span>
-            <span class="p">):</span>
-                <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-            <span class="c1"># issubclass failed!</span>
-            <span class="k">return</span> <span class="kc">None</span>
-
-        <span class="n">field_list</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">pydantic_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span>
-            <span class="nb">getattr</span><span class="p">(</span><span class="n">pydantic</span><span class="p">,</span> <span class="s2">&quot;__version__&quot;</span><span class="p">,</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">pydantic_version</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="p">(</span>
-            <span class="n">pydantic_v1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">pydantic_v1</span><span class="o">.</span><span class="n">BaseModel</span><span class="p">)</span>
-        <span class="p">):</span>
-            <span class="c1"># Pydantic 1.xx</span>
-            <span class="n">cls_cast</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span>
-            <span class="n">hints</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">get_type_hints_resolve_type_params</span><span class="p">(</span>
-                <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span>
-            <span class="k">for</span> <span class="n">pd1_field</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">cls_cast</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">helptext</span> <span class="o">=</span> <span class="n">pd1_field</span><span class="o">.</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span>
-                <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                        <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                        <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span>
-                        <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                    <span class="p">)</span>
-
-                <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v1_field_default</span><span class="p">(</span>
-                    <span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pd1_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span>
-                <span class="p">)</span>
-                <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">StructFieldSpec</span><span class="p">(</span>
-                        <span class="n">name</span><span class="o">=</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                        <span class="nb">type</span><span class="o">=</span><span class="n">hints</span><span class="p">[</span><span class="n">pd1_field</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-                        <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-                        <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Pydantic 2.xx</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pd2_field</span> <span class="ow">in</span> <span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">)</span><span class="o">.</span><span class="n">model_fields</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">helptext</span> <span class="o">=</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">description</span>
-                <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                        <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                        <span class="n">name</span><span class="p">,</span>
-                        <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span>
-                        <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                    <span class="p">)</span>
-
-                <span class="n">default</span> <span class="o">=</span> <span class="n">_get_pydantic_v2_field_default</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pd2_field</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
-                <span class="n">field_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">StructFieldSpec</span><span class="p">(</span>
-                        <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                        <span class="nb">type</span><span class="o">=</span><span class="p">(</span>
-                            <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
-                                <span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span>
-                            <span class="p">]</span>
-                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pd2_field</span><span class="o">.</span><span class="n">metadata</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-                            <span class="k">else</span> <span class="n">pd2_field</span><span class="o">.</span><span class="n">annotation</span>
-                        <span class="p">),</span>
-                        <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-                        <span class="n">helptext</span><span class="o">=</span><span class="n">helptext</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span></div>
-
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span>
-    <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Ensure that a dataclass type used directly as a default value is marked as</span>
-<span class="sd">    frozen.&quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
-    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__dataclass_params__</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;Mutable type </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> is used as a default value for `</span><span class="si">{</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">`. This is&quot;</span>
-            <span class="s2">&quot; dangerous! Consider using `dataclasses.field(default_factory=...)` or&quot;</span>
-            <span class="sa">f</span><span class="s2">&quot; marking </span><span class="si">{</span><span class="bp">cls</span><span class="si">}</span><span class="s2"> as frozen.&quot;</span>
-        <span class="p">)</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_dataclass_field_default</span><span class="p">(</span>
-    <span class="n">field</span><span class="p">:</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">Field</span><span class="p">,</span> <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a dataclass field.&quot;&quot;&quot;</span>
-    <span class="c1"># If the dataclass&#39;s parent is explicitly marked MISSING, mark this field as missing</span>
-    <span class="c1"># as well.</span>
-    <span class="k">if</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="n">MISSING</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">MISSING</span>
-
-    <span class="c1"># Try grabbing default from parent instance.</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
-        <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-    <span class="c1"># Try grabbing default from dataclass field.</span>
-    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span><span class="p">:</span>
-        <span class="n">default</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
-        <span class="c1"># dataclasses.is_dataclass() will also return true for dataclass</span>
-        <span class="c1"># _types_, not just instances.</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">default</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">type</span> <span class="ow">and</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">default</span><span class="p">):</span>
-            <span class="n">_ensure_dataclass_instance_used_as_default_is_frozen</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">default</span>
-
-    <span class="c1"># Populate default from `dataclasses.field(default_factory=...)`.</span>
-    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">dataclasses</span><span class="o">.</span><span class="n">MISSING</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span>
-        <span class="c1"># Special case to ignore default_factory if we write:</span>
-        <span class="c1"># `field: Dataclass = dataclasses.field(default_factory=Dataclass)`.</span>
-        <span class="c1">#</span>
-        <span class="c1"># In other words, treat it the same way as: `field: Dataclass`.</span>
-        <span class="c1">#</span>
-        <span class="c1"># The only time this matters is when we our dataclass has a `__post_init__`</span>
-        <span class="c1"># function that mutates the dataclass. We choose here to use the default values</span>
-        <span class="c1"># before this method is called.</span>
-        <span class="n">dataclasses</span><span class="o">.</span><span class="n">is_dataclass</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span> <span class="ow">is</span> <span class="n">field</span><span class="o">.</span><span class="n">type</span>
-    <span class="p">):</span>
-        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">default_factory</span><span class="p">()</span>
-
-    <span class="c1"># Otherwise, no default.</span>
-    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
-
-
-<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">pydantic</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pydantic</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">pydantic.v1.fields</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pydantic_v1_fields</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_pydantic_v1_field_default</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">field</span><span class="p">:</span> <span class="n">pydantic_v1_fields</span><span class="o">.</span><span class="n">ModelField</span><span class="p">,</span>
-    <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
-
-    <span class="c1"># Try grabbing default from parent instance.</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
-        <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">()</span>
-
-    <span class="c1"># Otherwise, no default.</span>
-    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">_get_pydantic_v2_field_default</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">field</span><span class="p">:</span> <span class="n">pydantic</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">FieldInfo</span><span class="p">,</span>
-    <span class="n">parent_default_instance</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper for getting the default instance for a Pydantic field.&quot;&quot;&quot;</span>
-
-    <span class="c1"># Try grabbing default from parent instance.</span>
-    <span class="k">if</span> <span class="p">(</span>
-        <span class="n">parent_default_instance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
-        <span class="ow">and</span> <span class="n">parent_default_instance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-    <span class="p">):</span>
-        <span class="c1"># Populate default from some parent, eg `default=` in `tyro.cli()`.</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent_default_instance</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">is_required</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">field</span><span class="o">.</span><span class="n">get_default</span><span class="p">(</span><span class="n">call_default_factory</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-    <span class="c1"># Otherwise, no default.</span>
-    <span class="k">return</span> <span class="n">MISSING_NONPROP</span>
 </pre></div>
         </article>
       </div>
