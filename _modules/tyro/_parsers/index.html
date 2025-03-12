@@ -365,8 +365,16 @@
 
         <span class="c1"># Cycle detection.</span>
         <span class="c1">#</span>
-        <span class="c1"># &#39;parent&#39; here refers to in the nesting hierarchy, not the superclass.</span>
-        <span class="k">if</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">parent_classes</span> <span class="ow">and</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="c1"># - &#39;parent&#39; here refers to in the nesting hierarchy, not the superclass.</span>
+        <span class="c1"># - We threshold by `max_nesting_depth` to suppress false positives,</span>
+        <span class="c1">#  for example from custom constructors that behave differently</span>
+        <span class="c1">#  depending the default value. (example: ml_collections.ConfigDict)</span>
+        <span class="n">max_nesting_depth</span> <span class="o">=</span> <span class="mi">128</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">f</span> <span class="ow">in</span> <span class="n">parent_classes</span>
+            <span class="ow">and</span> <span class="n">f</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">dict</span>
+            <span class="ow">and</span> <span class="n">intern_prefix</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">max_nesting_depth</span>
+        <span class="p">):</span>
             <span class="k">raise</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Found a cyclic dependency with type </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">.&quot;</span>
             <span class="p">)</span>

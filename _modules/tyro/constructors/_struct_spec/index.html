@@ -299,6 +299,11 @@
     <span class="n">is_typeddict</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">tyro.constructors._primitive_spec</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PrimitiveTypeInfo</span><span class="p">,</span>
+    <span class="n">UnsupportedTypeAnnotationError</span><span class="p">,</span>
+<span class="p">)</span>
+
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">EXCLUDE_FROM_CALL</span><span class="p">,</span>
@@ -805,11 +810,15 @@
 
         <span class="c1"># If the tuple only contains primitive types, we can just treat the</span>
         <span class="c1"># whole tuple as a primitive.</span>
+        <span class="c1">#</span>
+        <span class="c1"># We carve an exception when there are variable-length inner types, like</span>
+        <span class="c1"># `tuple[list[int], list[str]]`.</span>
         <span class="n">primitive_only</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">field_list</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">_is_primitive_type</span><span class="p">(</span>
-                <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">)</span>
-            <span class="p">):</span>
+            <span class="n">spec</span> <span class="o">=</span> <span class="n">ConstructorRegistry</span><span class="o">.</span><span class="n">get_primitive_spec</span><span class="p">(</span>
+                <span class="n">PrimitiveTypeInfo</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">))</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">UnsupportedTypeAnnotationError</span><span class="p">)</span> <span class="ow">or</span> <span class="n">spec</span><span class="o">.</span><span class="n">nargs</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span><span class="p">:</span>
                 <span class="n">primitive_only</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">break</span>
 

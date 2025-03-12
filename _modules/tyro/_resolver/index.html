@@ -526,8 +526,20 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallable</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;TypeForm narrowing for containers. Infers types of container contents.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Can&#39;t narrow if we don&#39;t have a default value!</span>
+    <span class="k">if</span> <span class="n">default_instance</span> <span class="ow">in</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">typ</span>
+
+    <span class="c1"># We&#39;ll recursively narrow contained types too!</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_type</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeForm</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">narrow_collection_types</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span>
+
     <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
     <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">typ</span><span class="p">)</span>
+
+    <span class="c1"># We should attempt to narrow if we see `list[Any]`, `tuple[Any]`,</span>
+    <span class="c1"># `tuple[Any, ...]`, etc.</span>
     <span class="k">if</span> <span class="n">args</span> <span class="o">==</span> <span class="p">(</span><span class="n">Any</span><span class="p">,)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">origin</span> <span class="ow">is</span> <span class="nb">tuple</span> <span class="ow">and</span> <span class="n">args</span> <span class="o">==</span> <span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="bp">Ellipsis</span><span class="p">)):</span>
         <span class="n">typ</span> <span class="o">=</span> <span class="n">origin</span>  <span class="c1"># type: ignore</span>
 
@@ -536,19 +548,34 @@
     <span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">typ</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))]]</span>  <span class="c1"># type: ignore</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_get_type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))]]</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">default_instance</span><span class="p">,</span> <span class="nb">set</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">typ</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">Set</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))]]</span>  <span class="c1"># type: ignore</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">Set</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_get_type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))]]</span>  <span class="c1"># type: ignore</span>
     <span class="k">elif</span> <span class="n">typ</span> <span class="ow">in</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span>
         <span class="n">default_instance</span><span class="p">,</span> <span class="nb">tuple</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">typ</span>
-        <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))]</span>  <span class="c1"># type: ignore</span>
+        <span class="n">default_types</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_get_type</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">default_types</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">default_types</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">Ellipsis</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">default_types</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+    <span class="k">elif</span> <span class="p">(</span>
+        <span class="n">origin</span> <span class="ow">is</span> <span class="nb">tuple</span>
+        <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">default_instance</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">default_instance</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="n">typ</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span>
+            <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">_get_type</span><span class="p">(</span><span class="n">val_i</span><span class="p">)</span> <span class="k">if</span> <span class="n">typ_i</span> <span class="ow">is</span> <span class="n">Any</span> <span class="k">else</span> <span class="n">typ_i</span>
+                <span class="k">for</span> <span class="n">typ_i</span><span class="p">,</span> <span class="n">val_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">default_instance</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">]</span>  <span class="c1"># type: ignore</span>
     <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeOrCallable</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span></div>
 
 
