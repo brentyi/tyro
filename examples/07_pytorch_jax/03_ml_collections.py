@@ -15,8 +15,9 @@ Usage:
 
 from pprint import pprint
 
-import tyro
 from ml_collections import ConfigDict  # type: ignore
+
+import tyro
 
 
 def get_config() -> ConfigDict:

@@ -166,8 +166,9 @@ based on value.
     # 03_ml_collections.py
     from pprint import pprint
 
-    import tyro
     from ml_collections import ConfigDict  # type: ignore
+
+    import tyro
 
     def get_config() -> ConfigDict:
         config = ConfigDict()
@@ -251,15 +252,16 @@ ML Collections + Field References
     # 04_ml_collections_refs.py
     from pprint import pprint
 
-    import tyro
     from ml_collections import ConfigDict, FieldReference  # type: ignore
+
+    import tyro
 
     def get_config() -> ConfigDict:
         config = ConfigDict()
 
         # Placeholder.
-        layer_dim_ref = FieldReference((128,) * 3)
-        config.layer_dims = layer_dim_ref
+        hidden_dim_ref = FieldReference(128)
+        config.hidden_dim = hidden_dim_ref
 
         # Wandb config.
         config.wandb = ConfigDict()
@@ -267,9 +269,11 @@ ML Collections + Field References
         config.wandb.project = "robot-sandbox"
 
         # Network config.
+        # Updating `policy_hidden_dim` will update `value_hidden_dim`, but not
+        # updating `value_hidden_dim` will not update `policy_hidden_dim`.
         config.network = ConfigDict()
-        config.network.policy_layer_dims = layer_dim_ref
-        config.network.value_layer_dims = layer_dim_ref
+        config.network.policy_hidden_dim = hidden_dim_ref
+        config.network.value_hidden_dim = hidden_dim_ref * 2
         config.network.policy_obs_key = "state"
         config.network.value_obs_key = "state"
 
@@ -293,29 +297,29 @@ ML Collections + Field References
     
     Train a model.
     
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>                         <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config options </span><span style="font-weight: lighter">─────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> --config.layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>                                       <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: (128, 128, 128).</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.network options </span><span style="font-weight: lighter">─────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> --config.network.policy-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>                        <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: (128, 128, 128).</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --config.network.policy-obs-key <span style="font-weight: bold">STR</span>                                       <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                                        <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --config.network.value-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>                         <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: (128, 128, 128).</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --config.network.value-obs-key <span style="font-weight: bold">STR</span>                                        <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                                        <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
-    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.wandb options </span><span style="font-weight: lighter">───────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
-    <span style="font-weight: lighter">│</span> --config.wandb.mode <span style="font-weight: bold">STR</span>                                                   <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: online)</span>                                       <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --config.wandb.project <span style="font-weight: bold">STR</span>                                                <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: robot-sandbox)</span>                                <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>             <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config options </span><span style="font-weight: lighter">─────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.hidden-dim <span style="font-weight: bold">INT</span>                                       <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: 128.</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.network options </span><span style="font-weight: lighter">─────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.network.policy-hidden-dim <span style="font-weight: bold">INT</span>                        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: 128.</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.policy-obs-key <span style="font-weight: bold">STR</span>                           <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                            <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.value-hidden-dim <span style="font-weight: bold">INT</span>                         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: 256.</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.value-obs-key <span style="font-weight: bold">STR</span>                            <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                            <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.wandb options </span><span style="font-weight: lighter">───────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.wandb.mode <span style="font-weight: bold">STR</span>                                       <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: online)</span>                           <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.wandb.project <span style="font-weight: bold">STR</span>                                    <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: robot-sandbox)</span>                    <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────╯</span>
     </pre>
 
 
@@ -323,11 +327,11 @@ ML Collections + Field References
 .. raw:: html
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_ml_collections_refs.py --config.layer-dims 32 32 32</strong>
-    {'layer_dims': (32, 32, 32),
-     'network': {'policy_layer_dims': (32, 32, 32),
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_ml_collections_refs.py --config.hidden-dim 32</strong>
+    {'hidden_dim': 32,
+     'network': {'policy_hidden_dim': 32,
                  'policy_obs_key': 'state',
-                 'value_layer_dims': (32, 32, 32),
+                 'value_hidden_dim': 64,
                  'value_obs_key': 'state'},
      'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
     </pre>
@@ -337,11 +341,11 @@ ML Collections + Field References
 .. raw:: html
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
-    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_ml_collections_refs.py --config.network.policy-layer-dims 64 64</strong>
-    {'layer_dims': (64, 64),
-     'network': {'policy_layer_dims': (64, 64),
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_ml_collections_refs.py --config.network.policy-hidden-dim 64</strong>
+    {'hidden_dim': 64,
+     'network': {'policy_hidden_dim': 64,
                  'policy_obs_key': 'state',
-                 'value_layer_dims': (64, 64),
+                 'value_hidden_dim': 128,
                  'value_obs_key': 'state'},
      'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
     </pre>

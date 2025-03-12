@@ -4,22 +4,23 @@
 
 Usage:
     python ./04_ml_collections_refs.py --help
-    python ./04_ml_collections_refs.py --config.layer-dims 32 32 32
-    python ./04_ml_collections_refs.py --config.network.policy-layer-dims 64 64
+    python ./04_ml_collections_refs.py --config.hidden-dim 32
+    python ./04_ml_collections_refs.py --config.network.policy-hidden-dim 64
 """
 
 from pprint import pprint
 
-import tyro
 from ml_collections import ConfigDict, FieldReference  # type: ignore
+
+import tyro
 
 
 def get_config() -> ConfigDict:
     config = ConfigDict()
 
     # Placeholder.
-    layer_dim_ref = FieldReference((128,) * 3)
-    config.layer_dims = layer_dim_ref
+    hidden_dim_ref = FieldReference(128)
+    config.hidden_dim = hidden_dim_ref
 
     # Wandb config.
     config.wandb = ConfigDict()
@@ -27,9 +28,11 @@ def get_config() -> ConfigDict:
     config.wandb.project = "robot-sandbox"
 
     # Network config.
+    # Updating `policy_hidden_dim` will update `value_hidden_dim`, but not
+    # updating `value_hidden_dim` will not update `policy_hidden_dim`.
     config.network = ConfigDict()
-    config.network.policy_layer_dims = layer_dim_ref
-    config.network.value_layer_dims = layer_dim_ref
+    config.network.policy_hidden_dim = hidden_dim_ref
+    config.network.value_hidden_dim = hidden_dim_ref * 2
     config.network.policy_obs_key = "state"
     config.network.value_obs_key = "state"
 

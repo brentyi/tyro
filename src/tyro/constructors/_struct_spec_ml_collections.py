@@ -2,8 +2,9 @@ import copy
 import sys
 from typing import Any
 
-import tyro
 from typing_extensions import Annotated
+
+import tyro
 
 from .._resolver import narrow_collection_types
 from .._singleton import EXCLUDE_FROM_CALL
