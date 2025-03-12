@@ -4,7 +4,6 @@ import io
 from typing import Dict, List, Tuple, TypeVar, Union
 
 import pytest
-from helptext_utils import get_helptext_with_checks
 from typing_extensions import Annotated, Literal
 
 import tyro
@@ -30,13 +29,13 @@ def test_ambiguous_collection_1() -> None:
 
 
 def test_ambiguous_collection_2() -> None:
-    def main(x: Tuple[List[str], List[str]]) -> None:
+    def main(x: Tuple[List[str], ...]) -> None:
         pass
 
-    # This used to be ambiguous, we now break it into two separate arguments!
-    helptext = get_helptext_with_checks(main)
-    assert "--x.0 [STR [STR ...]]" in helptext
-    assert "--x.1 [STR [STR ...]]" in helptext
+    # This should still be ambiguous!
+    with pytest.raises(UnsupportedTypeAnnotationError) as e:
+        tyro.cli(main, args=["--help"])
+    assert "Unsupported type annotation for field with name `x`" in e.value.args[0]
 
 
 def test_ambiguous_collection_3() -> None:
