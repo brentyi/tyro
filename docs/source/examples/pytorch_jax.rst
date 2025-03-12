@@ -147,3 +147,201 @@ directly from :func:`tyro.cli()`.
     )
     num_iterations=1000
     </pre>
+.. _example-03_ml_collections:
+
+ML Collections
+--------------
+
+:func:`tyro.cli` understands and can populate config objects implemented using
+`ml_collections <https://github.com/google/ml_collections/>`_, which is an
+excellent library from folks at Google.
+
+``ml_collections`` structures aren't statically typed, so we infer field types
+based on value.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 03_ml_collections.py
+    from pprint import pprint
+
+    import tyro
+    from ml_collections import ConfigDict  # type: ignore
+
+    def get_config() -> ConfigDict:
+        config = ConfigDict()
+
+        # Wandb config.
+        config.wandb = ConfigDict()
+        config.wandb.mode = "online"  # online, offline, disabled.
+        config.wandb.project = "robot-sandbox"
+
+        # Network config.
+        config.network = ConfigDict()
+        config.network.policy_layer_dims = (128,) * 3
+        config.network.value_layer_dims = (256,) * 5
+        config.network.policy_obs_key = "state"
+        config.network.value_obs_key = "state"
+
+        return config
+
+    def train(config: ConfigDict = get_config()) -> None:
+        """Train a model."""
+        pprint(config.to_dict())  # type: ignore
+
+    if __name__ == "__main__":
+        tyro.cli(train)
+
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_ml_collections.py --help</strong>
+    <span style="font-weight: bold">usage</span>: 03_ml_collections.py [-h] [OPTIONS]
+    
+    Train a model.
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>  <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.network options </span><span style="font-weight: lighter">──────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.network.policy-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: 128 128 128)</span>           <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.policy-obs-key <span style="font-weight: bold">STR</span>                <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.value-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>  <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: 256 256 256 256 256)</span>   <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.value-obs-key <span style="font-weight: bold">STR</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                 <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.wandb options </span><span style="font-weight: lighter">────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.wandb.mode <span style="font-weight: bold">STR</span>                            <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: online)</span>                <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.wandb.project <span style="font-weight: bold">STR</span>                         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: robot-sandbox)</span>         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./03_ml_collections.py --config.network.policy-layer-dims 64 64 64</strong>
+    {'network': {'policy_layer_dims': (64, 64, 64),
+                 'policy_obs_key': 'state',
+                 'value_layer_dims': (256, 256, 256, 256, 256),
+                 'value_obs_key': 'state'},
+     'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
+    </pre>
+.. _example-04_ml_collections_refs:
+
+ML Collections + Field References
+---------------------------------
+
+``ml_collections`` supports references for sharing values across multiple fields.
+
+
+.. code-block:: python
+    :linenos:
+
+    # 04_ml_collections_refs.py
+    from pprint import pprint
+
+    import tyro
+    from ml_collections import ConfigDict, FieldReference  # type: ignore
+
+    def get_config() -> ConfigDict:
+        config = ConfigDict()
+
+        # Placeholder.
+        layer_dim_ref = FieldReference((128,) * 3)
+        config.layer_dims = layer_dim_ref
+
+        # Wandb config.
+        config.wandb = ConfigDict()
+        config.wandb.mode = "online"  # online, offline, disabled.
+        config.wandb.project = "robot-sandbox"
+
+        # Network config.
+        config.network = ConfigDict()
+        config.network.policy_layer_dims = layer_dim_ref
+        config.network.value_layer_dims = layer_dim_ref
+        config.network.policy_obs_key = "state"
+        config.network.value_obs_key = "state"
+
+        return config
+
+    def train(config: ConfigDict = get_config()) -> None:
+        """Train a model."""
+        pprint(config.to_dict())  # type: ignore
+
+    if __name__ == "__main__":
+        tyro.cli(train)
+
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_ml_collections_refs.py --help</strong>
+    <span style="font-weight: bold">usage</span>: 04_ml_collections_refs.py [-h] [OPTIONS]
+    
+    Train a model.
+    
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> -h, --help        <span style="font-weight: lighter">show this help message and exit</span>                         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config options </span><span style="font-weight: lighter">─────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>                                       <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: (128, 128, 128).</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.network options </span><span style="font-weight: lighter">─────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.network.policy-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>                        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: (128, 128, 128).</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.policy-obs-key <span style="font-weight: bold">STR</span>                                       <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                                        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.value-layer-dims <span style="font-weight: bold">[INT [INT ...]]</span>                         <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="font-weight: lighter">Reference default: (128, 128, 128).</span> <span style="color: #008080">(assigns reference)</span> <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.network.value-obs-key <span style="font-weight: bold">STR</span>                                        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: state)</span>                                        <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
+    <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> config.wandb options </span><span style="font-weight: lighter">───────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
+    <span style="font-weight: lighter">│</span> --config.wandb.mode <span style="font-weight: bold">STR</span>                                                   <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: online)</span>                                       <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> --config.wandb.project <span style="font-weight: bold">STR</span>                                                <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span>                   <span style="color: #008080">(default: robot-sandbox)</span>                                <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">╰───────────────────────────────────────────────────────────────────────────╯</span>
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_ml_collections_refs.py --config.layer-dims 32 32 32</strong>
+    {'layer_dims': (32, 32, 32),
+     'network': {'policy_layer_dims': (32, 32, 32),
+                 'policy_obs_key': 'state',
+                 'value_layer_dims': (32, 32, 32),
+                 'value_obs_key': 'state'},
+     'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
+    </pre>
+
+
+
+.. raw:: html
+
+    <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
+    <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./04_ml_collections_refs.py --config.network.policy-layer-dims 64 64</strong>
+    {'layer_dims': (64, 64),
+     'network': {'policy_layer_dims': (64, 64),
+                 'policy_obs_key': 'state',
+                 'value_layer_dims': (64, 64),
+                 'value_obs_key': 'state'},
+     'wandb': {'mode': 'online', 'project': 'robot-sandbox'}}
+    </pre>
