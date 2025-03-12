@@ -159,10 +159,14 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
     from .._fields import is_struct_type
     from ._struct_spec_attrs import attrs_rule
     from ._struct_spec_dataclass import dataclass_rule
+    from ._struct_spec_ml_collections import ml_collections_rule
     from ._struct_spec_pydantic import pydantic_rule
 
-    # Register the dataclass rule
+    # Register imported rules.
+    registry.struct_rule(attrs_rule)
     registry.struct_rule(dataclass_rule)
+    registry.struct_rule(pydantic_rule)
+    registry.struct_rule(ml_collections_rule)
 
     @registry.struct_rule
     def typeddict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
@@ -232,9 +236,6 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                 )
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
-
-    # Register the attrs rule
-    registry.struct_rule(attrs_rule)
 
     @registry.struct_rule
     def dict_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
@@ -425,6 +426,3 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
         if primitive_only:
             return None
         return StructConstructorSpec(instantiate=tuple, fields=tuple(field_list))
-
-    # Register the pydantic rule
-    registry.struct_rule(pydantic_rule)

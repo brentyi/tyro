@@ -61,6 +61,7 @@ dev = [
     "pydantic>=2.5.2,!=2.10.0",
     "coverage[toml]>=6.5.0",
     "eval_type_backport>=0.1.3",
+    "ml_collections>=0.1.0",
 ]
 
 [project.urls]
