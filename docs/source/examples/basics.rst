@@ -756,13 +756,13 @@ Argument Aliases
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./10_aliases.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 10_aliases.py [-h] --branch <span style="font-weight: bold">STR</span>
+    <span style="font-weight: bold">usage</span>: 10_aliases.py [-h] -b <span style="font-weight: bold">STR</span>
     
     Check out a branch.
     
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">──────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help              <span style="font-weight: lighter">show this help message and exit</span> <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --branch <span style="font-weight: bold">STR</span>, -b <span style="font-weight: bold">STR</span>    <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> -b <span style="font-weight: bold">STR</span>, --branch <span style="font-weight: bold">STR</span>    <span style="font-weight: bold; color: #e60000">(required)</span>                      <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰─────────────────────────────────────────────────────────╯</span>
     </pre>
 
@@ -885,14 +885,14 @@ Repeatable 'counter' arguments can be specified via :data:`tyro.conf.UseCounterA
 
     <pre class="highlight" style="padding: 1em; box-sizing: border-box; font-size: 0.85em; line-height: 1.2em;">
     <strong style="opacity: 0.7; padding-bottom: 0.5em; display: inline-block"><span style="user-select: none">$ </span>python ./12_counters.py --help</strong>
-    <span style="font-weight: bold">usage</span>: 12_counters.py [-h] [--verbosity] [--aliased-verbosity]
+    <span style="font-weight: bold">usage</span>: 12_counters.py [-h] [--verbosity] [-v]
     
     Example showing how to use counter actions.
     
     <span style="font-weight: lighter">╭─</span><span style="font-weight: lighter"> options </span><span style="font-weight: lighter">─────────────────────────────────────────────────────────────────</span><span style="font-weight: lighter">─╮</span>
     <span style="font-weight: lighter">│</span> -h, --help         <span style="font-weight: lighter">show this help message and exit</span>                         <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span> --verbosity        <span style="font-weight: lighter">Verbosity level.</span> <span style="color: #008080">(repeatable)</span>                           <span style="font-weight: lighter">│</span>
-    <span style="font-weight: lighter">│</span> --aliased-verbosity, -v                                                    <span style="font-weight: lighter">│</span>
+    <span style="font-weight: lighter">│</span> -v, --aliased-verbosity                                                    <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>                    <span style="font-weight: lighter">Same as above, but can also be specified with -v, -vv, </span> <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">│</span>                    <span style="font-weight: lighter">-vvv, etc.</span> <span style="color: #008080">(repeatable)</span>                                 <span style="font-weight: lighter">│</span>
     <span style="font-weight: lighter">╰────────────────────────────────────────────────────────────────────────────╯</span>

@@ -79,8 +79,16 @@ class ParserSpecification:
 
         # Cycle detection.
         #
-        # 'parent' here refers to in the nesting hierarchy, not the superclass.
-        if f in parent_classes and f is not dict:
+        # - 'parent' here refers to in the nesting hierarchy, not the superclass.
+        # - We threshold by `max_nesting_depth` to suppress false positives,
+        #  for example from custom constructors that behave differently
+        #  depending the default value. (example: ml_collections.ConfigDict)
+        max_nesting_depth = 128
+        if (
+            f in parent_classes
+            and f is not dict
+            and intern_prefix.count(".") > max_nesting_depth
+        ):
             raise UnsupportedTypeAnnotationError(
                 f"Found a cyclic dependency with type {f}."
             )

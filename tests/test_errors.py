@@ -29,9 +29,10 @@ def test_ambiguous_collection_1() -> None:
 
 
 def test_ambiguous_collection_2() -> None:
-    def main(x: Tuple[List[str], List[str]]) -> None:
+    def main(x: Tuple[List[str], ...]) -> None:
         pass
 
+    # This should still be ambiguous!
     with pytest.raises(UnsupportedTypeAnnotationError) as e:
         tyro.cli(main, args=["--help"])
     assert "Unsupported type annotation for field with name `x`" in e.value.args[0]
