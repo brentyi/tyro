@@ -4,6 +4,7 @@ import copy
 import sys
 from typing import Any
 
+from ml_collections import FrozenConfigDict
 from typing_extensions import Annotated
 
 import tyro
@@ -27,7 +28,11 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
 
         class _NotRootConfigDict(ConfigDict): ...
 
-    if info.type not in (config_dict.ConfigDict, _NotRootConfigDict):
+    if info.type not in (
+        config_dict.ConfigDict,
+        config_dict.FrozenConfigDict,
+        _NotRootConfigDict,
+    ):
         return None
 
     # Handling ml_collections.ConfigDict is mostly very easy. The one
@@ -54,6 +59,11 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             config = copy.deepcopy(info.default)
             config.update(kwargs)
             return config
+        elif info.type is config_dict.FrozenConfigDict:
+            # Make mutable, update, then freeze.
+            config = copy.deepcopy(config_dict.ConfigDict(info.default))
+            config.update(kwargs)
+            return config_dict.FrozenConfigDict(config)
         else:
             # Not root. Just return the kwargs.
             return ConfigDict(kwargs)
@@ -62,7 +72,7 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     def _make_field_spec(k: str, v: Any) -> StructFieldSpec:
         val_type = narrow_collection_types(info.default.get_type(k), v)
         # (1) Convert all ConfigDict types to NotRootConfigDict.
-        if val_type is ConfigDict:
+        if val_type in (ConfigDict, FrozenConfigDict):
             val_type = _NotRootConfigDict
             v = _NotRootConfigDict(v)
         # (2) Exclude FieldReferences from the call signature by default. This will
