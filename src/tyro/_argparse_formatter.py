@@ -1217,7 +1217,7 @@ class TyroArgparseHelpFormatter(argparse.RawDescriptionHelpFormatter):
                 # expand to fill the full width of the console. This only impacts
                 # single-column layouts.
                 self.formatter._tyro_rule = Text.from_ansi(
-                    "─" * max_width, style=THEME.border, overflow="fold"
+                    "─" * max_width, style=THEME.border, overflow="crop"
                 )
             elif len(self.formatter._tyro_rule._text[0]) < max_width:
                 self.formatter._tyro_rule._text = ["─" * max_width]
