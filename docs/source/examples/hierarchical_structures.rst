@@ -714,7 +714,7 @@ ML Collections + Field References
         config.wandb.project = "robot-sandbox"
 
         # Network config.
-        # Updating `policy_hidden_dim` will update `value_hidden_dim`, but not
+        # Updating `policy_hidden_dim` will update `value_hidden_dim`, but
         # updating `value_hidden_dim` will not update `policy_hidden_dim`.
         config.network = ConfigDict()
         config.network.policy_hidden_dim = hidden_dim_ref
