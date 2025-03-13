@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Tests for ml_collections integration."""
 
 import dataclasses
@@ -7,7 +8,7 @@ from helptext_utils import get_helptext_with_checks
 import tyro
 
 
-def test_basic_configdict():
+def test_basic_configdict() -> None:
     """Test basic ConfigDict parsing."""
     from ml_collections import ConfigDict
 
@@ -46,7 +47,7 @@ def test_basic_configdict():
     assert "--config.network.value-layer-dims" in helptext
 
 
-def test_field_references():
+def test_field_references() -> None:
     """Test ConfigDict with FieldReference."""
     from ml_collections import ConfigDict, FieldReference
 
@@ -95,7 +96,7 @@ def test_field_references():
     assert "(assigns reference)" in helptext
 
 
-def test_nested_configdict():
+def test_nested_configdict() -> None:
     """Test deeply nested ConfigDict objects."""
     from ml_collections import ConfigDict
 
@@ -133,7 +134,7 @@ def test_nested_configdict():
     assert "--config.level1.level2.level3.sequence" in helptext
 
 
-def test_configdict_in_dataclass():
+def test_configdict_in_dataclass() -> None:
     """Test ConfigDict as a field within a dataclass."""
     from ml_collections import ConfigDict
 
@@ -169,7 +170,7 @@ def test_configdict_in_dataclass():
     assert "--config.value-layer-dims" in helptext
 
 
-def test_configdict_with_tuples():
+def test_configdict_with_tuples() -> None:
     """Test ConfigDict with tuple fields of different types."""
     from ml_collections import ConfigDict
 
@@ -212,7 +213,7 @@ def test_configdict_with_tuples():
 # FrozenConfigDict Tests
 
 
-def test_basic_frozenconfigdict():
+def test_basic_frozenconfigdict() -> None:
     """Test basic FrozenConfigDict parsing."""
     from ml_collections import FrozenConfigDict
 
@@ -251,7 +252,7 @@ def test_basic_frozenconfigdict():
     assert "--config.network.value-layer-dims" in helptext
 
 
-def test_field_references_frozenconfigdict():
+def test_field_references_frozenconfigdict() -> None:
     """Test FrozenConfigDict with FieldReference."""
     from ml_collections import FieldReference, FrozenConfigDict
 
@@ -300,7 +301,7 @@ def test_field_references_frozenconfigdict():
     assert "(assigns reference)" in helptext
 
 
-def test_nested_frozenconfigdict():
+def test_nested_frozenconfigdict() -> None:
     """Test deeply nested FrozenConfigDict objects."""
     from ml_collections import FrozenConfigDict
 
@@ -338,7 +339,7 @@ def test_nested_frozenconfigdict():
     assert "--config.level1.level2.level3.sequence" in helptext
 
 
-def test_frozenconfigdict_in_dataclass():
+def test_frozenconfigdict_in_dataclass() -> None:
     """Test FrozenConfigDict as a field within a dataclass."""
     from ml_collections import FrozenConfigDict
 
@@ -374,7 +375,7 @@ def test_frozenconfigdict_in_dataclass():
     assert "--config.value-layer-dims" in helptext
 
 
-def test_frozenconfigdict_with_tuples():
+def test_frozenconfigdict_with_tuples() -> None:
     """Test FrozenConfigDict with tuple fields of different types."""
     from ml_collections import FrozenConfigDict
 
