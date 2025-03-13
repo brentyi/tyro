@@ -810,7 +810,7 @@ Train a model.
 <span class="linenos">18</span>    <span class="n">config</span><span class="o">.</span><span class="n">wandb</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="s2">&quot;robot-sandbox&quot;</span>
 <span class="linenos">19</span>
 <span class="linenos">20</span>    <span class="c1"># Network config.</span>
-<span class="linenos">21</span>    <span class="c1"># Updating `policy_hidden_dim` will update `value_hidden_dim`, but not</span>
+<span class="linenos">21</span>    <span class="c1"># Updating `policy_hidden_dim` will update `value_hidden_dim`, but</span>
 <span class="linenos">22</span>    <span class="c1"># updating `value_hidden_dim` will not update `policy_hidden_dim`.</span>
 <span class="linenos">23</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span> <span class="o">=</span> <span class="n">ConfigDict</span><span class="p">()</span>
 <span class="linenos">24</span>    <span class="n">config</span><span class="o">.</span><span class="n">network</span><span class="o">.</span><span class="n">policy_hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim_ref</span>
