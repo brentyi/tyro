@@ -286,6 +286,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">ml_collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">FrozenConfigDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">tyro</span>
@@ -311,7 +312,11 @@
 
         <span class="k">class</span><span class="w"> </span><span class="nc">_NotRootConfigDict</span><span class="p">(</span><span class="n">ConfigDict</span><span class="p">):</span> <span class="o">...</span>
 
-    <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">config_dict</span><span class="o">.</span><span class="n">ConfigDict</span><span class="p">,</span> <span class="n">_NotRootConfigDict</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="n">config_dict</span><span class="o">.</span><span class="n">ConfigDict</span><span class="p">,</span>
+        <span class="n">config_dict</span><span class="o">.</span><span class="n">FrozenConfigDict</span><span class="p">,</span>
+        <span class="n">_NotRootConfigDict</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="c1"># Handling ml_collections.ConfigDict is mostly very easy. The one</span>
@@ -338,6 +343,11 @@
             <span class="n">config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">)</span>
             <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">config</span>
+        <span class="k">elif</span> <span class="n">info</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="n">config_dict</span><span class="o">.</span><span class="n">FrozenConfigDict</span><span class="p">:</span>
+            <span class="c1"># Make mutable, update, then freeze.</span>
+            <span class="n">config</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">config_dict</span><span class="o">.</span><span class="n">ConfigDict</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="p">))</span>
+            <span class="n">config</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">config_dict</span><span class="o">.</span><span class="n">FrozenConfigDict</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># Not root. Just return the kwargs.</span>
             <span class="k">return</span> <span class="n">ConfigDict</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
@@ -346,7 +356,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_field_spec</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructFieldSpec</span><span class="p">:</span>
         <span class="n">val_type</span> <span class="o">=</span> <span class="n">narrow_collection_types</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">default</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="n">v</span><span class="p">)</span>
         <span class="c1"># (1) Convert all ConfigDict types to NotRootConfigDict.</span>
-        <span class="k">if</span> <span class="n">val_type</span> <span class="ow">is</span> <span class="n">ConfigDict</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">val_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ConfigDict</span><span class="p">,</span> <span class="n">FrozenConfigDict</span><span class="p">):</span>
             <span class="n">val_type</span> <span class="o">=</span> <span class="n">_NotRootConfigDict</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">_NotRootConfigDict</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
         <span class="c1"># (2) Exclude FieldReferences from the call signature by default. This will</span>
