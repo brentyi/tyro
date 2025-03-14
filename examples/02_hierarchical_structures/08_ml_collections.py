@@ -15,12 +15,12 @@ Usage:
 
 from pprint import pprint
 
-from ml_collections import ConfigDict  # type: ignore
+from ml_collections import ConfigDict, FrozenConfigDict  # type: ignore
 
 import tyro
 
 
-def get_config() -> ConfigDict:
+def get_config() -> FrozenConfigDict:
     config = ConfigDict()
 
     # Wandb config.
@@ -35,10 +35,10 @@ def get_config() -> ConfigDict:
     config.network.policy_obs_key = "state"
     config.network.value_obs_key = "state"
 
-    return config
+    return FrozenConfigDict(config)
 
 
-def train(config: ConfigDict = get_config()) -> None:
+def train(config: FrozenConfigDict = get_config()) -> None:
     """Train a model."""
     pprint(config.to_dict())  # type: ignore
 
