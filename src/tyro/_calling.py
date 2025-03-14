@@ -251,7 +251,7 @@ def callable_with_args(
                         break
                 assert found, "This is likely a bug in tyro."
 
-            if len(missing_args):
+            if len(missing_args) > 0:
                 message += f" We're missing arguments {missing_args}."
         raise InstantiationError(
             message,
