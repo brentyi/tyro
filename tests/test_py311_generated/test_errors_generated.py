@@ -292,6 +292,28 @@ def test_similar_arguments_subcommands() -> None:
     assert error.count("--help") == 3
 
 
+def test_different_metavar_subcommands() -> None:
+    @dataclasses.dataclass
+    class ClassA:
+        arg: Literal["a"]
+
+    @dataclasses.dataclass
+    class ClassB:
+        arg: Literal["b"]
+
+    target = io.StringIO()
+    with pytest.raises(SystemExit), contextlib.redirect_stderr(target):
+        tyro.cli(ClassA | ClassB, args="--ar".split(" "))  # type: ignore
+
+    error = target.getvalue()
+    assert "Unrecognized option" in error
+    assert "Perhaps you meant:" in error
+    assert error.count("--arg") == 2
+    assert error.count("--arg {a}") == 1
+    assert error.count("--arg {b}") == 1
+    assert error.count("--help") == 3
+
+
 def test_similar_arguments_subcommands_multiple() -> None:
     @dataclasses.dataclass
     class RewardConfig:

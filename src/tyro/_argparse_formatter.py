@@ -669,8 +669,9 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                             # Prefer arguments available in the currently specified
                             # subcommands.
                             -arg_score[0].subcommand_match_score,
-                            # Cluster by flag name, usage hint, help message.
+                            # Cluster by flag name, metavar, usage hint, help message.
                             arg_score[0].option_strings[0],
+                            arg_score[0].metavar,
                             arg_score[0].usage_hint,
                             arg_score[0].help,
                         ),
@@ -689,8 +690,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     show_arguments.append(arg_info)
                     prev_arg_option_strings = arg_info.option_strings
 
-                prev_arg_option_strings = None
-                prev_argument_help: Optional[str] = None
+                prev_arg_info: Optional[_ArgumentInfo] = None
                 same_counter = 0
                 dots_printed = False
                 if len(show_arguments) > 0:
@@ -705,7 +705,10 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                 unique_counter = 0
                 for arg_info in show_arguments:
                     same_counter += 1
-                    if arg_info.option_strings != prev_arg_option_strings:
+                    if (
+                        prev_arg_info is None
+                        or arg_info.option_strings != prev_arg_info.option_strings
+                    ):
                         same_counter = 0
                         if unique_counter >= 10:
                             break
@@ -716,7 +719,8 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     if (
                         len(show_arguments) >= 8
                         and same_counter >= 4
-                        and arg_info.option_strings == prev_arg_option_strings
+                        and prev_arg_info is not None
+                        and arg_info.option_strings == prev_arg_info.option_strings
                     ):
                         if not dots_printed:
                             extra_info.append(
@@ -730,7 +734,9 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
 
                     if not (
                         has_subcommands
-                        and arg_info.option_strings == prev_arg_option_strings
+                        and prev_arg_info is not None
+                        and arg_info.option_strings == prev_arg_info.option_strings
+                        and arg_info.metavar == prev_arg_info.metavar
                     ):
                         extra_info.append(
                             Padding(
@@ -757,8 +763,10 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                     if arg_info.help is not None and (
                         # Only print help messages if it's not the same as the previous
                         # one.
-                        arg_info.help != prev_argument_help
-                        or arg_info.option_strings != prev_arg_option_strings
+                        prev_arg_info is None
+                        or arg_info.help != prev_arg_info.help
+                        or arg_info.option_strings != prev_arg_info.option_strings
+                        or arg_info.metavar != prev_arg_info.metavar
                     ):
                         extra_info.append(Padding(arg_info.help, (0, 0, 0, 8)))
 
@@ -771,8 +779,7 @@ class TyroArgumentParser(argparse.ArgumentParser, argparse_sys.ArgumentParser): 
                             )
                         )
 
-                    prev_arg_option_strings = arg_info.option_strings
-                    prev_argument_help = arg_info.help
+                    prev_arg_info = arg_info
 
         elif message.startswith("the following arguments are required:"):
             message_title = "Required options"
