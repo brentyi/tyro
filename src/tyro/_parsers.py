@@ -494,6 +494,13 @@ class SubparsersSpecification:
                 ),
                 type(None) if option_unwrapped is none_proxy else cast(type, option),
             )
+            if subcommand_name in subcommand_type_from_name:
+                # Raise a warning that the subcommand already exists
+                warnings.warn(
+                    f"Subcommand '{subcommand_name}' already exists for type "
+                    f"{subcommand_type_from_name[subcommand_name].__name__} and will be replaced by "
+                    f"{option_unwrapped.__name__ if option_unwrapped is not none_proxy else 'None'}."
+                )
             if len(found_subcommand_configs) != 0:
                 # Explicitly annotated default.
                 assert len(found_subcommand_configs) == 1, (

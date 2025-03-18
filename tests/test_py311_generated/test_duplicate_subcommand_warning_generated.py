@@ -1,15 +1,15 @@
-from typing import Union
+
+from typing import Literal
 
 import pytest
 from pydantic import BaseModel
-from typing_extensions import Literal
 
 import tyro
 
 
 def test_duplicate_subcommand_warning():
     """Test that a warning is raised when a subcommand is duplicated.
-    
+
     Adapted from an example by @foges in https://github.com/brentyi/tyro/issues/273
     """
 
@@ -17,16 +17,19 @@ def test_duplicate_subcommand_warning():
     class Config:
         class Nested(BaseModel):
             name: Literal["foo"] = "foo"
-    
+
     class ConfigAgain:
         class Nested(BaseModel):
             value: Literal["bar"] = "bar"
 
     # This will create duplicate 'nested' subcommands
-    ConfigType = Union[Config.Nested, ConfigAgain.Nested]
-    
+    ConfigType = Config.Nested | ConfigAgain.Nested
+
     # This should raise a warning about duplicate subcommands
-    with pytest.warns(UserWarning, match=r"Subcommand 'nested' already exists for type Nested and will be replaced by Nested"):
+    with pytest.warns(
+        UserWarning,
+        match=r"Subcommand 'nested' already exists for type Nested and will be replaced by Nested",
+    ):
         try:
             # We need to catch SystemExit since tyro.cli() will exit
             # when called with --help or with no arguments for required options
