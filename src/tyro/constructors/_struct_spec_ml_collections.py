@@ -4,11 +4,11 @@ import copy
 import sys
 from typing import Any
 
-import tyro
 from typing_extensions import Annotated
 
 from .._resolver import narrow_collection_types
 from .._singleton import EXCLUDE_FROM_CALL
+from ..conf import _confstruct
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 _NotRootConfigDict = None  # type: ignore
@@ -81,7 +81,7 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             val_type = narrow_collection_types(type(v), v)
             val_type = Annotated[
                 val_type,
-                tyro.conf.arg(
+                _confstruct.arg(
                     help=f"Reference default: {v}.",
                     help_behavior_hint="(assigns reference)",
                 ),
