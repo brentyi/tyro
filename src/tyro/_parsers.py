@@ -496,10 +496,17 @@ class SubparsersSpecification:
             )
             if subcommand_name in subcommand_type_from_name:
                 # Raise a warning that the subcommand already exists
+                original_type = subcommand_type_from_name[subcommand_name]
+                new_type = type(None) if option_unwrapped is none_proxy else option_unwrapped
+                original_type_full_name = f"{original_type.__module__}.{original_type.__name__}"
+                new_type_full_name = f"{new_type.__module__}.{new_type.__name__}" if new_type is not None else "None"
+                
                 warnings.warn(
-                    f"Subcommand '{subcommand_name}' already exists for type "
-                    f"{subcommand_type_from_name[subcommand_name].__name__} and will be replaced by "
-                    f"{option_unwrapped.__name__ if option_unwrapped is not none_proxy else 'None'}."
+                    f"Duplicate subcommand name detected: '{subcommand_name}' is already used for "
+                    f"{original_type_full_name} but will be overwritten by {new_type_full_name}. "
+                    f"Only the last type ({new_type_full_name}) will be accessible via this subcommand. "
+                    f"Consider using distinct class names or use tyro.conf.subcommand() to specify "
+                    f"explicit subcommand names."
                 )
             if len(found_subcommand_configs) != 0:
                 # Explicitly annotated default.

@@ -26,7 +26,7 @@ def test_duplicate_subcommand_warning():
     ConfigType = Union[Config.Nested, ConfigAgain.Nested]
     
     # This should raise a warning about duplicate subcommands
-    with pytest.warns(UserWarning, match=r"Subcommand 'nested' already exists for type Nested and will be replaced by Nested"):
+    with pytest.warns(UserWarning, match=r"Duplicate subcommand name detected:.*'nested'.*will be overwritten.*Consider using distinct class names"):
         try:
             # We need to catch SystemExit since tyro.cli() will exit
             # when called with --help or with no arguments for required options
