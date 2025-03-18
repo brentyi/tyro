@@ -33,6 +33,6 @@ def test_duplicate_subcommand_warning():
         try:
             # We need to catch SystemExit since tyro.cli() will exit
             # when called with --help or with no arguments for required options
-            tyro.cli(ConfigType, args=["nested"])
+            tyro.cli(ConfigType, args=["nested"])  # type: ignore
         except SystemExit:
             pass  # We're just testing for the warning, not the actual execution
