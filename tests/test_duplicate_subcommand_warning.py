@@ -9,7 +9,7 @@ import tyro
 
 def test_duplicate_subcommand_warning():
     """Test that a warning is raised when a subcommand is duplicated.
-    
+
     Adapted from an example by @foges in https://github.com/brentyi/tyro/issues/273
     """
 
@@ -17,16 +17,19 @@ def test_duplicate_subcommand_warning():
     class Config:
         class Nested(BaseModel):
             name: Literal["foo"] = "foo"
-    
+
     class ConfigAgain:
         class Nested(BaseModel):
             value: Literal["bar"] = "bar"
 
     # This will create duplicate 'nested' subcommands
     ConfigType = Union[Config.Nested, ConfigAgain.Nested]
-    
+
     # This should raise a warning about duplicate subcommands
-    with pytest.warns(UserWarning, match=r"Duplicate subcommand name detected:.*'nested'.*will be overwritten.*Consider using distinct class names"):
+    with pytest.warns(
+        UserWarning,
+        match=r"Duplicate subcommand name detected:.*'nested'.*will be overwritten.*Consider using distinct class names",
+    ):
         try:
             # We need to catch SystemExit since tyro.cli() will exit
             # when called with --help or with no arguments for required options

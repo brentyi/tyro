@@ -1,4 +1,3 @@
-
 from typing import Literal
 
 import pytest
@@ -28,7 +27,7 @@ def test_duplicate_subcommand_warning():
     # This should raise a warning about duplicate subcommands
     with pytest.warns(
         UserWarning,
-        match=r"Subcommand 'nested' already exists for type Nested and will be replaced by Nested",
+        match=r"Duplicate subcommand name detected:.*'nested'.*will be overwritten.*Consider using distinct class names",
     ):
         try:
             # We need to catch SystemExit since tyro.cli() will exit
