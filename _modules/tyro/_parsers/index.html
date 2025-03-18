@@ -795,6 +795,28 @@
                 <span class="p">),</span>
                 <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option_unwrapped</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">option</span><span class="p">),</span>
             <span class="p">)</span>
+            <span class="k">if</span> <span class="n">subcommand_name</span> <span class="ow">in</span> <span class="n">subcommand_type_from_name</span><span class="p">:</span>
+                <span class="c1"># Raise a warning that the subcommand already exists</span>
+                <span class="n">original_type</span> <span class="o">=</span> <span class="n">subcommand_type_from_name</span><span class="p">[</span><span class="n">subcommand_name</span><span class="p">]</span>
+                <span class="n">new_type</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="k">if</span> <span class="n">option_unwrapped</span> <span class="ow">is</span> <span class="n">none_proxy</span> <span class="k">else</span> <span class="n">option_unwrapped</span>
+                <span class="p">)</span>
+                <span class="n">original_type_full_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">original_type</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">original_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="n">new_type_full_name</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">new_type</span><span class="o">.</span><span class="vm">__module__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">new_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="k">if</span> <span class="n">new_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+                    <span class="k">else</span> <span class="s2">&quot;None&quot;</span>
+                <span class="p">)</span>
+
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Duplicate subcommand name detected: &#39;</span><span class="si">{</span><span class="n">subcommand_name</span><span class="si">}</span><span class="s2">&#39; is already used for &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">original_type_full_name</span><span class="si">}</span><span class="s2"> but will be overwritten by </span><span class="si">{</span><span class="n">new_type_full_name</span><span class="si">}</span><span class="s2">. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Only the last type (</span><span class="si">{</span><span class="n">new_type_full_name</span><span class="si">}</span><span class="s2">) will be accessible via this subcommand. &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;Consider using distinct class names or use tyro.conf.subcommand() to specify &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;explicit subcommand names.&quot;</span>
+                <span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="c1"># Explicitly annotated default.</span>
                 <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">found_subcommand_configs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span>
