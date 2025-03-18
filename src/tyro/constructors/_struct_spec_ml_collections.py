@@ -4,10 +4,8 @@ import copy
 import sys
 from typing import Any
 
-from ml_collections import FrozenConfigDict
-from typing_extensions import Annotated
-
 import tyro
+from typing_extensions import Annotated
 
 from .._resolver import narrow_collection_types
 from .._singleton import EXCLUDE_FROM_CALL
@@ -20,13 +18,13 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
     if "ml_collections" not in sys.modules.keys():  # pragma: no cover
         return None
 
-    from ml_collections import ConfigDict, FieldReference, config_dict
+    from ml_collections import FieldReference, config_dict
 
     # Lazy class definition.
     global _NotRootConfigDict
     if _NotRootConfigDict is None:
 
-        class _NotRootConfigDict(ConfigDict): ...
+        class _NotRootConfigDict(config_dict.ConfigDict): ...
 
     if info.type not in (
         config_dict.ConfigDict,
@@ -66,13 +64,13 @@ def ml_collections_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             return config_dict.FrozenConfigDict(config)
         else:
             # Not root. Just return the kwargs.
-            return ConfigDict(kwargs)
+            return config_dict.ConfigDict(kwargs)
 
     # For creating individual fields, we're going to do two things...
     def _make_field_spec(k: str, v: Any) -> StructFieldSpec:
         val_type = narrow_collection_types(info.default.get_type(k), v)
         # (1) Convert all ConfigDict types to NotRootConfigDict.
-        if val_type in (ConfigDict, FrozenConfigDict):
+        if val_type in (config_dict.ConfigDict, config_dict.FrozenConfigDict):
             val_type = _NotRootConfigDict
             v = _NotRootConfigDict(v)
         # (2) Exclude FieldReferences from the call signature by default. This will
