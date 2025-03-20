@@ -131,10 +131,11 @@ def resolve_newtype_and_aliases(
 ) -> TypeOrCallableOrNone:
     # Handle type aliases, eg via the `type` statement in Python 3.12.
     if isinstance(typ, (TypeAliasType, TypeAliasTypeAlternate)):
-        return Annotated[
+        typ_cast = cast(TypeAliasType, typ)
+        return Annotated[  # type: ignore
             (
-                cast(Any, resolve_newtype_and_aliases(typ.__value__)),
-                TyroTypeAliasBreadCrumb(typ.__name__),
+                cast(Any, resolve_newtype_and_aliases(typ_cast.__value__)),
+                TyroTypeAliasBreadCrumb(typ_cast.__name__),
             )
         ]
 
