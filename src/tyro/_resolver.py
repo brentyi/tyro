@@ -8,6 +8,7 @@ import dataclasses
 import inspect
 import sys
 import types
+import typing
 import warnings
 from typing import (
     Any,
@@ -43,6 +44,11 @@ from typing_extensions import (
 from . import _unsafe_cache, conf
 from ._singleton import MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
+
+# typing_extensions.TypeAliasType and typing.TypeAliasType are not the same
+# object in typing_extensions 4.13.0! This can break an isinstance() check we
+# use below.
+TypeAliasTypeAlternate = getattr(typing, "TypeAliasType", TypeAliasType)
 
 UnionType = getattr(types, "UnionType", Union)
 """Same as types.UnionType, but points to typing.Union for older versions of
@@ -124,7 +130,7 @@ def resolve_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
 ) -> TypeOrCallableOrNone:
     # Handle type aliases, eg via the `type` statement in Python 3.12.
-    if isinstance(typ, TypeAliasType):
+    if isinstance(typ, (TypeAliasType, TypeAliasTypeAlternate)):
         return Annotated[
             (
                 cast(Any, resolve_newtype_and_aliases(typ.__value__)),
@@ -751,15 +757,14 @@ def _get_type_hints_backported_syntax(
     try:
         out = get_type_hints(obj, include_extras=include_extras)
 
-        # Workaround for:
+        # Workaround for this Python bug:
         # - https://github.com/brentyi/tyro/issues/156
         # - https://github.com/python/cpython/issues/90353
         #
-        # Which impacts Python 3.10 and earlier.
-        #
-        # It may be possible to remove this if this issue is resolved:
+        # This issue is fixed in Python 3.10+ and typing_extensions>=4.13.0, but not in Python 3.7.
         # - https://github.com/python/typing_extensions/issues/310
-        if sys.version_info < (3, 11):
+        # - https://github.com/brentyi/tyro/issues/260#issuecomment-2735928988
+        if sys.version_info < (3, 8):
             # If we see Optional[Annotated[T, ...]], we're going to flip to Annotated[Optional[T]]...
             #
             # It's unlikely but possible for this to have unintended side effects.
