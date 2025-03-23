@@ -96,7 +96,7 @@ Module Contents
    
 
 .. py:function:: unwrap_annotated(typ: TypeOrCallable, search_type: tyro._typing.TypeForm[MetadataType]) -> Tuple[TypeOrCallable, Tuple[MetadataType, Ellipsis]]
-                 unwrap_annotated(typ: TypeOrCallable, search_type: typing_extensions.Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
+                 unwrap_annotated(typ: TypeOrCallable, search_type: Literal[all]) -> Tuple[TypeOrCallable, Tuple[Any, Ellipsis]]
                  unwrap_annotated(typ: TypeOrCallable, search_type: None = None) -> TypeOrCallable
 
    Helper for parsing typing.Annotated types.
@@ -150,7 +150,7 @@ Module Contents
    union. Loosely motivated by: https://github.com/brentyi/tyro/issues/20
 
 
-.. py:function:: isinstance_with_fuzzy_numeric_tower(obj: Any, classinfo: Type) -> Union[bool, typing_extensions.Literal[~]]
+.. py:function:: isinstance_with_fuzzy_numeric_tower(obj: Any, classinfo: Type) -> Union[bool, Literal[~]]
 
    Enhanced version of isinstance() that returns:
    - True: if object is exactly of the specified type

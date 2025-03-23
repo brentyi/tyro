@@ -20,18 +20,18 @@ Module Contents
    
 
 .. py:data:: DELIMETER
-   :type: typing_extensions.Literal[-, _]
+   :type: Literal[-, _]
    :value: '-'
 
    
 
-.. py:function:: delimeter_context(delimeter: typing_extensions.Literal[-, _])
+.. py:function:: delimeter_context(delimeter: Literal[-, _])
 
    Context for setting the delimeter. Determines if `field_a` is populated as
    `--field-a` or `--field_a`. Not thread-safe.
 
 
-.. py:function:: get_delimeter() -> typing_extensions.Literal[-, _]
+.. py:function:: get_delimeter() -> Literal[-, _]
 
    Get delimeter used to separate words.
 

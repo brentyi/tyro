@@ -290,11 +290,6 @@
 <span id="tyro-constructors-primitive-spec"></span><h1><a class="reference internal" href="#module-tyro.constructors._primitive_spec" title="tyro.constructors._primitive_spec"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors._primitive_spec</span></code></a><a class="headerlink" href="#module-tyro.constructors._primitive_spec" title="Link to this heading">¶</a></h1>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">¶</a></h2>
-<dl class="py data">
-<dt class="sig sig-object py" id="tyro.constructors._primitive_spec.LiteralAlternate">
-<span class="sig-prename descclassname"><span class="pre">tyro.constructors._primitive_spec.</span></span><span class="sig-name descname"><span class="pre">LiteralAlternate</span></span><a class="headerlink" href="#tyro.constructors._primitive_spec.LiteralAlternate" title="Link to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="py exception">
 <dt class="sig sig-object py" id="tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError">
 <em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tyro.constructors._primitive_spec.</span></span><span class="sig-name descname"><span class="pre">UnsupportedTypeAnnotationError</span></span><a class="reference internal" href="../../../../_modules/tyro/constructors/_primitive_spec/#UnsupportedTypeAnnotationError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError" title="Link to this definition">¶</a></dt>
@@ -361,7 +356,7 @@ individual fields.</p>
 <p>Alternatively, it can be returned by a rule in a <code class="xref py py-class docutils literal notranslate"><span class="pre">ConstructorRegistry</span></code>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs">
-<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">typing_extensions.Literal[*]</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">nargs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span> <span class="pre">|</span> <span class="pre">Literal[*]</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.nargs" title="Link to this definition">¶</a></dt>
 <dd><p>Number of arguments required to construct an instance. If nargs is “*”, then
 the number of arguments is variable.</p>
 </dd></dl>
@@ -381,7 +376,7 @@ length of the list will match the value of nargs.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="tyro.constructors._primitive_spec.PrimitiveConstructorSpec.is_instance">
-<span class="sig-name descname"><span class="pre">is_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable[[Any],</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">typing_extensions.Literal[~]]</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.is_instance" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">is_instance</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable[[Any],</span> <span class="pre">bool</span> <span class="pre">|</span> <span class="pre">Literal[~]]</span></em><a class="headerlink" href="#tyro.constructors._primitive_spec.PrimitiveConstructorSpec.is_instance" title="Link to this definition">¶</a></dt>
 <dd><p>Given an object instance, does it match this primitive type? This is
 used for specific help messages when both a union type is present and a
 default is provided.</p>
@@ -468,7 +463,6 @@ the instance. This is used for help messages when a default is provided.</p>
             <ul>
 <li><a class="reference internal" href="#"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tyro.constructors._primitive_spec</span></code></a><ul>
 <li><a class="reference internal" href="#module-contents">Module Contents</a><ul>
-<li><a class="reference internal" href="#tyro.constructors._primitive_spec.LiteralAlternate"><code class="docutils literal notranslate"><span class="pre">LiteralAlternate</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.UnsupportedTypeAnnotationError"><code class="docutils literal notranslate"><span class="pre">UnsupportedTypeAnnotationError</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.T"><code class="docutils literal notranslate"><span class="pre">T</span></code></a></li>
 <li><a class="reference internal" href="#tyro.constructors._primitive_spec.PrimitiveTypeInfo"><code class="docutils literal notranslate"><span class="pre">PrimitiveTypeInfo</span></code></a><ul>

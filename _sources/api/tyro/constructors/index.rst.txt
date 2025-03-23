@@ -77,7 +77,7 @@ Package Contents
    Alternatively, it can be returned by a rule in a :class:`ConstructorRegistry`.
 
    .. py:attribute:: nargs
-      :type: int | typing_extensions.Literal[*]
+      :type: int | Literal[*]
 
       Number of arguments required to construct an instance. If nargs is "*", then
       the number of arguments is variable.
@@ -94,7 +94,7 @@ Package Contents
       length of the list will match the value of nargs.
 
    .. py:attribute:: is_instance
-      :type: Callable[[Any], bool | typing_extensions.Literal[~]]
+      :type: Callable[[Any], bool | Literal[~]]
 
       Given an object instance, does it match this primitive type? This is
       used for specific help messages when both a union type is present and a

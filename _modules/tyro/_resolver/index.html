@@ -298,6 +298,7 @@
     <span class="n">Dict</span><span class="p">,</span>
     <span class="n">Generic</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
+    <span class="n">Literal</span><span class="p">,</span>
     <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">Set</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
@@ -313,7 +314,7 @@
     <span class="n">Annotated</span><span class="p">,</span>
     <span class="n">Final</span><span class="p">,</span>
     <span class="n">ForwardRef</span><span class="p">,</span>
-    <span class="n">Literal</span><span class="p">,</span>
+    <span class="n">ReadOnly</span><span class="p">,</span>
     <span class="n">Self</span><span class="p">,</span>
     <span class="n">TypeAliasType</span><span class="p">,</span>
     <span class="n">get_args</span><span class="p">,</span>
@@ -580,15 +581,7 @@
 
 
 
-<span class="c1"># `Final` and `ReadOnly` types are ignored in tyro.</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="c1"># Can only import ReadOnly in typing_extensions&gt;=4.9.0, which isn&#39;t</span>
-    <span class="c1"># supported by Python 3.7.</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReadOnly</span>
-
-    <span class="n">STRIP_WRAPPER_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">,</span> <span class="n">ReadOnly</span><span class="p">}</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="n">STRIP_WRAPPER_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">}</span>
+<span class="n">STRIP_WRAPPER_TYPES</span> <span class="o">=</span> <span class="p">{</span><span class="n">Final</span><span class="p">,</span> <span class="n">ReadOnly</span><span class="p">}</span>
 
 <span class="n">MetadataType</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;MetadataType&quot;</span><span class="p">)</span>
 
