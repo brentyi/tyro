@@ -1,7 +1,5 @@
 import enum
-from typing import Iterable, TypeVar, Union
-
-from typing_extensions import Literal
+from typing import Iterable, Literal, TypeVar, Union
 
 from .._typing import TypeForm
 

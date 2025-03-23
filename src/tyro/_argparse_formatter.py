@@ -21,7 +21,17 @@ import shlex
 import shutil
 import sys
 from gettext import gettext as _
-from typing import Any, Dict, Generator, Iterable, List, NoReturn, Optional, Set, Tuple
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    NoReturn,
+    Optional,
+    Set,
+    Tuple,
+)
 
 from rich.columns import Columns
 from rich.console import Console, Group, RenderableType
