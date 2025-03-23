@@ -357,31 +357,6 @@ Triple-quoted docstrings on fields are still used for helptext
 even when this marker is applied.
 """
 
-Pep727DocObjects = Annotated[T, None]
-"""Use PEP 727 Doc objects in annotations for helptext generation.
-
-When this marker is present, tyro will extract documentation from
-PEP 727 Doc objects that are used inside Annotated to generate
-helptext for CLI arguments.
-
-Example::
-
-    @dataclass
-    class Config:
-        input_file: Annotated[str, Doc("Path to the input file")]
-        # The Doc string will become helptext for input_file
-
-This allows you to place documentation directly in annotations following the
-PEP 727 draft, rather than relying on comments or docstrings.
-
-.. note::
-
-    As of this writing, PEP 727 remains in draft status and its future is far
-    from certain. However, a ``typing_extensions`` maintainer, who is also the
-    PEP sponsor, has indicated that ``Doc`` will continue to be available in
-    the package, regardless of whether the proposal is accepted or not.
-"""
-
 
 CallableType = TypeVar("CallableType", bound=Callable)
 

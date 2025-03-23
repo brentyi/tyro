@@ -30,7 +30,6 @@ from ._markers import FlagCreatePairsOff as FlagCreatePairsOff
 from ._markers import HelptextFromCommentsOff as HelptextFromCommentsOff
 from ._markers import OmitArgPrefixes as OmitArgPrefixes
 from ._markers import OmitSubcommandPrefixes as OmitSubcommandPrefixes
-from ._markers import Pep727DocObjects as Pep727DocObjects
 from ._markers import Positional as Positional
 from ._markers import PositionalRequiredArgs as PositionalRequiredArgs
 from ._markers import Suppress as Suppress

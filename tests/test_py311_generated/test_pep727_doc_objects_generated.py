@@ -1,5 +1,7 @@
 import dataclasses
-from typing import Annotated
+from typing import (
+    Annotated,
+)
 
 from typing_extensions import Doc
 

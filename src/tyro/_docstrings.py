@@ -134,7 +134,14 @@ class _ClassTokenization:
 
 def get_doc_from_annotated(typ: Type, field_name: str) -> Optional[str]:
     """Extract Doc objects from Annotated types."""
-    hints = get_type_hints(typ, include_extras=True)
+    try:
+        hints = get_type_hints(typ, include_extras=True)
+    # get_type_hints can choke on Pydantic objects
+    # Possibly relevant:
+    #   - https://docs.pydantic.dev/latest/internals/resolving_annotations/#the-challenges-of-runtime-evaluation
+    #   - https://github.com/pydantic/pydantic/issues/7623
+    except NameError:
+        return None
     if field_name not in hints:
         return None
 
@@ -220,10 +227,9 @@ def get_field_docstring(
         return None
 
     # Try to find docstring from associated Doc object.
-    if _markers.Pep727DocObjects in markers:
-        docstring = get_doc_from_annotated(cls, field_name)
-        if docstring is not None:
-            return docstring
+    docstring = get_doc_from_annotated(cls, field_name)
+    if docstring is not None:
+        return docstring
 
     # Try to parse using docstring_parser.
     for cls_search in cls.__mro__:

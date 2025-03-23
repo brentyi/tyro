@@ -25,29 +25,7 @@ class docstring can be cumbersome. If they are unavailable, :func:`tyro.cli`
 will generate helptext from docstrings and comments on attributes. These are
 parsed via source code inspection.
 
-Tyro checks multiple sources for helptext in the following order of precedence:
-
-**(1) PEP 727 Doc objects** (requires :data:`tyro.conf.Pep727DocObjects`
-marker)
-
-Using [PEP 727](https://peps.python.org/pep-0727/) `Doc` objects in `Annotated`
-types.
-
-```python
-from typing import Annotated
-from typing_extensions import Doc
-
-@dataclasses.dataclass
-class Args:
-    field1: Annotated[str, Doc("A string field.")]
-    field2: Annotated[int, Doc("A numeric field, with a default value.")] = 3
-```
-
-This approach allows embedding documentation directly in annotations, which
-allows their inspection via annotations and can be maintained in one place
-for multiple tools (CLI generators, documentation generators, etc...).
-
-**(2) Attribute docstrings**
+**(1) Attribute docstrings**
 
 As per [PEP 257](https://peps.python.org/pep-0257/#what-is-a-docstring).
 
@@ -60,7 +38,7 @@ class Args:
     """A numeric field, with a default value."""
 ```
 
-**(3) Inline comments**
+**(2) Inline comments**
 
 Inline comments can be more succinct than true attribute docstrings.
 
@@ -73,7 +51,7 @@ class Args:
 
 This can be turned off using :data:`tyro.conf.HelptextFromCommentsOff`.
 
-**(4) Preceding comments**
+**(3) Preceding comments**
 
 These can also be handy for semantically grouping fields, such as the two string
 fields below.
@@ -90,3 +68,26 @@ class Args:
 ```
 
 This can be turned off using :data:`tyro.conf.HelptextFromCommentsOff`.
+
+## Support for [PEP 727](https://peps.python.org/pep-0727/) `Doc` objects
+
+> ⚠️  As of this writing (2025-03-23), PEP 727 is in *draft* status and its
+> future is far from certain. Please be advised that support for this could
+> [disappear](https://github.com/python/typing_extensions/issues/443) from
+> `typing_extensions` at some point, although the PEP sponsor and
+> `typing_extensions` co-maintainer has expressed support for maintaining it
+> [indefinitely](https://discuss.python.org/t/pep-727-documentation-metadata-in-typing/32566/183).
+
+If you provide a PEP 727 `Doc` object in an `Annotated` type annotation,
+then it will be the source of helptext for the corresponding attribute,
+rather than docstrings or comments.
+
+```python
+@dataclasses.dataclass
+class Config:
+    input_file: Annotated[str, Doc("Path to the input file")]
+    # The Doc string will become helptext for input_file
+```
+
+Note: the current evaluation method may not work on Pydantic objects
+with these annotations.

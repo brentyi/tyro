@@ -1,6 +1,9 @@
 import dataclasses
 
-from typing_extensions import Annotated, Doc
+from typing_extensions import (
+    Annotated,
+    Doc,
+)
 
 from tyro._docstrings import get_doc_from_annotated
 
