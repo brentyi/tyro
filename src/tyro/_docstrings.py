@@ -136,6 +136,11 @@ def get_doc_from_annotated(typ: Type, field_name: str) -> Optional[str]:
     """Extract Doc objects from Annotated types."""
     try:
         hints = get_type_hints(typ, include_extras=True)
+    # get_type_hints expects an 'items' method on '__annotations__'.
+    # Pathological cases where '__annotations__' is not a dict exist.
+    # E.g., Python 3.8: test/test_dcargs::test_fixed_dataclass_type
+    except AttributeError:
+        return None
     # get_type_hints can choke on Pydantic objects
     # Possibly relevant:
     #   - https://docs.pydantic.dev/latest/internals/resolving_annotations/#the-challenges-of-runtime-evaluation
