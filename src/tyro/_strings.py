@@ -4,9 +4,9 @@ import contextlib
 import functools
 import re
 import textwrap
-from typing import Iterable, List, Sequence, Tuple, Type
+from typing import Iterable, List, Literal, Sequence, Tuple, Type
 
-from typing_extensions import Literal, get_args, get_origin
+from typing_extensions import get_args, get_origin
 
 from . import _resolver
 

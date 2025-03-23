@@ -16,6 +16,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Sequence,
     Set,
     Tuple,
@@ -25,18 +26,13 @@ from typing import (
     cast,
 )
 
-from typing_extensions import TYPE_CHECKING, Literal, get_args, get_origin
+from typing_extensions import TYPE_CHECKING, get_args, get_origin
+from typing_extensions import (
+    Literal as LiteralAlternate,
+)  # Sometimes different from typing.Literal.
 
 if TYPE_CHECKING:
     from ._registry import ConstructorRegistry
-
-# There are cases where typing.Literal doesn't match typing_extensions.Literal:
-# https://github.com/python/typing_extensions/pull/148
-try:
-    from typing import Literal as LiteralAlternate
-except ImportError:
-    LiteralAlternate = Literal  # type: ignore
-
 
 from .. import _resolver, _strings
 from .._typing import TypeForm
