@@ -17,10 +17,9 @@ description = "CLI interfaces & config objects, from types"
 dynamic = ["version"]
 readme = "README.md"
 license = { text = "MIT" }
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -33,9 +32,7 @@ classifiers = [
 dependencies = [
     "typeguard>=4.0.0",
     "docstring-parser>=0.15",
-    "typing-extensions>=4.9.0; python_version>='3.8'",
-    "typing-extensions>=4.7.0; python_version<'3.8'",
-    "backports.cached-property>=1.0.2; python_version<'3.8'",
+    "typing-extensions>=4.9.0",
     "colorama>=0.4.0; platform_system=='Windows'",
     "rich>=11.1.0",
     "shtab>=1.5.6",
@@ -55,9 +52,7 @@ dev = [
     "ruff>=0.1.13",
     "mypy>=1.4.1",
     "numpy>=1.20.0",
-    # As of 7/27/2023, flax install fails for Python 3.7 without pinning to an
-    # old version. But doing so breaks other Python versions.
-    "flax>=0.6.9;python_version>='3.8' and python_version<='3.12'",
+    "flax>=0.6.9;python_version<='3.12'",
     "pydantic>=2.5.2,!=2.10.0",
     "coverage[toml]>=6.5.0",
     "eval_type_backport>=0.1.3",
