@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import sys
 from typing import List, Optional, Tuple
 
 import pytest
@@ -193,26 +192,17 @@ TupleCustomConstructor2 = Annotated[
 ]
 
 
-# The following test works:
-# - [ ] in Python 3.7.
-# - [x] in Python 3.8 and 3.9, with typing_extensions>=4.13.0.
-# - [x] in Python 3.10+.
-#
-# https://github.com/python/typing_extensions/issues/310
-# https://github.com/brentyi/tyro/issues/260#issuecomment-2735928988
-if sys.version_info >= (3, 8):
+def test_tuple_custom_constructors_positional_default_none() -> None:
+    def main(
+        field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
+    ) -> Tuple[str, ...] | None:
+        del field2
+        return field1
 
-    def test_tuple_custom_constructors_positional_default_none() -> None:
-        def main(
-            field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
-        ) -> Tuple[str, ...] | None:
-            del field2
-            return field1
-
-        assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
-        assert tyro.cli(main, args=["a"]) == ("a",)
-        assert tyro.cli(main, args=[]) is None
-        assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+    assert tyro.cli(main, args=["a", "b"]) == ("a", "b")
+    assert tyro.cli(main, args=["a"]) == ("a",)
+    assert tyro.cli(main, args=[]) is None
+    assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
 
 
 def test_tuple_custom_constructors_positional_default_five() -> None:

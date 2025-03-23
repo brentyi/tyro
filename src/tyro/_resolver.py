@@ -6,7 +6,6 @@ import collections.abc
 import copy
 import dataclasses
 import inspect
-import sys
 import types
 import typing
 import warnings
@@ -749,37 +748,7 @@ def _get_type_hints_backported_syntax(
     and generics (list[str]) in older versions of Python."""
 
     try:
-        out = get_type_hints(obj, include_extras=include_extras)
-
-        # Workaround for this Python bug:
-        # - https://github.com/brentyi/tyro/issues/156
-        # - https://github.com/python/cpython/issues/90353
-        #
-        # This issue is fixed in Python 3.10+ and typing_extensions>=4.13.0, but not in Python 3.7.
-        # - https://github.com/python/typing_extensions/issues/310
-        # - https://github.com/brentyi/tyro/issues/260#issuecomment-2735928988
-        if sys.version_info < (3, 8):
-            # If we see Optional[Annotated[T, ...]], we're going to flip to Annotated[Optional[T]]...
-            #
-            # It's unlikely but possible for this to have unintended side effects.
-            for k, v in out.items():
-                origin = get_origin(v)
-                args = get_args(v)
-                if (
-                    origin is Union
-                    and len(args) == 2
-                    and (args[0] is NoneType or args[1] is NoneType)
-                ):
-                    non_none = args[1] if args[0] is NoneType else args[0]
-                    if get_origin(non_none) is Annotated:
-                        annotated_args = get_args(non_none)
-                        out[k] = Annotated[  # type: ignore
-                            (
-                                Union[(annotated_args[0], None)],  # type: ignore
-                                *annotated_args[1:],
-                            )
-                        ]
-        return out
+        return get_type_hints(obj, include_extras=include_extras)
 
     except TypeError as e:  # pragma: no cover
         # Resolve new type syntax using eval_type_backport.
