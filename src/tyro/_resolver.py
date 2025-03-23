@@ -32,6 +32,7 @@ from typing_extensions import (
     Final,
     ForwardRef,
     Literal,
+    ReadOnly,
     Self,
     TypeAliasType,
     get_args,
@@ -270,9 +271,6 @@ def narrow_collection_types(
         ]  # type: ignore
     return cast(TypeOrCallable, typ)
 
-
-# `Final` and `ReadOnly` types are ignored in tyro.
-from typing_extensions import ReadOnly
 
 STRIP_WRAPPER_TYPES = {Final, ReadOnly}
 
