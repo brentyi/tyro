@@ -4,7 +4,6 @@ import dataclasses
 import io
 import json as json_
 import shlex
-import sys
 from typing import Any, Dict, Generic, List, Sequence, Tuple, Type, TypeVar, Union
 
 import pytest
