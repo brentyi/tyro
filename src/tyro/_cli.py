@@ -6,10 +6,10 @@ import dataclasses
 import pathlib
 import sys
 import warnings
-from typing import Callable, Sequence, TypeVar, cast, overload
+from typing import Callable, Literal, Sequence, TypeVar, cast, overload
 
 import shtab
-from typing_extensions import Annotated, Literal
+from typing_extensions import Annotated
 
 from . import _argparse as argparse
 from . import (

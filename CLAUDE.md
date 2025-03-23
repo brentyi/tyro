@@ -6,6 +6,8 @@
 - Run all tests: `pytest` (sequential execution)
 - Run specific test: `pytest tests/test_file.py -v` or `pytest tests/test_file.py::test_name -v`
 - When modifying tests, regenerate the Py311 test variants: `python tests/test_py311_generated/_generate.py`
+  - Important: After making changes to main test files, always regenerate these test variants
+  - No need to directly modify the generated tests
 - Prefer pyright for type checking: `pyright .`
 - Run linting: `ruff check`
 - Fix linting issues: `ruff check --fix` (some fixes require `--unsafe-fixes` option)
@@ -24,7 +26,7 @@
 - Prefer composition over inheritance.
 
 ## Architecture
-Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.7-3.13 with conditional imports and version-specific features.
+Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.8-3.13 with conditional imports and version-specific features.
 
 ## Documentation
 - Document all public functions, classes, and methods.
@@ -34,4 +36,4 @@ Tyro focuses on generating CLI interfaces from type-annotated Python. The codeba
 - Update the docstrings when changing any public API.
 
 ## Architecture
-Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.7-3.13 with conditional imports and version-specific features.
+Tyro focuses on generating CLI interfaces from type-annotated Python. The codebase supports Python 3.8-3.13 with conditional imports and version-specific features.
