@@ -3,9 +3,6 @@ from typing import List
 
 collect_ignore_glob: List[str] = []
 
-if not sys.version_info >= (3, 8):
-    collect_ignore_glob.append("*min_py38*.py")
-
 if not sys.version_info >= (3, 9):
     collect_ignore_glob.append("*min_py39*.py")
 

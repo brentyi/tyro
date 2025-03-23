@@ -7,8 +7,8 @@ import collections.abc
 import dataclasses
 import json
 import shlex
+from functools import cached_property
 from typing import (
-    TYPE_CHECKING,
     Any,
     Callable,
     Iterable,
@@ -32,17 +32,6 @@ from .constructors import (
     PrimitiveTypeInfo,
     UnsupportedTypeAnnotationError,
 )
-
-if TYPE_CHECKING:
-    cached_property = property
-else:
-    try:
-        # Python >=3.8.
-        from functools import cached_property
-    except ImportError:
-        # Python 3.7.
-        from backports.cached_property import cached_property  # type: ignore
-
 
 _T = TypeVar("_T")
 

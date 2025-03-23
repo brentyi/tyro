@@ -16,6 +16,7 @@ from typing import (
     Dict,
     Generic,
     List,
+    Literal,
     Sequence,
     Set,
     Tuple,
@@ -31,7 +32,7 @@ from typing_extensions import (
     Annotated,
     Final,
     ForwardRef,
-    Literal,
+    ReadOnly,
     Self,
     TypeAliasType,
     get_args,
@@ -271,15 +272,7 @@ def narrow_collection_types(
     return cast(TypeOrCallable, typ)
 
 
-# `Final` and `ReadOnly` types are ignored in tyro.
-try:
-    # Can only import ReadOnly in typing_extensions>=4.9.0, which isn't
-    # supported by Python 3.7.
-    from typing_extensions import ReadOnly
-
-    STRIP_WRAPPER_TYPES = {Final, ReadOnly}
-except ImportError:
-    STRIP_WRAPPER_TYPES = {Final}
+STRIP_WRAPPER_TYPES = {Final, ReadOnly}
 
 MetadataType = TypeVar("MetadataType")
 
