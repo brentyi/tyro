@@ -1,9 +1,20 @@
 # Helptext generation
-In addition to type annotations, :func:`tyro.cli()` will also parse docstrings
-and comments. These are used to automatically generate helptext; see examples
-for how these end up being formatted.
 
-## General callables
+In addition to constructing arguments from type annotations, :func:`tyro.cli()`
+will also parse docstrings and comments and inspect annotations to
+automatically generate helptext for these arguments. See examples for how these
+end up being formatted.
+
+Both callables (functions, objects with `__call__` methods) and "struct" types
+(`dataclasses.dataclass`, `NamedTuple`, `TypedDict`, `attrs`, `pydantic`,
+etc...) are inspected for helptext, as appropriate.
+
+## Helptext from docstrings
+
+As per [PEP 257](https://peps.python.org/pep-0257/#what-is-a-docstring).
+
+### General callables
+
 For general callables, field helptext is extracted from the corresponding field
 docstring. Our examples use Google-style docstrings, but ReST, Numpydoc-style
 and Epydoc docstrings are supported as well. Under the hood, all of these
@@ -19,15 +30,12 @@ def main(field1: str, field2: int = 3) -> None:
     print(field1, field2)
 ```
 
-## Dataclasses, TypedDict, NamedTuple
+### Struct types
+
 For types defined using class attributes, enumerating each argument list in the
 class docstring can be cumbersome. If they are unavailable, :func:`tyro.cli`
-will generate helptext from docstrings and comments on attributes. These are
-parsed via source code inspection.
-
-**(1) Attribute docstrings**
-
-As per [PEP 257](https://peps.python.org/pep-0257/#what-is-a-docstring).
+will generate helptext from docstrings attributes. These are parsed via source
+code inspection.
 
 ```python
 @dataclasses.dataclass
@@ -38,7 +46,11 @@ class Args:
     """A numeric field, with a default value."""
 ```
 
-**(2) Inline comments**
+## Helptext from comments
+
+(Applies to struct types.)
+
+**Inline comments**
 
 Inline comments can be more succinct than true attribute docstrings.
 
@@ -51,7 +63,7 @@ class Args:
 
 This can be turned off using :data:`tyro.conf.HelptextFromCommentsOff`.
 
-**(3) Preceding comments**
+**Preceding comments**
 
 These can also be handy for semantically grouping fields, such as the two string
 fields below.
@@ -69,7 +81,21 @@ class Args:
 
 This can be turned off using :data:`tyro.conf.HelptextFromCommentsOff`.
 
-## Support for [PEP 727](https://peps.python.org/pep-0727/) `Doc` objects
+## Helptext from annotations
+
+**tyro.arg.conf `help` arguments**
+
+```python
+@dataclasses.dataclass
+class Command:
+    sources: Annotated[
+        tyro.conf.Positional[list[str]],
+        tyro.conf.arg(help="Filesystem locations or URLs."),
+        # The 'help' argument will be become helptext for 'sources'
+    ]
+```
+
+**[PEP 727](https://peps.python.org/pep-0727/) `Doc` objects**
 
 > ⚠️  As of this writing (2025-03-23), PEP 727 is in *draft* status and its
 > future is far from certain. Please be advised that support for this could
@@ -78,16 +104,22 @@ This can be turned off using :data:`tyro.conf.HelptextFromCommentsOff`.
 > `typing_extensions` co-maintainer has expressed support for maintaining it
 > [indefinitely](https://discuss.python.org/t/pep-727-documentation-metadata-in-typing/32566/183).
 
-If you provide a PEP 727 `Doc` object in an `Annotated` type annotation,
-then it will be the source of helptext for the corresponding attribute,
-rather than docstrings or comments.
-
 ```python
 @dataclasses.dataclass
 class Config:
     input_file: Annotated[str, Doc("Path to the input file")]
-    # The Doc string will become helptext for input_file
+    # The Doc string will become helptext for 'input-file'
 ```
 
-Note: the current evaluation method may not work on Pydantic objects
-with these annotations.
+Note: The current evaluation method may not work on Pydantic objects
+with `Doc` annotations.
+
+## Precedence rules
+
+When multiple helptext sources are available, they are chosen in the
+following order of precedence (from highest to lowest):
+
+- `tyro.conf.arg()`
+- PEP 727 `Doc`
+- Docstrings
+- Comments
