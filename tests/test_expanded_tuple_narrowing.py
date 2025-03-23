@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Any
+from typing import Any, Tuple
 
 from helptext_utils import get_helptext_with_checks
 
@@ -104,8 +104,8 @@ def test_partial_tuple_narrowing():
 
     @dataclasses.dataclass
     class Config:
-        x: tuple[int, int, Any] = (1, 2, "hello")
-        y: tuple[int, Any, float] = (1, "world", 3.0)
+        x: Tuple[int, int, Any] = (1, 2, "hello")
+        y: Tuple[int, Any, float] = (1, "world", 3.0)
 
     result = tyro.cli(Config, args="--x 4 5 six --y 7 eight 9.0".split())
 
