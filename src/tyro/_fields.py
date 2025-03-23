@@ -371,9 +371,7 @@ def _field_list_from_function(
         # TODO: re-add.
         if helptext is None and inspect.isclass(f_before_init_unwrap):
             helptext = _docstrings.get_field_docstring(
-                f_before_init_unwrap,
-                param.name,
-                helptext_from_comments=_markers.HelptextFromCommentsOff not in markers,
+                f_before_init_unwrap, param.name, markers
             )
 
         if param.name not in hints:

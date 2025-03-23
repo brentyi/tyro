@@ -9,12 +9,31 @@ import io
 import itertools
 import sys
 import tokenize
-from typing import Callable, Dict, Generic, Hashable, List, Optional, Set, Type, TypeVar
+from typing import (
+    Callable,
+    Dict,
+    Generic,
+    Hashable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 import docstring_parser
-from typing_extensions import get_origin, is_typeddict
+from typing_extensions import (
+    Annotated,
+    Doc,
+    get_args,
+    get_origin,
+    get_type_hints,
+    is_typeddict,
+)
 
 from . import _resolver, _strings, _unsafe_cache
+from .conf import _markers
 
 T = TypeVar("T", bound=Callable)
 
@@ -113,6 +132,26 @@ class _ClassTokenization:
         )
 
 
+def get_doc_from_annotated(typ: Type, field_name: str) -> Optional[str]:
+    """Extract Doc objects from Annotated types."""
+    hints = get_type_hints(typ, include_extras=True)
+    if field_name not in hints:
+        return None
+
+    ftyp = hints[field_name]
+    if get_origin(ftyp) is not Annotated:
+        return None
+
+    for arg in get_args(ftyp)[1:]:
+        if isinstance(arg, Doc):
+            # Extract string content from the Doc object
+            return _strings.dedent(
+                _strings.remove_single_line_breaks(arg.documentation)
+            ).strip()
+
+    return None
+
+
 @_unsafe_cache.unsafe_cache(1024)
 def get_class_tokenization_with_field(
     cls: Type, field_name: str
@@ -172,13 +211,19 @@ def parse_docstring_from_object(obj: object) -> Dict[str, str]:
 
 @_unsafe_cache.unsafe_cache(1024)
 def get_field_docstring(
-    cls: Type, field_name: str, helptext_from_comments: bool
+    cls: Type, field_name: str, markers: Tuple[_markers.Marker, ...]
 ) -> Optional[str]:
     """Get docstring for a field in a class."""
 
     # NoneType will break docstring_parser.
     if cls is type(None):
         return None
+
+    # Try to find docstring from associated Doc object.
+    if _markers.Pep727DocObjects in markers:
+        docstring = get_doc_from_annotated(cls, field_name)
+        if docstring is not None:
+            return docstring
 
     # Try to parse using docstring_parser.
     for cls_search in cls.__mro__:
@@ -190,9 +235,10 @@ def get_field_docstring(
                 _strings.remove_single_line_breaks(docstring)
             ).strip()
 
-    # If docstring_parser failed, let's try looking for comments.
-    if not helptext_from_comments:
+    if _markers.HelptextFromCommentsOff in markers:
         return None
+
+    # If docstring_parser failed, let's try looking for comments.
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
         return None

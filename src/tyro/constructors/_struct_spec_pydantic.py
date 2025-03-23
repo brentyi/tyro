@@ -7,7 +7,6 @@ from typing_extensions import Annotated, cast
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
-from ..conf import _markers
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 if TYPE_CHECKING:
@@ -110,10 +109,7 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             helptext = pd1_field.field_info.description
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(
-                    info.type,
-                    pd1_field.name,
-                    helptext_from_comments=_markers.HelptextFromCommentsOff
-                    not in info.markers,
+                    info.type, pd1_field.name, info.markers
                 )
 
             default = _get_pydantic_v1_field_default(
@@ -133,10 +129,7 @@ def pydantic_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
             helptext = pd2_field.description
             if helptext is None:
                 helptext = _docstrings.get_field_docstring(
-                    info.type,
-                    name,
-                    helptext_from_comments=_markers.HelptextFromCommentsOff
-                    not in info.markers,
+                    info.type, name, info.markers
                 )
 
             default = _get_pydantic_v2_field_default(name, pd2_field, info.default)

@@ -20,6 +20,7 @@ from typing import (
 
 import pytest
 from helptext_utils import get_helptext_with_checks
+from typing_extensions import Doc
 
 import tyro
 
@@ -1922,4 +1923,19 @@ def test_helptext_from_contents_off() -> None:
     assert "Comment in helptext." in get_helptext_with_checks(Config)
     assert "Comment in helptext." not in get_helptext_with_checks(
         tyro.conf.HelptextFromCommentsOff[Config]
+    )
+
+
+@dataclasses.dataclass
+class Pep727Config:
+    y: Annotated[int, Doc("Comment in Doc object.")]
+    """Comment in Sphinx-style postfix string."""
+
+
+def test_pep727doc() -> None:
+    assert "Comment in Sphinx-style postfix string." in get_helptext_with_checks(
+        Pep727Config
+    )
+    assert "Comment in Doc object." in get_helptext_with_checks(
+        tyro.conf.Pep727DocObjects[Pep727Config]
     )

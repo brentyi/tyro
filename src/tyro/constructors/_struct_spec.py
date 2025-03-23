@@ -227,12 +227,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     name=name,
                     type=typ,
                     default=default,
-                    helptext=_docstrings.get_field_docstring(
-                        cls,
-                        name,
-                        helptext_from_comments=_markers.HelptextFromCommentsOff
-                        not in info.markers,
-                    ),
+                    helptext=_docstrings.get_field_docstring(cls, name, info.markers),
                 )
             )
         return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))
@@ -300,10 +295,7 @@ def apply_default_struct_rules(registry: ConstructorRegistry) -> None:
                     type=typ,
                     default=default,
                     helptext=_docstrings.get_field_docstring(
-                        info.type,
-                        name,
-                        helptext_from_comments=_markers.HelptextFromCommentsOff
-                        not in info.markers,
+                        info.type, name, info.markers
                     ),
                 )
             )
