@@ -16,6 +16,13 @@ def test_basic():
     assert "Simple documentation" in get_helptext_with_checks(SimpleDoc)
 
 
+def test_basic_function():
+    def main(x: Annotated[int, Doc("Simple documentation")]) -> None:
+        del x
+
+    assert "Simple documentation" in get_helptext_with_checks(main)
+
+
 def test_multiple_annotations():
     @dataclasses.dataclass
     class MultipleAnnotations:
