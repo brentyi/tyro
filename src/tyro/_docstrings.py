@@ -24,11 +24,7 @@ from typing import (
 
 import docstring_parser
 from typing_extensions import (
-    Annotated,
-    Doc,
-    get_args,
     get_origin,
-    get_type_hints,
     is_typeddict,
 )
 
@@ -132,38 +128,6 @@ class _ClassTokenization:
         )
 
 
-def get_doc_from_annotated(typ: Type, field_name: str) -> Optional[str]:
-    """Extract Doc objects from Annotated types."""
-    try:
-        hints = get_type_hints(typ, include_extras=True)
-    # get_type_hints expects an 'items' method on '__annotations__'.
-    # Pathological cases where '__annotations__' is not a dict exist.
-    # E.g., Python 3.8: test/test_dcargs::test_fixed_dataclass_type
-    except AttributeError:
-        return None
-    # get_type_hints can choke on Pydantic objects
-    # Possibly relevant:
-    #   - https://docs.pydantic.dev/latest/internals/resolving_annotations/#the-challenges-of-runtime-evaluation
-    #   - https://github.com/pydantic/pydantic/issues/7623
-    except NameError:
-        return None
-    if field_name not in hints:
-        return None
-
-    ftyp = hints[field_name]
-    if get_origin(ftyp) is not Annotated:
-        return None
-
-    for arg in get_args(ftyp)[1:]:
-        if isinstance(arg, Doc):
-            # Extract string content from the Doc object
-            return _strings.dedent(
-                _strings.remove_single_line_breaks(arg.documentation)
-            ).strip()
-
-    return None
-
-
 @_unsafe_cache.unsafe_cache(1024)
 def get_class_tokenization_with_field(
     cls: Type, field_name: str
@@ -230,11 +194,6 @@ def get_field_docstring(
     # NoneType will break docstring_parser.
     if cls is type(None):
         return None
-
-    # Try to find docstring from associated Doc object.
-    docstring = get_doc_from_annotated(cls, field_name)
-    if docstring is not None:
-        return docstring
 
     # Try to parse using docstring_parser.
     for cls_search in cls.__mro__:

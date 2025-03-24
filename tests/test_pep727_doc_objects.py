@@ -1,11 +1,7 @@
 import dataclasses
 
-from typing_extensions import (
-    Annotated,
-    Doc,
-)
-
-from tyro._docstrings import get_doc_from_annotated
+from helptext_utils import get_helptext_with_checks
+from typing_extensions import Annotated, Doc
 
 
 class SomeOtherMarker:
@@ -17,7 +13,7 @@ def test_basic():
     class SimpleDoc:
         x: Annotated[int, Doc("Simple documentation")]
 
-    assert get_doc_from_annotated(SimpleDoc, "x") == "Simple documentation"
+    assert "Simple documentation" in get_helptext_with_checks(SimpleDoc)
 
 
 def test_multiple_annotations():
@@ -25,23 +21,7 @@ def test_multiple_annotations():
     class MultipleAnnotations:
         x: Annotated[int, SomeOtherMarker(), Doc("Doc with other markers")]
 
-    assert get_doc_from_annotated(MultipleAnnotations, "x") == "Doc with other markers"
-
-
-def test_absent_doc():
-    @dataclasses.dataclass
-    class NoDoc:
-        x: Annotated[int, SomeOtherMarker()]
-
-    assert get_doc_from_annotated(NoDoc, "x") is None
-
-
-def test_non_annotated():
-    @dataclasses.dataclass
-    class NotAnnotated:
-        x: int
-
-    assert get_doc_from_annotated(NotAnnotated, "x") is None
+    assert "Doc with other markers" in get_helptext_with_checks(MultipleAnnotations)
 
 
 def test_multiline_to_dedent():
@@ -56,14 +36,5 @@ def test_multiline_to_dedent():
         """),
         ]
 
-    assert get_doc_from_annotated(MultilineDoc, "x") == (
-        "This is a multiline\ndocumentation string\nthat should be dedented."
-    )
-
-
-def test_absent_field():
-    @dataclasses.dataclass
-    class ExistingField:
-        x: Annotated[int, Doc("Doc for x")]
-
-    assert get_doc_from_annotated(ExistingField, "non_existent") is None
+    assert "multiline documentation" in get_helptext_with_checks(MultilineDoc)
+    assert "string that" in get_helptext_with_checks(MultilineDoc)

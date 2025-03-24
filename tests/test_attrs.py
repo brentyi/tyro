@@ -3,7 +3,7 @@ from __future__ import annotations
 import contextlib
 import io
 import pathlib
-from typing import Generic, TypeVar, Union, cast
+from typing import Generic, TypeVar, cast
 
 import attr
 import pytest
@@ -156,7 +156,7 @@ def test_attrs_inheritance_with_same_typevar() -> None:
 def test_diamond_inheritance() -> None:
     @define(frozen=True)
     class A:
-        field: Union[int, str] = 5
+        field: int | str = 5
 
     @define(frozen=True)
     class B(A):
