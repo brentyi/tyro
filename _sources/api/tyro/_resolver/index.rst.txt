@@ -14,6 +14,10 @@
 Module Contents
 ---------------
 
+.. py:data:: TypeAliasTypeAlternate
+
+   
+
 .. py:data:: UnionType
 
    Same as types.UnionType, but points to typing.Union for older versions of

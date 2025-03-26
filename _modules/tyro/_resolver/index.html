@@ -288,8 +288,8 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Any</span><span class="p">,</span>
@@ -326,6 +326,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_unsafe_cache</span><span class="p">,</span> <span class="n">conf</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypeForm</span>
+
+<span class="c1"># typing_extensions.TypeAliasType and typing.TypeAliasType are not the same</span>
+<span class="c1"># object in typing_extensions 4.13.0! This can break an isinstance() check we</span>
+<span class="c1"># use below.</span>
+<span class="n">TypeAliasTypeAlternate</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">typing</span><span class="p">,</span> <span class="s2">&quot;TypeAliasType&quot;</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">)</span>
 
 <span class="n">UnionType</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="s2">&quot;UnionType&quot;</span><span class="p">,</span> <span class="n">Union</span><span class="p">)</span>
 <span class="sd">&quot;&quot;&quot;Same as types.UnionType, but points to typing.Union for older versions of</span>
@@ -424,11 +429,12 @@
     <span class="n">typ</span><span class="p">:</span> <span class="n">TypeOrCallableOrNone</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeOrCallableOrNone</span><span class="p">:</span>
     <span class="c1"># Handle type aliases, eg via the `type` statement in Python 3.12.</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">TypeAliasType</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Annotated</span><span class="p">[</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="p">(</span><span class="n">TypeAliasType</span><span class="p">,</span> <span class="n">TypeAliasTypeAlternate</span><span class="p">)):</span>
+        <span class="n">typ_cast</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">TypeAliasType</span><span class="p">,</span> <span class="n">typ</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
             <span class="p">(</span>
-                <span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="n">__value__</span><span class="p">)),</span>
-                <span class="n">TyroTypeAliasBreadCrumb</span><span class="p">(</span><span class="n">typ</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
+                <span class="n">cast</span><span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">resolve_newtype_and_aliases</span><span class="p">(</span><span class="n">typ_cast</span><span class="o">.</span><span class="n">__value__</span><span class="p">)),</span>
+                <span class="n">TyroTypeAliasBreadCrumb</span><span class="p">(</span><span class="n">typ_cast</span><span class="o">.</span><span class="vm">__name__</span><span class="p">),</span>
             <span class="p">)</span>
         <span class="p">]</span>
 
@@ -1084,38 +1090,7 @@
 <span class="sd">    and generics (list[str]) in older versions of Python.&quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span><span class="p">)</span>
-
-        <span class="c1"># Workaround for:</span>
-        <span class="c1"># - https://github.com/brentyi/tyro/issues/156</span>
-        <span class="c1"># - https://github.com/python/cpython/issues/90353</span>
-        <span class="c1">#</span>
-        <span class="c1"># Which impacts Python 3.10 and earlier.</span>
-        <span class="c1">#</span>
-        <span class="c1"># It may be possible to remove this if this issue is resolved:</span>
-        <span class="c1"># - https://github.com/python/typing_extensions/issues/310</span>
-        <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">):</span>
-            <span class="c1"># If we see Optional[Annotated[T, ...]], we&#39;re going to flip to Annotated[Optional[T]]...</span>
-            <span class="c1">#</span>
-            <span class="c1"># It&#39;s unlikely but possible for this to have unintended side effects.</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-                <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-                <span class="k">if</span> <span class="p">(</span>
-                    <span class="n">origin</span> <span class="ow">is</span> <span class="n">Union</span>
-                    <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
-                    <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">NoneType</span> <span class="ow">or</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="n">NoneType</span><span class="p">)</span>
-                <span class="p">):</span>
-                    <span class="n">non_none</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="n">NoneType</span> <span class="k">else</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">non_none</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
-                        <span class="n">annotated_args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">non_none</span><span class="p">)</span>
-                        <span class="n">out</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">Annotated</span><span class="p">[</span>  <span class="c1"># type: ignore</span>
-                            <span class="p">(</span>
-                                <span class="n">Union</span><span class="p">[(</span><span class="n">annotated_args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="kc">None</span><span class="p">)],</span>  <span class="c1"># type: ignore</span>
-                                <span class="o">*</span><span class="n">annotated_args</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span>
-                            <span class="p">)</span>
-                        <span class="p">]</span>
-        <span class="k">return</span> <span class="n">out</span>
+        <span class="k">return</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="n">include_extras</span><span class="p">)</span>
 
     <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="c1"># Resolve new type syntax using eval_type_backport.</span>
