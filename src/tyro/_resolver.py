@@ -6,8 +6,8 @@ import collections.abc
 import copy
 import dataclasses
 import inspect
-import sys
 import types
+import typing
 import warnings
 from typing import (
     Any,
@@ -44,6 +44,11 @@ from typing_extensions import (
 from . import _unsafe_cache, conf
 from ._singleton import MISSING_AND_MISSING_NONPROP
 from ._typing import TypeForm
+
+# typing_extensions.TypeAliasType and typing.TypeAliasType are not the same
+# object in typing_extensions 4.13.0! This can break an isinstance() check we
+# use below.
+TypeAliasTypeAlternate = getattr(typing, "TypeAliasType", TypeAliasType)
 
 UnionType = getattr(types, "UnionType", Union)
 """Same as types.UnionType, but points to typing.Union for older versions of
@@ -125,11 +130,12 @@ def resolve_newtype_and_aliases(
     typ: TypeOrCallableOrNone,
 ) -> TypeOrCallableOrNone:
     # Handle type aliases, eg via the `type` statement in Python 3.12.
-    if isinstance(typ, TypeAliasType):
-        return Annotated[
+    if isinstance(typ, (TypeAliasType, TypeAliasTypeAlternate)):
+        typ_cast = cast(TypeAliasType, typ)
+        return Annotated[  # type: ignore
             (
-                cast(Any, resolve_newtype_and_aliases(typ.__value__)),
-                TyroTypeAliasBreadCrumb(typ.__name__),
+                cast(Any, resolve_newtype_and_aliases(typ_cast.__value__)),
+                TyroTypeAliasBreadCrumb(typ_cast.__name__),
             )
         ]
 
@@ -742,38 +748,7 @@ def _get_type_hints_backported_syntax(
     and generics (list[str]) in older versions of Python."""
 
     try:
-        out = get_type_hints(obj, include_extras=include_extras)
-
-        # Workaround for:
-        # - https://github.com/brentyi/tyro/issues/156
-        # - https://github.com/python/cpython/issues/90353
-        #
-        # Which impacts Python 3.10 and earlier.
-        #
-        # It may be possible to remove this if this issue is resolved:
-        # - https://github.com/python/typing_extensions/issues/310
-        if sys.version_info < (3, 11):
-            # If we see Optional[Annotated[T, ...]], we're going to flip to Annotated[Optional[T]]...
-            #
-            # It's unlikely but possible for this to have unintended side effects.
-            for k, v in out.items():
-                origin = get_origin(v)
-                args = get_args(v)
-                if (
-                    origin is Union
-                    and len(args) == 2
-                    and (args[0] is NoneType or args[1] is NoneType)
-                ):
-                    non_none = args[1] if args[0] is NoneType else args[0]
-                    if get_origin(non_none) is Annotated:
-                        annotated_args = get_args(non_none)
-                        out[k] = Annotated[  # type: ignore
-                            (
-                                Union[(annotated_args[0], None)],  # type: ignore
-                                *annotated_args[1:],
-                            )
-                        ]
-        return out
+        return get_type_hints(obj, include_extras=include_extras)
 
     except TypeError as e:  # pragma: no cover
         # Resolve new type syntax using eval_type_backport.
