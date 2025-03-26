@@ -192,11 +192,16 @@ TupleCustomConstructor2 = Annotated[
 ]
 
 
-if sys.version_info >= (3, 11):
+# The following test works:
+# - [ ] in Python 3.7.
+# - [x] in Python 3.8 and 3.9, with typing>=4.13.0.
+# - [x] in Python 3.10+.
+#
+# https://github.com/python/typing/issues/310
+# https://github.com/brentyi/tyro/issues/260#issuecomment-2735928988
+if sys.version_info >= (3, 8):
 
     def test_tuple_custom_constructors_positional_default_none() -> None:
-        # Waiting for typing with this fixed:
-        # https://github.com/python/typing/issues/310
         def main(
             field1: TupleCustomConstructor2 | None = None, /, field2: int = 3
         ) -> Tuple[str, ...] | None:
