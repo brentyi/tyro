@@ -50,10 +50,7 @@ Usage: python script_name.py --foo INT [--bar STR]
 
 import tyro
 
-def main(
-    foo: int,
-    bar: str = "default",
-) -> None:
+def main(foo: int, bar: str = "default") -> None:
     ...  # Main body of a script.
 
 if __name__ == "__main__":
