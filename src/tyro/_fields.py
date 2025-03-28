@@ -355,7 +355,7 @@ def _field_list_from_function(
             hints = get_hints_for_signature_func(orig_cls)
 
     # Early return for lambda functions.
-    if f.__name__ == "<lambda>" and len(params) > 0:
+    if getattr(f, "__name__", None) == "<lambda>" and len(params) > 0:
         return UnsupportedStructTypeMessage(
             "Lambda functions cannot be type-annotated!"
         )
