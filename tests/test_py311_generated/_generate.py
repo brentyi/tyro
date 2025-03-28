@@ -10,11 +10,14 @@ def generate_from_path(test_path: pathlib.Path) -> None:
     content = test_path.read_text()
     content = content.replace("typing_extensions", "typing")
 
-    if "ReadOnly" in content:
-        content = content.replace("ReadOnly,", "", 1)
+    for typx_only_import in ("Doc", "ReadOnly"):
+        if typx_only_import not in content:
+            continue
+        content = content.replace(f"{typx_only_import},", "", 1)
+        content = content.replace(f", {typx_only_import}\n", "", 1)
         content = content.replace(
             "\nfrom typing import ",
-            "\nfrom typing_extensions import ReadOnly\nfrom typing import ",
+            f"\nfrom typing_extensions import {typx_only_import}\nfrom typing import ",
         )
 
     while "Union[" in content:
