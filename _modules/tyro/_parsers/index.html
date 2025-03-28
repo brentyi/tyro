@@ -676,15 +676,7 @@
                     <span class="k">return</span> <span class="n">subparsers_attempt</span>
 
         <span class="c1"># (2) Handle nested callables.</span>
-        <span class="k">if</span> <span class="n">force_primitive</span> <span class="o">==</span> <span class="s2">&quot;struct&quot;</span> <span class="ow">or</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span>
-            <span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span>
-        <span class="p">):</span>
-            <span class="n">field</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">with_new_type_stripped</span><span class="p">(</span>
-                <span class="n">_resolver</span><span class="o">.</span><span class="n">narrow_subtypes</span><span class="p">(</span>
-                    <span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span>
-                    <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">,</span>
-                <span class="p">),</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">_fields</span><span class="o">.</span><span class="n">is_struct_type</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">default</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">ParserSpecification</span><span class="o">.</span><span class="n">from_callable_or_type</span><span class="p">(</span>
                 <span class="n">field</span><span class="o">.</span><span class="n">type_stripped</span><span class="p">,</span>
                 <span class="n">markers</span><span class="o">=</span><span class="n">field</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
