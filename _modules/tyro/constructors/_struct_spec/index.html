@@ -529,12 +529,7 @@
                     <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                     <span class="nb">type</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
-                    <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                        <span class="bp">cls</span><span class="p">,</span>
-                        <span class="n">name</span><span class="p">,</span>
-                        <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span>
-                        <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
-                    <span class="p">),</span>
+                    <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">StructConstructorSpec</span><span class="p">(</span><span class="n">instantiate</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">field_list</span><span class="p">))</span>
@@ -602,10 +597,7 @@
                     <span class="nb">type</span><span class="o">=</span><span class="n">typ</span><span class="p">,</span>
                     <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
                     <span class="n">helptext</span><span class="o">=</span><span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                        <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                        <span class="n">name</span><span class="p">,</span>
-                        <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span>
-                        <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
+                        <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span>
                     <span class="p">),</span>
                 <span class="p">)</span>
             <span class="p">)</span>

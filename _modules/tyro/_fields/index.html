@@ -293,7 +293,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">docstring_parser</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_original_bases</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Doc</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_original_bases</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span><span class="p">,</span> <span class="n">_strings</span><span class="p">,</span> <span class="n">_unsafe_cache</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
@@ -379,8 +379,19 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">check_default_instances</span><span class="p">():</span>
             <span class="n">typ</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">expand_union_types</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
 
+        <span class="c1"># Get all Annotated[] metadata.</span>
+        <span class="c1"># This will unpack types in the form Annotated[type_stripped, *metadata].</span>
+        <span class="n">type_stripped</span><span class="p">,</span> <span class="n">metadata</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">search_type</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Support PEP 727 Doc objects.</span>
+        <span class="n">doc_objs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">metadata</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">Doc</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">doc_objs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">helptext</span> <span class="o">=</span> <span class="n">_strings</span><span class="o">.</span><span class="n">remove_single_line_breaks</span><span class="p">(</span>
+                <span class="n">_strings</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">doc_objs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">documentation</span><span class="p">)</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
         <span class="c1"># Try to extract argconf overrides from type.</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">argconfs</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfig</span><span class="p">)</span>
+        <span class="n">argconfs</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">metadata</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfig</span><span class="p">))</span>
         <span class="n">argconf</span> <span class="o">=</span> <span class="n">_confstruct</span><span class="o">.</span><span class="n">_ArgConfig</span><span class="p">(</span>
             <span class="kc">None</span><span class="p">,</span>
             <span class="kc">None</span><span class="p">,</span>
@@ -403,7 +414,8 @@
             <span class="k">if</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">helptext</span> <span class="o">=</span> <span class="n">argconf</span><span class="o">.</span><span class="n">help</span>
 
-        <span class="n">type_stripped</span><span class="p">,</span> <span class="n">markers</span> <span class="o">=</span> <span class="n">_resolver</span><span class="o">.</span><span class="n">unwrap_annotated</span><span class="p">(</span><span class="n">typ</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">)</span>
+        <span class="c1"># Get markers.</span>
+        <span class="n">markers</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">metadata</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">_markers</span><span class="o">.</span><span class="n">_Marker</span><span class="p">))</span>
 
         <span class="c1"># Include markers set via context manager.</span>
         <span class="k">for</span> <span class="n">context_markers</span> <span class="ow">in</span> <span class="n">global_context_markers</span><span class="p">:</span>
@@ -679,9 +691,7 @@
         <span class="c1"># TODO: re-add.</span>
         <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">f_before_init_unwrap</span><span class="p">):</span>
             <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                <span class="n">f_before_init_unwrap</span><span class="p">,</span>
-                <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">markers</span><span class="p">,</span>
+                <span class="n">f_before_init_unwrap</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">markers</span>
             <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hints</span><span class="p">:</span>

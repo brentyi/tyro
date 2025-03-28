@@ -266,7 +266,7 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="../_sources/helptext_generation.md.txt" title="View this page">
+  <a class="muted-link" href="../_sources/helptext_generation.rst.txt" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
@@ -288,67 +288,126 @@
         <article role="main" id="furo-main-content">
           <section id="helptext-generation">
 <h1>Helptext generation<a class="headerlink" href="#helptext-generation" title="Link to this heading">¶</a></h1>
-<p>In addition to type annotations, <a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> will also parse docstrings
-and comments. These are used to automatically generate helptext; see examples
-for how these end up being formatted.</p>
+<p><a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> automatically generates helptext for arguments from docstrings, comments, and annotations.
+This functionality relies heavily on <a class="reference external" href="https://github.com/rr-/docstring_parser">docstring_parser</a>.</p>
+<p>Both callables (functions, objects with <code class="docutils literal notranslate"><span class="pre">__call__</span></code> methods) and “struct” types
+(<code class="docutils literal notranslate"><span class="pre">dataclasses.dataclass</span></code>, <code class="docutils literal notranslate"><span class="pre">NamedTuple</span></code>, <code class="docutils literal notranslate"><span class="pre">TypedDict</span></code>, <code class="docutils literal notranslate"><span class="pre">attrs</span></code>, <code class="docutils literal notranslate"><span class="pre">pydantic</span></code>,
+etc) are inspected for helptext.</p>
+<section id="helptext-from-docstrings">
+<h2>Helptext from docstrings<a class="headerlink" href="#helptext-from-docstrings" title="Link to this heading">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>✨ Docstrings are the recommended way to provide helptext for callables! ✨</p>
+</div>
 <section id="general-callables">
-<h2>General callables<a class="headerlink" href="#general-callables" title="Link to this heading">¶</a></h2>
+<h3>General callables<a class="headerlink" href="#general-callables" title="Link to this heading">¶</a></h3>
 <p>For general callables, field helptext is extracted from the corresponding field
 docstring. Our examples use Google-style docstrings, but ReST, Numpydoc-style
-and Epydoc docstrings are supported as well. Under the hood, all of these
-options use <a class="reference external" href="https://github.com/rr-/docstring_parser">docstring_parser</a>.</p>
+and Epydoc docstrings are supported as well:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="n">field1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Function, whose arguments will be populated from a CLI interface.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helptext for the overall CLI interface.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        field1: A string field.</span>
-<span class="sd">        field2: A numeric field, with a default value.</span>
+<span class="sd">        field1: Helptext for field1.</span>
+<span class="sd">        field2: Helptext for field2.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">field1</span><span class="p">,</span> <span class="n">field2</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
-<section id="dataclasses-typeddict-namedtuple">
-<h2>Dataclasses, TypedDict, NamedTuple<a class="headerlink" href="#dataclasses-typeddict-namedtuple" title="Link to this heading">¶</a></h2>
-<p>For types defined using class attributes, enumerating each argument list in the
-class docstring can be cumbersome.</p>
-<p>If they are unavailable, <a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> will generate helptext from
-docstrings and comments on attributes. These are parsed via source code
-inspection.</p>
-<p><strong>(1) Attribute docstrings</strong></p>
-<p>As per <a class="reference external" href="https://peps.python.org/pep-0257/#what-is-a-docstring">PEP 257</a>.</p>
+<section id="struct-types">
+<h3>Struct types<a class="headerlink" href="#struct-types" title="Link to this heading">¶</a></h3>
+<p>For fields defined using class attributes, enumerating arguments in class
+docstrings can be cumbersome. <a class="reference internal" href="../api/tyro/#tyro.cli" title="tyro.cli"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.cli()</span></code></a> also supports helptext from
+attribute docstrings:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
     <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A string field.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helptext for field1.&quot;&quot;&quot;</span>
     <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;A numeric field, with a default value.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Helptext for field2.&quot;&quot;&quot;</span>
 </pre></div>
 </div>
-<p><strong>(2) Inline comments</strong></p>
+</section>
+</section>
+<section id="helptext-from-comments">
+<h2>Helptext from comments<a class="headerlink" href="#helptext-from-comments" title="Link to this heading">¶</a></h2>
+<p>For struct types, we also support helptext generation from comments.
+This can be turned off using <a class="reference internal" href="../api/tyro/conf/#tyro.conf.HelptextFromCommentsOff" title="tyro.conf.HelptextFromCommentsOff"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.HelptextFromCommentsOff</span></code></a>.</p>
+<section id="inline-comments">
+<h3>Inline comments<a class="headerlink" href="#inline-comments" title="Link to this heading">¶</a></h3>
 <p>Inline comments can be more succinct than true attribute docstrings.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># A string field.</span>
-    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># A numeric field, with a default value.</span>
+    <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># Helptext for field1.</span>
+    <span class="n">field2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># Helptext for field2.</span>
 </pre></div>
 </div>
-<p>This can be turned off using <a class="reference internal" href="../api/tyro/conf/#tyro.conf.HelptextFromCommentsOff" title="tyro.conf.HelptextFromCommentsOff"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.HelptextFromCommentsOff</span></code></a>.</p>
-<p><strong>(3) Preceding comments</strong></p>
-<p>These can also be handy for semantically grouping fields, such as the two string
-fields below.</p>
+</section>
+<section id="preceding-comments">
+<h3>Preceding comments<a class="headerlink" href="#preceding-comments" title="Link to this heading">¶</a></h3>
+<p>These comments will apply to all fields that directly follow them. They can be
+handy for semantically grouping fields, such as the two string fields below.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Args</span><span class="p">:</span>
-    <span class="c1"># String fields.</span>
+    <span class="c1"># Strings. This will be displayed as helptext for both fields.</span>
+    <span class="n">field2</span><span class="o">.</span>
     <span class="n">field1</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">field2</span><span class="p">:</span> <span class="nb">str</span>
-
     <span class="c1"># An integer field.</span>
     <span class="c1"># Multi-line comments are supported.</span>
     <span class="n">field3</span><span class="p">:</span> <span class="nb">int</span>
 </pre></div>
 </div>
-<p>This can be turned off using <a class="reference internal" href="../api/tyro/conf/#tyro.conf.HelptextFromCommentsOff" title="tyro.conf.HelptextFromCommentsOff"><code class="xref py py-data docutils literal notranslate"><span class="pre">tyro.conf.HelptextFromCommentsOff</span></code></a>.</p>
+</section>
+</section>
+<section id="helptext-from-annotations">
+<h2>Helptext from annotations<a class="headerlink" href="#helptext-from-annotations" title="Link to this heading">¶</a></h2>
+<section id="tyro-conf-arg">
+<h3>tyro.conf.arg()<a class="headerlink" href="#tyro-conf-arg" title="Link to this heading">¶</a></h3>
+<p><a class="reference internal" href="../api/tyro/conf/#tyro.conf.arg" title="tyro.conf.arg"><code class="xref py py-func docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></a> includes a <code class="docutils literal notranslate"><span class="pre">help</span></code> argument that can be used to provide helptext for a field.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Command</span><span class="p">:</span>
+    <span class="n">sources</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span>
+        <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">tyro</span><span class="o">.</span><span class="n">conf</span><span class="o">.</span><span class="n">arg</span><span class="p">(</span><span class="n">help</span><span class="o">=</span><span class="s2">&quot;Filesystem locations or URLs.&quot;</span><span class="p">),</span>
+        <span class="c1"># The &#39;help&#39; argument will be become helptext for &#39;sources&#39;</span>
+    <span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="doc-objects">
+<h3>Doc objects<a class="headerlink" href="#doc-objects" title="Link to this heading">¶</a></h3>
+<p><a class="reference external" href="https://peps.python.org/pep-0727/">PEP 727</a> proposes a <code class="docutils literal notranslate"><span class="pre">Doc</span></code> object for specifying introspectable documentation.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>As of this writing (2025-03-23), PEP 727 is in <strong>draft</strong> status.
+Please be advised that upstream support for this could
+<a class="reference external" href="https://github.com/python/typing_extensions/issues/443">disappear</a> from
+<code class="docutils literal notranslate"><span class="pre">typing_extensions</span></code>.</p>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Annotated</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Doc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">dataclasses</span>
+
+<span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">Config</span><span class="p">:</span>
+    <span class="n">input_file</span><span class="p">:</span> <span class="n">Annotated</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Doc</span><span class="p">(</span><span class="s2">&quot;Path to the input file&quot;</span><span class="p">)]</span>
+    <span class="c1"># The Doc string will become helptext for &#39;input-file&#39;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="precedence-rules">
+<h2>Precedence rules<a class="headerlink" href="#precedence-rules" title="Link to this heading">¶</a></h2>
+<p>When multiple helptext sources are available, they are chosen in the
+following order of precedence:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">tyro.conf.arg()</span></code></p></li>
+<li><p>PEP 727 <code class="docutils literal notranslate"><span class="pre">Doc</span></code></p></li>
+<li><p>Docstrings</p></li>
+<li><p>Comments</p></li>
+</ol>
 </section>
 </section>
 
@@ -415,8 +474,22 @@ fields below.</p>
           <div class="toc-tree">
             <ul>
 <li><a class="reference internal" href="#">Helptext generation</a><ul>
+<li><a class="reference internal" href="#helptext-from-docstrings">Helptext from docstrings</a><ul>
 <li><a class="reference internal" href="#general-callables">General callables</a></li>
-<li><a class="reference internal" href="#dataclasses-typeddict-namedtuple">Dataclasses, TypedDict, NamedTuple</a></li>
+<li><a class="reference internal" href="#struct-types">Struct types</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#helptext-from-comments">Helptext from comments</a><ul>
+<li><a class="reference internal" href="#inline-comments">Inline comments</a></li>
+<li><a class="reference internal" href="#preceding-comments">Preceding comments</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#helptext-from-annotations">Helptext from annotations</a><ul>
+<li><a class="reference internal" href="#tyro-conf-arg">tyro.conf.arg()</a></li>
+<li><a class="reference internal" href="#doc-objects">Doc objects</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#precedence-rules">Precedence rules</a></li>
 </ul>
 </li>
 </ul>

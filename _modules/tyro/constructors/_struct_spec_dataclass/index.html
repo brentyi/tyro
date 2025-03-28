@@ -288,7 +288,6 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">..</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docstrings</span><span class="p">,</span> <span class="n">_resolver</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.._singleton</span><span class="w"> </span><span class="kn">import</span> <span class="n">MISSING</span><span class="p">,</span> <span class="n">MISSING_AND_MISSING_NONPROP</span><span class="p">,</span> <span class="n">MISSING_NONPROP</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">..conf</span><span class="w"> </span><span class="kn">import</span> <span class="n">_markers</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec</span><span class="w"> </span><span class="kn">import</span> <span class="n">StructConstructorSpec</span><span class="p">,</span> <span class="n">StructFieldSpec</span><span class="p">,</span> <span class="n">StructTypeInfo</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">._struct_spec_flax</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_flax_module</span>
 
@@ -383,10 +382,7 @@
         <span class="c1"># dynamically.</span>
         <span class="k">if</span> <span class="n">helptext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">helptext</span> <span class="o">=</span> <span class="n">_docstrings</span><span class="o">.</span><span class="n">get_field_docstring</span><span class="p">(</span>
-                <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
-                <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-                <span class="n">helptext_from_comments</span><span class="o">=</span><span class="n">_markers</span><span class="o">.</span><span class="n">HelptextFromCommentsOff</span>
-                <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span><span class="p">,</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">dc_field</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">info</span><span class="o">.</span><span class="n">markers</span>
             <span class="p">)</span>
 
         <span class="k">assert</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dc_field</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>

@@ -24,7 +24,7 @@ Module Contents
 .. py:function:: parse_docstring_from_object(obj: object) -> Dict[str, str]
 
 
-.. py:function:: get_field_docstring(cls: Type, field_name: str, helptext_from_comments: bool) -> Optional[str]
+.. py:function:: get_field_docstring(cls: Type, field_name: str, markers: Tuple[tyro.conf._markers.Marker, Ellipsis]) -> Optional[str]
 
    Get docstring for a field in a class.
 
