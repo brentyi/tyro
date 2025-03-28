@@ -205,7 +205,6 @@ def field_list_from_type_or_callable(
         A list of field definitions.
     """
 
-    f = _resolver.swap_type_using_confstruct(f)
     type_info = StructTypeInfo.make(f, default_instance)
 
     with type_info._typevar_context:
