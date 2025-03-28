@@ -474,7 +474,7 @@ def _rule_generate_helptext(
         elif lowered.instance_from_str is None:
             # Intentionally not quoted via shlex, since this can't actually be passed
             # in via the commandline.
-            behavior_hint = f"(fixed to: {default_label})"
+            behavior_hint = f"(fixed to: {str(default)})"
         elif lowered.action == "count":
             # Repeatable argument.
             behavior_hint = "(repeatable)"

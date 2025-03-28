@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Any, Callable, Tuple
 
 import torch
@@ -27,6 +28,7 @@ def test_torch_device_2() -> None:
 
 
 def test_unparsable() -> None:
+    @dataclass
     class Struct:
         a: int = 5
         b: str = "7"

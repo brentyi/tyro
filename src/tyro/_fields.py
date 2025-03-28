@@ -17,7 +17,6 @@ from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
 from ._typing import TypeForm
 from .conf import _confstruct, _markers
-from .constructors._primitive_spec import UnsupportedTypeAnnotationError
 from .constructors._registry import ConstructorRegistry, check_default_instances
 from .constructors._struct_spec import (
     StructFieldSpec,
@@ -355,6 +354,12 @@ def _field_list_from_function(
 
             hints = get_hints_for_signature_func(orig_cls)
 
+    # Early return for lambda functions.
+    if getattr(f, "__name__", None) == "<lambda>" and len(params) > 0:
+        return UnsupportedStructTypeMessage(
+            "Lambda functions cannot be type-annotated!"
+        )
+
     # Get type annotations, docstrings.
     docstring = inspect.getdoc(f)
     docstring_from_arg_name = {}
@@ -371,6 +376,22 @@ def _field_list_from_function(
         except TypeError:
             return UnsupportedStructTypeMessage(f"Could not get hints for {f}!")
 
+    # Expect non-empty type hints from classes.
+    #
+    # Generally we can be more forgiving with functions, for example
+    #
+    #     def main(x = 3) -> None: ...
+    #
+    # we can parse as if `x` was annotated with int. But if we have:
+    #
+    #     def main(x: SomeScaryType = SomeScaryDefault) -> None: ...
+    #
+    # we'll be more conservative in converting `--x` to a {fixed} argument.
+    # The latter case requires returning an UnsupportedStructTypeMessage to avoid
+    # unpacking the arguments of SomeScaryType.
+    if (len(hints) == 0 or len(params) == 0) and inspect.isclass(f_before_init_unwrap):
+        return UnsupportedStructTypeMessage(f"Empty hints for {f}!")
+
     field_list = []
     for param in params:
         # Get default value.
@@ -378,28 +399,14 @@ def _field_list_from_function(
 
         # Get helptext from docstring.
         helptext = docstring_from_arg_name.get(param.name)
-
-        # TODO: re-add.
         if helptext is None and inspect.isclass(f_before_init_unwrap):
             helptext = _docstrings.get_field_docstring(
                 f_before_init_unwrap, param.name, markers
             )
 
-        if param.name not in hints:
-            out = UnsupportedStructTypeMessage(
-                f"Expected fully type-annotated callable, but {f} with arguments"
-                f" {tuple(map(lambda p: p.name, params))} has no annotation for"
-                f" '{param.name}'."
-            )
-            if param.kind is param.KEYWORD_ONLY:
-                # If keyword only: this can't possibly be an instantiator function
-                # either, so we escalate to an error.
-                raise UnsupportedTypeAnnotationError(out.message)
-            return out
-
         # Set markers for positional + variadic arguments.
         func_markers: Tuple[Any, ...] = ()
-        typ: Any = hints[param.name]
+        typ: Any = hints.get(param.name, Any)
         if param.kind is inspect.Parameter.POSITIONAL_ONLY:
             func_markers = (_markers.Positional, _markers._PositionalCall)
         elif param.kind is inspect.Parameter.VAR_POSITIONAL:
