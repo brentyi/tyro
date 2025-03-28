@@ -1047,3 +1047,18 @@ def test_diamond_inheritance() -> None:
     # The type, however, currently comes from C. This matches the MRO and the
     # behavior of pyright and mypy but not of dataclasses.fields().
     assert "INT|STR" not in helptext
+
+
+def test_partial_annotation() -> None:
+    class A:
+        def __init__(self, b=[], c: float = 1):
+            super(A, self).__init__()
+            del b
+            del c
+
+    def main(opt: A = A()):
+        del opt
+
+    assert "--opt.b" in get_helptext_with_checks(main)
+    assert "{fixed}" in get_helptext_with_checks(main)
+    assert "--opt.c" in get_helptext_with_checks(main)
