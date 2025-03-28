@@ -287,6 +287,10 @@ def _field_list_from_function(
     # Check for abstract classes.
     if inspect.isabstract(f):
         return UnsupportedStructTypeMessage("Abstract classes cannot be instantiated!")
+    if f.__name__ == "<lambda>":
+        return UnsupportedStructTypeMessage(
+            "Lambda functions cannot be type-annotated!"
+        )
 
     # If `f` is class, we want to inspect its __init__ method for the
     # signature. But the docstrings may still be in the class signature itself.
