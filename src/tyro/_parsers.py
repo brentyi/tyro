@@ -380,15 +380,7 @@ def handle_field(
                     return subparsers_attempt
 
         # (2) Handle nested callables.
-        if force_primitive == "struct" or _fields.is_struct_type(
-            field.type, field.default
-        ):
-            field = field.with_new_type_stripped(
-                _resolver.narrow_subtypes(
-                    field.type_stripped,
-                    field.default,
-                ),
-            )
+        if _fields.is_struct_type(field.type, field.default):
             return ParserSpecification.from_callable_or_type(
                 field.type_stripped,
                 markers=field.markers,
