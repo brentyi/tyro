@@ -6,7 +6,6 @@ from typing import Any, cast
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING, MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
-from ..conf import _markers
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 from ._struct_spec_flax import is_flax_module
 
@@ -99,10 +98,7 @@ def dataclass_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
         # dynamically.
         if helptext is None:
             helptext = _docstrings.get_field_docstring(
-                info.type,
-                dc_field.name,
-                helptext_from_comments=_markers.HelptextFromCommentsOff
-                not in info.markers,
+                info.type, dc_field.name, info.markers
             )
 
         assert not isinstance(dc_field.type, str)

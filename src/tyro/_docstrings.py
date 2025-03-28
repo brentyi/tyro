@@ -9,12 +9,27 @@ import io
 import itertools
 import sys
 import tokenize
-from typing import Callable, Dict, Generic, Hashable, List, Optional, Set, Type, TypeVar
+from typing import (
+    Callable,
+    Dict,
+    Generic,
+    Hashable,
+    List,
+    Optional,
+    Set,
+    Tuple,
+    Type,
+    TypeVar,
+)
 
 import docstring_parser
-from typing_extensions import get_origin, is_typeddict
+from typing_extensions import (
+    get_origin,
+    is_typeddict,
+)
 
 from . import _resolver, _strings, _unsafe_cache
+from .conf import _markers
 
 T = TypeVar("T", bound=Callable)
 
@@ -172,7 +187,7 @@ def parse_docstring_from_object(obj: object) -> Dict[str, str]:
 
 @_unsafe_cache.unsafe_cache(1024)
 def get_field_docstring(
-    cls: Type, field_name: str, helptext_from_comments: bool
+    cls: Type, field_name: str, markers: Tuple[_markers.Marker, ...]
 ) -> Optional[str]:
     """Get docstring for a field in a class."""
 
@@ -190,9 +205,10 @@ def get_field_docstring(
                 _strings.remove_single_line_breaks(docstring)
             ).strip()
 
-    # If docstring_parser failed, let's try looking for comments.
-    if not helptext_from_comments:
+    if _markers.HelptextFromCommentsOff in markers:
         return None
+
+    # If docstring_parser failed, let's try looking for comments.
     tokenization = get_class_tokenization_with_field(cls, field_name)
     if tokenization is None:  # Currently only happens for dynamic dataclasses.
         return None

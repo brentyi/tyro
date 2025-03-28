@@ -4,7 +4,6 @@ import sys
 
 from .. import _docstrings, _resolver
 from .._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
-from ..conf import _markers
 from ._struct_spec import StructConstructorSpec, StructFieldSpec, StructTypeInfo
 
 
@@ -54,12 +53,7 @@ def attrs_rule(info: StructTypeInfo) -> StructConstructorSpec | None:
                 name=name,
                 type=our_hints[name],
                 default=default,
-                helptext=_docstrings.get_field_docstring(
-                    info.type,
-                    name,
-                    helptext_from_comments=_markers.HelptextFromCommentsOff
-                    not in info.markers,
-                ),
+                helptext=_docstrings.get_field_docstring(info.type, name, info.markers),
             )
         )
     return StructConstructorSpec(instantiate=info.type, fields=tuple(field_list))

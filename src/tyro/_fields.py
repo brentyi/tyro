@@ -11,7 +11,7 @@ import sys
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
 import docstring_parser
-from typing_extensions import Annotated, get_args, get_origin, get_original_bases
+from typing_extensions import Annotated, Doc, get_args, get_origin, get_original_bases
 
 from . import _docstrings, _resolver, _strings, _unsafe_cache
 from ._singleton import MISSING_AND_MISSING_NONPROP, MISSING_NONPROP
@@ -87,8 +87,19 @@ class FieldDefinition:
         if not check_default_instances():
             typ = _resolver.expand_union_types(typ, default)
 
+        # Get all Annotated[] metadata.
+        # This will unpack types in the form Annotated[type_stripped, *metadata].
+        type_stripped, metadata = _resolver.unwrap_annotated(typ, search_type="all")
+
+        # Support PEP 727 Doc objects.
+        doc_objs = tuple(x for x in metadata if isinstance(x, Doc))
+        if len(doc_objs) > 0:
+            helptext = _strings.remove_single_line_breaks(
+                _strings.dedent(doc_objs[0].documentation)
+            ).strip()
+
         # Try to extract argconf overrides from type.
-        _, argconfs = _resolver.unwrap_annotated(typ, _confstruct._ArgConfig)
+        argconfs = tuple(x for x in metadata if isinstance(x, _confstruct._ArgConfig))
         argconf = _confstruct._ArgConfig(
             None,
             None,
@@ -111,7 +122,8 @@ class FieldDefinition:
             if argconf.help is not None:
                 helptext = argconf.help
 
-        type_stripped, markers = _resolver.unwrap_annotated(typ, _markers._Marker)
+        # Get markers.
+        markers = tuple(x for x in metadata if isinstance(x, _markers._Marker))
 
         # Include markers set via context manager.
         for context_markers in global_context_markers:
@@ -370,9 +382,7 @@ def _field_list_from_function(
         # TODO: re-add.
         if helptext is None and inspect.isclass(f_before_init_unwrap):
             helptext = _docstrings.get_field_docstring(
-                f_before_init_unwrap,
-                param.name,
-                helptext_from_comments=_markers.HelptextFromCommentsOff not in markers,
+                f_before_init_unwrap, param.name, markers
             )
 
         if param.name not in hints:
