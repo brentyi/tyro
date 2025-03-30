@@ -21,7 +21,7 @@ jobs:
       - name: Building documentation
         run: |
           pip install uv
-          uv pip install --system -e ".[dev]"
+          uv pip install --system -e ".[dev-nn]"
           uv pip install --system -r docs/requirements.txt
           sphinx-build docs/source docs/build -b dirhtml
 
