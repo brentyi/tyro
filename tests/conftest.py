@@ -20,3 +20,19 @@ if not sys.version_info >= (3, 11):
 
 if sys.version_info >= (3, 13):
     collect_ignore_glob.append("*_exclude_py313*.py")
+
+try:
+    import flax  # noqa: I001,F401 # type: ignore
+except ImportError:
+    collect_ignore_glob.append("*_flax*.py")
+
+try:
+    import numpy  # noqa: I001,F401 # type: ignore
+except ImportError:
+    collect_ignore_glob.append("*_custom_constructors*.py")
+
+try:
+    import torch  # noqa: I001,F401 # type: ignore
+except ImportError:
+    collect_ignore_glob.append("*_torch*.py")
+    collect_ignore_glob.append("*_base_configs_nested*.py")

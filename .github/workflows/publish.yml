@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install uv
-          uv pip install --system -e ".[dev]"
+          uv pip install --system -e ".[dev-nn]"
           uv pip install --system build twine
       - name: Strip unsupported tags in README
         run: |

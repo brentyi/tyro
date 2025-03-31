@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install uv
-          uv pip install --system -e ".[dev]"
+          uv pip install --system -e ".[dev-nn]"
       - name: Test with mypy
         run: |
           mypy --install-types --non-interactive .

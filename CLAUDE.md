@@ -1,7 +1,7 @@
 # Tyro Development Guide
 
 ## Build & Test Commands
-- Install dev dependencies: `pip install -e ".[dev]"`
+- Install dev dependencies: `pip install -e ".[dev-nn]"`
 - Run all tests: `pytest -n auto` (parallel execution)
 - Run all tests: `pytest` (sequential execution)
 - Run specific test: `pytest tests/test_file.py -v` or `pytest tests/test_file.py::test_name -v`

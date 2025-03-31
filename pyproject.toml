@@ -47,16 +47,19 @@ dev = [
     "pytest-xdist>=3.5.0",
     "omegaconf>=2.2.2",
     "attrs>=21.4.0",
-    "torch>=1.10.0;python_version<='3.12'",
     "pyright>=1.1.349,!=1.1.379",
     "ruff>=0.1.13",
     "mypy>=1.4.1",
-    "numpy>=1.20.0",
-    "flax>=0.6.9;python_version<='3.12'",
     "pydantic>=2.5.2,!=2.10.0",
     "coverage[toml]>=6.5.0",
     "eval_type_backport>=0.1.3",
     "ml_collections>=0.1.0",
+]
+dev-nn = [
+    "tyro[dev]",
+    "flax>=0.6.9;python_version<='3.12'",
+    "numpy>=1.20.0",
+    "torch>=1.10.0;python_version<='3.12'",
 ]
 
 [project.urls]

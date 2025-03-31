@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install uv
-          uv pip install --system -e ".[dev]"
+          uv pip install --system -e ".[dev-nn]"
       - name: Ruff check
         run: |
           ruff check --output-format github
