@@ -48,5 +48,5 @@ def main(
 
 
 if __name__ == "__main__":
-    # Pass the registry directly to tyro.cli()
+    # Pass the registry directly to tyro.cli().
     tyro.cli(main, registry=custom_registry)

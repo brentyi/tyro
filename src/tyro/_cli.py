@@ -435,7 +435,6 @@ def _cli_impl(
         _arguments.USE_RICH = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
-    # Use the context manager approach for registry if provided
     if registry is not None:
         with registry:
             parser_spec = _parsers.ParserSpecification.from_callable_or_type(
