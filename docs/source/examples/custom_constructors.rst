@@ -240,9 +240,8 @@ define a rule that applies to all types that match ``dict[str, Any]``.
         print(f"{dict2=}")
 
     if __name__ == "__main__":
-        # To activate a custom registry, we should use it as a context manager.
-        with custom_registry:
-            tyro.cli(main)
+        # Pass the registry directly to tyro.cli().
+        tyro.cli(main, registry=custom_registry)
 
 
 
@@ -363,9 +362,8 @@ structs.
         print(f"{bounds_with_default=}")
 
     if __name__ == "__main__":
-        # To activate a custom registry, we should use it as a context manager.
-        with custom_registry:
-            tyro.cli(main)
+        # Pass the registry directly to tyro.cli().
+        tyro.cli(main, registry=custom_registry)
 
 
 
