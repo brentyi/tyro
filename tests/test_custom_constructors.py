@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple, Union
 
 import numpy as np
@@ -186,3 +187,100 @@ def test_tuple_custom_constructors_positional() -> None:
     assert tyro.cli(main, args=["a"]) == ("a",)
     assert tyro.cli(main, args=[]) == ()
     assert "A TUPLE METAVAR" in get_helptext_with_checks(main)
+
+
+def test_registry_parameter_primitive() -> None:
+    """Test that we can use the registry parameter in tyro.cli() for primitive types."""
+    registry = tyro.constructors.ConstructorRegistry()
+
+    @registry.primitive_rule
+    def json_dict_spec(
+        type_info: tyro.constructors.PrimitiveTypeInfo,
+    ) -> tyro.constructors.PrimitiveConstructorSpec | None:
+        if not (
+            type_info.type_origin is dict and get_args(type_info.type) == (str, Any)
+        ):
+            return None
+        return json_constructor_spec
+
+    def main(x: Dict[str, Any]) -> Dict[str, Any]:
+        return x
+
+    # Use registry parameter instead of context manager
+    assert tyro.cli(main, args=["--x", '{"a": 1}'], registry=registry) == {"a": 1}
+
+
+def test_registry_parameter_with_default() -> None:
+    """Test that the registry parameter works with default values."""
+    registry = tyro.constructors.ConstructorRegistry()
+
+    @registry.primitive_rule
+    def json_dict_spec(
+        type_info: tyro.constructors.PrimitiveTypeInfo,
+    ) -> tyro.constructors.PrimitiveConstructorSpec | None:
+        if not (
+            type_info.type_origin is dict and get_args(type_info.type) == (str, Any)
+        ):
+            return None
+        return json_constructor_spec
+
+    def main_with_default(x: Dict[str, Any] = {"hello": 5}) -> Dict[str, Any]:
+        return x
+
+    # Test with registry parameter
+    assert tyro.cli(main_with_default, args=[], registry=registry) == {"hello": 5}
+    assert tyro.cli(main_with_default, args=["--x", '{"a": 1}'], registry=registry) == {"a": 1}
+
+
+# Define a custom dataclass
+@dataclass
+class CustomDataWithPrefix:
+    value: str
+
+def test_registry_parameter_struct_constructor() -> None:
+    """Test that registry parameter works with struct constructors as well."""
+    # Create a custom registry
+    registry = tyro.constructors.ConstructorRegistry()
+    
+    # Define a custom struct constructor that will add a prefix to all string values
+    @registry.struct_rule
+    def prefix_strings(
+        type_info: tyro.constructors.StructTypeInfo,
+    ) -> tyro.constructors.StructConstructorSpec | None:
+        # Only apply to our CustomDataWithPrefix class
+        if type_info.type is not CustomDataWithPrefix:
+            return None
+            
+        # Create a constructor that adds a prefix to string values
+        def prefix_constructor(**kwargs):
+            # Add prefix to string value
+            if "value" in kwargs and isinstance(kwargs["value"], str):
+                kwargs["value"] = "PREFIX_" + kwargs["value"]
+            return CustomDataWithPrefix(**kwargs)
+            
+        # Create field specs
+        field_specs = [
+            tyro.constructors.StructFieldSpec(
+                name="value",
+                type=str,
+                default=type_info.default.value if type_info.default not in tyro._singleton.DEFAULT_SENTINEL_SINGLETONS else tyro._singleton.MISSING_NONPROP,
+                helptext=None,
+            )
+        ]
+            
+        # Return a custom struct constructor spec
+        return tyro.constructors.StructConstructorSpec(
+            instantiate=prefix_constructor,
+            fields=tuple(field_specs)
+        )
+        
+    def main(data: CustomDataWithPrefix) -> CustomDataWithPrefix:
+        return data
+        
+    # Test without registry - normal behavior
+    result = tyro.cli(main, args=["--data.value", "test"])
+    assert result.value == "test"
+    
+    # Test with registry - should add prefix
+    result = tyro.cli(main, args=["--data.value", "test"], registry=registry)
+    assert result.value == "PREFIX_test"
