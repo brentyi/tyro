@@ -82,6 +82,5 @@ def main(
 
 
 if __name__ == "__main__":
-    # To activate a custom registry, we should use it as a context manager.
-    with custom_registry:
-        tyro.cli(main)
+    # Pass the registry directly to tyro.cli()
+    tyro.cli(main, registry=custom_registry)

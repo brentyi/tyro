@@ -24,6 +24,7 @@ from . import (
     conf,
 )
 from ._typing import TypeForm
+from .constructors._registry import ConstructorRegistry
 
 OutT = TypeVar("OutT")
 
@@ -47,6 +48,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
 
 
@@ -62,6 +64,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
 
 
@@ -80,6 +83,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
 ) -> OutT: ...
 
 
@@ -98,6 +102,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
 ) -> tuple[OutT, list[str]]: ...
 
 
@@ -112,6 +117,7 @@ def cli(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
 ) -> OutT | tuple[OutT, list[str]]:
     """Generate a command-line interface from type annotations and populate the target with arguments.
@@ -181,6 +187,9 @@ def cli(
         config: A sequence of configuration marker objects from :mod:`tyro.conf`. This
             allows applying markers globally instead of annotating individual fields.
             For example: ``tyro.cli(Config, config=(tyro.conf.PositionalRequiredArgs,))``
+        registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+            constructor rules. This is the recommended way to apply custom constructor rules
+            instead of using the context manager pattern.
 
     Returns:
         If ``f`` is a type (like a dataclass), returns an instance of that type populated
@@ -205,6 +214,7 @@ def cli(
             use_underscores=use_underscores,
             console_outputs=console_outputs,
             config=config,
+            registry=registry,
             **deprecated_kwargs,
         )
 
@@ -230,6 +240,7 @@ def get_parser(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser: ...
 
 
@@ -243,6 +254,7 @@ def get_parser(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser: ...
 
 
@@ -257,12 +269,25 @@ def get_parser(
     use_underscores: bool = False,
     console_outputs: bool = True,
     config: None | Sequence[conf._markers.Marker] = None,
+    registry: None | ConstructorRegistry = None,
 ) -> argparse.ArgumentParser:
     """Get the :py:class:`argparse.ArgumentParser` object generated under-the-hood by
     :func:`tyro.cli`. Useful for tools like ``sphinx-argparse``, ``argcomplete``, etc.
 
     For tab completion, we recommend using :func:`tyro.cli`'s built-in
-    ``--tyro-write-completion`` flag."""
+    ``--tyro-write-completion`` flag.
+
+    Args:
+        f: The function or type to populate from command-line arguments.
+        prog: The name of the program to display in the help text.
+        description: The description text shown at the top of the help output.
+        default: An instance to use for default values.
+        use_underscores: If True, uses underscores as word delimiters in the help text.
+        console_outputs: If set to False, suppresses parsing errors and help messages.
+        config: A sequence of configuration marker objects from :mod:`tyro.conf`.
+        registry: A :class:`tyro.constructors.ConstructorRegistry` instance containing custom
+            constructor rules.
+    """
     with _strings.delimeter_context("_" if use_underscores else "-"):
         return cast(
             argparse.ArgumentParser,
@@ -277,6 +302,7 @@ def get_parser(
                 use_underscores=use_underscores,
                 console_outputs=console_outputs,
                 config=config,
+                registry=registry,
             ),
         )
 
@@ -292,6 +318,7 @@ def _cli_impl(
     return_unknown_args: bool,
     console_outputs: bool,
     config: None | Sequence[conf._markers.Marker],
+    registry: None | ConstructorRegistry = None,
     **deprecated_kwargs,
 ) -> (
     OutT
@@ -408,15 +435,28 @@ def _cli_impl(
         _arguments.USE_RICH = True
 
     # Map a callable to the relevant CLI arguments + subparsers.
-    parser_spec = _parsers.ParserSpecification.from_callable_or_type(
-        f,
-        markers=set(),
-        description=description,
-        parent_classes=set(),  # Used for recursive calls.
-        default_instance=default_instance_internal,  # Overrides for default values.
-        intern_prefix="",  # Used for recursive calls.
-        extern_prefix="",  # Used for recursive calls.
-    )
+    # Use the context manager approach for registry if provided
+    if registry is not None:
+        with registry:
+            parser_spec = _parsers.ParserSpecification.from_callable_or_type(
+                f,
+                markers=set(),
+                description=description,
+                parent_classes=set(),  # Used for recursive calls.
+                default_instance=default_instance_internal,  # Overrides for default values.
+                intern_prefix="",  # Used for recursive calls.
+                extern_prefix="",  # Used for recursive calls.
+            )
+    else:
+        parser_spec = _parsers.ParserSpecification.from_callable_or_type(
+            f,
+            markers=set(),
+            description=description,
+            parent_classes=set(),  # Used for recursive calls.
+            default_instance=default_instance_internal,  # Overrides for default values.
+            intern_prefix="",  # Used for recursive calls.
+            extern_prefix="",  # Used for recursive calls.
+        )
 
     # Generate parser!
     with _argparse_formatter.ansi_context():
